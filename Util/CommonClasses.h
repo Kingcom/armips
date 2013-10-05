@@ -1,0 +1,136 @@
+#pragma once
+
+class CArchitecture
+{
+public:
+	virtual void AssembleOpcode(char* name, char* args) = 0;
+	virtual bool AssembleDirective(char* name, char* args) = 0;
+	virtual void NextSection() = 0;
+	virtual void Pass2() = 0;
+	virtual void Revalidate() = 0;
+	virtual int GetFileAddress(int MemoryAddress) = 0;
+	virtual int GetMemoryAddress(int FileAddress) = 0;
+	virtual int GetWordSize() = 0;
+};
+
+class CInvalidArchitecture: public CArchitecture
+{
+public:
+	virtual void AssembleOpcode(char* name, char* args);
+	virtual bool AssembleDirective(char* name, char* args);
+	virtual void NextSection();
+	virtual void Pass2();
+	virtual void Revalidate();
+	virtual int GetFileAddress(int MemoryAddress);
+	virtual int GetMemoryAddress(int FileAddress);
+	virtual int GetWordSize();
+};
+
+extern CInvalidArchitecture InvalidArchitecture;
+
+class CStringList
+{
+public:
+	CStringList();
+	~CStringList();
+	void Clear() { EntryCount = 0; DataPos = 0; };
+	void AddEntry(char* str);
+	char* GetEntry(int num);
+	int GetCount() { return EntryCount; };
+private:
+	int* EntryPoses;
+	int EntryCount;
+	int EntriesAllocated;
+	char* Data;
+	int DataPos;
+	int DataAllocated;
+};
+
+typedef struct {
+	int Pos;
+	bool String;
+} tArgumentListEntry;
+
+class CArgumentList
+{
+public:
+	CArgumentList();
+	~CArgumentList();
+	void Clear() { EntryCount = 0; DataPos = 0; };
+	void AddEntry(char* str, bool String);
+	char* GetEntry(int num);
+	bool IsString(int num) { return Entries[num].String; };
+	int GetCount() { return EntryCount; };
+private:
+	tArgumentListEntry* Entries;
+	int EntryCount;
+	int EntriesAllocated;
+	char* Data;
+	int DataPos;
+	int DataAllocated;
+};
+
+
+typedef struct {
+	int Pos;
+	int FileNum;
+	int LineNum;
+	int Level;
+} tErrorQueueEntry;
+
+class CErrorQueue
+{
+public:
+	CErrorQueue();
+	~CErrorQueue();
+	void Clear() { EntryCount = 0; DataPos = 0; };
+	void AddEntry(int Level, char* str);
+	void Output();
+	bool isEmpty() { return EntryCount == 0; };
+private:
+	tErrorQueueEntry* Entries;
+	int EntryCount;
+	int EntriesAllocated;
+	char* Data;
+	int DataPos;
+	int DataAllocated;
+};
+
+
+class CIntegerStack
+{
+public:
+	CIntegerStack() { pos = -1; };
+	void Push(unsigned int num) { Numbers[++pos] = num; };
+	unsigned int Pop() { return Numbers[pos--]; };
+	bool IsEmpty() { return pos == -1 ? true : false; };
+	int GetCount() { return pos+1; };
+private:
+	unsigned int Numbers[512];
+	int pos;
+};
+
+
+typedef struct {
+	int Pos;
+	int len;
+} tByteListEntry;
+
+class CByteList
+{
+public:
+	CByteList();
+	~CByteList();
+	void Clear() { EntryCount = 0; DataPos = 0; };
+	void AddEntry(unsigned char* ByteData, int len);
+	unsigned char* GetEntry(int num) { return &Data[Entries[num].Pos]; };
+	int GetLen(int num) { return Entries[num].len; };
+	int GetCount() { return EntryCount; };
+private:
+	tByteListEntry* Entries;
+	int EntryCount;
+	int EntriesAllocated;
+	unsigned char* Data;
+	int DataPos;
+	int DataAllocated;
+};

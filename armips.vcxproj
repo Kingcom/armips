@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1339711C-219A-4A50-AF8F-A27335FE1D4B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>armips</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)_Output\</OutDir>
+    <IntDir>_Output\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)d</TargetName>
+    <IncludePath>.;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)_Output\</OutDir>
+    <IntDir>_Output\$(Configuration)\</IntDir>
+    <IncludePath>.;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Archs\ARM\Arm.h" />
+    <ClInclude Include="Archs\ARM\ArmOpcodes.h" />
+    <ClInclude Include="Archs\ARM\CArmInstruction.h" />
+    <ClInclude Include="Archs\ARM\CThumbInstruction.h" />
+    <ClInclude Include="Archs\ARM\Pool.h" />
+    <ClInclude Include="Archs\ARM\ThumbOpcodes.h" />
+    <ClInclude Include="Archs\MIPS\CMipsInstruction.h" />
+    <ClInclude Include="Archs\MIPS\CMipsMacro.h" />
+    <ClInclude Include="Archs\MIPS\Mips.h" />
+    <ClInclude Include="Archs\MIPS\MipsMacros.h" />
+    <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
+    <ClInclude Include="Archs\Z80\CZ80Instruction.h" />
+    <ClInclude Include="Archs\Z80\z80.h" />
+    <ClInclude Include="Archs\Z80\z80Opcodes.h" />
+    <ClInclude Include="Commands\CAssemblerCommand.h" />
+    <ClInclude Include="Commands\CAssemblerLabel.h" />
+    <ClInclude Include="Commands\CDirectiveArea.h" />
+    <ClInclude Include="Commands\CDirectiveConditional.h" />
+    <ClInclude Include="Commands\CDirectiveData.h" />
+    <ClInclude Include="Commands\CDirectiveFile.h" />
+    <ClInclude Include="Commands\CDirectiveFill.h" />
+    <ClInclude Include="Commands\CDirectiveMessage.h" />
+    <ClInclude Include="Core\Assembler.h" />
+    <ClInclude Include="Core\CLabels.h" />
+    <ClInclude Include="Core\CMacro.h" />
+    <ClInclude Include="Core\Common.h" />
+    <ClInclude Include="Core\Directives.h" />
+    <ClInclude Include="Core\MathParser.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Util\CArmipsFile.h" />
+    <ClInclude Include="Util\CommonClasses.h" />
+    <ClInclude Include="Util\CTable.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Archs\ARM\Arm.cpp" />
+    <ClCompile Include="Archs\ARM\ArmOpcodes.cpp" />
+    <ClCompile Include="Archs\ARM\CArmInstruction.cpp" />
+    <ClCompile Include="Archs\ARM\CThumbInstruction.cpp" />
+    <ClCompile Include="Archs\ARM\Pool.cpp" />
+    <ClCompile Include="Archs\ARM\ThumbOpcodes.cpp" />
+    <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp" />
+    <ClCompile Include="Archs\MIPS\CMipsMacro.cpp" />
+    <ClCompile Include="Archs\MIPS\Mips.cpp" />
+    <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
+    <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
+    <ClCompile Include="Archs\Z80\CZ80Instruction.cpp" />
+    <ClCompile Include="Archs\Z80\z80.cpp" />
+    <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Commands\CAssemblerCommand.cpp" />
+    <ClCompile Include="Commands\CAssemblerLabel.cpp" />
+    <ClCompile Include="Commands\CDirectiveArea.cpp" />
+    <ClCompile Include="Commands\CDirectiveConditional.cpp" />
+    <ClCompile Include="Commands\CDirectiveData.cpp" />
+    <ClCompile Include="Commands\CDirectiveFile.cpp" />
+    <ClCompile Include="Commands\CDirectiveFill.cpp" />
+    <ClCompile Include="Commands\CDirectiveMessage.cpp" />
+    <ClCompile Include="Core\Assembler.cpp" />
+    <ClCompile Include="Core\CLabels.cpp" />
+    <ClCompile Include="Core\CMacro.cpp" />
+    <ClCompile Include="Core\Common.cpp" />
+    <ClCompile Include="Core\Directives.cpp" />
+    <ClCompile Include="Core\MathParser.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Util\CArmipsFile.cpp" />
+    <ClCompile Include="Util\CommonClasses.cpp" />
+    <ClCompile Include="Util\CTable.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

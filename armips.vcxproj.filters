@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Util\CommonClasses.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\CTable.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CAssemblerCommand.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CAssemblerLabel.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CDirectiveArea.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CDirectiveConditional.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CDirectiveData.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CDirectiveFile.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CDirectiveFill.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\CDirectiveMessage.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Assembler.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CLabels.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CMacro.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Common.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Directives.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\MathParser.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\Z80\CZ80Instruction.cpp">
+      <Filter>Archs\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\Z80\z80.cpp">
+      <Filter>Archs\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\Z80\z80Opcodes.cpp">
+      <Filter>Archs\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\CMipsMacro.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\Mips.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsMacros.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\Arm.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\ArmOpcodes.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\CArmInstruction.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\CThumbInstruction.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\Pool.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\ThumbOpcodes.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Util\CArmipsFile.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Util\CommonClasses.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\CTable.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CAssemblerCommand.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CAssemblerLabel.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CDirectiveArea.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CDirectiveConditional.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CDirectiveData.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CDirectiveFile.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CDirectiveFill.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CDirectiveMessage.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Assembler.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CLabels.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CMacro.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Common.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Directives.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\MathParser.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\Z80\CZ80Instruction.h">
+      <Filter>Archs\Z80</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\Z80\z80.h">
+      <Filter>Archs\Z80</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\Z80\z80Opcodes.h">
+      <Filter>Archs\Z80</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\CMipsInstruction.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\CMipsMacro.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\Mips.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsMacros.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsOpcodes.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\Arm.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\ArmOpcodes.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\CArmInstruction.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\CThumbInstruction.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\Pool.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\ThumbOpcodes.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\CArmipsFile.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Archs">
+      <UniqueIdentifier>{461d1b5a-8d9e-4ec7-91f3-662052065e1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{55091b3b-1037-4a53-b345-1f1b3b60de31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{2eeff599-8ee4-4da9-abbc-6c095aff6ede}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Commands">
+      <UniqueIdentifier>{ef340c46-602f-432c-ba83-298e6b7a2eec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archs\ARM">
+      <UniqueIdentifier>{873048fa-a5fa-4172-8a9c-78128119f5b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archs\MIPS">
+      <UniqueIdentifier>{b206fa15-ddbd-4611-8884-974492bb0b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archs\Z80">
+      <UniqueIdentifier>{30a41603-076b-40f9-8082-d5fdfa8bb8e2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
