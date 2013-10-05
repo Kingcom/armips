@@ -119,7 +119,6 @@ bool DirectiveString(CArgumentList& List, int flags)
 {
 	unsigned char Buffer[1024];
 	char str[32];
-	int len;
 	CArgumentList NewList;
 
 	if (Global.Table.IsOpen() == false)
@@ -200,7 +199,7 @@ bool DirectiveGba(CArgumentList& List, int flags)
 	Arm.SetThumbMode(true);
 	Arm.SetArm9(false);
 	
-	CArmStateCommand* cmd = new CArmStateCommand(false);
+	ArmStateCommand* cmd = new ArmStateCommand(false);
 	AddAssemblerCommand(cmd);
 	return true;
 }
@@ -211,7 +210,7 @@ bool DirectiveNds(CArgumentList& List, int flags)
 	Arm.SetThumbMode(false);
 	Arm.SetArm9(true);
 
-	CArmStateCommand* cmd = new CArmStateCommand(true);
+	ArmStateCommand* cmd = new ArmStateCommand(true);
 	AddAssemblerCommand(cmd);
 	return true;
 }

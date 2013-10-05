@@ -70,7 +70,7 @@ bool CArmArchitecture::AssembleDirective(char* Name, char* Arguments)
 bool ArmDirectiveThumb(CArgumentList& List, int flags)
 {
 	Arm.SetThumbMode(true);
-	CArmStateCommand* cmd = new CArmStateCommand(false);
+	ArmStateCommand* cmd = new ArmStateCommand(false);
 	AddAssemblerCommand(cmd);
 	return true;
 }
@@ -78,7 +78,7 @@ bool ArmDirectiveThumb(CArgumentList& List, int flags)
 bool ArmDirectiveArm(CArgumentList& List, int flags)
 {
 	Arm.SetThumbMode(false);
-	CArmStateCommand* cmd = new CArmStateCommand(true);
+	ArmStateCommand* cmd = new ArmStateCommand(true);
 	AddAssemblerCommand(cmd);
 	return true;
 }
@@ -87,7 +87,7 @@ bool ArmDirectivePool(CArgumentList& List, int flags)
 {
 	Arm.AssembleDirective(".align","4");
 
-	CPoolCommand* cmd = new CPoolCommand();
+	ArmPoolCommand* cmd = new ArmPoolCommand();
 	AddAssemblerCommand(cmd);
 	return true;
 }
@@ -181,7 +181,7 @@ CArmArchitecture::~CArmArchitecture()
 
 void CArmArchitecture::Pass2()
 {
-	Pools = new CPool[PoolCount];
+	Pools = new ArmPool[PoolCount];
 	CurrentPool = 0;
 }
 

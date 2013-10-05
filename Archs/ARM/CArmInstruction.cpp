@@ -137,7 +137,7 @@ bool CArmInstruction::ParseShift(char*& Line, int mode)
 {
 	char ImmediateBuffer[512];
 	CStringList List;
-	int p, RetLen;
+	int RetLen;
 
 	Vars.Shift.UseShift = false;
 	if (*Line != ',') return true;	// ein shift muss mit komma eingeleitet werden
@@ -195,7 +195,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 {
 	char ImmediateBuffer[512];
 
-	int p,RetLen;
+	int RetLen;
 	CStringList List;
 	bool Immediate = false;
 
@@ -527,7 +527,6 @@ bool ParsePostfixExpressionCheck(CExpressionCommandList& Postfix, CStringList* E
 bool CArmInstruction::Validate()
 {
 	CStringList List;
-	int p;
 
 	RamPos = Global.RamPos;
 	Vars.Opcode.UseNewEncoding = false;
@@ -748,7 +747,7 @@ bool CArmInstruction::Validate()
 		if (Vars.ImmediateBitLen != 32 && !(Opcode.flags & ARM_ABSIMM))
 		{
 			unsigned int check = Opcode.flags & ARM_ABS ? abs(Vars.Immediate) : Vars.Immediate;
-			if (check >= (1 << Vars.ImmediateBitLen))
+			if (check >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
 				QueueError(ERROR_ERROR,"Immediate value %X out of range",Vars.Immediate);
 				return false;

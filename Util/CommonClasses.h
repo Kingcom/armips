@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 class CArchitecture
 {
@@ -97,17 +98,15 @@ private:
 };
 
 
-class CIntegerStack
+class IntegerStack
 {
 public:
-	CIntegerStack() { pos = -1; };
-	void Push(unsigned int num) { Numbers[++pos] = num; };
-	unsigned int Pop() { return Numbers[pos--]; };
-	bool IsEmpty() { return pos == -1 ? true : false; };
-	int GetCount() { return pos+1; };
+	void Push(unsigned int num) { stack.push_back(num); };
+	unsigned int Pop() { unsigned int value = stack[stack.size()-1]; stack.pop_back(); return value; };
+	bool IsEmpty() { return stack.size() == 0; };
+	int GetCount() { return stack.size(); };
 private:
-	unsigned int Numbers[512];
-	int pos;
+	std::vector<unsigned int> stack;
 };
 
 

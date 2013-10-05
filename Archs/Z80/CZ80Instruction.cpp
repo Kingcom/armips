@@ -14,7 +14,7 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 {
 	char ImmediateBuffer[512];
 
-	int p,RetLen;
+	int RetLen;
 	CStringList List;
 	bool Immediate = false;
 

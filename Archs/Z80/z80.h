@@ -9,7 +9,7 @@ typedef struct {
 
 typedef struct {
 	char Name[5];
-	unsigned char Number;
+	short Number;
 } tZ80RegisterInfo;
 
 extern const tZ80Register Z80Registers8[];

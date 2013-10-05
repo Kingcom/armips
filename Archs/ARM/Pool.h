@@ -1,10 +1,10 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
 
-class CArmStateCommand: public CAssemblerCommand
+class ArmStateCommand: public CAssemblerCommand
 {
 public:
-	CArmStateCommand(bool state);
+	ArmStateCommand(bool state);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void WriteTempData(FILE*& Output) { return; };
@@ -14,10 +14,10 @@ private:
 };
 
 
-class CPool
+class ArmPool
 {
 public:
-	CPool();
+	ArmPool();
 	void Clear();
 	int AddEntry(int value);
 	int GetCount() { return EntryCount; };
@@ -30,10 +30,10 @@ private:
 	int RamPos;
 };
 
-class CPoolCommand: public CAssemblerCommand
+class ArmPoolCommand: public CAssemblerCommand
 {
 public:
-	CPoolCommand();
+	ArmPoolCommand();
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void WriteTempData(FILE*& Output);

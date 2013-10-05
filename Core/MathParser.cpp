@@ -344,7 +344,6 @@ bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix)
 bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 {
 	int StackPos = 0;
-	bool Error;
 	int num;
 	int index = 0;
 
@@ -387,7 +386,7 @@ bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 
 bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Result)
 {
-	CIntegerStack Stack;
+	IntegerStack Stack;
 	unsigned int arg[5];
 	char str[255];
 	bool Error = false;

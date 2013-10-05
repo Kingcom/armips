@@ -15,7 +15,6 @@ CDirectiveConditional::CDirectiveConditional()
 
 bool CDirectiveConditional::Load(CArgumentList& Args, int command)
 {
-	int p;
 	CStringList List;
 
 	Type = command;

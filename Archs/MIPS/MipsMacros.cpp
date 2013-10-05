@@ -298,9 +298,7 @@ bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 {
 	Vars.i[0] = false;
 	Vars.i[1] = false;
-	int p,RetLen;
-
-	char i1[256],i2[256];
+	int RetLen;
 
 	while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
 	if (*Opcode == 0 && *Arguments == 0) return true;

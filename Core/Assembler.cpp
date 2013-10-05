@@ -175,7 +175,6 @@ bool CheckEquLabel(char* str)
 	if (s != NULL)
 	{
 		int pos = 0;
-		int Immediate;
 
 		while (str[pos] != ':' && str[pos] != ' ') pos++;
 		str[pos++] = 0;	// lˆschen f¸r sp‰ter
@@ -272,7 +271,6 @@ void InsertMacro(CMacro* Macro, char* Args)
 {
 	tTextData* Text = (tTextData*) malloc(sizeof(tTextData));
 	CArgumentList Arguments;
-	int num;
 
 	SplitArguments(Arguments,Args);
 
@@ -306,7 +304,7 @@ void InsertMacro(CMacro* Macro, char* Args)
 			if (Text->Name[0] == 0) continue;
 
 			bool macro = false;
-			for (int i = 0; i < Global.Macros.size(); i++)
+			for (size_t i = 0; i < Global.Macros.size(); i++)
 			{
 				if (strcmp(Global.Macros[i]->GetName(),Text->Name) == 0)
 				{
@@ -334,7 +332,7 @@ bool ParseMacro(FILE*& Input, char* OpcodeName, char* Args)
 		return true;
 	}
 
-	for (int i = 0; i < Global.Macros.size(); i++)
+	for (size_t i = 0; i < Global.Macros.size(); i++)
 	{
 		if (strcmp(Global.Macros[i]->GetName(),OpcodeName) == 0)
 		{
@@ -371,7 +369,7 @@ void ParseMacroDefinition(FILE*& Input, char* Args)
 		Macro->AddLine(Text->Buffer);
 	}
 
-	for (int i = 0; i < Global.Macros.size(); i++)
+	for (size_t i = 0; i < Global.Macros.size(); i++)
 	{
 		if (strcmp(Macro->GetName(),Global.Macros[i]->GetName()) == 0)
 		{
@@ -467,7 +465,7 @@ bool EncodeAssembly()
 		printf("Validate %d...\n",validationPasses);
 #endif
 
-		for (int i = 0; i < Global.Commands.size(); i++)
+		for (size_t i = 0; i < Global.Commands.size(); i++)
 		{
 			if (Global.Commands[i]->IsConditional() == false)
 			{
@@ -514,7 +512,7 @@ bool EncodeAssembly()
 #endif
 
 	// und schlieﬂlich enkodieren	
-	for (int i = 0; i < Global.Commands.size(); i++)
+	for (size_t i = 0; i < Global.Commands.size(); i++)
 	{
 		if (Global.Commands[i]->IsConditional() == false)
 		{

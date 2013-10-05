@@ -49,7 +49,7 @@ typedef struct {
 
 typedef struct {
 	char Name[5];
-	unsigned char Number;
+	short Number;
 } tMipsRegisterInfo;
 
 extern const tMipsRegister MipsRegister[];

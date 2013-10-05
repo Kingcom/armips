@@ -3,18 +3,18 @@
 #include "Arm.h"
 #include "Core/Common.h"
 
-CArmStateCommand::CArmStateCommand(bool state)
+ArmStateCommand::ArmStateCommand(bool state)
 {
 	armstate = state;
 }
 
-bool CArmStateCommand::Validate()
+bool ArmStateCommand::Validate()
 {
 	RamPos = Global.RamPos;
 	return false;
 }
 
-void CArmStateCommand::Encode()
+void ArmStateCommand::Encode()
 {
 	if (Global.SymData.Write == true)
 	{
@@ -27,17 +27,17 @@ void CArmStateCommand::Encode()
 	}
 }
 
-CPool::CPool()
+ArmPool::ArmPool()
 {
 	EntryCount = 0;
 }
 
-void CPool::Clear()
+void ArmPool::Clear()
 {
 	EntryCount = 0;
 }
 
-int CPool::AddEntry(int value)
+int ArmPool::AddEntry(int value)
 {
 	if (Global.validationPasses < 10)
 	{
@@ -52,14 +52,14 @@ int CPool::AddEntry(int value)
 	return RamPos+(EntryCount++*4);
 }
 
-CPoolCommand::CPoolCommand()
+ArmPoolCommand::ArmPoolCommand()
 {
 	RamPos = Global.RamPos;
 	PoolId = Arm.NewPool();
 	Size = 0;
 }
 
-bool CPoolCommand::Validate()
+bool ArmPoolCommand::Validate()
 {
 	bool Result = false;
 	if (Arm.GetPool(PoolId).GetRamPos() != Global.RamPos)
@@ -79,7 +79,7 @@ bool CPoolCommand::Validate()
 	return Result;
 }
 
-void CPoolCommand::Encode()
+void ArmPoolCommand::Encode()
 {
 	for (int i = 0; i < Size; i++)
 	{
@@ -95,7 +95,7 @@ void CPoolCommand::Encode()
 	}
 }
 
-void CPoolCommand::WriteTempData(FILE *&Output)
+void ArmPoolCommand::WriteTempData(FILE *&Output)
 {
 	char str[32];
 

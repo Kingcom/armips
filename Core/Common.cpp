@@ -234,7 +234,7 @@ void WriteTempFile()
 
 		fprintf(Temp,"\n");
 
-		for (int i = 0; i < Global.Commands.size(); i++)
+		for (size_t i = 0; i < Global.Commands.size(); i++)
 		{
 			if (Global.Commands[i]->IsConditional() == false)
 			{

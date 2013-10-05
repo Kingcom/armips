@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
 	char Name[4];
-	unsigned char Number;
+	int Number;
 } tArmRegisterInfo;
 
 extern const tArmRegister ArmRegister[];
@@ -38,13 +38,13 @@ public:
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };
 	int NewPool() { return PoolCount++; };
-	CPool& GetPool(int num) { return Pools[num]; };
+	ArmPool& GetPool(int num) { return Pools[num]; };
 	int AddToCurrentPool(int value);
 	void NextPool() { CurrentPool++; };
 private:
 	bool thumb;
 	bool arm9;
-	CPool* Pools;
+	ArmPool* Pools;
 	int PoolCount;
 	int CurrentPool;
 };
