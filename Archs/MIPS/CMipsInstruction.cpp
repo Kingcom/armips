@@ -211,7 +211,7 @@ void CMipsInstruction::FormatInstruction(char* encoding,tMipsOpcodeVariables& Va
 
 void CMipsInstruction::WriteInstruction(unsigned int encoding)
 {
-	if (Global.Output.Write(&encoding,4) == -1)
+	if (Global.Output.write(&encoding,4) == -1)
 	{
 		PrintError(ERROR_ERROR,"No file opened");
 	}

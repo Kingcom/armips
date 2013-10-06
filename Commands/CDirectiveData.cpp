@@ -122,7 +122,7 @@ void CDirectiveData::Encode()
 			for (int i = 0; i < len; i++)
 			{
 				num = Data[i];
-				Global.Output.Write(&num,UnitSize);
+				Global.Output.write(&num,UnitSize);
 			}
 			Global.RamPos += len*UnitSize;
 			totalsize += len*UnitSize;
@@ -142,7 +142,7 @@ void CDirectiveData::Encode()
 			}
 			Global.RamPos += UnitSize;
 			totalsize += UnitSize;
-			Global.Output.Write(&num,UnitSize);
+			Global.Output.write(&num,UnitSize);
 		}
 	}
 

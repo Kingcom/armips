@@ -2,7 +2,7 @@
 #include "Commands/CDirectiveFile.h"
 #include "Core/Common.h"
 #include "Core/MathParser.h"
-#include "Util/CArmipsFile.h"
+#include "Util/FileClasses.h"
 
 // TODO: GUCKEN OB ALLES AUCH FUNKTIONIERT
 
@@ -58,17 +58,17 @@ void CDirectiveFile::InitOpen(CArgumentList& Args)
 
 bool CDirectiveFile::ValidateOpen()
 {
-	CArmipsFile TempFile;
+	BinaryFile TempFile;
 
 	Global.RamPos = RamAddress;
 	Global.HeaderSize = RamAddress;
 	Global.FileOpened = true;
 
-	if (TempFile.Open(FileName) == false)
+	if (TempFile.open(FileName,BinaryFile::ReadWrite) == false)
 	{
 		QueueError(ERROR_ERROR,"Could not open file %s",FileName);
 	} else {
-		TempFile.Close();
+		TempFile.close();
 	}
 
 	return false;
@@ -79,7 +79,7 @@ void CDirectiveFile::EncodeOpen()
 	Global.HeaderSize = RamAddress;
 	Global.RamPos = RamAddress;
 
-	if (Global.Output.Open(FileName) == false)
+	if (Global.Output.open(FileName,BinaryFile::ReadWrite) == false)
 	{
 		PrintError(ERROR_FATALERROR,"Could not open file %s",FileName);
 	}
@@ -113,7 +113,7 @@ void CDirectiveFile::InitCreate(CArgumentList& Args)
 
 bool CDirectiveFile::ValidateCreate()
 {
-	CArmipsFile TempFile;
+	BinaryFile TempFile;
 
 	Global.RamPos = RamAddress;
 	Global.HeaderSize = RamAddress;
@@ -121,18 +121,18 @@ bool CDirectiveFile::ValidateCreate()
 
 	if (FileExists(FileName) == true)
 	{
-		if (TempFile.Open(FileName) == false)
+		if (TempFile.open(FileName,BinaryFile::ReadWrite) == false)
 		{
 			QueueError(ERROR_ERROR,"Could not create file %s",FileName);
 		} else {
-			TempFile.Close();
+			TempFile.close();
 		}
 	} else {
-		if (TempFile.Create(FileName) == false)
+		if (TempFile.open(FileName,BinaryFile::Write) == false)
 		{
 			QueueError(ERROR_ERROR,"Could not create file %s",FileName);
 		} else {
-			TempFile.Close();
+			TempFile.close();
 #ifdef USE_WINDOWS_FUNCS
 			DeleteFile(FileName);
 #else
@@ -148,7 +148,7 @@ void CDirectiveFile::EncodeCreate()
 	Global.HeaderSize = RamAddress;
 	Global.RamPos = RamAddress;
 
-	if (Global.Output.Create(FileName) == false)
+	if (Global.Output.open(FileName,BinaryFile::Write) == false)
 	{
 		PrintError(ERROR_FATALERROR,"Could not create file %s",FileName);
 	}
@@ -185,17 +185,17 @@ void CDirectiveFile::InitCopy(CArgumentList& Args)
 
 bool CDirectiveFile::ValidateCopy()
 {
-	CArmipsFile TempFile;
+	BinaryFile TempFile;
 
 	Global.RamPos = RamAddress;
 	Global.HeaderSize = RamAddress;
 	Global.FileOpened = true;
 
-	if (TempFile.Open(OriginalName) == false)
+	if (TempFile.open(OriginalName,BinaryFile::ReadWrite) == false)
 	{
 		QueueError(ERROR_ERROR,"Could not open file %s",FileName);
 	} else {
-		TempFile.Close();
+		TempFile.close();
 	}
 	return false;
 }
@@ -210,7 +210,7 @@ void CDirectiveFile::EncodeCopy()
 	Global.HeaderSize = RamAddress;
 	Global.RamPos = RamAddress;
 
-	if (Global.Output.Open(FileName) == false)
+	if (Global.Output.open(FileName,BinaryFile::ReadWrite) == false)
 	{
 		PrintError(ERROR_FATALERROR,"Could not open file %s",FileName);
 	}
@@ -245,7 +245,7 @@ void CDirectiveFile::EncodeClose()
 		PrintError(ERROR_ERROR,"No file opened");
 		return;
 	}
-	Global.Output.Close();
+	Global.Output.close();
 	Global.FileOpened = false;
 }
 
@@ -283,7 +283,7 @@ void CDirectiveFile::EncodeOrg()
 		return;
 	}
 	Global.RamPos = RamAddress;
-	Global.Output.Seek(RamAddress-Global.HeaderSize);
+	Global.Output.setPos(RamAddress-Global.HeaderSize);
 }
 
 void CDirectiveFile::WriteTempOrg(char* str)
@@ -321,7 +321,7 @@ void CDirectiveFile::EncodeOrga()
 		return;
 	}
 	Global.RamPos = RamAddress;
-	Global.Output.Seek(RamAddress);
+	Global.Output.setPos(RamAddress);
 }
 
 void CDirectiveFile::WriteTempOrga(char* str)
@@ -364,7 +364,7 @@ void CDirectiveFile::EncodeIncbin()
 		PrintError(ERROR_ERROR,"Could not read file \"%s\"",FileName);
 		return;
 	}
-	Global.Output.Write(Buffer,InputFileSize);
+	Global.Output.write(Buffer,InputFileSize);
 	Global.RamPos += InputFileSize;
 	free(Buffer);
 
@@ -420,10 +420,10 @@ void CDirectiveFile::EncodeAlign()
 	memset(AlignBuffer,0,n > 128 ? 128 : n);
 	while (n > 128)
 	{
-		Global.Output.Write(AlignBuffer,128);
+		Global.Output.write(AlignBuffer,128);
 		n -= 128;
 	}
-	Global.Output.Write(AlignBuffer,n);
+	Global.Output.write(AlignBuffer,n);
 }
 
 void CDirectiveFile::WriteTempAlign(char* str)

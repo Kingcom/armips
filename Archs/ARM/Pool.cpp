@@ -84,7 +84,7 @@ void ArmPoolCommand::Encode()
 	for (int i = 0; i < Size; i++)
 	{
 		int num = Arm.GetPool(PoolId).GetEntry(i);
-		Global.Output.Write(&num,4);
+		Global.Output.write(&num,4);
 	}
 	Global.RamPos += Size*4;
 

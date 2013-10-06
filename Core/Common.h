@@ -8,7 +8,7 @@
 #include "Util/CommonClasses.h"
 #include "CMacro.h"
 #include "Util/CTable.h"
-#include "Util/CArmipsFile.h"
+#include "Util/FileClasses.h"
 
 typedef struct {
 	CStringList FileList;
@@ -46,7 +46,7 @@ typedef struct {
 	CErrorQueue ErrorQueue;
 	CTable Table;
 //	HANDLE hFile;
-	CArmipsFile Output;
+	BinaryFile Output;
 	int RamPos;
 	int HeaderSize;
 	bool FileOpened;

@@ -312,7 +312,7 @@ bool CThumbInstruction::Validate()
 
 void CThumbInstruction::WriteInstruction(unsigned short encoding)
 {
-	if (Global.Output.Write(&encoding,2) == -1)
+	if (Global.Output.write(&encoding,2) == -1)
 	{
 		PrintError(ERROR_ERROR,"No file opened");
 	}

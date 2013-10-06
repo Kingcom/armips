@@ -93,7 +93,7 @@
       <Filter>Archs\ARM</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Util\CArmipsFile.cpp">
+    <ClCompile Include="Util\FileClasses.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
@@ -189,7 +189,7 @@
     <ClInclude Include="Archs\ARM\ThumbOpcodes.h">
       <Filter>Archs\ARM</Filter>
     </ClInclude>
-    <ClInclude Include="Util\CArmipsFile.h">
+    <ClInclude Include="Util\FileClasses.h">
       <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>

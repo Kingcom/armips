@@ -103,10 +103,10 @@ void CDirectiveFill::Encode()
 	int n = Size;
 	while (n > 128)
 	{
-		Global.Output.Write(ByteBuffer,128);
+		Global.Output.write(ByteBuffer,128);
 		n -= 128;
 	}
-	Global.Output.Write(ByteBuffer,n);
+	Global.Output.write(ByteBuffer,n);
 
 	if (Global.SymData.Write == true)
 	{

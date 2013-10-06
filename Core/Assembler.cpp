@@ -537,10 +537,10 @@ bool EncodeAssembly()
 		fclose(Global.SymData.Handle);
 	}
 
-	if (Global.Output.Opened() == true)
+	if (Global.Output.isOpen() == true)
 	{
 		PrintError(ERROR_WARNING,"File not closed");
-		Global.Output.Close();
+		Global.Output.close();
 	}
 
 	return true;

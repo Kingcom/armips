@@ -917,7 +917,7 @@ void CArmInstruction::WriteTempData(FILE *&Output)
 
 void CArmInstruction::WriteInstruction(unsigned int encoding)
 {
-	if (Global.Output.Write(&encoding,4) == -1)
+	if (Global.Output.write(&encoding,4) == -1)
 	{
 		PrintError(ERROR_FATALERROR,"No file opened");
 	}
