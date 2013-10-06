@@ -723,7 +723,7 @@ bool TextFile::open(std::string fileName, Mode mode, Encoding defaultEncoding)
 	if (mode == Read)
 	{
 		fseek(handle,0,SEEK_END);
-		size = ftell(handle);
+		size_ = ftell(handle);
 		fseek(handle,0,SEEK_SET);
 
 		if (fread(&num,2,1,handle) == 1)

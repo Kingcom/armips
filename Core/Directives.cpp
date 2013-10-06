@@ -13,6 +13,7 @@
 #include "Archs/ARM/Arm.h"
 #include "Archs/Z80/Z80.h"
 #include "Core/MathParser.h"
+#include "Util/Util.h"
 
 bool DirectiveFile(CArgumentList& List, int flags)
 {
@@ -107,7 +108,7 @@ bool DirectiveLoadTable(CArgumentList& List, int flags)
 		PrintError(ERROR_ERROR,"Table file \"%s\" does not exist",FileName);
 		return false;
 	}
-	if (Global.Table.LoadTable(FileName) == false)
+	if (Global.Table.load(FileName) == false)
 	{
 		PrintError(ERROR_ERROR,"Invalid table file \"%s\"",FileName);
 		return false;
@@ -117,11 +118,10 @@ bool DirectiveLoadTable(CArgumentList& List, int flags)
 
 bool DirectiveString(CArgumentList& List, int flags)
 {
-	unsigned char Buffer[1024];
 	char str[32];
 	CArgumentList NewList;
 
-	if (Global.Table.IsOpen() == false)
+	if (Global.Table.isLoaded() == false)
 	{
 		PrintError(ERROR_ERROR,"No table opened");
 		return false;
@@ -129,27 +129,15 @@ bool DirectiveString(CArgumentList& List, int flags)
 
 	for (int i = 0; i < List.GetCount(); i++)
 	{
-		unsigned char* Input = (unsigned char*) List.GetEntry(i);
-		int OutputPos = 0;
-		int l;
+		char* Input = List.GetEntry(i);
 
 		if (List.IsString(i) == true)
 		{
-			while (*Input != 0)
-			{
-				if ((l = Global.Table.SearchStringMatch(Input)) == -1)
-				{
-					PrintError(ERROR_WARNING,"Character \"%c\" not in table",*Input++);
-				} else {
-					Input += Global.Table.GetStringLen(l);
-					memcpy(&Buffer[OutputPos],Global.Table.GetHexPointer(l),Global.Table.GetHexLen(l));
-					OutputPos += Global.Table.GetHexLen(l);
-				}
-			}
+			ByteArray data = Global.Table.encodeString(convertUtf8ToWString(Input),false);
 			
-			for (int i = 0; i < OutputPos; i++)
+			for (int i = 0; i < data.size(); i++)
 			{
-				sprintf(str,"0x%02X",Buffer[i]);
+				sprintf(str,"0x%02X",data[i]);
 				NewList.AddEntry(str,false);
 			}
 		} else {
@@ -157,10 +145,10 @@ bool DirectiveString(CArgumentList& List, int flags)
 		}
 	}
 
-	int OutputPos = Global.Table.WriteTerminator(Buffer);
-	for (int i = 0; i < OutputPos; i++)
+	ByteArray data = Global.Table.encodeTermination();
+	for (int i = 0; i < data.size(); i++)
 	{
-		sprintf(str,"0x%02X",Buffer[i]);
+		sprintf(str,"0x%02X",data[i]);
 		NewList.AddEntry(str,false);
 	}
 

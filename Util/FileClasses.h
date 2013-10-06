@@ -37,7 +37,8 @@ public:
 	~TextFile();
 	bool open(std::string fileName, Mode mode, Encoding defaultEncoding = UTF8);
 	bool isOpen() { return handle != NULL; };
-	bool atEnd() { return isOpen() && mode == Read && ftell(handle) == size; };
+	bool atEnd() { return isOpen() && mode == Read && ftell(handle) == size_; };
+	long size() { return size_; };
 	void close();
 
 	wchar_t readCharacter();
@@ -58,5 +59,5 @@ private:
 	Encoding encoding;
 	Mode mode;
 	bool recursion;
-	long size;
+	long size_;
 };

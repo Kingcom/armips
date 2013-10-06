@@ -109,9 +109,11 @@
     <ClInclude Include="Core\Directives.h" />
     <ClInclude Include="Core\MathParser.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Util\ByteArray.h" />
     <ClInclude Include="Util\CommonClasses.h" />
-    <ClInclude Include="Util\CTable.h" />
+    <ClInclude Include="Util\EncodingTable.h" />
     <ClInclude Include="Util\FileClasses.h" />
+    <ClInclude Include="Util\Util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Archs\ARM\Arm.cpp" />
@@ -147,9 +149,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Util\ByteArray.cpp" />
     <ClCompile Include="Util\CommonClasses.cpp" />
-    <ClCompile Include="Util\CTable.cpp" />
+    <ClCompile Include="Util\EncodingTable.cpp" />
     <ClCompile Include="Util\FileClasses.cpp" />
+    <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

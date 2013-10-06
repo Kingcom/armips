@@ -5,9 +5,6 @@
     <ClCompile Include="Util\CommonClasses.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="Util\CTable.cpp">
-      <Filter>Util</Filter>
-    </ClCompile>
     <ClCompile Include="Commands\CAssemblerCommand.cpp">
       <Filter>Commands</Filter>
     </ClCompile>
@@ -96,13 +93,19 @@
     <ClCompile Include="Util\FileClasses.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Util\ByteArray.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\EncodingTable.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\Util.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\CommonClasses.h">
-      <Filter>Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\CTable.h">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CAssemblerCommand.h">
@@ -190,6 +193,15 @@
       <Filter>Archs\ARM</Filter>
     </ClInclude>
     <ClInclude Include="Util\FileClasses.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\ByteArray.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\EncodingTable.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Util.h">
       <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>

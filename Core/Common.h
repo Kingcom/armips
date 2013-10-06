@@ -7,7 +7,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
 #include "CMacro.h"
-#include "Util/CTable.h"
+#include "Util/EncodingTable.h"
 #include "Util/FileClasses.h"
 
 typedef struct {
@@ -44,7 +44,7 @@ typedef struct {
 	tOutputFileData SymData;
 	CLabels Labels;
 	CErrorQueue ErrorQueue;
-	CTable Table;
+	EncodingTable Table;
 //	HANDLE hFile;
 	BinaryFile Output;
 	int RamPos;
