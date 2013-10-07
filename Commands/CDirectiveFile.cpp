@@ -42,7 +42,7 @@ void CDirectiveFile::InitOpen(CArgumentList& Args)
 	getFullPathName(FileName,Args.GetEntry(0));
 
 //	strcpy(FileName,Args.GetEntry(0));
-	if (FileExists(FileName) == false)
+	if (fileExists(FileName) == false)
 	{
 		PrintError(ERROR_FATALERROR,"File %s not found",FileName);
 	}
@@ -119,7 +119,7 @@ bool CDirectiveFile::ValidateCreate()
 	Global.HeaderSize = RamAddress;
 	Global.FileOpened = true;
 
-	if (FileExists(FileName) == true)
+	if (fileExists(FileName) == true)
 	{
 		if (TempFile.open(FileName,BinaryFile::ReadWrite) == false)
 		{
@@ -170,7 +170,7 @@ void CDirectiveFile::InitCopy(CArgumentList& Args)
 	getFullPathName(FileName,Args.GetEntry(1));
 	getFullPathName(OriginalName,Args.GetEntry(0));
 
-	if (FileExists(OriginalName) == false)
+	if (fileExists(OriginalName) == false)
 	{
 		PrintError(ERROR_FATALERROR,"File %s not found",OriginalName);
 	}
@@ -339,12 +339,12 @@ void CDirectiveFile::InitIncbin(CArgumentList& Args)
 {
 	getFullPathName(FileName,Args.GetEntry(0));
 
-	if (FileExists(FileName) == false)
+	if (fileExists(FileName) == false)
 	{
 		PrintError(ERROR_FATALERROR,"File %s not found",FileName);
 	}
 
-	InputFileSize = FileSize(FileName);
+	InputFileSize = fileSize((char*)FileName);
 	Global.RamPos += InputFileSize;
 }
 

@@ -74,12 +74,34 @@ bool AddAssemblerLabel(char* LabelName)
 	return true;
 }
 
-int FileSize( const char * szFileName ) 
-{ 
-  struct stat fileStat; 
-  int err = stat( szFileName, &fileStat ); 
-  if (0 != err) return 0; 
-  return fileStat.st_size; 
+int fileSize(const std::wstring&& fileName)
+{
+	struct _stat fileStat; 
+	int err = _wstat(fileName.c_str(), &fileStat ); 
+	if (0 != err) return 0; 
+	return fileStat.st_size; 
+}
+
+int fileSize(const std::string&& fileName)
+{
+	struct _stat fileStat; 
+	int err = _stat(fileName.c_str(), &fileStat ); 
+	if (0 != err) return 0; 
+	return fileStat.st_size; 
+}
+
+bool fileExists(const std::wstring& strFilename)
+{
+	struct _stat stFileInfo;
+	int intStat = _wstat(strFilename.c_str(),&stFileInfo);
+	return intStat == 0;
+}
+
+bool fileExists(const std::string& strFilename)
+{
+	struct _stat stFileInfo;
+	int intStat = _stat(strFilename.c_str(),&stFileInfo);
+	return intStat == 0;
 }
 
 bool FileExists(char* strFilename)

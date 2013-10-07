@@ -46,7 +46,7 @@ bool DirectiveInclude(CArgumentList& List, int flags)
 
 	int FileNum = Global.FileInfo.FileNum;
 	int LineNum = Global.FileInfo.LineNumber;
-	if (FileExists(FileName) == false)
+	if (fileExists(FileName) == false)
 	{
 		PrintError(ERROR_ERROR,"Included file \"%s\" does not exist",FileName);
 		return false;
@@ -103,7 +103,7 @@ bool DirectiveLoadTable(CArgumentList& List, int flags)
 	char FileName[255];
 	getFullPathName(FileName,List.GetEntry(0));
 
-	if (FileExists(FileName) == false)
+	if (fileExists(FileName) == false)
 	{
 		PrintError(ERROR_ERROR,"Table file \"%s\" does not exist",FileName);
 		return false;

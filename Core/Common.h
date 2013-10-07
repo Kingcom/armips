@@ -82,8 +82,12 @@ void getFolderNameFromPath(char* src, char* dest);
 bool CheckLabelDefined(char* LabelName);
 bool CheckValidLabelName(char* LabelName);
 bool AddAssemblerLabel(char* LabelName);
-int FileSize( const char * szFileName );
-bool FileExists(char* strFilename);
+
+int fileSize(const std::wstring&& fileName);
+int fileSize(const std::string&& fileName);
+bool fileExists(const std::wstring& strFilename);
+bool fileExists(const std::string& strFilename);
+
 void AddAssemblerCommand(CAssemblerCommand* Command);
 void QueueError(eErrorLevel level, char* format, ...);
 void PrintError(eErrorLevel level, char* format, ...);
