@@ -71,6 +71,31 @@ private:
 	int DataAllocated;
 };
 
+class ArgumentList
+{
+public:
+	struct Entry
+	{
+		std::wstring text;
+		bool isString;
+	};
+
+	void add(const std::wstring& text, bool isString)
+	{
+		Entry entry = { text, isString };
+		entries.push_back(entry);
+	};
+
+	const ArgumentList::Entry& operator [](unsigned int index) const
+	{
+		return entries[index];
+	};
+
+	size_t size() const { return entries.size(); };
+	void clear() { entries.clear(); };
+private:
+	std::vector<Entry> entries;
+};
 
 typedef struct {
 	int Pos;

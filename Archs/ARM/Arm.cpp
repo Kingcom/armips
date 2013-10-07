@@ -104,7 +104,7 @@ bool ArmDirectiveMsg(CArgumentList& List, int flags)
 	if (List.GetEntry(0)[0] == 0) Arm.AssembleDirective(".byte","0");
 	else Arm.AssembleDirective(".ascii",str2);
 	Arm.AssembleDirective(".align",Arm.GetThumbMode() == true ? "2" : "4");
-	AddAssemblerLabel(str);
+	addAssemblerLabel(convertUtf8ToWString(str));
 	return true;
 }
 
@@ -159,10 +159,10 @@ bool ArmDirectiveIdeasMsg(CArgumentList& List, int flags)
 
 	Arm.AssembleOpcode("b",Lab2);
 	Arm.AssembleDirective(".align","4");
-	AddAssemblerLabel(Lab1);
+	addAssemblerLabel(convertUtf8ToWString(Lab1));
 	Arm.AssembleDirective(".ascii",str);
 	Arm.AssembleDirective(".align",Arm.GetThumbMode() == true ? "2" : "4");
-	AddAssemblerLabel(Lab2);
+	addAssemblerLabel(convertUtf8ToWString(Lab2));
 	return true;
 }
 

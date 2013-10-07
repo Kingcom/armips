@@ -148,7 +148,7 @@ void CDirectiveConditional::Execute()
 		Global.ConditionData.EntryCount--;
 		break;
 	case CONDITIONAL_IFDEF:
-		b = CheckLabelDefined(LabelName);
+		b = checkLabelDefined(convertUtf8ToWString(LabelName));
 /*		switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 		{
 		case LABEL_UNDEFINED:
@@ -171,7 +171,7 @@ void CDirectiveConditional::Execute()
 		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
 		break;
 	case CONDITIONAL_IFNDEF:
-		b = !CheckLabelDefined(LabelName);
+		b = !checkLabelDefined(convertUtf8ToWString(LabelName));
 /*		switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 		{
 		case LABEL_UNDEFINED:
@@ -206,7 +206,7 @@ void CDirectiveConditional::Execute()
 				QueueError(ERROR_ERROR,"Else case already defined");
 				return;
 			}
-			b = CheckLabelDefined(LabelName);
+			b = checkLabelDefined(convertUtf8ToWString(LabelName));
 /*			switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 			{
 			case LABEL_UNDEFINED:
@@ -237,7 +237,7 @@ void CDirectiveConditional::Execute()
 				return;
 			}
 
-			b = !CheckLabelDefined(LabelName);
+			b = !checkLabelDefined(convertUtf8ToWString(LabelName));
 /*			switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 			{
 			case LABEL_UNDEFINED:

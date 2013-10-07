@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Core/Common.h"
 #include "Core/MathParser.h"
 #include "Util/CommonClasses.h"
@@ -38,7 +38,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		return 1;
 	}
 
-	if (FileExists(argv[1]) == false)
+	if (fileExists(argv[1]) == false)
 	{
 		printf("File %s not found\n",argv[1]);
 		return 1;
@@ -67,7 +67,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 
-	LoadAssemblyFile(argv[1]);
+	LoadAssemblyFile(convertUtf8ToWString(argv[1]));
 	if (Global.Error == true)
 	{
 		printf("Aborting.\n");

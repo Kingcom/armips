@@ -28,7 +28,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Secti
 
 bool CAssemblerLabel::Validate()
 {
-	if (label->getValue() != Global.RamPos)
+	if (constant == false && label->getValue() != Global.RamPos)
 	{
 		label->setValue(Global.RamPos);
 		return true;

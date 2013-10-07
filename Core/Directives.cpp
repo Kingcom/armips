@@ -51,7 +51,7 @@ bool DirectiveInclude(CArgumentList& List, int flags)
 		PrintError(ERROR_ERROR,"Included file \"%s\" does not exist",FileName);
 		return false;
 	}
-	LoadAssemblyFile(FileName);
+	LoadAssemblyFile(convertUtf8ToWString(FileName));
 	Global.FileInfo.FileNum = FileNum;
 	Global.FileInfo.LineNumber = LineNum;
 	return true;

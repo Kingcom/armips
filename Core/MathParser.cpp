@@ -412,6 +412,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				}
 				Error = true;
 				Stack.Push(-1);
+				num++;
 				break;
 			}
 

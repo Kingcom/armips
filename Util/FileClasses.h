@@ -36,6 +36,7 @@ public:
 	TextFile();
 	~TextFile();
 	bool open(std::string fileName, Mode mode, Encoding defaultEncoding = UTF8);
+	bool open(std::wstring fileName, Mode mode, Encoding defaultEncoding = UTF8);
 	bool isOpen() { return handle != NULL; };
 	bool atEnd() { return isOpen() && mode == Read && ftell(handle) == size_; };
 	long size() { return size_; };

@@ -1,6 +1,67 @@
 #include "stdafx.h"
 #include "Util.h"
 
+
+Formatter Formatter::arg(const std::wstring& s)
+{
+	// only replace first placeholder for now
+	size_t index = str.find(L"%");
+	while (index != std::string::npos)
+	{
+		if (str[index+1] != '%')
+		{
+			int length = 1;
+			while (index+length < str.size() && str[index+length] >= '0' && str[index+length] <= '9')
+				length++;
+
+			if (length != 1)
+			{
+				return str.replace(str.begin()+index,str.begin()+index+length,s);
+			}
+		}
+		index = str.find(L"%",index+1);
+	}
+
+	return str;
+}
+
+Formatter Formatter::arg(const std::string& s)
+{
+	return arg(convertUtf8ToWString(s.c_str()));
+}
+
+Formatter Formatter::arg(unsigned int value, int base, int width, wchar_t filler)
+{
+	wchar_t buffer[128];
+	int size;
+
+	switch (base)
+	{
+	case 10:
+		size = swprintf(buffer,L"%d",value);
+		break;
+	case 16:
+		size = swprintf(buffer,L"%X",value);
+		if (width != 0 && filler == 0) filler = '0'; 
+		break;
+	default:
+		return str;
+	}
+
+	std::wstring string;
+	if (width != 0 && filler != 0)
+	{
+		for (int i = 0; i < width-size; i++)
+		{
+			string.push_back(filler);
+		}
+	}
+
+	string.append(buffer);
+	return arg(string);
+}
+
+
 std::wstring convertUtf8ToWString(const char* source)
 {
 	std::wstring result;

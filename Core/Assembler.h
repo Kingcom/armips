@@ -1,7 +1,8 @@
-#pragma once
+#pragma 
 #include "Util/CommonClasses.h"
+#include "Util/FileClasses.h"
 
 bool ConditionalAssemblyTrue();
-void ParseMacroDefinition(FILE*& Input, char* Args);
-void LoadAssemblyFile(char* FileName);
+void parseMacroDefinition(TextFile& Input, std::wstring& Args);
+void LoadAssemblyFile(std::wstring& fileName);
 bool EncodeAssembly();

@@ -35,6 +35,7 @@ public:
 	bool isValidSymbolName(const std::wstring& symbol);
 	bool isLocalSymbol(const std::wstring& symbol) { return symbol.size() >= 2 && symbol[0] == '@' && symbol[1] == '@'; };
 	bool isStaticSymbol(const std::wstring& symbol) { return symbol.size() >= 1 && symbol[0] == '@'; };
+	bool isGlobalSymbol(const std::wstring& symbol) { return !isLocalSymbol(symbol) && !isStaticSymbol(symbol); };
 
 	Label* getLabel(const std::wstring& symbol, int file, int section);
 	bool addEquation(const std::wstring& name, int file, int section, std::wstring& replacement);

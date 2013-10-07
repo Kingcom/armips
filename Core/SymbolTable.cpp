@@ -116,6 +116,8 @@ bool SymbolTable::addEquation(const std::wstring& name, int file, int section, s
 	if (symbolExists(name,file,section))
 		return false;
 	
+	setFileSectionValues(name,file,section);
+
 	SymbolKey key = { name, file, section };
 	SymbolInfo value = { EquationSymbol, equations.size() };
 	symbols[key] = value;
@@ -171,7 +173,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 		result += line[pos++];
 	}
 
-	return line;
+	return result;
 }
 
 void SymbolTable::writeSymFile(const std::string fileName)

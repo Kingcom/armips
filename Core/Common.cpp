@@ -43,33 +43,32 @@ void getFullPathName(char* dest, char* path)
 	}
 }
 
-bool CheckLabelDefined(char* LabelName)
+bool checkLabelDefined(const std::wstring& labelName)
 {
-	Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(LabelName),Global.FileInfo.FileNum,Global.Section);
+	Label* label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,Global.Section);
 	return label->isDefined();
 }
 
-bool CheckValidLabelName(char* LabelName)
+bool checkValidLabelName(const std::wstring& labelName)
 {
-	return Global.symbolTable.isValidSymbolName(convertUtf8ToWString(LabelName));
+	return Global.symbolTable.isValidSymbolName(labelName);
 }
 
-bool AddAssemblerLabel(char* LabelName)
+bool addAssemblerLabel(const std::wstring& labelName)
 {
-	if (CheckValidLabelName(LabelName) == false)
+	if (checkValidLabelName(labelName) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",LabelName);
+		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",convertWStringToUtf8(labelName).c_str());
 		return false;
 	}
 
-	if (CheckLabelDefined(LabelName) == true)
+	if (checkLabelDefined(labelName) == true)
 	{
-		PrintError(ERROR_ERROR,"Label \"%s\" already defined",LabelName);
+		PrintError(ERROR_ERROR,"Label \"%s\" already defined",convertWStringToUtf8(labelName).c_str());
 		return false;
 	}
 
-	std::wstring name = convertUtf8ToWString(LabelName);
-	CAssemblerLabel* Label = new CAssemblerLabel(name,Global.RamPos,Global.Section,false);
+	CAssemblerLabel* Label = new CAssemblerLabel(labelName,Global.RamPos,Global.Section,false);
 	AddAssemblerCommand(Label);
 	return true;
 }

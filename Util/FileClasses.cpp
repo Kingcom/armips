@@ -628,7 +628,7 @@ BinaryFile::~BinaryFile()
 bool BinaryFile::open(std::string fileName, Mode mode)
 {
 	if (isOpen())
-		return false;
+		close();
 
 	this->mode = mode;
 
@@ -664,7 +664,10 @@ bool BinaryFile::open(std::string fileName, Mode mode)
 void BinaryFile::close()
 {
 	if (isOpen())
+	{
 		fclose(handle);
+		handle = NULL;
+	}
 }
 
 int BinaryFile::read(void* dest, int length)
@@ -694,8 +697,14 @@ TextFile::~TextFile()
 
 bool TextFile::open(std::string fileName, Mode mode, Encoding defaultEncoding)
 {
+	std::wstring wideName = convertUtf8ToWString(fileName.c_str());
+	return open(wideName,mode,defaultEncoding);
+}
+
+bool TextFile::open(std::wstring fileName, Mode mode, Encoding defaultEncoding)
+{
 	if (isOpen())
-		return false;
+		close();
 
 	encoding = defaultEncoding;
 	this->mode = mode;
@@ -704,10 +713,10 @@ bool TextFile::open(std::string fileName, Mode mode, Encoding defaultEncoding)
 	switch (mode)
 	{
 	case Read:
-		handle = fopen(fileName.c_str(),"rb");
+		handle = _wfopen(fileName.c_str(),L"rb");
 		break;
 	case Write:
-		handle = fopen(fileName.c_str(),"wb");
+		handle = _wfopen(fileName.c_str(),L"wb");
 		encoding = UTF8;
 		writeCharacter(0xFEFF);
 		break;
@@ -755,7 +764,10 @@ bool TextFile::open(std::string fileName, Mode mode, Encoding defaultEncoding)
 void TextFile::close()
 {
 	if (isOpen())
+	{
 		fclose(handle);
+		handle = NULL;
+	}
 }
 
 wchar_t TextFile::readCharacter()

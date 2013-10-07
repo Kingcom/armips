@@ -12,130 +12,58 @@
 #define ASSEMBLER_INCLUDE_NESTING_LEVEL		64
 
 typedef struct {
-	char Buffer[2048];
-	char Name[128];
-	char Params[1920];
+	std::wstring buffer;
+	std::wstring name;
+	std::wstring params;
 } tTextData;
 
-inline bool CheckEndLine(char* string)
+inline bool CheckEndLine(std::wstring& string, int pos)
 {
-	if (*string == 0) return true;
-	if (*string == '\n') return true;
-	if (*string == ';') return true;
-	if (string[0] == '/' && string[1] == '/') return true;
+	if (pos >= string.size()) return true;
+
+	if (string[pos] == 0) return true;
+	if (string[pos] == '\n') return true;
+	if (string[pos] == ';') return true;
+	if (pos+1 < string.size() && string[pos+0] == '/' && string[pos+1] == '/') return true;
 	return false;
 }
 
-bool GetLine(FILE*& Input)
+bool GetLine(TextFile& Input, std::wstring& dest)
 {
-	char Buffer[2048],TempString[2048];
-
-	Global.Arguments.Clear();
-	fgets(Buffer,2048,Input);
-	if (feof(Input))
-	{
-		return true;
-	}
+	std::wstring Buffer = Input.readLine();
+	dest = L"";
 
 	int InputPos = 0;
-	while (true)
-	{
-		int TempPos = 0;
-		while (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ') InputPos++;
-		if (CheckEndLine(&Buffer[InputPos]) == true) break;
 
-		bool endline = false;
-		while (endline == false &&  CheckEndLine(&Buffer[InputPos]) == false)
-		{
-			switch (Buffer[InputPos])
-			{
-			case ' ':
-			case '\t':
-				while (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ') InputPos++;
-				if (Buffer[InputPos] != ',' || CheckEndLine(&Buffer[InputPos]) == true)
-				{
-					endline = true;
-					break;
-				}
-				TempString[TempPos++] = ' ';
-				break;
-			case '"':	// string
-				TempString[TempPos++] = tolower(Buffer[InputPos++]);
-				while (Buffer[InputPos] != '"')
-				{
-					if (Buffer[InputPos] == '\n' || Buffer[InputPos] == 0)
-					{
-						PrintError(ERROR_ERROR,"Unexpected end of line in string constant");
-						return false;
-					}
-					TempString[TempPos++] = Buffer[InputPos++];
-				}
-				TempString[TempPos++] = tolower(Buffer[InputPos++]);
-				break;
-			case '\'':
-				if (Buffer[InputPos+2] == '\'')
-				{
-					TempString[TempPos++] = Buffer[InputPos++];
-					TempString[TempPos++] = Buffer[InputPos++];
-					TempString[TempPos++] = Buffer[InputPos++];
-				} else {
-					PrintError(ERROR_ERROR,"Invalid character constant");
-					return false;
-				}
-				break;
-			default:
-				TempString[TempPos++] = tolower(Buffer[InputPos++]);
-				break;
-			}
-		}
-		TempString[TempPos] = 0;
-		Global.Arguments.AddEntry(TempString);
-	}
-}
-
-bool GetLine(FILE*& Input, char* dest)
-{
-	char Buffer[2048];
-	char* s = fgets(Buffer,2048,Input);
-	if (feof(Input) && s == NULL)
-	{
-		dest[0] = 0;
-		return true;
-	}
-
-	int InputPos = 0;
-	int OutputPos = 0;
-
-	while (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ') InputPos++;
-	while (CheckEndLine(&Buffer[InputPos]) == false)
+	while (InputPos < Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
+	while (InputPos < Buffer.size() && CheckEndLine(Buffer,InputPos) == false)
 	{
 		switch (Buffer[InputPos])
 		{
 		case ' ':
 		case '\t':
-			while (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ') InputPos++;
-			if (CheckEndLine(&Buffer[InputPos]) == true)
+			while (InputPos < Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
+			if (CheckEndLine(Buffer,InputPos) == true)
 			{
-				dest[OutputPos] = 0;
 				return true;
 			}
-			dest[OutputPos++] = ' ';
+			dest += ' ';
 			break;
 		case '"':	// string
-			dest[OutputPos++] = tolower(Buffer[InputPos++]);
+			dest += towlower(Buffer[InputPos++]);
 			while (Buffer[InputPos] != '"')
 			{
 				if (Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '"')
 				{
-					dest[OutputPos++] = '\\';
-					dest[OutputPos++] = '"';
+					dest += '\\';
+					dest += '"';
 					InputPos += 2;
 					continue;
 				}
 				if (Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '\\')
 				{
-					dest[OutputPos++] = '\\';
-					dest[OutputPos++] = '\\';
+					dest += '\\';
+					dest += '\\';
 					InputPos += 2;
 					continue;
 				}
@@ -144,42 +72,39 @@ bool GetLine(FILE*& Input, char* dest)
 					PrintError(ERROR_ERROR,"Unexpected end of line in string constant");
 					return false;
 				}
-				dest[OutputPos++] = Buffer[InputPos++];
+				dest += Buffer[InputPos++];
 			}
-			dest[OutputPos++] = tolower(Buffer[InputPos++]);
+			dest += towlower(Buffer[InputPos++]);
 			break;
 		case '\'':
 			if (Buffer[InputPos+2] == '\'')
 			{
-				dest[OutputPos++] = Buffer[InputPos++];
-				dest[OutputPos++] = Buffer[InputPos++];
-				dest[OutputPos++] = Buffer[InputPos++];
+				dest += Buffer[InputPos++];
+				dest += Buffer[InputPos++];
+				dest += Buffer[InputPos++];
 			} else {
 				PrintError(ERROR_ERROR,"Invalid character constant");
 				return false;
 			}
 			break;
 		default:
-			dest[OutputPos++] = tolower(Buffer[InputPos++]);
+			dest += towlower(Buffer[InputPos++]);
 			break;
 		}
 	}
-	dest[OutputPos] = 0;
+
 	return true;
 }
 
-bool CheckEquLabel(char* str)
+bool CheckEquLabel(std::wstring& str)
 {
-	char* s = strstr(str," equ ");
-	if (s == NULL) s = strstr(str,":equ ");	// check
-	if (s != NULL)
+	size_t s = str.find(L" equ ");
+	if (s == std::string::npos) s = str.find(L":equ ");
+	if (s != std::string::npos)
 	{
-		int pos = 0;
+		std::wstring name = str.substr(0,s);
+		if (name.back() == ':') name.pop_back();
 
-		while (str[pos] != ':' && str[pos] != ' ') pos++;
-		str[pos++] = 0;	// löschen für später
-
-		std::wstring name = convertUtf8ToWString(str);
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
 			PrintError(ERROR_ERROR,"Invalid equation name %s",str);
@@ -191,8 +116,8 @@ bool CheckEquLabel(char* str)
 			PrintError(ERROR_ERROR,"Equation name %s already defined",str);
 			return true;
 		}
-
-		std::wstring replacement = convertUtf8ToWString(&s[5]);
+		
+		std::wstring replacement = str.substr(s+5);
 		Global.symbolTable.addEquation(name,Global.FileInfo.FileNum,Global.Section,replacement);
 		return true;
 	}
@@ -200,59 +125,49 @@ bool CheckEquLabel(char* str)
 	return false;
 }
 
-// TODO: RESTLICHE ROUTINEN AUCH ANPASSEN
-int CheckLabel(char* str, bool AllLocal)
+std::wstring checkLabel(std::wstring& str, bool AllLocal)
 {
-	char LabelName[128];
 	int pos = 0;
-	int NamePos = 0;
 
-	while (str[pos] != ' ' && str[pos] != 0)
+	while (pos < str.size() && str[pos] != ' ' && str[pos] != 0)
 	{
 		if (str[pos] == ':')
 		{
-			str[pos] = 0;
-			if (AllLocal == true)
-			{
-				if (str[0] != '@' && str[1] != '@')
-				{
-					LabelName[NamePos++] = '@';
-					LabelName[NamePos++] = '@';
-				}
-			}
-			strcpy(&LabelName[NamePos],str);
-			AddAssemblerLabel(LabelName);
-			return pos+1;
+			std::wstring name = str.substr(0,pos);
+			if (AllLocal == true && Global.symbolTable.isGlobalSymbol(name))
+				name = L"@@" + name;
+			
+			addAssemblerLabel(name);
+			return str.substr(pos+1);
 		}
 		pos++;
 	}
 
-	return 0;
+	return str;
 }
 
-
-void SplitLine(char* Line, char* Name, char* Arguments)
+void splitLine(std::wstring& line, std::wstring& name, std::wstring& arguments)
 {
-	while (*Line == ' ' || *Line == '\t') Line++;
-	while (*Line != ' ')
+	int linePos = 0;
+	name = L"";
+	arguments = L"";
+
+	while (linePos < line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
+	while (linePos < line.size() && line[linePos] != ' ')
 	{
-		if (*Line  == 0)
+		if (line[linePos]  == 0)
 		{
-			*Name = 0;
-			*Arguments = 0;
 			return;
 		}
-		*Name++ = *Line++;
+		name.push_back(line[linePos++]);
 	}
-	*Name = 0;
 	
-	while (*Line == ' ' || *Line == '\t') Line++;
+	while (linePos < line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
 
-	while (*Line != 0)
+	while (linePos < line.size() && line[linePos] != 0)
 	{
-		*Arguments++ = *Line++;
+		arguments.push_back(line[linePos++]);
 	}
-	*Arguments = 0;
 }
 
 void AddFileName(char* FileName)
@@ -262,12 +177,12 @@ void AddFileName(char* FileName)
 	Global.FileInfo.LineNumber = 0;
 }
 
-void InsertMacro(CMacro* Macro, char* Args)
+void InsertMacro(CMacro* Macro, std::wstring& Args)
 {
-	tTextData* Text = (tTextData*) malloc(sizeof(tTextData));
+	tTextData Text;
 	CArgumentList Arguments;
 
-	SplitArguments(Arguments,Args);
+	SplitArguments(Arguments,(char*)convertWStringToUtf8(Args).c_str());
 
 	if (Arguments.GetCount() != Macro->GetArgumentCount())
 	{
@@ -288,50 +203,50 @@ void InsertMacro(CMacro* Macro, char* Args)
 
 	for (int i = 0; i < Macro->GetLineCount(); i++)
 	{
-		Macro->GetLine(i,Arguments,Text->Buffer,MacroCounter);
+		char buffer[2048];
+		Macro->GetLine(i,Arguments,buffer,MacroCounter);
+		Text.buffer = convertUtf8ToWString(buffer);
 
-		std::wstring wide = Global.symbolTable.insertEquations(convertUtf8ToWString(Text->Buffer),Global.FileInfo.FileNum,Global.Section);
-		std::string normal = convertWStringToUtf8(wide);
-		strcpy(Text->Buffer,normal.c_str());
+		Text.buffer = Global.symbolTable.insertEquations(Text.buffer,Global.FileInfo.FileNum,Global.Section);
 
-		if (CheckEquLabel(Text->Buffer) == false)
+		if (CheckEquLabel(Text.buffer) == false)
 		{
-			int pos = CheckLabel(Text->Buffer,false);
-			SplitLine(&Text->Buffer[pos],Text->Name,Text->Params);
-			if (Text->Name[0] == 0) continue;
+			Text.buffer = checkLabel(Text.buffer,false);
+			splitLine(Text.buffer,Text.name,Text.params);
+			if (Text.name.size() == 0) continue;
 
 			bool macro = false;
 			for (size_t i = 0; i < Global.Macros.size(); i++)
 			{
-				if (strcmp(Global.Macros[i]->GetName(),Text->Name) == 0)
+				if (strcmp(Global.Macros[i]->GetName(),(char*)convertWStringToUtf8(Text.name).c_str()) == 0)
 				{
-					InsertMacro(Global.Macros[i],Text->Params);
+					InsertMacro(Global.Macros[i],Text.params);
 					macro = true;
 				}
 			}
 			if (macro == true) continue;
 
-			if (Arch->AssembleDirective(Text->Name,Text->Params) == false)
+			if (Arch->AssembleDirective((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str()) == false)
 			{
-				Arch->AssembleOpcode(Text->Name,Text->Params);
+				Arch->AssembleOpcode((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str());
 			}
 		}
 	}
 	Global.MacroNestingLevel--;
-	free(Text);
 }
 
-bool ParseMacro(FILE*& Input, char* OpcodeName, char* Args)
+bool ParseMacro(TextFile& Input, std::wstring& OpcodeName, std::wstring& Args)
 {
-	if (strcmp(OpcodeName,".macro") == 0)	// macro definition
+	if (OpcodeName.compare(L".macro") == 0)
 	{
-		ParseMacroDefinition(Input,Args);
+		parseMacroDefinition(Input,Args);
 		return true;
 	}
 
+	std::string utf8 = convertWStringToUtf8(OpcodeName);
 	for (size_t i = 0; i < Global.Macros.size(); i++)
 	{
-		if (strcmp(Global.Macros[i]->GetName(),OpcodeName) == 0)
+		if (strcmp(Global.Macros[i]->GetName(),utf8.c_str()) == 0)
 		{
 			Global.MacroNestingLevel = 0;
 			InsertMacro(Global.Macros[i],Args);
@@ -341,29 +256,29 @@ bool ParseMacro(FILE*& Input, char* OpcodeName, char* Args)
 	return false;
 }
 
-void ParseMacroDefinition(FILE*& Input, char* Args)
+void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 {
-	tTextData* Text = (tTextData*) malloc(sizeof(tTextData));
+	tTextData Text;
 	CArgumentList Arguments;
 
-	SplitArguments(Arguments,Args);
+	SplitArguments(Arguments,(char*)convertWStringToUtf8(Args).c_str());
 
 	CMacro* Macro = new CMacro();
 	Macro->LoadArguments(Arguments);
 
 	while (true)
 	{
-		if (feof(Input))
+		if (Input.atEnd())
 		{
 			PrintError(ERROR_ERROR,"Unexpected end of line in macro definition");
 			return;
 		}
 		Global.FileInfo.LineNumber++;
-		if (GetLine(Input,Text->Buffer) == false) continue;
-		if (Text->Buffer[0] == 0) continue;
-		SplitLine(Text->Buffer,Text->Name,Text->Params);
-		if (strcmp(Text->Name,".endmacro") == 0) break;
-		Macro->AddLine(Text->Buffer);
+		if (GetLine(Input,Text.buffer) == false) continue;
+		if (Text.buffer.empty()) continue;
+		splitLine(Text.buffer,Text.name,Text.params);
+		if (Text.name.compare(L".endmacro") == 0) break;
+		Macro->AddLine((char*)convertWStringToUtf8(Text.buffer).c_str());
 	}
 
 	for (size_t i = 0; i < Global.Macros.size(); i++)
@@ -377,16 +292,15 @@ void ParseMacroDefinition(FILE*& Input, char* Args)
 	}
 
 	Global.Macros.push_back(Macro);
-	free(Text);
 }
 
-void LoadAssemblyFile(char* FileName)
+void LoadAssemblyFile(std::wstring& fileName)
 {
-	tTextData* Text = (tTextData*) malloc(sizeof(tTextData));
+	tTextData Text;
 	CStringList Arguments;
 	int num = 0;
 
-	AddFileName(FileName);
+	AddFileName((char*)convertWStringToUtf8(fileName).c_str());
 	Global.IncludeNestingLevel++;
 
 	if (Global.IncludeNestingLevel == ASSEMBLER_INCLUDE_NESTING_LEVEL)
@@ -395,38 +309,39 @@ void LoadAssemblyFile(char* FileName)
 		return;
 	}
 
-	FILE* Input = fopen(FileName,"r");
-	if (CheckBom(Input) == false) return;
+	TextFile input;
+	if (input.open(fileName,TextFile::Read) == false)
+	{
+		PrintError(ERROR_ERROR,"Could not open file");
+		return;
+	}
 
-	while (!feof(Input))
+	while (!input.atEnd())
 	{
 		Global.FileInfo.LineNumber++;
 		Global.FileInfo.TotalLineCount++;
 
-		if (GetLine(Input,Text->Buffer) == false) continue;
-		if (Text->Buffer[0] == 0) continue;
+		if (GetLine(input,Text.buffer) == false) continue;
+		if (Text.buffer.size() == 0) continue;
 		
-		std::wstring wide = Global.symbolTable.insertEquations(convertUtf8ToWString(Text->Buffer),Global.FileInfo.FileNum,Global.Section);
-		std::string normal = convertWStringToUtf8(wide);
-		strcpy(Text->Buffer,normal.c_str());
+		Text.buffer = Global.symbolTable.insertEquations(Text.buffer,Global.FileInfo.FileNum,Global.Section);
 
-		if (CheckEquLabel(Text->Buffer) == false)
+		if (CheckEquLabel(Text.buffer) == false)
 		{
-			int pos = CheckLabel(Text->Buffer,false);
-			SplitLine(&Text->Buffer[pos],Text->Name,Text->Params);
-			if (Text->Name[0] == 0) continue;
+			Text.buffer = checkLabel(Text.buffer,false);
+			splitLine(Text.buffer,Text.name,Text.params);
+			if (Text.name.empty()) continue;
 
-			if (ParseMacro(Input,Text->Name,Text->Params) == true) continue;
-			if (Arch->AssembleDirective(Text->Name,Text->Params) == false)
+			if (ParseMacro(input,Text.name,Text.params) == true) continue;
+			if (Arch->AssembleDirective((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str()) == false)
 			{
-				Arch->AssembleOpcode(Text->Name,Text->Params);
+				Arch->AssembleOpcode((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str());
 			}
 		}
 	}
 
 	Global.IncludeNestingLevel--;
-	fclose(Input);
-	free(Text);
+	input.close();
 }
 
 bool ConditionalAssemblyTrue()

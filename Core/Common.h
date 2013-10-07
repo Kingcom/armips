@@ -79,9 +79,9 @@ extern tGlobal Global;
 extern CArchitecture* Arch;
 
 void getFolderNameFromPath(char* src, char* dest);
-bool CheckLabelDefined(char* LabelName);
-bool CheckValidLabelName(char* LabelName);
-bool AddAssemblerLabel(char* LabelName);
+bool checkLabelDefined(const std::wstring& labelName);
+bool checkValidLabelName(const std::wstring& labelName);
+bool addAssemblerLabel(const std::wstring& labelName);
 
 int fileSize(const std::wstring&& fileName);
 int fileSize(const std::string&& fileName);
