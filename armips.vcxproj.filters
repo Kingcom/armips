@@ -32,9 +32,6 @@
     <ClCompile Include="Core\Assembler.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\CLabels.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\CMacro.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -102,6 +99,9 @@
     <ClCompile Include="Util\Util.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Core\SymbolTable.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -133,9 +133,6 @@
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="Core\Assembler.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\CLabels.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\CMacro.h">
@@ -203,6 +200,9 @@
     </ClInclude>
     <ClInclude Include="Util\Util.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\SymbolTable.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

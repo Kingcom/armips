@@ -179,26 +179,21 @@ bool CheckEquLabel(char* str)
 		while (str[pos] != ':' && str[pos] != ' ') pos++;
 		str[pos++] = 0;	// löschen für später
 
-
-		if (CheckValidLabelName(str) == false)
+		std::wstring name = convertUtf8ToWString(str);
+		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
 			PrintError(ERROR_ERROR,"Invalid equation name %s",str);
 			return true;
 		}
 
-		if (CheckLabelDefined(str) == true)
+		if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 		{
 			PrintError(ERROR_ERROR,"Equation name %s already defined",str);
 			return true;
 		}
 
-		if (Global.Labels.EquationExists(str,Global.Section,Global.FileInfo.FileNum) == true)
-		{
-			PrintError(ERROR_ERROR,"Equation %s already defined",str);
-			return true;
-		}
-
-		Global.Labels.AddEquation(str,&s[5],Global.Section,Global.FileInfo.FileNum);
+		std::wstring replacement = convertUtf8ToWString(&s[5]);
+		Global.symbolTable.addEquation(name,Global.FileInfo.FileNum,Global.Section,replacement);
 		return true;
 	}
 
@@ -295,7 +290,9 @@ void InsertMacro(CMacro* Macro, char* Args)
 	{
 		Macro->GetLine(i,Arguments,Text->Buffer,MacroCounter);
 
-		Global.Labels.InsertEquations(Text->Buffer,Global.Section,Global.FileInfo.FileNum);
+		std::wstring wide = Global.symbolTable.insertEquations(convertUtf8ToWString(Text->Buffer),Global.FileInfo.FileNum,Global.Section);
+		std::string normal = convertWStringToUtf8(wide);
+		strcpy(Text->Buffer,normal.c_str());
 
 		if (CheckEquLabel(Text->Buffer) == false)
 		{
@@ -408,7 +405,10 @@ void LoadAssemblyFile(char* FileName)
 
 		if (GetLine(Input,Text->Buffer) == false) continue;
 		if (Text->Buffer[0] == 0) continue;
-		Global.Labels.InsertEquations(Text->Buffer,Global.Section,Global.FileInfo.FileNum);
+		
+		std::wstring wide = Global.symbolTable.insertEquations(convertUtf8ToWString(Text->Buffer),Global.FileInfo.FileNum,Global.Section);
+		std::string normal = convertWStringToUtf8(wide);
+		strcpy(Text->Buffer,normal.c_str());
 
 		if (CheckEquLabel(Text->Buffer) == false)
 		{

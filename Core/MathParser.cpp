@@ -366,7 +366,7 @@ bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 				StackPos++;
 			} else {
 				if (AllowLabels == false) return false;
-				if (Global.Labels.IsValidName(str) == false) return false;
+				if (Global.symbolTable.isValidSymbolName(convertUtf8ToWString(str)) == false) return false;
 				StackPos++;
 			}
 		} else {
@@ -392,6 +392,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 	bool Error = false;
 	int num = 0;
 	int Opcode;
+	Label* label;
 
 	while (num < Postfix.GetCount())
 	{
@@ -401,22 +402,20 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			Stack.Push(Postfix.GetValue(num++));
 			break;
 		case EXCOMM_VAR:	// label
-			switch (Global.Labels.CheckLabel(Postfix.GetValue(num)))
+			label = Postfix.GetLabel(num);
+			if (label->isDefined() == false)
 			{
-			case LABEL_UNDEFINED:
-			case LABEL_DOESNOTEXIST:
 				if (Errors != NULL)
 				{
-					sprintf_s(str,255,"Undefined label \"%s\"",Global.Labels.GetName(Postfix.GetValue(num)));
+					sprintf_s(str,255,"Undefined label \"%s\"",convertWStringToUtf8(label->getName()).c_str());
 					Errors->AddEntry(str);
 				}
 				Error = true;
 				Stack.Push(-1);
 				break;
-			default:
-				Stack.Push(Global.Labels.GetValue(Postfix.GetValue(num)));
-				break;
 			}
+
+			Stack.Push(label->getValue());
 			num++;
 			break;
 		case EXCOMM_RAMPOS:
@@ -558,15 +557,15 @@ bool CExpressionCommandList::Load(CStringList &List)
 			Entries[i].command = EXCOMM_RAMPOS;
 			Entries[i].num = 0;
 		} else {	// variable
-			switch (Global.Labels.AddLabel(str,0,Global.Section,Global.FileInfo.FileNum,false))
+			Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(str),Global.FileInfo.FileNum,Global.Section);
+			if (label == NULL)
 			{
-			case LABEL_INVALIDNAME:
 				PrintError(ERROR_ERROR,"Invalid label name \"%s\"",str);
 				return false;
 			}
 
 			Entries[i].command = EXCOMM_VAR;
-			Entries[i].num = Global.Labels.GetLabelNum(str,Global.Section,Global.FileInfo.FileNum);
+			Entries[i].label = label;
 		}
 	}
 

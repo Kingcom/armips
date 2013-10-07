@@ -42,3 +42,75 @@ std::wstring convertUtf8ToWString(const char* source)
 
 	return result;
 }
+
+std::string convertWStringToUtf8(const std::wstring& source)
+{
+	std::string result;
+	
+	for (size_t i = 0; i < source.size(); i++)
+	{
+		wchar_t character = source[i];
+		if (character < 0x80)
+		{
+			result.push_back(character & 0x7F);
+		} else if (character < 0x800)
+		{
+			result.push_back(0xC0 | (character >> 6) & 0x1F);
+			result.push_back(0x80 | (character & 0x3F));
+		} else {
+			result.push_back(0xE0 | (character >> 12) & 0xF);
+			result.push_back(0x80 | ((character >> 6) & 0x3F));
+			result.push_back(0x80 | (character & 0x3F));
+		}
+	}
+
+	return result;
+}
+
+std::wstring formatString(const wchar_t* format, ...)
+{
+	std::wstring result;
+	va_list args;
+
+	va_start(args,format);
+
+	int length = _vscwprintf(format,args);
+	if (length < 0) // error
+	{
+		va_end(args);
+		return L"";
+	}
+
+	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
+	length = _vsnwprintf(buffer,length+1,format,args);
+
+	if (length >= 0)
+		result = buffer;
+
+	va_end(args);
+	return result;
+}
+
+std::string formatString(const char* format, ...)
+{
+	std::string result;
+	va_list args;
+
+	va_start(args,format);
+
+	int length = _vscprintf(format,args);
+	if (length < 0) // error
+	{
+		va_end(args);
+		return "";
+	}
+
+	char* buffer = (char*) alloca((length+1)*sizeof(char));
+	length = _vsnprintf(buffer,length+1,format,args);
+
+	if (length >= 0)
+		result = buffer;
+
+	va_end(args);
+	return result;
+}

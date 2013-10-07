@@ -25,7 +25,7 @@ class CDirectiveSym: public CAssemblerCommand
 public:
 	CDirectiveSym(bool enable) {enabeld = enable; };
 	virtual bool Validate() { return false; };
-	virtual void Encode() { Global.SymData.Write = enabeld; };
+	virtual void Encode() { if(Global.SymData.Handle != NULL) Global.SymData.Write = enabeld; };
 	virtual void WriteTempData(FILE*& Output) { };
 private:
 	bool enabeld;

@@ -1,51 +1,54 @@
 #include "StdAfx.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Core/Common.h"
+#include "Util/Util.h"
 
-CAssemblerLabel::CAssemblerLabel(char* str, int RamPos, int Section, bool constant)
+CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant)
 {
-	strcpy(LabelName,str);
-	LabelRamPos = RamPos;
-	LabelSection = Section;
-
-	switch (Global.Labels.AddLabel(LabelName,LabelRamPos,LabelSection,FileNum,true))
+	label = Global.symbolTable.getLabel(name,FileNum,Section);
+	if (label == NULL)
 	{
-	case LABEL_ALREADYDEFINED:
-		PrintError(ERROR_ERROR,"Label \"%s\" already defined",LabelName);
-		break;
-	case LABEL_INVALIDNAME:
-		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",LabelName);
-		break;
+		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",convertWStringToUtf8(name).c_str());
+		return;
 	}
 
-	LabelConstant = constant;
-	if (Global.Labels.IsLocal(LabelName) == false) Global.Section++;
+	if (label->isDefined())
+	{
+		PrintError(ERROR_ERROR,"Label \"%s\" already defined",convertWStringToUtf8(name).c_str());
+		return;
+	}
+
+	label->setValue(RamPos);
+	label->setDefined(true);
+	this->constant = constant;
+
+	if (Global.symbolTable.isLocalSymbol(name) == false)
+		Global.Section++;
 }
 
 bool CAssemblerLabel::Validate()
 {
-	if (Global.RamPos != LabelRamPos && LabelConstant == false)
+	if (label->getValue() != Global.RamPos)
 	{
-		LabelRamPos = Global.RamPos;
-		Global.Labels.UpdateLabelValue(LabelName,LabelSection,FileNum,LabelRamPos);
+		label->setValue(Global.RamPos);
 		return true;
-	} else {
-		return false;
 	}
+	
+	return false;
 }
 
 void CAssemblerLabel::WriteTempData(FILE*& Output)
 {
 	char str[256];
 
-	sprintf(str,"%s:",LabelName);
-	WriteToTempData(Output,str,LabelRamPos);
+	sprintf(str,"%s:",convertWStringToUtf8(label->getName()).c_str());
+	WriteToTempData(Output,str,label->getValue());
 }
 
 void CAssemblerLabel::Encode()
 {
 	if (Global.SymData.Write == true)
 	{
-		fprintf(Global.SymData.Handle,"%08X %s\n",LabelRamPos,LabelName);
+		fprintf(Global.SymData.Handle,"%08X %s\n",label->getValue(),convertWStringToUtf8(label->getName()).c_str());
 	}
 }

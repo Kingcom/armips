@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include "Assembler.h"
 #include "Commands/CAssemblerLabel.h"
+#include "Util/Util.h"
 
 tGlobal Global;
 CArchitecture* Arch;
@@ -44,38 +45,13 @@ void getFullPathName(char* dest, char* path)
 
 bool CheckLabelDefined(char* LabelName)
 {
-	switch (Global.Labels.CheckLabel(LabelName,Global.Section,Global.FileInfo.FileNum))
-	{
-	case LABEL_UNDEFINED:
-	case LABEL_DOESNOTEXIST:
-	default:
-		return false;
-	case LABEL_DEFINED:
-		return true;
-	}
+	Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(LabelName),Global.FileInfo.FileNum,Global.Section);
+	return label->isDefined();
 }
 
 bool CheckValidLabelName(char* LabelName)
 {
-	switch (Global.Labels.CheckLabel(LabelName,Global.Section,Global.FileInfo.FileNum))
-	{
-	case LABEL_INVALIDNAME:
-		return false;
-	default:
-		return true;
-	}
-}
-
-bool CheckLabelExists(char* LabelName)
-{
-	switch (Global.Labels.CheckLabel(LabelName,Global.Section,Global.FileInfo.FileNum))
-	{
-	case LABEL_DOESNOTEXIST:
-	case LABEL_INVALIDNAME:
-		return false;
-	default:
-		return true;
-	}
+	return Global.symbolTable.isValidSymbolName(convertUtf8ToWString(LabelName));
 }
 
 bool AddAssemblerLabel(char* LabelName)
@@ -92,7 +68,8 @@ bool AddAssemblerLabel(char* LabelName)
 		return false;
 	}
 
-	CAssemblerLabel* Label = new CAssemblerLabel(LabelName,Global.RamPos,Global.Section,false);
+	std::wstring name = convertUtf8ToWString(LabelName);
+	CAssemblerLabel* Label = new CAssemblerLabel(name,Global.RamPos,Global.Section,false);
 	AddAssemblerCommand(Label);
 	return true;
 }
@@ -219,8 +196,8 @@ void WriteTempFile()
 	{
 		int FileCount = Global.FileInfo.FileList.GetCount();
 		int LineCount = Global.FileInfo.TotalLineCount;
-		int LabelCount = Global.Labels.GetLabelCount();
-		int EquCount = Global.Labels.GetEquationCount();
+		int LabelCount = Global.symbolTable.getLabelCount();
+		int EquCount = Global.symbolTable.getEquationCount();
 
 		FILE* Temp = fopen(Global.TempData.Name,"w");
 		fprintf(Temp,"; %d %s included\n",FileCount,FileCount == 1 ? "file" : "files");

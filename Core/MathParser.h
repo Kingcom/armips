@@ -63,9 +63,15 @@ private:
 
 typedef enum eExpressionCommand { EXCOMM_OP, EXCOMM_CONST, EXCOMM_VAR, EXCOMM_RAMPOS };
 
+class Label;
+
 typedef struct {
 	eExpressionCommand command;
-	int num;
+	union
+	{
+		int num;
+		Label* label;
+	};
 } tExpressionCommandEntry;
 
 class CExpressionCommandList
@@ -76,6 +82,7 @@ public:
 	bool Load(CStringList &List);
 	eExpressionCommand GetType(int i) { return Entries[i].command; };
 	unsigned int GetValue(int i) { return Entries[i].num; };
+	Label* GetLabel(int i) { return Entries[i].label; };
 	int GetCount() { return EntryCount; };
 private:
 	tExpressionCommandEntry* Entries;

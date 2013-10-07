@@ -8,7 +8,7 @@
 
 EncodingTable::EncodingTable()
 {
-	setTerminationEntry((unsigned char*)"\0",1);
+
 }
 
 EncodingTable::~EncodingTable()
@@ -53,6 +53,8 @@ bool EncodingTable::load(std::string fileName)
 
 	hexData.clear();
 	valueData.clear();
+	setTerminationEntry((unsigned char*)"\0",1);
+
 	while (!input.atEnd())
 	{
 		std::wstring line = input.readLine();

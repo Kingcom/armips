@@ -3,7 +3,7 @@
 #define COMMON_H
 
 #include <vector>
-#include "CLabels.h"
+#include "SymbolTable.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
 #include "CMacro.h"
@@ -42,7 +42,7 @@ typedef struct {
 	tFileInfo FileInfo;
 	tOutputFileData TempData;
 	tOutputFileData SymData;
-	CLabels Labels;
+	SymbolTable symbolTable;
 	CErrorQueue ErrorQueue;
 	EncodingTable Table;
 //	HANDLE hFile;
@@ -81,7 +81,6 @@ extern CArchitecture* Arch;
 void getFolderNameFromPath(char* src, char* dest);
 bool CheckLabelDefined(char* LabelName);
 bool CheckValidLabelName(char* LabelName);
-bool CheckLabelExists(char* LabelName);
 bool AddAssemblerLabel(char* LabelName);
 int FileSize( const char * szFileName );
 bool FileExists(char* strFilename);

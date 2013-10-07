@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "Core/MathParser.h"
 #include "Archs/ARM/Arm.h"
+#include "Util/Util.h"
 
 extern CArmArchitecture Arm;
 
@@ -39,9 +40,8 @@ bool CDirectiveConditional::Load(CArgumentList& Args, int command)
 	case CONDITIONAL_IFNDEF:
 	case CONDITIONAL_ELSEIFDEF:
 	case CONDITIONAL_ELSEIFNDEF:
-		switch (Global.Labels.CheckLabel(Args.GetEntry(0),Global.Section,Global.FileInfo.FileNum))
+		if (Global.symbolTable.isValidSymbolName(convertUtf8ToWString(Args.GetEntry(0))) == false)
 		{
-		case LABEL_INVALIDNAME:
 			PrintError(ERROR_ERROR,"Invalid label name \"%s\"",Args.GetEntry(0));
 			return false;
 		}

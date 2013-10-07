@@ -240,30 +240,30 @@ bool DirectiveFill(CArgumentList& List, int flags)
 bool DirectiveDefineLabel(CArgumentList& List, int flags)
 {
 	int value;
-	CAssemblerLabel* Label;
-	
-	switch (Global.Labels.CheckLabel(List.GetEntry(0),Global.Section,Global.FileInfo.FileNum))
+	CAssemblerLabel* labelCommand;
+
+	if (ConvertExpression(List.GetEntry(1),value) == false)
 	{
-	case LABEL_INVALIDNAME:
-		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",List.GetEntry(0));
-		return false;
-	case LABEL_UNDEFINED:
-	case LABEL_DOESNOTEXIST:
-		if (ConvertExpression(List.GetEntry(1),value) == false)
-		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",List.GetEntry(1));
-			return false;
-		}
-		Label = new CAssemblerLabel(List.GetEntry(0),value,Global.Section,true);
-		AddAssemblerCommand(Label);
-//		Global.Labels.AddLabel(List.GetEntry(0),value,Global.Section,true);
-		return true;
-	case LABEL_DEFINED:
-		PrintError(ERROR_ERROR,"Label \"%s\" already defined",List.GetEntry(0));
-		return false;
-	default:
+		PrintError(ERROR_ERROR,"Invalid expression \"%s\"",List.GetEntry(1));
 		return false;
 	}
+	
+	Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(List.GetEntry(0)),Global.FileInfo.FileNum,Global.Section);
+	if (label == NULL)
+	{
+		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",List.GetEntry(0));
+		return false;
+	}
+
+	if (label->isDefined())
+	{
+		PrintError(ERROR_ERROR,"Label \"%s\" already defined",List.GetEntry(0));
+		return false;
+	}
+	
+	labelCommand = new CAssemblerLabel(label->getName(),value,Global.Section,true);
+	AddAssemblerCommand(labelCommand);
+	return true;
 }
 
 bool DirectiveConditional(CArgumentList& List, int flags)

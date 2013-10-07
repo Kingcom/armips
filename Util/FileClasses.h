@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include "Util/Util.h"
 
 class BinaryFile
 {
@@ -25,7 +26,6 @@ private:
 	long size_;
 };
 
-typedef std::vector<std::wstring> StringList;
 
 class TextFile
 {
