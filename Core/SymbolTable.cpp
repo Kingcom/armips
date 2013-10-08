@@ -86,6 +86,7 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 	size_t size = symbol.size();
 	size_t start = 0;
 
+	// don't match empty names
 	if (size == 0 || symbol.compare(L"@") == 0 || symbol.compare(L"@@") == 0)
 		return false;
 
@@ -106,6 +107,15 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 	}
 
 	return true;
+}
+
+bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
+{
+	character = towlower(character);
+	if (character >= 'a' && character <= 'z') return true;
+	if (!first && character >= '0' && character <= '9') return false;
+	if (character == '_') return true;
+	return false;
 }
 
 bool SymbolTable::addEquation(const std::wstring& name, int file, int section, std::wstring& replacement)

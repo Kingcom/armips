@@ -4,18 +4,18 @@
 class CMacro
 {
 public:
-	CMacro(void) { Counter = 0; };
+	CMacro(void) { counter = 0; };
 	~CMacro(void) { };
-	void LoadArguments(CArgumentList& Arguments);
-	void AddLine(char* str) { Lines.AddEntry(str); };
-	void GetLine(int num, CArgumentList& ArgumentValues, char* dest, int MacroCounter);
-	int GetLineCount() { return Lines.GetCount(); };
-	int GetArgumentCount() { return Arguments.GetCount(); };
-	char* GetName() { return Name; };
-	int GetIncreaseCounter() { return Counter++; };
+	void loadArguments(ArgumentList& Arguments);
+	void addLine(const std::wstring& str) { lines.push_back(str); };
+	std::wstring getLine(int num, ArgumentList& ArgumentValues, int MacroCounter);
+	int getLineCount() { return lines.size(); };
+	int getArgumentCount() { return arguments.size(); };
+	const std::wstring& getName() { return name; };
+	int getIncreaseCounter() { return counter++; };
 private:
-	char Name[64];
-	CStringList Lines;
-	CStringList Arguments;
-	int Counter;
+	std::wstring name;
+	std::vector<std::wstring> lines;
+	std::vector<std::wstring> arguments;
+	int counter;
 };

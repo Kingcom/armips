@@ -32,10 +32,11 @@ public:
 	SymbolTable();
 	~SymbolTable();
 	bool symbolExists(const std::wstring& symbol, int file, int section);
-	bool isValidSymbolName(const std::wstring& symbol);
-	bool isLocalSymbol(const std::wstring& symbol) { return symbol.size() >= 2 && symbol[0] == '@' && symbol[1] == '@'; };
-	bool isStaticSymbol(const std::wstring& symbol) { return symbol.size() >= 1 && symbol[0] == '@'; };
-	bool isGlobalSymbol(const std::wstring& symbol) { return !isLocalSymbol(symbol) && !isStaticSymbol(symbol); };
+	static bool isValidSymbolName(const std::wstring& symbol);
+	static bool isValidSymbolCharacter(wchar_t character, bool first = false);
+	static bool isLocalSymbol(const std::wstring& symbol, size_t pos = 0) { return symbol.size() >= pos+2 && symbol[pos+0] == '@' && symbol[pos+1] == '@'; };
+	static bool isStaticSymbol(const std::wstring& symbol, size_t pos = 0) { return symbol.size() >= pos+1 && symbol[pos+0] == '@'; };
+	static bool isGlobalSymbol(const std::wstring& symbol, size_t pos = 0) { return !isLocalSymbol(symbol) && !isStaticSymbol(symbol); };
 
 	Label* getLabel(const std::wstring& symbol, int file, int section);
 	bool addEquation(const std::wstring& name, int file, int section, std::wstring& replacement);

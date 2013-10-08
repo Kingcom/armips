@@ -57,6 +57,6 @@ typedef struct {
 
 extern const tDirective Directives[];
 bool ExecuteDirective(const tDirective& Directive, char* args);
-bool SplitArguments(CArgumentList& List, char* args);
+bool splitArguments(ArgumentList& list, std::wstring& args);
 bool DirectiveAssemble(const tDirective* DirectiveSet, char* Name, char* Arguments);
 bool DirectiveAssembleGlobal(char* Name, char* Arguments);

@@ -180,15 +180,15 @@ void AddFileName(char* FileName)
 void InsertMacro(CMacro* Macro, std::wstring& Args)
 {
 	tTextData Text;
-	CArgumentList Arguments;
+	ArgumentList Arguments;
 
-	SplitArguments(Arguments,(char*)convertWStringToUtf8(Args).c_str());
+	splitArguments(Arguments,Args);
 
-	if (Arguments.GetCount() != Macro->GetArgumentCount())
+	if (Arguments.size() != Macro->getArgumentCount())
 	{
 		PrintError(ERROR_ERROR,"%s macro arguments (%d vs %d)",
-			Arguments.GetCount() > Macro->GetArgumentCount() ? "Too many" : "Not enough",
-			Arguments.GetCount(),Macro->GetArgumentCount());
+			Arguments.size() > Macro->getArgumentCount() ? "Too many" : "Not enough",
+			Arguments.size(),Macro->getArgumentCount());
 		return;
 	}
 
@@ -199,14 +199,11 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 		return;
 	}
 
-	int MacroCounter = Macro->GetIncreaseCounter();
+	int MacroCounter = Macro->getIncreaseCounter();
 
-	for (int i = 0; i < Macro->GetLineCount(); i++)
+	for (int i = 0; i < Macro->getLineCount(); i++)
 	{
-		char buffer[2048];
-		Macro->GetLine(i,Arguments,buffer,MacroCounter);
-		Text.buffer = convertUtf8ToWString(buffer);
-
+		Text.buffer = Macro->getLine(i,Arguments,MacroCounter);
 		Text.buffer = Global.symbolTable.insertEquations(Text.buffer,Global.FileInfo.FileNum,Global.Section);
 
 		if (CheckEquLabel(Text.buffer) == false)
@@ -218,7 +215,7 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 			bool macro = false;
 			for (size_t i = 0; i < Global.Macros.size(); i++)
 			{
-				if (strcmp(Global.Macros[i]->GetName(),(char*)convertWStringToUtf8(Text.name).c_str()) == 0)
+				if (Text.name.compare(Global.Macros[i]->getName()) == 0)
 				{
 					InsertMacro(Global.Macros[i],Text.params);
 					macro = true;
@@ -235,18 +232,17 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 	Global.MacroNestingLevel--;
 }
 
-bool ParseMacro(TextFile& Input, std::wstring& OpcodeName, std::wstring& Args)
+bool ParseMacro(TextFile& Input, std::wstring& opcodeName, std::wstring& Args)
 {
-	if (OpcodeName.compare(L".macro") == 0)
+	if (opcodeName.compare(L".macro") == 0)
 	{
 		parseMacroDefinition(Input,Args);
 		return true;
 	}
 
-	std::string utf8 = convertWStringToUtf8(OpcodeName);
 	for (size_t i = 0; i < Global.Macros.size(); i++)
 	{
-		if (strcmp(Global.Macros[i]->GetName(),utf8.c_str()) == 0)
+		if (opcodeName.compare(Global.Macros[i]->getName()) == 0)
 		{
 			Global.MacroNestingLevel = 0;
 			InsertMacro(Global.Macros[i],Args);
@@ -259,12 +255,12 @@ bool ParseMacro(TextFile& Input, std::wstring& OpcodeName, std::wstring& Args)
 void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 {
 	tTextData Text;
-	CArgumentList Arguments;
+	ArgumentList Arguments;
 
-	SplitArguments(Arguments,(char*)convertWStringToUtf8(Args).c_str());
+	splitArguments(Arguments,Args);
 
 	CMacro* Macro = new CMacro();
-	Macro->LoadArguments(Arguments);
+	Macro->loadArguments(Arguments);
 
 	while (true)
 	{
@@ -278,14 +274,14 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 		if (Text.buffer.empty()) continue;
 		splitLine(Text.buffer,Text.name,Text.params);
 		if (Text.name.compare(L".endmacro") == 0) break;
-		Macro->AddLine((char*)convertWStringToUtf8(Text.buffer).c_str());
+		Macro->addLine(Text.buffer);
 	}
 
 	for (size_t i = 0; i < Global.Macros.size(); i++)
 	{
-		if (strcmp(Macro->GetName(),Global.Macros[i]->GetName()) == 0)
+		if (Macro->getName().compare(Global.Macros[i]->getName()) == 0)
 		{
-			PrintError(ERROR_ERROR,"Macro \"%s\" already defined",Macro->GetName());
+			PrintError(ERROR_ERROR,"Macro \"%s\" already defined",convertWStringToUtf8(Macro->getName()));
 			delete Macro;
 			return;
 		}

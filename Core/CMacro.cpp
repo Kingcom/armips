@@ -1,72 +1,69 @@
 #include "StdAfx.h"
 #include "CMacro.h"
+#include "Core/SymbolTable.h"
+#include "Util/Util.h"
 
-void CMacro::LoadArguments(CArgumentList& ArgumentList)
+void CMacro::loadArguments(ArgumentList& argumentList)
 {
-	strcpy(Name,ArgumentList.GetEntry(0));
-	for (int i = 1; i < ArgumentList.GetCount(); i++)
+	name = argumentList[0].text;
+
+	for (int i = 1; i < argumentList.size(); i++)
 	{
-		Arguments.AddEntry(ArgumentList.GetEntry(i));
+		arguments.push_back(argumentList[i].text);
 	}
 }
 
 
-void CMacro::GetLine(int num, CArgumentList& ArgumentValues, char* dest, int MacroCounter)
+std::wstring CMacro::getLine(int num, ArgumentList& argumentValues, int macroCounter)
 {
-	char* Source = Lines.GetEntry(num);
-	char Buffer[128];
-	char StringBuffer[512];
-	int StringBufferPos = 0;
+	std::wstring dest;
+	const std::wstring& source = lines[num];
+	size_t pos = 0;
 
-	// parameter einsetzen
-	while (*Source != 0)
+	// insert parameters
+	while (pos < source.size())
 	{
-		while ((!(*Source >= 'A' && *Source <= 'Z'))
-			&& (!(*Source >= 'a' && *Source <= 'z')))
+		while (pos < source.size() && !SymbolTable::isValidSymbolCharacter(source[pos],true))
 		{
-			if (*Source == 0) break;
-			StringBuffer[StringBufferPos++] = *Source++;
+			dest += source[pos++];
 		}
-		if (*Source == 0) break;
-		int k = 0;
-		while ((*Source >= 'A' && *Source <= 'Z')
-			|| (*Source >= 'a' && *Source <= 'z')
-			|| (*Source >= '0' && *Source <= '9'))
-		{
-			if (*Source == 0) break;
-			Buffer[k++] = *Source++;
-		}
-		Buffer[k] = 0;
+		if (pos == source.size()) break;
 
-		bool insert = false;
-		for (int i = 0; i < Arguments.GetCount(); i++)
+		std::wstring arg;
+		while (pos < source.size() && SymbolTable::isValidSymbolCharacter(source[pos],false))
 		{
-			if (strcmp(Buffer,Arguments.GetEntry(i)) == 0)
+			arg += source[pos++];
+		}
+
+		bool found = false;
+		for (size_t i = 0; i < arguments.size(); i++)
+		{
+			if (arg.compare(arguments[i]) == 0)
 			{
-				StringBufferPos += sprintf(&StringBuffer[StringBufferPos],"%s",ArgumentValues.GetEntry(i));
-				insert = true;
+				dest += argumentValues[i].text;
+				found = true;
 				break;
 			}
 		}
-		if (insert == false)
-		{
-			StringBufferPos += sprintf(&StringBuffer[StringBufferPos],"%s",Buffer);
-		}
-	}
-	StringBuffer[StringBufferPos] = 0;
 
-	// labels ersetzen
-	StringBufferPos = 0;
-	while (StringBuffer[StringBufferPos] != 0)
+		if (found == false)
+			dest += arg;
+	}
+
+	// insert labels
+	std::wstring dest2;
+	pos = 0;
+	while (pos < dest.size())
 	{
-		// label
-		if (StringBuffer[StringBufferPos+0] == '@' && StringBuffer[StringBufferPos+1] == '@')
+		if (SymbolTable::isLocalSymbol(dest,pos))
 		{
-			dest += sprintf(dest,"@@%s_%08X_",Name,MacroCounter);
-			StringBufferPos += 2;
+			dest2 += Formatter("%1_%2_").arg(name).arg(macroCounter,16,8);
+			pos += 2;
 			continue;
 		}
-		*dest++ = StringBuffer[StringBufferPos++];
+
+		dest2 += dest[pos++];
 	}
-	*dest = 0;
+
+	return dest2;
 }

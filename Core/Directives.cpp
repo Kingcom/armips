@@ -407,6 +407,84 @@ bool DirectiveSym(CArgumentList& List, int flags)
 	return true;
 }
 
+bool splitArguments(ArgumentList& list, std::wstring& args)
+{
+	std::wstring buffer;
+	size_t pos = 0;
+	bool isString = false;
+
+	list.clear();
+
+	while (pos < args.size())
+	{
+		while (pos < args.size() && (args[pos] == ' ' || args[pos] == '\t')) pos++;
+		if (pos == args.size()) break;
+
+		if (args[pos] == ',')
+		{
+			if (buffer.empty())
+			{
+				PrintError(ERROR_ERROR,"Parameter failure (empty argument)");
+				return false;
+			}
+
+			list.add(buffer,isString);
+			buffer.clear();
+			isString = false;
+			pos++;
+			continue;
+		}
+
+		if (args[pos] == '"')
+		{
+			pos++;
+			while (args[pos] != '"')
+			{
+				if (pos == args.size())
+				{
+					PrintError(ERROR_ERROR,"Unexpected end of line in string");
+					return false;
+				}
+
+				if (args[pos] == '\\' && pos+1 < args.size())
+				{
+					if (args[pos+1] == '\\')
+					{
+						buffer += '\\';
+						pos += 2;
+						continue;
+					}
+					
+					if (args[pos+1] == '"')
+					{
+						buffer += '"';
+						pos += 2;
+						continue;
+					}
+				}
+
+				buffer += args[pos];
+			}
+			
+			isString = true;
+			pos++;
+			continue;
+		}
+
+		buffer += args[pos++];
+		if (buffer.size() >= 2048)
+		{
+			PrintError(ERROR_ERROR,"parameter replacement length overflow");
+			return false;
+		}
+	}
+
+	if (buffer.empty() == false || isString == true)
+		list.add(buffer,isString);
+
+	return true;
+}
+
 bool SplitArguments(CArgumentList& List, char* args)
 {
 	char Buffer[2048];
