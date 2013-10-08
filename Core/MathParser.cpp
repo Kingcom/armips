@@ -407,7 +407,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			{
 				if (Errors != NULL)
 				{
-					sprintf_s(str,255,"Undefined label \"%s\"",convertWStringToUtf8(label->getName()).c_str());
+					sprintf_s(str,255,"Undefined label \"%ls\"",label->getName().c_str());
 					Errors->AddEntry(str);
 				}
 				Error = true;
@@ -574,13 +574,67 @@ bool CExpressionCommandList::Load(CStringList &List)
 	return true;
 }
 
-bool ConvertExpression(char* exp, int& Result)
+bool ConvertExpression(const std::wstring& exp, int& Result)
 {
 	CStringList List;
 	CExpressionCommandList ExpList;
-	if (ConvertInfixToPostfix(exp,List) == false) return false;
+	if (ConvertInfixToPostfix((char*)convertWStringToUtf8(exp).c_str(),List) == false) return false;
 	if (CheckPostfix(List,false) == false) return false;
 	if (ExpList.Load(List) == false) return false;
 	if (ParsePostfix(ExpList,NULL,Result) == false) return false;
+	return true;
+}
+
+bool initExpression(CExpressionCommandList& dest, const std::wstring& source, bool queue)
+{
+	CStringList List;
+	
+	std::string utf8 = convertWStringToUtf8(source);
+	char* src = (char*) utf8.c_str();
+
+	if (ConvertInfixToPostfix(src,List) == false)
+	{
+		if (queue)
+			QueueError(ERROR_ERROR,"Invalid expression \"%\"",src);
+		else
+			PrintError(ERROR_ERROR,"Invalid expression \"%\"",src);
+		return false;
+	}
+	
+	if (CheckPostfix(List,true) == false)
+	{
+		if (queue)
+			QueueError(ERROR_ERROR,"Invalid expression \"%\"",src);
+		else
+			PrintError(ERROR_ERROR,"Invalid expression \"%\"",src);
+		return false;
+	}
+	
+	return dest.Load(List);
+}
+
+bool evalExpression(CExpressionCommandList& exp, int& dest, bool queue)
+{
+	CStringList List;
+	if (ParsePostfix(exp,&List,dest) == false)
+	{
+		if (List.GetCount() == 0)
+		{
+			if (queue)
+				QueueError(ERROR_ERROR,"Invalid expression");
+			else
+				PrintError(ERROR_ERROR,"Invalid expression");
+		} else {
+			for (int l = 0; l < List.GetCount(); l++)
+			{
+				if (queue)
+					QueueError(ERROR_ERROR,List.GetEntry(l));
+				else
+					PrintError(ERROR_ERROR,List.GetEntry(l));
+			}
+		}
+		return false;
+	}
+
 	return true;
 }

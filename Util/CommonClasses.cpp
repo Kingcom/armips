@@ -10,9 +10,9 @@ void CInvalidArchitecture::AssembleOpcode(char* name, char* args)
 	PrintError(ERROR_FATALERROR,"No architecture specified");
 }
 
-bool CInvalidArchitecture::AssembleDirective(char* name, char* args)
+bool CInvalidArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
 {
-	return DirectiveAssembleGlobal(name,args);
+	return directiveAssembleGlobal(name,args);
 }
 
 void CInvalidArchitecture::NextSection()
@@ -88,49 +88,6 @@ char* CStringList::GetEntry(int num)
 {
 	if (num >= EntryCount) return NULL;
 	return &Data[EntryPoses[num]];
-}
-
-
-CArgumentList::CArgumentList()
-{
-	Entries = (tArgumentListEntry*) malloc(256*sizeof(tArgumentListEntry));
-	EntryCount = 0;
-	EntriesAllocated = 256;
-	Data = (char*) malloc(1024);
-	DataPos = 0;
-	DataAllocated = 1024;
-}
-
-CArgumentList::~CArgumentList()
-{
-	free(Entries);
-	free(Data);
-}
-
-void CArgumentList::AddEntry(char* str, bool String)
-{
-	int len = strlen(str)+1;
-	if (EntriesAllocated == EntryCount)
-	{
-		EntriesAllocated <<= 1;
-		Entries = (tArgumentListEntry*) realloc(Entries,EntriesAllocated*sizeof(tArgumentListEntry));
-	}
-	if (DataPos+len > DataAllocated)
-	{
-		DataAllocated <<= 1;
-		Data = (char*) realloc(Data,DataAllocated);
-	}
-
-	Entries[EntryCount].Pos = DataPos;
-	Entries[EntryCount++].String = String;
-	memcpy(&Data[DataPos],str,len);
-	DataPos += len;
-}
-
-char* CArgumentList::GetEntry(int num)
-{
-	if (num > EntryCount) return NULL;
-	return &Data[Entries[num].Pos];
 }
 
 

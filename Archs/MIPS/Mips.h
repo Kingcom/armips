@@ -14,7 +14,7 @@ class CMipsArchitecture: public CArchitecture
 public:
 	CMipsArchitecture();
 	virtual void AssembleOpcode(char* name, char* args);
-	virtual bool AssembleDirective(char* name, char* args);
+	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();
 	virtual void Pass2() { return; };
 	virtual void Revalidate() { return; };

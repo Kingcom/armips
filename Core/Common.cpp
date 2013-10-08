@@ -9,37 +9,32 @@ tGlobal Global;
 CArchitecture* Arch;
 #include <direct.h>
 
-void getFolderNameFromPath(char* src, char* dest)
+std::wstring getFolderNameFromPath(const std::wstring& src)
 {
-	char* s = strrchr(src,'\\');
-	if (s == NULL)
+	size_t s = src.rfind('\\');
+	if (s == std::wstring::npos)
 	{
-		s = strrchr(src,'/');
-		if (s == NULL)
-		{
-			strcpy(dest,".");
-			return;
-		}
+		s = src.rfind('/');
+		if (s == std::wstring::npos)
+			return L".";
 	}
 
-	memcpy(dest,src,s-src);
-	dest[s-src] = 0;
+	return src.substr(0,s);
 }
 
-void getFullPathName(char* dest, char* path)
+std::wstring getFullPathName(const std::wstring& path)
 {
 	if (Global.relativeInclude == true)
 	{
-		if (path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
+		if (path.size() >= 3 && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
 		{
-			strcpy(dest,path);
+			return path;
 		} else {
-			char WorkingFolder[255];
-			getFolderNameFromPath(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum),WorkingFolder);
-			sprintf(dest,"%s\\%s",WorkingFolder,path);
+			std::wstring source = convertUtf8ToWString(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
+			return getFolderNameFromPath(source) + L"/" + path;
 		}
 	} else {
-		strcpy(dest,path);
+		return path;
 	}
 }
 
@@ -58,13 +53,13 @@ bool addAssemblerLabel(const std::wstring& labelName)
 {
 	if (checkValidLabelName(labelName) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",convertWStringToUtf8(labelName).c_str());
+		PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",labelName.c_str());
 		return false;
 	}
 
 	if (checkLabelDefined(labelName) == true)
 	{
-		PrintError(ERROR_ERROR,"Label \"%s\" already defined",convertWStringToUtf8(labelName).c_str());
+		PrintError(ERROR_ERROR,"Label \"%ls\" already defined",labelName.c_str());
 		return false;
 	}
 
@@ -73,7 +68,7 @@ bool addAssemblerLabel(const std::wstring& labelName)
 	return true;
 }
 
-int fileSize(const std::wstring&& fileName)
+int fileSize(const std::wstring& fileName)
 {
 	struct _stat fileStat; 
 	int err = _wstat(fileName.c_str(), &fileStat ); 
@@ -81,7 +76,7 @@ int fileSize(const std::wstring&& fileName)
 	return fileStat.st_size; 
 }
 
-int fileSize(const std::string&& fileName)
+int fileSize(const std::string& fileName)
 {
 	struct _stat fileStat; 
 	int err = _stat(fileName.c_str(), &fileStat ); 
@@ -257,23 +252,4 @@ bool isPowerOfTwo(int n)
 {
 	if (n == 0) return false;
 	return !(n & (n - 1));
-}
-
-bool CheckBom(FILE*& Handle)
-{
-	int num = 0;
-	fread(&num,2,1,Handle);
-	switch (num)
-	{
-	case 0xFFFE:
-	case 0xFEFF:
-		PrintError(ERROR_ERROR,"UTF-16 not supported");
-		return false;
-	case 0xBBEF:
-		if (fgetc(Handle) == 0xBF) break;
-	default:
-		rewind(Handle);
-		break;
-	}
-	return true;
 }

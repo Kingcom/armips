@@ -625,7 +625,7 @@ BinaryFile::~BinaryFile()
 	close();
 }
 
-bool BinaryFile::open(std::string fileName, Mode mode)
+bool BinaryFile::open(const std::wstring& fileName, Mode mode)
 {
 	if (isOpen())
 		close();
@@ -636,13 +636,13 @@ bool BinaryFile::open(std::string fileName, Mode mode)
 	switch (mode)
 	{
 	case Read:
-		handle = fopen(fileName.c_str(),"rb");
+		handle = _wfopen(fileName.c_str(),L"rb");
 		break;
 	case Write:
-		handle = fopen(fileName.c_str(),"wb");
+		handle = _wfopen(fileName.c_str(),L"wb");
 		break;
 	case ReadWrite:
-		handle = fopen(fileName.c_str(),"rb+");
+		handle = _wfopen(fileName.c_str(),L"rb+");
 		break;
 	default:
 		return false;
@@ -854,7 +854,7 @@ std::wstring TextFile::readLine()
 
 	while (!atEnd() && (value = readCharacter()) != L'\n')
 	{
-		result.push_back(value);
+		result += value;
 	}
 
 	return result;

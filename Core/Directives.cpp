@@ -15,14 +15,14 @@
 #include "Core/MathParser.h"
 #include "Util/Util.h"
 
-bool DirectiveFile(CArgumentList& List, int flags)
+bool DirectiveFile(ArgumentList& List, int flags)
 {
 	eDirectiveFileMode value;
 
 	switch (flags & DIRECTIVE_PARAMFIELD)
 	{
 	case DIRECTIVE_OPEN:
-		if (List.GetCount() == 3) value = DIRECTIVEFILE_COPY; else value = DIRECTIVEFILE_OPEN;
+		if (List.size() == 3) value = DIRECTIVEFILE_COPY; else value = DIRECTIVEFILE_OPEN;
 		break;
 	case DIRECTIVE_CREATE:		value = DIRECTIVEFILE_CREATE; break;
 	case DIRECTIVE_CLOSE:		value = DIRECTIVEFILE_CLOSE; break;
@@ -39,25 +39,24 @@ bool DirectiveFile(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveInclude(CArgumentList& List, int flags)
+bool DirectiveInclude(ArgumentList& List, int flags)
 {
-	char FileName[255];
-	getFullPathName(FileName,List.GetEntry(0));
+	std::wstring fileName = getFullPathName(List[0].text);
 
 	int FileNum = Global.FileInfo.FileNum;
 	int LineNum = Global.FileInfo.LineNumber;
-	if (fileExists(FileName) == false)
+	if (fileExists(fileName) == false)
 	{
-		PrintError(ERROR_ERROR,"Included file \"%s\" does not exist",FileName);
+		PrintError(ERROR_ERROR,"Included file \"%ls\" does not exist",fileName.c_str());
 		return false;
 	}
-	LoadAssemblyFile(convertUtf8ToWString(FileName));
+	LoadAssemblyFile(fileName);
 	Global.FileInfo.FileNum = FileNum;
 	Global.FileInfo.LineNumber = LineNum;
 	return true;
 }
 
-bool DirectiveData(CArgumentList& List, int flags)
+bool DirectiveData(ArgumentList& List, int flags)
 {
 	int DataSize;
 	bool ascii = false;
@@ -77,12 +76,12 @@ bool DirectiveData(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveRadix(CArgumentList& List, int flags)
+bool DirectiveRadix(ArgumentList& List, int flags)
 {
 	int rad;
-	if (ConvertExpression(List.GetEntry(0),rad) == false)
+	if (ConvertExpression(List[0].text,rad) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid expression %s",List.GetEntry(0));
+		PrintError(ERROR_ERROR,"Invalid expression %ls",List[0].text.c_str());
 		return false;
 	}
 
@@ -98,28 +97,26 @@ bool DirectiveRadix(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveLoadTable(CArgumentList& List, int flags)
+bool DirectiveLoadTable(ArgumentList& List, int flags)
 {
-	char FileName[255];
-	getFullPathName(FileName,List.GetEntry(0));
+	std::wstring fileName = getFullPathName(List[0].text);
 
-	if (fileExists(FileName) == false)
+	if (fileExists(fileName) == false)
 	{
-		PrintError(ERROR_ERROR,"Table file \"%s\" does not exist",FileName);
+		PrintError(ERROR_ERROR,"Table file \"%ls\" does not exist",fileName.c_str());
 		return false;
 	}
-	if (Global.Table.load(FileName) == false)
+	if (Global.Table.load(fileName) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid table file \"%s\"",FileName);
+		PrintError(ERROR_ERROR,"Invalid table file \"%ls\"",fileName.c_str());
 		return false;
 	}
 	return true;
 }
 
-bool DirectiveString(CArgumentList& List, int flags)
+bool DirectiveString(ArgumentList& List, int flags)
 {
-	char str[32];
-	CArgumentList NewList;
+	ArgumentList NewList;
 
 	if (Global.Table.isLoaded() == false)
 	{
@@ -127,29 +124,29 @@ bool DirectiveString(CArgumentList& List, int flags)
 		return false;
 	}
 
-	for (int i = 0; i < List.GetCount(); i++)
+	for (size_t i = 0; i < List.size(); i++)
 	{
-		char* Input = List.GetEntry(i);
-
-		if (List.IsString(i) == true)
+		if (List[i].isString)
 		{
-			ByteArray data = Global.Table.encodeString(convertUtf8ToWString(Input),false);
-			
+			ByteArray data = Global.Table.encodeString(List[i].text,false);
+
 			for (int i = 0; i < data.size(); i++)
 			{
-				sprintf(str,"0x%02X",data[i]);
-				NewList.AddEntry(str,false);
+				wchar_t str[32];
+				swprintf(str,32,L"0x%02X",data[i]);
+				NewList.add(str,false);
 			}
 		} else {
-			NewList.AddEntry(List.GetEntry(i),false);
+			NewList.add(List[i].text,false);
 		}
 	}
 
 	ByteArray data = Global.Table.encodeTermination();
 	for (int i = 0; i < data.size(); i++)
 	{
-		sprintf(str,"0x%02X",data[i]);
-		NewList.AddEntry(str,false);
+		wchar_t str[32];
+		swprintf(str,32,L"0x%02X",data[i]);
+		NewList.add(str,false);
 	}
 
 	CDirectiveData* Data = new CDirectiveData(NewList,1,false);
@@ -157,7 +154,7 @@ bool DirectiveString(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectivePsx(CArgumentList& List, int flags)
+bool DirectivePsx(ArgumentList& List, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
@@ -165,7 +162,7 @@ bool DirectivePsx(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectivePs2(CArgumentList& List, int flags)
+bool DirectivePs2(ArgumentList& List, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
@@ -173,7 +170,7 @@ bool DirectivePs2(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectivePsp(CArgumentList& List, int flags)
+bool DirectivePsp(ArgumentList& List, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
@@ -181,7 +178,7 @@ bool DirectivePsp(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveGba(CArgumentList& List, int flags)
+bool DirectiveGba(ArgumentList& List, int flags)
 {
 	Arch = &Arm;
 	Arm.SetThumbMode(true);
@@ -192,7 +189,7 @@ bool DirectiveGba(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveNds(CArgumentList& List, int flags)
+bool DirectiveNds(ArgumentList& List, int flags)
 {
 	Arch = &Arm;
 	Arm.SetThumbMode(false);
@@ -203,20 +200,20 @@ bool DirectiveNds(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveGb(CArgumentList& List, int flags)
+bool DirectiveGb(ArgumentList& List, int flags)
 {
 	Arch = &z80;
 	return true;
 }
 
-bool DirectiveNocash(CArgumentList& List, int flags)
+bool DirectiveNocash(ArgumentList& List, int flags)
 {
-	if (List.GetCount() == 1)
+	if (List.size() == 1)
 	{
-		if (strcmp(List.GetEntry(0),"on") == 0)
+		if (List[0].text == L"on")
 		{
 			Global.nocash = true;
-		} else if (strcmp(List.GetEntry(0),"off") == 0)
+		} else if (List[0].text == L"off")
 		{
 			Global.nocash = false;
 		} else {
@@ -229,7 +226,7 @@ bool DirectiveNocash(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveFill(CArgumentList& List, int flags)
+bool DirectiveFill(ArgumentList& List, int flags)
 {
 	CDirectiveFill* Command = new CDirectiveFill();
 	if (Command->Load(List) == false) return false;
@@ -237,27 +234,27 @@ bool DirectiveFill(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveDefineLabel(CArgumentList& List, int flags)
+bool DirectiveDefineLabel(ArgumentList& List, int flags)
 {
 	int value;
 	CAssemblerLabel* labelCommand;
 
-	if (ConvertExpression(List.GetEntry(1),value) == false)
+	if (ConvertExpression(List[1].text,value) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid expression \"%s\"",List.GetEntry(1));
+		PrintError(ERROR_ERROR,"Invalid expression \"%ls\"",List[1].text.c_str());
 		return false;
 	}
 	
-	Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(List.GetEntry(0)),Global.FileInfo.FileNum,Global.Section);
+	Label* label = Global.symbolTable.getLabel(List[0].text,Global.FileInfo.FileNum,Global.Section);
 	if (label == NULL)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",List.GetEntry(0));
+		PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",List[0].text.c_str());
 		return false;
 	}
 
 	if (label->isDefined())
 	{
-		PrintError(ERROR_ERROR,"Label \"%s\" already defined",List.GetEntry(0));
+		PrintError(ERROR_ERROR,"Label \"%ls\" already defined",List[0].text.c_str());
 		return false;
 	}
 	
@@ -266,7 +263,7 @@ bool DirectiveDefineLabel(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveConditional(CArgumentList& List, int flags)
+bool DirectiveConditional(ArgumentList& List, int flags)
 {
 	int value;
 
@@ -296,7 +293,7 @@ bool DirectiveConditional(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveArea(CArgumentList& List, int flags)
+bool DirectiveArea(ArgumentList& List, int flags)
 {
 	CDirectiveArea* Command;
 
@@ -326,7 +323,7 @@ bool DirectiveArea(CArgumentList& List, int flags)
 }
 
 
-bool DirectiveMessage(CArgumentList& List, int flags)
+bool DirectiveMessage(ArgumentList& List, int flags)
 {
 	int value;
 
@@ -350,14 +347,14 @@ bool DirectiveMessage(CArgumentList& List, int flags)
 }
 
 
-bool DirectiveWarningAsError(CArgumentList& List, int flags)
+bool DirectiveWarningAsError(ArgumentList& List, int flags)
 {
-	if (List.GetCount() == 1)
+	if (List.size() == 1)
 	{
-		if (strcmp(List.GetEntry(0),"on") == 0)
+		if (List[0].text == L"on")
 		{
 			Global.warningAsError = true;
-		} else if (strcmp(List.GetEntry(0),"off") == 0)
+		} else if (List[0].text == L"off")
 		{
 			Global.warningAsError = false;
 		} else {
@@ -370,14 +367,14 @@ bool DirectiveWarningAsError(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveRelativeInclude(CArgumentList& List, int flags)
+bool DirectiveRelativeInclude(ArgumentList& List, int flags)
 {
-	if (List.GetCount() == 1)
+	if (List.size() == 1)
 	{
-		if (strcmp(List.GetEntry(0),"on") == 0)
+		if (List[0].text == L"on")
 		{
 			Global.relativeInclude = true;
-		} else if (strcmp(List.GetEntry(0),"off") == 0)
+		} else if (List[0].text == L"off")
 		{
 			Global.relativeInclude = false;
 		} else {
@@ -390,13 +387,13 @@ bool DirectiveRelativeInclude(CArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveSym(CArgumentList& List, int flags)
+bool DirectiveSym(ArgumentList& List, int flags)
 {
-	if (strcmp(List.GetEntry(0),"on") == 0)
+	if (List[0].text == L"on")
 	{
 		CDirectiveSym* sym = new CDirectiveSym(true);
 		AddAssemblerCommand(sym);
-	} else if (strcmp(List.GetEntry(0),"off") == 0)
+	} else if (List[0].text == L"off")
 	{
 		CDirectiveSym* sym = new CDirectiveSym(false);
 		AddAssemblerCommand(sym);
@@ -407,7 +404,7 @@ bool DirectiveSym(CArgumentList& List, int flags)
 	return true;
 }
 
-bool splitArguments(ArgumentList& list, std::wstring& args)
+bool splitArguments(ArgumentList& list, const std::wstring& args)
 {
 	std::wstring buffer;
 	size_t pos = 0;
@@ -463,7 +460,7 @@ bool splitArguments(ArgumentList& list, std::wstring& args)
 					}
 				}
 
-				buffer += args[pos];
+				buffer += args[pos++];
 			}
 			
 			isString = true;
@@ -485,121 +482,44 @@ bool splitArguments(ArgumentList& list, std::wstring& args)
 	return true;
 }
 
-bool SplitArguments(CArgumentList& List, char* args)
+bool executeDirective(const tDirective& directive, const std::wstring& args)
 {
-	char Buffer[2048];
-	int BufferPos = 0;
-	bool String = false;
+	ArgumentList arguments;
+	if (splitArguments(arguments,args) == false) return false;
 
-	List.Clear();
-
-	while (*args != 0)
-	{
-		while (*args == ' ' || *args == '\t') args++;
-		if (*args == ',')
-		{
-			if (BufferPos == 0)
-			{
-				PrintError(ERROR_ERROR,"Parameter failure (empty argument)");
-				return false;
-			}
-			Buffer[BufferPos] = 0;
-			List.AddEntry(Buffer,String);
-			BufferPos = 0;
-			args++;
-			String = false;
-			continue;
-		}
-
-		if (*args == '\\' && *(args+1) == '"')
-		{
-			Buffer[BufferPos++] = '"';
-			args += 2;
-			continue;
-		}
-
-		if (*args == '"')
-		{
-			args++;
-			while (*args != '"')
-			{
-				if (*args == '\\' && *(args+1) == '\\')
-				{
-					Buffer[BufferPos++] = '\\';
-					args += 2;
-					continue;
-				}
-
-				if (*args == '\\' && *(args+1) == '"')
-				{
-					Buffer[BufferPos++] = '"';
-					args += 2;
-					continue;
-				}
-
-				if (*args == 0)
-				{
-					PrintError(ERROR_ERROR,"Unexpected end of line in string");
-					return false;
-				}
-				Buffer[BufferPos++] = *args++;
-			}
-			String = true;
-			args++;
-			continue;
-		}
-		Buffer[BufferPos++] = *args++;
-		if (BufferPos == 2048)
-		{
-			PrintError(ERROR_ERROR,"equ replacement length overflow");
-			return false;
-		}
-	}
-
-	if (BufferPos != 0 || String == true)
-	{
-		Buffer[BufferPos] = 0;
-		List.AddEntry(Buffer,String);
-	}
-	return true;
-}
-
-bool ExecuteDirective(const tDirective& Directive, char* args)
-{
-	CArgumentList Arguments;
-	if (SplitArguments(Arguments,args) == false) return false;
-
-	if (Directive.minparam > Arguments.GetCount())
+	if (directive.minparam > arguments.size())
 	{
 		PrintError(ERROR_ERROR,"Not enough parameters (min %d)",
-			Directive.minparam);
+			directive.minparam);
 		return false;
 	}
 
-	if (Directive.maxparam < Arguments.GetCount())
+	if (directive.maxparam < arguments.size())
 	{
 		PrintError(ERROR_ERROR,"Too many parameters (max %d)",
-			Directive.maxparam);
+			directive.maxparam);
 		return false;
 	}
 
-	if (Directive.Flags & DIRECTIVE_MIPSRESETDELAY)
+	if (directive.Flags & DIRECTIVE_MIPSRESETDELAY)
 	{
 		Arch->NextSection();
 	}
 
-	return Directive.Function(Arguments,Directive.Flags);
+	return directive.Function(arguments,directive.Flags);
 }
 
-int GetDirective(const tDirective* DirectiveSet, char* name)
+int getDirective(const tDirective* DirectiveSet, const std::wstring& name)
 {
+	std::string utf8 = convertWStringToUtf8(name);
+
 	int num = -1;
 	for (int z = 0; DirectiveSet[z].name != NULL; z++)
 	{
 		if (DirectiveSet[z].Flags & DIRECTIVE_DISABLED) continue;
 		if (DirectiveSet[z].Flags & DIRECTIVE_NOCASHOFF && Global.nocash == true) continue;
 		if (DirectiveSet[z].Flags & DIRECTIVE_NOCASHON && Global.nocash == false) continue;
-		if (strcmp(name,DirectiveSet[z].name) == 0)
+		if (strcmp(utf8.c_str(),DirectiveSet[z].name) == 0)
 		{
 			num = z;
 			break;
@@ -608,11 +528,11 @@ int GetDirective(const tDirective* DirectiveSet, char* name)
 	return num;
 }
 
-bool DirectiveAssemble(const tDirective* DirectiveSet, char* Name, char* Arguments)
+bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name, const std::wstring& arguments)
 {
-	int num = GetDirective(DirectiveSet,Name);
+	int num = getDirective(directiveSet,name);
 	if (num == -1) return false;
-	ExecuteDirective(DirectiveSet[num],Arguments);
+	executeDirective(directiveSet[num],arguments);
 	return true;
 }
 
@@ -698,7 +618,7 @@ const tDirective Directives[] = {
 	{ NULL,			0,	0,	NULL,					0 }
 };
 
-bool DirectiveAssembleGlobal(char* Name, char* Arguments)
+bool directiveAssembleGlobal(const std::wstring& name, const std::wstring& arguments)
 {
-	return DirectiveAssemble(Directives,Name,Arguments);
+	return directiveAssemble(Directives,name,arguments);
 }

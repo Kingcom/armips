@@ -96,5 +96,6 @@ int HexToInt(char* Hex, int length);
 bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix);
 bool CheckPostfix(CStringList& Postfix, bool AllowLabels);
 bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Result);
-bool ConvertExpression(char* exp, int& Result);
-
+bool ConvertExpression(const std::wstring& exp, int& Result);
+bool initExpression(CExpressionCommandList& dest, const std::wstring& source, bool queue = false);
+bool evalExpression(CExpressionCommandList& exp, int& dest, bool queue = false);

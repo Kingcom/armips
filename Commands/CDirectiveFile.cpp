@@ -6,7 +6,7 @@
 
 // TODO: GUCKEN OB ALLES AUCH FUNKTIONIERT
 
-typedef void (CDirectiveFile::*fileinitfunc)(CArgumentList&);
+typedef void (CDirectiveFile::*fileinitfunc)(ArgumentList&);
 typedef bool (CDirectiveFile::*filevalidatefunc)();
 typedef void (CDirectiveFile::*fileencodefunc)();
 typedef void (CDirectiveFile::*filewritetempfunc)(char*);
@@ -37,18 +37,18 @@ const tDirectiveFileTypes DirectiveFileTypes[] = {
 // Directive Open
 // **************
 
-void CDirectiveFile::InitOpen(CArgumentList& Args)
+void CDirectiveFile::InitOpen(ArgumentList& Args)
 {
-	getFullPathName(FileName,Args.GetEntry(0));
+	fileName = getFullPathName(Args[0].text);
 
 //	strcpy(FileName,Args.GetEntry(0));
-	if (fileExists(FileName) == false)
+	if (fileExists(fileName) == false)
 	{
-		PrintError(ERROR_FATALERROR,"File %s not found",FileName);
+		PrintError(ERROR_FATALERROR,"File %ls not found",fileName.c_str());
 	}
-	if (ConvertExpression(Args.GetEntry(1),RamAddress) == false)
+	if (ConvertExpression(Args[1].text,RamAddress) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Invalid ram address %s",Args.GetEntry(1));
+		PrintError(ERROR_FATALERROR,"Invalid ram address %ls",Args[1].text.c_str());
 	}
 
 	Global.RamPos = RamAddress;
@@ -64,9 +64,9 @@ bool CDirectiveFile::ValidateOpen()
 	Global.HeaderSize = RamAddress;
 	Global.FileOpened = true;
 
-	if (TempFile.open(FileName,BinaryFile::ReadWrite) == false)
+	if (TempFile.open(fileName,BinaryFile::ReadWrite) == false)
 	{
-		QueueError(ERROR_ERROR,"Could not open file %s",FileName);
+		QueueError(ERROR_ERROR,"Could not open file %ls",fileName.c_str());
 	} else {
 		TempFile.close();
 	}
@@ -79,16 +79,16 @@ void CDirectiveFile::EncodeOpen()
 	Global.HeaderSize = RamAddress;
 	Global.RamPos = RamAddress;
 
-	if (Global.Output.open(FileName,BinaryFile::ReadWrite) == false)
+	if (Global.Output.open(fileName,BinaryFile::ReadWrite) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Could not open file %s",FileName);
+		PrintError(ERROR_FATALERROR,"Could not open file %ls",fileName.c_str());
 	}
 	Global.FileOpened = true;
 }
 
 void CDirectiveFile::WriteTempOpen(char* str)
 {
-	sprintf(str,".open \"%s\",0x%08X",FileName,RamAddress);
+	sprintf(str,".open \"%ls\",0x%08X",fileName.c_str(),RamAddress);
 }
 
 
@@ -96,14 +96,13 @@ void CDirectiveFile::WriteTempOpen(char* str)
 // Directive Create
 // ****************
 
-void CDirectiveFile::InitCreate(CArgumentList& Args)
+void CDirectiveFile::InitCreate(ArgumentList& Args)
 {
-	getFullPathName(FileName,Args.GetEntry(0));
+	fileName = getFullPathName(Args[0].text);
 
-//	strcpy(FileName,Args.GetEntry(0));
-	if (ConvertExpression(Args.GetEntry(1),RamAddress) == false)
+	if (ConvertExpression(Args[1].text,RamAddress) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Invalid ram address %s",Args.GetEntry(1));
+		PrintError(ERROR_FATALERROR,"Invalid ram address %ls",Args[1].text.c_str());
 	}
 
 	Global.RamPos = RamAddress;
@@ -119,22 +118,22 @@ bool CDirectiveFile::ValidateCreate()
 	Global.HeaderSize = RamAddress;
 	Global.FileOpened = true;
 
-	if (fileExists(FileName) == true)
+	if (fileExists(fileName) == true)
 	{
-		if (TempFile.open(FileName,BinaryFile::ReadWrite) == false)
+		if (TempFile.open(fileName,BinaryFile::ReadWrite) == false)
 		{
-			QueueError(ERROR_ERROR,"Could not create file %s",FileName);
+			QueueError(ERROR_ERROR,"Could not create file %ls",fileName.c_str());
 		} else {
 			TempFile.close();
 		}
 	} else {
-		if (TempFile.open(FileName,BinaryFile::Write) == false)
+		if (TempFile.open(fileName,BinaryFile::Write) == false)
 		{
-			QueueError(ERROR_ERROR,"Could not create file %s",FileName);
+			QueueError(ERROR_ERROR,"Could not create file %ls",fileName.c_str());
 		} else {
 			TempFile.close();
 #ifdef USE_WINDOWS_FUNCS
-			DeleteFile(FileName);
+			DeleteFileW(fileName.c_str());
 #else
 			// gute frage...
 #endif
@@ -148,16 +147,16 @@ void CDirectiveFile::EncodeCreate()
 	Global.HeaderSize = RamAddress;
 	Global.RamPos = RamAddress;
 
-	if (Global.Output.open(FileName,BinaryFile::Write) == false)
+	if (Global.Output.open(fileName,BinaryFile::Write) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Could not create file %s",FileName);
+		PrintError(ERROR_FATALERROR,"Could not create file %ls",fileName.c_str());
 	}
 	Global.FileOpened = true;
 }
 
 void CDirectiveFile::WriteTempCreate(char* str)
 {
-	sprintf(str,".create \"%s\",0x%08X",FileName,RamAddress);
+	sprintf(str,".create \"%ls\",0x%08X",fileName.c_str(),RamAddress);
 }
 
 
@@ -165,18 +164,18 @@ void CDirectiveFile::WriteTempCreate(char* str)
 // Directive Copy
 // **************
 
-void CDirectiveFile::InitCopy(CArgumentList& Args)
+void CDirectiveFile::InitCopy(ArgumentList& Args)
 {
-	getFullPathName(FileName,Args.GetEntry(1));
-	getFullPathName(OriginalName,Args.GetEntry(0));
+	fileName = getFullPathName(Args[1].text);
+	originalName = getFullPathName(Args[0].text);
 
-	if (fileExists(OriginalName) == false)
+	if (fileExists(originalName) == false)
 	{
-		PrintError(ERROR_FATALERROR,"File %s not found",OriginalName);
+		PrintError(ERROR_FATALERROR,"File %ls not found",originalName.c_str());
 	}
-	if (ConvertExpression(Args.GetEntry(2),RamAddress) == false)
+	if (ConvertExpression(Args[2].text,RamAddress) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Invalid ram address %s",Args.GetEntry(2));
+		PrintError(ERROR_FATALERROR,"Invalid ram address %ls",Args[2].text.c_str());
 	}
 	Global.RamPos = RamAddress;
 	Global.HeaderSize = RamAddress;
@@ -191,9 +190,9 @@ bool CDirectiveFile::ValidateCopy()
 	Global.HeaderSize = RamAddress;
 	Global.FileOpened = true;
 
-	if (TempFile.open(OriginalName,BinaryFile::ReadWrite) == false)
+	if (TempFile.open(originalName,BinaryFile::ReadWrite) == false)
 	{
-		QueueError(ERROR_ERROR,"Could not open file %s",FileName);
+		QueueError(ERROR_ERROR,"Could not open file %ls",fileName.c_str());
 	} else {
 		TempFile.close();
 	}
@@ -203,23 +202,23 @@ bool CDirectiveFile::ValidateCopy()
 void CDirectiveFile::EncodeCopy()
 {
 #ifdef USE_WINDOWS_FUNCS
-	CopyFile(OriginalName,FileName,false);
+	CopyFileW(originalName.c_str(),fileName.c_str(),false);
 #else
 	// gute frage...
 #endif
 	Global.HeaderSize = RamAddress;
 	Global.RamPos = RamAddress;
 
-	if (Global.Output.open(FileName,BinaryFile::ReadWrite) == false)
+	if (Global.Output.open(fileName,BinaryFile::ReadWrite) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Could not open file %s",FileName);
+		PrintError(ERROR_FATALERROR,"Could not open file %ls",fileName.c_str());
 	}
 	Global.FileOpened = true;
 }
 
 void CDirectiveFile::WriteTempCopy(char* str)
 {
-	sprintf(str,".open \"%s\",\"%s\",0x%08X",OriginalName,FileName,RamAddress);
+	sprintf(str,".open \"%ls\",\"%ls\",0x%08X",originalName.c_str(),fileName.c_str(),RamAddress);
 }
 
 
@@ -227,7 +226,7 @@ void CDirectiveFile::WriteTempCopy(char* str)
 // Directive Close
 // ***************
 
-void CDirectiveFile::InitClose(CArgumentList& Args)
+void CDirectiveFile::InitClose(ArgumentList& Args)
 {
 	return;
 }
@@ -259,11 +258,11 @@ void CDirectiveFile::WriteTempClose(char* str)
 // Directive Org
 // *************
 
-void CDirectiveFile::InitOrg(CArgumentList& Args)
+void CDirectiveFile::InitOrg(ArgumentList& Args)
 {
-	if (ConvertExpression(Args.GetEntry(0),RamAddress) == false)
+	if (ConvertExpression(Args[0].text,RamAddress) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Invalid ram address %s",Args.GetEntry(0));
+		PrintError(ERROR_FATALERROR,"Invalid ram address %ls",Args[0].text.c_str());
 	}
 	Global.RamPos = RamAddress;
 	Global.Section++;
@@ -296,11 +295,11 @@ void CDirectiveFile::WriteTempOrg(char* str)
 // Directive Orga
 // **************
 
-void CDirectiveFile::InitOrga(CArgumentList& Args)
+void CDirectiveFile::InitOrga(ArgumentList& Args)
 {
-	if (ConvertExpression(Args.GetEntry(0),RamAddress) == false)
+	if (ConvertExpression(Args[0].text,RamAddress) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Invalid file address %s",Args.GetEntry(0));
+		PrintError(ERROR_FATALERROR,"Invalid file address %ls",Args[0].text.c_str());
 	}
 
 	Global.RamPos = RamAddress+Global.HeaderSize;
@@ -335,16 +334,16 @@ void CDirectiveFile::WriteTempOrga(char* str)
 // ****************
 
 
-void CDirectiveFile::InitIncbin(CArgumentList& Args)
+void CDirectiveFile::InitIncbin(ArgumentList& Args)
 {
-	getFullPathName(FileName,Args.GetEntry(0));
+	fileName = getFullPathName(Args[0].text);
 
-	if (fileExists(FileName) == false)
+	if (fileExists(fileName) == false)
 	{
-		PrintError(ERROR_FATALERROR,"File %s not found",FileName);
+		PrintError(ERROR_FATALERROR,"File %ls not found",fileName.c_str());
 	}
 
-	InputFileSize = fileSize((char*)FileName);
+	InputFileSize = fileSize(fileName);
 	Global.RamPos += InputFileSize;
 }
 
@@ -359,9 +358,9 @@ void CDirectiveFile::EncodeIncbin()
 	int n;
 	unsigned char* Buffer = NULL;
 
-	if ((n = ReadFileToBuffer(FileName,&Buffer)) == -1)
+	if ((n = ReadFileToBuffer((char*)convertWStringToUtf8(fileName).c_str(),&Buffer)) == -1)
 	{
-		PrintError(ERROR_ERROR,"Could not read file \"%s\"",FileName);
+		PrintError(ERROR_ERROR,"Could not read file \"%ls\"",fileName.c_str());
 		return;
 	}
 	Global.Output.write(Buffer,InputFileSize);
@@ -376,7 +375,7 @@ void CDirectiveFile::EncodeIncbin()
 
 void CDirectiveFile::WriteTempIncbin(char* str)
 {
-	sprintf(str,".incbin \"%s\"",FileName);
+	sprintf(str,".incbin \"%ls\"",fileName.c_str());
 }
 
 
@@ -384,13 +383,13 @@ void CDirectiveFile::WriteTempIncbin(char* str)
 // Directive Align
 // ***************
 
-void CDirectiveFile::InitAlign(CArgumentList& Args)
+void CDirectiveFile::InitAlign(ArgumentList& Args)
 {
-	if (Args.GetCount() == 1)
+	if (Args.size() == 1)
 	{
-		if (ConvertExpression(Args.GetEntry(0),Alignment) == false)
+		if (ConvertExpression(Args[0].text,Alignment) == false)
 		{
-			PrintError(ERROR_FATALERROR,"Invalid alignment %s",Args.GetEntry(0));
+			PrintError(ERROR_FATALERROR,"Invalid alignment %ls",Args[0].text.c_str());
 		}
 		if (isPowerOfTwo(Alignment) == false)
 		{
@@ -436,11 +435,11 @@ void CDirectiveFile::WriteTempAlign(char* str)
 // Directive HeaderSize
 // ********************
 
-void CDirectiveFile::InitHeaderSize(CArgumentList& Args)
+void CDirectiveFile::InitHeaderSize(ArgumentList& Args)
 {
-	if (ConvertExpression(Args.GetEntry(0),RamAddress) == false)
+	if (ConvertExpression(Args[0].text,RamAddress) == false)
 	{
-		PrintError(ERROR_FATALERROR,"Invalid header size %s",Args.GetEntry(0));
+		PrintError(ERROR_FATALERROR,"Invalid header size %ls",Args[0].text.c_str());
 	}
 
 	Global.HeaderSize = RamAddress;
@@ -470,7 +469,7 @@ void CDirectiveFile::WriteTempHeaderSize(char* str)
 // Base Functions
 // **************
 
-CDirectiveFile::CDirectiveFile(eDirectiveFileMode FileMode, CArgumentList& Args)
+CDirectiveFile::CDirectiveFile(eDirectiveFileMode FileMode, ArgumentList& Args)
 {
 	Mode = FileMode;
 	if (DirectiveFileTypes[Mode].Mode != Mode)

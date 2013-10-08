@@ -3,16 +3,16 @@
 #include "Core/Common.h"
 #include "Core/MathParser.h"
 
-CDirectiveData::CDirectiveData(CArgumentList& Args, int SizePerUnit, bool asc)
+CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
 {
 	CStringList List;
 
-	TotalAmount = Args.GetCount();
+	TotalAmount = Args.size();
 	StrAmount = 0;
 	ExpAmount = 0;
 	for (int i = 0; i < TotalAmount; i++)
 	{
-		if (Args.IsString(i) == true)
+		if (Args[i].isString == true)
 		{
 			StrAmount++;
 		} else {
@@ -38,28 +38,23 @@ CDirectiveData::CDirectiveData(CArgumentList& Args, int SizePerUnit, bool asc)
 	SpaceNeeded = 0;
 	for (int i = 0; i < TotalAmount; i++)
 	{
-		if (Args.IsString(i) == true)
+		if (Args[i].isString == true)
 		{
-			int len = strlen(Args.GetEntry(i));
+			std::string tt = convertWStringToUtf8(Args[i].text);
+			char* t = (char*) tt.c_str();
+
+			int len = strlen(t);
 			Entries[i].String = true;
 			Entries[i].num = StrData.GetCount();
-			StrData.AddEntry((unsigned char*)Args.GetEntry(i),len);
+			StrData.AddEntry((unsigned char*)t,len);
 			SpaceNeeded += len*UnitSize;
 		} else {
 			Entries[i].String = false;
 			Entries[i].num = ExpNum;
 
-			if (ConvertInfixToPostfix(Args.GetEntry(i),List) == false)
-			{
-				PrintError(ERROR_ERROR,"Invalid number or label in expression \"%s\"",Args.GetEntry(i));
+			if (initExpression(ExpData[ExpNum++],Args[i].text) == false)
 				return;
-			}
-			if (CheckPostfix(List,true) == false)
-			{
-				PrintError(ERROR_ERROR,"Invalid expression \"%s\"",Args.GetEntry(i));
-				return;
-			}
-			ExpData[ExpNum++].Load(List);
+
 			SpaceNeeded += UnitSize;
 		}
 	}
@@ -83,19 +78,8 @@ bool CDirectiveData::Validate()
 	{
 		if (Entries[i].String == false)
 		{
-			if (ParsePostfix(ExpData[Entries[i].num],&List,num) == false)
-			{
-				if (List.GetCount() == 0)
-				{
-					QueueError(ERROR_ERROR,"Invalid expression");
-				} else {
-					for (int l = 0; l < List.GetCount(); l++)
-					{
-						QueueError(ERROR_ERROR,List.GetEntry(l));
-					}
-				}
+			if (evalExpression(ExpData[Entries[i].num],num,true) == false)
 				return false;
-			}
 			Global.RamPos += UnitSize;
 		} else {
 			Global.RamPos += StrData.GetLen(Entries[i].num)*UnitSize;
@@ -127,19 +111,8 @@ void CDirectiveData::Encode()
 			Global.RamPos += len*UnitSize;
 			totalsize += len*UnitSize;
 		} else {
-			if (ParsePostfix(ExpData[Entries[i].num],&List,num) == false)
-			{
-				if (List.GetCount() == 0)
-				{
-					PrintError(ERROR_ERROR,"Invalid expression");
-				} else {
-					for (int l = 0; l < List.GetCount(); l++)
-					{
-						PrintError(ERROR_ERROR,List.GetEntry(l));
-					}
-				}
+			if (evalExpression(ExpData[Entries[i].num],num) == false)
 				return;
-			}
 			Global.RamPos += UnitSize;
 			totalsize += UnitSize;
 			Global.Output.write(&num,UnitSize);
@@ -216,19 +189,8 @@ void CDirectiveData::WriteTempData(FILE*& Output)
 			}
 			Global.RamPos += len*UnitSize;
 		} else {
-			if (ParsePostfix(ExpData[Entries[i].num],&List,num) == false)
-			{
-				if (List.GetCount() == 0)
-				{
-					PrintError(ERROR_ERROR,"Invalid expression");
-				} else {
-					for (int l = 0; l < List.GetCount(); l++)
-					{
-						PrintError(ERROR_ERROR,List.GetEntry(l));
-					}
-				}
+			if (evalExpression(ExpData[Entries[i].num],num) == false)
 				return;
-			}
 			Global.RamPos += UnitSize;
 			pos += sprintf(&str[pos],"0x%0*X,",UnitSize*2,num);
 		}

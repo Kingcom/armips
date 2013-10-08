@@ -11,12 +11,12 @@ class CDirectiveMessage: public CAssemblerCommand
 {
 public:
 	CDirectiveMessage() {ErrorType = -1; };
-	bool Load(CArgumentList& Args, int type);
+	bool Load(ArgumentList& Args, int type);
 	virtual bool Validate();
 	virtual void Encode() {};
 	virtual void WriteTempData(FILE*& Output) {};
 private:
-	char Message[1024];
+	std::wstring message;
 	int ErrorType;
 };
 

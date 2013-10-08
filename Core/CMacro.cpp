@@ -7,7 +7,7 @@ void CMacro::loadArguments(ArgumentList& argumentList)
 {
 	name = argumentList[0].text;
 
-	for (int i = 1; i < argumentList.size(); i++)
+	for (size_t i = 1; i < argumentList.size(); i++)
 	{
 		arguments.push_back(argumentList[i].text);
 	}

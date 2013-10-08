@@ -175,3 +175,45 @@ std::string formatString(const char* format, ...)
 	va_end(args);
 	return result;
 }
+
+std::wstring intToHexString(unsigned int value, int digits, bool prefix)
+{
+	std::wstring result;
+	result.reserve(digits+prefix ? 2 : 0);
+
+	if (prefix)
+	{
+		result.push_back('0');
+		result.push_back('x');
+	}
+
+	while (digits > 8)
+	{
+		result.push_back('0');
+		digits--;
+	}
+	
+	wchar_t buf[9];
+	swprintf(buf,L"%0*X",digits,value);
+	result += buf;
+
+	return result;
+}
+
+std::wstring intToString(unsigned int value, int digits)
+{
+	std::wstring result;
+	result.reserve(digits);
+
+	while (digits > 8)
+	{
+		result.push_back(' ');
+		digits--;
+	}
+	
+	wchar_t buf[9];
+	swprintf(buf,L"%*d",digits,value);
+	result += buf;
+
+	return result;
+}

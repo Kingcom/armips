@@ -5,7 +5,7 @@ class CArchitecture
 {
 public:
 	virtual void AssembleOpcode(char* name, char* args) = 0;
-	virtual bool AssembleDirective(char* name, char* args) = 0;
+	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args) = 0;
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;
@@ -18,7 +18,7 @@ class CInvalidArchitecture: public CArchitecture
 {
 public:
 	virtual void AssembleOpcode(char* name, char* args);
-	virtual bool AssembleDirective(char* name, char* args);
+	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
@@ -40,30 +40,6 @@ public:
 	int GetCount() { return EntryCount; };
 private:
 	int* EntryPoses;
-	int EntryCount;
-	int EntriesAllocated;
-	char* Data;
-	int DataPos;
-	int DataAllocated;
-};
-
-typedef struct {
-	int Pos;
-	bool String;
-} tArgumentListEntry;
-
-class CArgumentList
-{
-public:
-	CArgumentList();
-	~CArgumentList();
-	void Clear() { EntryCount = 0; DataPos = 0; };
-	void AddEntry(char* str, bool String);
-	char* GetEntry(int num);
-	bool IsString(int num) { return Entries[num].String; };
-	int GetCount() { return EntryCount; };
-private:
-	tArgumentListEntry* Entries;
 	int EntryCount;
 	int EntriesAllocated;
 	char* Data;

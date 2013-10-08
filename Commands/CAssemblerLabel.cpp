@@ -8,13 +8,13 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Secti
 	label = Global.symbolTable.getLabel(name,FileNum,Section);
 	if (label == NULL)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%s\"",convertWStringToUtf8(name).c_str());
+		PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",name.c_str());
 		return;
 	}
 
 	if (label->isDefined())
 	{
-		PrintError(ERROR_ERROR,"Label \"%s\" already defined",convertWStringToUtf8(name).c_str());
+		PrintError(ERROR_ERROR,"Label \"%ls\" already defined",name.c_str());
 		return;
 	}
 
@@ -41,7 +41,7 @@ void CAssemblerLabel::WriteTempData(FILE*& Output)
 {
 	char str[256];
 
-	sprintf(str,"%s:",convertWStringToUtf8(label->getName()).c_str());
+	sprintf(str,"%ls:",label->getName().c_str());
 	WriteToTempData(Output,str,label->getValue());
 }
 
@@ -49,6 +49,6 @@ void CAssemblerLabel::Encode()
 {
 	if (Global.SymData.Write == true)
 	{
-		fprintf(Global.SymData.Handle,"%08X %s\n",label->getValue(),convertWStringToUtf8(label->getName()).c_str());
+		fprintf(Global.SymData.Handle,"%08X %ls\n",label->getValue(),label->getName().c_str());
 	}
 }

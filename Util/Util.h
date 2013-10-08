@@ -24,3 +24,5 @@ private:
 	std::wstring str;
 };
 
+std::wstring intToHexString(unsigned int value, int digits, bool prefix = false);
+std::wstring intToString(unsigned int value, int digits);

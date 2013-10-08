@@ -147,7 +147,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 	{
 		for (size_t i = 0; i < equations.size(); i++)
 		{
-			Equation& eq = equations[i];
+			const Equation& eq = equations.at(i);
 			if ((eq.file == -1 || eq.file == file) &&
 				(eq.section == -1 || eq.section == section))
 			{

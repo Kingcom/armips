@@ -28,9 +28,9 @@ const tZ80Register Z80Registers16[] = {
 CZ80Architecture z80;
 
 
-bool CZ80Architecture::AssembleDirective(char* Name, char* Arguments)
+bool CZ80Architecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
 {
-	if (DirectiveAssembleGlobal(Name,Arguments) == true) return true;
+	if (directiveAssembleGlobal(name,args) == true) return true;
 	return false;
 }
 

@@ -9,36 +9,18 @@ CDirectiveArea::CDirectiveArea()
 	Size = 0;
 }
 
-bool CDirectiveArea::LoadStart(CArgumentList &Args)
+bool CDirectiveArea::LoadStart(ArgumentList &Args)
 {
 	CStringList List;
 
-	if (ConvertInfixToPostfix(Args.GetEntry(0),List) == false)
-	{
-		PrintError(ERROR_ERROR,"Invalid expression \"%\"",Args.GetEntry(0));
+	if (initExpression(SizeExpression,Args[0].text) == false)
 		return false;
-	}
-	if (CheckPostfix(List,true) == false)
-	{
-		PrintError(ERROR_ERROR,"Invalid expression \"%\"",Args.GetEntry(0));
-		return false;
-	}
-	SizeExpression.Load(List);
 	Start = true;
 
-	if (Args.GetCount() == 2)
+	if (Args.size() == 2)
 	{
-		if (ConvertInfixToPostfix(Args.GetEntry(1),List) == false)
-		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%\"",Args.GetEntry(1));
+		if (initExpression(FillExpression,Args[1].text) == false)
 			return false;
-		}
-		if (CheckPostfix(List,true) == false)
-		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%\"",Args.GetEntry(1));
-			return false;
-		}
-		FillExpression.Load(List);
 		UseFill = true;
 	}
 
@@ -60,19 +42,8 @@ bool CDirectiveArea::Validate()
 
 	if (Start == true)
 	{
-		if (ParsePostfix(SizeExpression,&List,NewSize) == false)
-		{
-			if (List.GetCount() == 0)
-			{
-				QueueError(ERROR_ERROR,"Invalid expression");
-			} else {
-				for (int l = 0; l < List.GetCount(); l++)
-				{
-					QueueError(ERROR_ERROR,List.GetEntry(l));
-				}
-			}
+		if (evalExpression(SizeExpression,NewSize,true) == false)
 			return false;
-		}
 		Global.AreaData.Entries[Global.AreaData.EntryCount].FileNum = FileNum;
 		Global.AreaData.Entries[Global.AreaData.EntryCount].LineNumber = FileLine;
 		Global.AreaData.Entries[Global.AreaData.EntryCount++].MaxRamPos = RamPos+NewSize;

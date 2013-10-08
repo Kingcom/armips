@@ -18,7 +18,7 @@ class CDirectiveConditional: public CAssemblerCommand
 {
 public:
 	CDirectiveConditional();
-	bool Load(CArgumentList& Args, int command);
+	bool Load(ArgumentList& Args, int command);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void WriteTempData(FILE*& Output);
@@ -26,7 +26,7 @@ public:
 private:
 	void Execute();
 	CExpressionCommandList Expression;
-	char LabelName[255];
+	std::wstring labelName;
 	int Value;
 	int Type;
 	int RamPos;

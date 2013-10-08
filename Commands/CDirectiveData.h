@@ -10,7 +10,7 @@ typedef struct {
 class CDirectiveData: public CAssemblerCommand
 {
 public:
-	CDirectiveData(CArgumentList& Args, int SizePerUnit, bool asc);
+	CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc);
 	~CDirectiveData();
 	virtual bool Validate();
 	virtual void Encode();

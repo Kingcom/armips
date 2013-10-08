@@ -78,13 +78,15 @@ typedef enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NO
 extern tGlobal Global;
 extern CArchitecture* Arch;
 
-void getFolderNameFromPath(char* src, char* dest);
+std::wstring getFolderNameFromPath(const std::wstring& src);
+std::wstring getFullPathName(const std::wstring& path);
+
 bool checkLabelDefined(const std::wstring& labelName);
 bool checkValidLabelName(const std::wstring& labelName);
 bool addAssemblerLabel(const std::wstring& labelName);
 
-int fileSize(const std::wstring&& fileName);
-int fileSize(const std::string&& fileName);
+int fileSize(const std::wstring& fileName);
+int fileSize(const std::string& fileName);
 bool fileExists(const std::wstring& strFilename);
 bool fileExists(const std::string& strFilename);
 
@@ -95,6 +97,4 @@ int ReadFileToBuffer(char* FileName, unsigned char** Pointer);
 void WriteToTempData(FILE*& Output, char* str, int RamPos);
 void WriteTempFile();
 bool isPowerOfTwo(int n);
-bool CheckBom(FILE*& Handle);
-void getFullPathName(char* dest, char* path);
 #endif

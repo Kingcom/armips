@@ -223,7 +223,7 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 			}
 			if (macro == true) continue;
 
-			if (Arch->AssembleDirective((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str()) == false)
+			if (Arch->AssembleDirective(Text.name,Text.params) == false)
 			{
 				Arch->AssembleOpcode((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str());
 			}
@@ -281,7 +281,7 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 	{
 		if (Macro->getName().compare(Global.Macros[i]->getName()) == 0)
 		{
-			PrintError(ERROR_ERROR,"Macro \"%s\" already defined",convertWStringToUtf8(Macro->getName()));
+			PrintError(ERROR_ERROR,"Macro \"%ls\" already defined",Macro->getName().c_str());
 			delete Macro;
 			return;
 		}
@@ -329,7 +329,7 @@ void LoadAssemblyFile(std::wstring& fileName)
 			if (Text.name.empty()) continue;
 
 			if (ParseMacro(input,Text.name,Text.params) == true) continue;
-			if (Arch->AssembleDirective((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str()) == false)
+			if (Arch->AssembleDirective(Text.name,Text.params) == false)
 			{
 				Arch->AssembleOpcode((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str());
 			}

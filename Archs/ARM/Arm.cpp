@@ -8,11 +8,11 @@
 
 CArmArchitecture Arm;
 
-bool ArmDirectiveThumb(CArgumentList& List, int flags);
-bool ArmDirectiveArm(CArgumentList& List, int flags);
-bool ArmDirectivePool(CArgumentList& List, int flags);
-bool ArmDirectiveMsg(CArgumentList& List, int flags);
-bool ArmDirectiveIdeasMsg(CArgumentList& List, int flags);
+bool ArmDirectiveThumb(ArgumentList& List, int flags);
+bool ArmDirectiveArm(ArgumentList& List, int flags);
+bool ArmDirectivePool(ArgumentList& List, int flags);
+bool ArmDirectiveMsg(ArgumentList& List, int flags);
+bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags);
 
 const tArmRegister ArmRegister[] = {
 	{ "r0", 0, 2 },		{ "r1", 1, 2 },
@@ -61,13 +61,13 @@ const tDirective ArmDirectives[] = {
 };
 
 
-bool CArmArchitecture::AssembleDirective(char* Name, char* Arguments)
+bool CArmArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
 {
-	if (DirectiveAssembleGlobal(Name,Arguments) == true) return true;
-	return DirectiveAssemble(ArmDirectives,Name,Arguments);
+	if (directiveAssembleGlobal(name,args) == true) return true;
+	return directiveAssemble(ArmDirectives,name,args);
 }
 
-bool ArmDirectiveThumb(CArgumentList& List, int flags)
+bool ArmDirectiveThumb(ArgumentList& List, int flags)
 {
 	Arm.SetThumbMode(true);
 	ArmStateCommand* cmd = new ArmStateCommand(false);
@@ -75,7 +75,7 @@ bool ArmDirectiveThumb(CArgumentList& List, int flags)
 	return true;
 }
 
-bool ArmDirectiveArm(CArgumentList& List, int flags)
+bool ArmDirectiveArm(ArgumentList& List, int flags)
 {
 	Arm.SetThumbMode(false);
 	ArmStateCommand* cmd = new ArmStateCommand(true);
@@ -83,43 +83,43 @@ bool ArmDirectiveArm(CArgumentList& List, int flags)
 	return true;
 }
 
-bool ArmDirectivePool(CArgumentList& List, int flags)
+bool ArmDirectivePool(ArgumentList& List, int flags)
 {
-	Arm.AssembleDirective(".align","4");
+	Arm.AssembleDirective(L".align",L"4");
 
 	ArmPoolCommand* cmd = new ArmPoolCommand();
 	AddAssemblerCommand(cmd);
 	return true;
 }
 
-bool ArmDirectiveMsg(CArgumentList& List, int flags)
+bool ArmDirectiveMsg(ArgumentList& List, int flags)
 {
-	char str[64], str2[512];
+	char str[64];
+
 	sprintf_s(str,64,"@@debug_msg_%08X",Global.DebugMessages++);
-	sprintf_s(str2,512,"\"%s\"",List.GetEntry(0));
+	std::wstring str2 = L"\"" + List[0].text + L"\"";
 
 	Arm.AssembleOpcode("mov","r12,r12");
 	Arm.AssembleOpcode("b",str);
-	Arm.AssembleDirective(".byte","0x64,0x64,0x00,0x00");
-	if (List.GetEntry(0)[0] == 0) Arm.AssembleDirective(".byte","0");
-	else Arm.AssembleDirective(".ascii",str2);
-	Arm.AssembleDirective(".align",Arm.GetThumbMode() == true ? "2" : "4");
+	Arm.AssembleDirective(L".byte",L"0x64,0x64,0x00,0x00");
+	if (List[0].text.empty()) Arm.AssembleDirective(L".byte",L"0");
+	else Arm.AssembleDirective(L".ascii",str2);
+	Arm.AssembleDirective(L".align",Arm.GetThumbMode() == true ? L"2" : L"4");
 	addAssemblerLabel(convertUtf8ToWString(str));
 	return true;
 }
 
-bool ArmDirectiveIdeasMsg(CArgumentList& List, int flags)
+bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags)
 {
 	char Lab1[64],Lab2[64],Temp[64];
-	char str[512];
 
 	bool push = true;
-	if (List.GetCount() == 2)
+	if (List.size() == 2)
 	{
-		if (strcmp(List.GetEntry(1),"false") == 0)
+		if (List[1].text == L"false")
 		{
 			push = false;
-		} else if (strcmp(List.GetEntry(1),"true") != 0)
+		} else if (List[1].text != L"true")
 		{
 			PrintError(ERROR_ERROR,"Invalid arguments");
 			return false;
@@ -128,7 +128,7 @@ bool ArmDirectiveIdeasMsg(CArgumentList& List, int flags)
 
 	sprintf_s(Lab1,64,"@@debug_msg_%08X",Global.DebugMessages++);
 	sprintf_s(Lab2,64,"@@debug_msg_%08X",Global.DebugMessages++);
-	sprintf_s(str,512,"\"%s\",0",List.GetEntry(0));
+	std::wstring str = L"\"" + List[0].text + L"\"";
 
 	if (push == true)
 	{
@@ -158,10 +158,10 @@ bool ArmDirectiveIdeasMsg(CArgumentList& List, int flags)
 	}
 
 	Arm.AssembleOpcode("b",Lab2);
-	Arm.AssembleDirective(".align","4");
+	Arm.AssembleDirective(L".align",L"4");
 	addAssemblerLabel(convertUtf8ToWString(Lab1));
-	Arm.AssembleDirective(".ascii",str);
-	Arm.AssembleDirective(".align",Arm.GetThumbMode() == true ? "2" : "4");
+	Arm.AssembleDirective(L".ascii",str);
+	Arm.AssembleDirective(L".align",Arm.GetThumbMode() == true ? L"2" : L"4");
 	addAssemblerLabel(convertUtf8ToWString(Lab2));
 	return true;
 }

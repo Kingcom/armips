@@ -19,7 +19,7 @@ class CZ80Architecture: public CArchitecture
 {
 public:
 	virtual void AssembleOpcode(char* name, char* args);
-	virtual bool AssembleDirective(char* name, char* args);
+	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection(){ };
 	virtual void Pass2(){ };
 	virtual void Revalidate(){ };

@@ -7,7 +7,7 @@ class CDirectiveArea: public CAssemblerCommand
 {
 public:
 	CDirectiveArea();
-	bool LoadStart(CArgumentList& Args);
+	bool LoadStart(ArgumentList& Args);
 	bool LoadEnd();
 	virtual bool Validate();
 	virtual void Encode();

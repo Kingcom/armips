@@ -2,9 +2,9 @@
 #include "Commands/CDirectiveMessage.h"
 #include "Core/Common.h"
 
-bool CDirectiveMessage::Load(CArgumentList &Args, int type)
+bool CDirectiveMessage::Load(ArgumentList &Args, int type)
 {
-	strcpy(Message,Args.GetEntry(0));
+	message = Args[0].text;
 	ErrorType = type;
 	return true;
 }
@@ -15,13 +15,13 @@ bool CDirectiveMessage::Validate()
 	switch (ErrorType)
 	{
 	case USERMESSAGE_WARNING:
-		QueueError(ERROR_WARNING,"%s",Message);
+		QueueError(ERROR_WARNING,"%ls",message.c_str());
 		break;
 	case USERMESSAGE_ERROR:
-		QueueError(ERROR_ERROR,"%s",Message);
+		QueueError(ERROR_ERROR,"%ls",message.c_str());
 		break;
 	case USERMESSAGE_NOTICE:
-		QueueError(ERROR_NOTICE,"%s",Message);
+		QueueError(ERROR_NOTICE,"%ls",message.c_str());
 		break;
 	}
 	return false;

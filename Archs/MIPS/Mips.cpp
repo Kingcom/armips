@@ -139,13 +139,13 @@ const tMipsRegister MipsFloatRegister[] = {
 	{ "f31", 31, 3},	{ "$f31", 31, 4 }
 };
 
-bool MipsDirectiveResetDelay(CArgumentList& List, int flags)
+bool MipsDirectiveResetDelay(ArgumentList& List, int flags)
 {
 	Mips.SetIgnoreDelay(true);
 	return true;
 }
 
-bool MipsDirectiveFixLoadDelay(CArgumentList& List, int flags)
+bool MipsDirectiveFixLoadDelay(ArgumentList& List, int flags)
 {
 	Mips.SetFixLoadDelay(true);
 	return true;
@@ -157,10 +157,10 @@ const tDirective MipsDirectives[] = {
 	{ NULL,				0,	0,	NULL,	0 }
 };
 
-bool CMipsArchitecture::AssembleDirective(char* Name, char* Arguments)
+bool CMipsArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
 {
-	if (DirectiveAssembleGlobal(Name,Arguments) == true) return true;
-	return DirectiveAssemble(MipsDirectives,Name,Arguments);
+	if (directiveAssembleGlobal(name,args) == true) return true;
+	return directiveAssemble(MipsDirectives,name,args);
 }
 
 CMipsArchitecture::CMipsArchitecture()

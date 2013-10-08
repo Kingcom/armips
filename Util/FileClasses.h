@@ -10,7 +10,7 @@ public:
 	BinaryFile();
 	~BinaryFile();
 
-	bool open(std::string fileName, Mode mode);
+	bool open(const std::wstring& fileName, Mode mode);
 	bool isOpen() { return handle != NULL; };
 	bool atEnd() { return isOpen() && mode != Write && ftell(handle) == size_; };
 	void setPos(long pos) { if (isOpen()) fseek(handle,pos,SEEK_SET); };

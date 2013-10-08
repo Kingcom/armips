@@ -8,7 +8,7 @@ class CDirectiveFill: public CAssemblerCommand
 {
 public:
 	CDirectiveFill();
-	bool Load(CArgumentList& Args);
+	bool Load(ArgumentList& Args);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void WriteTempData(FILE*& Output);

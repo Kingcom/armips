@@ -14,7 +14,7 @@ CDirectiveConditional::CDirectiveConditional()
 	IsNumSolved = false;
 }
 
-bool CDirectiveConditional::Load(CArgumentList& Args, int command)
+bool CDirectiveConditional::Load(ArgumentList& Args, int command)
 {
 	CStringList List;
 
@@ -24,28 +24,19 @@ bool CDirectiveConditional::Load(CArgumentList& Args, int command)
 	{
 	case CONDITIONAL_IF:
 	case CONDITIONAL_ELSEIF:
-		if (ConvertInfixToPostfix(Args.GetEntry(0),List) == false)
-		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%\"",Args.GetEntry(0));
+		if (initExpression(Expression,Args[0].text) == false)
 			return false;
-		}
-		if (CheckPostfix(List,true) == false)
-		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%\"",Args.GetEntry(0));
-			return false;
-		}
-		Expression.Load(List);
 		break;
 	case CONDITIONAL_IFDEF:
 	case CONDITIONAL_IFNDEF:
 	case CONDITIONAL_ELSEIFDEF:
 	case CONDITIONAL_ELSEIFNDEF:
-		if (Global.symbolTable.isValidSymbolName(convertUtf8ToWString(Args.GetEntry(0))) == false)
+		if (Global.symbolTable.isValidSymbolName(Args[0].text) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid label name \"%s\"",Args.GetEntry(0));
+			PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",Args[0].text.c_str());
 			return false;
 		}
-		strcpy(LabelName,Args.GetEntry(0));
+		labelName = Args[0].text;
 		break;
 	case CONDITIONAL_IFARM:
 	case CONDITIONAL_IFTHUMB:
@@ -148,7 +139,7 @@ void CDirectiveConditional::Execute()
 		Global.ConditionData.EntryCount--;
 		break;
 	case CONDITIONAL_IFDEF:
-		b = checkLabelDefined(convertUtf8ToWString(LabelName));
+		b = checkLabelDefined(labelName);
 /*		switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 		{
 		case LABEL_UNDEFINED:
@@ -171,7 +162,7 @@ void CDirectiveConditional::Execute()
 		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
 		break;
 	case CONDITIONAL_IFNDEF:
-		b = !checkLabelDefined(convertUtf8ToWString(LabelName));
+		b = !checkLabelDefined(labelName);
 /*		switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 		{
 		case LABEL_UNDEFINED:
@@ -206,7 +197,7 @@ void CDirectiveConditional::Execute()
 				QueueError(ERROR_ERROR,"Else case already defined");
 				return;
 			}
-			b = checkLabelDefined(convertUtf8ToWString(LabelName));
+			b = checkLabelDefined(labelName);
 /*			switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 			{
 			case LABEL_UNDEFINED:
@@ -237,7 +228,7 @@ void CDirectiveConditional::Execute()
 				return;
 			}
 
-			b = !checkLabelDefined(convertUtf8ToWString(LabelName));
+			b = !checkLabelDefined(labelName);
 /*			switch (Global.Labels.CheckLabel(LabelName,Global.Section))
 			{
 			case LABEL_UNDEFINED:

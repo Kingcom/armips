@@ -43,7 +43,7 @@ int parseHexString(std::wstring& hex, unsigned char* dest)
 	return hex.size()/2;
 }
 
-bool EncodingTable::load(std::string fileName)
+bool EncodingTable::load(const std::wstring& fileName)
 {
 	unsigned char hexBuffer[MAXHEXLENGTH];
 
@@ -121,7 +121,7 @@ void EncodingTable::setTerminationEntry(unsigned char* hex, int hexLength)
 	terminationEntry.valueLen = terminationEntry.valuePos = 0;
 }
 
-int EncodingTable::searchStringMatch(std::wstring& str, size_t pos)
+int EncodingTable::searchStringMatch(const std::wstring& str, size_t pos)
 {
 	int longestLength = 0;
 	int longestNum = -1;
@@ -151,7 +151,7 @@ int EncodingTable::searchStringMatch(std::wstring& str, size_t pos)
 	return longestNum;
 }
 
-ByteArray EncodingTable::encodeString(std::wstring& str, bool writeTermination)
+ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermination)
 {
 	ByteArray result;
 	size_t pos = 0;
