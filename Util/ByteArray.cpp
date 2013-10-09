@@ -132,11 +132,14 @@ ByteArray ByteArray::mid(int start, int length)
 	return ret;
 }
 
-ByteArray ByteArray::fromFile(char* fileName)
+ByteArray ByteArray::fromFile(const std::wstring& fileName)
 {
 	ByteArray ret;
 	
-	FILE* input = fopen(fileName,"rb");
+	FILE* input = _wfopen(fileName.c_str(),L"rb");
+	if (input == NULL)
+		return ret;
+
 	fseek(input,0,SEEK_END);
 	int fileSize = ftell(input);
 	fseek(input,0,SEEK_SET);
@@ -150,9 +153,9 @@ ByteArray ByteArray::fromFile(char* fileName)
 	return ret;
 }
 
-bool ByteArray::toFile(char* fileName)
+bool ByteArray::toFile(const std::wstring& fileName)
 {
-	FILE* output = fopen(fileName,"wb");
+	FILE* output = _wfopen(fileName.c_str(),L"wb");
 	if (output == NULL) return false;
 	int length = fwrite(data_,1,size_,output);
 	fclose(output);

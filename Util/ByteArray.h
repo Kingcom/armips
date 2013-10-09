@@ -37,8 +37,8 @@ public:
 	ByteArray left(int length) { return mid(0,length); };
 	ByteArray right(int length) { return mid(size_-length,length); };
 
-	static ByteArray fromFile(char* fileName);
-	bool toFile(char* fileName);
+	static ByteArray fromFile(const std::wstring& fileName);
+	bool toFile(const std::wstring& fileName);
 private:
 	void grow(int neededSize);
 	byte* data_;

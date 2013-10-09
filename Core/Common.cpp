@@ -68,51 +68,6 @@ bool addAssemblerLabel(const std::wstring& labelName)
 	return true;
 }
 
-int fileSize(const std::wstring& fileName)
-{
-	struct _stat fileStat; 
-	int err = _wstat(fileName.c_str(), &fileStat ); 
-	if (0 != err) return 0; 
-	return fileStat.st_size; 
-}
-
-int fileSize(const std::string& fileName)
-{
-	struct _stat fileStat; 
-	int err = _stat(fileName.c_str(), &fileStat ); 
-	if (0 != err) return 0; 
-	return fileStat.st_size; 
-}
-
-bool fileExists(const std::wstring& strFilename)
-{
-	struct _stat stFileInfo;
-	int intStat = _wstat(strFilename.c_str(),&stFileInfo);
-	return intStat == 0;
-}
-
-bool fileExists(const std::string& strFilename)
-{
-	struct _stat stFileInfo;
-	int intStat = _stat(strFilename.c_str(),&stFileInfo);
-	return intStat == 0;
-}
-
-bool FileExists(char* strFilename)
-{
-	struct stat stFileInfo;
-	int intStat;
-
-
-	intStat = stat(strFilename,&stFileInfo);
-	if(intStat == 0)
-	{
-		return true;
-	} else {
-		return false;
-	}
-}
-
 void AddAssemblerCommand(CAssemblerCommand* Command)
 {
 	Global.Commands.push_back(Command);
@@ -158,37 +113,6 @@ void PrintError(eErrorLevel level, char* format, ...)
 		printf("%s(%d) notice: %s\n",FileName,Global.FileInfo.LineNumber,str);
 		break;
 	}
-}
-
-
-int ReadFileToBuffer(char* FileName, unsigned char** Pointer)
-{
-#ifdef USE_WINDOWS_FUNCS
-	DWORD dwBytesRead;
-
-	HANDLE hSource = CreateFileA(FileName, GENERIC_READ, FILE_SHARE_READ,
-                   NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hSource == INVALID_HANDLE_VALUE) return -1;
-
-	int Size = GetFileSize(hSource,NULL);
-	*Pointer = (unsigned char*) malloc(Size);
-	ReadFile(hSource,*Pointer,Size,&dwBytesRead,NULL);
-	CloseHandle(hSource);
-
-	return Size;
-#else
-	FILE* Input = fopen(FileName,"rb");
-	if (Input == NULL) return -1;
-	fseek(Input,0,SEEK_END);
-	int Size = ftell(Input);
-	rewind(Input);
-	
-	*Pointer = (unsigned char*) malloc(Size);
-	fread(*Pointer,1,Size,Input);
-	fclose(Input);
-
-	return Size;
-#endif
 }
 
 void WriteToTempData(FILE*& Output, char* str, int RamPos)

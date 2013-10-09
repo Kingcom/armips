@@ -355,17 +355,17 @@ bool CDirectiveFile::ValidateIncbin()
 
 void CDirectiveFile::EncodeIncbin()
 {
-	int n;
-	unsigned char* Buffer = NULL;
-
-	if ((n = ReadFileToBuffer((char*)convertWStringToUtf8(fileName).c_str(),&Buffer)) == -1)
+	if (InputFileSize != 0)
 	{
-		PrintError(ERROR_ERROR,"Could not read file \"%ls\"",fileName.c_str());
-		return;
+		ByteArray data = ByteArray::fromFile(fileName);
+		if (data.size() == 0)
+		{
+			PrintError(ERROR_ERROR,"Could not read file \"%ls\"",fileName.c_str());
+			return;
+		}
+		Global.Output.write(data.data(),data.size());
+		Global.RamPos += InputFileSize;
 	}
-	Global.Output.write(Buffer,InputFileSize);
-	Global.RamPos += InputFileSize;
-	free(Buffer);
 
 	if (Global.SymData.Write == true)
 	{

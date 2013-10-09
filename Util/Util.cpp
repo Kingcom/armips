@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Util.h"
+#include <sys/stat.h>
 
 
 Formatter Formatter::arg(const std::wstring& s)
@@ -227,4 +228,35 @@ StringList getStringListFromArray(wchar_t** source, int count)
 	}
 
 	return result;
+}
+
+
+int fileSize(const std::wstring& fileName)
+{
+	struct _stat fileStat; 
+	int err = _wstat(fileName.c_str(), &fileStat ); 
+	if (0 != err) return 0; 
+	return fileStat.st_size; 
+}
+
+int fileSize(const std::string& fileName)
+{
+	struct _stat fileStat; 
+	int err = _stat(fileName.c_str(), &fileStat ); 
+	if (0 != err) return -1; 
+	return fileStat.st_size; 
+}
+
+bool fileExists(const std::wstring& strFilename)
+{
+	struct _stat stFileInfo;
+	int intStat = _wstat(strFilename.c_str(),&stFileInfo);
+	return intStat == 0;
+}
+
+bool fileExists(const std::string& strFilename)
+{
+	struct _stat stFileInfo;
+	int intStat = _stat(strFilename.c_str(),&stFileInfo);
+	return intStat == 0;
 }

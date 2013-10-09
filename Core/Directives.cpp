@@ -141,12 +141,15 @@ bool DirectiveString(ArgumentList& List, int flags)
 		}
 	}
 
-	ByteArray data = Global.Table.encodeTermination();
-	for (int i = 0; i < data.size(); i++)
+	if ((flags & DIRECTIVE_NOTERMINATION) == 0)
 	{
-		wchar_t str[32];
-		swprintf(str,32,L"0x%02X",data[i]);
-		NewList.add(str,false);
+		ByteArray data = Global.Table.encodeTermination();
+		for (int i = 0; i < data.size(); i++)
+		{
+			wchar_t str[32];
+			swprintf(str,32,L"0x%02X",data[i]);
+			NewList.add(str,false);
+		}
 	}
 
 	CDirectiveData* Data = new CDirectiveData(NewList,1,false);
@@ -598,6 +601,8 @@ const tDirective Directives[] = {
 	{ ".table",		1,	1,	&DirectiveLoadTable,0 },
 	{ ".string",	1,	64,	&DirectiveString,	0 },
 	{ ".str",		1,	64,	&DirectiveString,	0 },
+	{ ".stringn",	1,	64,	&DirectiveString,	DIRECTIVE_NOTERMINATION },
+	{ ".strn",		1,	64,	&DirectiveString,	DIRECTIVE_NOTERMINATION },
 	{ ".psx",		0,	0,	&DirectivePsx,		0 },
 	{ ".ps2",		0,	0,	&DirectivePs2,		DIRECTIVE_DISABLED },
 	{ ".psp",		0,	0,	&DirectivePsp,		DIRECTIVE_DISABLED },

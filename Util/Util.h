@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Util/ByteArray.h"
 
 typedef std::vector<std::wstring> StringList;
 
@@ -28,3 +29,8 @@ std::wstring intToHexString(unsigned int value, int digits, bool prefix = false)
 std::wstring intToString(unsigned int value, int digits);
 
 StringList getStringListFromArray(wchar_t** source, int count);
+
+int fileSize(const std::wstring& fileName);
+int fileSize(const std::string& fileName);
+bool fileExists(const std::wstring& strFilename);
+bool fileExists(const std::string& strFilename);

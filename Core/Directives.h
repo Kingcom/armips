@@ -46,6 +46,7 @@ typedef bool (*directivefunc)(ArgumentList&,int);
 #define DIRECTIVE_DATA32			0x00001000
 #define DIRECTIVE_ASCII				0x00002000
 
+#define DIRECTIVE_NOTERMINATION		0x80000000
 
 typedef struct {
 	char* name;
