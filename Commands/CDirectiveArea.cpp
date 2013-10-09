@@ -44,9 +44,7 @@ bool CDirectiveArea::Validate()
 	{
 		if (evalExpression(SizeExpression,NewSize,true) == false)
 			return false;
-		Global.AreaData.Entries[Global.AreaData.EntryCount].FileNum = FileNum;
-		Global.AreaData.Entries[Global.AreaData.EntryCount].LineNumber = FileLine;
-		Global.AreaData.Entries[Global.AreaData.EntryCount++].MaxRamPos = RamPos+NewSize;
+		Global.areaData.startArea(RamPos,NewSize,FileNum,FileLine);
 
 		if (Size != NewSize)
 		{
@@ -56,11 +54,7 @@ bool CDirectiveArea::Validate()
 			return false;
 		}
 	} else {
-		if (Global.AreaData.EntryCount-- == 0)
-		{
-			QueueError(ERROR_ERROR,"No active area");
-			Global.AreaData.EntryCount = 0;
-		}
+		Global.areaData.endArea();
 		return false;
 	}
 }

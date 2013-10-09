@@ -17,7 +17,6 @@ int wmain(int argc, wchar_t* argv[])
 	Global.Revalidate = true;
 	Global.Section = 0;
 	Global.nocash = false;
-	Global.AreaData.EntryCount = 0;
 	Global.IncludeNestingLevel = 0;
 	Global.FileInfo.FileCount = 0;
 	Global.FileInfo.TotalLineCount = 0;

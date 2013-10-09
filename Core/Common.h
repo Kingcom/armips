@@ -18,12 +18,6 @@ typedef struct {
 } tFileInfo;
 
 typedef struct {
-	int MaxRamPos;
-	int FileNum;
-	int LineNumber;
-} tAreaEntry;
-
-typedef struct {
 	std::vector<CAssemblerCommand*> Commands;
 	std::vector<CMacro*> Macros;
 	tFileInfo FileInfo;
@@ -46,10 +40,7 @@ typedef struct {
 	bool warningAsError;
 	int DebugMessages;
 	ConditionData conditionData;
-	struct {
-		tAreaEntry Entries[128];
-		int EntryCount;
-	} AreaData;
+	AreaData areaData;
 	int IncludeNestingLevel;
 	int MacroNestingLevel;
 	CStringList Arguments;

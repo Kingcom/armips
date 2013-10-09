@@ -373,21 +373,10 @@ bool EncodeAssembly()
 			}
 
 			Global.Commands[i]->SetFileInfo();
-
-			for (int l = 0; l < Global.AreaData.EntryCount; l++)
-			{
-				if (Global.AreaData.Entries[l].MaxRamPos < Global.RamPos)
-				{
-					QueueError(ERROR_ERROR,"Area at %s(%d) overflown",
-						Global.FileInfo.FileList.GetEntry(Global.AreaData.Entries[l].FileNum),
-						Global.AreaData.Entries[l].LineNumber);
-				}
-			}
+			Global.areaData.checkAreas(Global.RamPos);
 
 			if (Global.Commands[i]->Validate() == true)
-			{
 				Revalidate = true;
-			}
 		}
 		if (Global.conditionData.activeConditions() != 0)
 			QueueError(ERROR_ERROR,"One or more if statements not terminated");
