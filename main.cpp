@@ -6,7 +6,7 @@
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CDirectiveFile.h"
 
-int _tmain(int argc, _TCHAR* argv[])
+int wmain(int argc, wchar_t* argv[])
 {
 	Global.Radix = 10;
 	Global.Error = false;
@@ -31,43 +31,44 @@ int _tmain(int argc, _TCHAR* argv[])
 	Arch = &InvalidArchitecture;
 
 	printf("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom\n");
+	StringList arguments = getStringListFromArray(argv,argc);
 
-	if (argc < 2)
+	if (arguments.size() < 2)
 	{
 		printf("Usage: armips.exe file.asm [-temp temp.txt] [-sym symfile.sym]\n");
 		return 1;
 	}
 
-	if (fileExists(argv[1]) == false)
+	if (fileExists(arguments[1]) == false)
 	{
 		printf("File %s not found\n",argv[1]);
 		return 1;
 	}
 
 	int argpos = 2;
-	while (argpos < argc)
+	while (argpos < arguments.size())
 	{
-		if (strcmp(argv[argpos],"-temp") == 0)
+		if (arguments[argpos] == L"-temp")
 		{
-			strcpy(Global.TempData.Name,argv[argpos+1]);
+			strcpy(Global.TempData.Name,convertWStringToUtf8(arguments[argpos]).c_str());
 			Global.TempData.Write = true;
 			argpos += 2;
-		} else if (strcmp(argv[argpos],"-sym") == 0)
+		} else if (arguments[argpos] == L"-sym")
 		{
-			strcpy(Global.SymData.Name,argv[argpos+1]);
+			strcpy(Global.SymData.Name,convertWStringToUtf8(arguments[argpos]).c_str());
 			Global.SymData.Write = true;
 			argpos += 2;
-		} else if (strcmp(argv[argpos],"-erroronwarning") == 0)
+		} else if (arguments[argpos] == L"-erroronwarning")
 		{
 			Global.warningAsError = true;
 			argpos += 1;
 		} else {
-			printf("Invalid parameter %s\n",argv[argpos]);
+			printf("Invalid parameter %ls\n",arguments[argpos].c_str());
 			return 1;
 		}
 	}
 
-	LoadAssemblyFile(convertUtf8ToWString(argv[1]));
+	LoadAssemblyFile(arguments[1]);
 	if (Global.Error == true)
 	{
 		printf("Aborting.\n");

@@ -166,7 +166,7 @@ int ReadFileToBuffer(char* FileName, unsigned char** Pointer)
 #ifdef USE_WINDOWS_FUNCS
 	DWORD dwBytesRead;
 
-	HANDLE hSource = CreateFile(FileName, GENERIC_READ, FILE_SHARE_READ,
+	HANDLE hSource = CreateFileA(FileName, GENERIC_READ, FILE_SHARE_READ,
                    NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hSource == INVALID_HANDLE_VALUE) return -1;
 

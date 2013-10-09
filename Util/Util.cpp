@@ -217,3 +217,14 @@ std::wstring intToString(unsigned int value, int digits)
 
 	return result;
 }
+
+StringList getStringListFromArray(wchar_t** source, int count)
+{
+	StringList result;
+	for (int i = 0; i < count; i++)
+	{
+		result.push_back(std::wstring(source[i]));
+	}
+
+	return result;
+}
