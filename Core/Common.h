@@ -17,12 +17,6 @@ typedef struct {
 } tFileInfo;
 
 typedef struct {
-	char Name[256];
-	bool Write;
-	FILE* Handle;
-} tOutputFileData;
-
-typedef struct {
 	bool ConditionMet;
 	bool ConditionTrue;
 	bool ElseCase;
@@ -39,7 +33,7 @@ typedef struct {
 	std::vector<CMacro*> Macros;
 	tFileInfo FileInfo;
 	TempData tempData;
-	tOutputFileData SymData;
+	SymbolData symData;
 	SymbolTable symbolTable;
 	CErrorQueue ErrorQueue;
 	EncodingTable Table;

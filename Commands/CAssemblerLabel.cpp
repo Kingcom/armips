@@ -42,10 +42,7 @@ void CAssemblerLabel::writeTempData(TempData& tempData)
 	tempData.writeLine(label->getValue(),formatString(L"%ls:",label->getName().c_str()));
 }
 
-void CAssemblerLabel::Encode()
+void CAssemblerLabel::writeSymData(SymbolData& symData)
 {
-	if (Global.SymData.Write == true)
-	{
-		fprintf(Global.SymData.Handle,"%08X %ls\n",label->getValue(),label->getName().c_str());
-	}
+	symData.addSymbol(label->getValue(),label->getName());
 }

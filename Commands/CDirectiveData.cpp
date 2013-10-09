@@ -119,23 +119,7 @@ void CDirectiveData::Encode()
 		}
 	}
 
-	if (Global.SymData.Write == true)
-	{
-		if (ascii == true)
-		{
-			fprintf(Global.SymData.Handle,"%08X .asc:%04X\n",RamPos,totalsize);
-		} else {
-			switch (UnitSize)
-			{
-			case 1: fprintf(Global.SymData.Handle,"%08X .byt:%04X\n",RamPos,totalsize);
-				break;
-			case 2: fprintf(Global.SymData.Handle,"%08X .wrd:%04X\n",RamPos,totalsize);
-				break;
-			case 4: fprintf(Global.SymData.Handle,"%08X .dbl:%04X\n",RamPos,totalsize);
-				break;
-			}
-		}
-	}
+	SpaceNeeded = totalsize;
 }
 
 
@@ -176,4 +160,25 @@ void CDirectiveData::writeTempData(TempData& tempData)
 
 	result.pop_back();
 	tempData.writeLine(RamPos,result);
+}
+
+void CDirectiveData::writeSymData(SymbolData& symData)
+{
+	if (ascii == true)
+	{
+		symData.addSymbol(RamPos,formatString(L".asc:%04X",SpaceNeeded));
+	} else {
+		switch (UnitSize)
+		{
+		case 1:
+			symData.addSymbol(RamPos,formatString(L".byt:%04X",SpaceNeeded));
+			break;
+		case 2:
+			symData.addSymbol(RamPos,formatString(L".wrd:%04X",SpaceNeeded));
+			break;
+		case 4:
+			symData.addSymbol(RamPos,formatString(L".dbl:%04X",SpaceNeeded));
+			break;
+		}
+	}
 }

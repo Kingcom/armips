@@ -23,10 +23,11 @@ private:
 class CDirectiveSym: public CAssemblerCommand
 {
 public:
-	CDirectiveSym(bool enable) {enabeld = enable; };
+	CDirectiveSym(bool enable) {enabled = enable; };
 	virtual bool Validate() { return false; };
-	virtual void Encode() { if(Global.SymData.Handle != NULL) Global.SymData.Write = enabeld; };
+	virtual void Encode() { };
 	virtual void writeTempData(TempData& tempData) { };
+	virtual void writeSymData(SymbolData& symData) { symData.setEnabled(enabled); }
 private:
-	bool enabeld;
+	bool enabled;
 };

@@ -98,6 +98,37 @@ void TempData::writeLine(int memoryAddress, const std::wstring& text)
 }
 
 
+void SymbolData::start()
+{
+	if (file.getFileName().empty() == false)
+	{
+		if (file.open(TextFile::Write,TextFile::ASCII) == false)
+		{
+			PrintError(ERROR_ERROR,"Could not open sym file %ls.",file.getFileName().c_str());
+			return;
+		}
+		file.writeLine(L"00000000 0");
+	}
+}
+
+void SymbolData::end()
+{
+	if (file.isOpen())
+	{
+		file.write("\x1A");
+		file.close();
+	}
+}
+
+void SymbolData::addSymbol(int memoryAddress, const std::wstring& name)
+{
+	if (file.isOpen() && enabled)
+	{
+		file.writeFormat(L"%08X %ls\n",memoryAddress,name.c_str());
+	}
+}
+
+
 CStringList::CStringList()
 {
 	EntryPoses = (int*) malloc(256*4);

@@ -411,18 +411,13 @@ bool EncodeAssembly()
 		return false;
 	}
 
-	if (Global.SymData.Write == true)
-	{
-		Global.SymData.Handle = fopen(Global.SymData.Name,"w");
-		fprintf(Global.SymData.Handle,"00000000 0\n");
-	}
-
 #ifdef _DEBUG
 	printf("Encode...\n");
 #endif
 
 	// und schlieﬂlich enkodieren
 	Global.tempData.start();
+	Global.symData.start();
 	for (size_t i = 0; i < Global.Commands.size(); i++)
 	{
 		if (Global.Commands[i]->IsConditional() == false)
@@ -440,16 +435,12 @@ bool EncodeAssembly()
 		Global.Commands[i]->SetFileInfo();
 		Global.Commands[i]->Encode();
 		Global.Commands[i]->writeTempData(Global.tempData);
+		Global.Commands[i]->writeSymData(Global.symData);
 		delete Global.Commands[i];
 	}
 
 	Global.tempData.end();
-
-	if (Global.SymData.Write == true)
-	{
-		fputc(0x1A,Global.SymData.Handle);	// eof zeichen
-		fclose(Global.SymData.Handle);
-	}
+	Global.symData.end();
 
 	if (Global.Output.isOpen() == true)
 	{

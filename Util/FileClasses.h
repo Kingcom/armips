@@ -30,7 +30,7 @@ private:
 class TextFile
 {
 public:
-	enum Encoding { UTF8, UTF16LE, UTF16BE, SJIS };
+	enum Encoding { ASCII, UTF8, UTF16LE, UTF16BE, SJIS };
 	enum Mode { Read, Write };
 	
 	TextFile();

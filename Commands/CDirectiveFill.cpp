@@ -61,14 +61,14 @@ void CDirectiveFill::Encode()
 		n -= 128;
 	}
 	Global.Output.write(ByteBuffer,n);
-
-	if (Global.SymData.Write == true)
-	{
-		fprintf(Global.SymData.Handle,"%08X .byt:%04X\n",RamPos,Size);
-	}
 }
 
 void CDirectiveFill::writeTempData(TempData& tempData)
 {
 	tempData.writeLine(RamPos,formatString(L".fill 0x%08X,0x%02X",Size,Byte));
+}
+
+void CDirectiveFill::writeSymData(SymbolData& symData)
+{
+	symData.addSymbol(RamPos,formatString(L".byt:%04X",Size));
 }

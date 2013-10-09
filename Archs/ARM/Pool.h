@@ -6,8 +6,9 @@ class ArmStateCommand: public CAssemblerCommand
 public:
 	ArmStateCommand(bool state);
 	virtual bool Validate();
-	virtual void Encode();
+	virtual void Encode() { };
 	virtual void writeTempData(TempData& tempData) { };
+	virtual void writeSymData(SymbolData& symData);
 private:
 	int RamPos;
 	bool armstate;
@@ -37,6 +38,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData);
 private:
 	int RamPos;
 	int PoolId;

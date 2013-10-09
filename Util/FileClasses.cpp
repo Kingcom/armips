@@ -720,8 +720,11 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		break;
 	case Write:
 		handle = _wfopen(fileName.c_str(),L"wb");
-		encoding = UTF8;
-		writeCharacter(0xFEFF);
+		if (encoding != ASCII)
+		{
+			encoding = UTF8;
+			writeCharacter(0xFEFF);
+		}
 		break;
 	default:
 		return false;
@@ -886,26 +889,23 @@ void TextFile::writeCharacter(wchar_t character)
 #ifdef WIN32
 		if (character == L'\n')
 		{
-			buffer[0] = '\r';
-			buffer[1] = '\n';
-			length = 2;
-		} else {
-#endif
-			buffer[0] = character & 0x7F;
-			length = 1;
-#ifdef WIN32
+			buffer[length++] = '\r';
 		}
 #endif
-	} else if (character < 0x800)
+		buffer[length++] = character & 0x7F;
+	} else if (encoding != ASCII)
 	{
-		buffer[0] = 0xC0 | (character >> 6) & 0x1F;
-		buffer[1] = 0x80 | (character & 0x3F);
-		length = 2;
-	} else {
-		buffer[0] = 0xE0 | (character >> 12) & 0xF;
-		buffer[1] = 0x80 | ((character >> 6) & 0x3F);
-		buffer[2] = 0x80 | (character & 0x3F);
-		length = 3;
+		if (character < 0x800)
+		{
+			buffer[0] = 0xC0 | (character >> 6) & 0x1F;
+			buffer[1] = 0x80 | (character & 0x3F);
+			length = 2;
+		} else {
+			buffer[0] = 0xE0 | (character >> 12) & 0xF;
+			buffer[1] = 0x80 | ((character >> 6) & 0x3F);
+			buffer[2] = 0x80 | (character & 0x3F);
+			length = 3;
+		}
 	}
 
 	fwrite(buffer,1,length,handle);

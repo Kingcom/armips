@@ -12,6 +12,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData);
 private:
 	CExpressionCommandList SizeExpression;
 	CExpressionCommandList ByteExpression;

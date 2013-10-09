@@ -14,16 +14,13 @@ bool ArmStateCommand::Validate()
 	return false;
 }
 
-void ArmStateCommand::Encode()
+void ArmStateCommand::writeSymData(SymbolData& symData)
 {
-	if (Global.SymData.Write == true)
+	if (armstate == true)
 	{
-		if (armstate == true)
-		{
-			fprintf(Global.SymData.Handle,"%08X .arm\n",RamPos);
-		} else {
-			fprintf(Global.SymData.Handle,"%08X .thumb\n",RamPos);
-		}
+		symData.addSymbol(RamPos,L".arm");
+	} else {
+		symData.addSymbol(RamPos,L".thumb");
 	}
 }
 
@@ -87,12 +84,6 @@ void ArmPoolCommand::Encode()
 		Global.Output.write(&num,4);
 	}
 	Global.RamPos += Size*4;
-
-	if (Global.SymData.Write == true)
-	{
-		fprintf(Global.SymData.Handle,"%08X .pool\n",RamPos);
-		fprintf(Global.SymData.Handle,"%08X .dbl:%04X\n",RamPos,Size*4);
-	}
 }
 
 void ArmPoolCommand::writeTempData(TempData& tempData)
@@ -101,4 +92,10 @@ void ArmPoolCommand::writeTempData(TempData& tempData)
 	{
 		tempData.writeLine(RamPos+i*4,formatString(L".word 0x%08X",Arm.GetPool(PoolId).GetEntry(i)));
 	}
+}
+
+void ArmPoolCommand::writeSymData(SymbolData& symData)
+{
+	symData.addSymbol(RamPos,L".pool");
+	symData.addSymbol(RamPos,formatString(L".dbl:%04X",Size*4));
 }

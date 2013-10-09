@@ -16,7 +16,6 @@ int wmain(int argc, wchar_t* argv[])
 	Global.RamPos = 0;
 	Global.Revalidate = true;
 	Global.Section = 0;
-	Global.SymData.Write = false;
 	Global.nocash = false;
 	Global.ConditionData.EntryCount = 0;
 	Global.AreaData.EntryCount = 0;
@@ -53,8 +52,7 @@ int wmain(int argc, wchar_t* argv[])
 			argpos += 2;
 		} else if (arguments[argpos] == L"-sym")
 		{
-			strcpy(Global.SymData.Name,convertWStringToUtf8(arguments[argpos+1]).c_str());
-			Global.SymData.Write = true;
+			Global.symData.setFileName(arguments[argpos+1]);
 			argpos += 2;
 		} else if (arguments[argpos] == L"-erroronwarning")
 		{

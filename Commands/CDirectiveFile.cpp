@@ -366,11 +366,6 @@ void CDirectiveFile::EncodeIncbin()
 		Global.Output.write(data.data(),data.size());
 		Global.RamPos += InputFileSize;
 	}
-
-	if (Global.SymData.Write == true)
-	{
-		fprintf(Global.SymData.Handle,"%08X .byt:%04X\n",RamPos,InputFileSize);
-	}
 }
 
 std::wstring CDirectiveFile::WriteTempIncbin()
@@ -499,4 +494,14 @@ void CDirectiveFile::writeTempData(TempData& tempData)
 {
 	std::wstring text = (*this.*DirectiveFileTypes[(int)Mode].WriteTempFunc)();
 	tempData.writeLine(RamPos,text);
+}
+
+void CDirectiveFile::writeSymData(SymbolData& symData)
+{
+	switch (Mode)
+	{
+	case DIRECTIVEFILE_INCBIN:
+		symData.addSymbol(RamPos,formatString(L".byt:%04X",InputFileSize));
+		break;
+	}
 }
