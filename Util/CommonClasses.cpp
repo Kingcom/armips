@@ -5,7 +5,7 @@
 
 CInvalidArchitecture InvalidArchitecture;
 
-void CInvalidArchitecture::AssembleOpcode(char* name, char* args)
+void CInvalidArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
 {
 	PrintError(ERROR_FATALERROR,"No architecture specified");
 }

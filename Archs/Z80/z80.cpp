@@ -34,10 +34,10 @@ bool CZ80Architecture::AssembleDirective(const std::wstring& name, const std::ws
 	return false;
 }
 
-void CZ80Architecture::AssembleOpcode(char *name, char *args)
+void CZ80Architecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
 {
 	CZ80Instruction* Opcode = new CZ80Instruction();
-	if (Opcode->Load(name,args) == false)
+	if (Opcode->Load((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
 	{
 		delete Opcode;
 		return;

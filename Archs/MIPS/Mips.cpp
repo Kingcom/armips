@@ -173,23 +173,13 @@ CMipsArchitecture::CMipsArchitecture()
 	Version = 0;
 }
 
-void CMipsArchitecture::AssembleOpcode(char* name, char* args)
+void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
 {
-/*	// erst directives prüfen
-	for (int z = 0; MipsDirectives[z].name != NULL; z++)
-	{
-		if (strcmp(name,MipsDirectives[z].name) == 0)
-		{
-			ExecuteDirective(MipsDirectives[z],args);
-			return;
-		}
-	}*/
-
 	// dann macros/opcodes
-	if (MipsCheckMacro(name,args) == false)
+	if (MipsCheckMacro((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
 	{
 		CMipsInstruction* Opcode = new CMipsInstruction();
-		if (Opcode->Load(name,args) == false)
+		if (Opcode->Load((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
 		{
 			delete Opcode;
 			return;

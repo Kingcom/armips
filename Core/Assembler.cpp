@@ -225,7 +225,7 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 
 			if (Arch->AssembleDirective(Text.name,Text.params) == false)
 			{
-				Arch->AssembleOpcode((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str());
+				Arch->AssembleOpcode(Text.name,Text.params);
 			}
 		}
 	}
@@ -331,7 +331,7 @@ void LoadAssemblyFile(std::wstring& fileName)
 			if (ParseMacro(input,Text.name,Text.params) == true) continue;
 			if (Arch->AssembleDirective(Text.name,Text.params) == false)
 			{
-				Arch->AssembleOpcode((char*)convertWStringToUtf8(Text.name).c_str(),(char*)convertWStringToUtf8(Text.params).c_str());
+				Arch->AssembleOpcode(Text.name,Text.params);
 			}
 		}
 	}

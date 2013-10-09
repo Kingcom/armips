@@ -94,25 +94,21 @@ bool ArmDirectivePool(ArgumentList& List, int flags)
 
 bool ArmDirectiveMsg(ArgumentList& List, int flags)
 {
-	char str[64];
-
-	sprintf_s(str,64,"@@debug_msg_%08X",Global.DebugMessages++);
+	std::wstring str = formatString(L"@@debug_msg_%08X",Global.DebugMessages++);
 	std::wstring str2 = L"\"" + List[0].text + L"\"";
 
-	Arm.AssembleOpcode("mov","r12,r12");
-	Arm.AssembleOpcode("b",str);
+	Arm.AssembleOpcode(L"mov",L"r12,r12");
+	Arm.AssembleOpcode(L"b",str);
 	Arm.AssembleDirective(L".byte",L"0x64,0x64,0x00,0x00");
 	if (List[0].text.empty()) Arm.AssembleDirective(L".byte",L"0");
 	else Arm.AssembleDirective(L".ascii",str2);
 	Arm.AssembleDirective(L".align",Arm.GetThumbMode() == true ? L"2" : L"4");
-	addAssemblerLabel(convertUtf8ToWString(str));
+	addAssemblerLabel(str);
 	return true;
 }
 
 bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags)
 {
-	char Lab1[64],Lab2[64],Temp[64];
-
 	bool push = true;
 	if (List.size() == 2)
 	{
@@ -125,44 +121,44 @@ bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags)
 			return false;
 		}
 	}
-
-	sprintf_s(Lab1,64,"@@debug_msg_%08X",Global.DebugMessages++);
-	sprintf_s(Lab2,64,"@@debug_msg_%08X",Global.DebugMessages++);
+	
+	std::wstring label1 = formatString(L"@@debug_msg_%08X",Global.DebugMessages++);
+	std::wstring label2 = formatString(L"@@debug_msg_%08X",Global.DebugMessages++);
 	std::wstring str = L"\"" + List[0].text + L"\"";
 
 	if (push == true)
 	{
 		if (Arm.GetThumbMode() == true)
 		{
-			Arm.AssembleOpcode("push","r0");
-			Arm.AssembleOpcode("push","r14");
+			Arm.AssembleOpcode(L"push",L"r0");
+			Arm.AssembleOpcode(L"push",L"r14");
 		} else {
-			Arm.AssembleOpcode("push","r0,r14");
+			Arm.AssembleOpcode(L"push",L"r0,r14");
 		}
 	}
-
-	sprintf_s(Temp,"r0,=%s",Lab1);
-	Arm.AssembleOpcode("add",Temp);
-	Arm.AssembleOpcode("swi","0xFC");
+	
+	std::wstring temp = formatString(L"r0,=%ls",label1);
+	Arm.AssembleOpcode(L"add",temp);
+	Arm.AssembleOpcode(L"swi",L"0xFC");
 
 	if (push == true)
 	{
 		if (Arm.GetThumbMode() == true)
 		{
-			Arm.AssembleOpcode("pop","r0");
-			Arm.AssembleOpcode("mov","r14,r0");
-			Arm.AssembleOpcode("pop","r0");
+			Arm.AssembleOpcode(L"pop",L"r0");
+			Arm.AssembleOpcode(L"mov",L"r14,r0");
+			Arm.AssembleOpcode(L"pop",L"r0");
 		} else {
-			Arm.AssembleOpcode("pop","r0,r14");
+			Arm.AssembleOpcode(L"pop",L"r0,r14");
 		}
 	}
 
-	Arm.AssembleOpcode("b",Lab2);
+	Arm.AssembleOpcode(L"b",label2);
 	Arm.AssembleDirective(L".align",L"4");
-	addAssemblerLabel(convertUtf8ToWString(Lab1));
+	addAssemblerLabel(label1);
 	Arm.AssembleDirective(L".ascii",str);
 	Arm.AssembleDirective(L".align",Arm.GetThumbMode() == true ? L"2" : L"4");
-	addAssemblerLabel(convertUtf8ToWString(Lab2));
+	addAssemblerLabel(label2);
 	return true;
 }
 
@@ -194,12 +190,12 @@ void CArmArchitecture::Revalidate()
 	CurrentPool = 0;
 }
 
-void CArmArchitecture::AssembleOpcode(char *name, char *args)
+void CArmArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
 {
 	if (thumb == true)	// thumb opcode
 	{
 		CThumbInstruction* Opcode = new CThumbInstruction();
-		if (Opcode->Load(name,args) == false)
+		if (Opcode->Load((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
 		{
 			delete Opcode;
 			return;
@@ -208,7 +204,7 @@ void CArmArchitecture::AssembleOpcode(char *name, char *args)
 		Global.RamPos += Opcode->GetSize();
 	} else {			// arm opcode
 		CArmInstruction* Opcode = new CArmInstruction();
-		if (Opcode->Load(name,args) == false)
+		if (Opcode->Load((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
 		{
 			delete Opcode;
 			return;

@@ -5,7 +5,7 @@
 class CArchitecture
 {
 public:
-	virtual void AssembleOpcode(char* name, char* args) = 0;
+	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args) = 0;
 	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args) = 0;
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
@@ -18,7 +18,7 @@ public:
 class CInvalidArchitecture: public CArchitecture
 {
 public:
-	virtual void AssembleOpcode(char* name, char* args);
+	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
 	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();
 	virtual void Pass2();
