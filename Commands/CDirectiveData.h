@@ -14,7 +14,7 @@ public:
 	~CDirectiveData();
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output);
+	virtual void writeTempData(TempData& tempData);
 private:
 	tDirectiveDataEntry* Entries;
 	CExpressionCommandList* ExpData;

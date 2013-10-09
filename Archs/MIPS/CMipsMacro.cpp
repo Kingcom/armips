@@ -99,10 +99,10 @@ void CMipsMacro::Encode()
 	}
 }
 
-void CMipsMacro::WriteTempData(FILE*& Output)
+void CMipsMacro::writeTempData(TempData& tempData)
 {
 	for (int i = 0; i < InstructionAmount; i++)
 	{
-		Instructions[i].WriteTempData(Output);
+		Instructions[i].writeTempData(tempData);
 	}
 }

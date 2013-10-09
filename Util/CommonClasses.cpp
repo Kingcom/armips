@@ -49,6 +49,55 @@ int CInvalidArchitecture::GetWordSize()
 }
 
 
+void TempData::start()
+{
+	if (file.getFileName().empty() == false)
+	{
+		if (file.open(TextFile::Write) == false)
+		{
+			PrintError(ERROR_ERROR,"Could not open temp file %ls.",file.getFileName().c_str());
+			return;
+		}
+
+		int fileCount = Global.FileInfo.FileList.GetCount();
+		int lineCount = Global.FileInfo.TotalLineCount;
+		int labelCount = Global.symbolTable.getLabelCount();
+		int equCount = Global.symbolTable.getEquationCount();
+
+		file.writeFormat(L"; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
+		file.writeFormat(L"; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
+		file.writeFormat(L"; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
+		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
+		for (int i = 0; i < fileCount; i++)
+		{
+			file.writeFormat(L"; %S\n",Global.FileInfo.FileList.GetEntry(i));
+		}
+		file.writeLine("");
+	}
+}
+
+void TempData::end()
+{
+	if (file.isOpen())
+		file.close();
+}
+
+void TempData::writeLine(int memoryAddress, const std::wstring& text)
+{
+	if (file.isOpen())
+	{
+		std::wstring str = formatString(L"%08X %ls",memoryAddress,text.c_str());
+		while (str.size() < 70)
+			str += ' ';
+
+		str += formatString(L"; %S line %d",
+			Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
+
+		file.writeLine(str);
+	}
+}
+
+
 CStringList::CStringList()
 {
 	EntryPoses = (int*) malloc(256*4);

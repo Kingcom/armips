@@ -139,43 +139,23 @@ void CDirectiveData::Encode()
 }
 
 
-void CDirectiveData::WriteTempData(FILE*& Output)
+void CDirectiveData::writeTempData(TempData& tempData)
 {
-	CStringList List;
-	char str[2048];
-	int pos = 0;
 	int num;
 
-/*	if (Global.SymData.Write == true)
-	{
-		switch (UnitSize)
-		{
-		case 1:
-			fprintf(Global.SymData.Handle,".byt:%04X\n",SpaceNeeded);
-			break;
-		case 2:
-			fprintf(Global.SymData.Handle,".wrd:%04X\n",SpaceNeeded);
-			break;
-		case 4:
-			fprintf(Global.SymData.Handle,".dbl:%04X\n",SpaceNeeded);
-			break;
-		}
-	}*/
-
+	std::wstring result;
 	switch (UnitSize)
 	{
 	case 1:
-		pos = sprintf(str,".byte ");
+		result = L".byte ";
 		break;
 	case 2:
-		pos = sprintf(str,".halfword ");
+		result = L".halfword ";
 		break;
 	case 4:
-		pos = sprintf(str,".word ");
+		result = L".word ";
 		break;
 	}
-
-	Global.RamPos = RamPos;
 
 	for (int i = 0; i < TotalAmount; i++)
 	{
@@ -185,16 +165,15 @@ void CDirectiveData::WriteTempData(FILE*& Output)
 			int len = StrData.GetLen(Entries[i].num);
 			for (int i = 0; i < len; i++)
 			{
-				pos += sprintf(&str[pos],"0x%0*X,",UnitSize*2,Data[i]);
+				result += formatString(L"0x%0*X,",UnitSize*2,Data[i]);
 			}
-			Global.RamPos += len*UnitSize;
 		} else {
 			if (evalExpression(ExpData[Entries[i].num],num) == false)
 				return;
-			Global.RamPos += UnitSize;
-			pos += sprintf(&str[pos],"0x%0*X,",UnitSize*2,num);
+			result += formatString(L"0x%0*X,",UnitSize*2,num);
 		}
 	}
-	str[pos-1] = 0;
-	WriteToTempData(Output,str,RamPos);
+
+	result.pop_back();
+	tempData.writeLine(RamPos,result);
 }

@@ -695,14 +695,17 @@ TextFile::~TextFile()
 	close();
 }
 
-bool TextFile::open(std::string fileName, Mode mode, Encoding defaultEncoding)
+bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
 {
-	std::wstring wideName = convertUtf8ToWString(fileName.c_str());
-	return open(wideName,mode,defaultEncoding);
+	setFileName(fileName);
+	return open(mode,defaultEncoding);
 }
 
-bool TextFile::open(std::wstring fileName, Mode mode, Encoding defaultEncoding)
+bool TextFile::open(Mode mode, Encoding defaultEncoding)
 {
+	if (fileName.empty())
+		return false;
+
 	if (isOpen())
 		close();
 
@@ -968,4 +971,28 @@ void TextFile::writeLines(StringList& list)
 	{
 		writeLine(list[i]);
 	}
+}
+
+void TextFile::writeFormat(wchar_t* format, ...)
+{
+	std::wstring result;
+	va_list args;
+
+	va_start(args,format);
+
+	int length = _vscwprintf(format,args);
+	if (length <= 0) // error
+	{
+		va_end(args);
+		return;
+	}
+
+	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
+	length = _vsnwprintf(buffer,length+1,format,args);
+
+	if (length >= 0)
+		result = buffer;
+
+	va_end(args);
+	write(result);
 }

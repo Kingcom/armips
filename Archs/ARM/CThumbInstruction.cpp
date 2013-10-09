@@ -473,7 +473,7 @@ void CThumbInstruction::FormatInstruction(char* encoding,tThumbOpcodeVariables& 
 	*dest = 0;
 }
 
-void CThumbInstruction::WriteTempData(FILE *&Output)
+void CThumbInstruction::writeTempData(TempData& tempData)
 {
 	char str[256];
 
@@ -482,5 +482,5 @@ void CThumbInstruction::WriteTempData(FILE *&Output)
 	str[pos] = 0;
 	FormatInstruction(Opcode.mask,Vars,&str[pos]);
 
-	WriteToTempData(Output,str,RamPos);
+	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }

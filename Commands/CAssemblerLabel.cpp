@@ -37,12 +37,9 @@ bool CAssemblerLabel::Validate()
 	return false;
 }
 
-void CAssemblerLabel::WriteTempData(FILE*& Output)
+void CAssemblerLabel::writeTempData(TempData& tempData)
 {
-	char str[256];
-
-	sprintf(str,"%ls:",label->getName().c_str());
-	WriteToTempData(Output,str,label->getValue());
+	tempData.writeLine(label->getValue(),formatString(L"%ls:",label->getName().c_str()));
 }
 
 void CAssemblerLabel::Encode()

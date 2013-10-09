@@ -901,7 +901,7 @@ void CArmInstruction::FormatInstruction(char* encoding, char* dest)
 	*dest = 0;
 }
 
-void CArmInstruction::WriteTempData(FILE *&Output)
+void CArmInstruction::writeTempData(TempData& tempData)
 {
 	char OpcodeName[32];
 	char str[256];
@@ -912,7 +912,7 @@ void CArmInstruction::WriteTempData(FILE *&Output)
 	str[pos] = 0;
 	FormatInstruction(Opcode.mask,&str[pos]);
 
-	WriteToTempData(Output,str,RamPos);
+	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }
 
 void CArmInstruction::WriteInstruction(unsigned int encoding)

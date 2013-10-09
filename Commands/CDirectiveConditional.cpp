@@ -272,11 +272,6 @@ bool CDirectiveConditional::Validate()
 	return Result;
 }
 
-void CDirectiveConditional::WriteTempData(FILE*& Output)
-{
-	Execute();
-}
-
 void CDirectiveConditional::Encode()
 {
 	Execute();

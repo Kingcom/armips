@@ -95,13 +95,10 @@ void ArmPoolCommand::Encode()
 	}
 }
 
-void ArmPoolCommand::WriteTempData(FILE *&Output)
+void ArmPoolCommand::writeTempData(TempData& tempData)
 {
-	char str[32];
-
 	for (int i = 0; i < Arm.GetPool(PoolId).GetCount(); i++)
 	{
-		sprintf(str,".word 0x%08X",Arm.GetPool(PoolId).GetEntry(i));
-		WriteToTempData(Output,str,RamPos+i*4);
+		tempData.writeLine(RamPos+i*4,formatString(L".word 0x%08X",Arm.GetPool(PoolId).GetEntry(i)));
 	}
 }

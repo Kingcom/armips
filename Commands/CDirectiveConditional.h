@@ -21,7 +21,7 @@ public:
 	bool Load(ArgumentList& Args, int command);
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output);
+	virtual void writeTempData(TempData& tempData) { };
 	virtual bool IsConditional() { return true; };
 private:
 	void Execute();

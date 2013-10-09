@@ -35,12 +35,15 @@ public:
 	
 	TextFile();
 	~TextFile();
-	bool open(std::string fileName, Mode mode, Encoding defaultEncoding = UTF8);
-	bool open(std::wstring fileName, Mode mode, Encoding defaultEncoding = UTF8);
+	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = UTF8);
+	bool open(Mode mode, Encoding defaultEncoding = UTF8);
 	bool isOpen() { return handle != NULL; };
 	bool atEnd() { return isOpen() && mode == Read && ftell(handle) == size_; };
 	long size() { return size_; };
 	void close();
+
+	void setFileName(const std::wstring& name) { fileName = name; };
+	const std::wstring& getFileName() { return fileName; };
 
 	wchar_t readCharacter();
 	std::wstring readLine();
@@ -55,8 +58,10 @@ public:
 	void writeLine(const char* line);
 	void writeLine(const std::string& line);
 	void writeLines(StringList& list);
+	void writeFormat(wchar_t* format, ...);
 private:
 	FILE* handle;
+	std::wstring fileName;
 	Encoding encoding;
 	Mode mode;
 	bool recursion;

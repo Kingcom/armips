@@ -23,52 +23,52 @@ public:
 	~CDirectiveFile();
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output);
+	virtual void writeTempData(TempData& tempData);
 	//  Open
 	void InitOpen(ArgumentList& Args);
 	bool ValidateOpen();
 	void EncodeOpen();
-	void WriteTempOpen(char* str);
+	std::wstring WriteTempOpen();
 	// Create
 	void InitCreate(ArgumentList& Args);
 	bool ValidateCreate();
 	void EncodeCreate();
-	void WriteTempCreate(char* str);
+	std::wstring WriteTempCreate();
 	// Copy
 	void InitCopy(ArgumentList& Args);
 	bool ValidateCopy();
 	void EncodeCopy();
-	void WriteTempCopy(char* str);
+	std::wstring WriteTempCopy();
 	// Close
 	void InitClose(ArgumentList& Args);
 	bool ValidateClose();
 	void EncodeClose();
-	void WriteTempClose(char* str);
+	std::wstring WriteTempClose();
 	// Org
 	void InitOrg(ArgumentList& Args);
 	bool ValidateOrg();
 	void EncodeOrg();
-	void WriteTempOrg(char* str);
+	std::wstring WriteTempOrg();
 	// Orga
 	void InitOrga(ArgumentList& Args);
 	bool ValidateOrga();
 	void EncodeOrga();
-	void WriteTempOrga(char* str);
+	std::wstring WriteTempOrga();
 	// Incbin
 	void InitIncbin(ArgumentList& Args);
 	bool ValidateIncbin();
 	void EncodeIncbin();
-	void WriteTempIncbin(char* str);
+	std::wstring WriteTempIncbin();
 	// Align
 	void InitAlign(ArgumentList& Args);
 	bool ValidateAlign();
 	void EncodeAlign();
-	void WriteTempAlign(char* str);
+	std::wstring WriteTempAlign();
 	// HeaderSize
 	void InitHeaderSize(ArgumentList& Args);
 	bool ValidateHeaderSize();
 	void EncodeHeaderSize();
-	void WriteTempHeaderSize(char* str);
+	std::wstring WriteTempHeaderSize();
 private:
 	eDirectiveFileMode Mode;
 	std::wstring fileName;

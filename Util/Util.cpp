@@ -2,7 +2,6 @@
 #include "Util.h"
 #include <sys/stat.h>
 
-
 Formatter Formatter::arg(const std::wstring& s)
 {
 	// only replace first placeholder for now
@@ -135,9 +134,8 @@ std::wstring formatString(const wchar_t* format, ...)
 	va_list args;
 
 	va_start(args,format);
-
 	int length = _vscwprintf(format,args);
-	if (length < 0) // error
+	if (length <= 0) // error
 	{
 		va_end(args);
 		return L"";

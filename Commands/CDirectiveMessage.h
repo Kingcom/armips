@@ -14,7 +14,7 @@ public:
 	bool Load(ArgumentList& Args, int type);
 	virtual bool Validate();
 	virtual void Encode() {};
-	virtual void WriteTempData(FILE*& Output) {};
+	virtual void writeTempData(TempData& tempData) { };
 private:
 	std::wstring message;
 	int ErrorType;
@@ -26,7 +26,7 @@ public:
 	CDirectiveSym(bool enable) {enabeld = enable; };
 	virtual bool Validate() { return false; };
 	virtual void Encode() { if(Global.SymData.Handle != NULL) Global.SymData.Write = enabeld; };
-	virtual void WriteTempData(FILE*& Output) { };
+	virtual void writeTempData(TempData& tempData) { };
 private:
 	bool enabeld;
 };

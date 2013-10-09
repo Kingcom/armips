@@ -7,7 +7,7 @@ public:
 	ArmStateCommand(bool state);
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output) { return; };
+	virtual void writeTempData(TempData& tempData) { };
 private:
 	int RamPos;
 	bool armstate;
@@ -36,7 +36,7 @@ public:
 	ArmPoolCommand();
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output);
+	virtual void writeTempData(TempData& tempData);
 private:
 	int RamPos;
 	int PoolId;

@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "Util/FileClasses.h"
 
 class CArchitecture
 {
@@ -71,6 +72,17 @@ public:
 	void clear() { entries.clear(); };
 private:
 	std::vector<Entry> entries;
+};
+
+class TempData
+{
+public:
+	void setFileName(const std::wstring& name) { file.setFileName(name); };
+	void start();
+	void end();
+	void writeLine(int memoryAddress, const std::wstring& text);
+private:
+	TextFile file;
 };
 
 typedef struct {

@@ -189,7 +189,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 void SymbolTable::writeSymFile(const std::string fileName)
 {
 	TextFile output;
-	if (output.open(fileName,TextFile::Write) == false)
+	if (output.open(convertUtf8ToWString(fileName.c_str()),TextFile::Write) == false)
 		return;
 
 	output.writeLine("00000000 0");

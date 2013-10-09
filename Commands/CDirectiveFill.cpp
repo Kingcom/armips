@@ -68,10 +68,7 @@ void CDirectiveFill::Encode()
 	}
 }
 
-void CDirectiveFill::WriteTempData(FILE *&Output)
+void CDirectiveFill::writeTempData(TempData& tempData)
 {
-	char str[256];
-
-	sprintf_s(str,256,".fill 0x%08X,0x%02X",Size,Byte);
-	WriteToTempData(Output,str,RamPos);
+	tempData.writeLine(RamPos,formatString(L".fill 0x%08X,0x%02X",Size,Byte));
 }

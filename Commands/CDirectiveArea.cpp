@@ -70,16 +70,12 @@ void CDirectiveArea::Encode()
 	return;
 }
 
-void CDirectiveArea::WriteTempData(FILE *&Output)
+void CDirectiveArea::writeTempData(TempData& tempData)
 {
-	char str[256];
-
 	if (Start == true)
 	{
-		sprintf_s(str,256,".area 0x%08X",Size);
+		tempData.writeLine(RamPos,formatString(L".area 0x%08X",Size));
 	} else {
-		sprintf_s(str,256,".endarea");
+		tempData.writeLine(RamPos,L".endarea");
 	}
-
-	WriteToTempData(Output,str,RamPos);
 }

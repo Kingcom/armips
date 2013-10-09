@@ -411,7 +411,6 @@ bool EncodeAssembly()
 		return false;
 	}
 
-	WriteTempFile();
 	if (Global.SymData.Write == true)
 	{
 		Global.SymData.Handle = fopen(Global.SymData.Name,"w");
@@ -422,7 +421,8 @@ bool EncodeAssembly()
 	printf("Encode...\n");
 #endif
 
-	// und schlieﬂlich enkodieren	
+	// und schlieﬂlich enkodieren
+	Global.tempData.start();
 	for (size_t i = 0; i < Global.Commands.size(); i++)
 	{
 		if (Global.Commands[i]->IsConditional() == false)
@@ -439,8 +439,11 @@ bool EncodeAssembly()
 
 		Global.Commands[i]->SetFileInfo();
 		Global.Commands[i]->Encode();
+		Global.Commands[i]->writeTempData(Global.tempData);
 		delete Global.Commands[i];
 	}
+
+	Global.tempData.end();
 
 	if (Global.SymData.Write == true)
 	{

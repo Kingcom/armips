@@ -415,16 +415,16 @@ void CMipsInstruction::Encode()
 	WriteInstruction(encoding);
 }
 
-void CMipsInstruction::WriteTempData(FILE*& Output)
+void CMipsInstruction::writeTempData(TempData& tempData)
 {
 	char str[256];
 
-	if (SubInstructionEnabled == true) SubInstruction->WriteTempData(Output);
+	if (SubInstructionEnabled == true) SubInstruction->writeTempData(tempData);
 
 	int pos = sprintf(str,"   %s",Opcode.name);
 	while (pos < 11) str[pos++] = ' ';
 	str[pos] = 0;
 	FormatInstruction(Opcode.encoding,Vars,&str[pos]);
 
-	WriteToTempData(Output,str,RamPos);
+	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }

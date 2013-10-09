@@ -11,7 +11,7 @@ public:
 	bool LoadEnd();
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output);
+	virtual void writeTempData(TempData& tempData);
 private:
 	bool Start;
 	CExpressionCommandList SizeExpression;

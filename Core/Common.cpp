@@ -115,63 +115,6 @@ void PrintError(eErrorLevel level, char* format, ...)
 	}
 }
 
-void WriteToTempData(FILE*& Output, char* str, int RamPos)
-{
-	char Dest[2048];
-	int pos = sprintf(Dest,"%08X %s",RamPos,str);
-
-	while (pos < 70)
-	{
-		Dest[pos++] = ' ';
-	}
-
-	sprintf(&Dest[pos],"; %s line %d",
-		Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
-	fprintf(Output,"%s\n",Dest);
-}
-
-void WriteTempFile()
-{
-	if (Global.TempData.Write == true)
-	{
-		int FileCount = Global.FileInfo.FileList.GetCount();
-		int LineCount = Global.FileInfo.TotalLineCount;
-		int LabelCount = Global.symbolTable.getLabelCount();
-		int EquCount = Global.symbolTable.getEquationCount();
-
-		FILE* Temp = fopen(Global.TempData.Name,"w");
-		fprintf(Temp,"; %d %s included\n",FileCount,FileCount == 1 ? "file" : "files");
-		fprintf(Temp,"; %d %s\n",LineCount,LineCount == 1 ? "line" : "lines");
-		fprintf(Temp,"; %d %s\n",LabelCount,LabelCount == 1 ? "label" : "labels");
-		fprintf(Temp,"; %d %s\n\n",EquCount,EquCount == 1 ? "equation" : "equations");
-		for (int i = 0; i < FileCount; i++)
-		{
-			fprintf(Temp,"; %s\n",Global.FileInfo.FileList.GetEntry(i));
-		}
-
-		fprintf(Temp,"\n");
-
-		for (size_t i = 0; i < Global.Commands.size(); i++)
-		{
-			if (Global.Commands[i]->IsConditional() == false)
-			{
-				if (Global.ConditionData.EntryCount != 0)
-				{
-					if (ConditionalAssemblyTrue() == false)
-//					if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue == false)
-					{
-						continue;
-					}
-				}
-			}
-			Global.Commands[i]->SetFileInfo();
-			Global.Commands[i]->WriteTempData(Temp);
-		}
-		fclose(Temp);
-	}
-}
-
-
 bool isPowerOfTwo(int n)
 {
 	if (n == 0) return false;

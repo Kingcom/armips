@@ -1,6 +1,4 @@
 #pragma once
-#ifndef COMMON_H
-#define COMMON_H
 
 #include <vector>
 #include "SymbolTable.h"
@@ -40,12 +38,11 @@ typedef struct {
 	std::vector<CAssemblerCommand*> Commands;
 	std::vector<CMacro*> Macros;
 	tFileInfo FileInfo;
-	tOutputFileData TempData;
+	TempData tempData;
 	tOutputFileData SymData;
 	SymbolTable symbolTable;
 	CErrorQueue ErrorQueue;
 	EncodingTable Table;
-//	HANDLE hFile;
 	BinaryFile Output;
 	int RamPos;
 	int HeaderSize;
@@ -88,7 +85,4 @@ bool addAssemblerLabel(const std::wstring& labelName);
 void AddAssemblerCommand(CAssemblerCommand* Command);
 void QueueError(eErrorLevel level, char* format, ...);
 void PrintError(eErrorLevel level, char* format, ...);
-void WriteToTempData(FILE*& Output, char* str, int RamPos);
-void WriteTempFile();
 bool isPowerOfTwo(int n);
-#endif

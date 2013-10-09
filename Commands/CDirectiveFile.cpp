@@ -9,7 +9,7 @@
 typedef void (CDirectiveFile::*fileinitfunc)(ArgumentList&);
 typedef bool (CDirectiveFile::*filevalidatefunc)();
 typedef void (CDirectiveFile::*fileencodefunc)();
-typedef void (CDirectiveFile::*filewritetempfunc)(char*);
+typedef std::wstring (CDirectiveFile::*filewritetempfunc)();
 
 typedef struct {
 	eDirectiveFileMode Mode;
@@ -86,9 +86,9 @@ void CDirectiveFile::EncodeOpen()
 	Global.FileOpened = true;
 }
 
-void CDirectiveFile::WriteTempOpen(char* str)
+std::wstring CDirectiveFile::WriteTempOpen()
 {
-	sprintf(str,".open \"%ls\",0x%08X",fileName.c_str(),RamAddress);
+	return formatString(L".open \"%s\",0x%08X",fileName.c_str(),RamAddress);
 }
 
 
@@ -154,9 +154,9 @@ void CDirectiveFile::EncodeCreate()
 	Global.FileOpened = true;
 }
 
-void CDirectiveFile::WriteTempCreate(char* str)
+std::wstring CDirectiveFile::WriteTempCreate()
 {
-	sprintf(str,".create \"%ls\",0x%08X",fileName.c_str(),RamAddress);
+	return formatString(L".create \"%s\",0x%08X",fileName.c_str(),RamAddress);
 }
 
 
@@ -216,9 +216,9 @@ void CDirectiveFile::EncodeCopy()
 	Global.FileOpened = true;
 }
 
-void CDirectiveFile::WriteTempCopy(char* str)
+std::wstring CDirectiveFile::WriteTempCopy()
 {
-	sprintf(str,".open \"%ls\",\"%ls\",0x%08X",originalName.c_str(),fileName.c_str(),RamAddress);
+	return formatString(L".open \"%s\",\"%s\",0x%08X",originalName.c_str(),fileName.c_str(),RamAddress);
 }
 
 
@@ -248,9 +248,9 @@ void CDirectiveFile::EncodeClose()
 	Global.FileOpened = false;
 }
 
-void CDirectiveFile::WriteTempClose(char* str)
+std::wstring CDirectiveFile::WriteTempClose()
 {
-	sprintf(str,".close");
+	return L".close";
 }
 
 
@@ -285,9 +285,9 @@ void CDirectiveFile::EncodeOrg()
 	Global.Output.setPos(RamAddress-Global.HeaderSize);
 }
 
-void CDirectiveFile::WriteTempOrg(char* str)
+std::wstring CDirectiveFile::WriteTempOrg()
 {
-	sprintf(str,".org 0x%08X",RamAddress);
+	return formatString(L".org 0x%08X",RamAddress);
 }
 
 
@@ -323,9 +323,9 @@ void CDirectiveFile::EncodeOrga()
 	Global.Output.setPos(RamAddress);
 }
 
-void CDirectiveFile::WriteTempOrga(char* str)
+std::wstring CDirectiveFile::WriteTempOrga()
 {
-	sprintf(str,".orga 0x%08X",RamAddress);
+	return formatString(L".orga 0x%08X",RamAddress);
 }
 
 
@@ -373,9 +373,9 @@ void CDirectiveFile::EncodeIncbin()
 	}
 }
 
-void CDirectiveFile::WriteTempIncbin(char* str)
+std::wstring CDirectiveFile::WriteTempIncbin()
 {
-	sprintf(str,".incbin \"%ls\"",fileName.c_str());
+	return formatString(L".incbin \"%s\"",fileName.c_str());
 }
 
 
@@ -425,9 +425,9 @@ void CDirectiveFile::EncodeAlign()
 	Global.Output.write(AlignBuffer,n);
 }
 
-void CDirectiveFile::WriteTempAlign(char* str)
+std::wstring CDirectiveFile::WriteTempAlign()
 {
-	sprintf(str,".align 0x%08X",Alignment);
+	return formatString(L".align 0x%08X",Alignment);
 }
 
 
@@ -459,9 +459,9 @@ void CDirectiveFile::EncodeHeaderSize()
 	Global.RamPos = RamAddress;
 }
 
-void CDirectiveFile::WriteTempHeaderSize(char* str)
+std::wstring CDirectiveFile::WriteTempHeaderSize()
 {
-	sprintf(str,".headersize 0x%08X",RamAddress);
+	return formatString(L".headersize 0x%08X",RamAddress);
 }
 
 
@@ -495,10 +495,8 @@ void CDirectiveFile::Encode()
 	(*this.*DirectiveFileTypes[(int)Mode].EncodeFunc)();
 }
 
-void CDirectiveFile::WriteTempData(FILE*& Output)
+void CDirectiveFile::writeTempData(TempData& tempData)
 {
-	char str[512];
-
-	(*this.*DirectiveFileTypes[(int)Mode].WriteTempFunc)(str);
-	WriteToTempData(Output,str,RamPos);
+	std::wstring text = (*this.*DirectiveFileTypes[(int)Mode].WriteTempFunc)();
+	tempData.writeLine(RamPos,text);
 }

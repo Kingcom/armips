@@ -26,7 +26,7 @@ public:
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void WriteTempData(FILE*& Output);
+	virtual void writeTempData(TempData& tempData);
 	int GetSize() { return OpcodeSize; };
 private:
 	bool LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line);
