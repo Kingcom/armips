@@ -102,6 +102,9 @@
     <ClCompile Include="Core\SymbolTable.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Misc.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -202,6 +205,9 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Core\SymbolTable.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Misc.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,6 +7,7 @@
 #include "CMacro.h"
 #include "Util/EncodingTable.h"
 #include "Util/FileClasses.h"
+#include "Core/Misc.h"
 
 typedef struct {
 	CStringList FileList;
@@ -15,12 +16,6 @@ typedef struct {
 	int LineNumber;
 	int TotalLineCount;
 } tFileInfo;
-
-typedef struct {
-	bool ConditionMet;
-	bool ConditionTrue;
-	bool ElseCase;
-} tConditionEntry;
 
 typedef struct {
 	int MaxRamPos;
@@ -50,10 +45,7 @@ typedef struct {
 	bool relativeInclude;
 	bool warningAsError;
 	int DebugMessages;
-	struct {
-		tConditionEntry Entries[128];
-		int EntryCount;
-	} ConditionData; 
+	ConditionData conditionData;
 	struct {
 		tAreaEntry Entries[128];
 		int EntryCount;

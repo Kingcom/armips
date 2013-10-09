@@ -54,197 +54,43 @@ void CDirectiveConditional::Execute()
 	switch (Type)
 	{
 	case CONDITIONAL_IFARM:
-		if (Global.ConditionData.EntryCount >= 128)
-		{
-			QueueError(ERROR_ERROR,"Maximum nesting level reached");
-			return;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionTrue =
-			Value == 1 ? true : false;
-		if (Value == 1) Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = true;
-		else Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = false;
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
+		b = Value == 1;
+		Global.conditionData.addIf(b);
 		break;
 	case CONDITIONAL_IFTHUMB:
-		if (Global.ConditionData.EntryCount >= 128)
-		{
-			QueueError(ERROR_ERROR,"Maximum nesting level reached");
-			return;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionTrue =
-			Value == 3 ? true : false;
-		if (Value == 3) Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = true;
-		else Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = false;
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
+		b = Value == 3;
+		Global.conditionData.addIf(b);
 		break;
 	case CONDITIONAL_IF:
-		if (Global.ConditionData.EntryCount >= 128)
-		{
-			QueueError(ERROR_ERROR,"Maximum nesting level reached");
-			return;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionTrue =
-			Value != 0 ? true : false;
-		if (Value != 0) Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = true;
-		else Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = false;
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
+		b = Value != 0;
+		Global.conditionData.addIf(b);
 		break;
 	case CONDITIONAL_ELSE:
-		if (Global.ConditionData.EntryCount == 0)
-		{
-			QueueError(ERROR_ERROR,"No if clause active");
-			return;
-		}
-		if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet == false)
-		{
-			if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase == true)
-			{
-				QueueError(ERROR_ERROR,"Else case already defined");
-				return;
-			}
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue =
-				!Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue;
-		} else {
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue = false;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase = true;
+		Global.conditionData.addElse();
 		break;
 	case CONDITIONAL_ELSEIF:
-		if (Global.ConditionData.EntryCount == 0)
-		{
-			QueueError(ERROR_ERROR,"No if clause active");
-			return;
-		}
-		if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet == false)
-		{
-			if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase == true)
-			{
-				QueueError(ERROR_ERROR,"Else case already defined");
-				return;
-			}
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue =
-				Value != 0 ? true : false;
-			if (Value != 0) Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet = true;
-		} else {
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue = false;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase = false;
+		b = Value != 0;
+		Global.conditionData.addElseIf(b);
 		break;
 	case CONDITIONAL_ENDIF:
-		if (Global.ConditionData.EntryCount == 0)
-		{
-			QueueError(ERROR_ERROR,"No if clause active");
-			return;
-		}
-		Global.ConditionData.EntryCount--;
+		Global.conditionData.addEndIf();
 		break;
 	case CONDITIONAL_IFDEF:
 		b = checkLabelDefined(labelName);
-/*		switch (Global.Labels.CheckLabel(LabelName,Global.Section))
-		{
-		case LABEL_UNDEFINED:
-		case LABEL_DOESNOTEXIST:
-			b = false;
-			break;
-		case LABEL_DEFINED:
-			b = true;
-			break;
-		}*/
-
-		if (Global.ConditionData.EntryCount == 128)
-		{
-			QueueError(ERROR_ERROR,"Maximum nesting level reached");
-			return;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionTrue = b;
-		if (b == true) Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = true;
-		else Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = false;
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
+		Global.conditionData.addIf(b);
 		break;
 	case CONDITIONAL_IFNDEF:
 		b = !checkLabelDefined(labelName);
-/*		switch (Global.Labels.CheckLabel(LabelName,Global.Section))
-		{
-		case LABEL_UNDEFINED:
-		case LABEL_DOESNOTEXIST:
-			b = true;
-			break;
-		case LABEL_DEFINED:
-			b = false;
-			break;
-		}*/
-
-		if (Global.ConditionData.EntryCount == 128)
-		{
-			QueueError(ERROR_ERROR,"Maximum nesting level reached");
-			return;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionTrue = b;
-		if (b == true) Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = true;
-		else Global.ConditionData.Entries[Global.ConditionData.EntryCount].ConditionMet = false;
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount++].ElseCase = false;
+		Global.conditionData.addIf(b);
 		break;
 	case CONDITIONAL_ELSEIFDEF:	
-		if (Global.ConditionData.EntryCount == 0)
-		{
-			QueueError(ERROR_ERROR,"No if clause active");
-			return;
-		}
-		if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet == false)
-		{
-			if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase == true)
-			{
-				QueueError(ERROR_ERROR,"Else case already defined");
-				return;
-			}
-			b = checkLabelDefined(labelName);
-/*			switch (Global.Labels.CheckLabel(LabelName,Global.Section))
-			{
-			case LABEL_UNDEFINED:
-			case LABEL_DOESNOTEXIST:
-				b = false;
-				break;
-			case LABEL_DEFINED:
-				b = true;
-				break;
-			}*/
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue = b;
-			if (b == true) Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet = true;
-		} else {
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue = false;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase = false;
-	case CONDITIONAL_ELSEIFNDEF:	
-		if (Global.ConditionData.EntryCount == 0)
-		{
-			QueueError(ERROR_ERROR,"No if clause active");
-			return;
-		}
-		if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet == false)
-		{
-			if (Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase == true)
-			{
-				QueueError(ERROR_ERROR,"Else case already defined");
-				return;
-			}
-
-			b = !checkLabelDefined(labelName);
-/*			switch (Global.Labels.CheckLabel(LabelName,Global.Section))
-			{
-			case LABEL_UNDEFINED:
-			case LABEL_DOESNOTEXIST:
-				b = true;
-				break;
-			case LABEL_DEFINED:
-				b = false;
-				break;
-			}*/
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue = b;
-			if (b == true) Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionMet = true;
-		} else {
-			Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ConditionTrue = false;
-		}
-		Global.ConditionData.Entries[Global.ConditionData.EntryCount-1].ElseCase = false;
+		b = checkLabelDefined(labelName);
+		Global.conditionData.addElseIf(b);
+		break;
+	case CONDITIONAL_ELSEIFNDEF:
+		b = !checkLabelDefined(labelName);
+		Global.conditionData.addElseIf(b);
+		break;
 	}
 }
 

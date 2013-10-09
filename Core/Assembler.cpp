@@ -340,18 +340,6 @@ void LoadAssemblyFile(std::wstring& fileName)
 	input.close();
 }
 
-bool ConditionalAssemblyTrue()
-{
-	if (Global.ConditionData.EntryCount != 0)
-	{
-		for (int i = 0; i < Global.ConditionData.EntryCount; i++)
-		{
-			if (Global.ConditionData.Entries[i].ConditionTrue == false) return false;
-		}
-	}
-	return true;
-}
-
 bool EncodeAssembly()
 {
 	bool Revalidate;
@@ -380,7 +368,8 @@ bool EncodeAssembly()
 		{
 			if (Global.Commands[i]->IsConditional() == false)
 			{
-				if (ConditionalAssemblyTrue() == false) continue;
+				if (Global.conditionData.conditionTrue() == false)
+					continue;
 			}
 
 			Global.Commands[i]->SetFileInfo();
@@ -400,7 +389,8 @@ bool EncodeAssembly()
 				Revalidate = true;
 			}
 		}
-		if (Global.ConditionData.EntryCount != 0) QueueError(ERROR_ERROR,"One or more if statements not terminated");
+		if (Global.conditionData.activeConditions() != 0)
+			QueueError(ERROR_ERROR,"One or more if statements not terminated");
 		validationPasses++;
 	} while (Revalidate == true);
 
@@ -420,16 +410,10 @@ bool EncodeAssembly()
 	Global.symData.start();
 	for (size_t i = 0; i < Global.Commands.size(); i++)
 	{
-		if (Global.Commands[i]->IsConditional() == false)
+		if (Global.Commands[i]->IsConditional() == false && Global.conditionData.conditionTrue() == false)
 		{
-			if (Global.ConditionData.EntryCount != 0)
-			{
-				if (ConditionalAssemblyTrue() == false)
-				{
-					delete Global.Commands[i];
-					continue;
-				}
-			}
+			delete Global.Commands[i];
+			continue;
 		}
 
 		Global.Commands[i]->SetFileInfo();
