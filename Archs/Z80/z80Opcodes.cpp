@@ -13,7 +13,6 @@
 	R = fixed 16 bit register
 	Q = fixed 8 bit register
 */
-// änderung
 
 const tZ80Opcode Z80Opcodes[] = {
 

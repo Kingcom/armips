@@ -151,11 +151,11 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 				Line += RetLen;
 				SourceEncoding += 3;
 				break;
-			case '/':	// optionale zeichen
+			case '/':	// optional characters
 				if (*Line == *(SourceEncoding+1)) Line++;
 				SourceEncoding += 2;
 				break;
-			default:	// alles andere
+			default:	// everything else
 				if (*SourceEncoding++ != *Line++) return false;
 				break;
 			}
@@ -163,9 +163,9 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 	}
 
 	while (*Line == ' ' || *Line == '\t') Line++;
-	if (*Line != 0)	return false;	// da ist noch mehr, nicht gut
+	if (*Line != 0)	return false;	// there's something else, bad
 
-	// opcode ist ok - jetzt noch alle weiteren flags setzen
+	// opcode is ok - now set all flags
 	Opcode = SourceOpcode;
 
 	if (Opcode.flags & THUMB_IMMEDIATE)
@@ -248,7 +248,7 @@ bool CThumbInstruction::Validate()
 			}
 		} else if (Opcode.flags & THUMB_WORD)
 		{
-			if (Vars.Immediate & 3)	// darf nicht sein
+			if (Vars.Immediate & 3)	// not allowed
 			{
 				QueueError(ERROR_ERROR,"Immediate value must be a multiple of 4");
 				return false;
@@ -256,7 +256,7 @@ bool CThumbInstruction::Validate()
 			Vars.Immediate >>= 2;
 		} else if (Opcode.flags & THUMB_HALFWORD)
 		{
-			if (Vars.Immediate & 1)	// darf nicht sein
+			if (Vars.Immediate & 1)	// not allowed
 			{
 				QueueError(ERROR_ERROR,"Immediate value must be a multiple of 2");
 				return false;

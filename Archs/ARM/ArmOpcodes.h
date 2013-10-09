@@ -1,7 +1,7 @@
 #pragma once
 
 
-// opcode typen
+// opcode types
 #define ARM_TYPE3 0
 #define ARM_TYPE4 1
 #define ARM_TYPE5 2
@@ -40,19 +40,19 @@
 #define ARM_ABS				0x00020000	// absolute immediate value for range check
 #define ARM_BRANCH			0x00040000
 #define ARM_ABSIMM			0x00080000	// ldr r0,[200h]
-#define ARM_MRS				0x00100000	// differenzieren zwischen msr und mrs
+#define ARM_MRS				0x00100000	// differentiate between msr und mrs
 #define ARM_SWI				0x00200000	// software interrupt
 #define ARM_COPOP			0x00400000	// cp opcode number
 #define ARM_COPINF			0x00800000	// cp information number
 #define ARM_DN				0x01000000	// rn = rd
 #define ARM_DM				0x02000000	// rm = rd
-#define ARM_SIGN			0x04000000	// vorzeichen
-#define ARM_RDEVEN			0x08000000	// rd muss gerade sein
-#define ARM_OPTIMIZE		0x10000000	// optimierung
-#define ARM_OPMOVMVN		0x20000000	// ... von mov/mvn durch umkehrung
-#define ARM_OPANDBIC		0x40000000	// ... von and/bic durch umkehrung
-#define ARM_OPCMPCMN		0x80000000	// ... von cmp/cmn durch umkehrung
-#define ARM_PCR			   0x100000000	// pc relate
+#define ARM_SIGN			0x04000000	// sign
+#define ARM_RDEVEN			0x08000000	// rd has to be even
+#define ARM_OPTIMIZE		0x10000000	// optimization
+#define ARM_OPMOVMVN		0x20000000	// ... of mov/mvn
+#define ARM_OPANDBIC		0x40000000	// ... of and/bic
+#define ARM_OPCMPCMN		0x80000000	// ... of cmp/cmn
+#define ARM_PCR			   0x100000000	// pc relative
 
 typedef struct {
 	char* name;

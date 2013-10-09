@@ -51,8 +51,8 @@ bool z80CheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 	int BufferPos = 0;
 	int l;
 
-	if (z80GetRegister8(Source,l) != -1) return false;	// fehler ende
-	if (z80GetRegister16(Source,l) != -1) return false;	// fehler ende
+	if (z80GetRegister8(Source,l) != -1) return false;
+	if (z80GetRegister16(Source,l) != -1) return false;
 
 	int SourceLen = 0;
 
@@ -87,7 +87,6 @@ bool z80CheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 	if (BufferPos == 0) return false;
 
 	if (ConvertInfixToPostfix(Dest,List) == false) return false;
-//	if (CheckPostfix(List) == false) return false;	// später machen für genauere fehlermeldungen?
 
 	RetLen = SourceLen;
 	return true;
@@ -98,7 +97,7 @@ int z80GetRegister8(char* source, int& RetLen)
 	for (int z = 0; Z80Registers8[z].name != NULL; z++)
 	{
 		int len = Z80Registers8[z].len;
-		if (strncmp(Z80Registers8[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(Z80Registers8[z].name,source,len) == 0)
 		{
 			switch (source[len])
 			{
@@ -118,7 +117,7 @@ bool z80GetRegister8(char* source, int& RetLen, tZ80RegisterInfo& Result)
 	for (int z = 0; Z80Registers8[z].name != NULL; z++)
 	{
 		int len = Z80Registers8[z].len;
-		if (strncmp(Z80Registers8[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(Z80Registers8[z].name,source,len) == 0)
 		{
 			switch (source[len])
 			{
@@ -141,7 +140,7 @@ int z80GetRegister16(char* source, int& RetLen)
 	for (int z = 0; Z80Registers16[z].name != NULL; z++)
 	{
 		int len = Z80Registers16[z].len;
-		if (strncmp(Z80Registers16[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(Z80Registers16[z].name,source,len) == 0)
 		{
 			switch (source[len])
 			{
@@ -161,7 +160,7 @@ bool z80GetRegister16(char* source, int& RetLen, tZ80RegisterInfo& Result)
 	for (int z = 0; Z80Registers16[z].name != NULL; z++)
 	{
 		int len = Z80Registers16[z].len;
-		if (strncmp(Z80Registers16[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(Z80Registers16[z].name,source,len) == 0)
 		{
 			switch (source[len])
 			{

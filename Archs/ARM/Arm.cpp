@@ -233,7 +233,7 @@ bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result)
 	for (int z = 0; ArmRegister[z].name != NULL; z++)
 	{
 		int len = ArmRegister[z].len;
-		if (strncmp(ArmRegister[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(ArmRegister[z].name,source,len) == 0)	// okay so far
 		{
 			switch (source[len])
 			{
@@ -276,7 +276,7 @@ bool ArmCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 	int BufferPos = 0;
 	int l;
 
-	if (ArmGetRegister(Source,l) != -1)	// fehler ende
+	if (ArmGetRegister(Source,l) != -1)	// error, quit
 	{
 		return false;
 	}
@@ -316,7 +316,6 @@ bool ArmCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 	if (strcmp(Dest,"cpsr") == 0 || strcmp(Dest,"spsr") == 0) return false;
 
 	if (ConvertInfixToPostfix(Dest,List) == false) return false;
-//	if (CheckPostfix(List) == false) return false;	// später machen für genauere fehlermeldungen?
 
 	RetLen = SourceLen;
 	return true;
@@ -363,7 +362,7 @@ int ArmGetShiftedImmediate(unsigned int num, int& ShiftAmount)
 	{
 		unsigned int andval = (0xFFFFFF00 >> i) | (0xFFFFFF00 << (32-i));
 
-		if ((num & andval) == 0)	// treffer
+		if ((num & andval) == 0)	// found it
 		{
 			ShiftAmount = i;
 			return (num << i) | (num >> (32 - i));
@@ -377,7 +376,7 @@ bool ArmGetCopNumber(char* source, int& RetLen, tArmRegisterInfo& Result)
 	for (int z = 0; ArmCopNumber[z].name != NULL; z++)
 	{
 		int len = ArmCopNumber[z].len;
-		if (strncmp(ArmCopNumber[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(ArmCopNumber[z].name,source,len) == 0)	// okay so far
 		{
 			switch (source[len])
 			{
@@ -400,7 +399,7 @@ bool ArmGetCopRegister(char* source, int& RetLen, tArmRegisterInfo& Result)
 	for (int z = 0; ArmCopRegister[z].name != NULL; z++)
 	{
 		int len = ArmCopRegister[z].len;
-		if (strncmp(ArmCopRegister[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(ArmCopRegister[z].name,source,len) == 0)	// okay so far
 		{
 			switch (source[len])
 			{

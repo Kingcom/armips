@@ -81,7 +81,7 @@ bool CMipsMacro::Validate()
 		Instructions[i].Validate();
 	}
 
-	if (NewNum != InstructionAmount)	// anzahl geändert
+	if (NewNum != InstructionAmount)	// amount changed
 	{
 		InstructionAmount = NewNum;
 		SpaceNeeded = InstructionAmount*4;

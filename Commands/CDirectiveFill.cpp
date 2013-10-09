@@ -12,7 +12,7 @@ bool CDirectiveFill::Load(ArgumentList &Args)
 {
 	initExpression(SizeExpression,Args[0].text);
 
-	if (Args.size() == 2)	// mit fill byte
+	if (Args.size() == 2)	// includes fill byte
 	{
 		FillByte = true;
 		initExpression(ByteExpression,Args[1].text);

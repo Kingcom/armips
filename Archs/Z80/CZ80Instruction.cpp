@@ -59,7 +59,7 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 				Line += RetLen;
 				SourceEncoding += 2;
 				break;
-			default:	// alles andere
+			default:	// everything else
 				if (*SourceEncoding++ != *Line++) return false;
 				break;
 			}
@@ -67,9 +67,9 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 	}
 
 	while (*Line == ' ' || *Line == '\t') Line++;
-	if (*Line != 0)	return false;	// da ist noch mehr, nicht gut
-
-	// opcode ist ok - jetzt noch alle weiteren flags setzen
+	if (*Line != 0)	return false;	// there's something else, bad
+	
+	// opcode is ok - now set all flags
 	Opcode = SourceOpcode;
 
 	if (Opcode.flags & Z80_IMMEDIATE)
@@ -129,7 +129,7 @@ void CZ80Instruction::Encode()
 
 	if (Opcode.flags & Z80_IMMEDIATE)
 	{
-		if (Opcode.flags & Z80_ADD_IMMEDIATE_TIMES_8)	// letztes byte += immediate*8
+		if (Opcode.flags & Z80_ADD_IMMEDIATE_TIMES_8)	// last byte += immediate*8
 		{
 			WriteBuffer[WritePos-1] += Vars.Immediate*8;
 		} else {

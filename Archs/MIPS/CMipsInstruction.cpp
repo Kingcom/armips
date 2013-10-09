@@ -117,7 +117,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 				Line += RetLen;
 				SourceEncoding += 2;
 				break;
-			default:	// alles andere
+			default:	// everything else
 				if (*SourceEncoding++ != *Line++) return false;
 				break;
 			}
@@ -125,9 +125,9 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 	}
 
 	while (*Line == ' ' || *Line == '\t') Line++;
-	if (*Line != 0)	return false;	// da ist noch mehr, nicht gut
-
-	// opcode ist ok - jetzt noch alle weiteren flags setzen
+	if (*Line != 0)	return false;	// there's something else, bad
+	
+	// opcode is ok - now set all flags
 	Opcode = SourceOpcode;
 
 	if (Immediate == true)
@@ -231,7 +231,7 @@ bool CMipsInstruction::Validate()
 		QueueError(ERROR_WARNING,"opcode not aligned to word boundary");
 	}
 
-	// immediates prüfen
+	// check immediates
 	if (Vars.ImmediateType != MIPS_NOIMMEDIATE)
 	{
 		if (ParsePostfix(Vars.ImmediateExpression,&List,Vars.Immediate) == false)
@@ -302,7 +302,7 @@ bool CMipsInstruction::Validate()
 		}
 	}
 
-	// load delay überprüfen
+	// check load delay
 	if (Mips.GetLoadDelay() && IgnoreLoadDelay == false && !(Opcode.flags & MO_IGNORERTD))
 	{
 		bool fix = false;
@@ -344,10 +344,9 @@ bool CMipsInstruction::Validate()
 
 	Mips.SetDelaySlot(Opcode.flags & MO_DELAY ? true : false);
 
-	// jetzt prüfen ob ein delay mit diesem opcode entsteht
+	// now check if this opcode causes a load delay
 	Mips.SetLoadDelay(Opcode.flags & MO_DELAYRT ? true : false,Vars.rt.Number);
 	
-	// und pos anpassen
 	Global.RamPos += 4;
 	return Result;
 }

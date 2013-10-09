@@ -357,7 +357,7 @@ bool EncodeAssembly()
 	bool Revalidate;
 	Arch->Pass2();
 	int validationPasses = 0;
-	do	// die schleife so lange durchlaufen lassen bis alles konstant ist
+	do	// loop until everything is constant
 	{
 		Global.validationPasses = validationPasses;
 		Global.ErrorQueue.Clear();
@@ -415,7 +415,7 @@ bool EncodeAssembly()
 	printf("Encode...\n");
 #endif
 
-	// und schlieﬂlich enkodieren
+	// and finally encode
 	Global.tempData.start();
 	Global.symData.start();
 	for (size_t i = 0; i < Global.Commands.size(); i++)

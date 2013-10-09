@@ -260,7 +260,7 @@ bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix)
 	{
 		while (Infix[InfixPos] == ' ' || Infix[InfixPos] == '	') InfixPos++;
 		int Opcode = GetOpcode(&Infix[InfixPos],OpcodeLen,LastOpcode);
-		if (Opcode == EXOP_NONE)	// variable oder zahl
+		if (Opcode == EXOP_NONE)	// number/variable
 		{
 			int BufferPos = 0;
 
@@ -277,7 +277,6 @@ bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix)
 
 			if (IsAlphaNum(Infix[InfixPos]) == false)
 			{
-//				printf("Invalid expression\n");
 				return false;
 			}
 
@@ -335,7 +334,7 @@ bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix)
 	while (!OpcodeStack.IsEmpty())
 	{
 		OpcodeStack.Pop(Buffer);
-		if (strcmp(Buffer,"(") == 0) return false;	// offene klammer ohne abschlieﬂende
+		if (strcmp(Buffer,"(") == 0) return false;	// open paranthesis without closing one
 		Postfix.AddEntry(Buffer);
 	}
 	return true;
@@ -350,10 +349,10 @@ bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 	while (index < Postfix.GetCount())
 	{
 		int Opcode = GetOpcodeNum(Postfix.GetEntry(index));
-		if (Opcode == EXOP_NONE)	// zahl/variable
+		if (Opcode == EXOP_NONE)	// number/variable
 		{
 			char* str = Postfix.GetEntry(index++);
-			if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$' )	// zahl
+			if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$' )	// number
 			{
 				if (ConvertToInt(str,Global.Radix,0,num) == false) return false;
 				StackPos++;
@@ -398,7 +397,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 	{
 		switch (Postfix.GetType(num))
 		{
-		case EXCOMM_CONST:	// konstante zahl
+		case EXCOMM_CONST:	// constant
 			Stack.Push(Postfix.GetValue(num++));
 			break;
 		case EXCOMM_VAR:	// label
@@ -433,7 +432,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 
 			switch (Opcode)
 			{
-			case EXOP_SIGNPLUS:		// keine aktion nˆtig
+			case EXOP_SIGNPLUS:
 				break;
 			case EXOP_SIGNMINUS:	// -0
 				Stack.Push(0-arg[0]);
@@ -498,9 +497,9 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			case EXOP_LOGOR:			// a && b
 				Stack.Push(arg[1]||arg[0]);
 				break;
-			case EXOP_TERTIF:			// darf so nicht vorkommen
+			case EXOP_TERTIF:			// must not appear
 				return false;
-			case EXOP_TERTELSE:			// exp ? exp : exp, else muss zuerst kommen!
+			case EXOP_TERTELSE:			// exp ? exp : exp, else comes first!
 				if (Postfix.GetValue(num++) != EXOP_TERTIF) return false;
 				Stack.Push(arg[2]?arg[1]:arg[0]);
 				break;
@@ -541,7 +540,7 @@ bool CExpressionCommandList::Load(CStringList &List)
 		{
 			Entries[i].command = EXCOMM_OP;
 			Entries[i].num = num;
-		} else if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$')	// konstante zahl
+		} else if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$')	// constant
 		{
 			Entries[i].command = EXCOMM_CONST;
 			if (ConvertToInt(str,Global.Radix,0,Entries[i].num) == false)

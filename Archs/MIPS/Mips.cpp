@@ -175,7 +175,6 @@ CMipsArchitecture::CMipsArchitecture()
 
 void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
 {
-	// dann macros/opcodes
 	if (MipsCheckMacro((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
 	{
 		CMipsInstruction* Opcode = new CMipsInstruction();
@@ -199,11 +198,10 @@ void CMipsArchitecture::NextSection()
 
 int CMipsArchitecture::GetWordSize()
 {
-	// keine ahnung ob das alles stimmt...
 	if (Version & MARCH_PSX) return 4;
 	if (Version & MARCH_N64) return 4;
 	if (Version & MARCH_PS2) return 8;
-	if (Version & MARCH_PSP) return 8;
+	if (Version & MARCH_PSP) return 4;
 	return 0;
 }
 
@@ -218,10 +216,10 @@ bool MipsGetRegister(char* source, int& RetLen, tMipsRegisterInfo& Result)
 	for (int z = 0; MipsRegister[z].name != NULL; z++)
 	{
 		int len = MipsRegister[z].len;
-		if (strncmp(MipsRegister[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(MipsRegister[z].name,source,len) == 0)	// okay so far
 		{
 			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
-				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// eins hiervon MUSS nach nem register kommen
+				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
 			{
 				memcpy(Result.Name,source,len);
 				Result.Name[len] = 0;
@@ -239,10 +237,10 @@ int MipsGetRegister(char* source, int& RetLen)
 	for (int z = 0; MipsRegister[z].name != NULL; z++)
 	{
 		int len = MipsRegister[z].len;
-		if (strncmp(MipsRegister[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(MipsRegister[z].name,source,len) == 0)	// okay so far
 		{
 			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
-				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// eins hiervon MUSS nach nem register kommen
+				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
 			{
 				RetLen = len;
 				return MipsRegister[z].num;
@@ -258,10 +256,10 @@ bool MipsGetFloatRegister(char* source, int& RetLen, tMipsRegisterInfo& Result)
 	for (int z = 0; MipsFloatRegister[z].name != NULL; z++)
 	{
 		int len = MipsFloatRegister[z].len;
-		if (strncmp(MipsFloatRegister[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(MipsFloatRegister[z].name,source,len) == 0)	// okay so far
 		{
 			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
-				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// eins hiervon MUSS nach nem register kommen
+				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
 			{
 				memcpy(Result.Name,source,len);
 				Result.Name[len] = 0;
@@ -279,10 +277,10 @@ int MipsGetFloatRegister(char* source, int& RetLen)
 	for (int z = 0; MipsFloatRegister[z].name != NULL; z++)
 	{
 		int len = MipsFloatRegister[z].len;
-		if (strncmp(MipsFloatRegister[z].name,source,len) == 0)	// erstmal in ordnung
+		if (strncmp(MipsFloatRegister[z].name,source,len) == 0)	// okay so far
 		{
 			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
-				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// eins hiervon MUSS nach nem register kommen
+				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
 			{
 				RetLen = len;
 				return MipsFloatRegister[z].num;
@@ -299,7 +297,7 @@ bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List
 	int BufferPos = 0;
 	int l;
 
-	if (MipsGetRegister(Source,l) != -1)	// fehler ende
+	if (MipsGetRegister(Source,l) != -1)	// error
 	{
 		return false;
 	}
@@ -330,9 +328,9 @@ bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List
 		}
 
 
-		if (*Source == '(')	// könnte auch durch ne klammer kommen
+		if (*Source == '(')	// could be part of the opcode
 		{
-			if (MipsGetRegister(Source+1,l) != -1)	// ende
+			if (MipsGetRegister(Source+1,l) != -1)	// end
 			{
 				Dest[BufferPos] = 0;
 				break;
@@ -344,7 +342,6 @@ bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List
 
 	if (BufferPos == 0) return false;
 	if (ConvertInfixToPostfix(Dest,List) == false) return false;
-//	if (CheckPostfix(List) == false) return false;	// später machen für genauere fehlermeldungen?
 
 	RetLen = SourceLen;
 	return true;

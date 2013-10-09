@@ -4,8 +4,6 @@
 #include "Core/MathParser.h"
 #include "Util/FileClasses.h"
 
-// TODO: GUCKEN OB ALLES AUCH FUNKTIONIERT
-
 typedef void (CDirectiveFile::*fileinitfunc)(ArgumentList&);
 typedef bool (CDirectiveFile::*filevalidatefunc)();
 typedef void (CDirectiveFile::*fileencodefunc)();

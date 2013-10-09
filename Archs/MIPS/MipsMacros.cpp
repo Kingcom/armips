@@ -6,8 +6,6 @@
 #include "MipsOpcodes.h"
 #include "CMipsMacro.h"
 
-// error messages queue bei pass 2 - immer füllen und bei revalidate leeren
-
 void MipsMacroLoadOpcode(CMipsInstruction& Opcode, char* name, char* argformat, ...)
 {
 	char str[1024];
@@ -24,13 +22,13 @@ int MipsMacroLi(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes)
 {
 	int OpcodeCount = 0;
 
-	if ((unsigned)Values.i2 > 0xFFFF)	// passt eventuell nicht in eine anweisung
+	if ((unsigned)Values.i2 > 0xFFFF)	// may not fit into one opcode
 	{
-		if ((Values.i2 & 0xFFFF8000) == 0xFFFF8000)	// nur ein addiu
+		if ((Values.i2 & 0xFFFF8000) == 0xFFFF8000)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,r0,0x%04X",
 				Values.rs.Name,Values.i2 & 0xFFFF);
-		} else if ((Values.i2 & 0xFFFF) == 0) // nur ein lui
+		} else if ((Values.i2 & 0xFFFF) == 0)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
 				Values.rs.Name,Values.i2 >> 16);
@@ -41,7 +39,7 @@ int MipsMacroLi(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes)
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,%s,0x%04X",
 				Values.rs.Name,Values.rs.Name,Values.i2 & 0xFFFF);
 		}
-	} else { // passt auf jeden fall in eine anweisung
+	} else { // definitely fits into one opcode
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"ori","%s,r0,0x%04X",Values.rs.Name,Values.i2);
 	}
 
@@ -157,7 +155,7 @@ int MipsMacroBranch(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 	bool LoadedImmediate = false;
 
 	if (((Flags & MIPSM_IMM) && (unsigned) Values.i1 > 0xFFFF) ||
-		(Flags & MIPSM_NE) || (Flags & MIPSM_EQ)) // muss in r1 geladen werden
+		(Flags & MIPSM_NE) || (Flags & MIPSM_EQ)) // has to be loaded into r1
 	{
 		strcpy(NewValues.rs.Name,"r1");
 		NewValues.i2 = Values.i1;
@@ -342,7 +340,7 @@ bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 	}
 	
 	while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
-	if (*Arguments != 0)	return false;	// da ist noch mehr, nicht gut
+	if (*Arguments != 0)	return false;	// there's something else, bad
 
 	if (Vars.i[0] == true)
 	{
@@ -388,8 +386,6 @@ bool MipsCheckMacro(char* Opcode, char* Arguments)
 
 	if (ParamFail == true)
 	{
-//		if (Vars.NoCheckError == false) PrintError(ERROR_ERROR,"Parameter failure");
-//		return true;
 		return false;
 	}
 	return false;

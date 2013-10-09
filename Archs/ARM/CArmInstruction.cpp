@@ -140,15 +140,15 @@ bool CArmInstruction::ParseShift(char*& Line, int mode)
 	int RetLen;
 
 	Vars.Shift.UseShift = false;
-	if (*Line != ',') return true;	// ein shift muss mit komma eingeleitet werden
+	if (*Line != ',') return true;	// a shift has to start with a comma
 	while (Line[1] == ' ' || Line[1] == '\t') Line++;
-	if ((Vars.Shift.Type = ArmGetShiftMode(&Line[1])) == 0xFF) return false;	// muss richtiger shift sein
+	if ((Vars.Shift.Type = ArmGetShiftMode(&Line[1])) == 0xFF) return false;
 	Line += 4;
 	while (*Line == ' ' || *Line == '\t') Line++;
 
 	if (ArmGetRegister(Line,RetLen,Vars.Shift.reg) == true)	// shift by register
 	{
-		if (mode == '1') return false;	// mode 1 kann nur immediate
+		if (mode == '1') return false;	// mode 1 can only be an immediate
 		Vars.Shift.ShiftByRegister = true;
 	} else {	// shift by immediate
 		if (*Line == '#') Line++;
@@ -221,7 +221,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 			switch (*SourceEncoding)
 			{
 			case 'd': case 's': case 'n': case 'm':
-			case 'D': case 'N': case 'M':	// alles registers
+			case 'D': case 'N': case 'M':	// all of them are registers
 				for (int i = 0; ; i++)
 				{
 					if (RegisterLookup[i].Character == *SourceEncoding)
@@ -282,20 +282,20 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				}
 				SourceEncoding++;
 				break;
-			case 'P':	// msr/mrs psr daten
-				if (strncmp(Line,"cpsr",4) == 0)	// ist cpsr
+			case 'P':	// msr/mrs psr data
+				if (strncmp(Line,"cpsr",4) == 0)	// is cpsr
 				{
 					Vars.PsrData.spsr = false;
 					Line += 4;
-				} else if (strncmp(Line,"spsr",4) == 0)	// ist spsr
+				} else if (strncmp(Line,"spsr",4) == 0)	// is spsr
 				{
 					Vars.PsrData.spsr = true;
 					Line += 4;
-				} else return false;		// ansonsten trifft das hier nicht zu
+				} else return false;		// otherwise it's neither
 
 				if (SourceEncoding[1] != '1')
 				{
-					if (*Line != '_')		// kein unterstrich = kurzversion
+					if (*Line != '_')		// no underscore = short version
 					{
 						Vars.PsrData.field = 0xF;
 					} else {
@@ -315,21 +315,21 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 								if (*Line == ',') break;
 								if (*Line == 'f')
 								{
-									if (Vars.PsrData.field & 8) return false;	// darf nur einmal
+									if (Vars.PsrData.field & 8) return false;	// can only appear once
 									Vars.PsrData.field |= 8;
 								} else if (*Line == 's')
 								{
-									if (Vars.PsrData.field & 4) return false;	// darf nur einmal
+									if (Vars.PsrData.field & 4) return false;	// can only appear once
 									Vars.PsrData.field |= 4;
 								} else if (*Line == 'x')
 								{
-									if (Vars.PsrData.field & 2) return false;	// darf nur einmal
+									if (Vars.PsrData.field & 2) return false;	// can only appear once
 									Vars.PsrData.field |= 2;
 								} else if (*Line == 'c')
 								{
-									if (Vars.PsrData.field & 1) return false;	// darf nur einmal
+									if (Vars.PsrData.field & 1) return false;	// can only appear once
 									Vars.PsrData.field |= 1;
-								} else return false;	// eins der 5 muss es sein
+								} else return false;	// has to be one of those
 								Line++;
 							}
 						}
@@ -411,7 +411,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				Line += RetLen;
 				SourceEncoding++;
 				break;
-			case 'z':	// shift für pseudo opcodes
+			case 'z':	// shift for pseudo opcodes
 				Vars.Shift.Type = SourceEncoding[1];
 				if (ArmGetRegister(Line,RetLen,Vars.Shift.reg) == true)	// shift by register
 				{
@@ -431,7 +431,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				Vars.Shift.UseShift = true;
 				SourceEncoding += 2;
 				break;
-			case 'v':	// vorzeichen für register index parameter
+			case 'v':	// sign for register index parameter
 				if (*Line == '-')
 				{
 					Vars.SignPlus = false;
@@ -445,7 +445,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				}
 				SourceEncoding++;
 				break;
-			default:	// alles andere
+			default:	// everything else
 				if (*SourceEncoding++ != *Line++) return false;
 				break;
 			}
@@ -453,9 +453,9 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 	}
 
 	while (*Line == ' ' || *Line == '\t') Line++;
-	if (*Line != 0)	return false;	// da ist noch mehr, nicht gut
+	if (*Line != 0)	return false;	// there's something left, bad
 
-	// opcode ist ok - jetzt noch alle weiteren flags setzen
+	// opcode is fine - now set all flags
 	Opcode = SourceOpcode;
 
 	if (Opcode.flags & ARM_IMMEDIATE)
@@ -673,7 +673,7 @@ bool CArmInstruction::Validate()
 
 			if ((temp = ArmGetShiftedImmediate(Vars.Immediate,Vars.Shift.ShiftAmount)) != -1)
 			{
-				// ldr= als mov interpretieren
+				// interpete ldr= as mov
 				Vars.Opcode.NewEncoding = 0x03A00000;
 				Vars.Opcode.UseNewEncoding = true;
 				Vars.Opcode.NewType = ARM_TYPE5;
@@ -681,7 +681,7 @@ bool CArmInstruction::Validate()
 				Vars.Immediate = temp;
 			} else if ((temp = ArmGetShiftedImmediate(~Vars.Immediate,Vars.Shift.ShiftAmount)) != -1) 
 			{
-				// ldr= als mvn interpretieren
+				// interprete ldr= as mvn
 				Vars.Opcode.NewEncoding = 0x03E00000;
 				Vars.Opcode.UseNewEncoding = true;
 				Vars.Opcode.NewType = ARM_TYPE5;
@@ -731,7 +731,7 @@ bool CArmInstruction::Validate()
 				QueueError(ERROR_ERROR,"Load target %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
-		} else if (Opcode.flags & ARM_SWI)	// ist ein swi, also evtl schiben
+		} else if (Opcode.flags & ARM_SWI)	// it's an interrupt, may need to shift it
 		{
 			if (Vars.Immediate < 0xFF)
 			{
@@ -924,7 +924,6 @@ void CArmInstruction::WriteInstruction(unsigned int encoding)
 }
 void CArmInstruction::Encode()
 {
-	// wenn wahr dann neues encoding, ansonsten das im opcode
 	unsigned int encoding = Vars.Opcode.UseNewEncoding == true ? Vars.Opcode.NewEncoding : Opcode.encoding;
 
 	if ((Opcode.flags & ARM_UNCOND) == 0) encoding |= Vars.Opcode.c << 28;
