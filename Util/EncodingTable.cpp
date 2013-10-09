@@ -43,12 +43,12 @@ int parseHexString(std::wstring& hex, unsigned char* dest)
 	return hex.size()/2;
 }
 
-bool EncodingTable::load(const std::wstring& fileName)
+bool EncodingTable::load(const std::wstring& fileName, bool sjis)
 {
 	unsigned char hexBuffer[MAXHEXLENGTH];
 
 	TextFile input;
-	if (input.open(fileName,TextFile::Read) == false)
+	if (input.open(fileName,TextFile::Read,sjis == true ? TextFile::SJIS : TextFile::UTF8) == false)
 		return false;
 
 	hexData.clear();

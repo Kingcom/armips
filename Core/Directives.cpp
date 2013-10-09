@@ -106,7 +106,12 @@ bool DirectiveLoadTable(ArgumentList& List, int flags)
 		PrintError(ERROR_ERROR,"Table file \"%ls\" does not exist",fileName.c_str());
 		return false;
 	}
-	if (Global.Table.load(fileName) == false)
+
+	bool sjis = false;
+	if (List.size() == 2 && List[1].text == L"sjis")
+		sjis = true;
+
+	if (Global.Table.load(fileName,sjis) == false)
 	{
 		PrintError(ERROR_ERROR,"Invalid table file \"%ls\"",fileName.c_str());
 		return false;
@@ -129,6 +134,12 @@ bool DirectiveString(ArgumentList& List, int flags)
 		if (List[i].isString)
 		{
 			ByteArray data = Global.Table.encodeString(List[i].text,false);
+
+			if (data.size() == 0 && List[i].text.size() != 0)
+			{
+				PrintError(ERROR_ERROR,"Failed to encode string");
+				return false;
+			}
 
 			for (int i = 0; i < data.size(); i++)
 			{
@@ -597,8 +608,8 @@ const tDirective Directives[] = {
 
 	{ ".include",	1,	1,	&DirectiveInclude,	0 },
 	{ ".radix",		1,	1,	&DirectiveRadix,	0 },
-	{ ".loadtable",	1,	1,	&DirectiveLoadTable,0 },
-	{ ".table",		1,	1,	&DirectiveLoadTable,0 },
+	{ ".loadtable",	1,	2,	&DirectiveLoadTable,0 },
+	{ ".table",		1,	2,	&DirectiveLoadTable,0 },
 	{ ".string",	1,	64,	&DirectiveString,	0 },
 	{ ".str",		1,	64,	&DirectiveString,	0 },
 	{ ".stringn",	1,	64,	&DirectiveString,	DIRECTIVE_NOTERMINATION },

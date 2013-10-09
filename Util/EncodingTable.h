@@ -6,7 +6,7 @@ class EncodingTable
 public:
 	EncodingTable();
 	~EncodingTable();
-	bool load(const std::wstring& fileName);
+	bool load(const std::wstring& fileName, bool sjis);
 	bool isLoaded() { return entries.size() != 0; };
 	void addEntry(unsigned char* hex, int hexLength, std::wstring& value);
 	void setTerminationEntry(unsigned char* hex, int hexLength);
