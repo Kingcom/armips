@@ -545,7 +545,7 @@ bool CExpressionCommandList::Load(CStringList &List)
 			Entries[i].command = EXCOMM_CONST;
 			if (ConvertToInt(str,Global.Radix,0,Entries[i].num) == false)
 			{
-				PrintError(ERROR_ERROR,"Invalid number \"%s\"",str);
+				Logger::printError(Logger::Error,L"Invalid number \"%S\"",str);
 				return false;
 			}
 		} else if (str[0] == '\'' && str[2] == '\'' && str[3] == 0)	// ascii
@@ -560,7 +560,7 @@ bool CExpressionCommandList::Load(CStringList &List)
 			Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(str),Global.FileInfo.FileNum,Global.Section);
 			if (label == NULL)
 			{
-				PrintError(ERROR_ERROR,"Invalid label name \"%s\"",str);
+				Logger::printError(Logger::Error,L"Invalid label name \"%S\"",str);
 				return false;
 			}
 
@@ -594,18 +594,18 @@ bool initExpression(CExpressionCommandList& dest, const std::wstring& source, bo
 	if (ConvertInfixToPostfix(src,List) == false)
 	{
 		if (queue)
-			QueueError(ERROR_ERROR,"Invalid expression \"%\"",src);
+			Logger::queueError(Logger::Error,L"Invalid expression \"%S\"",src);
 		else
-			PrintError(ERROR_ERROR,"Invalid expression \"%\"",src);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",src);
 		return false;
 	}
 	
 	if (CheckPostfix(List,true) == false)
 	{
 		if (queue)
-			QueueError(ERROR_ERROR,"Invalid expression \"%\"",src);
+			Logger::queueError(Logger::Error,L"Invalid expression \"%S\"",src);
 		else
-			PrintError(ERROR_ERROR,"Invalid expression \"%\"",src);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",src);
 		return false;
 	}
 	
@@ -620,16 +620,16 @@ bool evalExpression(CExpressionCommandList& exp, int& dest, bool queue)
 		if (List.GetCount() == 0)
 		{
 			if (queue)
-				QueueError(ERROR_ERROR,"Invalid expression");
+				Logger::queueError(Logger::Error,L"Invalid expression");
 			else
-				PrintError(ERROR_ERROR,"Invalid expression");
+				Logger::printError(Logger::Error,L"Invalid expression");
 		} else {
 			for (int l = 0; l < List.GetCount(); l++)
 			{
 				if (queue)
-					QueueError(ERROR_ERROR,List.GetEntry(l));
+					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 				else
-					PrintError(ERROR_ERROR,List.GetEntry(l));
+					Logger::printError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 			}
 		}
 		return false;

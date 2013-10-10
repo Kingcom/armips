@@ -9,7 +9,6 @@
 int wmain(int argc, wchar_t* argv[])
 {
 	Global.Radix = 10;
-	Global.Error = false;
 	Global.FileOpened = false;
 	Global.HeaderSize = 0;
 	Global.Quit = false;
@@ -26,18 +25,18 @@ int wmain(int argc, wchar_t* argv[])
 	Global.validationPasses = 0;
 	Arch = &InvalidArchitecture;
 
-	printf("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom\n");
+	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
 	StringList arguments = getStringListFromArray(argv,argc);
 
 	if (arguments.size() < 2)
 	{
-		printf("Usage: armips.exe file.asm [-temp temp.txt] [-sym symfile.sym]\n");
+		Logger::printLine("Usage: armips.exe file.asm [-temp temp.txt] [-sym symfile.sym]");
 		return 1;
 	}
 
 	if (fileExists(arguments[1]) == false)
 	{
-		printf("File %s not found\n",argv[1]);
+		Logger::printLine("File %ls not found\n",arguments[1].c_str());
 		return 1;
 	}
 
@@ -57,22 +56,22 @@ int wmain(int argc, wchar_t* argv[])
 			Global.warningAsError = true;
 			argpos += 1;
 		} else {
-			printf("Invalid parameter %ls\n",arguments[argpos].c_str());
+			Logger::printLine("Invalid parameter %ls\n",arguments[argpos].c_str());
 			return 1;
 		}
 	}
 
 	LoadAssemblyFile(arguments[1]);
-	if (Global.Error == true)
+	if (Logger::hasError())
 	{
-		printf("Aborting.\n");
+		Logger::printLine("Aborting.");
 		return 1;
 	}
 	if (EncodeAssembly() == true)
 	{
-		printf("Done.\n");
+		Logger::printLine("Done.");
 	} else {
-		printf("Aborting.\n");
+		Logger::printLine("Aborting.");
 		return 1;
 	}
 	return 0;

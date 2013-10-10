@@ -69,7 +69,7 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 				}
 				if (Buffer[InputPos] == '\n' || Buffer[InputPos] == 0)
 				{
-					PrintError(ERROR_ERROR,"Unexpected end of line in string constant");
+					Logger::printError(Logger::Error,L"Unexpected end of line in string constant");
 					return false;
 				}
 				dest += Buffer[InputPos++];
@@ -83,7 +83,7 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 				dest += Buffer[InputPos++];
 				dest += Buffer[InputPos++];
 			} else {
-				PrintError(ERROR_ERROR,"Invalid character constant");
+				Logger::printError(Logger::Error,L"Invalid character constant");
 				return false;
 			}
 			break;
@@ -107,13 +107,13 @@ bool CheckEquLabel(std::wstring& str)
 
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid equation name %s",str);
+			Logger::printError(Logger::Error,L"Invalid equation name %s",str.c_str());
 			return true;
 		}
 
 		if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 		{
-			PrintError(ERROR_ERROR,"Equation name %s already defined",str);
+			Logger::printError(Logger::Error,L"Equation name %s already defined",str.c_str());
 			return true;
 		}
 		
@@ -186,8 +186,8 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 
 	if (Arguments.size() != Macro->getArgumentCount())
 	{
-		PrintError(ERROR_ERROR,"%s macro arguments (%d vs %d)",
-			Arguments.size() > Macro->getArgumentCount() ? "Too many" : "Not enough",
+		Logger::printError(Logger::Error,L"%s macro arguments (%d vs %d)",
+			Arguments.size() > Macro->getArgumentCount() ? L"Too many" : L"Not enough",
 			Arguments.size(),Macro->getArgumentCount());
 		return;
 	}
@@ -195,7 +195,7 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 	Global.MacroNestingLevel++;
 	if (Global.MacroNestingLevel == ASSEMBLER_MACRO_NESTING_LEVEL)
 	{
-		PrintError(ERROR_ERROR,"Maximum macro nesting level reached");
+		Logger::printError(Logger::Error,L"Maximum macro nesting level reached");
 		return;
 	}
 
@@ -266,7 +266,7 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 	{
 		if (Input.atEnd())
 		{
-			PrintError(ERROR_ERROR,"Unexpected end of line in macro definition");
+			Logger::printError(Logger::Error,L"Unexpected end of line in macro definition");
 			return;
 		}
 		Global.FileInfo.LineNumber++;
@@ -281,7 +281,7 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 	{
 		if (Macro->getName().compare(Global.Macros[i]->getName()) == 0)
 		{
-			PrintError(ERROR_ERROR,"Macro \"%ls\" already defined",Macro->getName().c_str());
+			Logger::printError(Logger::Error,L"Macro \"%s\" already defined",Macro->getName().c_str());
 			delete Macro;
 			return;
 		}
@@ -301,14 +301,14 @@ void LoadAssemblyFile(std::wstring& fileName)
 
 	if (Global.IncludeNestingLevel == ASSEMBLER_INCLUDE_NESTING_LEVEL)
 	{
-		PrintError(ERROR_ERROR,"Maximum include nesting level reached");
+		Logger::printError(Logger::Error,L"Maximum include nesting level reached");
 		return;
 	}
 
 	TextFile input;
 	if (input.open(fileName,TextFile::Read) == false)
 	{
-		PrintError(ERROR_ERROR,"Could not open file");
+		Logger::printError(Logger::Error,L"Could not open file");
 		return;
 	}
 
@@ -348,12 +348,12 @@ bool EncodeAssembly()
 	do	// loop until everything is constant
 	{
 		Global.validationPasses = validationPasses;
-		Global.ErrorQueue.Clear();
+		Logger::clearQueue();
 		Revalidate = false;
 
 		if (validationPasses >= 100)
 		{
-			QueueError(ERROR_ERROR,"Stuck in infinite validation loop");
+			Logger::queueError(Logger::Error,L"Stuck in infinite validation loop");
 			break;
 		}
 
@@ -379,13 +379,12 @@ bool EncodeAssembly()
 				Revalidate = true;
 		}
 		if (Global.conditionData.activeConditions() != 0)
-			QueueError(ERROR_ERROR,"One or more if statements not terminated");
+			Logger::queueError(Logger::Error,L"One or more if statements not terminated");
 		validationPasses++;
 	} while (Revalidate == true);
 
-	Global.ErrorQueue.Output();
-
-	if (Global.Error == true)
+	Logger::printQueue();
+	if (Logger::hasError() == true)
 	{
 		return false;
 	}
@@ -417,7 +416,7 @@ bool EncodeAssembly()
 
 	if (Global.Output.isOpen() == true)
 	{
-		PrintError(ERROR_WARNING,"File not closed");
+		Logger::printError(Logger::Warning,L"File not closed");
 		Global.Output.close();
 	}
 

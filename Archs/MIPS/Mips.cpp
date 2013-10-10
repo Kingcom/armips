@@ -41,7 +41,7 @@ bool CMipsDelayManager::CheckGprDelay(tMipsOpcodeVariables& Vars, int flags)
 	else if ((flags & O_RST) && Vars.rs.Number == Gpr.number) Reg = &Vars.rs;
 
 	if (Reg == NULL) return false;
-	QueueError(ERROR_WARNING,"register %s may not be available due to load delay",Reg->Name);
+	Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Reg->Name);
 	return true;
 }
 
@@ -56,7 +56,7 @@ bool CMipsDelayManager::CheckFprDelay(tMipsOpcodeVariables& Vars, int flags)
 	else if ((flags & MO_FRST) && Vars.rs.Number == Fpr.number) Reg = &Vars.rs;
 
 	if (Reg == NULL) return false;
-	QueueError(ERROR_WARNING,"register %s may not be available due to load delay",Reg->Name);
+	Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Reg->Name);
 	return true;
 }
 

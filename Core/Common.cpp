@@ -53,13 +53,13 @@ bool addAssemblerLabel(const std::wstring& labelName)
 {
 	if (checkValidLabelName(labelName) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",labelName.c_str());
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",labelName.c_str());
 		return false;
 	}
 
 	if (checkLabelDefined(labelName) == true)
 	{
-		PrintError(ERROR_ERROR,"Label \"%ls\" already defined",labelName.c_str());
+		Logger::printError(Logger::Error,L"Label \"%s\" already defined",labelName.c_str());
 		return false;
 	}
 
@@ -71,48 +71,6 @@ bool addAssemblerLabel(const std::wstring& labelName)
 void AddAssemblerCommand(CAssemblerCommand* Command)
 {
 	Global.Commands.push_back(Command);
-}
-
-void QueueError(eErrorLevel level, char* format, ...)
-{
-	char str[1024];
-	va_list args;
-
-	va_start(args,format);
-	vsprintf(str,format,args);
-	va_end (args);
-
-	Global.ErrorQueue.AddEntry(level,str);
-}
-
-void PrintError(eErrorLevel level, char* format, ...)
-{
-	char str[1024];
-	va_list args;
-
-	va_start(args,format);
-	vsprintf(str,format,args);
-	va_end (args);
-
-	char* FileName = Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum);
-
-	switch (level)
-	{
-	case ERROR_WARNING:
-		printf("%s(%d) warning: %s\n",FileName,Global.FileInfo.LineNumber,str);
-		if (Global.warningAsError == true) Global.Error = true;
-		break;
-	case ERROR_ERROR:
-		printf("%s(%d) error: %s\n",FileName,Global.FileInfo.LineNumber,str);
-		Global.Error = true;
-		break;
-	case ERROR_FATALERROR:
-		printf("%s(%d) fatal error: %s\n",FileName,Global.FileInfo.LineNumber,str);
-		exit(2);
-	case ERROR_NOTICE:
-		printf("%s(%d) notice: %s\n",FileName,Global.FileInfo.LineNumber,str);
-		break;
-	}
 }
 
 bool isPowerOfTwo(int n)

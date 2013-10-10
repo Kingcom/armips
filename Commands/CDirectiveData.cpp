@@ -30,7 +30,7 @@ CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
 		ascii = asc;
 		break;
 	default:
-		PrintError(ERROR_ERROR,"Invalid data unit size %d",SizePerUnit);
+		Logger::printError(Logger::Error,L"Invalid data unit size %d",SizePerUnit);
 		return;
 	}
 

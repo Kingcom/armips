@@ -8,13 +8,13 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Secti
 	label = Global.symbolTable.getLabel(name,FileNum,Section);
 	if (label == NULL)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",name.c_str());
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name.c_str());
 		return;
 	}
 
 	if (label->isDefined())
 	{
-		PrintError(ERROR_ERROR,"Label \"%ls\" already defined",name.c_str());
+		Logger::printError(Logger::Error,L"Label \"%s\" already defined",name.c_str());
 		return;
 	}
 
@@ -39,7 +39,7 @@ bool CAssemblerLabel::Validate()
 
 void CAssemblerLabel::writeTempData(TempData& tempData)
 {
-	tempData.writeLine(label->getValue(),formatString(L"%ls:",label->getName().c_str()));
+	tempData.writeLine(label->getValue(),formatString(L"%s:",label->getName().c_str()));
 }
 
 void CAssemblerLabel::writeSymData(SymbolData& symData)

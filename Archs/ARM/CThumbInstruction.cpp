@@ -33,9 +33,9 @@ bool CThumbInstruction::Load(char *Name, char *Params)
 	{
 		if (paramfail == true)
 		{
-			PrintError(ERROR_ERROR,"THUMB parameter failure \"%s\"",Params);
+			Logger::printError(Logger::Error,L"THUMB parameter failure \"%S\"",Params);
 		} else {
-			PrintError(ERROR_ERROR,"Invalid THUMB opcode \"%s\"",Name);
+			Logger::printError(Logger::Error,L"Invalid THUMB opcode \"%S\"",Name);
 		}
 	}
 	return false;
@@ -172,7 +172,7 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 	{
 		if (CheckPostfix(List,true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",ImmediateBuffer);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 			NoCheckError = true;
 			return false;
 		}
@@ -191,7 +191,7 @@ bool CThumbInstruction::Validate()
 
 	if (RamPos & 1)
 	{
-		QueueError(ERROR_WARNING,"Opcode not halfword aligned");
+		Logger::queueError(Logger::Warning,L"Opcode not halfword aligned");
 	}
 
 	if (Opcode.flags & THUMB_DS)
@@ -205,11 +205,11 @@ bool CThumbInstruction::Validate()
 		{
 			if (List.GetCount() == 0)
 			{
-				QueueError(ERROR_ERROR,"Invalid expression");
+				Logger::queueError(Logger::Error,L"Invalid expression");
 			} else {
 				for (int l = 0; l < List.GetCount(); l++)
 				{
-					QueueError(ERROR_ERROR,List.GetEntry(l));
+					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 				}
 			}
 			return false;
@@ -222,13 +222,13 @@ bool CThumbInstruction::Validate()
 			{
 				if (Vars.Immediate & 3)
 				{
-					QueueError(ERROR_ERROR,"Branch target must be word aligned");
+					Logger::queueError(Logger::Error,L"Branch target must be word aligned");
 					return false;
 				}
 			} else {
 				if (Vars.Immediate & 1)
 				{
-					QueueError(ERROR_ERROR,"Branch target must be halfword aligned");
+					Logger::queueError(Logger::Error,L"Branch target must be halfword aligned");
 					return false;
 				}
 			}
@@ -237,7 +237,7 @@ bool CThumbInstruction::Validate()
 			
 			if (num >= (1 << Vars.ImmediateBitLen) || num < (0-(1 << Vars.ImmediateBitLen)))
 			{
-				QueueError(ERROR_ERROR,"Branch target %08X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.Immediate);
 				return false;
 			}
 
@@ -250,7 +250,7 @@ bool CThumbInstruction::Validate()
 		{
 			if (Vars.Immediate & 3)	// not allowed
 			{
-				QueueError(ERROR_ERROR,"Immediate value must be a multiple of 4");
+				Logger::queueError(Logger::Error,L"Immediate value must be a multiple of 4");
 				return false;
 			}
 			Vars.Immediate >>= 2;
@@ -258,7 +258,7 @@ bool CThumbInstruction::Validate()
 		{
 			if (Vars.Immediate & 1)	// not allowed
 			{
-				QueueError(ERROR_ERROR,"Immediate value must be a multiple of 2");
+				Logger::queueError(Logger::Error,L"Immediate value must be a multiple of 2");
 				return false;
 			}
 			Vars.Immediate >>= 1;
@@ -267,13 +267,13 @@ bool CThumbInstruction::Validate()
 			int pos;
 			if ((pos = Arm.AddToCurrentPool(Vars.Immediate)) == -1)
 			{
-				QueueError(ERROR_ERROR,"Unable to find literal pool");
+				Logger::queueError(Logger::Error,L"Unable to find literal pool");
 				return false;
 			}
 			pos = pos-((Global.RamPos+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
-				QueueError(ERROR_ERROR,"Literal pool out of range");
+				Logger::queueError(Logger::Error,L"Literal pool out of range");
 				return false;
 			}
 			Vars.Immediate = pos >> 2;
@@ -281,7 +281,7 @@ bool CThumbInstruction::Validate()
 		{
 			if (Vars.Immediate & 3)
 			{
-				QueueError(ERROR_ERROR,"PC relative address must be word aligned");
+				Logger::queueError(Logger::Error,L"PC relative address must be word aligned");
 				Global.RamPos += OpcodeSize;
 				return false;
 			}
@@ -289,7 +289,7 @@ bool CThumbInstruction::Validate()
 			int pos = Vars.Immediate-((Global.RamPos+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
-				QueueError(ERROR_ERROR,"PC relative address out of range");
+				Logger::queueError(Logger::Error,L"PC relative address out of range");
 				return false;
 			}
 			Vars.Immediate = pos >> 2;
@@ -299,7 +299,7 @@ bool CThumbInstruction::Validate()
 		{
 			if (Vars.Immediate >= (1 << Vars.ImmediateBitLen))
 			{
-				QueueError(ERROR_ERROR,"Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
 				return false;
 			}
 			Vars.Immediate &= (1 << Vars.ImmediateBitLen)-1;
@@ -314,7 +314,7 @@ void CThumbInstruction::WriteInstruction(unsigned short encoding)
 {
 	if (Global.Output.write(&encoding,2) == -1)
 	{
-		PrintError(ERROR_ERROR,"No file opened");
+		Logger::printError(Logger::Error,L"No file opened");
 	}
 }
 

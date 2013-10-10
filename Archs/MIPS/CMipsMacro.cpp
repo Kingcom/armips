@@ -46,11 +46,11 @@ bool CMipsMacro::Validate()
 	{
 		if (List.GetCount() == 0)
 		{
-			QueueError(ERROR_ERROR,"Invalid expression");
+			Logger::queueError(Logger::Error,L"Invalid expression");
 		} else {
 			for (int l = 0; l < List.GetCount(); l++)
 			{
-				QueueError(ERROR_ERROR,List.GetEntry(l));
+				Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 			}
 		}
 		return false;
@@ -59,11 +59,11 @@ bool CMipsMacro::Validate()
 	{
 		if (List.GetCount() == 0)
 		{
-			QueueError(ERROR_ERROR,"Invalid expression");
+			Logger::queueError(Logger::Error,L"Invalid expression");
 		} else {
 			for (int l = 0; l < List.GetCount(); l++)
 			{
-				QueueError(ERROR_ERROR,List.GetEntry(l));
+				Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 			}
 		}
 		return false;
@@ -73,7 +73,7 @@ bool CMipsMacro::Validate()
 
 	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && NewNum > 1)
 	{
-		QueueError(ERROR_WARNING,"Macro with multiple opcodes used inside a delay slot");
+		Logger::queueError(Logger::Warning,L"Macro with multiple opcodes used inside a delay slot");
 	}
 
 	for (int i = 0; i < NewNum; i++)

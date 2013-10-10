@@ -156,7 +156,7 @@ bool CArmInstruction::ParseShift(char*& Line, int mode)
 		Vars.Shift.ShiftByRegister = false;
 		if (CheckPostfix(List,true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid shift expression \"%s\"",ImmediateBuffer);
+			Logger::printError(Logger::Error,L"Invalid shift expression \"%S\"",ImmediateBuffer);
 			NoCheckError = true;
 			return false;
 		}
@@ -389,7 +389,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
 				if (CheckPostfix(List,true) == false)
 				{
-					PrintError(ERROR_ERROR,"Invalid expression \"%s\"",ImmediateBuffer);
+					Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 					NoCheckError = true;
 					return false;
 				}
@@ -402,7 +402,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
 				if (CheckPostfix(List,true) == false)
 				{
-					PrintError(ERROR_ERROR,"Invalid expression \"%s\"",ImmediateBuffer);
+					Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 					NoCheckError = true;
 					return false;
 				}
@@ -421,7 +421,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 					Vars.Shift.ShiftByRegister = false;
 					if (CheckPostfix(List,true) == false)
 					{
-						PrintError(ERROR_ERROR,"Invalid shift expression \"%s\"",ImmediateBuffer);
+						Logger::printError(Logger::Error,L"Invalid shift expression \"%S\"",ImmediateBuffer);
 						NoCheckError = true;
 						return false;
 					}
@@ -462,7 +462,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 	{
 		if (CheckPostfix(List,true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",ImmediateBuffer);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 			NoCheckError = true;
 			return false;
 		}
@@ -494,9 +494,9 @@ bool CArmInstruction::Load(char *Name, char *Params)
 	{
 		if (paramfail == true)
 		{
-			PrintError(ERROR_ERROR,"ARM parameter failure \"%s\"",Params);
+			Logger::printError(Logger::Error,L"ARM parameter failure \"%S\"",Params);
 		} else {
-			PrintError(ERROR_ERROR,"Invalid ARM opcode \"%s\"",Name);
+			Logger::printError(Logger::Error,L"Invalid ARM opcode \"%S\"",Name);
 		}
 	}
 	return false;
@@ -510,11 +510,11 @@ bool ParsePostfixExpressionCheck(CExpressionCommandList& Postfix, CStringList* E
 		{
 			if (Errors->GetCount() == 0)
 			{
-				QueueError(ERROR_ERROR,"Invalid expression");
+				Logger::queueError(Logger::Error,L"Invalid expression");
 			} else {
 				for (int l = 0; l < Errors->GetCount(); l++)
 				{
-					QueueError(ERROR_ERROR,Errors->GetEntry(l));
+					Logger::queueError(Logger::Error,convertUtf8ToWString(Errors->GetEntry(l)));
 				}
 			}
 		}
@@ -535,7 +535,7 @@ bool CArmInstruction::Validate()
 
 	if (RamPos & 3)
 	{
-		QueueError(ERROR_WARNING,"Opcode not word aligned");
+		Logger::queueError(Logger::Warning,L"Opcode not word aligned");
 	}
 
 	if (Vars.Shift.UseShift == true && Vars.Shift.ShiftByRegister == false)
@@ -553,13 +553,13 @@ bool CArmInstruction::Validate()
 		else if (num == 32 && mode == ARM_SHIFT_ASR) num = 0;
 		else if (num == 32 && mode == ARM_SHIFT_LSL)
 		{
-			QueueError(ERROR_ERROR,"Invalid shift mode");
+			Logger::queueError(Logger::Error,L"Invalid shift mode");
 			return false;
 		} else if (mode == ARM_SHIFT_RRX)
 		{
 			if (num != 1)
 			{
-				QueueError(ERROR_ERROR,"Invalid shift mode");
+				Logger::queueError(Logger::Error,L"Invalid shift mode");
 				return false;
 			}
 			mode = ARM_SHIFT_ROR;
@@ -568,7 +568,7 @@ bool CArmInstruction::Validate()
 
 		if (num > 32 || num < 0)
 		{
-			QueueError(ERROR_ERROR,"Shift amount out of range");
+			Logger::queueError(Logger::Error,L"Shift amount out of range");
 			return false;
 		}
 
@@ -585,7 +585,7 @@ bool CArmInstruction::Validate()
 		}
 		if (Vars.CopData.Cpop > 15)
 		{
-			QueueError(ERROR_ERROR,"CP Opc number %02X too big",Vars.CopData.Cpop);
+			Logger::queueError(Logger::Error,L"CP Opc number %02X too big",Vars.CopData.Cpop);
 			return false;
 		}
 	}
@@ -598,7 +598,7 @@ bool CArmInstruction::Validate()
 		}
 		if (Vars.CopData.Cpinf > 7)
 		{
-			QueueError(ERROR_ERROR,"CP Inf number %02X too big",Vars.CopData.Cpinf);
+			Logger::queueError(Logger::Error,L"CP Inf number %02X too big",Vars.CopData.Cpinf);
 			return false;
 		}
 	}
@@ -617,7 +617,7 @@ bool CArmInstruction::Validate()
 	{
 		if (Vars.rd.Number & 1)
 		{
-			QueueError(ERROR_ERROR,"rd must be even");
+			Logger::queueError(Logger::Error,L"rd must be even");
 			return false;
 		}
 	}
@@ -662,7 +662,7 @@ bool CArmInstruction::Validate()
 					if (Opcode.flags & ARM_OPCMPCMN) Vars.Opcode.NewEncoding = Opcode.encoding ^ 0x0200000;
 					Vars.Opcode.UseNewEncoding = true;
 				} else {
-					QueueError(ERROR_ERROR,"Invalid shifted immediate %X",Vars.OriginalImmediate);
+					Logger::queueError(Logger::Error,L"Invalid shifted immediate %X",Vars.OriginalImmediate);
 					return false;
 				}
 			}
@@ -689,13 +689,13 @@ bool CArmInstruction::Validate()
 				Vars.Immediate = temp;
 			} else if ((pos = Arm.AddToCurrentPool(Vars.Immediate)) == -1)
 			{
-				QueueError(ERROR_ERROR,"Unable to find literal pool");
+				Logger::queueError(Logger::Error,L"Unable to find literal pool");
 				return false;
 			} else {
 				pos = pos-((Global.RamPos+8) & 0xFFFFFFFD);
 				if (abs(pos) > 4095)
 				{
-					QueueError(ERROR_ERROR,"Literal pool out of range");
+					Logger::queueError(Logger::Error,L"Literal pool out of range");
 					return false;
 				}
 				Vars.Immediate = pos;
@@ -706,13 +706,13 @@ bool CArmInstruction::Validate()
 			{
 				if (Vars.Immediate & 1)
 				{
-					QueueError(ERROR_ERROR,"Branch target must be halfword aligned");
+					Logger::queueError(Logger::Error,L"Branch target must be halfword aligned");
 					return false;
 				}
 			} else {
 				if (Vars.Immediate & 3)
 				{
-					QueueError(ERROR_ERROR,"Branch target must be word aligned");
+					Logger::queueError(Logger::Error,L"Branch target must be word aligned");
 					return false;
 				}
 			}
@@ -720,7 +720,7 @@ bool CArmInstruction::Validate()
 			Vars.Immediate = (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= 0x2000000)
 			{
-				QueueError(ERROR_ERROR,"Branch target %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		} else if (Opcode.flags & ARM_ABSIMM)	// ldr r0,[I]
@@ -728,7 +728,7 @@ bool CArmInstruction::Validate()
 			Vars.Immediate = Vars.Immediate-RamPos-8;
 			if (abs(Vars.Immediate) >= (1 << Vars.ImmediateBitLen))
 			{
-				QueueError(ERROR_ERROR,"Load target %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Load target %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		} else if (Opcode.flags & ARM_SWI)	// it's an interrupt, may need to shift it
@@ -749,7 +749,7 @@ bool CArmInstruction::Validate()
 			unsigned int check = Opcode.flags & ARM_ABS ? abs(Vars.Immediate) : Vars.Immediate;
 			if (check >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
-				QueueError(ERROR_ERROR,"Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
 				return false;
 			}
 		}
@@ -919,7 +919,7 @@ void CArmInstruction::WriteInstruction(unsigned int encoding)
 {
 	if (Global.Output.write(&encoding,4) == -1)
 	{
-		PrintError(ERROR_FATALERROR,"No file opened");
+		Logger::printError(Logger::FatalError,L"No file opened");
 	}
 }
 void CArmInstruction::Encode()

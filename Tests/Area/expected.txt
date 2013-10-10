@@ -1,0 +1,2 @@
+Area.asm(15) error: Area at Area.asm(13) overflown
+Area.asm(25) error: Area at Area.asm(20) overflown

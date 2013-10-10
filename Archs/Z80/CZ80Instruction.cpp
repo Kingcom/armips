@@ -76,7 +76,7 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 	{
 		if (CheckPostfix(List,true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",ImmediateBuffer);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 			NoCheckError = true;
 			return false;
 		}
@@ -109,9 +109,9 @@ bool CZ80Instruction::Load(char *Name, char *Params)
 	{
 		if (paramfail == true)
 		{
-			PrintError(ERROR_ERROR,"Parameter failure \"%s\"",Params);
+			Logger::printError(Logger::Error,L"Parameter failure \"%S\"",Params);
 		} else {
-			PrintError(ERROR_ERROR,"Invalid opcode \"%s\"",Name);
+			Logger::printError(Logger::Error,L"Invalid opcode \"%S\"",Name);
 		}
 	}
 	return false;

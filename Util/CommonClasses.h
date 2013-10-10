@@ -99,31 +99,6 @@ private:
 	bool enabled;
 };
 
-typedef struct {
-	int Pos;
-	int FileNum;
-	int LineNum;
-	int Level;
-} tErrorQueueEntry;
-
-class CErrorQueue
-{
-public:
-	CErrorQueue();
-	~CErrorQueue();
-	void Clear() { EntryCount = 0; DataPos = 0; };
-	void AddEntry(int Level, char* str);
-	void Output();
-	bool isEmpty() { return EntryCount == 0; };
-private:
-	tErrorQueueEntry* Entries;
-	int EntryCount;
-	int EntriesAllocated;
-	char* Data;
-	int DataPos;
-	int DataAllocated;
-};
-
 
 class IntegerStack
 {

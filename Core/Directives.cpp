@@ -47,7 +47,7 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 	int LineNum = Global.FileInfo.LineNumber;
 	if (fileExists(fileName) == false)
 	{
-		PrintError(ERROR_ERROR,"Included file \"%ls\" does not exist",fileName.c_str());
+		Logger::printError(Logger::Error,L"Included file \"%s\" does not exist",fileName.c_str());
 		return false;
 	}
 	LoadAssemblyFile(fileName);
@@ -66,7 +66,7 @@ bool DirectiveData(ArgumentList& List, int flags)
 	case DIRECTIVE_DATA8:	DataSize = 1; break;
 	case DIRECTIVE_DATA16:	DataSize = 2; break;
 	case DIRECTIVE_DATA32:	DataSize = 4; break;
-	default: PrintError(ERROR_ERROR,"Invalid data directive"); return false;;
+	default: Logger::printError(Logger::Error,L"Invalid data directive"); return false;;
 	}
 
 	if (flags & DIRECTIVE_ASCII) ascii = true;
@@ -81,7 +81,7 @@ bool DirectiveRadix(ArgumentList& List, int flags)
 	int rad;
 	if (ConvertExpression(List[0].text,rad) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid expression %ls",List[0].text.c_str());
+		Logger::printError(Logger::Error,L"Invalid expression %s",List[0].text.c_str());
 		return false;
 	}
 
@@ -91,7 +91,7 @@ bool DirectiveRadix(ArgumentList& List, int flags)
 		Global.Radix = rad;
 		break;
 	default:
-		PrintError(ERROR_ERROR,"Invalid radix %d",rad);
+		Logger::printError(Logger::Error,L"Invalid radix %d",rad);
 		return false;;
 	}
 	return true;
@@ -103,7 +103,7 @@ bool DirectiveLoadTable(ArgumentList& List, int flags)
 
 	if (fileExists(fileName) == false)
 	{
-		PrintError(ERROR_ERROR,"Table file \"%ls\" does not exist",fileName.c_str());
+		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName.c_str());
 		return false;
 	}
 
@@ -113,7 +113,7 @@ bool DirectiveLoadTable(ArgumentList& List, int flags)
 
 	if (Global.Table.load(fileName,sjis) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid table file \"%ls\"",fileName.c_str());
+		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName.c_str());
 		return false;
 	}
 	return true;
@@ -125,7 +125,7 @@ bool DirectiveString(ArgumentList& List, int flags)
 
 	if (Global.Table.isLoaded() == false)
 	{
-		PrintError(ERROR_ERROR,"No table opened");
+		Logger::printError(Logger::Error,L"No table opened");
 		return false;
 	}
 
@@ -137,7 +137,7 @@ bool DirectiveString(ArgumentList& List, int flags)
 
 			if (data.size() == 0 && List[i].text.size() != 0)
 			{
-				PrintError(ERROR_ERROR,"Failed to encode string");
+				Logger::printError(Logger::Error,L"Failed to encode string");
 				return false;
 			}
 
@@ -231,7 +231,7 @@ bool DirectiveNocash(ArgumentList& List, int flags)
 		{
 			Global.nocash = false;
 		} else {
-			PrintError(ERROR_ERROR,"Invalid arguments");
+			Logger::printError(Logger::Error,L"Invalid arguments");
 			return false;
 		}
 	} else {
@@ -255,20 +255,20 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 
 	if (ConvertExpression(List[1].text,value) == false)
 	{
-		PrintError(ERROR_ERROR,"Invalid expression \"%ls\"",List[1].text.c_str());
+		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",List[1].text.c_str());
 		return false;
 	}
 	
 	Label* label = Global.symbolTable.getLabel(List[0].text,Global.FileInfo.FileNum,Global.Section);
 	if (label == NULL)
 	{
-		PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",List[0].text.c_str());
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",List[0].text.c_str());
 		return false;
 	}
 
 	if (label->isDefined())
 	{
-		PrintError(ERROR_ERROR,"Label \"%ls\" already defined",List[0].text.c_str());
+		Logger::printError(Logger::Error,L"Label \"%s\" already defined",List[0].text.c_str());
 		return false;
 	}
 	
@@ -372,7 +372,7 @@ bool DirectiveWarningAsError(ArgumentList& List, int flags)
 		{
 			Global.warningAsError = false;
 		} else {
-			PrintError(ERROR_ERROR,"Invalid arguments");
+			Logger::printError(Logger::Error,L"Invalid arguments");
 			return false;
 		}
 	} else {
@@ -392,7 +392,7 @@ bool DirectiveRelativeInclude(ArgumentList& List, int flags)
 		{
 			Global.relativeInclude = false;
 		} else {
-			PrintError(ERROR_ERROR,"Invalid arguments");
+			Logger::printError(Logger::Error,L"Invalid arguments");
 			return false;
 		}
 	} else {
@@ -412,7 +412,7 @@ bool DirectiveSym(ArgumentList& List, int flags)
 		CDirectiveSym* sym = new CDirectiveSym(false);
 		AddAssemblerCommand(sym);
 	} else {
-		PrintError(ERROR_ERROR,"Invalid arguments");
+		Logger::printError(Logger::Error,L"Invalid arguments");
 		return false;
 	}
 	return true;
@@ -435,7 +435,7 @@ bool splitArguments(ArgumentList& list, const std::wstring& args)
 		{
 			if (buffer.empty())
 			{
-				PrintError(ERROR_ERROR,"Parameter failure (empty argument)");
+				Logger::printError(Logger::Error,L"Parameter failure (empty argument)");
 				return false;
 			}
 
@@ -453,7 +453,7 @@ bool splitArguments(ArgumentList& list, const std::wstring& args)
 			{
 				if (pos == args.size())
 				{
-					PrintError(ERROR_ERROR,"Unexpected end of line in string");
+					Logger::printError(Logger::Error,L"Unexpected end of line in string");
 					return false;
 				}
 
@@ -485,7 +485,7 @@ bool splitArguments(ArgumentList& list, const std::wstring& args)
 		buffer += args[pos++];
 		if (buffer.size() >= 2048)
 		{
-			PrintError(ERROR_ERROR,"parameter replacement length overflow");
+			Logger::printError(Logger::Error,L"parameter replacement length overflow");
 			return false;
 		}
 	}
@@ -503,14 +503,14 @@ bool executeDirective(const tDirective& directive, const std::wstring& args)
 
 	if (directive.minparam > arguments.size())
 	{
-		PrintError(ERROR_ERROR,"Not enough parameters (min %d)",
+		Logger::printError(Logger::Error,L"Not enough parameters (min %d)",
 			directive.minparam);
 		return false;
 	}
 
 	if (directive.maxparam < arguments.size())
 	{
-		PrintError(ERROR_ERROR,"Too many parameters (max %d)",
+		Logger::printError(Logger::Error,L"Too many parameters (max %d)",
 			directive.maxparam);
 		return false;
 	}

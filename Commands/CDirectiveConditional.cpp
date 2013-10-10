@@ -33,7 +33,7 @@ bool CDirectiveConditional::Load(ArgumentList& Args, int command)
 	case CONDITIONAL_ELSEIFNDEF:
 		if (Global.symbolTable.isValidSymbolName(Args[0].text) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid label name \"%ls\"",Args[0].text.c_str());
+			Logger::printError(Logger::Error,L"Invalid label name \"%s\"",Args[0].text.c_str());
 			return false;
 		}
 		labelName = Args[0].text;
@@ -105,7 +105,7 @@ bool CDirectiveConditional::Validate()
 	case CONDITIONAL_ELSEIF:
 		if (ParsePostfix(Expression,NULL,num) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression");
+			Logger::printError(Logger::Error,L"Invalid expression");
 			return false;
 		}
 

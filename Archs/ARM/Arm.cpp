@@ -117,7 +117,7 @@ bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags)
 			push = false;
 		} else if (List[1].text != L"true")
 		{
-			PrintError(ERROR_ERROR,"Invalid arguments");
+			Logger::printError(Logger::Error,L"Invalid arguments");
 			return false;
 		}
 	}

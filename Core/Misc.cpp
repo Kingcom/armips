@@ -2,6 +2,147 @@
 #include "Misc.h"
 #include "Common.h"
 
+std::vector<Logger::QueueEntry> Logger::queue;
+std::vector<std::wstring> Logger::errors;
+bool Logger::error = false;
+bool Logger::fatalError = false;
+
+std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
+{
+	char* FileName = Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum);
+
+	switch (type)
+	{
+	case Warning:
+		return formatString(L"%hs(%d) warning: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+	case Error:
+		return formatString(L"%hs(%d) error: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+	case ERROR_FATALERROR:
+		return formatString(L"%hs(%d) fatal error: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+	case ERROR_NOTICE:
+		return formatString(L"%hs(%d) notice: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+	}
+
+	return L"";
+}
+
+void Logger::setFlags(ErrorType type)
+{
+	switch (type)
+	{
+	case Warning:
+		if (Global.warningAsError)
+			error = true;
+		break;
+	case Error:
+		error = true;
+		break;
+	case FatalError:
+		error = true;
+		fatalError = true;
+		exit(2);	// TODO: quit in a less drastic way
+		break;
+	}
+}
+
+void Logger::clear()
+{
+	queue.clear();
+	errors.clear();
+	error = false;
+	fatalError = false;
+}
+
+void Logger::printLine(const std::wstring& text)
+{
+	wprintf(L"%s\n",text.c_str());
+}
+
+void Logger::printLine(const char* format, ...)
+{
+	va_list args;
+
+	va_start(args,format);
+	vprintf(format,args);
+	va_end(args);
+	printf("\n");
+}
+
+void Logger::printError(ErrorType type, const std::wstring& text)
+{
+	std::wstring errorText = formatError(type,text);
+	errors.push_back(errorText);
+	printLine(errorText);
+	setFlags(type);
+}
+
+void Logger::printError(ErrorType type, const wchar_t* format, ...)
+{
+	std::wstring result;
+	va_list args;
+
+	va_start(args,format);
+
+	int length = _vscwprintf(format,args);
+	if (length < 0) // error
+	{
+		va_end(args);
+		return;
+	}
+
+	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
+	length = _vsnwprintf(buffer,length+1,format,args);
+
+	if (length < 0)
+		return;
+	va_end(args);
+
+	printError(type,result);
+}
+
+void Logger::queueError(ErrorType type, const std::wstring& text)
+{
+	QueueEntry entry;
+	entry.type = type;
+	entry.text = formatError(type,text);
+	queue.push_back(entry);
+}
+
+void Logger::queueError(ErrorType type, const wchar_t* format, ...)
+{
+	std::wstring result;
+	va_list args;
+
+	va_start(args,format);
+
+	int length = _vscwprintf(format,args);
+	if (length < 0) // error
+	{
+		va_end(args);
+		return;
+	}
+
+	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
+	length = _vsnwprintf(buffer,length+1,format,args);
+
+	if (length < 0)
+		return;
+	va_end(args);
+
+	queueError(type,result);
+}
+
+void Logger::printQueue()
+{
+	for (size_t i = 0; i < queue.size(); i++)
+	{
+		errors.push_back(queue[i].text);
+		printLine(queue[i].text);
+		setFlags(queue[i].type);
+	}
+}
+
+
 void ConditionData::addIf(bool conditionMet)
 {
 	Entry entry;
@@ -15,14 +156,14 @@ void ConditionData::addElse()
 {
 	if (conditions.size() == 0)
 	{
-		QueueError(ERROR_ERROR,"No if clause active");
+		Logger::queueError(Logger::Error,L"No if clause active");
 		return;
 	}
 
 	Entry& entry = conditions.back();
 	if (entry.isInElseCase)
 	{
-		QueueError(ERROR_ERROR,"Else case already defined");
+		Logger::queueError(Logger::Error,L"Else case already defined");
 		return;
 	}
 
@@ -34,14 +175,14 @@ void ConditionData::addElseIf(bool conditionMet)
 {
 	if (conditions.size() == 0)
 	{
-		QueueError(ERROR_ERROR,"No if clause active");
+		Logger::queueError(Logger::Error,L"No if clause active");
 		return;
 	}
 
 	Entry& entry = conditions.back();
 	if (entry.isInElseCase)
 	{
-		QueueError(ERROR_ERROR,"Else case already defined");
+		Logger::queueError(Logger::Error,L"Else case already defined");
 		return;
 	}
 
@@ -58,7 +199,7 @@ void ConditionData::addEndIf()
 {
 	if (conditions.size() == 0)
 	{
-		QueueError(ERROR_ERROR,"No if clause active");
+		Logger::queueError(Logger::Error,L"No if clause active");
 		return;
 	}
 
@@ -92,7 +233,7 @@ void AreaData::endArea()
 {
 	if (entries.size() == 0)
 	{
-		QueueError(ERROR_ERROR,"No active area");
+		Logger::queueError(Logger::Error,L"No active area");
 		return;
 	}
 
@@ -110,7 +251,7 @@ bool AreaData::checkAreas(int currentAddress)
 			error = true;
 			if (entries[i].overflow == false)
 			{
-				QueueError(ERROR_ERROR,"Area at %s(%d) overflown",
+				Logger::queueError(Logger::Error,L"Area at %S(%d) overflown",
 					Global.FileInfo.FileList.GetEntry(entries[i].fileNum),
 					entries[i].lineNumber);
 				entries[i].overflow = true;

@@ -41,9 +41,9 @@ bool CMipsInstruction::Load(char* Name, char* Params)
 	{
 		if (paramfail == true)
 		{
-			PrintError(ERROR_ERROR,"MIPS parameter failure \"%s\"",Params);
+			Logger::printError(Logger::Error,L"MIPS parameter failure \"%S\"",Params);
 		} else {
-			PrintError(ERROR_ERROR,"Invalid MIPS opcode \"%s\"",Name);
+			Logger::printError(Logger::Error,L"Invalid MIPS opcode \"%S\"",Name);
 		}
 	}
 	return false;
@@ -134,7 +134,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 	{
 		if (CheckPostfix(List,true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",ImmediateBuffer);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 			NoCheckError = true;
 			return false;
 		}
@@ -213,7 +213,7 @@ void CMipsInstruction::WriteInstruction(unsigned int encoding)
 {
 	if (Global.Output.write(&encoding,4) == -1)
 	{
-		PrintError(ERROR_ERROR,"No file opened");
+		Logger::printError(Logger::Error,L"No file opened");
 	}
 }
 
@@ -228,7 +228,7 @@ bool CMipsInstruction::Validate()
 
 	if (RamPos % 4)
 	{
-		QueueError(ERROR_WARNING,"opcode not aligned to word boundary");
+		Logger::queueError(Logger::Warning,L"opcode not aligned to word boundary");
 	}
 
 	// check immediates
@@ -238,11 +238,11 @@ bool CMipsInstruction::Validate()
 		{
 			if (List.GetCount() == 0)
 			{
-				QueueError(ERROR_ERROR,"Invalid expression");
+				Logger::queueError(Logger::Error,L"Invalid expression");
 			} else {
 				for (int l = 0; l < List.GetCount(); l++)
 				{
-					QueueError(ERROR_ERROR,List.GetEntry(l));
+					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 				}
 			}
 			return false;
@@ -258,7 +258,7 @@ bool CMipsInstruction::Validate()
 			
 			if (num > 0x20000 || num < (-0x20000))
 			{
-				QueueError(ERROR_ERROR,"Branch target %08X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.Immediate);
 				return false;
 			}
 			Vars.Immediate = num >> 2;
@@ -269,7 +269,7 @@ bool CMipsInstruction::Validate()
 		case MIPS_IMMEDIATE5:
 			if (Vars.Immediate > 0x1F)
 			{
-				QueueError(ERROR_ERROR,"Immediate value %02X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 			break;
@@ -278,7 +278,7 @@ bool CMipsInstruction::Validate()
 		case MIPS_IMMEDIATE16:
 			if (abs(Vars.Immediate) > 0xFFFF)
 			{
-				QueueError(ERROR_ERROR,"Immediate value %04X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Immediate value %04X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 			Vars.Immediate &= 0xFFFF;
@@ -286,7 +286,7 @@ bool CMipsInstruction::Validate()
 		case MIPS_IMMEDIATE20:
 			if (abs(Vars.Immediate) > 0xFFFFF)
 			{
-				QueueError(ERROR_ERROR,"Immediate value %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Immediate value %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 			Vars.Immediate &= 0xFFFFF;
@@ -294,7 +294,7 @@ bool CMipsInstruction::Validate()
 		case MIPS_IMMEDIATE26:
 			if (abs(Vars.Immediate) > 0x3FFFFFF)
 			{
-				QueueError(ERROR_ERROR,"Immediate value %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Immediate value %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 			Vars.Immediate &= 0x3FFFFFF;
@@ -310,17 +310,17 @@ bool CMipsInstruction::Validate()
 		if ((Opcode.flags & O_RD) && Vars.rd.Number == Mips.GetLoadDelayRegister()
 			|| (Opcode.flags & O_RDT) && Vars.rd.Number == Mips.GetLoadDelayRegister())
 		{
-			QueueError(ERROR_WARNING,"register %s may not be available due to load delay",Vars.rd.Name);
+			Logger::queueError(Logger::Warning,L"register %s may not be available due to load delay",Vars.rd.Name);
 			fix = true;
 		} else if ((Opcode.flags & O_RS) && Vars.rs.Number == Mips.GetLoadDelayRegister()
 			|| (Opcode.flags & O_RSD) && Vars.rs.Number == Mips.GetLoadDelayRegister()
 			|| (Opcode.flags & O_RST) && Vars.rs.Number == Mips.GetLoadDelayRegister())
 		{
-			QueueError(ERROR_WARNING,"register %s may not be available due to load delay",Vars.rs.Name);
+			Logger::queueError(Logger::Warning,L"register %s may not be available due to load delay",Vars.rs.Name);
 			fix = true;
 		} else if ((Opcode.flags & O_RT) && Vars.rt.Number == Mips.GetLoadDelayRegister())
 		{
-			QueueError(ERROR_WARNING,"register %s may not be available due to load delay",Vars.rt.Name);
+			Logger::queueError(Logger::Warning,L"register %s may not be available due to load delay",Vars.rt.Name);
 			fix = true;
 		}
 
@@ -333,13 +333,13 @@ bool CMipsInstruction::Validate()
 			SubInstruction->Validate();
 			RamPos = Global.RamPos;
 
-			PrintError(ERROR_NOTICE,"added nop to ensure correct behavior");
+			Logger::printError(Logger::Notice,L"added nop to ensure correct behavior");
 		}
 	}
 
 	if ((Opcode.flags & MO_NODELAY) && Mips.GetDelaySlot() == true && IgnoreLoadDelay == false)
 	{
-		QueueError(ERROR_ERROR,"This instruction can't be in a delay slot");
+		Logger::queueError(Logger::Error,L"This instruction can't be in a delay slot");
 	}
 
 	Mips.SetDelaySlot(Opcode.flags & MO_DELAY ? true : false);

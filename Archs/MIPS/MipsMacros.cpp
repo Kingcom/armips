@@ -63,7 +63,7 @@ int MipsMacroLoad(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes
 		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
 	else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lw","%s,0x%04X(%s)",
 		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
-	else PrintError(ERROR_ERROR,"Invalid Load macro");
+	else Logger::printError(Logger::Error,L"Invalid Load macro");
 
 	return OpcodeCount;
 }
@@ -81,7 +81,7 @@ int MipsMacroStore(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcode
 		Values.rs.Name,Values.i2 & 0xFFFF);
 	else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sw","%s,0x%04X(r1)",
 		Values.rs.Name,Values.i2 & 0xFFFF);
-	else PrintError(ERROR_ERROR,"Invalid Store macro");
+	else Logger::printError(Logger::Error,L"Invalid Store macro");
 
 	return OpcodeCount;
 }
@@ -116,7 +116,7 @@ int MipsMacroLoadUnaligned(tMipsMacroValues& Values, int Flags, CMipsInstruction
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lwr","%s,0x%04X(%s)",
 			Values.rd.Name,Values.i1,Values.rs.Name);
 	} else {
-		PrintError(ERROR_ERROR,"Invalid Store Unaligned macro");
+		Logger::printError(Logger::Error,L"Invalid Store Unaligned macro");
 	}
 
 	return OpcodeCount;
@@ -142,7 +142,7 @@ int MipsMacroStoreUnaligned(tMipsMacroValues& Values, int Flags, CMipsInstructio
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"swr","%s,0x%04X(%s)",
 			Values.rd.Name,Values.i1,Values.rs.Name);
 	} else {
-		PrintError(ERROR_ERROR,"Invalid Store Unaligned macro");
+		Logger::printError(Logger::Error,L"Invalid Store Unaligned macro");
 	}
 
 	return OpcodeCount;
@@ -196,7 +196,7 @@ int MipsMacroBranch(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"bnez","r1,0x%08X",
 				Values.i2);
 		} else {
-			PrintError(ERROR_ERROR,"Invalid Branch macro");
+			Logger::printError(Logger::Error,L"Invalid Branch macro");
 		}
 	}
 
@@ -346,7 +346,7 @@ bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 	{
 		if (CheckPostfix(Vars.List[0],true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",Vars.i1);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",Vars.i1);
 			Vars.NoCheckError = true;
 			return false;
 		}
@@ -355,7 +355,7 @@ bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 	{
 		if (CheckPostfix(Vars.List[1],true) == false)
 		{
-			PrintError(ERROR_ERROR,"Invalid expression \"%s\"",Vars.i2);
+			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",Vars.i2);
 			Vars.NoCheckError = true;
 			return false;
 		}

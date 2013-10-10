@@ -24,7 +24,6 @@ typedef struct {
 	TempData tempData;
 	SymbolData symData;
 	SymbolTable symbolTable;
-	CErrorQueue ErrorQueue;
 	EncodingTable Table;
 	BinaryFile Output;
 	int RamPos;
@@ -32,7 +31,6 @@ typedef struct {
 	bool FileOpened;
 	int Section;
 	int Radix;
-	bool Error;
 	bool Quit;
 	bool Revalidate;
 	bool nocash;
@@ -60,6 +58,4 @@ bool checkValidLabelName(const std::wstring& labelName);
 bool addAssemblerLabel(const std::wstring& labelName);
 
 void AddAssemblerCommand(CAssemblerCommand* Command);
-void QueueError(eErrorLevel level, char* format, ...);
-void PrintError(eErrorLevel level, char* format, ...);
 bool isPowerOfTwo(int n);
