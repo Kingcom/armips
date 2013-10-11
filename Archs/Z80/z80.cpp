@@ -4,6 +4,7 @@
 #include "Core/MathParser.h"
 #include "CZ80Instruction.h"
 #include "Core/Directives.h"
+#include "Core/FileManager.h"
 
 const tZ80Register Z80Registers8[] = {
 	{ "b",		0,		1 },
@@ -43,7 +44,7 @@ void CZ80Architecture::AssembleOpcode(const std::wstring& name, const std::wstri
 		return;
 	}
 	AddAssemblerCommand(Opcode);
-	Global.RamPos += Opcode->GetSize();
+	g_fileManager->advanceMemory(Opcode->GetSize());
 }
 
 bool z80CheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)

@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "Mips.h"
 #include "MipsOpcodes.h"
+#include "Core/FileManager.h"
 
 CMipsInstruction::CMipsInstruction()
 {
@@ -211,10 +212,7 @@ void CMipsInstruction::FormatInstruction(char* encoding,tMipsOpcodeVariables& Va
 
 void CMipsInstruction::WriteInstruction(unsigned int encoding)
 {
-	if (Global.Output.write(&encoding,4) == -1)
-	{
-		Logger::printError(Logger::Error,L"No file opened");
-	}
+	g_fileManager->write(&encoding,4);
 }
 
 bool CMipsInstruction::Validate()
@@ -224,7 +222,7 @@ bool CMipsInstruction::Validate()
 
 	if (SubInstructionEnabled == true) SubInstruction->Validate();
 
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 
 	if (RamPos % 4)
 	{
@@ -331,7 +329,7 @@ bool CMipsInstruction::Validate()
 			SubInstructionEnabled = true;
 			Result = true;
 			SubInstruction->Validate();
-			RamPos = Global.RamPos;
+			RamPos = g_fileManager->getVirtualAddress();
 
 			Logger::printError(Logger::Notice,L"added nop to ensure correct behavior");
 		}
@@ -347,7 +345,7 @@ bool CMipsInstruction::Validate()
 	// now check if this opcode causes a load delay
 	Mips.SetLoadDelay(Opcode.flags & MO_DELAYRT ? true : false,Vars.rt.Number);
 	
-	Global.RamPos += 4;
+	g_fileManager->advanceMemory(4);
 	return Result;
 }
 

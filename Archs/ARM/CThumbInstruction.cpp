@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "Arm.h"
 #include "ThumbOpcodes.h"
+#include "Core/FileManager.h"
 
 CThumbInstruction::CThumbInstruction()
 {
@@ -186,8 +187,7 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 bool CThumbInstruction::Validate()
 {
 	CStringList List;
-	RamPos = Global.RamPos;
-
+	RamPos = g_fileManager->getVirtualAddress();
 
 	if (RamPos & 1)
 	{
@@ -270,7 +270,7 @@ bool CThumbInstruction::Validate()
 				Logger::queueError(Logger::Error,L"Unable to find literal pool");
 				return false;
 			}
-			pos = pos-((Global.RamPos+4) & 0xFFFFFFFD);
+			pos = pos-((g_fileManager->getVirtualAddress()+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
 				Logger::queueError(Logger::Error,L"Literal pool out of range");
@@ -282,11 +282,11 @@ bool CThumbInstruction::Validate()
 			if (Vars.Immediate & 3)
 			{
 				Logger::queueError(Logger::Error,L"PC relative address must be word aligned");
-				Global.RamPos += OpcodeSize;
+				g_fileManager->advanceMemory(OpcodeSize);
 				return false;
 			}
 
-			int pos = Vars.Immediate-((Global.RamPos+4) & 0xFFFFFFFD);
+			int pos = Vars.Immediate-((g_fileManager->getVirtualAddress()+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
 				Logger::queueError(Logger::Error,L"PC relative address out of range");
@@ -306,16 +306,13 @@ bool CThumbInstruction::Validate()
 		}
 	}
 
-	Global.RamPos += OpcodeSize;
+	g_fileManager->advanceMemory(OpcodeSize);
 	return false;
 }
 
 void CThumbInstruction::WriteInstruction(unsigned short encoding)
 {
-	if (Global.Output.write(&encoding,2) == -1)
-	{
-		Logger::printError(Logger::Error,L"No file opened");
-	}
+	g_fileManager->write(&encoding,2);
 }
 
 void CThumbInstruction::Encode()

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Misc.h"
 #include "Common.h"
+#include "Core/FileManager.h"
 
 std::vector<Logger::QueueEntry> Logger::queue;
 std::vector<std::wstring> Logger::errors;
@@ -9,18 +10,18 @@ bool Logger::fatalError = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
-	char* FileName = Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum);
+	std::wstring fileName = convertUtf8ToWString(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
 
 	switch (type)
 	{
 	case Warning:
-		return formatString(L"%hs(%d) warning: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) warning: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
 	case Error:
-		return formatString(L"%hs(%d) error: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) error: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
 	case ERROR_FATALERROR:
-		return formatString(L"%hs(%d) fatal error: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) fatal error: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
 	case ERROR_NOTICE:
-		return formatString(L"%hs(%d) notice: %ls\n",FileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) notice: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
 	}
 
 	return L"";
@@ -97,6 +98,7 @@ void Logger::printError(ErrorType type, const wchar_t* format, ...)
 		return;
 	va_end(args);
 
+	result = buffer;
 	printError(type,result);
 }
 
@@ -240,13 +242,13 @@ void AreaData::endArea()
 	entries.pop_back();
 }
 
-bool AreaData::checkAreas(int currentAddress)
+bool AreaData::checkAreas()
 {
 	bool error = false;
 
 	for (size_t i = 0; i < entries.size(); i++)
 	{
-		if (entries[i].maxAddress < currentAddress)
+		if (entries[i].maxAddress < g_fileManager->getVirtualAddress())
 		{
 			error = true;
 			if (entries[i].overflow == false)

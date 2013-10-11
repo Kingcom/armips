@@ -60,7 +60,7 @@ class AreaData
 public:
 	void startArea(int start, int size, int fileNum, int lineNumber);
 	void endArea();
-	bool checkAreas(int currentAddress);
+	bool checkAreas();
 private:
 	struct Entry
 	{

@@ -715,6 +715,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 	if (isOpen())
 		close();
 
+	guessedEncoding = false;
 	encoding = defaultEncoding;
 	this->mode = mode;
 
@@ -764,8 +765,19 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 					break;
 				}
 			default:
+				if (defaultEncoding == GUESS)
+				{
+					encoding = UTF8;
+					guessedEncoding = true;
+				}
 				fseek(handle,0,SEEK_SET);
 				break;
+			}
+		} else {
+			if (defaultEncoding == GUESS)
+			{
+				encoding = UTF8;
+				guessedEncoding = true;
 			}
 		}
 	}
@@ -840,6 +852,8 @@ wchar_t TextFile::readCharacter()
 				// error, handle
 			}
 		}
+	case ASCII:
+		value = fgetc(handle);
 		break;
 	}
 
@@ -1001,4 +1015,34 @@ void TextFile::writeFormat(wchar_t* format, ...)
 
 	va_end(args);
 	write(result);
+}
+
+
+struct EncodingValue
+{
+	const wchar_t* name;
+	TextFile::Encoding value;
+};
+
+const EncodingValue encodingValues[] = {
+	{ L"sjis",			TextFile::SJIS },
+	{ L"shift-jis",		TextFile::SJIS },
+	{ L"utf8",			TextFile::UTF8 },
+	{ L"utf-8",			TextFile::UTF8 },
+	{ L"utf16",			TextFile::UTF16LE },
+	{ L"utf-16",		TextFile::UTF16LE },
+	{ L"utf16-be",		TextFile::UTF16BE },
+	{ L"utf-16-be",		TextFile::UTF16BE },
+	{ L"ascii",			TextFile::ASCII },
+};
+
+TextFile::Encoding getEncodingFromString(const std::wstring& str)
+{
+	for (int i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
+	{
+		if (str.compare(encodingValues[i].name) == 0)
+			return encodingValues[i].value;
+	}
+
+	return TextFile::GUESS;
 }

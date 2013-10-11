@@ -1,12 +1,13 @@
 #pragma once
 #include "Util/ByteArray.h"
+#include "Util/FileClasses.h"
 
 class EncodingTable
 {
 public:
 	EncodingTable();
 	~EncodingTable();
-	bool load(const std::wstring& fileName, bool sjis);
+	bool load(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
 	bool isLoaded() { return entries.size() != 0; };
 	void addEntry(unsigned char* hex, int hexLength, std::wstring& value);
 	void setTerminationEntry(unsigned char* hex, int hexLength);

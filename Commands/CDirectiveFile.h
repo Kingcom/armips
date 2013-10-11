@@ -15,6 +15,9 @@ typedef enum eDirectiveFileMode {
 	DIRECTIVEFILE_INVALID
 };
 
+class GenericAssemblerFile;
+
+// TODO: split into several classes
 
 class CDirectiveFile: public CAssemblerCommand
 {
@@ -73,12 +76,19 @@ public:
 	std::wstring WriteTempHeaderSize();
 private:
 	eDirectiveFileMode Mode;
+
+	// open/create
+	GenericAssemblerFile* file;
+
+	// org/orga
+	int position;
+
+	// incbin
 	std::wstring fileName;
-	std::wstring originalName;
-	int RamAddress;
-	int InputFileSize;
-	int Alignment;
-	int RamPos;
-	CExpressionCommandList FillExpression;
-	int FillByte;
+	int inputFileSize;
+
+	// align
+	int alignment;
+	CExpressionCommandList fillExpression;
+	int fillByte;
 };

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Core/MathParser.h"
 #include "Core/Common.h"
+#include "Core/FileManager.h"
 
 const tExpressionCleanOpcode ExpressionCleanOpcodes[EXOP_COUNT] = {
 	{"", 0},	{"(",0},	{")",0},
@@ -420,7 +421,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			break;
 		case EXCOMM_RAMPOS:
 			Postfix.GetValue(num++);
-			Stack.Push(Global.RamPos);
+			Stack.Push(g_fileManager->getVirtualAddress());
 			break;
 		case EXCOMM_OP:	// opcode
 			Opcode = Postfix.GetValue(num++);

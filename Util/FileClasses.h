@@ -31,21 +31,22 @@ private:
 	long size_;
 };
 
-
 class TextFile
 {
 public:
-	enum Encoding { ASCII, UTF8, UTF16LE, UTF16BE, SJIS };
+	enum Encoding { ASCII, UTF8, UTF16LE, UTF16BE, SJIS, GUESS };
 	enum Mode { Read, Write };
 	
 	TextFile();
 	~TextFile();
-	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = UTF8);
-	bool open(Mode mode, Encoding defaultEncoding = UTF8);
+	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = GUESS);
+	bool open(Mode mode, Encoding defaultEncoding = GUESS);
 	bool isOpen() { return handle != NULL; };
 	bool atEnd() { return isOpen() && mode == Read && ftell(handle) == size_; };
 	long size() { return size_; };
 	void close();
+
+	bool hasGuessedEncoding() { return guessedEncoding; };
 
 	void setFileName(const std::wstring& name) { fileName = name; };
 	const std::wstring& getFileName() { return fileName; };
@@ -70,5 +71,8 @@ private:
 	Encoding encoding;
 	Mode mode;
 	bool recursion;
+	bool guessedEncoding;
 	long size_;
 };
+
+TextFile::Encoding getEncodingFromString(const std::wstring& str);

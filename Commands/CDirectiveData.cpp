@@ -2,6 +2,7 @@
 #include "Commands/CDirectiveData.h"
 #include "Core/Common.h"
 #include "Core/MathParser.h"
+#include "Core/FileManager.h"
 
 CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
 {
@@ -58,7 +59,7 @@ CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
 			SpaceNeeded += UnitSize;
 		}
 	}
-	Global.RamPos += SpaceNeeded;
+	g_fileManager->advanceMemory(SpaceNeeded);
 }
 
 CDirectiveData::~CDirectiveData()
@@ -71,7 +72,7 @@ bool CDirectiveData::Validate()
 {
 	CStringList List;
 
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 
 	int num;
 	for (int i = 0; i < TotalAmount; i++)
@@ -80,9 +81,9 @@ bool CDirectiveData::Validate()
 		{
 			if (evalExpression(ExpData[Entries[i].num],num,true) == false)
 				return false;
-			Global.RamPos += UnitSize;
+			g_fileManager->advanceMemory(UnitSize);
 		} else {
-			Global.RamPos += StrData.GetLen(Entries[i].num)*UnitSize;
+			g_fileManager->advanceMemory(StrData.GetLen(Entries[i].num)*UnitSize);
 		}
 	}
 
@@ -93,8 +94,6 @@ void CDirectiveData::Encode()
 {
 	CStringList List;
 	int num;
-
-	Global.RamPos = RamPos;
 	int totalsize = 0;
 
 	for (int i = 0; i < TotalAmount; i++)
@@ -106,16 +105,14 @@ void CDirectiveData::Encode()
 			for (int i = 0; i < len; i++)
 			{
 				num = Data[i];
-				Global.Output.write(&num,UnitSize);
+				g_fileManager->write(&num,UnitSize);
 			}
-			Global.RamPos += len*UnitSize;
 			totalsize += len*UnitSize;
 		} else {
 			if (evalExpression(ExpData[Entries[i].num],num) == false)
 				return;
-			Global.RamPos += UnitSize;
 			totalsize += UnitSize;
-			Global.Output.write(&num,UnitSize);
+			g_fileManager->write(&num,UnitSize);
 		}
 	}
 

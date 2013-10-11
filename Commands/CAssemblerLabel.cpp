@@ -2,6 +2,7 @@
 #include "Commands/CAssemblerLabel.h"
 #include "Core/Common.h"
 #include "Util/Util.h"
+#include "Core/FileManager.h"
 
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant)
 {
@@ -28,9 +29,9 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Secti
 
 bool CAssemblerLabel::Validate()
 {
-	if (constant == false && label->getValue() != Global.RamPos)
+	if (constant == false && label->getValue() != g_fileManager->getVirtualAddress())
 	{
-		label->setValue(Global.RamPos);
+		label->setValue(g_fileManager->getVirtualAddress());
 		return true;
 	}
 	

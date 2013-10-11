@@ -43,6 +43,10 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 {
 	std::wstring fileName = getFullPathName(List[0].text);
 
+	TextFile::Encoding encoding = TextFile::GUESS;
+	if (List.size() == 2)
+		encoding = getEncodingFromString(List[1].text);
+
 	int FileNum = Global.FileInfo.FileNum;
 	int LineNum = Global.FileInfo.LineNumber;
 	if (fileExists(fileName) == false)
@@ -50,7 +54,7 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 		Logger::printError(Logger::Error,L"Included file \"%s\" does not exist",fileName.c_str());
 		return false;
 	}
-	LoadAssemblyFile(fileName);
+	LoadAssemblyFile(fileName,encoding);
 	Global.FileInfo.FileNum = FileNum;
 	Global.FileInfo.LineNumber = LineNum;
 	return true;
@@ -107,11 +111,11 @@ bool DirectiveLoadTable(ArgumentList& List, int flags)
 		return false;
 	}
 
-	bool sjis = false;
-	if (List.size() == 2 && List[1].text == L"sjis")
-		sjis = true;
+	TextFile::Encoding encoding = TextFile::GUESS;
+	if (List.size() == 2)
+		encoding = getEncodingFromString(List[1].text);
 
-	if (Global.Table.load(fileName,sjis) == false)
+	if (Global.Table.load(fileName,encoding) == false)
 	{
 		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName.c_str());
 		return false;
@@ -606,7 +610,7 @@ const tDirective Directives[] = {
 	{ ".area",		1,	1,	&DirectiveArea,			DIRECTIVE_AREASTART },
 	{ ".endarea",	0,	0,	&DirectiveArea,			DIRECTIVE_AREAEND },
 
-	{ ".include",	1,	1,	&DirectiveInclude,	0 },
+	{ ".include",	1,	2,	&DirectiveInclude,	0 },
 	{ ".radix",		1,	1,	&DirectiveRadix,	0 },
 	{ ".loadtable",	1,	2,	&DirectiveLoadTable,0 },
 	{ ".table",		1,	2,	&DirectiveLoadTable,0 },

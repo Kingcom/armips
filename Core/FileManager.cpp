@@ -185,12 +185,17 @@ bool GenericAssemblerFile::seekPhysical(int physicalAddress)
 
 FileManager::FileManager()
 {
-	activeFile = NULL;
+	reset();
 }
 
 FileManager::~FileManager()
 {
 
+}
+
+void FileManager::reset()
+{
+	activeFile = NULL;
 }
 
 bool FileManager::checkActiveFile()
@@ -213,6 +218,12 @@ bool FileManager::openFile(AssemblerFile* file, bool onlyCheck)
 
 	activeFile = file;
 	return activeFile->open(onlyCheck);
+}
+
+void FileManager::addFile(AssemblerFile* file)
+{
+	files.push_back(file);
+	activeFile = file;
 }
 
 void FileManager::closeFile()

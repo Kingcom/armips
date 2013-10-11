@@ -4,7 +4,7 @@
 #include "Core/Common.h"
 #include "MipsMacros.h"
 #include "Core/Directives.h"
-
+#include "Core/FileManager.h"
 CMipsArchitecture Mips;
 
 typedef struct {
@@ -184,7 +184,7 @@ void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstr
 			return;
 		}
 		AddAssemblerCommand(Opcode);
-		Global.RamPos += 4;
+		g_fileManager->advanceMemory(4);
 	}
 	SetIgnoreDelay(false);
 }

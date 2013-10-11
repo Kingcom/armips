@@ -7,6 +7,7 @@
 #include "Util/CommonClasses.h"
 #include "Core/Directives.h"
 #include "Archs/MIPS/Mips.h"
+#include "Core/FileManager.h"
 
 #define ASSEMBLER_MACRO_NESTING_LEVEL		128
 #define ASSEMBLER_INCLUDE_NESTING_LEVEL		64
@@ -159,14 +160,14 @@ void splitLine(std::wstring& line, std::wstring& name, std::wstring& arguments)
 		{
 			return;
 		}
-		name.push_back(line[linePos++]);
+		name += line[linePos++];
 	}
 	
 	while (linePos < line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
 
 	while (linePos < line.size() && line[linePos] != 0)
 	{
-		arguments.push_back(line[linePos++]);
+		arguments += line[linePos++];
 	}
 }
 
@@ -290,7 +291,7 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 	Global.Macros.push_back(Macro);
 }
 
-void LoadAssemblyFile(std::wstring& fileName)
+void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 {
 	tTextData Text;
 	CStringList Arguments;
@@ -306,10 +307,15 @@ void LoadAssemblyFile(std::wstring& fileName)
 	}
 
 	TextFile input;
-	if (input.open(fileName,TextFile::Read) == false)
+	if (input.open(fileName,TextFile::Read,encoding) == false)
 	{
 		Logger::printError(Logger::Error,L"Could not open file");
 		return;
+	}
+
+	if (input.hasGuessedEncoding())
+	{
+		Logger::printError(Logger::Warning,L"No byte order mark found, defaulting to UTF8");
 	}
 
 	while (!input.atEnd())
@@ -357,7 +363,7 @@ bool EncodeAssembly()
 			break;
 		}
 
-		Global.RamPos = 0;
+		g_fileManager->reset();
 		Arch->Revalidate();
 
 #ifdef _DEBUG
@@ -373,7 +379,7 @@ bool EncodeAssembly()
 			}
 
 			Global.Commands[i]->SetFileInfo();
-			Global.areaData.checkAreas(Global.RamPos);
+			Global.areaData.checkAreas();
 
 			if (Global.Commands[i]->Validate() == true)
 				Revalidate = true;
@@ -414,10 +420,10 @@ bool EncodeAssembly()
 	Global.tempData.end();
 	Global.symData.end();
 
-	if (Global.Output.isOpen() == true)
+	if (g_fileManager->hasOpenFile())
 	{
 		Logger::printError(Logger::Warning,L"File not closed");
-		Global.Output.close();
+		g_fileManager->closeFile();
 	}
 
 	return true;

@@ -25,10 +25,10 @@ typedef struct {
 	SymbolData symData;
 	SymbolTable symbolTable;
 	EncodingTable Table;
-	BinaryFile Output;
-	int RamPos;
-	int HeaderSize;
-	bool FileOpened;
+//	BinaryFile Output;
+//	int RamPos;
+//	int HeaderSize;
+//	bool FileOpened;
 	int Section;
 	int Radix;
 	bool Quit;
@@ -49,6 +49,9 @@ typedef enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NO
 
 extern tGlobal Global;
 extern CArchitecture* Arch;
+
+class FileManager;
+extern FileManager* g_fileManager;
 
 std::wstring getFolderNameFromPath(const std::wstring& src);
 std::wstring getFullPathName(const std::wstring& path);

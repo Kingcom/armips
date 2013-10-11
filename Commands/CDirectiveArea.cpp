@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveArea.h"
 #include "Core/Common.h"
+#include "Core/FileManager.h"
 
 CDirectiveArea::CDirectiveArea()
 {
@@ -38,7 +39,7 @@ bool CDirectiveArea::Validate()
 	CStringList List;
 	int NewSize;
 
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 
 	if (Start == true)
 	{

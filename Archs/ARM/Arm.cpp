@@ -5,6 +5,7 @@
 #include "CThumbInstruction.h"
 #include "CArmInstruction.h"
 #include "Commands/CAssemblerLabel.h"
+#include "Core/FileManager.h"
 
 CArmArchitecture Arm;
 
@@ -201,7 +202,7 @@ void CArmArchitecture::AssembleOpcode(const std::wstring& name, const std::wstri
 			return;
 		}
 		AddAssemblerCommand(Opcode);
-		Global.RamPos += Opcode->GetSize();
+		g_fileManager->advanceMemory(Opcode->GetSize());
 	} else {			// arm opcode
 		CArmInstruction* Opcode = new CArmInstruction();
 		if (Opcode->Load((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
@@ -210,7 +211,7 @@ void CArmArchitecture::AssembleOpcode(const std::wstring& name, const std::wstri
 			return;
 		}
 		AddAssemblerCommand(Opcode);
-		Global.RamPos += 4;
+		g_fileManager->advanceMemory(4);
 	}
 }
 

@@ -2,6 +2,7 @@
 #include "CArmInstruction.h"
 #include "Core/Common.h"
 #include "Arm.h"
+#include "Core/FileManager.h"
 
 const char ArmConditions[16][3] = {
 	"eq","ne","cs","cc","mi","pl","vs","vc","hi","ls","ge","lt","gt","le","","nv"
@@ -528,7 +529,7 @@ bool CArmInstruction::Validate()
 {
 	CStringList List;
 
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 	Vars.Opcode.UseNewEncoding = false;
 	Vars.Opcode.UseNewType = false;
 
@@ -643,7 +644,7 @@ bool CArmInstruction::Validate()
 
 			if (Opcode.flags & ARM_PCR)
 			{
-				Vars.Immediate = Vars.Immediate - ((Global.RamPos+8) & ~3);
+				Vars.Immediate = Vars.Immediate - ((g_fileManager->getVirtualAddress()+8) & ~3);
 				if (Vars.Immediate < 0)
 				{
 					Vars.Opcode.NewEncoding = Opcode.encoding ^ 0xC00000;
@@ -692,7 +693,7 @@ bool CArmInstruction::Validate()
 				Logger::queueError(Logger::Error,L"Unable to find literal pool");
 				return false;
 			} else {
-				pos = pos-((Global.RamPos+8) & 0xFFFFFFFD);
+				pos = pos-((g_fileManager->getVirtualAddress()+8) & 0xFFFFFFFD);
 				if (abs(pos) > 4095)
 				{
 					Logger::queueError(Logger::Error,L"Literal pool out of range");
@@ -755,7 +756,7 @@ bool CArmInstruction::Validate()
 		}
 	}
 
-	Global.RamPos += 4;
+	g_fileManager->advanceMemory(4);
 	return false;
 }
 
@@ -917,11 +918,9 @@ void CArmInstruction::writeTempData(TempData& tempData)
 
 void CArmInstruction::WriteInstruction(unsigned int encoding)
 {
-	if (Global.Output.write(&encoding,4) == -1)
-	{
-		Logger::printError(Logger::FatalError,L"No file opened");
-	}
+	g_fileManager->write(&encoding,4);
 }
+
 void CArmInstruction::Encode()
 {
 	unsigned int encoding = Vars.Opcode.UseNewEncoding == true ? Vars.Opcode.NewEncoding : Opcode.encoding;

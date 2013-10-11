@@ -43,13 +43,18 @@ int parseHexString(std::wstring& hex, unsigned char* dest)
 	return hex.size()/2;
 }
 
-bool EncodingTable::load(const std::wstring& fileName, bool sjis)
+bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encoding)
 {
 	unsigned char hexBuffer[MAXHEXLENGTH];
 
 	TextFile input;
-	if (input.open(fileName,TextFile::Read,sjis == true ? TextFile::SJIS : TextFile::UTF8) == false)
+	if (input.open(fileName,TextFile::Read,encoding) == false)
 		return false;
+	
+	if (input.hasGuessedEncoding())
+	{
+		Logger::printError(Logger::Warning,L"No byte order mark found, defaulting to UTF8");
+	}
 
 	hexData.clear();
 	valueData.clear();

@@ -9,10 +9,7 @@
 int wmain(int argc, wchar_t* argv[])
 {
 	Global.Radix = 10;
-	Global.FileOpened = false;
-	Global.HeaderSize = 0;
 	Global.Quit = false;
-	Global.RamPos = 0;
 	Global.Revalidate = true;
 	Global.Section = 0;
 	Global.nocash = false;

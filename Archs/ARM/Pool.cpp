@@ -2,6 +2,7 @@
 #include "Pool.h"
 #include "Arm.h"
 #include "Core/Common.h"
+#include "Core/FileManager.h"
 
 ArmStateCommand::ArmStateCommand(bool state)
 {
@@ -10,7 +11,7 @@ ArmStateCommand::ArmStateCommand(bool state)
 
 bool ArmStateCommand::Validate()
 {
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 	return false;
 }
 
@@ -51,7 +52,7 @@ int ArmPool::AddEntry(int value)
 
 ArmPoolCommand::ArmPoolCommand()
 {
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 	PoolId = Arm.NewPool();
 	Size = 0;
 }
@@ -59,9 +60,9 @@ ArmPoolCommand::ArmPoolCommand()
 bool ArmPoolCommand::Validate()
 {
 	bool Result = false;
-	if (Arm.GetPool(PoolId).GetRamPos() != Global.RamPos)
+	if (Arm.GetPool(PoolId).GetRamPos() != g_fileManager->getVirtualAddress())
 	{
-		RamPos = Global.RamPos;
+		RamPos = g_fileManager->getVirtualAddress();
 		Arm.GetPool(PoolId).SetRamPos(RamPos);
 		Result = true;
 	}
@@ -71,7 +72,7 @@ bool ArmPoolCommand::Validate()
 		Result = true;
 	}
 
-	Global.RamPos += Size*4;
+	g_fileManager->advanceMemory(Size*4);
 	Arm.NextPool();
 	return Result;
 }
@@ -81,9 +82,8 @@ void ArmPoolCommand::Encode()
 	for (int i = 0; i < Size; i++)
 	{
 		int num = Arm.GetPool(PoolId).GetEntry(i);
-		Global.Output.write(&num,4);
+		g_fileManager->write(&num,4);
 	}
-	Global.RamPos += Size*4;
 }
 
 void ArmPoolCommand::writeTempData(TempData& tempData)

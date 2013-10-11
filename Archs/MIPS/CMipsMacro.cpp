@@ -5,6 +5,7 @@
 #include "Core/Common.h"
 #include "Mips.h"
 #include "MipsOpcodes.h"
+#include "Core/FileManager.h"
 
 CMipsMacro::CMipsMacro(int num, tMipsMacroVars& InputVars)
 {
@@ -24,7 +25,7 @@ CMipsMacro::CMipsMacro(int num, tMipsMacroVars& InputVars)
 	Data.rt = InputVars.rt;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
 
-	Global.RamPos += SpaceNeeded;
+	g_fileManager->advanceMemory(SpaceNeeded);
 }
 
 CMipsMacro::~CMipsMacro()

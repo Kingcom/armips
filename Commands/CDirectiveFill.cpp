@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveFill.h"
 #include "Core/Common.h"
+#include "Core/FileManager.h"
 
 CDirectiveFill::CDirectiveFill()
 {
@@ -28,7 +29,7 @@ bool CDirectiveFill::Validate()
 {
 	int NewSize;
 
-	RamPos = Global.RamPos;
+	RamPos = g_fileManager->getVirtualAddress();
 	if (evalExpression(SizeExpression,NewSize,true) == false)
 		return false;
 
@@ -38,7 +39,7 @@ bool CDirectiveFill::Validate()
 			return false;
 	}
 
-	Global.RamPos += NewSize;
+	g_fileManager->advanceMemory(NewSize);
 
 	if (Size != NewSize)
 	{
@@ -57,10 +58,10 @@ void CDirectiveFill::Encode()
 	int n = Size;
 	while (n > 128)
 	{
-		Global.Output.write(ByteBuffer,128);
+		g_fileManager->write(ByteBuffer,128);
 		n -= 128;
 	}
-	Global.Output.write(ByteBuffer,n);
+	g_fileManager->write(ByteBuffer,n);
 }
 
 void CDirectiveFill::writeTempData(TempData& tempData)
