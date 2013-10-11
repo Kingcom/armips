@@ -102,7 +102,7 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 	return true;
 }
 
-void EncodingTable::addEntry(unsigned char* hex, int hexLength, std::wstring& value)
+void EncodingTable::addEntry(unsigned char* hex, int hexLength, const std::wstring& value)
 {
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
@@ -110,6 +110,18 @@ void EncodingTable::addEntry(unsigned char* hex, int hexLength, std::wstring& va
 	entry.valuePos = valueData.size();
 	valueData.append(value);
 	entry.valueLen = value.size();
+
+	entries.push_back(entry);
+}
+
+void EncodingTable::addEntry(unsigned char* hex, int hexLength, wchar_t value)
+{
+	TableEntry entry;
+	entry.hexPos = hexData.append(hex,hexLength);
+	entry.hexLen = hexLength;
+	entry.valuePos = valueData.size();
+	valueData += value;
+	entry.valueLen = 1;
 
 	entries.push_back(entry);
 }

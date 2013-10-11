@@ -9,7 +9,6 @@
 int wmain(int argc, wchar_t* argv[])
 {
 	Global.Radix = 10;
-	Global.Quit = false;
 	Global.Revalidate = true;
 	Global.Section = 0;
 	Global.nocash = false;

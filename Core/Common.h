@@ -25,13 +25,8 @@ typedef struct {
 	SymbolData symData;
 	SymbolTable symbolTable;
 	EncodingTable Table;
-//	BinaryFile Output;
-//	int RamPos;
-//	int HeaderSize;
-//	bool FileOpened;
 	int Section;
 	int Radix;
-	bool Quit;
 	bool Revalidate;
 	bool nocash;
 	bool relativeInclude;
@@ -41,7 +36,6 @@ typedef struct {
 	AreaData areaData;
 	int IncludeNestingLevel;
 	int MacroNestingLevel;
-	CStringList Arguments;
 	int validationPasses;
 } tGlobal;
 

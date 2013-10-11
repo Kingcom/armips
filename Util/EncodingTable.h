@@ -9,7 +9,8 @@ public:
 	~EncodingTable();
 	bool load(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
 	bool isLoaded() { return entries.size() != 0; };
-	void addEntry(unsigned char* hex, int hexLength, std::wstring& value);
+	void addEntry(unsigned char* hex, int hexLength, const std::wstring& value);
+	void addEntry(unsigned char* hex, int hexLength, wchar_t value);
 	void setTerminationEntry(unsigned char* hex, int hexLength);
 	ByteArray encodeString(const std::wstring& str, bool writeTermination = true);
 	ByteArray encodeTermination();
