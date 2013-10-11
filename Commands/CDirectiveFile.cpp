@@ -307,15 +307,15 @@ void CDirectiveFile::InitAlign(ArgumentList& Args)
 		alignment = Arch->GetWordSize();
 	}
 
-	int mod = g_fileManager->getVirtualAddress() % alignment;
-	int num = mod ? alignment-mod : 0;
+	unsigned int mod = g_fileManager->getVirtualAddress() % alignment;
+	unsigned int num = mod ? alignment-mod : 0;
 	g_fileManager->advanceMemory(num);
 }
 
 bool CDirectiveFile::ValidateAlign()
 {
-	int mod = g_fileManager->getVirtualAddress() % alignment;
-	int num = mod ? alignment-mod : 0;
+	unsigned int mod = g_fileManager->getVirtualAddress() % alignment;
+	unsigned int num = mod ? alignment-mod : 0;
 	g_fileManager->advanceMemory(num);
 	return false;
 }
@@ -324,8 +324,8 @@ void CDirectiveFile::EncodeAlign()
 {
 	unsigned char AlignBuffer[128];
 	
-	int mod = g_fileManager->getVirtualAddress() % alignment;
-	int n = mod ? alignment-mod : 0;
+	unsigned int mod = g_fileManager->getVirtualAddress() % alignment;
+	unsigned int n = mod ? alignment-mod : 0;
 	memset(AlignBuffer,0,n > 128 ? 128 : n);
 	while (n > 128)
 	{

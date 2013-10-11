@@ -694,6 +694,7 @@ TextFile::TextFile()
 {
 	handle = NULL;
 	recursion = false;
+	errorRetrieved = false;
 }
 
 TextFile::~TextFile()
@@ -816,7 +817,7 @@ wchar_t TextFile::readCharacter()
 				value &= 0x0F;
 			} else if (value > 0x7F)
 			{
-				// error
+				errorText = formatString(L"One or more invalid UTF-8 characters in this file");
 			}
 
 			for (int i = 0; i < extraBytes; i++)
@@ -824,7 +825,7 @@ wchar_t TextFile::readCharacter()
 				int b = fgetc(handle);
 				if ((b & 0xC0) != 0x80)
 				{
-					// error, handle
+					errorText = formatString(L"One or more invalid UTF-8 characters in this file");
 				}
 
 				value = (value << 6) | (b & 0x3F);
@@ -849,9 +850,10 @@ wchar_t TextFile::readCharacter()
 			value = sjisToUnicode(sjis);
 			if (value == -1)
 			{
-				// error, handle
+				errorText = formatString(L"One or more invalid Shift-JIS characters in this file");
 			}
 		}
+		break;
 	case ASCII:
 		value = fgetc(handle);
 		break;

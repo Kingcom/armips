@@ -34,6 +34,9 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 	std::wstring Buffer = Input.readLine();
 	dest = L"";
 
+	if (Input.hasError())
+		Logger::printError(Logger::Warning,Input.getErrorText());
+
 	int InputPos = 0;
 
 	while (InputPos < Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
@@ -313,11 +316,6 @@ void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 		return;
 	}
 
-	if (input.hasGuessedEncoding())
-	{
-		Logger::printError(Logger::Warning,L"No byte order mark found, defaulting to UTF8");
-	}
-
 	while (!input.atEnd())
 	{
 		Global.FileInfo.LineNumber++;
@@ -411,9 +409,9 @@ bool EncodeAssembly()
 		}
 
 		Global.Commands[i]->SetFileInfo();
-		Global.Commands[i]->Encode();
 		Global.Commands[i]->writeTempData(Global.tempData);
 		Global.Commands[i]->writeSymData(Global.symData);
+		Global.Commands[i]->Encode();
 		delete Global.Commands[i];
 	}
 

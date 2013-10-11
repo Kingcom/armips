@@ -64,6 +64,7 @@ int wmain(int argc, wchar_t* argv[])
 		Logger::printLine("Aborting.");
 		return 1;
 	}
+
 	if (EncodeAssembly() == true)
 	{
 		Logger::printLine("Done.");

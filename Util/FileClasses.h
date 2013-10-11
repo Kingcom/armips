@@ -65,6 +65,9 @@ public:
 	void writeLine(const std::string& line);
 	void writeLines(StringList& list);
 	void writeFormat(wchar_t* format, ...);
+
+	bool hasError() { return errorText.size() != 0 && !errorRetrieved; };
+	const std::wstring& getErrorText() { errorRetrieved = true; return errorText; };
 private:
 	FILE* handle;
 	std::wstring fileName;
@@ -73,6 +76,8 @@ private:
 	bool recursion;
 	bool guessedEncoding;
 	long size_;
+	std::wstring errorText;
+	bool errorRetrieved;
 };
 
 TextFile::Encoding getEncodingFromString(const std::wstring& str);

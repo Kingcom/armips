@@ -160,10 +160,10 @@ bool GenericAssemblerFile::write(void* data, int length)
 	return len == length;
 }
 
-bool GenericAssemblerFile::seekVirtual(int virtualAddress)
+bool GenericAssemblerFile::seekVirtual(size_t virtualAddress)
 {
 	this->virtualAddress = virtualAddress;
-	int physicalAddress = virtualAddress-headerSize;
+	size_t physicalAddress = virtualAddress-headerSize;
 
 	if (isOpen())
 		handle.setPos(physicalAddress);
@@ -171,7 +171,7 @@ bool GenericAssemblerFile::seekVirtual(int virtualAddress)
 	return true;
 }
 
-bool GenericAssemblerFile::seekPhysical(int physicalAddress)
+bool GenericAssemblerFile::seekPhysical(size_t physicalAddress)
 {
 	virtualAddress = physicalAddress+headerSize;
 
@@ -252,28 +252,28 @@ bool FileManager::write(void* data, int length)
 	return activeFile->write(data,length);
 }
 
-int FileManager::getVirtualAddress()
+size_t FileManager::getVirtualAddress()
 {
 	if (checkActiveFile() == false)
 		return -1;
 	return activeFile->getVirtualAddress();
 }
 
-int FileManager::getPhysicalAddress()
+size_t FileManager::getPhysicalAddress()
 {
 	if (checkActiveFile() == false)
 		return -1;
 	return activeFile->getPhysicalAddress();
 }
 
-bool FileManager::seekVirtual(int virtualAddress)
+bool FileManager::seekVirtual(size_t virtualAddress)
 {
 	if (checkActiveFile() == false)
 		return false;
 	return activeFile->seekVirtual(virtualAddress);
 }
 
-bool FileManager::seekPhysical(int virtualAddress)
+bool FileManager::seekPhysical(size_t virtualAddress)
 {
 	if (checkActiveFile() == false)
 		return false;

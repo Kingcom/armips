@@ -10,10 +10,10 @@ public:
 	virtual void close() = 0;
 	virtual bool isOpen() = 0;
 	virtual bool write(void* data, int length) = 0;
-	virtual int getVirtualAddress() = 0;
-	virtual int getPhysicalAddress() = 0;
-	virtual bool seekVirtual(int virtualAddress) = 0;
-	virtual bool seekPhysical(int physicalAddress) = 0;
+	virtual size_t getVirtualAddress() = 0;
+	virtual size_t getPhysicalAddress() = 0;
+	virtual bool seekVirtual(size_t virtualAddress) = 0;
+	virtual bool seekPhysical(size_t physicalAddress) = 0;
 };
 
 class GenericAssemblerFile: public AssemblerFile
@@ -26,10 +26,10 @@ public:
 	virtual void close() { handle.close(); };
 	virtual bool isOpen() { return handle.isOpen(); };
 	virtual bool write(void* data, int length);
-	virtual int getVirtualAddress() { return virtualAddress; };
-	virtual int getPhysicalAddress() { return virtualAddress-headerSize; };
-	virtual bool seekVirtual(int virtualAddress);
-	virtual bool seekPhysical(int physicalAddress);
+	virtual size_t getVirtualAddress() { return virtualAddress; };
+	virtual size_t getPhysicalAddress() { return virtualAddress-headerSize; };
+	virtual bool seekVirtual(size_t virtualAddress);
+	virtual bool seekPhysical(size_t physicalAddress);
 
 	const std::wstring& getFileName() { return fileName; };
 	const std::wstring& getOriginalFileName() { return originalName; };
@@ -41,7 +41,7 @@ private:
 	Mode mode;
 	int originalHeaderSize;
 	int headerSize;
-	int virtualAddress;
+	size_t virtualAddress;
 	BinaryFile handle;
 	std::wstring fileName;
 	std::wstring originalName;
@@ -59,10 +59,10 @@ public:
 	bool hasOpenFile() { return activeFile != NULL; };
 	void closeFile();
 	bool write(void* data, int length);
-	int getVirtualAddress();
-	int getPhysicalAddress();
-	bool seekVirtual(int virtualAddress);
-	bool seekPhysical(int physicalAddress);
+	size_t getVirtualAddress();
+	size_t getPhysicalAddress();
+	bool seekVirtual(size_t virtualAddress);
+	bool seekPhysical(size_t physicalAddress);
 	bool advanceMemory(int bytes);
 	AssemblerFile* getOpenFile() { return activeFile; };
 private:

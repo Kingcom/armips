@@ -50,11 +50,6 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 	TextFile input;
 	if (input.open(fileName,TextFile::Read,encoding) == false)
 		return false;
-	
-	if (input.hasGuessedEncoding())
-	{
-		Logger::printError(Logger::Warning,L"No byte order mark found, defaulting to UTF8");
-	}
 
 	hexData.clear();
 	valueData.clear();

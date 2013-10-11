@@ -15,13 +15,13 @@ std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 	switch (type)
 	{
 	case Warning:
-		return formatString(L"%s(%d) warning: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) warning: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
 	case Error:
-		return formatString(L"%s(%d) error: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) error: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
 	case ERROR_FATALERROR:
-		return formatString(L"%s(%d) fatal error: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) fatal error: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
 	case ERROR_NOTICE:
-		return formatString(L"%s(%d) notice: %s",fileName,Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) notice: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
 	}
 
 	return L"";
