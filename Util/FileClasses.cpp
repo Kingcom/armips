@@ -627,6 +627,12 @@ BinaryFile::~BinaryFile()
 
 bool BinaryFile::open(const std::wstring& fileName, Mode mode)
 {
+	setFileName(fileName);
+	return open(mode);
+}
+
+bool BinaryFile::open(Mode mode)
+{
 	if (isOpen())
 		close();
 

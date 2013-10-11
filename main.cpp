@@ -36,7 +36,7 @@ int wmain(int argc, wchar_t* argv[])
 
 	if (fileExists(arguments[1]) == false)
 	{
-		Logger::printLine("File %ls not found\n",arguments[1].c_str());
+		Logger::printLine("File %s not found\n",arguments[1].c_str());
 		return 1;
 	}
 
@@ -56,7 +56,7 @@ int wmain(int argc, wchar_t* argv[])
 			Global.warningAsError = true;
 			argpos += 1;
 		} else {
-			Logger::printLine("Invalid parameter %ls\n",arguments[argpos].c_str());
+			Logger::printLine("Invalid parameter %s\n",arguments[argpos].c_str());
 			return 1;
 		}
 	}

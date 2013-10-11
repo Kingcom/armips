@@ -11,17 +11,22 @@ public:
 	~BinaryFile();
 
 	bool open(const std::wstring& fileName, Mode mode);
+	bool open(Mode mode);
 	bool isOpen() { return handle != NULL; };
 	bool atEnd() { return isOpen() && mode != Write && ftell(handle) == size_; };
 	void setPos(long pos) { if (isOpen()) fseek(handle,pos,SEEK_SET); };
 	long pos() { return isOpen() ? ftell(handle) : -1; }
 	long size() { return size_; };
 	void close();
+	
+	void setFileName(const std::wstring& name) { fileName = name; };
+	const std::wstring& getFileName() { return fileName; };
 
 	int read(void* dest, int length);
 	int write(void* source, int length);
 private:
 	FILE* handle;
+	std::wstring fileName;
 	Mode mode;
 	long size_;
 };

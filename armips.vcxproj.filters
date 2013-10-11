@@ -105,6 +105,9 @@
     <ClCompile Include="Core\Misc.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\FileManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -208,6 +211,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Misc.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\FileManager.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
