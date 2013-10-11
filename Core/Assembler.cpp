@@ -55,16 +55,16 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 			break;
 		case '"':	// string
 			dest += towlower(Buffer[InputPos++]);
-			while (Buffer[InputPos] != '"')
+			while (InputPos < Buffer.size() && Buffer[InputPos] != '"')
 			{
-				if (Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '"')
+				if (InputPos+1 < Buffer.size() && Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '"')
 				{
 					dest += '\\';
 					dest += '"';
 					InputPos += 2;
 					continue;
 				}
-				if (Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '\\')
+				if (InputPos+1 < Buffer.size() && Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '\\')
 				{
 					dest += '\\';
 					dest += '\\';
@@ -77,6 +77,11 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 					return false;
 				}
 				dest += Buffer[InputPos++];
+			}
+			if (InputPos == Buffer.size())
+			{
+				Logger::printError(Logger::Error,L"Unexpected end of line in string constant");
+				return false;
 			}
 			dest += towlower(Buffer[InputPos++]);
 			break;

@@ -75,6 +75,22 @@ bool DirectiveData(ArgumentList& List, int flags)
 
 	if (flags & DIRECTIVE_ASCII) ascii = true;
 
+	bool hasNonAscii = false;
+	for (size_t i = 0; i < List.size(); i++)
+	{
+		if (List[i].isString)
+		{
+			for (size_t k = 0; k < List[i].text.size(); k++)
+			{
+				if (List[i].text[k] >= 0x80)
+					hasNonAscii = true;
+			}
+		}
+	}
+
+	if (hasNonAscii)
+		Logger::printError(Logger::Warning,L"Non-ASCII character in data directive. Use .string instead");
+
 	CDirectiveData* Data = new CDirectiveData(List,DataSize,ascii);
 	AddAssemblerCommand(Data);
 	return true;
