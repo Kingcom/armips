@@ -131,6 +131,7 @@ void Logger::queueError(ErrorType type, const wchar_t* format, ...)
 		return;
 	va_end(args);
 
+	result = buffer;
 	queueError(type,result);
 }
 

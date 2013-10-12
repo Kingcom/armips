@@ -5,6 +5,8 @@
 #include "MipsMacros.h"
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
+#include "ELF/PspFile.h"
+
 CMipsArchitecture Mips;
 
 typedef struct {
@@ -151,9 +153,17 @@ bool MipsDirectiveFixLoadDelay(ArgumentList& List, int flags)
 	return true;
 }
 
+bool MipsDirectiveLoadElf(ArgumentList& list, int flags)
+{
+	DirectiveLoadPspElf* command = new DirectiveLoadPspElf(list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
 const tDirective MipsDirectives[] = {
 	{ L".resetdelay",	0,	0,	&MipsDirectiveResetDelay,	0 },
 	{ L".fixloaddelay",	0,	0,	&MipsDirectiveFixLoadDelay,	0 },
+	{ L".loadelf",		1,	2,	&MipsDirectiveLoadElf,		0 },
 	{ NULL,				0,	0,	NULL,	0 }
 };
 

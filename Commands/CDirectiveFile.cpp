@@ -163,6 +163,7 @@ void CDirectivePosition::exec()
 
 bool CDirectivePosition::Validate()
 {
+	Arch->NextSection();
 	exec();
 	return false;
 }
@@ -242,6 +243,7 @@ CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
 
 bool CDirectiveIncbin::Validate()
 {
+	Arch->NextSection();
 	g_fileManager->advanceMemory(loadSize);
 	return false;
 }
@@ -302,6 +304,7 @@ int CDirectiveAlign::computePadding()
 
 bool CDirectiveAlign::Validate()
 {
+	Arch->NextSection();
 	int num = computePadding();
 	g_fileManager->advanceMemory(num);
 	return false;

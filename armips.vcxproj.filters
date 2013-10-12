@@ -108,6 +108,12 @@
     <ClCompile Include="Core\FileManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\MIPS\ELF\ElfFile.cpp">
+      <Filter>Archs\MIPS\ELF</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\ELF\PspFile.cpp">
+      <Filter>Archs\MIPS\ELF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -216,6 +222,15 @@
     <ClInclude Include="Core\FileManager.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Archs\MIPS\ELF\ElfFile.h">
+      <Filter>Archs\MIPS\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\ELF\ElfTypes.h">
+      <Filter>Archs\MIPS\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\ELF\PspFile.h">
+      <Filter>Archs\MIPS\ELF</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Archs">
@@ -238,6 +253,9 @@
     </Filter>
     <Filter Include="Archs\Z80">
       <UniqueIdentifier>{30a41603-076b-40f9-8082-d5fdfa8bb8e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archs\MIPS\ELF">
+      <UniqueIdentifier>{4de29050-e5ba-46ab-abdc-2834de860504}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

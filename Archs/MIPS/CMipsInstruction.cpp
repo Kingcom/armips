@@ -301,24 +301,24 @@ bool CMipsInstruction::Validate()
 	}
 
 	// check load delay
-	if (Mips.GetLoadDelay() && IgnoreLoadDelay == false && !(Opcode.flags & MO_IGNORERTD))
+	if ((Mips.GetVersion() & MARCH_PSX) && Mips.GetLoadDelay() && IgnoreLoadDelay == false && !(Opcode.flags & MO_IGNORERTD))
 	{
 		bool fix = false;
 
 		if ((Opcode.flags & O_RD) && Vars.rd.Number == Mips.GetLoadDelayRegister()
 			|| (Opcode.flags & O_RDT) && Vars.rd.Number == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %s may not be available due to load delay",Vars.rd.Name);
+			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Vars.rd.Name);
 			fix = true;
 		} else if ((Opcode.flags & O_RS) && Vars.rs.Number == Mips.GetLoadDelayRegister()
 			|| (Opcode.flags & O_RSD) && Vars.rs.Number == Mips.GetLoadDelayRegister()
 			|| (Opcode.flags & O_RST) && Vars.rs.Number == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %s may not be available due to load delay",Vars.rs.Name);
+			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Vars.rs.Name);
 			fix = true;
 		} else if ((Opcode.flags & O_RT) && Vars.rt.Number == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %s may not be available due to load delay",Vars.rt.Name);
+			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Vars.rt.Name);
 			fix = true;
 		}
 
@@ -343,7 +343,8 @@ bool CMipsInstruction::Validate()
 	Mips.SetDelaySlot(Opcode.flags & MO_DELAY ? true : false);
 
 	// now check if this opcode causes a load delay
-	Mips.SetLoadDelay(Opcode.flags & MO_DELAYRT ? true : false,Vars.rt.Number);
+	if (Mips.GetVersion() & MARCH_PSX)
+		Mips.SetLoadDelay(Opcode.flags & MO_DELAYRT ? true : false,Vars.rt.Number);
 	
 	g_fileManager->advanceMemory(4);
 	return Result;

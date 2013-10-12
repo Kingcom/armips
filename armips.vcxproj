@@ -88,6 +88,9 @@
     <ClInclude Include="Archs\ARM\ThumbOpcodes.h" />
     <ClInclude Include="Archs\MIPS\CMipsInstruction.h" />
     <ClInclude Include="Archs\MIPS\CMipsMacro.h" />
+    <ClInclude Include="Archs\MIPS\ELF\ElfFile.h" />
+    <ClInclude Include="Archs\MIPS\ELF\ElfTypes.h" />
+    <ClInclude Include="Archs\MIPS\ELF\PspFile.h" />
     <ClInclude Include="Archs\MIPS\Mips.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
@@ -126,6 +129,8 @@
     <ClCompile Include="Archs\ARM\ThumbOpcodes.cpp" />
     <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp" />
     <ClCompile Include="Archs\MIPS\CMipsMacro.cpp" />
+    <ClCompile Include="Archs\MIPS\ELF\ElfFile.cpp" />
+    <ClCompile Include="Archs\MIPS\ELF\PspFile.cpp" />
     <ClCompile Include="Archs\MIPS\Mips.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />

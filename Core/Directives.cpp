@@ -668,7 +668,7 @@ const tDirective Directives[] = {
 	{ L".strn",				1,	-1,	&DirectiveString,			DIRECTIVE_STR_NOTERMINATION },
 	{ L".psx",				0,	0,	&DirectivePsx,				0 },
 	{ L".ps2",				0,	0,	&DirectivePs2,				DIRECTIVE_DISABLED },
-	{ L".psp",				0,	0,	&DirectivePsp,				DIRECTIVE_DISABLED },
+	{ L".psp",				0,	0,	&DirectivePsp,				0 },
 	{ L".gba",				0,	0,	&DirectiveGba,				0 },
 	{ L".nds",				0,	0,	&DirectiveNds,				0 },
 	{ L".gb",				0,	0,	&DirectiveGb,				DIRECTIVE_DISABLED },
