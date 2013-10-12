@@ -53,11 +53,11 @@ const tArmRegister ArmCopNumber[] = {
 };
 
 const tDirective ArmDirectives[] = {
-	{ ".thumb",			0,	0,	&ArmDirectiveThumb,		0 },
-	{ ".arm",			0,	0,	&ArmDirectiveArm,		0 },
-	{ ".pool",			0,	0,	&ArmDirectivePool,		0 },
-	{ ".msg",			1,	1,	&ArmDirectiveMsg,		0 },
-	{ ".ideasmsg",		1,	2,	&ArmDirectiveIdeasMsg,	0 },
+	{ L".thumb",		0,	0,	&ArmDirectiveThumb,		0 },
+	{ L".arm",			0,	0,	&ArmDirectiveArm,		0 },
+	{ L".pool",			0,	0,	&ArmDirectivePool,		0 },
+	{ L".msg",			1,	1,	&ArmDirectiveMsg,		0 },
+	{ L".ideasmsg",		1,	2,	&ArmDirectiveIdeasMsg,	0 },
 	{ NULL,				0,	0,	NULL,					0 }
 };
 

@@ -2,25 +2,25 @@
 #include "Commands/CDirectiveMessage.h"
 #include "Core/Common.h"
 
-bool CDirectiveMessage::Load(ArgumentList &Args, int type)
+bool CDirectiveMessage::Load(ArgumentList &Args, Type type)
 {
 	message = Args[0].text;
-	ErrorType = type;
+	errorType = type;
 	return true;
 }
 
 
 bool CDirectiveMessage::Validate()
 {
-	switch (ErrorType)
+	switch (errorType)
 	{
-	case USERMESSAGE_WARNING:
+	case Warning:
 		Logger::queueError(Logger::Warning,L"%s",message.c_str());
 		break;
-	case USERMESSAGE_ERROR:
+	case Error:
 		Logger::queueError(Logger::Error,L"%s",message.c_str());
 		break;
-	case USERMESSAGE_NOTICE:
+	case Notice:
 		Logger::queueError(Logger::Notice,L"%s",message.c_str());
 		break;
 	}

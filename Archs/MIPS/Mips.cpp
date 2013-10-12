@@ -152,8 +152,8 @@ bool MipsDirectiveFixLoadDelay(ArgumentList& List, int flags)
 }
 
 const tDirective MipsDirectives[] = {
-	{ ".resetdelay",	0,	0,	&MipsDirectiveResetDelay,	0 },
-	{ ".fixloaddelay",	0,	0,	&MipsDirectiveFixLoadDelay,	0 },
+	{ L".resetdelay",	0,	0,	&MipsDirectiveResetDelay,	0 },
+	{ L".fixloaddelay",	0,	0,	&MipsDirectiveFixLoadDelay,	0 },
 	{ NULL,				0,	0,	NULL,	0 }
 };
 

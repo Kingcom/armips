@@ -3,21 +3,18 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Common.h"
 
-#define USERMESSAGE_WARNING		0
-#define USERMESSAGE_ERROR		1
-#define USERMESSAGE_NOTICE		2
-
 class CDirectiveMessage: public CAssemblerCommand
 {
 public:
-	CDirectiveMessage() {ErrorType = -1; };
-	bool Load(ArgumentList& Args, int type);
+	enum Type { Invalid, Warning, Error, Notice };
+	CDirectiveMessage() { errorType = Invalid; };
+	bool Load(ArgumentList& Args, Type type);
 	virtual bool Validate();
 	virtual void Encode() {};
 	virtual void writeTempData(TempData& tempData) { };
 private:
 	std::wstring message;
-	int ErrorType;
+	Type errorType;
 };
 
 class CDirectiveSym: public CAssemblerCommand

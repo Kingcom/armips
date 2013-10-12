@@ -132,7 +132,7 @@ ByteArray ByteArray::mid(int start, int length)
 	return ret;
 }
 
-ByteArray ByteArray::fromFile(const std::wstring& fileName)
+ByteArray ByteArray::fromFile(const std::wstring& fileName, int start, int size)
 {
 	ByteArray ret;
 	
@@ -142,12 +142,22 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName)
 
 	fseek(input,0,SEEK_END);
 	int fileSize = ftell(input);
-	fseek(input,0,SEEK_SET);
 
-	ret.grow(fileSize);
-	ret.size_ = fileSize;
+	if (start >= fileSize)
+	{
+		fclose(input);
+		return ret;
+	}
 
-	fread(ret.data(),1,fileSize,input);
+	if (size == -1 || start+size > fileSize)
+		size = fileSize-start;
+
+	fseek(input,start,SEEK_SET);
+
+	ret.grow(size);
+	ret.size_ = size;
+
+	fread(ret.data(),1,size,input);
 	fclose(input);
 
 	return ret;

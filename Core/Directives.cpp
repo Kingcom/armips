@@ -15,27 +15,67 @@
 #include "Core/MathParser.h"
 #include "Util/Util.h"
 
-bool DirectiveFile(ArgumentList& List, int flags)
+bool DirectiveOpen(ArgumentList& list, int flags)
 {
-	eDirectiveFileMode value;
-
-	switch (flags & DIRECTIVE_PARAMFIELD)
+	if (list.size() == 2)
 	{
-	case DIRECTIVE_OPEN:
-		if (List.size() == 3) value = DIRECTIVEFILE_COPY; else value = DIRECTIVEFILE_OPEN;
-		break;
-	case DIRECTIVE_CREATE:		value = DIRECTIVEFILE_CREATE; break;
-	case DIRECTIVE_CLOSE:		value = DIRECTIVEFILE_CLOSE; break;
-	case DIRECTIVE_ORG:			value = DIRECTIVEFILE_ORG; break;
-	case DIRECTIVE_ORGA:		value = DIRECTIVEFILE_ORGA; break;
-	case DIRECTIVE_INCBIN:		value = DIRECTIVEFILE_INCBIN; break;
-	case DIRECTIVE_ALIGN:		value = DIRECTIVEFILE_ALIGN; break;
-	case DIRECTIVE_HEADERSIZE:	value = DIRECTIVEFILE_HEADERSIZE; break;
-	default:					return false;
+		// open
+		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Open,list);
+		AddAssemblerCommand(command);
+	} else {
+		// copy
+		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Copy,list);
+		AddAssemblerCommand(command);
 	}
+	return true;
+}
 
-	CDirectiveFile* File = new CDirectiveFile(value,List);
-	AddAssemblerCommand(File);
+bool DirectiveCreate(ArgumentList& list, int flags)
+{
+	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Create,list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
+bool DirectiveClose(ArgumentList& list, int flags)
+{
+	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Close,list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
+bool DirectiveOrg(ArgumentList& list, int flags)
+{
+	CDirectivePosition* command = new CDirectivePosition(CDirectivePosition::Virtual,list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
+bool DirectiveOrga(ArgumentList& list, int flags)
+{
+	CDirectivePosition* command = new CDirectivePosition(CDirectivePosition::Physical,list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
+bool DirectiveIncbin(ArgumentList& list, int flags)
+{
+	CDirectiveIncbin* command = new CDirectiveIncbin(list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
+bool DirectiveAlign(ArgumentList& list, int flags)
+{
+	CDirectiveAlign* command = new CDirectiveAlign(list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
+bool DirectiveHeaderSize(ArgumentList& list, int flags)
+{
+	CDirectiveHeaderSize* command = new CDirectiveHeaderSize(list);
+	AddAssemblerCommand(command);
 	return true;
 }
 
@@ -62,18 +102,13 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 
 bool DirectiveData(ArgumentList& List, int flags)
 {
-	int DataSize;
 	bool ascii = false;
 
-	switch (flags & (DIRECTIVE_DATA8|DIRECTIVE_DATA16|DIRECTIVE_DATA32))
+	if (flags & DIRECTIVE_DATA_ASCII)
 	{
-	case DIRECTIVE_DATA8:	DataSize = 1; break;
-	case DIRECTIVE_DATA16:	DataSize = 2; break;
-	case DIRECTIVE_DATA32:	DataSize = 4; break;
-	default: Logger::printError(Logger::Error,L"Invalid data directive"); return false;;
+		ascii = true;
+		flags &= ~DIRECTIVE_DATA_ASCII;
 	}
-
-	if (flags & DIRECTIVE_ASCII) ascii = true;
 
 	bool hasNonAscii = false;
 	for (size_t i = 0; i < List.size(); i++)
@@ -91,7 +126,7 @@ bool DirectiveData(ArgumentList& List, int flags)
 	if (hasNonAscii)
 		Logger::printError(Logger::Warning,L"Non-ASCII character in data directive. Use .string instead");
 
-	CDirectiveData* Data = new CDirectiveData(List,DataSize,ascii);
+	CDirectiveData* Data = new CDirectiveData(List,flags,ascii);
 	AddAssemblerCommand(Data);
 	return true;
 }
@@ -172,7 +207,7 @@ bool DirectiveString(ArgumentList& List, int flags)
 		}
 	}
 
-	if ((flags & DIRECTIVE_NOTERMINATION) == 0)
+	if ((flags & DIRECTIVE_STR_NOTERMINATION) == 0)
 	{
 		ByteArray data = Global.Table.encodeTermination();
 		for (int i = 0; i < data.size(); i++)
@@ -301,18 +336,18 @@ bool DirectiveConditional(ArgumentList& List, int flags)
 {
 	int value;
 
-	switch (flags & DIRECTIVE_PARAMFIELD)
+	switch (flags)
 	{
-	case DIRECTIVE_IF:			value = CONDITIONAL_IF; break;
-	case DIRECTIVE_ELSE:		value = CONDITIONAL_ELSE; break;
-	case DIRECTIVE_ELSEIF:		value = CONDITIONAL_ELSEIF; break;
-	case DIRECTIVE_ENDIF:		value = CONDITIONAL_ENDIF; break;
-	case DIRECTIVE_IFDEF:		value = CONDITIONAL_IFDEF; break;
-	case DIRECTIVE_IFNDEF:		value = CONDITIONAL_IFNDEF; break;
-	case DIRECTIVE_ELSEIFDEF:	value = CONDITIONAL_ELSEIFDEF; break;
-	case DIRECTIVE_ELSEIFNDEF:	value = CONDITIONAL_ELSEIFNDEF; break;
-	case DIRECTIVE_IFARM:		value = CONDITIONAL_IFARM; break;
-	case DIRECTIVE_IFTHUMB:		value = CONDITIONAL_IFTHUMB; break;
+	case DIRECTIVE_COND_IF:			value = CONDITIONAL_IF; break;
+	case DIRECTIVE_COND_ELSE:		value = CONDITIONAL_ELSE; break;
+	case DIRECTIVE_COND_ELSEIF:		value = CONDITIONAL_ELSEIF; break;
+	case DIRECTIVE_COND_ENDIF:		value = CONDITIONAL_ENDIF; break;
+	case DIRECTIVE_COND_IFDEF:		value = CONDITIONAL_IFDEF; break;
+	case DIRECTIVE_COND_IFNDEF:		value = CONDITIONAL_IFNDEF; break;
+	case DIRECTIVE_COND_ELSEIFDEF:	value = CONDITIONAL_ELSEIFDEF; break;
+	case DIRECTIVE_COND_ELSEIFNDEF:	value = CONDITIONAL_ELSEIFNDEF; break;
+	case DIRECTIVE_COND_IFARM:		value = CONDITIONAL_IFARM; break;
+	case DIRECTIVE_COND_IFTHUMB:	value = CONDITIONAL_IFTHUMB; break;
 	default: return false;
 	}
 
@@ -331,9 +366,9 @@ bool DirectiveArea(ArgumentList& List, int flags)
 {
 	CDirectiveArea* Command;
 
-	switch (flags & DIRECTIVE_PARAMFIELD)
+	switch (flags)
 	{
-	case DIRECTIVE_AREASTART:
+	case DIRECTIVE_AREA_START:
 		Command = new CDirectiveArea();
 		if (Command->LoadStart(List) == false)
 		{
@@ -341,7 +376,7 @@ bool DirectiveArea(ArgumentList& List, int flags)
 			return false;
 		}
 		break;
-	case DIRECTIVE_AREAEND:
+	case DIRECTIVE_AREA_END:
 		Command = new CDirectiveArea();
 		if (Command->LoadEnd() == false)
 		{
@@ -359,13 +394,13 @@ bool DirectiveArea(ArgumentList& List, int flags)
 
 bool DirectiveMessage(ArgumentList& List, int flags)
 {
-	int value;
+	CDirectiveMessage::Type value;
 
-	switch (flags & DIRECTIVE_PARAMFIELD)
+	switch (flags)
 	{
-	case DIRECTIVE_WARNING:		value = USERMESSAGE_WARNING; break;
-	case DIRECTIVE_ERROR:		value = USERMESSAGE_ERROR; break;
-	case DIRECTIVE_NOTICE:		value = USERMESSAGE_NOTICE; break;
+	case DIRECTIVE_MSG_WARNING:		value = CDirectiveMessage::Warning;	break;
+	case DIRECTIVE_MSG_ERROR:		value = CDirectiveMessage::Error;	break;
+	case DIRECTIVE_MSG_NOTICE:		value = CDirectiveMessage::Notice;	break;
 	default: return false;
 	}
 
@@ -528,7 +563,7 @@ bool executeDirective(const tDirective& directive, const std::wstring& args)
 		return false;
 	}
 
-	if (directive.maxparam < arguments.size())
+	if (directive.maxparam != -1 && directive.maxparam < arguments.size())
 	{
 		Logger::printError(Logger::Error,L"Too many parameters (max %d)",
 			directive.maxparam);
@@ -540,20 +575,18 @@ bool executeDirective(const tDirective& directive, const std::wstring& args)
 		Arch->NextSection();
 	}
 
-	return directive.Function(arguments,directive.Flags);
+	return directive.Function(arguments,directive.Flags & DIRECTIVE_USERMASK);
 }
 
 int getDirective(const tDirective* DirectiveSet, const std::wstring& name)
 {
-	std::string utf8 = convertWStringToUtf8(name);
-
 	int num = -1;
 	for (int z = 0; DirectiveSet[z].name != NULL; z++)
 	{
 		if (DirectiveSet[z].Flags & DIRECTIVE_DISABLED) continue;
 		if (DirectiveSet[z].Flags & DIRECTIVE_NOCASHOFF && Global.nocash == true) continue;
 		if (DirectiveSet[z].Flags & DIRECTIVE_NOCASHON && Global.nocash == false) continue;
-		if (strcmp(utf8.c_str(),DirectiveSet[z].name) == 0)
+		if (wcscmp(name.c_str(),DirectiveSet[z].name) == 0)
 		{
 			num = z;
 			break;
@@ -572,86 +605,84 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 
 
 const tDirective Directives[] = {
-	{ ".open",		2,	3,	&DirectiveFile,		DIRECTIVE_OPEN },
-	{ ".openfile",	2,	3,	&DirectiveFile,		DIRECTIVE_OPEN },
-	{ ".create",	2,	2,	&DirectiveFile,		DIRECTIVE_CREATE },
-	{ ".createfile",2,	2,	&DirectiveFile,		DIRECTIVE_CREATE },
-	{ ".close",		0,	0,	&DirectiveFile,		DIRECTIVE_CLOSE },
-	{ ".closefile",	0,	0,	&DirectiveFile,		DIRECTIVE_CLOSE },
-	{ ".incbin",	1,	1,	&DirectiveFile,		DIRECTIVE_INCBIN },
-	{ ".import",	1,	1,	&DirectiveFile,		DIRECTIVE_INCBIN },
-	{ ".org",		1,	1,	&DirectiveFile,		DIRECTIVE_ORG },
-	{ "org",		1,	1,	&DirectiveFile,		DIRECTIVE_ORG },
-	{ ".orga",		1,	1,	&DirectiveFile,		DIRECTIVE_ORGA },
-	{ "orga",		1,	1,	&DirectiveFile,		DIRECTIVE_ORGA },
-	{ ".align",		0,	1,	&DirectiveFile,		DIRECTIVE_ALIGN },
-	{ ".headersize",1,	1,	&DirectiveFile,		DIRECTIVE_HEADERSIZE },
+	{ L".open",				2,	3,	&DirectiveOpen,				0 },
+	{ L".openfile",			2,	3,	&DirectiveOpen,				0 },
+	{ L".create",			2,	2,	&DirectiveCreate,			0 },
+	{ L".createfile",		2,	2,	&DirectiveCreate,			0 },
+	{ L".close",			0,	0,	&DirectiveClose,			0 },
+	{ L".closefile",		0,	0,	&DirectiveClose,			0 },
+	{ L".incbin",			1,	3,	&DirectiveIncbin,			0 },
+	{ L".import",			1,	3,	&DirectiveIncbin,			0 },
+	{ L".org",				1,	1,	&DirectiveOrg,				0 },
+	{ L"org",				1,	1,	&DirectiveOrg,				0 },
+	{ L".orga",				1,	1,	&DirectiveOrga,				0 },
+	{ L"orga",				1,	1,	&DirectiveOrga,				0 },
+	{ L".align",			0,	1,	&DirectiveAlign,			0 },
+	{ L".headersize",		1,	1,	&DirectiveHeaderSize,		0 },
 
-	{ ".fill",		1,	2,	&DirectiveFill,		0 },
-	{ "defs",		1,	2,	&DirectiveFill,		0 },
+	{ L".fill",				1,	2,	&DirectiveFill,				0 },
+	{ L"defs",				1,	2,	&DirectiveFill,				0 },
 
-	{ ".byte",		1,	256,&DirectiveData,		DIRECTIVE_DATA8 },
-	{ ".halfword",	1,	256,&DirectiveData,		DIRECTIVE_DATA16 },
-	{ ".word",		1,	256,&DirectiveData,		DIRECTIVE_DATA32 },
-	{ ".db",		1,	256,&DirectiveData,		DIRECTIVE_DATA8 },
-	{ ".dh",		1,	256,&DirectiveData,		DIRECTIVE_DATA16|DIRECTIVE_NOCASHOFF },
-	{ ".dw",		1,	256,&DirectiveData,		DIRECTIVE_DATA32|DIRECTIVE_NOCASHOFF },
-	{ ".dw",		1,	256,&DirectiveData,		DIRECTIVE_DATA16|DIRECTIVE_NOCASHON },
-	{ ".dd",		1,	256,&DirectiveData,		DIRECTIVE_DATA32|DIRECTIVE_NOCASHON },
-	{ ".dcb",		1,	256,&DirectiveData,		DIRECTIVE_DATA8 },
-	{ ".dcw",		1,	256,&DirectiveData,		DIRECTIVE_DATA16 },
-	{ ".dcd",		1,	256,&DirectiveData,		DIRECTIVE_DATA32 },
-	{ "db",			1,	256,&DirectiveData,		DIRECTIVE_DATA8 },
-	{ "dh",			1,	256,&DirectiveData,		DIRECTIVE_DATA16|DIRECTIVE_NOCASHOFF },
-	{ "dw",			1,	256,&DirectiveData,		DIRECTIVE_DATA32|DIRECTIVE_NOCASHOFF },
-	{ "dw",			1,	256,&DirectiveData,		DIRECTIVE_DATA16|DIRECTIVE_NOCASHON },
-	{ "dd",			1,	256,&DirectiveData,		DIRECTIVE_DATA32|DIRECTIVE_NOCASHON },
-	{ "dcb",		1,	256,&DirectiveData,		DIRECTIVE_DATA8 },
-	{ "dcw",		1,	256,&DirectiveData,		DIRECTIVE_DATA16 },
-	{ "dcd",		1,	256,&DirectiveData,		DIRECTIVE_DATA32 },
+	{ L".byte",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8 },
+	{ L".halfword",			1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16 },
+	{ L".word",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32 },
+	{ L".db",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8 },
+	{ L".dh",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF },
+	{ L".dw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF },
+	{ L".dw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON },
+	{ L".dd",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON },
+	{ L".dcb",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8 },
+	{ L".dcw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16 },
+	{ L".dcd",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32 },
+	{ L"db",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8 },
+	{ L"dh",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF },
+	{ L"dw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF },
+	{ L"dw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON },
+	{ L"dd",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON },
+	{ L"dcb",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8 },
+	{ L"dcw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16 },
+	{ L"dcd",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32 },
+	{ L".ascii",			1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8|DIRECTIVE_DATA_ASCII },
 
-	{ ".ascii",		1,	256,&DirectiveData,		DIRECTIVE_DATA8|DIRECTIVE_ASCII },
+	{ L".if",				1,	1,	&DirectiveConditional,		DIRECTIVE_COND_IF },
+	{ L".else",				0,	0,	&DirectiveConditional,		DIRECTIVE_COND_ELSE },
+	{ L".elseif",			1,	1,	&DirectiveConditional,		DIRECTIVE_COND_ELSEIF },
+	{ L".endif",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_ENDIF },
+	{ L".ifdef",			1,	1,	&DirectiveConditional,		DIRECTIVE_COND_IFDEF },
+	{ L".ifndef",			1,	1,	&DirectiveConditional,		DIRECTIVE_COND_IFNDEF },
+	{ L".elseifdef",		1,	1,	&DirectiveConditional,		DIRECTIVE_COND_ELSEIFDEF },
+	{ L".elseifndef",		1,	1,	&DirectiveConditional,		DIRECTIVE_COND_ELSEIFNDEF },
+	{ L".ifarm",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_IFARM },
+	{ L".ifthumb",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_IFTHUMB },
 
-	{ ".if",		1,	1,	&DirectiveConditional,	DIRECTIVE_IF },
-	{ ".else",		0,	0,	&DirectiveConditional,	DIRECTIVE_ELSE },
-	{ ".elseif",	1,	1,	&DirectiveConditional,	DIRECTIVE_ELSEIF },
-	{ ".endif",		0,	0,	&DirectiveConditional,	DIRECTIVE_ENDIF },
-	{ ".ifdef",		1,	1,	&DirectiveConditional,	DIRECTIVE_IFDEF },
-	{ ".ifndef",	1,	1,	&DirectiveConditional,	DIRECTIVE_IFNDEF },
-	{ ".elseifdef",	1,	1,	&DirectiveConditional,	DIRECTIVE_ELSEIFDEF },
-	{ ".elseifndef",1,	1,	&DirectiveConditional,	DIRECTIVE_ELSEIFNDEF },
-	{ ".ifarm",		0,	0,	&DirectiveConditional,	DIRECTIVE_IFARM },
-	{ ".ifthumb",	0,	0,	&DirectiveConditional,	DIRECTIVE_IFTHUMB },
+	{ L".area",				1,	1,	&DirectiveArea,				DIRECTIVE_AREA_START },
+	{ L".endarea",			0,	0,	&DirectiveArea,				DIRECTIVE_AREA_END },
 
-	{ ".area",		1,	1,	&DirectiveArea,			DIRECTIVE_AREASTART },
-	{ ".endarea",	0,	0,	&DirectiveArea,			DIRECTIVE_AREAEND },
+	{ L".include",			1,	2,	&DirectiveInclude,			0 },
+	{ L".radix",			1,	1,	&DirectiveRadix,			0 },
+	{ L".loadtable",		1,	2,	&DirectiveLoadTable,		0 },
+	{ L".table",			1,	2,	&DirectiveLoadTable,		0 },
+	{ L".string",			1,	-1,	&DirectiveString,			0 },
+	{ L".str",				1,	-1,	&DirectiveString,			0 },
+	{ L".stringn",			1,	-1,	&DirectiveString,			DIRECTIVE_STR_NOTERMINATION },
+	{ L".strn",				1,	-1,	&DirectiveString,			DIRECTIVE_STR_NOTERMINATION },
+	{ L".psx",				0,	0,	&DirectivePsx,				0 },
+	{ L".ps2",				0,	0,	&DirectivePs2,				DIRECTIVE_DISABLED },
+	{ L".psp",				0,	0,	&DirectivePsp,				DIRECTIVE_DISABLED },
+	{ L".gba",				0,	0,	&DirectiveGba,				0 },
+	{ L".nds",				0,	0,	&DirectiveNds,				0 },
+	{ L".gb",				0,	0,	&DirectiveGb,				DIRECTIVE_DISABLED },
+	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
+	{ L".definelabel",		2,	2,	&DirectiveDefineLabel,		0 },
+	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
+	{ L".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
+	{ L".sym",				1,	1,	&DirectiveSym,				0 },
 
-	{ ".include",	1,	2,	&DirectiveInclude,	0 },
-	{ ".radix",		1,	1,	&DirectiveRadix,	0 },
-	{ ".loadtable",	1,	2,	&DirectiveLoadTable,0 },
-	{ ".table",		1,	2,	&DirectiveLoadTable,0 },
-	{ ".string",	1,	64,	&DirectiveString,	0 },
-	{ ".str",		1,	64,	&DirectiveString,	0 },
-	{ ".stringn",	1,	64,	&DirectiveString,	DIRECTIVE_NOTERMINATION },
-	{ ".strn",		1,	64,	&DirectiveString,	DIRECTIVE_NOTERMINATION },
-	{ ".psx",		0,	0,	&DirectivePsx,		0 },
-	{ ".ps2",		0,	0,	&DirectivePs2,		DIRECTIVE_DISABLED },
-	{ ".psp",		0,	0,	&DirectivePsp,		DIRECTIVE_DISABLED },
-	{ ".gba",		0,	0,	&DirectiveGba,		0 },
-	{ ".nds",		0,	0,	&DirectiveNds,		0 },
-	{ ".gb",		0,	0,	&DirectiveGb,		DIRECTIVE_DISABLED },
-	{ ".nocash",	0,	1,	&DirectiveNocash,	0 },
-	{ ".definelabel",2,	2,	&DirectiveDefineLabel,	0 },
-	{ ".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
-	{ ".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
-	{ ".sym",		1,	1,	&DirectiveSym,	0 },
+	{ L".warning",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_WARNING },
+	{ L".error",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_ERROR },
+	{ L".notice",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_NOTICE },
 
-	{ ".warning",	1,	1,	&DirectiveMessage,	DIRECTIVE_WARNING },
-	{ ".error",		1,	1,	&DirectiveMessage,	DIRECTIVE_ERROR },
-	{ ".notice",	1,	1,	&DirectiveMessage,	DIRECTIVE_NOTICE },
-
-	
-	{ NULL,			0,	0,	NULL,					0 }
+	{ NULL,					0,	0,	NULL,						0 }
 };
 
 bool directiveAssembleGlobal(const std::wstring& name, const std::wstring& arguments)

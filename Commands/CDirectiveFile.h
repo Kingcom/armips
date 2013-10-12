@@ -2,93 +2,77 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
 #include "Core/MathParser.h"
-typedef enum eDirectiveFileMode {
-	DIRECTIVEFILE_OPEN,
-	DIRECTIVEFILE_CREATE,
-	DIRECTIVEFILE_COPY,
-	DIRECTIVEFILE_CLOSE,
-	DIRECTIVEFILE_ORG,
-	DIRECTIVEFILE_ORGA,
-	DIRECTIVEFILE_INCBIN,
-	DIRECTIVEFILE_ALIGN,
-	DIRECTIVEFILE_HEADERSIZE,
-	DIRECTIVEFILE_INVALID
-};
 
 class GenericAssemblerFile;
-
-// TODO: split into several classes
 
 class CDirectiveFile: public CAssemblerCommand
 {
 public:
-	CDirectiveFile(eDirectiveFileMode FileMode, ArgumentList& Args);
-	~CDirectiveFile();
+	enum Type { Open, Create, Copy, Close };
+
+	CDirectiveFile(Type type, ArgumentList& args);
+	virtual bool Validate();
+	virtual void Encode();
+	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData) { };
+private:
+	Type type;
+	GenericAssemblerFile* file;
+};
+
+class CDirectivePosition: public CAssemblerCommand
+{
+public:
+	enum Type { Physical, Virtual };
+	CDirectivePosition(Type type, ArgumentList& args);
+	virtual bool Validate();
+	virtual void Encode();
+	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData) { };
+private:
+	void exec();
+	Type type;
+	int position;
+};
+
+class CDirectiveIncbin: public CAssemblerCommand
+{
+public:
+	CDirectiveIncbin(ArgumentList& args);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
-
-	//  Open
-	void InitOpen(ArgumentList& Args);
-	bool ValidateOpen();
-	void EncodeOpen();
-	std::wstring WriteTempOpen();
-	// Create
-	void InitCreate(ArgumentList& Args);
-	bool ValidateCreate();
-	void EncodeCreate();
-	std::wstring WriteTempCreate();
-	// Copy
-	void InitCopy(ArgumentList& Args);
-	bool ValidateCopy();
-	void EncodeCopy();
-	std::wstring WriteTempCopy();
-	// Close
-	void InitClose(ArgumentList& Args);
-	bool ValidateClose();
-	void EncodeClose();
-	std::wstring WriteTempClose();
-	// Org
-	void InitOrg(ArgumentList& Args);
-	bool ValidateOrg();
-	void EncodeOrg();
-	std::wstring WriteTempOrg();
-	// Orga
-	void InitOrga(ArgumentList& Args);
-	bool ValidateOrga();
-	void EncodeOrga();
-	std::wstring WriteTempOrga();
-	// Incbin
-	void InitIncbin(ArgumentList& Args);
-	bool ValidateIncbin();
-	void EncodeIncbin();
-	std::wstring WriteTempIncbin();
-	// Align
-	void InitAlign(ArgumentList& Args);
-	bool ValidateAlign();
-	void EncodeAlign();
-	std::wstring WriteTempAlign();
-	// HeaderSize
-	void InitHeaderSize(ArgumentList& Args);
-	bool ValidateHeaderSize();
-	void EncodeHeaderSize();
-	std::wstring WriteTempHeaderSize();
 private:
-	eDirectiveFileMode Mode;
-
-	// open/create
-	GenericAssemblerFile* file;
-
-	// org/orga
-	int position;
-
-	// incbin
 	std::wstring fileName;
-	int inputFileSize;
+	int startAddress;
+	int loadSize;
+};
 
-	// align
+class CDirectiveAlign: public CAssemblerCommand
+{
+public:
+	CDirectiveAlign(ArgumentList& args);
+	virtual bool Validate();
+	virtual void Encode();
+	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData) { };
+private:
+	int computePadding();
 	int alignment;
 	CExpressionCommandList fillExpression;
 	int fillByte;
+};
+
+class CDirectiveHeaderSize: public CAssemblerCommand
+{
+public:
+	CDirectiveHeaderSize(ArgumentList& args);
+	virtual bool Validate();
+	virtual void Encode();
+	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData) { };
+private:
+	void updateFile();
+	int headerSize;
 };
