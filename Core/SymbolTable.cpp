@@ -143,7 +143,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 	std::wstring result;
 
 	int pos = 0;
-	while (pos < line.size())
+	while (pos < (int)line.size())
 	{
 		for (size_t i = 0; i < equations.size(); i++)
 		{
@@ -152,7 +152,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 				(eq.section == -1 || eq.section == section))
 			{
 				size_t size = eq.key.size();
-				if (pos+size > line.size())
+				if (pos+size > (int)line.size())
 					continue;
 
 				bool valid = true;
@@ -178,7 +178,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 			}
 		}
 
-		if (pos == line.size())
+		if (pos == (int)line.size())
 			break;
 		result += line[pos++];
 	}
@@ -186,7 +186,7 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 	return result;
 }
 
-void SymbolTable::writeSymFile(const std::string fileName)
+void SymbolTable::writeSymFile(const std::string &fileName)
 {
 	TextFile output;
 	if (output.open(convertUtf8ToWString(fileName.c_str()),TextFile::Write) == false)

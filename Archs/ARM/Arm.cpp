@@ -138,7 +138,7 @@ bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags)
 		}
 	}
 	
-	std::wstring temp = formatString(L"r0,=%ls",label1);
+	std::wstring temp = formatString(L"r0,=%ls",label1); //-V510
 	Arm.AssembleOpcode(L"add",temp);
 	Arm.AssembleOpcode(L"swi",L"0xFC");
 

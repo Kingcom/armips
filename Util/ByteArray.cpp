@@ -33,14 +33,12 @@ ByteArray::ByteArray(ByteArray&& other)
 
 ByteArray::~ByteArray()
 {
-	if (data_)
-		free(data_);
+	free(data_);
 }
 
 ByteArray& ByteArray::operator=(ByteArray& other)
 {
-	if (data_)
-		free(data_);
+	free(data_);
 	data_ = NULL;
 	size_ = allocatedSize_ = 0;
 	append(other);

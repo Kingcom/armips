@@ -37,7 +37,7 @@ int wmain(int argc, wchar_t* argv[])
 	}
 
 	int argpos = 2;
-	while (argpos < arguments.size())
+	while (argpos < (int)arguments.size())
 	{
 		if (arguments[argpos] == L"-temp")
 		{

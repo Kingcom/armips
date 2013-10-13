@@ -16,8 +16,6 @@ CDirectiveConditional::CDirectiveConditional()
 
 bool CDirectiveConditional::Load(ArgumentList& Args, int command)
 {
-	CStringList List;
-
 	Type = command;
 
 	switch (Type)

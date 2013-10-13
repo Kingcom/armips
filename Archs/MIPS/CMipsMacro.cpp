@@ -9,8 +9,6 @@
 
 CMipsMacro::CMipsMacro(int num, tMipsMacroVars& InputVars)
 {
-	CStringList List;
-
 	InstructionAmount = MipsMacros[num].MaxOpcodes;
 	Instructions = new CMipsInstruction[InstructionAmount];
 	SpaceNeeded = InstructionAmount*4;
