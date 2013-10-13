@@ -42,7 +42,7 @@ public:
 	bool addEquation(const std::wstring& name, int file, int section, std::wstring& replacement);
 	std::wstring insertEquations(const std::wstring& line, int file, int section);
 
-	void writeSymFile(const std::string fileName);
+	void writeSymFile(const std::string& fileName);
 	size_t getLabelCount() { return labels.size(); };
 	size_t getEquationCount() { return equations.size(); };
 private:

@@ -60,15 +60,17 @@ ArmPoolCommand::ArmPoolCommand()
 bool ArmPoolCommand::Validate()
 {
 	bool Result = false;
-	if (Arm.GetPool(PoolId).GetRamPos() != g_fileManager->getVirtualAddress())
+	ArmPool& Pool = Arm.GetPool(PoolId);
+
+	if (Pool.GetRamPos() != g_fileManager->getVirtualAddress())
 	{
 		RamPos = g_fileManager->getVirtualAddress();
-		Arm.GetPool(PoolId).SetRamPos(RamPos);
+		Pool.SetRamPos(RamPos);
 		Result = true;
 	}
-	if (Arm.GetPool(PoolId).GetCount() != Size)
+	if (Pool.GetCount() != Size)
 	{
-		Size = Arm.GetPool(PoolId).GetCount();
+		Size = Pool.GetCount();
 		Result = true;
 	}
 

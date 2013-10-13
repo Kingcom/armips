@@ -12,8 +12,6 @@ CDirectiveArea::CDirectiveArea()
 
 bool CDirectiveArea::LoadStart(ArgumentList &Args)
 {
-	CStringList List;
-
 	if (initExpression(SizeExpression,Args[0].text) == false)
 		return false;
 	Start = true;
@@ -36,7 +34,6 @@ bool CDirectiveArea::LoadEnd()
 
 bool CDirectiveArea::Validate()
 {
-	CStringList List;
 	int NewSize;
 
 	RamPos = g_fileManager->getVirtualAddress();

@@ -6,8 +6,6 @@
 
 CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
 {
-	CStringList List;
-
 	TotalAmount = Args.size();
 	StrAmount = 0;
 	ExpAmount = 0;
@@ -70,8 +68,6 @@ CDirectiveData::~CDirectiveData()
 
 bool CDirectiveData::Validate()
 {
-	CStringList List;
-
 	RamPos = g_fileManager->getVirtualAddress();
 
 	int num;
@@ -92,7 +88,6 @@ bool CDirectiveData::Validate()
 
 void CDirectiveData::Encode()
 {
-	CStringList List;
 	int num;
 	int totalsize = 0;
 

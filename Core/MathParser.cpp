@@ -523,12 +523,12 @@ CExpressionCommandList::CExpressionCommandList()
 
 CExpressionCommandList::~CExpressionCommandList()
 {
-	if (Entries != NULL) free(Entries);
+	free(Entries);
 }
 
 bool CExpressionCommandList::Load(CStringList &List)
 {
-	if (Entries != NULL) free(Entries);
+	free(Entries);
 	Entries = (tExpressionCommandEntry*) malloc(List.GetCount() * sizeof(tExpressionCommandEntry));
 	EntryCount = List.GetCount();
 
