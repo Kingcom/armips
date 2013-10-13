@@ -5,7 +5,7 @@
 bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
 {
 #ifdef _WIN32
-	return CopyFileW(existingFile.c_str(),newFile.c_str(),false) == TRUE;
+	return CopyFileW(existingFile.c_str(),newFile.c_str(),false) != FALSE;
 #else
 	// good question...
 	return false;
@@ -15,7 +15,7 @@ bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
 bool deleteFile(const std::wstring& fileName)
 {
 #ifdef _WIN32
-	return DeleteFileW(fileName.c_str()) == TRUE;
+	return DeleteFileW(fileName.c_str()) != FALSE;
 #else
 	// good question...
 	return false;
@@ -117,6 +117,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 
 		if (exists == false)
 			deleteFile(fileName);
+
 		return true;
 
 	case Copy:
@@ -141,6 +142,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		
 		if (exists == false)
 			deleteFile(fileName);
+
 		return true;
 
 	default:

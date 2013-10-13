@@ -20,12 +20,12 @@ typedef struct {
 
 inline bool CheckEndLine(std::wstring& string, int pos)
 {
-	if (pos >= string.size()) return true;
+	if (pos >= (int)string.size()) return true;
 
 	if (string[pos] == 0) return true;
 	if (string[pos] == '\n') return true;
 	if (string[pos] == ';') return true;
-	if (pos+1 < string.size() && string[pos+0] == '/' && string[pos+1] == '/') return true;
+	if (pos+1 < (int)string.size() && string[pos+0] == '/' && string[pos+1] == '/') return true;
 	return false;
 }
 
@@ -39,14 +39,14 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 
 	int InputPos = 0;
 
-	while (InputPos < Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
-	while (InputPos < Buffer.size() && CheckEndLine(Buffer,InputPos) == false)
+	while (InputPos < (int)Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
+	while (InputPos < (int)Buffer.size() && CheckEndLine(Buffer,InputPos) == false)
 	{
 		switch (Buffer[InputPos])
 		{
 		case ' ':
 		case '\t':
-			while (InputPos < Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
+			while (InputPos < (int)Buffer.size() && (Buffer[InputPos] == '\t' || Buffer[InputPos] == ' ')) InputPos++;
 			if (CheckEndLine(Buffer,InputPos) == true)
 			{
 				return true;
@@ -55,16 +55,16 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 			break;
 		case '"':	// string
 			dest += towlower(Buffer[InputPos++]);
-			while (InputPos < Buffer.size() && Buffer[InputPos] != '"')
+			while (InputPos < (int)Buffer.size() && Buffer[InputPos] != '"')
 			{
-				if (InputPos+1 < Buffer.size() && Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '"')
+				if (InputPos+1 < (int)Buffer.size() && Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '"')
 				{
 					dest += '\\';
 					dest += '"';
 					InputPos += 2;
 					continue;
 				}
-				if (InputPos+1 < Buffer.size() && Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '\\')
+				if (InputPos+1 < (int)Buffer.size() && Buffer[InputPos] == '\\' && Buffer[InputPos+1] == '\\')
 				{
 					dest += '\\';
 					dest += '\\';
@@ -78,7 +78,7 @@ bool GetLine(TextFile& Input, std::wstring& dest)
 				}
 				dest += Buffer[InputPos++];
 			}
-			if (InputPos == Buffer.size())
+			if (InputPos == (int)Buffer.size())
 			{
 				Logger::printError(Logger::Error,L"Unexpected end of line in string constant");
 				return false;
@@ -138,7 +138,7 @@ std::wstring checkLabel(std::wstring& str, bool AllLocal)
 {
 	int pos = 0;
 
-	while (pos < str.size() && str[pos] != ' ' && str[pos] != 0)
+	while (pos < (int)str.size() && str[pos] != ' ' && str[pos] != 0)
 	{
 		if (str[pos] == ':')
 		{
@@ -161,8 +161,8 @@ void splitLine(std::wstring& line, std::wstring& name, std::wstring& arguments)
 	name = L"";
 	arguments = L"";
 
-	while (linePos < line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
-	while (linePos < line.size() && line[linePos] != ' ')
+	while (linePos < (int)line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
+	while (linePos < (int)line.size() && line[linePos] != ' ')
 	{
 		if (line[linePos]  == 0)
 		{
@@ -171,9 +171,9 @@ void splitLine(std::wstring& line, std::wstring& name, std::wstring& arguments)
 		name += line[linePos++];
 	}
 	
-	while (linePos < line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
+	while (linePos < (int)line.size() && (line[linePos] == ' ' || line[linePos] == '\t')) linePos++;
 
-	while (linePos < line.size() && line[linePos] != 0)
+	while (linePos < (int)line.size() && line[linePos] != 0)
 	{
 		arguments += line[linePos++];
 	}
@@ -193,10 +193,10 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 
 	splitArguments(Arguments,Args);
 
-	if (Arguments.size() != Macro->getArgumentCount())
+	if ((int)Arguments.size() != Macro->getArgumentCount())
 	{
 		Logger::printError(Logger::Error,L"%s macro arguments (%d vs %d)",
-			Arguments.size() > Macro->getArgumentCount() ? L"Too many" : L"Not enough",
+			(int)Arguments.size() > Macro->getArgumentCount() ? L"Too many" : L"Not enough",
 			Arguments.size(),Macro->getArgumentCount());
 		return;
 	}
@@ -302,7 +302,6 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 {
 	tTextData Text;
-	CStringList Arguments;
 	int num = 0;
 
 	AddFileName((char*)convertWStringToUtf8(fileName).c_str());

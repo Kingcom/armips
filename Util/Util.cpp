@@ -38,10 +38,10 @@ Formatter Formatter::arg(unsigned int value, int base, int width, wchar_t filler
 	switch (base)
 	{
 	case 10:
-		size = swprintf(buffer,L"%d",value);
+		size = swprintf(buffer,128,L"%d",value);
 		break;
 	case 16:
-		size = swprintf(buffer,L"%X",value);
+		size = swprintf(buffer,128,L"%X",value);
 		if (width != 0 && filler == 0) filler = '0'; 
 		break;
 	default:
@@ -178,7 +178,7 @@ std::string formatString(const char* format, ...)
 std::wstring intToHexString(unsigned int value, int digits, bool prefix)
 {
 	std::wstring result;
-	result.reserve(digits+prefix ? 2 : 0);
+	result.reserve((digits+prefix) ? 2 : 0);
 
 	if (prefix)
 	{
@@ -193,7 +193,7 @@ std::wstring intToHexString(unsigned int value, int digits, bool prefix)
 	}
 	
 	wchar_t buf[9];
-	swprintf(buf,L"%0*X",digits,value);
+	swprintf(buf,9,L"%0*X",digits,value);
 	result += buf;
 
 	return result;
@@ -211,7 +211,7 @@ std::wstring intToString(unsigned int value, int digits)
 	}
 	
 	wchar_t buf[9];
-	swprintf(buf,L"%*d",digits,value);
+	swprintf(buf,9,L"%*d",digits,value);
 	result += buf;
 
 	return result;

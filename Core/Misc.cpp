@@ -18,9 +18,9 @@ std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 		return formatString(L"%s(%d) warning: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
 	case Error:
 		return formatString(L"%s(%d) error: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
-	case ERROR_FATALERROR:
+	case FatalError:
 		return formatString(L"%s(%d) fatal error: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
-	case ERROR_NOTICE:
+	case Notice:
 		return formatString(L"%s(%d) notice: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
 	}
 
@@ -249,7 +249,7 @@ bool AreaData::checkAreas()
 
 	for (size_t i = 0; i < entries.size(); i++)
 	{
-		if (entries[i].maxAddress < g_fileManager->getVirtualAddress())
+		if ((size_t)entries[i].maxAddress < g_fileManager->getVirtualAddress())
 		{
 			error = true;
 			if (entries[i].overflow == false)

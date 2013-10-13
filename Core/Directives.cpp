@@ -556,14 +556,14 @@ bool executeDirective(const tDirective& directive, const std::wstring& args)
 	ArgumentList arguments;
 	if (splitArguments(arguments,args) == false) return false;
 
-	if (directive.minparam > arguments.size())
+	if (directive.minparam > (short)arguments.size())
 	{
 		Logger::printError(Logger::Error,L"Not enough parameters (min %d)",
 			directive.minparam);
 		return false;
 	}
 
-	if (directive.maxparam != -1 && directive.maxparam < arguments.size())
+	if (directive.maxparam != -1 && (directive.maxparam < (short)arguments.size()))
 	{
 		Logger::printError(Logger::Error,L"Too many parameters (max %d)",
 			directive.maxparam);

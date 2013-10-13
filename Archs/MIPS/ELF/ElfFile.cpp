@@ -9,7 +9,7 @@ static bool stringEqualInsensive(const std::string& a, const std::string& b)
 {
 	if (a.size() != b.size())
 		return false;
-	return stricmp(a.c_str(),b.c_str()) == 0;
+	return _stricmp(a.c_str(),b.c_str()) == 0;
 }
 
 bool compareSection(ElfSection* a, ElfSection* b)
@@ -71,7 +71,7 @@ bool ElfSegment::isSectionPartOf(ElfSection* section)
 	int segmentEnd = header.p_offset+header.p_filesz;
 
 	// exclusive > in case the size is 0
-	if (sectionStart < header.p_offset || sectionStart > segmentEnd) return false;
+	if (sectionStart < (int)header.p_offset || sectionStart > segmentEnd) return false;
 
 	// does an empty section belong to this or the next segment? hm...
 	if (sectionStart == segmentEnd) return sectionSize == 0;
@@ -107,7 +107,7 @@ void ElfSegment::writeData(ByteArray& output)
 	output.alignSize(align);
 
 	header.p_offset = output.size();
-	for (int i = 0; i < sections.size(); i++)
+	for (int i = 0; i < (int)sections.size(); i++)
 	{
 		sections[i]->setOffsetBase(header.p_offset);
 	}
@@ -132,7 +132,7 @@ void ElfSegment::splitSections()
 
 int ElfSegment::findSection(const std::string& name)
 {
-	for (int i = 0; i < sections.size(); i++)
+	for (int i = 0; i < (int)sections.size(); i++)
 	{
 		if (stringEqualInsensive(name,sections[i]->getName()))
 			return i;
@@ -170,7 +170,7 @@ void ElfFile::loadSectionNames()
 			return;
 	}
 
-	for (int i = 0; i < sections.size(); i++)
+	for (int i = 0; i < (int)sections.size(); i++)
 	{
 		ElfSection* section = sections[i];
 		if (section->getType() == SHT_NULL) continue;
@@ -199,13 +199,13 @@ void ElfFile::determinePartOrder()
 		memcpy(&segmentHeader,&fileData[pos],sizeof(Elf32_Phdr));
 		int end = segmentHeader.p_offset+segmentHeader.p_filesz;
 
-		if (segmentHeader.p_offset < firstSegmentStart) firstSegmentStart = segmentHeader.p_offset;
+		if ((int)segmentHeader.p_offset < firstSegmentStart) firstSegmentStart = segmentHeader.p_offset;
 		if (lastSegmentEnd < end) lastSegmentEnd = end;
 	}
 
 	// segmentless sections
 	int firstSectionStart = fileData.size(), lastSectionEnd = 0;
-	for (int i = 0; i < segmentlessSections.size(); i++)
+	for (int i = 0; i < (int)segmentlessSections.size(); i++)
 	{
 		if (segmentlessSections[i]->getType() == SHT_NULL) continue;
 
@@ -239,7 +239,7 @@ void ElfFile::determinePartOrder()
 
 int ElfFile::findSegmentlessSection(const std::string& name)
 {
-	for (int i = 0; i < sections.size(); i++)
+	for (int i = 0; i < (int)sections.size(); i++)
 	{
 		if (stringEqualInsensive(name,segmentlessSections[i]->getName()))
 			return i;
@@ -279,7 +279,7 @@ bool ElfFile::load(const std::wstring&fileName)
 
 		// check if the section belongs to a segment
 		ElfSegment* owner = NULL;
-		for (int k = 0; k < segments.size(); k++)
+		for (int k = 0; k < (int)segments.size(); k++)
 		{
 			if (segments[k]->isSectionPartOf(section))
 			{
@@ -305,7 +305,7 @@ bool ElfFile::load(const std::wstring&fileName)
 	loadSectionNames();
 
 	std::sort(segmentlessSections.begin(),segmentlessSections.end(),compareSection);
-	for (int i = 0; i < segments.size(); i++)
+	for (int i = 0; i < (int)segments.size(); i++)
 	{
 		segments[i]->sortSections();
 	}
@@ -334,13 +334,13 @@ void ElfFile::save(const std::wstring&fileName)
 			fileData.reserveBytes(sections.size()*fileHeader.e_shentsize);
 			break;
 		case ELFPART_SEGMENTS:
-			for (int i = 0; i < segments.size(); i++)
+			for (int i = 0; i < (int)segments.size(); i++)
 			{
 				segments[i]->writeData(fileData);
 			}
 			break;
 		case ELFPART_SEGMENTLESSSECTIONS:
-			for (int i = 0; i < segmentlessSections.size(); i++)
+			for (int i = 0; i < (int)segmentlessSections.size(); i++)
 			{
 				segmentlessSections[i]->writeData(fileData);
 			}
@@ -350,13 +350,13 @@ void ElfFile::save(const std::wstring&fileName)
 
 	// copy data to the tables
 	memcpy(fileData.data(0),&fileHeader,sizeof(Elf32_Ehdr));
-	for (int i = 0; i < segments.size(); i++)
+	for (int i = 0; i < (int)segments.size(); i++)
 	{
 		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
 		segments[i]->writeHeader(fileData.data(pos));
 	}
 	
-	for (int i = 0; i < sections.size(); i++)
+	for (int i = 0; i < (int)sections.size(); i++)
 	{
 		byte* pointer = fileData.data(fileHeader.e_shoff+i*fileHeader.e_shentsize);
 		sections[i]->writeHeader(pointer);
