@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "Core/Misc.h"
 
-static bool stringEqualInsensive(const std::string& a, const std::string& b)
+static bool stringEqualInsensitive(const std::string& a, const std::string& b)
 {
 	if (a.size() != b.size())
 		return false;
@@ -134,7 +134,7 @@ int ElfSegment::findSection(const std::string& name)
 {
 	for (int i = 0; i < (int)sections.size(); i++)
 	{
-		if (stringEqualInsensive(name,sections[i]->getName()))
+		if (stringEqualInsensitive(name,sections[i]->getName()))
 			return i;
 	}
 
@@ -241,7 +241,7 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 {
 	for (int i = 0; i < (int)sections.size(); i++)
 	{
-		if (stringEqualInsensive(name,segmentlessSections[i]->getName()))
+		if (stringEqualInsensitive(name,segmentlessSections[i]->getName()))
 			return i;
 	}
 

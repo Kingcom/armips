@@ -30,18 +30,6 @@ void CInvalidArchitecture::Revalidate()
 	Logger::printError(Logger::FatalError,L"No architecture specified");
 }
 
-int CInvalidArchitecture::GetFileAddress(int MemoryAddress)
-{
-	Logger::printError(Logger::FatalError,L"No architecture specified");
-	return 0;
-}
-
-int CInvalidArchitecture::GetMemoryAddress(int FileAddress)
-{
-	Logger::printError(Logger::FatalError,L"No architecture specified");
-	return 0;
-}
-
 int CInvalidArchitecture::GetWordSize()
 {
 	Logger::printError(Logger::FatalError,L"No architecture specified");

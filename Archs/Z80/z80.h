@@ -23,8 +23,6 @@ public:
 	virtual void NextSection(){ };
 	virtual void Pass2(){ };
 	virtual void Revalidate(){ };
-	virtual int GetFileAddress(int MemoryAddress){ return 0; };
-	virtual int GetMemoryAddress(int FileAddress){ return 0; };
 	virtual int GetWordSize() { return 2; };
 };
 

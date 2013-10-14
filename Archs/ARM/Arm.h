@@ -31,8 +31,6 @@ public:
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
-	virtual int GetFileAddress(int MemoryAddress) { return 0; };
-	virtual int GetMemoryAddress(int FileAddress) { return 0; };
 	virtual int GetWordSize() { return 4; };
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };

@@ -18,8 +18,6 @@ public:
 	virtual void NextSection();
 	virtual void Pass2() { return; };
 	virtual void Revalidate() { return; };
-	virtual int GetFileAddress(int MemoryAddress) { return 0; };
-	virtual int GetMemoryAddress(int FileAddress) { return 0; };
 	virtual int GetWordSize();
 	void SetLoadDelay(bool Delay, int Register);
 	bool GetLoadDelay() { return LoadDelay; };
