@@ -21,7 +21,7 @@ int wmain(int argc, wchar_t* argv[])
 	Global.validationPasses = 0;
 	Arch = &InvalidArchitecture;
 
-	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
+	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by KAJITANI-EIZAN (and also maybe Kingcom)");
 	StringList arguments = getStringListFromArray(argv,argc);
 
 	if (arguments.size() < 2)
