@@ -47,3 +47,33 @@ void CAssemblerLabel::writeSymData(SymbolData& symData)
 {
 	symData.addSymbol(label->getValue(),label->getName());
 }
+
+
+
+
+CDirectiveFunction::CDirectiveFunction(const std::wstring& name, int Section)
+{
+	if (!name.empty())
+		label = new CAssemblerLabel(name,g_fileManager->getVirtualAddress(),Section,false);
+	else
+		label = NULL;
+}
+
+bool CDirectiveFunction::Validate()
+{
+	if (label == NULL)
+		return false;
+	return label->Validate();
+}
+
+void CDirectiveFunction::writeTempData(TempData& tempData)
+{
+	if (label != NULL)
+		label->writeTempData(tempData);
+}
+
+void CDirectiveFunction::writeSymData(SymbolData& symData)
+{
+	if (label != NULL)
+		label->writeSymData(symData);
+}

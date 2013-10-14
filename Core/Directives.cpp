@@ -473,6 +473,20 @@ bool DirectiveSym(ArgumentList& List, int flags)
 	return true;
 }
 
+bool DirectiveStartFunction(ArgumentList& List, int flags)
+{
+	CDirectiveFunction* func = new CDirectiveFunction(List[0].text,Global.Section);
+	AddAssemblerCommand(func);
+	return true;
+}
+
+bool DirectiveEndFunction(ArgumentList& List, int flags)
+{
+	CDirectiveFunction* func = new CDirectiveFunction(L"",Global.Section);
+	AddAssemblerCommand(func);
+	return true;
+}
+
 bool splitArguments(ArgumentList& list, const std::wstring& args)
 {
 	std::wstring buffer;
@@ -677,6 +691,11 @@ const tDirective Directives[] = {
 	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
 	{ L".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
 	{ L".sym",				1,	1,	&DirectiveSym,				0 },
+
+	{ L".function",			1,	1,	&DirectiveStartFunction,	0 },
+	{ L".func",				1,	1,	&DirectiveStartFunction,	0 },
+	{ L".endfunction",		0,	0,	&DirectiveEndFunction,		0 },
+	{ L".endfunc",			0,	0,	&DirectiveEndFunction,		0 },
 
 	{ L".warning",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_WARNING },
 	{ L".error",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_ERROR },
