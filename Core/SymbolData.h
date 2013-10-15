@@ -6,8 +6,12 @@ class AssemblerFile;
 struct SymDataSymbol
 {
 	std::string name;
-	int addressInfoIndex;
-	int functionIndex;
+	int address;
+	
+	bool operator<(SymDataSymbol& other)
+	{
+		return address < other.address;
+	}
 };
 
 struct SymDataAddressInfo
@@ -15,19 +19,34 @@ struct SymDataAddressInfo
 	int address;
 	int fileIndex;
 	int lineNumber;
+	
+	bool operator<(SymDataAddressInfo& other)
+	{
+		return address < other.address;
+	}
 };
 
 struct SymDataFunction
 {
-	int addressInfoIndex;
+	int address;
 	int size;
+	
+	bool operator<(SymDataFunction& other)
+	{
+		return address < other.address;
+	}
 };
 
 struct SymDataData
 {
-	int addressInfoIndex;
+	int address;
 	int size;
 	int type;
+	
+	bool operator<(SymDataData& other)
+	{
+		return address < other.address;
+	}
 };
 
 struct SymDataModule
@@ -47,6 +66,7 @@ public:
 
 	SymbolData();
 	void setNocashSymFileName(const std::wstring& name) { nocashSymFileName = name; };
+	void setExSymFileName(const std::wstring& name) { exSymFileName = name; };
 	void write();
 	void setEnabled(bool b) { enabled = b; };
 
@@ -58,10 +78,12 @@ public:
 	void endFunction(int address);
 private:
 	void writeNocashSym();
+	void writeExSym();
 	int addAddress(int address);
 	int addFileName(const std::string& fileName);
 
 	std::wstring nocashSymFileName;
+	std::wstring exSymFileName;
 	bool enabled;
 
 	// entry 0 is for data without parent modules

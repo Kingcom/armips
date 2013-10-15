@@ -16,6 +16,7 @@ public:
 	int append(byte* data, int size);
 	int appendByte(byte b) { return append(&b,1); };
 	void replaceByte(int pos, byte b) { data_[pos] = b; };
+	void replaceBytes(int pos, byte* data, int size);
 	void reserveBytes(int count, byte value = 0);
 	void alignSize(int alignment);
 

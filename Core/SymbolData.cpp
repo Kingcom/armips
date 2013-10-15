@@ -43,7 +43,7 @@ void SymbolData::writeNocashSym()
 			SymDataSymbol& sym = module.symbols[i];
 			
 			NocashSymEntry entry;
-			entry.address = module.addressInfo[sym.addressInfoIndex].address;
+			entry.address = sym.address;
 			entry.text = sym.name;
 			entries.push_back(entry);
 		}
@@ -52,7 +52,7 @@ void SymbolData::writeNocashSym()
 		{
 			SymDataData& data = module.data[i];
 			NocashSymEntry entry;
-			entry.address = module.addressInfo[data.addressInfoIndex].address;
+			entry.address = data.address;
 
 			switch (data.type)
 			{
@@ -96,17 +96,18 @@ void SymbolData::writeNocashSym()
 void SymbolData::write()
 {
 	writeNocashSym();
+	writeExSym();
 }
 
 void SymbolData::addLabel(int memoryAddress, const std::wstring& name)
 {
 	if (!enabled)
 		return;
+	addAddress(memoryAddress);
 
 	SymDataSymbol sym;
-	sym.addressInfoIndex = addAddress(memoryAddress);
+	sym.address = memoryAddress;
 	sym.name = convertWStringToUtf8(name);
-	sym.functionIndex = currentFunction;
 	modules[currentModule].symbols.push_back(sym);
 }
 
@@ -114,9 +115,10 @@ void SymbolData::addData(int address, int size, DataType type)
 {
 	if (!enabled)
 		return;
+	addAddress(address);
 
 	SymDataData data;
-	data.addressInfoIndex = addAddress(address);
+	data.address = address;
 	data.size = size;
 	data.type = type;
 	modules[currentModule].data.push_back(data);
@@ -198,9 +200,10 @@ void SymbolData::startFunction(int address)
 	}
 
 	currentFunction = modules[currentModule].functions.size();
+	addAddress(address);
 
 	SymDataFunction func;
-	func.addressInfoIndex = addAddress(address);
+	func.address = address;
 	func.size = 0;
 	modules[currentModule].functions.push_back(func);
 }
@@ -214,6 +217,214 @@ void SymbolData::endFunction(int address)
 	}
 
 	SymDataFunction& func = modules[currentModule].functions[currentFunction];
-	func.size = address- modules[currentModule].addressInfo[func.addressInfoIndex].address;
+	func.size = address-func.address;
 	currentFunction = -1;
 }
+
+
+
+
+
+
+typedef unsigned int u32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+
+struct ExSymHeader
+{
+	u8 magic[4];
+	u16 version;
+	u16 headerSize;	// or whatever
+	u32 modulePos;
+	u32 moduleCount;
+	u32 filesPos;
+	u32 fileCount;
+	u32 stringTablePos;
+};
+
+struct ExSymModuleHeader
+{
+	u32 crc32;
+	u32 addressInfosPos;
+	u32 addressInfosCount;
+	u32 functionsPos;
+	u32 functionsCount;
+	u32 symbolsPos;
+	u32 symbolsCount;
+	u32 datasPos;
+	u32 datasCount;
+};
+
+struct ExSymAddressInfoEntry
+{
+	u32 address;
+	u32 fileIndex;
+	u32 lineNumber;
+};
+
+struct ExSymFunctionEntry
+{
+	u32 addressInfoIndex;
+	u32 size;
+};
+
+struct ExSymDataEntry
+{
+	u32 addressInfoIndex;
+	u32 size:28;
+	u32 type:4;
+};
+
+struct ExSymSymbolEntry
+{
+	u32 addressInfoIndex;
+	u32 functionIndex;	// -1 if none
+	u32 namePos:28;
+	u32 type:4;
+};
+
+struct ExSymFileEntry
+{
+	u32 filePos;
+};
+
+
+int getAddressInfoEntry(std::vector<SymDataAddressInfo>& addresses, int address)
+{
+	for (size_t i = 0; i < addresses.size(); i++)
+	{
+		if (addresses[i].address == address)
+			return i;
+	}
+
+	return -1;
+}
+
+int getFunctionEntry(std::vector<SymDataFunction>& functions, int address)
+{
+	for (size_t i = 0; i < functions.size(); i++)
+	{
+		if (functions[i].address <= address &&
+			(functions[i].address+functions[i].size) > address)
+			return i;
+	}
+
+	return -1;
+}
+
+void SymbolData::writeExSym()
+{
+	if (exSymFileName.empty())
+		return;
+
+	ByteArray data;
+	ByteArray stringData;
+
+	data.reserveBytes(sizeof(ExSymHeader));
+
+	ExSymHeader header;
+	memcpy(header.magic,"ESYM",4);
+	header.version = 1;
+	header.headerSize = sizeof(ExSymHeader);
+	header.modulePos = data.size();
+	header.moduleCount = modules.size();
+	data.reserveBytes(header.moduleCount*sizeof(ExSymModuleHeader));
+
+	// add modules
+	for (size_t i = 0; i < modules.size(); i++)
+	{
+		SymDataModule& module = modules[i];
+
+		ExSymModuleHeader moduleHeader;
+		int modulePos = header.modulePos+i*sizeof(ExSymModuleHeader);
+
+		std::sort(module.addressInfo.begin(),module.addressInfo.end());
+		std::sort(module.data.begin(),module.data.end());
+		std::sort(module.functions.begin(),module.functions.end());
+		std::sort(module.symbols.begin(),module.symbols.end());
+
+		moduleHeader.crc32 = -1;
+
+		// add address info
+		moduleHeader.addressInfosPos = data.size();
+		moduleHeader.addressInfosCount = module.addressInfo.size();
+		for (size_t l = 0; l < module.addressInfo.size(); l++)
+		{
+			SymDataAddressInfo& info = module.addressInfo[l];
+
+			ExSymAddressInfoEntry entry;
+			entry.address = info.address;
+			entry.fileIndex = info.fileIndex;
+			entry.lineNumber = info.lineNumber;
+			data.append((byte*)&entry,sizeof(entry));
+		}
+
+		// add symbols
+		moduleHeader.symbolsPos = data.size();
+		moduleHeader.symbolsCount = module.symbols.size();
+		for (size_t l = 0; l < module.symbols.size(); l++)
+		{
+			SymDataSymbol& sym = module.symbols[l];
+
+			ExSymSymbolEntry entry;
+			entry.addressInfoIndex = getAddressInfoEntry(module.addressInfo,sym.address);
+			entry.functionIndex = getFunctionEntry(module.functions,sym.address);
+			entry.namePos = stringData.size();
+			stringData.append((byte*)sym.name.c_str(),sym.name.size()+1);
+			entry.type = 0;
+			data.append((byte*)&entry,sizeof(entry));
+		}
+
+		// add functions
+		moduleHeader.functionsPos = data.size();
+		moduleHeader.functionsCount = module.functions.size();
+		for (size_t l = 0; l < module.functions.size(); l++)
+		{
+			SymDataFunction& func = module.functions[l];
+
+			ExSymFunctionEntry entry;
+			entry.addressInfoIndex = getAddressInfoEntry(module.addressInfo,func.address);
+			entry.size = func.size;
+			data.append((byte*)&entry,sizeof(entry));
+		}
+
+		// add data
+		moduleHeader.datasPos = data.size();
+		moduleHeader.datasCount = module.data.size();
+		for (size_t l = 0; l < module.data.size(); l++)
+		{
+			SymDataData& d = module.data[l];
+
+			ExSymDataEntry entry;
+			entry.addressInfoIndex = getAddressInfoEntry(module.addressInfo,d.address);
+			entry.size = d.size;
+			entry.type = d.type;
+			data.append((byte*)&entry,sizeof(entry));
+		}
+
+		// write header
+		data.replaceBytes(modulePos,(byte*)&moduleHeader,sizeof(moduleHeader));
+	}
+
+	// add files
+	header.filesPos = data.size();
+	header.fileCount = files.size();
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		ExSymFileEntry entry;
+		entry.filePos = stringData.size();
+		stringData.append((byte*)files[i].c_str(),files[i].size()+1);
+		data.append((byte*)&entry,sizeof(entry));
+	}
+
+	// add string table
+	header.stringTablePos = data.size();
+	data.append(stringData);
+	
+	// write header
+	data.replaceBytes(0,(byte*)&header,sizeof(header));
+
+	// write
+	data.toFile(exSymFileName);
+}
+

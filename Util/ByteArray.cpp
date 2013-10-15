@@ -89,6 +89,14 @@ int ByteArray::append(byte* data, int size)
 	return oldSize;
 }
 
+void ByteArray::replaceBytes(int pos, byte* data, int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		replaceByte(pos+i,data[i]);
+	}
+}
+
 void ByteArray::reserveBytes(int count, byte value)
 {
 	grow(this->size()+count);

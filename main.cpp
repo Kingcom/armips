@@ -47,6 +47,10 @@ int wmain(int argc, wchar_t* argv[])
 		{
 			Global.symData.setNocashSymFileName(arguments[argpos+1]);
 			argpos += 2;
+		} else if (arguments[argpos] == L"-exsym")
+		{
+			Global.symData.setExSymFileName(arguments[argpos+1]);
+			argpos += 2;
 		} else if (arguments[argpos] == L"-erroronwarning")
 		{
 			Global.warningAsError = true;
