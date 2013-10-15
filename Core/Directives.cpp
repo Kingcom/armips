@@ -227,7 +227,31 @@ bool DirectiveSJIS(ArgumentList& List, int flags)
 {
 	ArgumentList NewList;
 	
-	if (Global.SJISTable.isLoaded() == false) Global.SJISTable.generateSJIS();
+	if (Global.SJISTable.isLoaded() == false)
+	{
+		unsigned char hexBuffer[2];
+
+		Global.SJISTable.setTerminationEntry((unsigned char*)"\0",1);
+
+		for (unsigned short SJISValue = 0; SJISValue < 0xFFFF; SJISValue++)
+		{
+			wchar_t unicodeValue = sjisToUnicode(SJISValue);
+			if (unicodeValue != 0xFFFF)
+			{
+				if (SJISValue <= 0xFF)
+				{
+					hexBuffer[0] = SJISValue & 0xFF;
+					Global.SJISTable.addEntry(hexBuffer, 1, unicodeValue);
+				}
+				else
+				{
+					hexBuffer[0] = (SJISValue >> 8) & 0xFF;
+					hexBuffer[1] = SJISValue & 0xFF;
+					Global.SJISTable.addEntry(hexBuffer, 2, unicodeValue);
+				}		
+			}
+		}
+	}
 
 	for (size_t i = 0; i < List.size(); i++)
 	{

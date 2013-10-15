@@ -80,4 +80,5 @@ private:
 	bool errorRetrieved;
 };
 
+wchar_t sjisToUnicode(unsigned short);
 TextFile::Encoding getEncodingFromString(const std::wstring& str);
