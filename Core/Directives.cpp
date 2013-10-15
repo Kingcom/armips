@@ -233,22 +233,23 @@ bool DirectiveSJIS(ArgumentList& List, int flags)
 
 		Global.SJISTable.setTerminationEntry((unsigned char*)"\0",1);
 
-		for (unsigned short SJISValue = 0; SJISValue < 0xFFFF; SJISValue++)
+		for (unsigned short SJISValue = 0x0000; SJISValue < 0x0100; SJISValue++)
 		{
 			wchar_t unicodeValue = sjisToUnicode(SJISValue);
 			if (unicodeValue != 0xFFFF)
 			{
-				if (SJISValue <= 0xFF)
-				{
-					hexBuffer[0] = SJISValue & 0xFF;
-					Global.SJISTable.addEntry(hexBuffer, 1, unicodeValue);
-				}
-				else
-				{
-					hexBuffer[0] = (SJISValue >> 8) & 0xFF;
-					hexBuffer[1] = SJISValue & 0xFF;
-					Global.SJISTable.addEntry(hexBuffer, 2, unicodeValue);
-				}		
+				hexBuffer[0] = SJISValue & 0xFF;
+				Global.SJISTable.addEntry(hexBuffer, 1, unicodeValue);
+			}
+		}
+		for (unsigned short SJISValue = 0x8100; SJISValue < 0xEF00; SJISValue++)
+		{
+			wchar_t unicodeValue = sjisToUnicode(SJISValue);
+			if (unicodeValue != 0xFFFF)
+			{
+				hexBuffer[0] = (SJISValue >> 8) & 0xFF;
+				hexBuffer[1] = SJISValue & 0xFF;
+				Global.SJISTable.addEntry(hexBuffer, 2, unicodeValue);
 			}
 		}
 	}
