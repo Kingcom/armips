@@ -102,6 +102,36 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 	return true;
 }
 
+bool EncodingTable::generateSJIS(void)
+{
+	unsigned char hexBuffer[MAXHEXLENGTH];
+
+	hexData.clear();
+	valueData.clear();
+	setTerminationEntry((unsigned char*)"\0",1);
+
+	for (unsigned short SJISValue = 0; SJISValue < 0xFFFF; SJISValue++)
+	{
+		wchar_t unicodeValue = sjisToUnicode(SJISValue);
+		if (unicodeValue != 0xFFFF)
+		{
+			if (SJISValue <= 0xFF)
+			{
+				hexBuffer[0] = SJISValue & 0xFF;
+				addEntry(hexBuffer,1,unicodeValue);
+			}
+			else
+			{
+				hexBuffer[0] = SJISValue >> 8;
+				hexBuffer[1] = SJISValue & 0xFF;
+				addEntry(hexBuffer,2,unicodeValue);
+			}		
+		}
+	}
+
+	return true;
+}
+
 void EncodingTable::addEntry(unsigned char* hex, int hexLength, const std::wstring& value)
 {
 	TableEntry entry;

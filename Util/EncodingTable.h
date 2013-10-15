@@ -2,12 +2,15 @@
 #include "Util/ByteArray.h"
 #include "Util/FileClasses.h"
 
+wchar_t sjisToUnicode(unsigned short SjisCharacter);
+
 class EncodingTable
 {
 public:
 	EncodingTable();
 	~EncodingTable();
 	bool load(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
+	bool generateSJIS(void);
 	bool isLoaded() { return entries.size() != 0; };
 	void addEntry(unsigned char* hex, int hexLength, const std::wstring& value);
 	void addEntry(unsigned char* hex, int hexLength, wchar_t value);
