@@ -269,7 +269,7 @@ void CDirectiveIncbin::writeTempData(TempData& tempData)
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData)
 {
-	symData.addSymbol(g_fileManager->getVirtualAddress(),formatString(L".byt:%04X",loadSize));
+	symData.addData(g_fileManager->getVirtualAddress(),loadSize,SymbolData::Data8);
 }
 
 

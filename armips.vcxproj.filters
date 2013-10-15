@@ -114,6 +114,9 @@
     <ClCompile Include="Archs\MIPS\ELF\PspFile.cpp">
       <Filter>Archs\MIPS\ELF</Filter>
     </ClCompile>
+    <ClCompile Include="Core\SymbolData.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -230,6 +233,9 @@
     </ClInclude>
     <ClInclude Include="Archs\MIPS\ELF\PspFile.h">
       <Filter>Archs\MIPS\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\SymbolData.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

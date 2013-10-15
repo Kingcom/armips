@@ -81,21 +81,6 @@ private:
 	TextFile file;
 };
 
-class SymbolData
-{
-public:
-	SymbolData(): enabled(true) { };
-	void setFileName(const std::wstring& name) { file.setFileName(name); };
-	void start();
-	void end();
-	void setEnabled(bool b) { enabled = b; };
-	void addSymbol(int address, const std::wstring& name);
-private:
-	TextFile file;
-	bool enabled;
-};
-
-
 class IntegerStack
 {
 public:

@@ -8,6 +8,7 @@
 #include "Util/EncodingTable.h"
 #include "Util/FileClasses.h"
 #include "Core/Misc.h"
+#include "Core/SymbolData.h"
 
 typedef struct {
 	CStringList FileList;

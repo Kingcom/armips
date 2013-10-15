@@ -112,6 +112,7 @@
     <ClInclude Include="Core\FileManager.h" />
     <ClInclude Include="Core\MathParser.h" />
     <ClInclude Include="Core\Misc.h" />
+    <ClInclude Include="Core\SymbolData.h" />
     <ClInclude Include="Core\SymbolTable.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\ByteArray.h" />
@@ -139,6 +140,7 @@
     <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />
     <ClCompile Include="Core\FileManager.cpp" />
     <ClCompile Include="Core\Misc.cpp" />
+    <ClCompile Include="Core\SymbolData.cpp" />
     <ClCompile Include="Core\SymbolTable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Commands\CAssemblerCommand.cpp" />

@@ -71,5 +71,5 @@ void CDirectiveFill::writeTempData(TempData& tempData)
 
 void CDirectiveFill::writeSymData(SymbolData& symData)
 {
-	symData.addSymbol(RamPos,formatString(L".byt:%04X",Size));
+	symData.addData(RamPos,Size,SymbolData::Data8);
 }

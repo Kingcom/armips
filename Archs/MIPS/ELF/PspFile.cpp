@@ -9,6 +9,21 @@ PspElfFile::PspElfFile()
 	opened = false;
 }
 
+bool PspElfFile::open(bool onlyCheck)
+{
+	opened = !onlyCheck;
+	Global.symData.startModule(this);
+	return true;
+}
+
+void PspElfFile::close()
+{
+	if (isOpen())
+		save();
+
+	Global.symData.endModule(this);
+}
+
 size_t PspElfFile::getVirtualAddress()
 {
 	if (segment != -1)

@@ -403,7 +403,6 @@ bool EncodeAssembly()
 
 	// and finally encode
 	Global.tempData.start();
-	Global.symData.start();
 	for (size_t i = 0; i < Global.Commands.size(); i++)
 	{
 		if (Global.Commands[i]->IsConditional() == false && Global.conditionData.conditionTrue() == false)
@@ -420,7 +419,7 @@ bool EncodeAssembly()
 	}
 
 	Global.tempData.end();
-	Global.symData.end();
+	Global.symData.write();
 
 	if (g_fileManager->hasOpenFile())
 	{

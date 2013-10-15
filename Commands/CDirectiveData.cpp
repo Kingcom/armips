@@ -158,18 +158,18 @@ void CDirectiveData::writeSymData(SymbolData& symData)
 {
 	if (ascii == true)
 	{
-		symData.addSymbol(RamPos,formatString(L".asc:%04X",SpaceNeeded));
+		symData.addData(RamPos,SpaceNeeded,SymbolData::DataAscii);
 	} else {
 		switch (UnitSize)
 		{
 		case 1:
-			symData.addSymbol(RamPos,formatString(L".byt:%04X",SpaceNeeded));
+			symData.addData(RamPos,SpaceNeeded,SymbolData::Data8);
 			break;
 		case 2:
-			symData.addSymbol(RamPos,formatString(L".wrd:%04X",SpaceNeeded));
+			symData.addData(RamPos,SpaceNeeded,SymbolData::Data16);
 			break;
 		case 4:
-			symData.addSymbol(RamPos,formatString(L".dbl:%04X",SpaceNeeded));
+			symData.addData(RamPos,SpaceNeeded,SymbolData::Data32);
 			break;
 		}
 	}

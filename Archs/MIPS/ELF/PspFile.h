@@ -8,8 +8,8 @@ class PspElfFile: public AssemblerFile
 {
 public:
 	PspElfFile();
-	virtual bool open(bool onlyCheck) { opened = !onlyCheck; return true; };
-	virtual void close() { if (isOpen()) save(); };
+	virtual bool open(bool onlyCheck);
+	virtual void close();
 	virtual bool isOpen() { return opened; };
 	virtual bool write(void* data, int length);
 	virtual size_t getVirtualAddress();

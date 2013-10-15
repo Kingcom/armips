@@ -45,7 +45,7 @@ void CAssemblerLabel::writeTempData(TempData& tempData)
 
 void CAssemblerLabel::writeSymData(SymbolData& symData)
 {
-	symData.addSymbol(label->getValue(),label->getName());
+	symData.addLabel(label->getValue(),label->getName());
 }
 
 
@@ -75,5 +75,10 @@ void CDirectiveFunction::writeTempData(TempData& tempData)
 void CDirectiveFunction::writeSymData(SymbolData& symData)
 {
 	if (label != NULL)
+	{
+		Global.symData.startFunction(g_fileManager->getVirtualAddress());
 		label->writeSymData(symData);
+	} else {
+		Global.symData.endFunction(g_fileManager->getVirtualAddress());
+	}
 }
