@@ -223,6 +223,76 @@ bool DirectiveString(ArgumentList& List, int flags)
 	return true;
 }
 
+bool DirectiveSJIS(ArgumentList& List, int flags)
+{
+	ArgumentList NewList;
+	
+	if (Global.SJISTable.isLoaded() == false)
+	{
+		unsigned char hexBuffer[2];
+
+		Global.SJISTable.setTerminationEntry((unsigned char*)"\0",1);
+
+		for (unsigned short SJISValue = 0x0000; SJISValue < 0x0100; SJISValue++)
+		{
+			wchar_t unicodeValue = sjisToUnicode(SJISValue);
+			if (unicodeValue != 0xFFFF)
+			{
+				hexBuffer[0] = SJISValue & 0xFF;
+				Global.SJISTable.addEntry(hexBuffer, 1, unicodeValue);
+			}
+		}
+		for (unsigned short SJISValue = 0x8100; SJISValue < 0xEF00; SJISValue++)
+		{
+			wchar_t unicodeValue = sjisToUnicode(SJISValue);
+			if (unicodeValue != 0xFFFF)
+			{
+				hexBuffer[0] = (SJISValue >> 8) & 0xFF;
+				hexBuffer[1] = SJISValue & 0xFF;
+				Global.SJISTable.addEntry(hexBuffer, 2, unicodeValue);
+			}
+		}
+	}
+
+	for (size_t i = 0; i < List.size(); i++)
+	{
+		if (List[i].isString)
+		{
+			ByteArray data = Global.SJISTable.encodeString(List[i].text,false);
+
+			if (data.size() == 0 && List[i].text.size() != 0)
+			{
+				Logger::printError(Logger::Error,L"Failed to encode string");
+				return false;
+			}
+
+			for (int i = 0; i < data.size(); i++)
+			{
+				wchar_t str[32];
+				swprintf(str,32,L"0x%02X",data[i]);
+				NewList.add(str,false);
+			}
+		} else {
+			NewList.add(List[i].text,false);
+		}
+	}
+
+	if ((flags & DIRECTIVE_STR_NOTERMINATION) == 0)
+	{
+		ByteArray data = Global.SJISTable.encodeTermination();
+		for (int i = 0; i < data.size(); i++)
+		{
+			wchar_t str[32];
+			swprintf(str,32,L"0x%02X",data[i]);
+			NewList.add(str,false);
+		}
+	}
+
+	CDirectiveData* Data = new CDirectiveData(NewList,1,false);
+	AddAssemblerCommand(Data);
+	return true;
+}
+
 bool DirectivePsx(ArgumentList& List, int flags)
 {
 	Arch = &Mips;
@@ -680,6 +750,8 @@ const tDirective Directives[] = {
 	{ L".str",				1,	-1,	&DirectiveString,			0 },
 	{ L".stringn",			1,	-1,	&DirectiveString,			DIRECTIVE_STR_NOTERMINATION },
 	{ L".strn",				1,	-1,	&DirectiveString,			DIRECTIVE_STR_NOTERMINATION },
+	{ L".sjis",				1,	-1,	&DirectiveSJIS,				0 },
+	{ L".sjisn",			1,	-1,	&DirectiveSJIS,				DIRECTIVE_STR_NOTERMINATION },
 	{ L".psx",				0,	0,	&DirectivePsx,				0 },
 	{ L".ps2",				0,	0,	&DirectivePs2,				DIRECTIVE_DISABLED },
 	{ L".psp",				0,	0,	&DirectivePsp,				0 },

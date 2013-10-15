@@ -26,6 +26,7 @@ typedef struct {
 	SymbolData symData;
 	SymbolTable symbolTable;
 	EncodingTable Table;
+	EncodingTable SJISTable;
 	int Section;
 	int Radix;
 	bool Revalidate;
