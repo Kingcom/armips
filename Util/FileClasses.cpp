@@ -588,7 +588,7 @@ wchar_t sjisToUnicode(unsigned short SjisCharacter)
 		return SjisToUnicodeTable1[SjisCharacter-0x80];
 	}
 
-	if ((SjisCharacter & 0xFF) < 0x40) return -1;
+	if ((SjisCharacter & 0xFF) < 0x40) return 0xFFFF;
 
 	if (SjisCharacter >= 0x8100 && SjisCharacter < 0x8500)
 	{
@@ -611,7 +611,7 @@ wchar_t sjisToUnicode(unsigned short SjisCharacter)
 		SjisCharacter -= (SjisCharacter >> 8) * 0x40;
 		return SjisToUnicodeTable5[SjisCharacter];
 	} else {
-		return -1;
+		return 0xFFFF;
 	}
 }
 
