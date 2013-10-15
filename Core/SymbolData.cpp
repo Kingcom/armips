@@ -38,16 +38,14 @@ void SymbolData::writeNocashSym()
 	for (size_t k = 0; k < modules.size(); k++)
 	{
 		SymDataModule& module = modules[k];
-		for (size_t i = 0; i < module.addressInfo.size(); i++)
+		for (size_t i = 0; i < module.symbols.size(); i++)
 		{
-			SymDataAddressInfo& info = module.addressInfo[i];
-			if (info.symbolIndex != -1)
-			{
-				NocashSymEntry entry;
-				entry.address = info.address;
-				entry.text = module.symbols[info.symbolIndex].name;
-				entries.push_back(entry);
-			}
+			SymDataSymbol& sym = module.symbols[i];
+			
+			NocashSymEntry entry;
+			entry.address = module.addressInfo[sym.addressInfoIndex].address;
+			entry.text = sym.name;
+			entries.push_back(entry);
 		}
 
 		for (size_t i = 0; i < module.data.size(); i++)
@@ -72,16 +70,6 @@ void SymbolData::writeNocashSym()
 				break;
 			}
 
-			entries.push_back(entry);
-		}
-	
-		for (size_t i = 0; i < module.specialSymbols.size(); i++)
-		{
-			SymDataSpecialSymbol& sym = module.specialSymbols[i];
-			
-			NocashSymEntry entry;
-			entry.address = module.addressInfo[sym.addressInfoIndex].address;
-			entry.text = sym.name;
 			entries.push_back(entry);
 		}
 	}
@@ -115,28 +103,11 @@ void SymbolData::addLabel(int memoryAddress, const std::wstring& name)
 	if (!enabled)
 		return;
 
-	std::string utf8 = convertWStringToUtf8(name);
-	int addressIndex = addAddress(memoryAddress);
-
-	SymDataAddressInfo& info = modules[currentModule].addressInfo[addressIndex];
-	if (info.symbolIndex != -1)
-	{
-		// address already has a symbol. let's just keep that
-		return;
-	}
-
-	info.symbolIndex = addSymbol(utf8);
-}
-
-void SymbolData::addSpecialSymbol(int address, const std::wstring& name)
-{
-	if (!enabled)
-		return;
-
-	SymDataSpecialSymbol sym;
-	sym.addressInfoIndex = addAddress(address);
+	SymDataSymbol sym;
+	sym.addressInfoIndex = addAddress(memoryAddress);
 	sym.name = convertWStringToUtf8(name);
-	modules[currentModule].specialSymbols.push_back(sym);
+	sym.functionIndex = currentFunction;
+	modules[currentModule].symbols.push_back(sym);
 }
 
 void SymbolData::addData(int address, int size, DataType type)
@@ -177,18 +148,8 @@ int SymbolData::addAddress(int address)
 	info.address = address;
 	info.fileIndex = addFileName(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
 	info.lineNumber = Global.FileInfo.LineNumber;
-	info.symbolIndex = -1;
 	module.addressInfo.push_back(info);
 	return module.addressInfo.size()-1;
-}
-
-int SymbolData::addSymbol(const std::string& name)
-{
-	SymDataSymbol sym;
-	sym.name = name;
-	sym.function = currentFunction;
-	modules[currentModule].symbols.push_back(sym);
-	return modules[currentModule].symbols.size()-1;
 }
 
 void SymbolData::startModule(AssemblerFile* file)

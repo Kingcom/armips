@@ -6,13 +6,8 @@ class AssemblerFile;
 struct SymDataSymbol
 {
 	std::string name;
-	int function;
-};
-
-struct SymDataSpecialSymbol
-{
-	std::string name;
 	int addressInfoIndex;
+	int functionIndex;
 };
 
 struct SymDataAddressInfo
@@ -20,7 +15,6 @@ struct SymDataAddressInfo
 	int address;
 	int fileIndex;
 	int lineNumber;
-	int symbolIndex;
 };
 
 struct SymDataFunction
@@ -43,7 +37,6 @@ struct SymDataModule
 	std::vector<SymDataSymbol> symbols;
 	std::vector<SymDataFunction> functions;
 	std::vector<SymDataData> data;
-	std::vector<SymDataSpecialSymbol> specialSymbols;
 };
 
 
@@ -58,7 +51,6 @@ public:
 	void setEnabled(bool b) { enabled = b; };
 
 	void addLabel(int address, const std::wstring& name);
-	void addSpecialSymbol(int address, const std::wstring& name);
 	void addData(int address, int size, DataType type);
 	void startModule(AssemblerFile* file);
 	void endModule(AssemblerFile* file);
@@ -68,7 +60,6 @@ private:
 	void writeNocashSym();
 	int addAddress(int address);
 	int addFileName(const std::string& fileName);
-	int addSymbol(const std::string& name);
 
 	std::wstring nocashSymFileName;
 	bool enabled;

@@ -19,9 +19,9 @@ void ArmStateCommand::writeSymData(SymbolData& symData)
 {
 	if (armstate == true)
 	{
-		symData.addSpecialSymbol(RamPos,L".arm");
+		symData.addLabel(RamPos,L".arm");
 	} else {
-		symData.addSpecialSymbol(RamPos,L".thumb");
+		symData.addLabel(RamPos,L".thumb");
 	}
 }
 
@@ -98,6 +98,6 @@ void ArmPoolCommand::writeTempData(TempData& tempData)
 
 void ArmPoolCommand::writeSymData(SymbolData& symData)
 {
-	symData.addSpecialSymbol(RamPos,L".pool");
+	symData.addLabel(RamPos,L".pool");
 	symData.addData(RamPos,Size*4,SymbolData::Data32);
 }
