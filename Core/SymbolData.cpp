@@ -343,7 +343,13 @@ void SymbolData::writeExSym()
 		std::sort(module.functions.begin(),module.functions.end());
 		std::sort(module.symbols.begin(),module.symbols.end());
 
-		moduleHeader.crc32 = -1;
+		SymDataModuleInfo moduleInfo;
+		if (module.file != NULL && module.file->getModuleInfo(moduleInfo))
+		{
+			moduleHeader.crc32 = moduleInfo.crc32;
+		} else {
+			moduleHeader.crc32 = -1;
+		}
 
 		// add address info
 		moduleHeader.addressInfosPos = data.size();

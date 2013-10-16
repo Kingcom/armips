@@ -2,6 +2,7 @@
 #include "PspFile.h"
 #include "Core/Misc.h"
 #include "Core/Common.h"
+#include "Util/CRC.h"
 
 PspElfFile::PspElfFile()
 {
@@ -148,6 +149,12 @@ bool PspElfFile::seekPhysical(size_t physicalAddress)
 	section = -1;
 	Logger::queueError(Logger::Error,L"Couldn't find a section");
 	return false;
+}
+
+bool PspElfFile::getModuleInfo(SymDataModuleInfo& info)
+{
+	info.crc32 = getCrc32(elf.getFileData().data(),elf.getFileData().size());
+	return true;
 }
 
 bool PspElfFile::write(void* data, int length)

@@ -58,6 +58,10 @@ struct SymDataModule
 	std::vector<SymDataData> data;
 };
 
+struct SymDataModuleInfo
+{
+	unsigned int crc32;
+};
 
 class SymbolData
 {

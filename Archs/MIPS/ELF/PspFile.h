@@ -16,6 +16,7 @@ public:
 	virtual size_t getPhysicalAddress();
 	virtual bool seekVirtual(size_t virtualAddress);
 	virtual bool seekPhysical(size_t physicalAddress);
+	virtual bool getModuleInfo(SymDataModuleInfo& info);
 
 	bool load(const std::wstring& fileName, const std::wstring& outputFileName);
 	void save();

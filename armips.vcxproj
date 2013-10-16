@@ -117,6 +117,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\ByteArray.h" />
     <ClInclude Include="Util\CommonClasses.h" />
+    <ClInclude Include="Util\CRC.h" />
     <ClInclude Include="Util\EncodingTable.h" />
     <ClInclude Include="Util\FileClasses.h" />
     <ClInclude Include="Util\Util.h" />
@@ -162,6 +163,7 @@
     </ClCompile>
     <ClCompile Include="Util\ByteArray.cpp" />
     <ClCompile Include="Util\CommonClasses.cpp" />
+    <ClCompile Include="Util\CRC.cpp" />
     <ClCompile Include="Util\EncodingTable.cpp" />
     <ClCompile Include="Util\FileClasses.cpp" />
     <ClCompile Include="Util\Util.cpp" />

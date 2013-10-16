@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Util/FileClasses.h"
+#include "Core/SymbolData.h"
 
 class AssemblerFile
 {
@@ -14,6 +15,7 @@ public:
 	virtual size_t getPhysicalAddress() = 0;
 	virtual bool seekVirtual(size_t virtualAddress) = 0;
 	virtual bool seekPhysical(size_t physicalAddress) = 0;
+	virtual bool getModuleInfo(SymDataModuleInfo& info) { return false; };
 };
 
 class GenericAssemblerFile: public AssemblerFile
