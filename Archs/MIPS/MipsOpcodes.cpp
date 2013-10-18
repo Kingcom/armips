@@ -24,12 +24,12 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
 // 000 | *1    | *2    | J     | JAL   | BEQ   | BNE   | BLEZ  | BGTZ  | 00..07
 // 001 | ADDI  | ADDIU | SLTI  | SLTIU | ANDI  | ORI   | XORI  | LUI   | 08..0F
-// 010 | *3    | *4    | ---   | ---   | ---   | ---   | ---   | ---   | 10..17
+// 010 | *3    | *4    | ---   | ---   | BEQL  | BNEL  | BLEZL | BGTZL | 10..17
 // 011 | ---   | ---   |  ---  | ---   | ---   | ---   | ---   | ---   | 18..1F
 // 100 | LB    | LH    | LWL   | LW    | LBU   | LHU   | LWR   | ---   | 20..27
-// 101 | SB    | SH    | SWL   | SW    | ---   | ---   | SWR   | ---   | 28..2F
-// 110 | ---   | ---   | ---   | ---   | ---   | ---   | ---   | ---   | 30..37
-// 111 | ---   | ---   | ---   | ---   | ---   | ---   | ---   | ---   | 38..3F
+// 101 | SB    | SH    | SWL   | SW    | ---   | ---   | SWR   | CACHE | 28..2F
+// 110 | LL    | LWC1  | ---   | ---   | ---   | ---   | ---   | ---   | 30..37
+// 111 | SC    | SWC1  | ---   | ---   | ---   | ---   | ---   | ---   | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 //		*1 = SPECIAL	*2 = REGIMM		*3 = COP0		*4 = COP1
 	{ "j",		"I",		MIPS_OP(0x02), 					MARCH_ALL,	O_I26|O_IPCA|MO_DELAY|MO_NODELAY },
@@ -86,6 +86,16 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "sw",		"t,(s)",	MIPS_OP(0x2B),					MARCH_ALL,	O_RT|O_RS },
 	{ "swr",	"t,i(s)",	MIPS_OP(0x2E),					MARCH_ALL,	O_RT|O_I16|O_RS },
 	{ "swr",	"t,(s)",	MIPS_OP(0x2E),					MARCH_ALL,	O_RT|O_RS },
+	// todo: cache
+	{ "ll",		"t,i(s)",	MIPS_OP(0x30),					MARCH_PSP,	O_RT|O_I16|O_RS|MO_DELAYRT },
+	{ "ll",		"t,(s)",	MIPS_OP(0x30),					MARCH_PSP,	O_RT|O_RS|MO_DELAYRT },
+	{ "lwc1",	"T,i(s)",	MIPS_OP(0x31),					MARCH_PSP,	MO_FRT|O_I16|O_RS },
+	{ "lwc1",	"T,(s)",	MIPS_OP(0x31),					MARCH_PSP,	MO_FRT|O_RS },
+	{ "sc",		"t,i(s)",	MIPS_OP(0x38),					MARCH_PSP,	O_RT|O_I16|O_RS },
+	{ "sc",		"t,(s)",	MIPS_OP(0x38),					MARCH_PSP,	O_RT|O_RS },
+	{ "swc1",	"T,i(s)",	MIPS_OP(0x39),					MARCH_PSP,	MO_FRT|O_I16|O_RS },
+	{ "swc1",	"T,(s)",	MIPS_OP(0x39),					MARCH_PSP,	MO_FRT|O_RS },
+
 
 //     31---------26------------------------------------------5--------0
 //     |=   SPECIAL|                                         | function|
@@ -186,12 +196,12 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "msub",	"s,t",		MIPS_SPECIAL(0x2E),				MARCH_PSP,	O_RS|O_RT },
 	{ "dsubu",	"d,s,t",	MIPS_SPECIAL(0x2F), 			MARCH_PS2,	O_RD|O_RT|O_RS },
 	{ "msubu",	"s,t",		MIPS_SPECIAL(0x2F),				MARCH_PSP,	O_RS|O_RT },
-	{ "tge",	"s,t",		MIPS_SPECIAL(0x30),				MARCH_PS2,	O_RSD|O_RT },
-	{ "tgeu",	"s,t",		MIPS_SPECIAL(0x31),				MARCH_PS2,	O_RSD|O_RT },
-	{ "tlt",	"s,t",		MIPS_SPECIAL(0x32),				MARCH_PS2,	O_RSD|O_RT },
-	{ "tltu",	"s,t",		MIPS_SPECIAL(0x33),				MARCH_PS2,	O_RSD|O_RT },
-	{ "teq",	"s,t",		MIPS_SPECIAL(0x34),				MARCH_PS2,	O_RSD|O_RT },
-	{ "tne",	"s,t",		MIPS_SPECIAL(0x36),				MARCH_PS2,	O_RSD|O_RT },
+	{ "tge",	"s,t",		MIPS_SPECIAL(0x30),				MARCH_LV2,	O_RSD|O_RT },
+	{ "tgeu",	"s,t",		MIPS_SPECIAL(0x31),				MARCH_LV2,	O_RSD|O_RT },
+	{ "tlt",	"s,t",		MIPS_SPECIAL(0x32),				MARCH_LV2,	O_RSD|O_RT },
+	{ "tltu",	"s,t",		MIPS_SPECIAL(0x33),				MARCH_LV2,	O_RSD|O_RT },
+	{ "teq",	"s,t",		MIPS_SPECIAL(0x34),				MARCH_LV2,	O_RSD|O_RT },
+	{ "tne",	"s,t",		MIPS_SPECIAL(0x36),				MARCH_LV2,	O_RSD|O_RT },
 	{ "dsll",	"d,t,a",	MIPS_SPECIAL(0x38),				MARCH_PS2,	O_RD|O_RT|O_I5 },
 	{ "dsll",	"d,a",		MIPS_SPECIAL(0x38),				MARCH_PS2,	O_RDT|O_I5 },
 	{ "dsrl",	"d,t,a",	MIPS_SPECIAL(0x3A),				MARCH_PS2,	O_RD|O_RT|O_I5 },
