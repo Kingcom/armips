@@ -13,7 +13,6 @@ private:
 	CMipsInstruction* Instructions;
 	tMipsMacroData Data;
 	int InstructionAmount;
-	int SpaceNeeded;
 	int MacroNum;
 	bool IgnoreLoadDelay;
 };

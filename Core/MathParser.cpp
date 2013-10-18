@@ -47,6 +47,83 @@ const tExpressionOpcode ExpressionOpcodes[] = {
 	{ "",	0,	0,	EXOP_NONE,			false,	false }
 };
 
+MathExpression::MathExpression()
+{
+	loaded = false;
+	checked = false;
+}
+
+MathExpression::MathExpression(MathExpression& other)
+{
+	*this = other;
+}
+
+MathExpression& MathExpression::operator=(MathExpression& other)
+{
+	loaded = false;
+	checked = false;
+
+	if (other.loaded)
+		init(other.originalText,other.allowLabels);
+	if (other.checked)
+		check();
+
+	return *this;
+}
+
+bool MathExpression::init(const std::wstring& infix, bool allowLabels)
+{
+	this->allowLabels = allowLabels;
+	originalText = infix;
+
+	std::string utf8 = convertWStringToUtf8(infix);
+	loaded = ConvertInfixToPostfix((char*)utf8.c_str(),postfix);
+	return loaded;
+}
+
+bool MathExpression::check()
+{
+	if (CheckPostfix(postfix,allowLabels) == false)
+	{
+		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",originalText.c_str());
+		return false;
+	}
+
+	if (expList.Load(postfix) == false)
+	{
+		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",originalText.c_str());
+		return false;
+	}
+	
+	checked = true;
+	return true;
+}
+
+bool MathExpression::evaluate(int& dest, bool queue)
+{
+	CStringList List;
+	if (ParsePostfix(expList,&List,dest) == false)
+	{
+		if (List.GetCount() == 0)
+		{
+			if (queue)
+				Logger::queueError(Logger::Error,L"Invalid expression");
+			else
+				Logger::printError(Logger::Error,L"Invalid expression");
+		} else {
+			for (int l = 0; l < List.GetCount(); l++)
+			{
+				if (queue)
+					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
+				else
+					Logger::printError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
+			}
+		}
+		return false;
+	}
+
+	return true;
+}
 
 inline int htd(char Hex)
 {
@@ -399,7 +476,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 		switch (Postfix.GetType(num))
 		{
 		case EXCOMM_CONST:	// constant
-			Stack.Push(Postfix.GetValue(num++));
+			Stack.push(Postfix.GetValue(num++));
 			break;
 		case EXCOMM_VAR:	// label
 			label = Postfix.GetLabel(num);
@@ -411,24 +488,24 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 					Errors->AddEntry(str);
 				}
 				Error = true;
-				Stack.Push(-1);
+				Stack.push(-1);
 				num++;
 				break;
 			}
 
-			Stack.Push(label->getValue());
+			Stack.push(label->getValue());
 			num++;
 			break;
 		case EXCOMM_RAMPOS:
 			Postfix.GetValue(num++);
-			Stack.Push(g_fileManager->getVirtualAddress());
+			Stack.push(g_fileManager->getVirtualAddress());
 			break;
 		case EXCOMM_OP:	// opcode
 			Opcode = Postfix.GetValue(num++);
-			if (Stack.GetCount() < ExpressionCleanOpcodes[Opcode].Arguments) return false;
+			if (Stack.size() < ExpressionCleanOpcodes[Opcode].Arguments) return false;
 			for (int l = 0; l < ExpressionCleanOpcodes[Opcode].Arguments; l++)
 			{
-				arg[l] = Stack.Pop();
+				arg[l] = Stack.pop();
 			}
 
 			switch (Opcode)
@@ -436,81 +513,81 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			case EXOP_SIGNPLUS:
 				break;
 			case EXOP_SIGNMINUS:	// -0
-				Stack.Push(0-arg[0]);
+				Stack.push(0-arg[0]);
 				break;
 			case EXOP_BITNOT:			// ~b
-				Stack.Push(~arg[0]);
+				Stack.push(~arg[0]);
 				break;
 			case EXOP_LOGNOT:			// !b
-				Stack.Push(!arg[0]);
+				Stack.push(!arg[0]);
 				break;
 			case EXOP_MUL:			// a*b
-				Stack.Push(arg[1]*arg[0]);
+				Stack.push(arg[1]*arg[0]);
 				break;
 			case EXOP_DIV:			// a/b
-				Stack.Push(arg[1]/arg[0]);
+				Stack.push(arg[1]/arg[0]);
 				break;
 			case EXOP_MOD:			// a%b
-				Stack.Push(arg[1]%arg[0]);
+				Stack.push(arg[1]%arg[0]);
 				break;
 			case EXOP_ADD:			// a+b
-				Stack.Push(arg[1]+arg[0]);
+				Stack.push(arg[1]+arg[0]);
 				break;
 			case EXOP_SUB:			// a-b
-				Stack.Push(arg[1]-arg[0]);
+				Stack.push(arg[1]-arg[0]);
 				break;
 			case EXOP_SHL:			// a<<b
-				Stack.Push(arg[1]<<arg[0]);
+				Stack.push(arg[1]<<arg[0]);
 				break;
 			case EXOP_SHR:			// a>>b
-				Stack.Push(arg[1]>>arg[0]);
+				Stack.push(arg[1]>>arg[0]);
 				break;
 			case EXOP_GREATEREQUAL:		// a >= b
-				Stack.Push(arg[1]>=arg[0]);
+				Stack.push(arg[1]>=arg[0]);
 				break;
 			case EXOP_GREATER:			// a > b
-				Stack.Push(arg[1]>arg[0]);
+				Stack.push(arg[1]>arg[0]);
 				break;
 			case EXOP_LOWEREQUAL:		// a <= b
-				Stack.Push(arg[1]<=arg[0]);
+				Stack.push(arg[1]<=arg[0]);
 				break;
 			case EXOP_LOWER:			// a < b
-				Stack.Push(arg[1]<arg[0]);
+				Stack.push(arg[1]<arg[0]);
 				break;
 			case EXOP_EQUAL:		// a == b
-				Stack.Push(arg[1]==arg[0]);
+				Stack.push(arg[1]==arg[0]);
 				break;
 			case EXOP_NOTEQUAL:			// a != b
-				Stack.Push(arg[1]!=arg[0]);
+				Stack.push(arg[1]!=arg[0]);
 				break;
 			case EXOP_BITAND:			// a&b
-				Stack.Push(arg[1]&arg[0]);
+				Stack.push(arg[1]&arg[0]);
 				break;
 			case EXOP_XOR:			// a^b
-				Stack.Push(arg[1]^arg[0]);
+				Stack.push(arg[1]^arg[0]);
 				break;
 			case EXOP_BITOR:			// a|b
-				Stack.Push(arg[1]|arg[0]);
+				Stack.push(arg[1]|arg[0]);
 				break;
 			case EXOP_LOGAND:			// a && b
-				Stack.Push(arg[1]&&arg[0]);
+				Stack.push(arg[1]&&arg[0]);
 				break;
 			case EXOP_LOGOR:			// a && b
-				Stack.Push(arg[1]||arg[0]);
+				Stack.push(arg[1]||arg[0]);
 				break;
 			case EXOP_TERTIF:			// must not appear
 				return false;
 			case EXOP_TERTELSE:			// exp ? exp : exp, else comes first!
 				if (Postfix.GetValue(num++) != EXOP_TERTIF) return false;
-				Stack.Push(arg[2]?arg[1]:arg[0]);
+				Stack.push(arg[2]?arg[1]:arg[0]);
 				break;
 			}
 			break;
 		}
 	}
 
-	if (Stack.GetCount() != 1) return false;
-	Result = Stack.Pop();
+	if (Stack.size() != 1) return false;
+	Result = Stack.pop();
 	return Error == true ? false : true;
 }
 

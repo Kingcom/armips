@@ -256,14 +256,14 @@ bool FileManager::write(void* data, int length)
 
 size_t FileManager::getVirtualAddress()
 {
-	if (checkActiveFile() == false)
+	if (activeFile == NULL)
 		return -1;
 	return activeFile->getVirtualAddress();
 }
 
 size_t FileManager::getPhysicalAddress()
 {
-	if (checkActiveFile() == false)
+	if (activeFile == NULL)
 		return -1;
 	return activeFile->getPhysicalAddress();
 }

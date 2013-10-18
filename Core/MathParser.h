@@ -89,6 +89,28 @@ private:
 	int EntryCount;
 };
 
+class MathExpression
+{
+public:
+	MathExpression();
+	MathExpression(MathExpression& other);
+	MathExpression& operator=(MathExpression& other);
+
+	bool init(const std::wstring& infix, bool allowLabels = true);
+	bool check();
+	bool evaluate(int& dest, bool queue);
+	const std::wstring& getOriginalText() { return originalText; };
+	void clear() { loaded = false; };
+	bool isLoaded() { return loaded; };
+private:
+	CStringList postfix;
+	CExpressionCommandList expList;
+	std::wstring originalText;
+	bool allowLabels;
+	bool loaded;
+	bool checked;
+};
+
 bool IsHex(char Hex);
 inline int htd(char Hex);
 bool ConvertToInt(char* str, int defaultrad, int len, int& Result);

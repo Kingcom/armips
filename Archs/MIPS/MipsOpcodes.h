@@ -10,9 +10,9 @@
 #define O_IPCR			0x00000080	// PC, -> difference >> 2
 #define O_I26			0x00000200	// 26 bit immediate
 #define O_I5			0x00000400	// 5 bit immediate
-#define O_RSD			0x00000800	// rs = rd
-#define O_RST			0x00001000	// rs = rt
-#define O_RDT			0x00002000	// rd = rt
+#define O_RSD			(0x00000800|O_RS|O_RD)	// rs = rd
+#define O_RST			(0x00001000|O_RS|O_RT)	// rs = rt
+#define O_RDT			(0x00002000|O_RD|O_RT)	// rd = rt
 #define MO_DELAY		0x00004000	// delay slot follows
 #define MO_NODELAY		0x00008000	// can't be in a delay slot
 #define MO_DELAYRT		0x00010000	// rt won't be available for one instruction
@@ -21,9 +21,9 @@
 #define MO_FRS			0x00040000	// float rs
 #define MO_FRD			0x00080000	// float rd
 #define MO_FRT			0x00100000	// float rt
-#define MO_FRSD			0x00200000	// float rs + rd
-#define MO_FRST			0x00400000	// float rs + rt
-#define MO_FRDT			0x00800000	// float rt + rd
+#define MO_FRSD			(0x00200000|MO_FRS|MO_FRD)	// float rs + rd
+#define MO_FRST			(0x00400000|MO_FRS|MO_FRT)	// float rs + rt
+#define MO_FRDT			(0x00800000|MO_FRD|MO_FRT)	// float rt + rd
 
 
 #define MIPS1			0x0000001

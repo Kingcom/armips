@@ -11,18 +11,16 @@ CMipsMacro::CMipsMacro(int num, tMipsMacroVars& InputVars)
 {
 	InstructionAmount = MipsMacros[num].MaxOpcodes;
 	Instructions = new CMipsInstruction[InstructionAmount];
-	SpaceNeeded = InstructionAmount*4;
 	MacroNum = num;
 
-	Data.i[0] = InputVars.i[0];
-	Data.i[1] = InputVars.i[1];
-	if (Data.i[0] == true) Data.i1.Load(InputVars.List[0]);
-	if (Data.i[1] == true) Data.i2.Load(InputVars.List[1]);
+	Data.i1 = InputVars.i1;
+	Data.i2 = InputVars.i2;
 	Data.rd = InputVars.rd;
 	Data.rs = InputVars.rs;
 	Data.rt = InputVars.rt;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
-
+	
+	int SpaceNeeded = InstructionAmount*4;
 	g_fileManager->advanceMemory(SpaceNeeded);
 }
 
@@ -41,32 +39,11 @@ bool CMipsMacro::Validate()
 	Values.rs = Data.rs;
 	Values.rt = Data.rt;
 
-	if (Data.i[0] == true && ParsePostfix(Data.i1,&List,Values.i1) == false)
-	{
-		if (List.GetCount() == 0)
-		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
-		} else {
-			for (int l = 0; l < List.GetCount(); l++)
-			{
-				Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
-			}
-		}
+	if (Data.i1.isLoaded() && Data.i1.evaluate(Values.i1,true) == false)
 		return false;
-	}
-	if (Data.i[1] == true && ParsePostfix(Data.i2,&List,Values.i2) == false)
-	{
-		if (List.GetCount() == 0)
-		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
-		} else {
-			for (int l = 0; l < List.GetCount(); l++)
-			{
-				Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
-			}
-		}
+	
+	if (Data.i2.isLoaded() && Data.i2.evaluate(Values.i2,true) == false)
 		return false;
-	}
 
 	int NewNum = MipsMacros[MacroNum].Function(Values,MipsMacros[MacroNum].flags,Instructions);
 
@@ -83,7 +60,6 @@ bool CMipsMacro::Validate()
 	if (NewNum != InstructionAmount)	// amount changed
 	{
 		InstructionAmount = NewNum;
-		SpaceNeeded = InstructionAmount*4;
 		return true;
 	} else {
 		return false;

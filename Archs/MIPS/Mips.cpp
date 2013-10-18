@@ -18,10 +18,10 @@ class CMipsDelayManager
 {
 public:
 	void Advance();
-	bool CheckDelay(tMipsOpcodeVariables& Vars, int flags);
+	bool CheckDelay(MipsOpcodeVariables& Vars, int flags);
 private:
-	bool CheckGprDelay(tMipsOpcodeVariables& Vars, int flags);
-	bool CheckFprDelay(tMipsOpcodeVariables& Vars, int flags);
+	bool CheckGprDelay(MipsOpcodeVariables& Vars, int flags);
+	bool CheckFprDelay(MipsOpcodeVariables& Vars, int flags);
 	tRegisterDelay Gpr;
 	tRegisterDelay Fpr;
 };
@@ -32,7 +32,7 @@ void CMipsDelayManager::Advance()
 	if (Fpr.instructions != 0) Fpr.instructions--;
 }
 
-bool CMipsDelayManager::CheckGprDelay(tMipsOpcodeVariables& Vars, int flags)
+bool CMipsDelayManager::CheckGprDelay(MipsOpcodeVariables& Vars, int flags)
 {
 	tMipsRegisterInfo* Reg = NULL;
 	if ((flags & O_RD) && Vars.rd.Number == Gpr.number) Reg = &Vars.rd;
@@ -47,7 +47,7 @@ bool CMipsDelayManager::CheckGprDelay(tMipsOpcodeVariables& Vars, int flags)
 	return true;
 }
 
-bool CMipsDelayManager::CheckFprDelay(tMipsOpcodeVariables& Vars, int flags)
+bool CMipsDelayManager::CheckFprDelay(MipsOpcodeVariables& Vars, int flags)
 {
 	tMipsRegisterInfo* Reg = NULL;
 	if ((flags & MO_FRD) && Vars.rd.Number == Fpr.number) Reg = &Vars.rd;
@@ -62,7 +62,7 @@ bool CMipsDelayManager::CheckFprDelay(tMipsOpcodeVariables& Vars, int flags)
 	return true;
 }
 
-bool CMipsDelayManager::CheckDelay(tMipsOpcodeVariables& Vars, int flags)
+bool CMipsDelayManager::CheckDelay(MipsOpcodeVariables& Vars, int flags)
 {
 	if (Gpr.instructions != 0) if (CheckGprDelay(Vars,flags) == true) return true;
 	if (Fpr.instructions != 0) if (CheckFprDelay(Vars,flags) == true) return true;
@@ -301,9 +301,9 @@ int MipsGetFloatRegister(char* source, int& RetLen)
 }
 
 
-
-bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
+bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen)
 {
+	char Buffer[512];
 	int BufferPos = 0;
 	int l;
 
@@ -318,16 +318,16 @@ bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List
 	{
 		if (*Source == '\'' && *(Source+2) == '\'')
 		{
-			Dest[BufferPos++] = *Source++;
-			Dest[BufferPos++] = *Source++;
-			Dest[BufferPos++] = *Source++;
+			Buffer[BufferPos++] = *Source++;
+			Buffer[BufferPos++] = *Source++;
+			Buffer[BufferPos++] = *Source++;
 			SourceLen+=3;
 			continue;
 		}
 
 		if (*Source == 0 || *Source == '\n' || *Source == ',')
 		{
-			Dest[BufferPos] = 0;
+			Buffer[BufferPos] = 0;
 			break;
 		}
 		if ( *Source == ' ' || *Source == '\t')
@@ -342,17 +342,16 @@ bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List
 		{
 			if (MipsGetRegister(Source+1,l) != -1)	// end
 			{
-				Dest[BufferPos] = 0;
+				Buffer[BufferPos] = 0;
 				break;
 			}
 		}
-		Dest[BufferPos++] = *Source++;
+		Buffer[BufferPos++] = *Source++;
 		SourceLen++;
 	}
 
 	if (BufferPos == 0) return false;
-	if (ConvertInfixToPostfix(Dest,List) == false) return false;
-
 	RetLen = SourceLen;
-	return true;
+
+	return Dest.init(convertUtf8ToWString(Buffer),true);
 }

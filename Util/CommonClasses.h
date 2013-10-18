@@ -84,10 +84,11 @@ private:
 class IntegerStack
 {
 public:
-	void Push(unsigned int num) { stack.push_back(num); };
-	unsigned int Pop() { unsigned int value = stack[stack.size()-1]; stack.pop_back(); return value; };
-	bool IsEmpty() { return stack.size() == 0; };
-	int GetCount() { return stack.size(); };
+	void push(unsigned int num) { stack.push_back(num); };
+	unsigned int pop() { unsigned int value = stack.back(); stack.pop_back(); return value; };
+	bool isEmpty() { return stack.size() == 0; };
+	int size() { return stack.size(); };
+	void clear() { stack.clear(); };
 private:
 	std::vector<unsigned int> stack;
 };

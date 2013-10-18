@@ -4,18 +4,22 @@
 #include "MipsOpcodes.h"
 #include "Core/MathParser.h"
 
-typedef enum eMipsImmediateType { MIPS_NOIMMEDIATE, MIPS_IMMEDIATE5,
+typedef enum MipsImmediateType { MIPS_NOIMMEDIATE, MIPS_IMMEDIATE5,
 	MIPS_IMMEDIATE16, MIPS_IMMEDIATE20, MIPS_IMMEDIATE26 };
 
-typedef struct {
+struct MipsImmediate
+{
+	MathExpression expression;
+	int value;
+	int originalValue;
+};
+
+struct MipsOpcodeVariables {
 	tMipsRegisterInfo rs;			// source reg
 	tMipsRegisterInfo rt;			// target reg
 	tMipsRegisterInfo rd;			// dest reg
-	eMipsImmediateType ImmediateType;
-	CExpressionCommandList ImmediateExpression;
-	int Immediate;
-	int OriginalImmediate;
-} tMipsOpcodeVariables;
+
+};
 
 class CMipsInstruction: public CAssemblerCommand
 {
@@ -28,14 +32,18 @@ public:
 	virtual void writeTempData(TempData& tempData);
 private:
 	bool LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line);
-	void FormatInstruction(char* encoding,tMipsOpcodeVariables& Vars, char* dest);
-	void WriteInstruction(unsigned int encoding);
+	void setOmittedRegisters();
+	void FormatInstruction(char* encoding,MipsOpcodeVariables& Vars, char* dest);
+
 	tMipsOpcode Opcode;
 	bool IgnoreLoadDelay;
 	bool NoCheckError;
 	bool Loaded;
-	tMipsOpcodeVariables Vars;
 	int RamPos;
-	CMipsInstruction* SubInstruction;
-	bool SubInstructionEnabled;
+	CMipsInstruction* subInstruction;
+
+	// opcode variables
+	MipsOpcodeVariables vars;
+	MipsImmediateType immediateType;
+	MipsImmediate immediate;
 };

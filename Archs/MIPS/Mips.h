@@ -1,5 +1,6 @@
 #pragma once
 #include "Util/CommonClasses.h"
+#include "Core/MathParser.h"
 
 #define MARCH_PSX			0x0000001
 #define MARCH_N64			0x0000002
@@ -30,6 +31,7 @@ public:
 	int GetVersion() { return Version; };
 	bool GetDelaySlot() { return DelaySlot; };
 	void SetDelaySlot(bool b) {DelaySlot = b; };
+	bool hasLoadDelay() { return (Version & MARCH_PSX) != 0; };
 private:
 	bool FixLoadDelay;
 	bool IgnoreLoadDelay;
@@ -57,5 +59,5 @@ bool MipsGetRegister(char* source, int& RetLen, tMipsRegisterInfo& Result);
 int MipsGetRegister(char* source, int& RetLen);
 bool MipsGetFloatRegister(char* source, int& RetLen, tMipsRegisterInfo& Result);
 int MipsGetFloatRegister(char* source, int& RetLen);
-bool MipsCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List);
+bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen);
 

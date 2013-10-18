@@ -294,8 +294,6 @@ const tMipsMacro MipsMacros[] = {
 
 bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 {
-	Vars.i[0] = false;
-	Vars.i[1] = false;
 	int RetLen;
 
 	while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
@@ -322,16 +320,14 @@ bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 			Opcode++;
 			break;
 		case 'i':
-			if (MipsCheckImmediate(Arguments,Vars.i1,RetLen,Vars.List[0]) == false) return false;
+			if (MipsCheckImmediate(Arguments,Vars.i1,RetLen) == false) return false;
 			Arguments += RetLen;
 			Opcode++;
-			Vars.i[0] = true;
 			break;
 		case 'I':
-			if (MipsCheckImmediate(Arguments,Vars.i2,RetLen,Vars.List[1]) == false) return false;
+			if (MipsCheckImmediate(Arguments,Vars.i2,RetLen) == false) return false;
 			Arguments += RetLen;
 			Opcode++;
-			Vars.i[1] = true;
 			break;
 		default:
 			if (*Opcode++ != *Arguments++) return false;
@@ -342,24 +338,24 @@ bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
 	while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
 	if (*Arguments != 0)	return false;	// there's something else, bad
 
-	if (Vars.i[0] == true)
+	if (Vars.i1.isLoaded())
 	{
-		if (CheckPostfix(Vars.List[0],true) == false)
+		if (Vars.i1.check() == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",Vars.i1);
 			Vars.NoCheckError = true;
 			return false;
 		}
 	}
-	if (Vars.i[1] == true)
+
+	if (Vars.i2.isLoaded())
 	{
-		if (CheckPostfix(Vars.List[1],true) == false)
+		if (Vars.i2.check() == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",Vars.i2);
 			Vars.NoCheckError = true;
 			return false;
 		}
 	}
+
 	return true;
 }
 
