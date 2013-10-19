@@ -777,9 +777,9 @@ void CArmInstruction::FormatOpcode(char* Dest, char* Source)
 		case 'A':	// addressing mode
 			if (Opcode.flags & ARM_LOAD)
 			{
-				Dest += sprintf(Dest,"%s",ArmAddressingModes[LdmModes[Vars.Opcode.c]]);
+				Dest += sprintf(Dest,"%s",ArmAddressingModes[LdmModes[Vars.Opcode.a]]);
 			} else {
-				Dest += sprintf(Dest,"%s",ArmAddressingModes[StmModes[Vars.Opcode.c]]);
+				Dest += sprintf(Dest,"%s",ArmAddressingModes[StmModes[Vars.Opcode.a]]);
 			}
 			Source++;
 			break;
