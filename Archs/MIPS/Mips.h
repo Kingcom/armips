@@ -52,6 +52,15 @@ typedef struct {
 	short Number;
 } tMipsRegisterInfo;
 
+enum MipsVfpuType { MIPSVFPU_VECTOR, MIPSVFPU_MATRIX };
+
+struct MipsVFPURegister
+{
+	MipsVfpuType type;
+	int num;
+	char name[8];
+};
+
 extern const tMipsRegister MipsRegister[];
 extern CMipsArchitecture Mips;
 

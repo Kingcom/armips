@@ -355,3 +355,89 @@ bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen)
 
 	return Dest.init(convertUtf8ToWString(Buffer),true);
 }
+
+static bool decodeDigit(char digit, int& dest)
+{
+	if (digit >= '0' && digit <= '9')
+	{
+		dest = digit-'0';
+		return true;
+	}
+	return false;
+}
+
+bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size)
+{
+	int mtx,col,row;
+	if (decodeDigit(line[1],mtx) == false) return false;
+	if (decodeDigit(line[2],col) == false) return false;
+	if (decodeDigit(line[3],row) == false) return false;
+	char mode = tolower(line[0]);
+	
+	if (row > 3 || col > 3 || mtx > 7)
+		return false;
+
+	reg.num = 0;
+	switch (mode)
+	{
+	case 'r':					// transposed vector
+		reg.num |= (1 << 5);
+		std::swap(col,row);		// fallthrough
+	case 'c':					// vector	
+		reg.type = MIPSVFPU_VECTOR;
+
+		switch (size)
+		{
+		case 1:	// pair
+		case 3: // quad
+			if (row & 1)
+				return false;
+			break;
+		case 2:	// triple
+			if (row & ~1)
+				return false;
+			row <<= 1;
+			break;
+		default:
+			return false;
+		}
+		break;
+	case 's':					// single
+		reg.type = MIPSVFPU_VECTOR;
+
+		if (size != 0)
+			return false;
+		break;
+	case 'e':					// transposed matrix
+		reg.num |= (1 << 5);	// fallthrough
+	case 'm':					// matrix
+		reg.type = MIPSVFPU_MATRIX;
+
+		// check size
+		switch (size)
+		{
+		case 0:	// 2x2
+		case 2:	// 4x4
+			if (row & 1)
+				return false;
+			break;
+		case 1:	// 3x3
+			if ( row & ~1)
+				return false;
+			row <<= 1;
+			break;
+		default:
+			return false;
+		}
+		break;
+	default:
+		return false;
+	}
+
+	reg.num |= mtx << 2;
+	reg.num |= col;
+	reg.num |= row << 5;
+	memcpy(reg.name,line,4);
+	reg.name[4] = 0;
+	return true;
+}
