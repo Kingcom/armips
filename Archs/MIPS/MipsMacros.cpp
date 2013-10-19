@@ -207,6 +207,35 @@ int MipsMacroRotate(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 {
 	int OpcodeCount = 0;
 
+	// PSP has its own rotate opcodes, use those
+	if (Mips.GetVersion() & MARCH_PSP)
+	{
+		if (Flags & MIPSM_IMM)
+		{
+			if (Flags & MIPSM_LEFT)
+			{
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotr","%s,%s,32-0x%02X",
+					Values.rd.Name,Values.rs.Name,Values.i1);
+			} else {
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotr","%s,%s,0x%02X",
+					Values.rd.Name,Values.rs.Name,Values.i1);
+			}
+		} else {
+			if (Flags & MIPSM_LEFT)
+			{
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"subu","r1,r0,%s",
+					Values.rt.Name);
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotrv","%s,%s,r1",
+					Values.rd.Name,Values.rs.Name);
+			} else {
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotrv","%s,%s,%s",
+					Values.rd.Name,Values.rs.Name,Values.rt.Name);
+			}
+		}
+
+		return OpcodeCount;
+	}
+
 	if (Flags & MIPSM_IMM)
 	{
 		if (Flags & MIPSM_LEFT)
@@ -276,13 +305,13 @@ const tMipsMacro MipsMacros[] = {
 	{ "ush",	"d,(s)",	3,	&MipsMacroStoreUnaligned,	MIPSM_HW },
 	{ "usw",	"d,i(s)",	3,	&MipsMacroStoreUnaligned,	MIPSM_W|MIPSM_IMM },
 	{ "usw",	"d,(s)",	3,	&MipsMacroStoreUnaligned,	MIPSM_W },
-
-	{ "blt",	"s,t,I",	4,	&MipsMacroBranch,			MIPSM_LT },
-	{ "blt",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_LT|MIPSM_IMM },
-	{ "bge",	"s,t,I",	4,	&MipsMacroBranch,			MIPSM_GE },
-	{ "bge",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_GE|MIPSM_IMM },
-	{ "bne",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_NE|MIPSM_IMM },
-	{ "beq",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_EQ|MIPSM_IMM },
+	
+	{ "blt",	"s,t,I",	4,	&MipsMacroBranch,			MIPSM_LT|MIPSM_DONTWARNDELAYSLOT },
+	{ "blt",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ "bge",	"s,t,I",	4,	&MipsMacroBranch,			MIPSM_GE|MIPSM_DONTWARNDELAYSLOT },
+	{ "bge",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ "bne",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_NE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ "beq",	"s,i,I",	4,	&MipsMacroBranch,			MIPSM_EQ|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
 
 	{ "rol",	"d,s,t",	4,	&MipsMacroRotate,			MIPSM_LEFT },
 	{ "rol",	"d,s,i",	4,	&MipsMacroRotate,			MIPSM_LEFT|MIPSM_IMM },

@@ -47,7 +47,8 @@ bool CMipsMacro::Validate()
 
 	int NewNum = MipsMacros[MacroNum].Function(Values,MipsMacros[MacroNum].flags,Instructions);
 
-	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && NewNum > 1)
+	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && NewNum > 1
+		&& (MipsMacros[MacroNum].flags & MIPSM_DONTWARNDELAYSLOT) == 0)
 	{
 		Logger::queueError(Logger::Warning,L"Macro with multiple opcodes used inside a delay slot");
 	}
