@@ -27,20 +27,20 @@ int MipsMacroLi(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes)
 		if ((Values.i2 & 0xFFFF8000) == 0xFFFF8000)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,r0,0x%04X",
-				Values.rs.Name,Values.i2 & 0xFFFF);
+				Values.rs.name,Values.i2 & 0xFFFF);
 		} else if ((Values.i2 & 0xFFFF) == 0)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
-				Values.rs.Name,Values.i2 >> 16);
+				Values.rs.name,Values.i2 >> 16);
 		} else {	// lui+addiu
 			if (Values.i2 & 0x8000) Values.i2 += 0x10000;
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
-				Values.rs.Name,Values.i2 >> 16);
+				Values.rs.name,Values.i2 >> 16);
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,%s,0x%04X",
-				Values.rs.Name,Values.rs.Name,Values.i2 & 0xFFFF);
+				Values.rs.name,Values.rs.name,Values.i2 & 0xFFFF);
 		}
 	} else { // definitely fits into one opcode
-		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"ori","%s,r0,0x%04X",Values.rs.Name,Values.i2);
+		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"ori","%s,r0,0x%04X",Values.rs.name,Values.i2);
 	}
 
 	return OpcodeCount;
@@ -51,18 +51,18 @@ int MipsMacroLoad(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes
 	int OpcodeCount = 0;
 
 	if (Values.i2 & 0x8000) Values.i2 += 0x10000;
-	MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",Values.rs.Name,Values.i2 >> 16);
+	MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",Values.rs.name,Values.i2 >> 16);
 
 	if (Flags & MIPSM_B) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lb","%s,0x%04X(%s)",
-		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
+		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
 	else if (Flags & MIPSM_BU) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lbu","%s,0x%04X(%s)",
-		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
+		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
 	else if (Flags & MIPSM_HW) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lh","%s,0x%04X(%s)",
-		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
+		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
 	else if (Flags & MIPSM_HWU) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lhu","%s,0x%04X(%s)",
-		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
+		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
 	else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lw","%s,0x%04X(%s)",
-		Values.rs.Name,Values.i2 & 0xFFFF,Values.rs.Name);
+		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
 	else Logger::printError(Logger::Error,L"Invalid Load macro");
 
 	return OpcodeCount;
@@ -76,11 +76,11 @@ int MipsMacroStore(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcode
 	MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","r1,0x%04X",Values.i2 >> 16);
 
 	if (Flags & MIPSM_B) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sb","%s,0x%04X(r1)",
-		Values.rs.Name,Values.i2 & 0xFFFF);
+		Values.rs.name,Values.i2 & 0xFFFF);
 	else if (Flags & MIPSM_HW) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sh","%s,0x%04X(r1)",
-		Values.rs.Name,Values.i2 & 0xFFFF);
+		Values.rs.name,Values.i2 & 0xFFFF);
 	else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sw","%s,0x%04X(r1)",
-		Values.rs.Name,Values.i2 & 0xFFFF);
+		Values.rs.name,Values.i2 & 0xFFFF);
 	else Logger::printError(Logger::Error,L"Invalid Store macro");
 
 	return OpcodeCount;
@@ -94,27 +94,27 @@ int MipsMacroLoadUnaligned(tMipsMacroValues& Values, int Flags, CMipsInstruction
 	if (Flags & MIPSM_HW)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lb","r1,0x%04X(%s)",
-			Values.i1+1,Values.rs.Name);
+			Values.i1+1,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lb","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1,Values.rs.Name);
+			Values.rd.name,Values.i1,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sll","r1,8");
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"or","%s,r1",
-			Values.rd.Name );
+			Values.rd.name );
 	} else if (Flags & MIPSM_HWU)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lbu","r1,0x%04X(%s)",
-			Values.i1+1,Values.rs.Name);
+			Values.i1+1,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lbu","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1,Values.rs.Name);
+			Values.rd.name,Values.i1,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sll","r1,8");
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"or","%s,r1",
-			Values.rd.Name );
+			Values.rd.name );
 	} else if (Flags & MIPSM_W)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lwl","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1+3,Values.rs.Name);
+			Values.rd.name,Values.i1+3,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lwr","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1,Values.rs.Name);
+			Values.rd.name,Values.i1,Values.rs.name);
 	} else {
 		Logger::printError(Logger::Error,L"Invalid Store Unaligned macro");
 	}
@@ -130,17 +130,17 @@ int MipsMacroStoreUnaligned(tMipsMacroValues& Values, int Flags, CMipsInstructio
 	if (Flags & MIPSM_HW)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sb","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1,Values.rs.Name);
+			Values.rd.name,Values.i1,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"srl","r1,%s,8",
-			Values.rd.Name);
+			Values.rd.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sb","r1,0x%04X(%s)",
-			Values.i1+1,Values.rs.Name);
+			Values.i1+1,Values.rs.name);
 	} else if (Flags & MIPSM_W)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"swl","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1+3,Values.rs.Name);
+			Values.rd.name,Values.i1+3,Values.rs.name);
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"swr","%s,0x%04X(%s)",
-			Values.rd.Name,Values.i1,Values.rs.Name);
+			Values.rd.name,Values.i1,Values.rs.name);
 	} else {
 		Logger::printError(Logger::Error,L"Invalid Store Unaligned macro");
 	}
@@ -157,7 +157,7 @@ int MipsMacroBranch(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 	if (((Flags & MIPSM_IMM) && (unsigned) Values.i1 > 0xFFFF) ||
 		(Flags & MIPSM_NE) || (Flags & MIPSM_EQ)) // has to be loaded into r1
 	{
-		strcpy(NewValues.rs.Name,"r1");
+		strcpy(NewValues.rs.name,"r1");
 		NewValues.i2 = Values.i1;
 		OpcodeCount = MipsMacroLi(NewValues,0,Opcodes);
 		LoadedImmediate = true;
@@ -166,24 +166,24 @@ int MipsMacroBranch(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 	if (Flags & MIPSM_NE)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"bne","%s,r1,0x%08X",
-			Values.rs.Name,Values.i2);
+			Values.rs.name,Values.i2);
 	} else if (Flags & MIPSM_EQ)
 	{
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"beq","%s,r1,0x%08X",
-			Values.rs.Name,Values.i2);
+			Values.rs.name,Values.i2);
 	} else {
 		if (LoadedImmediate == true)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"slt","r1,%s,r1",
-				Values.rs.Name);
+				Values.rs.name);
 		} else {
 			if (Flags & MIPSM_IMM)
 			{
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"slti","r1,%s,0x%04X",
-					Values.rs.Name,Values.i1);
+					Values.rs.name,Values.i1);
 			} else {
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"slt","r1,%s,%s",
-					Values.rs.Name,Values.rt.Name);
+					Values.rs.name,Values.rt.name);
 			}
 		}
 
@@ -215,21 +215,21 @@ int MipsMacroRotate(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 			if (Flags & MIPSM_LEFT)
 			{
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotr","%s,%s,32-0x%02X",
-					Values.rd.Name,Values.rs.Name,Values.i1);
+					Values.rd.name,Values.rs.name,Values.i1);
 			} else {
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotr","%s,%s,0x%02X",
-					Values.rd.Name,Values.rs.Name,Values.i1);
+					Values.rd.name,Values.rs.name,Values.i1);
 			}
 		} else {
 			if (Flags & MIPSM_LEFT)
 			{
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"subu","r1,r0,%s",
-					Values.rt.Name);
+					Values.rt.name);
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotrv","%s,%s,r1",
-					Values.rd.Name,Values.rs.Name);
+					Values.rd.name,Values.rs.name);
 			} else {
 				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"rotrv","%s,%s,%s",
-					Values.rd.Name,Values.rs.Name,Values.rt.Name);
+					Values.rd.name,Values.rs.name,Values.rt.name);
 			}
 		}
 
@@ -241,35 +241,35 @@ int MipsMacroRotate(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 		if (Flags & MIPSM_LEFT)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"srl","r1,%s,0x%02X",
-				Values.rs.Name,32-Values.i1);
+				Values.rs.name,32-Values.i1);
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sll","%s,%s,0x%02X",
-				Values.rd.Name,Values.rs.Name,Values.i1);
+				Values.rd.name,Values.rs.name,Values.i1);
 		} else {
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sll","r1,%s,0x%02X",
-				Values.rs.Name,32-Values.i1);
+				Values.rs.name,32-Values.i1);
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"srl","%s,%s,0x%02X",
-				Values.rd.Name,Values.rs.Name,Values.i1);
+				Values.rd.name,Values.rs.name,Values.i1);
 		}
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"or","%s,r1",
-			Values.rd.Name);
+			Values.rd.name);
 	} else {
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"subu","r1,r0,%s",
-			Values.rt.Name);
+			Values.rt.name);
 
 		if (Flags & MIPSM_LEFT)
 		{
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"srlv","r1,%s,r1",
-				Values.rs.Name);
+				Values.rs.name);
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sllv","%s,%s,%s",
-				Values.rd.Name,Values.rs.Name,Values.rt.Name);
+				Values.rd.name,Values.rs.name,Values.rt.name);
 		} else {
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sllv","r1,%s,r1",
-				Values.rs.Name);
+				Values.rs.name);
 			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"srlv","%s,%s,%s",
-				Values.rd.Name,Values.rs.Name,Values.rt.Name);
+				Values.rd.name,Values.rs.name,Values.rt.name);
 		}
 		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"or","%s,r1",
-			Values.rd.Name);
+			Values.rd.name);
 	}
 
 	return OpcodeCount;

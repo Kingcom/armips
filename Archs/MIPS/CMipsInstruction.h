@@ -14,12 +14,27 @@ struct MipsImmediate
 	int originalValue;
 };
 
-struct MipsOpcodeVariables {
-	tMipsRegisterInfo rs;			// source reg
-	tMipsRegisterInfo rt;			// target reg
-	tMipsRegisterInfo rd;			// dest reg
+struct MipsOpcodeRegisters {
+	MipsRegisterInfo grs;			// general source reg
+	MipsRegisterInfo grt;			// general target reg
+	MipsRegisterInfo grd;			// general dest reg
+	
+	MipsRegisterInfo frs;			// float source reg
+	MipsRegisterInfo frt;			// float target reg
+	MipsRegisterInfo frd;			// float dest reg
 
+	MipsVFPURegister vrs;			// vfpu source reg
+	MipsVFPURegister vrt;			// vfpu target reg
+	MipsVFPURegister vrd;			// vfpu dest reg
+
+	void reset()
+	{
+		grs.num = grt.num = grd.num = -1;
+		frs.num = frt.num = frd.num = -1;
+		vrs.num = vrt.num = vrd.num = -1;
+	}
 };
+
 
 class CMipsInstruction: public CAssemblerCommand
 {
@@ -33,7 +48,7 @@ public:
 private:
 	bool LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line);
 	void setOmittedRegisters();
-	void FormatInstruction(char* encoding,MipsOpcodeVariables& Vars, char* dest);
+	void FormatInstruction(char* encoding,MipsOpcodeRegisters& Vars, char* dest);
 
 	tMipsOpcode Opcode;
 	bool IgnoreLoadDelay;
@@ -43,7 +58,7 @@ private:
 	CMipsInstruction* subInstruction;
 
 	// opcode variables
-	MipsOpcodeVariables vars;
+	MipsOpcodeRegisters registers;
 	MipsImmediateType immediateType;
 	MipsImmediate immediate;
 };

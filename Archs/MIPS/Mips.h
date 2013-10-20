@@ -48,9 +48,9 @@ typedef struct {
 } tMipsRegister;
 
 typedef struct {
-	char Name[5];
-	short Number;
-} tMipsRegisterInfo;
+	char name[5];
+	short num;
+} MipsRegisterInfo;
 
 enum MipsVfpuType { MIPSVFPU_VECTOR, MIPSVFPU_MATRIX };
 
@@ -64,9 +64,9 @@ struct MipsVFPURegister
 extern const tMipsRegister MipsRegister[];
 extern CMipsArchitecture Mips;
 
-bool MipsGetRegister(char* source, int& RetLen, tMipsRegisterInfo& Result);
+bool MipsGetRegister(char* source, int& RetLen, MipsRegisterInfo& Result);
 int MipsGetRegister(char* source, int& RetLen);
-bool MipsGetFloatRegister(char* source, int& RetLen, tMipsRegisterInfo& Result);
+bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result);
 int MipsGetFloatRegister(char* source, int& RetLen);
 bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen);
 

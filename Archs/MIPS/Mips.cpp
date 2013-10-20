@@ -9,66 +9,6 @@
 
 CMipsArchitecture Mips;
 
-typedef struct {
-	int number;
-	int instructions;
-} tRegisterDelay;
-
-class CMipsDelayManager
-{
-public:
-	void Advance();
-	bool CheckDelay(MipsOpcodeVariables& Vars, int flags);
-private:
-	bool CheckGprDelay(MipsOpcodeVariables& Vars, int flags);
-	bool CheckFprDelay(MipsOpcodeVariables& Vars, int flags);
-	tRegisterDelay Gpr;
-	tRegisterDelay Fpr;
-};
-
-void CMipsDelayManager::Advance()
-{
-	if (Gpr.instructions != 0) Gpr.instructions--;
-	if (Fpr.instructions != 0) Fpr.instructions--;
-}
-
-bool CMipsDelayManager::CheckGprDelay(MipsOpcodeVariables& Vars, int flags)
-{
-	tMipsRegisterInfo* Reg = NULL;
-	if ((flags & O_RD) && Vars.rd.Number == Gpr.number) Reg = &Vars.rd;
-	else if ((flags & O_RS) && Vars.rs.Number == Gpr.number) Reg = &Vars.rs;
-	else if ((flags & O_RT) && Vars.rt.Number == Gpr.number) Reg = &Vars.rt;
-	else if ((flags & O_RDT) && Vars.rd.Number == Gpr.number) Reg = &Vars.rd;
-	else if ((flags & O_RSD) && Vars.rs.Number == Gpr.number) Reg = &Vars.rs;
-	else if ((flags & O_RST) && Vars.rs.Number == Gpr.number) Reg = &Vars.rs;
-
-	if (Reg == NULL) return false;
-	Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Reg->Name);
-	return true;
-}
-
-bool CMipsDelayManager::CheckFprDelay(MipsOpcodeVariables& Vars, int flags)
-{
-	tMipsRegisterInfo* Reg = NULL;
-	if ((flags & MO_FRD) && Vars.rd.Number == Fpr.number) Reg = &Vars.rd;
-	else if ((flags & MO_FRS) && Vars.rs.Number == Fpr.number) Reg = &Vars.rs;
-	else if ((flags & MO_FRT) && Vars.rt.Number == Fpr.number) Reg = &Vars.rt;
-	else if ((flags & MO_FRDT) && Vars.rd.Number == Fpr.number) Reg = &Vars.rd;
-	else if ((flags & MO_FRSD) && Vars.rs.Number == Fpr.number) Reg = &Vars.rs;
-	else if ((flags & MO_FRST) && Vars.rs.Number == Fpr.number) Reg = &Vars.rs;
-
-	if (Reg == NULL) return false;
-	Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",Reg->Name);
-	return true;
-}
-
-bool CMipsDelayManager::CheckDelay(MipsOpcodeVariables& Vars, int flags)
-{
-	if (Gpr.instructions != 0) if (CheckGprDelay(Vars,flags) == true) return true;
-	if (Fpr.instructions != 0) if (CheckFprDelay(Vars,flags) == true) return true;
-	return false;
-}
-
 const tMipsRegister MipsRegister[] = {
 	{ "r0", 0, 2 }, { "zero", 0, 4}, { "$0", 0, 2 },
 	{ "at", 1, 2 }, { "r1", 1, 2 }, { "$1", 1, 2 },
@@ -221,7 +161,7 @@ void CMipsArchitecture::SetLoadDelay(bool Delay, int Register)
 	LoadDelayRegister = Register;
 }
 
-bool MipsGetRegister(char* source, int& RetLen, tMipsRegisterInfo& Result)
+bool MipsGetRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
 {
 	for (int z = 0; MipsRegister[z].name != NULL; z++)
 	{
@@ -231,9 +171,9 @@ bool MipsGetRegister(char* source, int& RetLen, tMipsRegisterInfo& Result)
 			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
 				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
 			{
-				memcpy(Result.Name,source,len);
-				Result.Name[len] = 0;
-				Result.Number = MipsRegister[z].num;
+				memcpy(Result.name,source,len);
+				Result.name[len] = 0;
+				Result.num = MipsRegister[z].num;
 				RetLen = len;
 				return true;
 			}
@@ -261,7 +201,7 @@ int MipsGetRegister(char* source, int& RetLen)
 }
 
 
-bool MipsGetFloatRegister(char* source, int& RetLen, tMipsRegisterInfo& Result)
+bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
 {
 	for (int z = 0; MipsFloatRegister[z].name != NULL; z++)
 	{
@@ -271,9 +211,9 @@ bool MipsGetFloatRegister(char* source, int& RetLen, tMipsRegisterInfo& Result)
 			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
 				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
 			{
-				memcpy(Result.Name,source,len);
-				Result.Name[len] = 0;
-				Result.Number = MipsFloatRegister[z].num;
+				memcpy(Result.name,source,len);
+				Result.name[len] = 0;
+				Result.num = MipsFloatRegister[z].num;
 				RetLen = len;
 				return true;
 			}

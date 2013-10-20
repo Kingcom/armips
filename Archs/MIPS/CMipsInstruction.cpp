@@ -58,6 +58,9 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 	int RetLen;
 	CStringList List;
 	bool Immediate = false;
+	
+	immediateType = MIPS_NOIMMEDIATE;
+	registers.reset();
 
 	char* SourceEncoding = SourceOpcode.encoding;
 	char* OriginalLine = Line;
@@ -74,40 +77,56 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 			switch (*SourceEncoding)
 			{
 			case 'T':	// float reg
-				if (MipsGetFloatRegister(Line,RetLen,vars.rt) == false) return false;
+				if (MipsGetFloatRegister(Line,RetLen,registers.frt) == false) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'D':	// float reg
-				if (MipsGetFloatRegister(Line,RetLen,vars.rd) == false) return false;
+				if (MipsGetFloatRegister(Line,RetLen,registers.frd) == false) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'S':	// float reg
-				if (MipsGetFloatRegister(Line,RetLen,vars.rs) == false) return false;
+				if (MipsGetFloatRegister(Line,RetLen,registers.frs) == false) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 't':
-				if (MipsGetRegister(Line,RetLen,vars.rt) == false) return false;
+				if (MipsGetRegister(Line,RetLen,registers.grt) == false) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'd':
-				if (MipsGetRegister(Line,RetLen,vars.rd) == false) return false;
+				if (MipsGetRegister(Line,RetLen,registers.grd) == false) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 's':
-				if (MipsGetRegister(Line,RetLen,vars.rs) == false) return false;
+				if (MipsGetRegister(Line,RetLen,registers.grs) == false) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'a':	// 5 bit immediate
+				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
+				immediateType = MIPS_IMMEDIATE5;
+				Line += RetLen;
+				SourceEncoding++;
+				break;
 			case 'i':	// 16 bit immediate
+				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
+				immediateType = MIPS_IMMEDIATE16;
+				Line += RetLen;
+				SourceEncoding++;
+				break;
 			case 'b':	// 20 bit immediate
+				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
+				immediateType = MIPS_IMMEDIATE20;
+				Line += RetLen;
+				SourceEncoding++;
+				break;
 			case 'I':	// 32 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
+				immediateType = MIPS_IMMEDIATE26;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
@@ -128,27 +147,11 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 	
 	// opcode is ok - now set all flags
 	Opcode = SourceOpcode;
-
-	immediateType = MIPS_NOIMMEDIATE;
 	if (immediate.expression.isLoaded())
 	{
 		if (immediate.expression.check() == false)
 		{
 			NoCheckError = true;
-			return false;
-		}
-
-		if (Opcode.flags & O_I5)
-			immediateType = MIPS_IMMEDIATE5;
-		else if (Opcode.flags & O_I16)
-			immediateType = MIPS_IMMEDIATE16;
-		else if (Opcode.flags & O_I20)
-			immediateType = MIPS_IMMEDIATE20;
-		else if (Opcode.flags & O_I26)
-			immediateType = MIPS_IMMEDIATE26;
-		else
-		{
-			Logger::printError(Logger::Error,L"Unknown immediate type");
 			return false;
 		}
 	}
@@ -160,26 +163,20 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 void CMipsInstruction::setOmittedRegisters()
 {
 	// copy over omitted registers
-	if ((Opcode.flags & O_RSD) == O_RSD)
-		vars.rd = vars.rs;
+	if (Opcode.flags & MO_RSD)
+		registers.grd = registers.grs;
 	
-	if ((Opcode.flags & O_RST) == O_RST)
-		vars.rt = vars.rs;
+	if (Opcode.flags & MO_RST)
+		registers.grt = registers.grs;
 	
-	if ((Opcode.flags & O_RDT) == O_RDT)
-		vars.rt = vars.rd;
+	if (Opcode.flags & MO_RDT)
+		registers.grt = registers.grd;
 	
-	if ((Opcode.flags & MO_FRSD) == MO_FRSD)
-		vars.rd = vars.rs;
-	
-	if ((Opcode.flags & MO_FRST) == MO_FRST)
-		vars.rt = vars.rs;
-	
-	if ((Opcode.flags & MO_FRDT) == MO_FRDT)
-		vars.rt = vars.rd;
+	if (Opcode.flags & MO_FRSD)
+		registers.frd = registers.frs;
 }
 
-void CMipsInstruction::FormatInstruction(char* encoding,MipsOpcodeVariables& Vars, char* dest)
+void CMipsInstruction::FormatInstruction(char* encoding,MipsOpcodeRegisters& Vars, char* dest)
 {
 	while (*encoding != 0)
 	{
@@ -190,18 +187,27 @@ void CMipsInstruction::FormatInstruction(char* encoding,MipsOpcodeVariables& Var
 			encoding+=2;
 			break;
 		case 's':
+			dest += sprintf(dest,"%s",registers.grs.name);
+			encoding++;
+			break;
 		case 'S':
-			dest += sprintf(dest,"%s",vars.rs.Name);
+			dest += sprintf(dest,"%s",registers.frs.name);
 			encoding++;
 			break;
 		case 'd':
+			dest += sprintf(dest,"%s",registers.grd.name);
+			encoding++;
+			break;
 		case 'D':
-			dest += sprintf(dest,"%s",vars.rd.Name);
+			dest += sprintf(dest,"%s",registers.frd.name);
 			encoding++;
 			break;
 		case 't':
+			dest += sprintf(dest,"%s",registers.grt.name);
+			encoding++;
+			break;
 		case 'T':
-			dest += sprintf(dest,"%s",vars.rt.Name);
+			dest += sprintf(dest,"%s",registers.frt.name);
 			encoding++;
 			break;
 		case 'i':	// 16 bit immediate
@@ -268,10 +274,10 @@ bool CMipsInstruction::Validate()
 
 		immediate.originalValue = immediate.value;
 		
-		if (Opcode.flags & O_IPCA)	// absolute value >> 2)
+		if (Opcode.flags & MO_IPCA)	// absolute value >> 2)
 		{
 			immediate.value = (immediate.value >> 2) & 0x3FFFFFF;
-		} else if (Opcode.flags & O_IPCR)	// relative 16 bit value
+		} else if (Opcode.flags & MO_IPCR)	// relative 16 bit value
 		{
 			int num = (immediate.value-RamPos-4);
 			
@@ -301,17 +307,17 @@ bool CMipsInstruction::Validate()
 	{
 		bool fix = false;
 
-		if ((Opcode.flags & O_RD) && vars.rd.Number == Mips.GetLoadDelayRegister())
+		if (registers.grd.num != -1 && registers.grd.num == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",vars.rd.Name);
+			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registers.grd.name);
 			fix = true;
-		} else if ((Opcode.flags & O_RS) && vars.rs.Number == Mips.GetLoadDelayRegister())
+		} else if (registers.grs.num != -1 && registers.grs.num == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",vars.rs.Name);
+			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registers.grs.name);
 			fix = true;
-		} else if ((Opcode.flags & O_RT) && vars.rt.Number == Mips.GetLoadDelayRegister())
+		} else if (registers.grt.num != -1 && registers.grt.num == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",vars.rt.Name);
+			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registers.grt.name);
 			fix = true;
 		}
 
@@ -331,7 +337,7 @@ bool CMipsInstruction::Validate()
 		}
 	}
 
-	if ((Opcode.flags & MO_NODELAY) && Mips.GetDelaySlot() == true && IgnoreLoadDelay == false)
+	if ((Opcode.flags & MO_NODELAYSLOT) && Mips.GetDelaySlot() == true && IgnoreLoadDelay == false)
 	{
 		Logger::queueError(Logger::Error,L"This instruction can't be in a delay slot");
 	}
@@ -339,8 +345,8 @@ bool CMipsInstruction::Validate()
 	Mips.SetDelaySlot(Opcode.flags & MO_DELAY ? true : false);
 
 	// now check if this opcode causes a load delay
-	if (Mips.GetVersion() & MARCH_PSX)
-		Mips.SetLoadDelay(Opcode.flags & MO_DELAYRT ? true : false,vars.rt.Number);
+	if (Mips.hasLoadDelay())
+		Mips.SetLoadDelay(Opcode.flags & MO_DELAYRT ? true : false,registers.grt.num);
 	
 	g_fileManager->advanceMemory(4);
 	return Result;
@@ -353,13 +359,13 @@ void CMipsInstruction::Encode()
 		subInstruction->Encode();
 	int encoding = Opcode.destencoding;
 
-	if (Opcode.flags & O_RS) encoding |= (vars.rs.Number << 21);	// source reg
-	if (Opcode.flags & O_RT) encoding |= (vars.rt.Number << 16);	// target reg
-	if (Opcode.flags & O_RD) encoding |= (vars.rd.Number << 11);	// dest reg
-
-	if (Opcode.flags & MO_FRT) encoding |= (vars.rt.Number << 16);	// float target
-	if (Opcode.flags & MO_FRS) encoding |= (vars.rs.Number << 11);	// float source
-	if (Opcode.flags & MO_FRD) encoding |= (vars.rd.Number << 6);	// float dest
+	if (registers.grs.num != -1) encoding |= (registers.grs.num << 21);	// source reg
+	if (registers.grt.num != -1) encoding |= (registers.grt.num << 16);	// target reg
+	if (registers.grd.num != -1) encoding |= (registers.grd.num << 11);	// dest reg
+	
+	if (registers.frt.num != -1) encoding |= (registers.frt.num << 16);	// float target reg
+	if (registers.frs.num != -1) encoding |= (registers.frs.num << 21);	// float source reg
+	if (registers.frd.num != -1) encoding |= (registers.frd.num << 6);	// float dest reg
 
 	switch (immediateType)
 	{
@@ -386,7 +392,7 @@ void CMipsInstruction::writeTempData(TempData& tempData)
 	int pos = sprintf(str,"   %s",Opcode.name);
 	while (pos < 11) str[pos++] = ' ';
 	str[pos] = 0;
-	FormatInstruction(Opcode.encoding,vars,&str[pos]);
+	FormatInstruction(Opcode.encoding,registers,&str[pos]);
 
 	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }

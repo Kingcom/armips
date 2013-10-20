@@ -20,26 +20,26 @@
 typedef struct {
 	MathExpression i1;
 	MathExpression i2;
-	tMipsRegisterInfo rs;			// source reg
-	tMipsRegisterInfo rt;			// target reg
-	tMipsRegisterInfo rd;			// dest reg
+	MipsRegisterInfo rs;			// source reg
+	MipsRegisterInfo rt;			// target reg
+	MipsRegisterInfo rd;			// dest reg
 	bool NoCheckError;
 } tMipsMacroVars;
 
 typedef struct {
 	MathExpression i1;
 	MathExpression i2;
-	tMipsRegisterInfo rs;			// source reg
-	tMipsRegisterInfo rt;			// target reg
-	tMipsRegisterInfo rd;			// dest reg
+	MipsRegisterInfo rs;			// source reg
+	MipsRegisterInfo rt;			// target reg
+	MipsRegisterInfo rd;			// dest reg
 } tMipsMacroData;
 
 typedef struct {
 	int i1;
 	int i2;
-	tMipsRegisterInfo rs;			// source reg
-	tMipsRegisterInfo rt;			// target reg
-	tMipsRegisterInfo rd;			// dest reg
+	MipsRegisterInfo rs;			// source reg
+	MipsRegisterInfo rt;			// target reg
+	MipsRegisterInfo rd;			// dest reg
 } tMipsMacroValues;
 
 typedef int (*mipsmacrofunc)(tMipsMacroValues&,int,CMipsInstruction*);
