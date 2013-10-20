@@ -11,6 +11,11 @@
 #define MO_DELAYRT		0x00000080	// rt won't be available for one instruction
 #define MO_IGNORERTD	0x00000100	// don't care for rt delay
 #define MO_FRSD			0x00000200	// float rs + rd
+#define MO_IMMALIGNED	0x00000400	// immediate 4 byte aligned
+#define MO_VFPU_MIXED	0x00000800	// mixed mode vfpu register
+#define MO_VFPU_6BIT	0x00001000	// vfpu register can have 6 bits max
+#define MO_VFPU_SINGLE	0x00002000	// single vfpu reg
+#define MO_VFPU_QUAD	0x00004000	// quad vfpu reg
 
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) << (START)))

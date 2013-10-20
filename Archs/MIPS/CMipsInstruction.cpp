@@ -61,6 +61,12 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 	
 	immediateType = MIPS_NOIMMEDIATE;
 	registers.reset();
+	vfpuSize = -1;
+
+	if (SourceOpcode.flags & MO_VFPU_SINGLE)
+		vfpuSize = 0;
+	else if (SourceOpcode.flags & MO_VFPU_QUAD)
+		vfpuSize = 3;
 
 	char* SourceEncoding = SourceOpcode.encoding;
 	char* OriginalLine = Line;
@@ -106,6 +112,30 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 				Line += RetLen;
 				SourceEncoding++;
 				break;
+			case 'v':	// vfpu vector register
+				switch (*(SourceEncoding+1))
+				{
+				case 's':
+					if (MipsGetVFPURegister(Line,registers.vrs,vfpuSize) == false) return false;
+					if (registers.vrs.type != MIPSVFPU_VECTOR) return false;
+					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrs.num & 0x40)) return false;
+					break;
+				case 't':
+					if (MipsGetVFPURegister(Line,registers.vrt,vfpuSize) == false) return false;
+					if (registers.vrt.type != MIPSVFPU_VECTOR) return false;
+					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrt.num & 0x40)) return false;
+					break;
+				case 'd':
+					if (MipsGetVFPURegister(Line,registers.vrd,vfpuSize) == false) return false;
+					if (registers.vrd.type != MIPSVFPU_VECTOR) return false;
+					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrd.num & 0x40)) return false;
+					break;
+				default:
+					return false;
+				}
+				Line += 4;
+				SourceEncoding += 2;
+				break;
 			case 'a':	// 5 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
 				immediateType = MIPS_IMMEDIATE5;
@@ -135,6 +165,8 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 				Line += RetLen;
 				SourceEncoding += 2;
 				break;
+			case '/':	// forced letter
+				SourceEncoding++;	// fallthrough
 			default:	// everything else
 				if (*SourceEncoding++ != *Line++) return false;
 				break;
@@ -274,6 +306,15 @@ bool CMipsInstruction::Validate()
 
 		immediate.originalValue = immediate.value;
 		
+		if (Opcode.flags & MO_IMMALIGNED)	// immediate must be aligned
+		{
+			if (immediate.value % 4)
+			{
+				Logger::queueError(Logger::Error,L"Immediate must be word aligned",immediate.value);
+				return false;
+			}
+		}
+
 		if (Opcode.flags & MO_IPCA)	// absolute value >> 2)
 		{
 			immediate.value = (immediate.value >> 2) & 0x3FFFFFF;
@@ -377,6 +418,13 @@ void CMipsInstruction::Encode()
 	case MIPS_IMMEDIATE26:
 		encoding |= immediate.value;
 		break;
+	}
+
+	if (Opcode.flags & MO_VFPU_MIXED)
+	{
+		// always vrt
+		encoding |= registers.vrt.num >> 5;
+		encoding |= (registers.vrt.num & 0x1F) << 16;
 	}
 	
 	g_fileManager->write(&encoding,4);

@@ -69,4 +69,4 @@ int MipsGetRegister(char* source, int& RetLen);
 bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result);
 int MipsGetFloatRegister(char* source, int& RetLen);
 bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen);
-
+bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size);

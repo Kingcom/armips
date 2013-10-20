@@ -61,4 +61,5 @@ private:
 	MipsOpcodeRegisters registers;
 	MipsImmediateType immediateType;
 	MipsImmediate immediate;
+	int vfpuSize;
 };

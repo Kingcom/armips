@@ -313,7 +313,10 @@ bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size)
 	if (decodeDigit(line[2],col) == false) return false;
 	if (decodeDigit(line[3],row) == false) return false;
 	char mode = tolower(line[0]);
-	
+
+	if (size < 0 || size > 3)
+		return false;
+
 	if (row > 3 || col > 3 || mtx > 7)
 		return false;
 

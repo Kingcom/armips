@@ -28,8 +28,8 @@ const tMipsOpcode MipsOpcodes[] = {
 // 011 | ---   | ---   |  ---  | ---   | ---   | ---   | ---   | ---   | 18..1F
 // 100 | LB    | LH    | LWL   | LW    | LBU   | LHU   | LWR   | ---   | 20..27
 // 101 | SB    | SH    | SWL   | SW    | ---   | ---   | SWR   | CACHE | 28..2F
-// 110 | LL    | LWC1  | ---   | ---   | ---   | ---   | ---   | ---   | 30..37
-// 111 | SC    | SWC1  | ---   | ---   | ---   | ---   | ---   | ---   | 38..3F
+// 110 | LL    | LWC1  | LV.S  | ---   | ---   | ULV.Q | LV.Q  | ---   | 30..37
+// 111 | SC    | SWC1  | SV.S  | ---   | ---   | USV.Q | SV.Q  | ---   | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 //		*1 = SPECIAL	*2 = REGIMM		*3 = COP0		*4 = COP1
 	{ "j",		"I",		MIPS_OP(0x02), 					MARCH_ALL,	MO_IPCA|MO_DELAY|MO_NODELAYSLOT },
@@ -91,10 +91,36 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "ll",		"t,(s)",	MIPS_OP(0x30),					MARCH_PSP,	MO_DELAYRT },
 	{ "lwc1",	"T,i(s)",	MIPS_OP(0x31),					MARCH_PSP,	0 },
 	{ "lwc1",	"T,(s)",	MIPS_OP(0x31),					MARCH_PSP,	0 },
-	{ "sc",		"t,i(s)",	MIPS_OP(0x38),					MARCH_PSP,	0 },
-	{ "sc",		"t,(s)",	MIPS_OP(0x38),					MARCH_PSP,	0 },
-	{ "swc1",	"T,i(s)",	MIPS_OP(0x39),					MARCH_PSP,	0 },
-	{ "swc1",	"T,(s)",	MIPS_OP(0x39),					MARCH_PSP,	0 },
+	
+	{ "lv.s",	"vt,i(s)",		MIPS_OP(0x32),				MARCH_PSP,	MO_VFPU_SINGLE|MO_VFPU_MIXED|MO_IMMALIGNED },
+	{ "lv.s",	"vt,(s)",		MIPS_OP(0x32),				MARCH_PSP,	MO_VFPU_SINGLE|MO_VFPU_MIXED },
+	{ "ulv.q",	"vt,i(s)",		MIPS_OP(0x35),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_IMMALIGNED },
+	{ "ulv.q",	"vt,(s)",		MIPS_OP(0x35),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED },
+	{ "lvl.q",	"vt,i(s)",		MIPS_OP(0x35),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "lvl.q",	"vt,(s)",		MIPS_OP(0x35),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "lvr.q",	"vt,i(s)",		MIPS_OP(0x35)|0x02,			MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "lvr.q",	"vt,(s)",		MIPS_OP(0x35)|0x02,			MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "lv.q",	"vt,i(s)",		MIPS_OP(0x36),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "lv.q",	"vt,(s)",		MIPS_OP(0x36),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+
+	{ "sc",		"t,i(s)",		MIPS_OP(0x38),				MARCH_PSP,	0 },
+	{ "sc",		"t,(s)",		MIPS_OP(0x38),				MARCH_PSP,	0 },
+	{ "swc1",	"T,i(s)",		MIPS_OP(0x39),				MARCH_PSP,	0 },
+	{ "swc1",	"T,(s)",		MIPS_OP(0x39),				MARCH_PSP,	0 },
+	
+	{ "sv.s",	"vt,i(s)",		MIPS_OP(0x3A),				MARCH_PSP,	MO_VFPU_SINGLE|MO_VFPU_MIXED|MO_IMMALIGNED },
+	{ "sv.s",	"vt,(s)",		MIPS_OP(0x3A),				MARCH_PSP,	MO_VFPU_SINGLE|MO_VFPU_MIXED },
+	{ "usv.q",	"vt,i(s)",		MIPS_OP(0x3D),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_IMMALIGNED },
+	{ "usv.q",	"vt,(s)",		MIPS_OP(0x3D),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED },
+	{ "svl.q",	"vt,i(s)",		MIPS_OP(0x3D),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "svl.q",	"vt,(s)",		MIPS_OP(0x3D),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "svr.q",	"vt,i(s)",		MIPS_OP(0x3D)|0x02,			MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "svr.q",	"vt,(s)",		MIPS_OP(0x3D)|0x02,			MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "sv.q",	"vt,i(s)",		MIPS_OP(0x3E),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "sv.q",	"vt,(s)",		MIPS_OP(0x3E),				MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "sv.q",	"vt,i(s),/w/b",	MIPS_OP(0x3E)|0x02,			MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "sv.q",	"vt,(s),/w/b",	MIPS_OP(0x3E)|0x02,			MARCH_PSP,	MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+
 
 
 //     31---------26------------------------------------------5--------0
