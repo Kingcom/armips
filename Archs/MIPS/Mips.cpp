@@ -337,7 +337,7 @@ bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size)
 				return false;
 			break;
 		case 2:	// triple
-			if (row & ~1)
+			if (row & 2)
 				return false;
 			row <<= 1;
 			break;

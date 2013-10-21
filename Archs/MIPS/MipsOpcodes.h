@@ -16,7 +16,7 @@
 #define MO_VFPU_6BIT	0x00001000	// vfpu register can have 6 bits max
 #define MO_VFPU_SINGLE	0x00002000	// single vfpu reg
 #define MO_VFPU_QUAD	0x00004000	// quad vfpu reg
-
+#define MO_VFPU			0x00008000	// vfpu type opcode
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) << (START)))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))

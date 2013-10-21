@@ -27,7 +27,7 @@ bool CMipsInstruction::Load(char* Name, char* Params)
 	{
 		if (MipsOpcodes[z].ver & Mips.GetVersion())
 		{
-			if (strcmp(Name,MipsOpcodes[z].name) == 0)
+			if (parseOpcode(MipsOpcodes[z],Name) == true)
 			{
 				if (LoadEncoding(MipsOpcodes[z],Params) == true)
 				{
@@ -52,6 +52,47 @@ bool CMipsInstruction::Load(char* Name, char* Params)
 }
 
 
+bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, char* Line)
+{
+	vfpuSize = -1;
+
+	char* SourceEncoding = SourceOpcode.name;
+	while (*SourceEncoding != NULL)
+	{
+		if (*Line == 0) return false;
+
+		switch (*SourceEncoding)
+		{
+		case 'S':	// vfpu size
+			switch (*Line)
+			{
+			case 's':
+				vfpuSize = 0;
+				break;
+			case 'p':
+				vfpuSize = 1;
+				break;
+			case 't':
+				vfpuSize = 2;
+				break;
+			case 'q':
+				vfpuSize = 3;
+				break;
+			default:
+				return false;
+			}
+			SourceEncoding++;
+			Line++;
+			break;
+		default:
+			if (*SourceEncoding++ != *Line++) return false;
+			break;
+		}
+	}
+	
+	if (*Line != 0)	return false;	// there's something else, bad
+	return true;
+}
 
 bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 {
@@ -61,12 +102,14 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 	
 	immediateType = MIPS_NOIMMEDIATE;
 	registers.reset();
-	vfpuSize = -1;
 
-	if (SourceOpcode.flags & MO_VFPU_SINGLE)
-		vfpuSize = 0;
-	else if (SourceOpcode.flags & MO_VFPU_QUAD)
-		vfpuSize = 3;
+	if (vfpuSize == -1)
+	{
+		if (SourceOpcode.flags & MO_VFPU_SINGLE)
+			vfpuSize = 0;
+		else if (SourceOpcode.flags & MO_VFPU_QUAD)
+			vfpuSize = 3;
+	}
 
 	char* SourceEncoding = SourceOpcode.encoding;
 	char* OriginalLine = Line;
@@ -208,8 +251,32 @@ void CMipsInstruction::setOmittedRegisters()
 		registers.frd = registers.frs;
 }
 
-void CMipsInstruction::FormatInstruction(char* encoding,MipsOpcodeRegisters& Vars, char* dest)
+int CMipsInstruction::formatOpcodeName(char* dest)
 {
+	char* encoding = Opcode.name;
+	char* start = dest;
+
+	while (*encoding != 0)
+	{
+		switch (*encoding)
+		{
+		case 'S':
+			*dest++ = "sptq"[vfpuSize];
+			encoding++;
+			break;
+		default:
+			*dest++ = *encoding++;
+			break;
+		}
+	}
+	*dest = 0;
+	return dest-start;
+}
+
+void CMipsInstruction::formatParameters(char* dest)
+{
+	char* encoding = Opcode.encoding;
+
 	while (*encoding != 0)
 	{
 		switch (*encoding)
@@ -241,6 +308,21 @@ void CMipsInstruction::FormatInstruction(char* encoding,MipsOpcodeRegisters& Var
 		case 'T':
 			dest += sprintf(dest,"%s",registers.frt.name);
 			encoding++;
+			break;
+		case 'v':
+			switch (*(encoding+1))
+			{
+			case 'd':
+				dest += sprintf(dest,"%s",registers.vrd.name);
+				break;
+			case 's':
+				dest += sprintf(dest,"%s",registers.vrs.name);
+				break;
+			case 't':
+				dest += sprintf(dest,"%s",registers.vrt.name);
+				break;
+			}
+			encoding += 2;
 			break;
 		case 'i':	// 16 bit immediate
 			dest += sprintf(dest,"0x%X",immediate.originalValue & 0xFFFF);
@@ -393,11 +475,8 @@ bool CMipsInstruction::Validate()
 	return Result;
 }
 
-
-void CMipsInstruction::Encode()
+void CMipsInstruction::encodeNormal()
 {
-	if (subInstruction != NULL)
-		subInstruction->Encode();
 	int encoding = Opcode.destencoding;
 
 	if (registers.grs.num != -1) encoding |= (registers.grs.num << 21);	// source reg
@@ -430,6 +509,33 @@ void CMipsInstruction::Encode()
 	g_fileManager->write(&encoding,4);
 }
 
+void CMipsInstruction::encodeVfpu()
+{
+	int encoding = Opcode.destencoding;
+
+	if (registers.vrd.num != -1) encoding |= (registers.vrd.num << 0);
+	if (registers.vrs.num != -1) encoding |= (registers.vrs.num << 8);
+	if (registers.vrt.num != -1) encoding |= (registers.vrt.num << 16);
+	if (vfpuSize != -1)
+	{
+		if (vfpuSize & 1) encoding |= (1 << 7);
+		if (vfpuSize & 2) encoding |= (1 << 15);
+	}
+	
+	g_fileManager->write(&encoding,4);
+}
+
+void CMipsInstruction::Encode()
+{
+	if (subInstruction != NULL)
+		subInstruction->Encode();
+
+	if (Opcode.flags & MO_VFPU)
+		encodeVfpu();
+	else
+		encodeNormal();
+}
+
 void CMipsInstruction::writeTempData(TempData& tempData)
 {
 	char str[256];
@@ -437,10 +543,11 @@ void CMipsInstruction::writeTempData(TempData& tempData)
 	if (subInstruction != NULL)
 		subInstruction->writeTempData(tempData);
 
-	int pos = sprintf(str,"   %s",Opcode.name);
+	int pos = sprintf(str,"   ");
+	pos += formatOpcodeName(&str[pos]);
 	while (pos < 11) str[pos++] = ' ';
 	str[pos] = 0;
-	FormatInstruction(Opcode.encoding,registers,&str[pos]);
+	formatParameters(&str[pos]);
 
 	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }

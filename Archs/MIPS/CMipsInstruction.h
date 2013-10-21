@@ -46,9 +46,13 @@ public:
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 private:
+	void encodeNormal();
+	void encodeVfpu();
+	bool parseOpcode(const tMipsOpcode& SourceOpcode, char* Line);
 	bool LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line);
 	void setOmittedRegisters();
-	void FormatInstruction(char* encoding,MipsOpcodeRegisters& Vars, char* dest);
+	int formatOpcodeName(char* dest);
+	void formatParameters(char* dest);
 
 	tMipsOpcode Opcode;
 	bool IgnoreLoadDelay;
