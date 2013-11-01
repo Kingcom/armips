@@ -42,9 +42,24 @@ void SymbolData::writeNocashSym()
 		{
 			SymDataSymbol& sym = module.symbols[i];
 			
+			int size = 0;
+			for (size_t f = 0; f < module.functions.size(); f++)
+			{
+				if (module.functions[f].address == sym.address)
+				{
+					size = module.functions[f].size;
+					break;
+				}
+			}
+
 			NocashSymEntry entry;
 			entry.address = sym.address;
-			entry.text = sym.name;
+
+			if (size != 0)
+				entry.text = formatString("%s,%08X",sym.name.c_str(),size);
+			else
+				entry.text = sym.name;
+
 			entries.push_back(entry);
 		}
 
@@ -195,8 +210,7 @@ void SymbolData::startFunction(int address)
 {
 	if (currentFunction != -1)
 	{
-		Logger::printError(Logger::Error,L"Opened a function inside another function");
-		return;
+		endFunction(address);
 	}
 
 	currentFunction = modules[currentModule].functions.size();
