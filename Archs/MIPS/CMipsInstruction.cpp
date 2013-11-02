@@ -416,7 +416,7 @@ bool CMipsInstruction::Validate()
 		unsigned int mask = (0xFFFFFFFF << (32-immediateBits)) >> (32-immediateBits);
 		int digits = (immediateBits+3) / 4;
 
-		if (std::abs(immediate.value) > mask)
+		if ((unsigned int)std::abs(immediate.value) > mask)
 		{
 			Logger::queueError(Logger::Error,L"Immediate value %0*X out of range",digits,immediate.value);
 			return false;
