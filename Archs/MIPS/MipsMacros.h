@@ -17,6 +17,9 @@
 #define MIPSM_RIGHT					0x00000800
 #define MIPSM_UNALIGNED				0x00001000
 #define MIPSM_DONTWARNDELAYSLOT		0x00002000
+#define MIPSM_UPPER					0x00004000
+#define MIPSM_LOWER					0x00008000
+
 typedef struct {
 	MathExpression i1;
 	MathExpression i2;

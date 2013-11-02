@@ -10,7 +10,7 @@ void MipsMacroLoadOpcode(CMipsInstruction& Opcode, char* name, char* argformat, 
 {
 	char str[1024];
 	va_list args;
-
+	
 	va_start(args,argformat);
 	vsprintf(str,argformat,args);
 	va_end (args);
@@ -22,25 +22,54 @@ int MipsMacroLi(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes)
 {
 	int OpcodeCount = 0;
 
+	bool upper = (Flags & MIPSM_UPPER) != 0;
+	bool lower = (Flags & MIPSM_LOWER) != 0;
+
 	if ((unsigned)Values.i2 > 0xFFFF)	// may not fit into one opcode
 	{
 		if ((Values.i2 & 0xFFFF8000) == 0xFFFF8000)
 		{
-			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,r0,0x%04X",
-				Values.rs.name,Values.i2 & 0xFFFF);
+			if (!upper)
+			{
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,r0,0x%04X",
+					Values.rs.name,Values.i2 & 0xFFFF);
+			}
 		} else if ((Values.i2 & 0xFFFF) == 0)
 		{
-			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
-				Values.rs.name,Values.i2 >> 16);
+			if (lower)
+			{
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"nop","");
+			} else {
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
+					Values.rs.name,Values.i2 >> 16);
+			}
 		} else {	// lui+addiu
 			if (Values.i2 & 0x8000) Values.i2 += 0x10000;
-			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
-				Values.rs.name,Values.i2 >> 16);
-			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,%s,0x%04X",
-				Values.rs.name,Values.rs.name,Values.i2 & 0xFFFF);
+
+			if (upper == false && lower == false)
+			{
+				upper = lower = true;
+			}
+
+			if (upper)
+			{
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",
+					Values.rs.name,Values.i2 >> 16);
+			}
+
+			if (lower)
+			{
+				MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"addiu","%s,%s,0x%04X",
+					Values.rs.name,Values.rs.name,Values.i2 & 0xFFFF);
+			}
 		}
 	} else { // definitely fits into one opcode
-		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"ori","%s,r0,0x%04X",Values.rs.name,Values.i2);
+		if (upper)
+		{
+			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"nop","");
+		} else {
+			MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"ori","%s,r0,0x%04X",Values.rs.name,Values.i2);
+		}
 	}
 
 	return OpcodeCount;
@@ -51,19 +80,26 @@ int MipsMacroLoad(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcodes
 	int OpcodeCount = 0;
 
 	if (Values.i2 & 0x8000) Values.i2 += 0x10000;
-	MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",Values.rs.name,Values.i2 >> 16);
 
-	if (Flags & MIPSM_B) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lb","%s,0x%04X(%s)",
-		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
-	else if (Flags & MIPSM_BU) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lbu","%s,0x%04X(%s)",
-		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
-	else if (Flags & MIPSM_HW) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lh","%s,0x%04X(%s)",
-		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
-	else if (Flags & MIPSM_HWU) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lhu","%s,0x%04X(%s)",
-		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
-	else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lw","%s,0x%04X(%s)",
-		Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
-	else Logger::printError(Logger::Error,L"Invalid Load macro");
+	if (Flags & MIPSM_UPPER)
+	{
+		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","%s,0x%04X",Values.rs.name,Values.i2 >> 16);
+	}
+
+	if (Flags & MIPSM_LOWER)
+	{
+		if (Flags & MIPSM_B) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lb","%s,0x%04X(%s)",
+			Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
+		else if (Flags & MIPSM_BU) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lbu","%s,0x%04X(%s)",
+			Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
+		else if (Flags & MIPSM_HW) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lh","%s,0x%04X(%s)",
+			Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
+		else if (Flags & MIPSM_HWU) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lhu","%s,0x%04X(%s)",
+			Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
+		else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lw","%s,0x%04X(%s)",
+			Values.rs.name,Values.i2 & 0xFFFF,Values.rs.name);
+		else Logger::printError(Logger::Error,L"Invalid Load macro");
+	}
 
 	return OpcodeCount;
 }
@@ -73,15 +109,22 @@ int MipsMacroStore(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcode
 	int OpcodeCount = 0;
 
 	if (Values.i2 & 0x8000) Values.i2 += 0x10000;
-	MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","r1,0x%04X",Values.i2 >> 16);
-
-	if (Flags & MIPSM_B) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sb","%s,0x%04X(r1)",
-		Values.rs.name,Values.i2 & 0xFFFF);
-	else if (Flags & MIPSM_HW) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sh","%s,0x%04X(r1)",
-		Values.rs.name,Values.i2 & 0xFFFF);
-	else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sw","%s,0x%04X(r1)",
-		Values.rs.name,Values.i2 & 0xFFFF);
-	else Logger::printError(Logger::Error,L"Invalid Store macro");
+	
+	if (Flags & MIPSM_UPPER)
+	{
+		MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"lui","r1,0x%04X",Values.i2 >> 16);
+	}
+	
+	if (Flags & MIPSM_LOWER)
+	{
+		if (Flags & MIPSM_B) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sb","%s,0x%04X(r1)",
+			Values.rs.name,Values.i2 & 0xFFFF);
+		else if (Flags & MIPSM_HW) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sh","%s,0x%04X(r1)",
+			Values.rs.name,Values.i2 & 0xFFFF);
+		else if (Flags & MIPSM_W) MipsMacroLoadOpcode(Opcodes[OpcodeCount++],"sw","%s,0x%04X(r1)",
+			Values.rs.name,Values.i2 & 0xFFFF);
+		else Logger::printError(Logger::Error,L"Invalid Store macro");
+	}
 
 	return OpcodeCount;
 }
@@ -283,12 +326,27 @@ int MipsMacroRotate(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 	s,t,d = registers */
 const tMipsMacro MipsMacros[] = {
 	{ "li",		"s,I",		2,	&MipsMacroLi,				MIPSM_IMM },
+	{ "li.u",	"s,I",		2,	&MipsMacroLi,				MIPSM_IMM|MIPSM_UPPER },
+	{ "li.l",	"s,I",		2,	&MipsMacroLi,				MIPSM_IMM|MIPSM_LOWER },
 	{ "la",		"s,I",		2,	&MipsMacroLi,				MIPSM_IMM },
-	{ "lb",		"s,I",		2,	&MipsMacroLoad,				MIPSM_B },
-	{ "lbu",	"s,I",		2,	&MipsMacroLoad,				MIPSM_BU },
-	{ "lh",		"s,I",		2,	&MipsMacroLoad,				MIPSM_HW },
-	{ "lhu",	"s,I",		2,	&MipsMacroLoad,				MIPSM_HWU },
-	{ "lw",		"s,I",		2,	&MipsMacroLoad,				MIPSM_W },
+
+	{ "lb",		"s,I",		2,	&MipsMacroLoad,				MIPSM_B|MIPSM_UPPER|MIPSM_LOWER },
+	{ "lbu",	"s,I",		2,	&MipsMacroLoad,				MIPSM_BU|MIPSM_UPPER|MIPSM_LOWER },
+	{ "lh",		"s,I",		2,	&MipsMacroLoad,				MIPSM_HW|MIPSM_UPPER|MIPSM_LOWER },
+	{ "lhu",	"s,I",		2,	&MipsMacroLoad,				MIPSM_HWU|MIPSM_UPPER|MIPSM_LOWER },
+	{ "lw",		"s,I",		2,	&MipsMacroLoad,				MIPSM_W|MIPSM_UPPER|MIPSM_LOWER },
+
+	{ "lb.u",	"s,I",		2,	&MipsMacroLoad,				MIPSM_B|MIPSM_UPPER },
+	{ "lbu.u",	"s,I",		2,	&MipsMacroLoad,				MIPSM_BU|MIPSM_UPPER },
+	{ "lh.u",	"s,I",		2,	&MipsMacroLoad,				MIPSM_HW|MIPSM_UPPER },
+	{ "lhu.u",	"s,I",		2,	&MipsMacroLoad,				MIPSM_HWU|MIPSM_UPPER },
+	{ "lw.u",	"s,I",		2,	&MipsMacroLoad,				MIPSM_W|MIPSM_UPPER },
+	
+	{ "lb.l",	"s,I",		2,	&MipsMacroLoad,				MIPSM_B|MIPSM_LOWER },
+	{ "lbu.l",	"s,I",		2,	&MipsMacroLoad,				MIPSM_BU|MIPSM_LOWER },
+	{ "lh.l",	"s,I",		2,	&MipsMacroLoad,				MIPSM_HW|MIPSM_LOWER },
+	{ "lhu.l",	"s,I",		2,	&MipsMacroLoad,				MIPSM_HWU|MIPSM_LOWER },
+	{ "lw.l",	"s,I",		2,	&MipsMacroLoad,				MIPSM_W|MIPSM_LOWER },
 
 	{ "ulh",	"d,i(s)",	4,	&MipsMacroLoadUnaligned,	MIPSM_HW|MIPSM_IMM },
 	{ "ulh",	"d,(s)",	4,	&MipsMacroLoadUnaligned,	MIPSM_HW },
@@ -297,9 +355,17 @@ const tMipsMacro MipsMacros[] = {
 	{ "ulw",	"d,i(s)",	4,	&MipsMacroLoadUnaligned,	MIPSM_W|MIPSM_IMM },
 	{ "ulw",	"d,(s)",	4,	&MipsMacroLoadUnaligned,	MIPSM_W },
 
-	{ "sb",		"s,I",		2,	&MipsMacroStore,			MIPSM_B },
-	{ "sh",		"s,I",		2,	&MipsMacroStore,			MIPSM_HW },
-	{ "sw",		"s,I",		2,	&MipsMacroStore,			MIPSM_W },
+	{ "sb",		"s,I",		2,	&MipsMacroStore,			MIPSM_B|MIPSM_UPPER|MIPSM_LOWER },
+	{ "sh",		"s,I",		2,	&MipsMacroStore,			MIPSM_HW|MIPSM_UPPER|MIPSM_LOWER },
+	{ "sw",		"s,I",		2,	&MipsMacroStore,			MIPSM_W|MIPSM_UPPER|MIPSM_LOWER },
+	
+	{ "sb.u",	"s,I",		2,	&MipsMacroStore,			MIPSM_B|MIPSM_UPPER },
+	{ "sh.u",	"s,I",		2,	&MipsMacroStore,			MIPSM_HW|MIPSM_UPPER },
+	{ "sw.u",	"s,I",		2,	&MipsMacroStore,			MIPSM_W|MIPSM_UPPER },
+
+	{ "sb.l",	"s,I",		2,	&MipsMacroStore,			MIPSM_B|MIPSM_LOWER },
+	{ "sh.l",	"s,I",		2,	&MipsMacroStore,			MIPSM_HW|MIPSM_LOWER },
+	{ "sw.l",	"s,I",		2,	&MipsMacroStore,			MIPSM_W|MIPSM_LOWER },
 
 	{ "ush",	"d,i(s)",	3,	&MipsMacroStoreUnaligned,	MIPSM_HW|MIPSM_IMM },
 	{ "ush",	"d,(s)",	3,	&MipsMacroStoreUnaligned,	MIPSM_HW },
