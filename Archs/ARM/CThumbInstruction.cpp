@@ -297,7 +297,7 @@ bool CThumbInstruction::Validate()
 
 		if (Vars.ImmediateBitLen != 32)
 		{
-			if ((unsigned int)Vars.Immediate >= (unsigned int)(1 << Vars.ImmediateBitLen))
+			if (abs(Vars.Immediate) >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
 				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
 				return false;
