@@ -394,6 +394,8 @@ void CThumbInstruction::Encode()
 			encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE13:	// THUMB.13: add offset to stack pointer
+			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE) 
+				Vars.Immediate = (unsigned char)~Vars.Immediate;
 			if (Vars.Immediate & 0x80)	// sub
 			{
 				encoding |= 1 << 7;
