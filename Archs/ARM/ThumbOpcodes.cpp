@@ -108,6 +108,10 @@ const tThumbOpcode ThumbOpcodes[] = {
 	{ "add",	"d,r\xD,/#i\x08",	0xA800,	THUMB_TYPE12,	2,	THUMB_D|THUMB_IMMEDIATE|THUMB_WORD },
 
 	{ "add",	"r\xD,/#i\x08",		0xB000,	THUMB_TYPE13,	2,	THUMB_IMMEDIATE|THUMB_WORD },
+	{ "sub",	"r\xD,/#i\x08",		0xB080,	THUMB_TYPE13,	2,	THUMB_IMMEDIATE|THUMB_WORD },
+
+	{ "add",	"r\xD,r\xD,/#i\x08",0xB000,	THUMB_TYPE13,	2,	THUMB_IMMEDIATE|THUMB_WORD },
+	{ "sub",	"r\xD,r\xD,/#i\x08",0xB080,	THUMB_TYPE13,	2,	THUMB_IMMEDIATE|THUMB_WORD },
 
 	{ "push",	"/{R\xFF\x40/}",	0xB400,	THUMB_TYPE14,	2,	THUMB_RLIST },
 	{ "pop",	"/{R\xFF\x80/}",	0xBC00,	THUMB_TYPE14,	2,	THUMB_RLIST },
