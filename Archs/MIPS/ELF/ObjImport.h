@@ -18,7 +18,7 @@ private:
 	struct SymbolEntry
 	{
 		int type;
-		std::string name;
+		std::wstring name;
 		unsigned int address;
 		unsigned int size;
 	};

@@ -7,6 +7,17 @@
 #include "Core/FileManager.h"
 #include <map>
 
+std::wstring toWLowercase(const std::string& str)
+{
+	std::wstring result;
+	for (int i = 0; i < str.size(); i++)
+	{
+		result += tolower(str[i]);
+	}
+
+	return result;
+}
+
 DirectivePspObjImport::DirectivePspObjImport(ArgumentList& args)
 {
 	inputName = args[0].text;
@@ -30,6 +41,39 @@ bool DirectivePspObjImport::init()
 	{
 		Logger::printError(Logger::Error,L"Unexpected segment count");
 		return false;
+	}
+
+	// init symbols
+
+	// now load symbols
+	for (int i = 0; i < elf.getSymbolCount(); i++)
+	{
+		Elf32_Sym* symbol = elf.getSymbol(i);
+		std::wstring name = toWLowercase(elf.getStrTableString(symbol->st_name));
+
+		switch (symbol->st_info & 0xF)
+		{
+		case STT_OBJECT:
+		case STT_FUNC:
+			{
+				Label* label = Global.symbolTable.getLabel(name,-1,-1);
+				if (label == NULL)
+				{
+					Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name.c_str());
+					continue;
+				}
+
+				if (label->isDefined())
+				{
+					Logger::printError(Logger::Error,L"Label \"%s\" already defined",name.c_str());
+					continue;
+				}
+
+				label->setValue(0);
+				label->setDefined(true);
+			}
+			break;
+		}
 	}
 
 	return true;
@@ -115,23 +159,19 @@ bool DirectivePspObjImport::loadData(ElfFile& elf)
 				int relTo;
 
 				// externs?
-				if ((sym->st_info & 0xF) == STT_NOTYPE)
+				if ((sym->st_info & 0xF) == STT_NOTYPE && sym->st_shndx == 0)
 				{
-					std::string symName = elf.getStrTableString(sym->st_name);
-					for (size_t k = 0; k < symName.size(); k++)
-					{
-						symName[k] = tolower(symName[k]);
-					}
+					std::wstring symName = toWLowercase(elf.getStrTableString(sym->st_name));
 
-					Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(symName.c_str()),-1,-1);
+					Label* label = Global.symbolTable.getLabel(symName,-1,-1);
 					if (label == NULL)
 					{
-						Logger::queueError(Logger::Error,L"Invalid external symbol %S",symName);
+						Logger::queueError(Logger::Error,L"Invalid external symbol %s",symName.c_str());
 						continue;
 					}
 					if (label->isDefined() == false)
 					{
-						Logger::queueError(Logger::Error,L"Undefined external symbol %S",symName);
+						Logger::queueError(Logger::Error,L"Undefined external symbol %s",symName.c_str());
 						continue;
 					}
 
@@ -181,7 +221,7 @@ bool DirectivePspObjImport::loadData(ElfFile& elf)
 		SymbolEntry entry;
 
 		Elf32_Sym* symbol = elf.getSymbol(i);
-		entry.name = elf.getStrTableString(symbol->st_name);
+		entry.name = toWLowercase(elf.getStrTableString(symbol->st_name));
 		entry.address = symbol->st_value+relocationOffsets[symbol->st_shndx];
 		entry.size = symbol->st_size;
 		entry.type = symbol->st_info & 0xF;
@@ -206,6 +246,12 @@ bool DirectivePspObjImport::Validate()
 		Logger::queueError(Logger::Error,L"Failed to relocate object data");
 		return false;
 	}
+	
+	for (size_t i = 0; i < symbols.size(); i++)
+	{
+		Label* label = Global.symbolTable.getLabel(symbols[i].name,-1,-1);
+		label->setValue(symbols[i].address);
+	}
 
 	g_fileManager->advanceMemory(fileData.size());
 	return false;
@@ -220,7 +266,7 @@ void DirectivePspObjImport::writeSymData(SymbolData& symData)
 {
 	for (size_t i = 0; i < symbols.size(); i++)
 	{
-		symData.addLabel(symbols[i].address,convertUtf8ToWString(symbols[i].name.c_str()));
+		symData.addLabel(symbols[i].address,symbols[i].name.c_str());
 
 		switch (symbols[i].type)
 		{

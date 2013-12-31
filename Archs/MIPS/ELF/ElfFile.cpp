@@ -251,6 +251,29 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 bool ElfFile::load(const std::wstring&fileName, bool sort)
 {
 	fileData = ByteArray::fromFile(fileName);
+
+	if (memcmp("!<arch>\n",fileData.data(),8) == 0)
+	{
+		// 7F ELF
+		int pos = 8;
+		bool found = false;
+
+		while (pos < fileData.size()-4)
+		{
+			if (memcmp(fileData.data(pos),"\x7F\x45\x4C\x46",4) == 0)
+			{
+				found = true;
+				break;
+			}
+			pos++;
+		}
+
+		if (found == false)
+			return false;
+
+		fileData = fileData.mid(pos);
+	}
+
 	memcpy(&fileHeader,&fileData[0],sizeof(Elf32_Ehdr));
 	symTab = NULL;
 	strTab = NULL;
