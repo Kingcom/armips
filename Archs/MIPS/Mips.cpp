@@ -6,6 +6,7 @@
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
 #include "ELF/PspFile.h"
+#include "ELF/ObjImport.h"
 
 CMipsArchitecture Mips;
 
@@ -100,10 +101,19 @@ bool MipsDirectiveLoadElf(ArgumentList& list, int flags)
 	return true;
 }
 
+bool MipsDirectiveImportObj(ArgumentList& list, int flags)
+{
+	DirectivePspObjImport* command = new DirectivePspObjImport(list);
+	command->init();
+	AddAssemblerCommand(command);
+	return true;
+}
+
 const tDirective MipsDirectives[] = {
 	{ L".resetdelay",	0,	0,	&MipsDirectiveResetDelay,	0 },
 	{ L".fixloaddelay",	0,	0,	&MipsDirectiveFixLoadDelay,	0 },
 	{ L".loadelf",		1,	2,	&MipsDirectiveLoadElf,		0 },
+	{ L".importobj",	1,	1,	&MipsDirectiveImportObj,	0 },
 	{ NULL,				0,	0,	NULL,	0 }
 };
 

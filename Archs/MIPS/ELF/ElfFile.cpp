@@ -248,10 +248,12 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 	return -1;
 }
 
-bool ElfFile::load(const std::wstring&fileName)
+bool ElfFile::load(const std::wstring&fileName, bool sort)
 {
 	fileData = ByteArray::fromFile(fileName);
 	memcpy(&fileHeader,&fileData[0],sizeof(Elf32_Ehdr));
+	symTab = NULL;
+	strTab = NULL;
 
 	// load segments
 	for (int i = 0; i < fileHeader.e_phnum; i++)
@@ -297,6 +299,17 @@ bool ElfFile::load(const std::wstring&fileName)
 				ByteArray data = fileData.mid(section->getOffset(),section->getSize());
 				section->setData(data);
 			}
+
+			switch (section->getType())
+			{
+			case SHT_SYMTAB:
+				symTab = section;
+				break;
+			case SHT_STRTAB:
+				strTab = section;
+				break;
+			}
+
 			segmentlessSections.push_back(section);
 		}
 	}
@@ -304,11 +317,16 @@ bool ElfFile::load(const std::wstring&fileName)
 	determinePartOrder();
 	loadSectionNames();
 
-	std::sort(segmentlessSections.begin(),segmentlessSections.end(),compareSection);
-	for (int i = 0; i < (int)segments.size(); i++)
+	if (sort)
 	{
-		segments[i]->sortSections();
+		std::sort(segmentlessSections.begin(),segmentlessSections.end(),compareSection);
+
+		for (int i = 0; i < (int)segments.size(); i++)
+		{
+			segments[i]->sortSections();
+		}
 	}
+
 	return true;
 }
 
@@ -363,4 +381,28 @@ void ElfFile::save(const std::wstring&fileName)
 	}
 
 	fileData.toFile(fileName);
+}
+
+int ElfFile::getSymbolCount()
+{
+	if (symTab == NULL)
+		return 0;
+
+	return symTab->getSize()/sizeof(Elf32_Sym);
+}
+
+Elf32_Sym* ElfFile::getSymbol(int index)
+{
+	if (symTab == NULL)
+		return NULL;
+	
+	return (Elf32_Sym*) &symTab->getData()[index*sizeof(Elf32_Sym)];
+}
+
+const char* ElfFile::getStrTableString(int pos)
+{
+	if (strTab == NULL)
+		return NULL;
+	
+	return (const char*) &strTab->getData()[pos];
 }

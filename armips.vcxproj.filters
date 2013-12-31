@@ -120,6 +120,9 @@
     <ClCompile Include="Util\CRC.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\MIPS\ELF\ObjImport.cpp">
+      <Filter>Archs\MIPS\ELF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -242,6 +245,9 @@
     </ClInclude>
     <ClInclude Include="Util\CRC.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\ELF\ObjImport.h">
+      <Filter>Archs\MIPS\ELF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
