@@ -58,12 +58,12 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 	case R_ARM_JUMP24:		// ((S + A) | T) – P
 		{
 			int condField = (data.opcode >> 8) & 0xF;
-			int opField = (data.opcode & 0x7FFFFF) << 2;
-			int a = signExtend(opField,25);
+			int opField = (data.opcode & 0xFFFFFF) << 2;
+			int a = signExtend(opField,26);
 			int value = ((s+a) | t) - p;
 
-			data.opcode &= ~0x7FFFFF;
-			data.opcode |= (value >> 2) & 0x7FFFFF;
+			data.opcode &= ~0xFFFFFF;
+			data.opcode |= (value >> 2) & 0xFFFFFF;
 		}
 		break;
 	default:
