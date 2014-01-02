@@ -85,32 +85,42 @@ const tMipsRegister MipsFloatRegister[] = {
 class MipsElfRelocator: public IElfRelocator
 {
 public:
-	virtual bool relocateOpcode(int type, unsigned int& opcode, unsigned int relocationBase);
+	virtual bool relocateOpcode(int type, RelocationData& data);
+	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
 };
 
-bool MipsElfRelocator::relocateOpcode(int type, unsigned int& op, unsigned int relocationBase)
+bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 {
 	unsigned int p;
+
+	unsigned int op = data.opcode;
 	switch (type)
 	{
 	case R_MIPS_26: //j, jal
-		op = (op & 0xFC000000) | (((op&0x03FFFFFF)+(relocationBase>>2))&0x03FFFFFF);
+		op = (op & 0xFC000000) | (((op&0x03FFFFFF)+(data.relocationBase>>2))&0x03FFFFFF);
 		break;
 	case R_MIPS_32:
-		op += relocationBase;
+		op += data.relocationBase;
 		break;	
 	case R_MIPS_HI16:
-		p = (op & 0xFFFF) + relocationBase;
+		p = (op & 0xFFFF) + data.relocationBase;
 		op = (op&0xffff0000) | (((p >> 16) + ((p & 0x8000) != 0)) & 0xFFFF);
 		break;
 	case R_MIPS_LO16:
-		op = (op&0xffff0000) | (((op&0xffff)+relocationBase)&0xffff);
+		op = (op&0xffff0000) | (((op&0xffff)+data.relocationBase)&0xffff);
 		break;
 	default:
 		return false;
 	}
 
+	data.opcode = op;
 	return true;
+}
+
+void MipsElfRelocator::setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType)
+{
+	data.symbolAddress = symbolAddress;
+	data.targetSymbolType = symbolType;
 }
 
 bool MipsDirectiveResetDelay(ArgumentList& List, int flags)

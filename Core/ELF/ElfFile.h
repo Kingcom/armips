@@ -99,9 +99,21 @@ private:
 	ElfSection* paddrSection;
 };
 
+struct RelocationData
+{
+	unsigned int opcodeOffset;
+	unsigned int opcode;
+	unsigned int relocationBase;
+
+	unsigned int symbolAddress;
+	int targetSymbolType;
+	int targetSymbolInfo;
+};
+
 class IElfRelocator
 {
 public:
 	virtual ~IElfRelocator() { };
-	virtual bool relocateOpcode(int type, unsigned int& opcode, unsigned int relocationBase) = 0;
+	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
+	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType) = 0;
 };

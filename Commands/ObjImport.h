@@ -10,6 +10,7 @@ class DirectiveObjImport: public CAssemblerCommand
 {
 public:
 	DirectiveObjImport(ArgumentList& args);
+	~DirectiveObjImport();
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData) { };

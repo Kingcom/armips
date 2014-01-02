@@ -84,6 +84,7 @@
   <ItemGroup>
     <ClInclude Include="Archs\ARM\Arm.h" />
     <ClInclude Include="Archs\ARM\ArmOpcodes.h" />
+    <ClInclude Include="Archs\ARM\ArmRelocator.h" />
     <ClInclude Include="Archs\ARM\CArmInstruction.h" />
     <ClInclude Include="Archs\ARM\CThumbInstruction.h" />
     <ClInclude Include="Archs\ARM\Pool.h" />
@@ -128,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="Archs\ARM\Arm.cpp" />
     <ClCompile Include="Archs\ARM\ArmOpcodes.cpp" />
+    <ClCompile Include="Archs\ARM\ArmRelocator.cpp" />
     <ClCompile Include="Archs\ARM\CArmInstruction.cpp" />
     <ClCompile Include="Archs\ARM\CThumbInstruction.cpp" />
     <ClCompile Include="Archs\ARM\Pool.cpp" />

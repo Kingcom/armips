@@ -21,6 +21,13 @@ std::wstring toWLowercase(const std::string& str)
 DirectiveObjImport::DirectiveObjImport(ArgumentList& args)
 {
 	inputName = args[0].text;
+	relocator = NULL;
+}
+
+DirectiveObjImport::~DirectiveObjImport()
+{
+	if (relocator != NULL)
+		delete relocator;
 }
 
 bool DirectiveObjImport::init()
@@ -152,7 +159,6 @@ bool DirectiveObjImport::loadData(ElfFile& elf)
 			for (int i = 0; i < relCount; i++)
 			{
 				int pos = rel[i].r_offset;
-				unsigned int op = sectionData.getDoubleWord(pos);
 
 				int symNum = rel[i].getSymbolNum();
 				if (symNum <= 0)
@@ -161,12 +167,17 @@ bool DirectiveObjImport::loadData(ElfFile& elf)
 					continue;
 				}
 
+
 				auto sym = elf.getSymbol(symNum);
 				int symSection = sym->st_shndx;
-				int relTo;
+				
+				RelocationData relData;
+				relData.opcode = sectionData.getDoubleWord(pos);
+				relData.opcodeOffset = pos+relocationOffsets[index];
+				relocator->setSymbolAddress(relData,sym->st_value,sym->st_info & 0xF);
 
 				// externs?
-				if ((sym->st_info & 0xF) == STT_NOTYPE && sym->st_shndx == 0)
+				if (relData.targetSymbolType == STT_NOTYPE && sym->st_shndx == 0)
 				{
 					std::wstring symName = toWLowercase(elf.getStrTableString(sym->st_name));
 
@@ -182,17 +193,17 @@ bool DirectiveObjImport::loadData(ElfFile& elf)
 						continue;
 					}
 
-					relTo = label->getValue();
+					relData.relocationBase = label->getValue();
 				} else {
-					relTo = relocationOffsets[symSection]+sym->st_value;
+					relData.relocationBase = relocationOffsets[symSection]+relData.symbolAddress;
 				}
 
-				if (relocator->relocateOpcode(rel[i].getType(),op,relTo) == false)
+				if (relocator->relocateOpcode(rel[i].getType(),relData) == false)
 				{
-					Logger::queueError(Logger::Error,L"Unknown relocation type %d\n",rel[i].getType());
+					Logger::queueError(Logger::Error,L"Unknown relocation type %d",rel[i].getType());
 				}
 
-				sectionData.replaceDoubleWord(pos,op);
+				sectionData.replaceDoubleWord(pos,relData.opcode);
 			}
 
 			break;

@@ -20,10 +20,13 @@ public:
 	void setValue(unsigned int val) { value = val; };
 	bool isDefined() { return defined; };
 	void setDefined(bool b) { defined = b; };
+	bool isData() { return data; };
+	void setIsData(bool b) { data = b; };
 private:
 	std::wstring name;
 	unsigned int value;
 	bool defined;
+	bool data;
 };
 
 class SymbolTable

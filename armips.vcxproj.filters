@@ -123,6 +123,9 @@
     <ClCompile Include="Core\ELF\ElfFile.cpp">
       <Filter>Core\ELF</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\ARM\ArmRelocator.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -248,6 +251,9 @@
     </ClInclude>
     <ClInclude Include="Core\ELF\ElfTypes.h">
       <Filter>Core\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\ArmRelocator.h">
+      <Filter>Archs\ARM</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
