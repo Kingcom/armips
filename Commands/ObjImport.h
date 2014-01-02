@@ -2,12 +2,14 @@
 
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
-#include "ElfFile.h"
+#include "Core/ELF/ElfFile.h"
 
-class DirectivePspObjImport: public CAssemblerCommand
+class IELfRelocator;
+
+class DirectiveObjImport: public CAssemblerCommand
 {
 public:
-	DirectivePspObjImport(ArgumentList& args);
+	DirectiveObjImport(ArgumentList& args);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData) { };
@@ -24,8 +26,9 @@ private:
 	};
 
 	bool loadData(ElfFile& elf);
-	
+
 	ElfFile elf;
+	IElfRelocator* relocator;
 	ByteArray fileData;
 	std::vector<SymbolEntry> symbols;
 	std::wstring inputName;

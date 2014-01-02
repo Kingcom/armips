@@ -24,6 +24,7 @@ public:
 	virtual void Pass2(){ };
 	virtual void Revalidate(){ };
 	virtual int GetWordSize() { return 2; };
+	virtual IElfRelocator* getElfRelocator() { return NULL; };
 };
 
 extern CZ80Architecture z80;;

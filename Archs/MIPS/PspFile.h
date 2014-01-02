@@ -1,5 +1,5 @@
 #pragma once
-#include "Archs/MIPS/ELF/ElfFile.h"
+#include "Core/ELF/ElfFile.h"
 #include "Core/FileManager.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"

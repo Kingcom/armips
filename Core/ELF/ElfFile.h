@@ -98,3 +98,10 @@ private:
 	std::vector<ElfSection*> sections;
 	ElfSection* paddrSection;
 };
+
+class IElfRelocator
+{
+public:
+	virtual ~IElfRelocator() { };
+	virtual bool relocateOpcode(int type, unsigned int& opcode, unsigned int relocationBase) = 0;
+};

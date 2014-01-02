@@ -8,6 +8,7 @@
 #include "Commands/CDirectiveFill.h"
 #include "Commands/CDirectiveArea.h"
 #include "Commands/CAssemblerLabel.h"
+#include "Commands/ObjImport.h"
 #include "Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Archs/ARM/Arm.h"
@@ -557,6 +558,15 @@ bool DirectiveEndFunction(ArgumentList& List, int flags)
 	return true;
 }
 
+bool DirectiveImportObj(ArgumentList& list, int flags)
+{
+	DirectiveObjImport* command = new DirectiveObjImport(list);
+	command->init();
+	AddAssemblerCommand(command);
+	return true;
+}
+
+
 bool splitArguments(ArgumentList& list, const std::wstring& args)
 {
 	std::wstring buffer;
@@ -763,6 +773,7 @@ const tDirective Directives[] = {
 	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
 	{ L".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
 	{ L".sym",				1,	1,	&DirectiveSym,				0 },
+	{ L".importobj",		1,	1,	&DirectiveImportObj,		0 },
 
 	{ L".function",			1,	1,	&DirectiveStartFunction,	0 },
 	{ L".func",				1,	1,	&DirectiveStartFunction,	0 },

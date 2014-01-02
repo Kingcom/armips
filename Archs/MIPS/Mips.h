@@ -10,6 +10,22 @@
 #define MARCH_LV2			MARCH_PS2|MARCH_PSP
 #define MARCH_ALL			MARCH_PSX|MARCH_PS2|MARCH_PSP
 
+enum {
+	R_MIPS_NONE,
+	R_MIPS_16,
+	R_MIPS_32,
+	R_MIPS_REL32,
+	R_MIPS_26,
+	R_MIPS_HI16,
+	R_MIPS_LO16,
+	R_MIPS_GPREL16,
+	R_MIPS_LITERAL,
+	R_MIPS_GOT16,
+	R_MIPS_PC16,
+	R_MIPS_CALL16,
+	R_MIPS_GPREL32
+};
+
 class CMipsArchitecture: public CArchitecture
 {
 public:
@@ -20,6 +36,7 @@ public:
 	virtual void Pass2() { return; };
 	virtual void Revalidate() { return; };
 	virtual int GetWordSize();
+	virtual IElfRelocator* getElfRelocator();
 	void SetLoadDelay(bool Delay, int Register);
 	bool GetLoadDelay() { return LoadDelay; };
 	int GetLoadDelayRegister() { return LoadDelayRegister; };

@@ -5,8 +5,8 @@
 #include "MipsMacros.h"
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
-#include "ELF/PspFile.h"
-#include "ELF/ObjImport.h"
+#include "PspFile.h"
+#include "Core/ELF/ElfFile.h"
 
 CMipsArchitecture Mips;
 
@@ -82,6 +82,37 @@ const tMipsRegister MipsFloatRegister[] = {
 	{ "f31", 31, 3},	{ "$f31", 31, 4 }
 };
 
+class MipsElfRelocator: public IElfRelocator
+{
+public:
+	virtual bool relocateOpcode(int type, unsigned int& opcode, unsigned int relocationBase);
+};
+
+bool MipsElfRelocator::relocateOpcode(int type, unsigned int& op, unsigned int relocationBase)
+{
+	unsigned int p;
+	switch (type)
+	{
+	case R_MIPS_26: //j, jal
+		op = (op & 0xFC000000) | (((op&0x03FFFFFF)+(relocationBase>>2))&0x03FFFFFF);
+		break;
+	case R_MIPS_32:
+		op += relocationBase;
+		break;	
+	case R_MIPS_HI16:
+		p = (op & 0xFFFF) + relocationBase;
+		op = (op&0xffff0000) | (((p >> 16) + ((p & 0x8000) != 0)) & 0xFFFF);
+		break;
+	case R_MIPS_LO16:
+		op = (op&0xffff0000) | (((op&0xffff)+relocationBase)&0xffff);
+		break;
+	default:
+		return false;
+	}
+
+	return true;
+}
+
 bool MipsDirectiveResetDelay(ArgumentList& List, int flags)
 {
 	Mips.SetIgnoreDelay(true);
@@ -101,19 +132,10 @@ bool MipsDirectiveLoadElf(ArgumentList& list, int flags)
 	return true;
 }
 
-bool MipsDirectiveImportObj(ArgumentList& list, int flags)
-{
-	DirectivePspObjImport* command = new DirectivePspObjImport(list);
-	command->init();
-	AddAssemblerCommand(command);
-	return true;
-}
-
 const tDirective MipsDirectives[] = {
 	{ L".resetdelay",	0,	0,	&MipsDirectiveResetDelay,	0 },
 	{ L".fixloaddelay",	0,	0,	&MipsDirectiveFixLoadDelay,	0 },
 	{ L".loadelf",		1,	2,	&MipsDirectiveLoadElf,		0 },
-	{ L".importobj",	1,	1,	&MipsDirectiveImportObj,	0 },
 	{ NULL,				0,	0,	NULL,	0 }
 };
 
@@ -164,6 +186,16 @@ int CMipsArchitecture::GetWordSize()
 	if (Version & MARCH_PSP) return 4;
 	return 0;
 }
+
+IElfRelocator* CMipsArchitecture::getElfRelocator()
+{
+	if (Version & MARCH_PSX) return NULL;
+	if (Version & MARCH_N64) return NULL;
+	if (Version & MARCH_PS2) return new MipsElfRelocator();
+	if (Version & MARCH_PSP) return new MipsElfRelocator();
+	return NULL;
+}
+
 
 void CMipsArchitecture::SetLoadDelay(bool Delay, int Register)
 {

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ObjImport.h"
-#include "ElfFile.h"
+#include "Core/ELF/ElfFile.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"
 #include "Core/MathParser.h"
@@ -10,7 +10,7 @@
 std::wstring toWLowercase(const std::string& str)
 {
 	std::wstring result;
-	for (int i = 0; i < str.size(); i++)
+	for (size_t i = 0; i < str.size(); i++)
 	{
 		result += tolower(str[i]);
 	}
@@ -18,13 +18,20 @@ std::wstring toWLowercase(const std::string& str)
 	return result;
 }
 
-DirectivePspObjImport::DirectivePspObjImport(ArgumentList& args)
+DirectiveObjImport::DirectiveObjImport(ArgumentList& args)
 {
 	inputName = args[0].text;
 }
 
-bool DirectivePspObjImport::init()
+bool DirectiveObjImport::init()
 {
+	relocator = Arch->getElfRelocator();
+	if (relocator == NULL)
+	{
+		Logger::printError(Logger::Error,L"Object importing not supported for this architecture");
+		return false;
+	}
+
 	if (elf.load(inputName,false) == false)
 	{
 		Logger::printError(Logger::Error,L"Could not load object file");
@@ -79,7 +86,7 @@ bool DirectivePspObjImport::init()
 	return true;
 }
 
-bool DirectivePspObjImport::loadData(ElfFile& elf)
+bool DirectiveObjImport::loadData(ElfFile& elf)
 {
 	fileData.clear();
 	symbols.clear();
@@ -175,30 +182,14 @@ bool DirectivePspObjImport::loadData(ElfFile& elf)
 						continue;
 					}
 
-					relTo = relocationOffsets[symSection]+label->getValue();
+					relTo = label->getValue();
 				} else {
 					relTo = relocationOffsets[symSection]+sym->st_value;
 				}
 
-				unsigned int p;
-				switch (rel[i].getType())
+				if (relocator->relocateOpcode(rel[i].getType(),op,relTo) == false)
 				{
-				case R_MIPS_26: //j, jal
-					op = (op & 0xFC000000) | (((op&0x03FFFFFF)+(relTo>>2))&0x03FFFFFF);
-					break;
-				case R_MIPS_32:
-					op += relTo;
-					break;
-				case R_MIPS_HI16:
-					p = (op & 0xFFFF) + relTo;
-					op = (op&0xffff0000) | (((p >> 16) + ((p & 0x8000) != 0)) & 0xFFFF);
-					break;
-				case R_MIPS_LO16:
-					op = (op&0xffff0000) | (((op&0xffff)+relTo)&0xffff);
-					break;
-				default:
 					Logger::queueError(Logger::Error,L"Unknown relocation type %d\n",rel[i].getType());
-					break;
 				}
 
 				sectionData.replaceDoubleWord(pos,op);
@@ -239,7 +230,7 @@ bool DirectivePspObjImport::loadData(ElfFile& elf)
 }
 
 
-bool DirectivePspObjImport::Validate()
+bool DirectiveObjImport::Validate()
 {
 	if (loadData(elf) == false)
 	{
@@ -257,12 +248,12 @@ bool DirectivePspObjImport::Validate()
 	return false;
 }
 
-void DirectivePspObjImport::Encode()
+void DirectiveObjImport::Encode()
 {
 	g_fileManager->write(fileData.data(),fileData.size());
 }
 
-void DirectivePspObjImport::writeSymData(SymbolData& symData)
+void DirectiveObjImport::writeSymData(SymbolData& symData)
 {
 	for (size_t i = 0; i < symbols.size(); i++)
 	{
