@@ -108,6 +108,8 @@ struct RelocationData
 	unsigned int symbolAddress;
 	int targetSymbolType;
 	int targetSymbolInfo;
+
+	std::wstring errorMessage;
 };
 
 class IElfRelocator

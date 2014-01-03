@@ -48,7 +48,7 @@ private:
 	int CurrentPool;
 };
 
-extern CArmArchitecture Arm;;
+extern CArmArchitecture Arm;
 
 bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result);
 int ArmGetRegister(char* source, int& RetLen);

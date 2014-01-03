@@ -14,7 +14,7 @@ bool operator<(SymbolKey const& lhs, SymbolKey const& rhs);
 class Label
 {
 public:
-	Label(std::wstring name): name(name), defined(false) { };
+	Label(std::wstring name): name(name), defined(false),info(0),data(false) { };
 	const std::wstring getName() { return name; };
 	unsigned int getValue() { return value; };
 	void setValue(unsigned int val) { value = val; };
@@ -22,11 +22,14 @@ public:
 	void setDefined(bool b) { defined = b; };
 	bool isData() { return data; };
 	void setIsData(bool b) { data = b; };
+	void setInfo(int inf) { info = inf; };
+	int getInfo() { return info; };
 private:
 	std::wstring name;
 	unsigned int value;
 	bool defined;
 	bool data;
+	int info;
 };
 
 class SymbolTable

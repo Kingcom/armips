@@ -12,6 +12,9 @@ enum {
 class ArmElfRelocator: public IElfRelocator
 {
 public:
+	ArmElfRelocator(bool arm9): arm9(arm9) { };
 	virtual bool relocateOpcode(int type, RelocationData& data);
 	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
+private:
+	bool arm9;
 };

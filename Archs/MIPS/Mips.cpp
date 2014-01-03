@@ -110,6 +110,7 @@ bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 		op = (op&0xffff0000) | (((op&0xffff)+data.relocationBase)&0xffff);
 		break;
 	default:
+		data.errorMessage = formatString(L"Unknown MIPS relocation type %d",type);
 		return false;
 	}
 

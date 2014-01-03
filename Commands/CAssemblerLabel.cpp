@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "Util/Util.h"
 #include "Core/FileManager.h"
+#include "Archs/ARM/Arm.h"
 
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant)
 {
@@ -18,6 +19,11 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Secti
 		Logger::printError(Logger::Error,L"Label \"%s\" already defined",name.c_str());
 		return;
 	}
+
+	if (Arch == &Arm && Arm.GetThumbMode())
+		label->setInfo(1);
+	else
+		label->setInfo(0);
 
 	label->setValue(RamPos);
 	label->setDefined(true);

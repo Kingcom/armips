@@ -225,7 +225,7 @@ void CArmArchitecture::NextSection()
 
 IElfRelocator* CArmArchitecture::getElfRelocator()
 {
-	return new ArmElfRelocator();
+	return new ArmElfRelocator(arm9);
 }
 
 int CArmArchitecture::AddToCurrentPool(int value)

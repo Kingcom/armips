@@ -194,13 +194,16 @@ bool DirectiveObjImport::loadData(ElfFile& elf)
 					}
 
 					relData.relocationBase = label->getValue();
+					relData.targetSymbolType = label->isData() ? STT_OBJECT : STT_FUNC;
+					relData.targetSymbolInfo = label->getInfo();
 				} else {
 					relData.relocationBase = relocationOffsets[symSection]+relData.symbolAddress;
 				}
 
 				if (relocator->relocateOpcode(rel[i].getType(),relData) == false)
 				{
-					Logger::queueError(Logger::Error,L"Unknown relocation type %d",rel[i].getType());
+					Logger::queueError(Logger::Error,relData.errorMessage);
+					continue;
 				}
 
 				sectionData.replaceDoubleWord(pos,relData.opcode);
