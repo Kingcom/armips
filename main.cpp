@@ -45,7 +45,11 @@ int wmain(int argc, wchar_t* argv[])
 			argpos += 2;
 		} else if (arguments[argpos] == L"-sym")
 		{
-			Global.symData.setNocashSymFileName(arguments[argpos+1]);
+			Global.symData.setNocashSymFileName(arguments[argpos+1],1);
+			argpos += 2;
+		} else if (arguments[argpos] == L"-sym2")
+		{
+			Global.symData.setNocashSymFileName(arguments[argpos+1],2);
 			argpos += 2;
 		} else if (arguments[argpos] == L"-exsym")
 		{

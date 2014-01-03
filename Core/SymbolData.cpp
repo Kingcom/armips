@@ -55,7 +55,7 @@ void SymbolData::writeNocashSym()
 			NocashSymEntry entry;
 			entry.address = sym.address;
 
-			if (size != 0)
+			if (size != 0 && nocashSymVersion >= 2)
 				entry.text = formatString("%s,%08X",sym.name.c_str(),size);
 			else
 				entry.text = sym.name;
