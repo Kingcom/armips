@@ -7,28 +7,6 @@ inline int signExtend(int value, int bitsLength)
 	return (value << (32-bitsLength)) >> (32-bitsLength);
 }
 
-int getThumbCallAddend(unsigned int opcode)
-{
-	unsigned short first = opcode & 0xFFFF;
-	unsigned short second = (opcode >> 16) & 0xFFFF;
-
-	int a = ((first & 0x7FF) << 11) | (second & 0x7FF);
-	return signExtend(a << 1,23);
-}
-
-unsigned int updateThumbCallOpcode(unsigned int oldOpcode, int newAddend)
-{
-	unsigned short first = (oldOpcode & 0xFFFF) & ~0x7FF;
-	unsigned short second = ((oldOpcode >> 16) & 0xFFFF) & ~0x7FF;
-
-	newAddend >>= 1;
-	first |= (newAddend >> 11) & 0x7FF;
-	second |= (newAddend & 0x7FF);
-
-	return first | (second << 16);
-}
-
-
 /*
 	S = symbol address
 	T = 1 if symbol is a thumb mode function, 0 otherwise
@@ -49,9 +27,48 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 		break;
 	case R_ARM_THM_CALL:	// ((S + A) | T) – P
 		{
-			int a = getThumbCallAddend(data.opcode);
-			int value = ((s+a) | t) - p;
-			data.opcode = updateThumbCallOpcode(data.opcode,value);
+			unsigned short first = data.opcode & 0xFFFF;
+			unsigned short second = (data.opcode >> 16) & 0xFFFF;
+			int opField = ((first & 0x7FF) << 11) | (second & 0x7FF);
+			int a = signExtend(opField << 1,23);
+			int value = (s+a) - p;
+
+			first &= ~0x7FF;
+			second &= ~0x7FF;
+
+			if (t == 1)
+			{
+				if (data.relocationBase % 2)
+				{
+					data.errorMessage = L"Branch target must be halfword aligned";
+					return false;
+				}
+			} else {
+				if (arm9 == false)
+				{
+					data.errorMessage = L"Cannot call ARM function from THUMB code without stub";
+					return false;
+				}
+
+				if (data.relocationBase % 4)
+				{
+					data.errorMessage = L"Branch target must be word aligned";
+					return false;
+				}
+				
+				second = 0xE800;
+			}
+
+			if (abs(value) >= 0x400000)
+			{
+				data.errorMessage = formatString(L"Branch target %08X out of range",data.relocationBase);
+				return false;
+			}
+
+			value >>= 1;
+			first |= (value >> 11) & 0x7FF;
+			second |= value & 0x7FF;
+			data.opcode = first | (second << 16);
 		}
 		break;
 	case R_ARM_CALL:		// ((S + A) | T) – P
@@ -61,17 +78,17 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 			int opField = (data.opcode & 0xFFFFFF) << 2;
 			data.opcode &= ~0xFFFFFF;
 
-			if (data.relocationBase % 4)
-			{
-				data.errorMessage = L"Branch target must be word aligned";
-				return false;
-			}
-
 			int a = signExtend(opField,26);
 			int value = (s+a) - p;
 
 			if (t == 1)
 			{
+				if (data.relocationBase % 2)
+				{
+					data.errorMessage = L"Branch target must be halfword aligned";
+					return false;
+				}
+
 				if (type == R_ARM_JUMP24)
 				{
 					data.errorMessage = L"Cannot jump from ARM to THUMB without link";
@@ -89,7 +106,16 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 					data.errorMessage = L"Cannot convert conditional bl into blx";
 					return false;
 				}
+
 				data.opcode = 0xFA000000;
+				if (value & 2)
+					data.opcode |= (1 << 24);
+			} else {
+				if (data.relocationBase % 4)
+				{
+					data.errorMessage = L"Branch target must be word aligned";
+					return false;
+				}
 			}
 			
 			if (abs(value) >= 0x2000000)
