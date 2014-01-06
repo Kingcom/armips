@@ -6,7 +6,7 @@
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
 #include "PspFile.h"
-#include "Core/ELF/ElfFile.h"
+#include "Core/ELF/ElfRelocator.h"
 
 CMipsArchitecture Mips;
 

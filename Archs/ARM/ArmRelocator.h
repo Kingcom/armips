@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/ELF/ElfFile.h"
+#include "Core/ELF/ElfRelocator.h"
 
 enum {
 	R_ARM_ABS32 = 2,

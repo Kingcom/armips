@@ -361,6 +361,8 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 	// now update symbols
 	for (ElfRelocatorSymbol& sym: file.symbols)
 	{
+		int oldAddress = sym.relocatedAddress;
+
 		switch (sym.section)
 		{
 		case SHN_ABS:		// address does not change
@@ -385,6 +387,9 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 
 		if (sym.label != NULL)
 			sym.label->setValue(sym.relocatedAddress);
+
+		if (oldAddress != sym.relocatedAddress)
+			dataChanged = true;
 	}
 
 	return !error;
@@ -394,6 +399,7 @@ bool ElfRelocator::relocate(int& memoryAddress)
 {
 	int oldCrc = getCrc32(outputData.data(),outputData.size());
 	outputData.clear();
+	dataChanged = false;
 
 	bool error = false;
 	int start = memoryAddress;
@@ -405,7 +411,8 @@ bool ElfRelocator::relocate(int& memoryAddress)
 	}
 	
 	int newCrc = getCrc32(outputData.data(),outputData.size());
-	dataChanged = oldCrc != newCrc;
+	if (oldCrc != newCrc)
+		dataChanged = true;
 
 	memoryAddress -= start;
 	return !error;
