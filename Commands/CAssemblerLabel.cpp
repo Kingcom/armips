@@ -20,10 +20,13 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Secti
 		return;
 	}
 
-	if (Arch == &Arm && Arm.GetThumbMode())
-		label->setInfo(1);
-	else
-		label->setInfo(0);
+	if (label->getUpdateInfo())
+	{
+		if (Arch == &Arm && Arm.GetThumbMode())
+			label->setInfo(1);
+		else
+			label->setInfo(0);
+	}
 
 	label->setValue(RamPos);
 	label->setDefined(true);

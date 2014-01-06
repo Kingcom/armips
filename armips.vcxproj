@@ -106,12 +106,12 @@
     <ClInclude Include="Commands\CDirectiveFile.h" />
     <ClInclude Include="Commands\CDirectiveFill.h" />
     <ClInclude Include="Commands\CDirectiveMessage.h" />
-    <ClInclude Include="Commands\ObjImport.h" />
     <ClInclude Include="Core\Assembler.h" />
     <ClInclude Include="Core\CMacro.h" />
     <ClInclude Include="Core\Common.h" />
     <ClInclude Include="Core\Directives.h" />
     <ClInclude Include="Core\ELF\ElfFile.h" />
+    <ClInclude Include="Core\ELF\ElfRelocator.h" />
     <ClInclude Include="Core\ELF\ElfTypes.h" />
     <ClInclude Include="Core\FileManager.h" />
     <ClInclude Include="Core\MathParser.h" />
@@ -143,8 +143,8 @@
     <ClCompile Include="Archs\Z80\CZ80Instruction.cpp" />
     <ClCompile Include="Archs\Z80\z80.cpp" />
     <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />
-    <ClCompile Include="Commands\ObjImport.cpp" />
     <ClCompile Include="Core\ELF\ElfFile.cpp" />
+    <ClCompile Include="Core\ELF\ElfRelocator.cpp" />
     <ClCompile Include="Core\FileManager.cpp" />
     <ClCompile Include="Core\Misc.cpp" />
     <ClCompile Include="Core\SymbolData.cpp" />

@@ -14,6 +14,7 @@ class ElfFile
 public:
 
 	bool load(const std::wstring&fileName, bool sort);
+	bool load(ByteArray& data, bool sort);
 	void save(const std::wstring&fileName);
 
 	Elf32_Half getType() { return fileHeader.e_type; };
@@ -110,12 +111,4 @@ struct RelocationData
 	int targetSymbolInfo;
 
 	std::wstring errorMessage;
-};
-
-class IElfRelocator
-{
-public:
-	virtual ~IElfRelocator() { };
-	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
-	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType) = 0;
 };

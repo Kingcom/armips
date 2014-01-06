@@ -5,14 +5,14 @@ class ByteArray
 {
 public:
 	ByteArray();
-	ByteArray(ByteArray& other);
+	ByteArray(const ByteArray& other);
 	ByteArray(byte* data, int size);
 	ByteArray(ByteArray&& other);
 	~ByteArray();
 	ByteArray& operator=(ByteArray& other);
 	ByteArray& operator=(ByteArray&& other);
 
-	int append(ByteArray& other);
+	int append(const ByteArray& other);
 	int append(byte* data, int size);
 	int appendByte(byte b) { return append(&b,1); };
 	void replaceByte(int pos, byte b) { data_[pos] = b; };
@@ -62,8 +62,8 @@ public:
 		return data_[index];
 	};
 
-	int size() { return size_; };
-	byte* data(int pos = 0) { return &data_[pos]; };
+	int size() const { return size_; };
+	byte* data(int pos = 0) const { return &data_[pos]; };
 	void clear() { size_ = 0; };
 	void resize(int newSize);
 	ByteArray mid(int start, int length = 0);

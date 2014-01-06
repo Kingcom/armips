@@ -117,14 +117,14 @@
     <ClCompile Include="Archs\MIPS\PspFile.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
-    <ClCompile Include="Commands\ObjImport.cpp">
-      <Filter>Commands</Filter>
-    </ClCompile>
     <ClCompile Include="Core\ELF\ElfFile.cpp">
       <Filter>Core\ELF</Filter>
     </ClCompile>
     <ClCompile Include="Archs\ARM\ArmRelocator.cpp">
       <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ELF\ElfRelocator.cpp">
+      <Filter>Core\ELF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,9 +243,6 @@
     <ClInclude Include="Archs\MIPS\PspFile.h">
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\ObjImport.h">
-      <Filter>Commands</Filter>
-    </ClInclude>
     <ClInclude Include="Core\ELF\ElfFile.h">
       <Filter>Core\ELF</Filter>
     </ClInclude>
@@ -254,6 +251,9 @@
     </ClInclude>
     <ClInclude Include="Archs\ARM\ArmRelocator.h">
       <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ELF\ElfRelocator.h">
+      <Filter>Core\ELF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

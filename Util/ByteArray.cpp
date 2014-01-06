@@ -8,7 +8,7 @@ ByteArray::ByteArray()
 	size_ = allocatedSize_ = 0;
 }
 
-ByteArray::ByteArray(ByteArray& other)
+ByteArray::ByteArray(const ByteArray& other)
 {
 	data_ = NULL;
 	size_ = allocatedSize_ = 0;
@@ -70,7 +70,7 @@ void ByteArray::grow(int neededSize)
 	}
 }
 
-int ByteArray::append(ByteArray& other)
+int ByteArray::append(const ByteArray& other)
 {
 	int oldSize = size();
 	int otherSize = other.size();
@@ -100,10 +100,8 @@ void ByteArray::replaceBytes(int pos, byte* data, int size)
 void ByteArray::reserveBytes(int count, byte value)
 {
 	grow(this->size()+count);
-	for (int i = 0; i < count; i++)
-	{
-		data_[size_++] = value;
-	}
+	memset(&data_[size_],value,count);
+	size_ += count;
 }
 
 void ByteArray::alignSize(int alignment)
@@ -126,7 +124,7 @@ ByteArray ByteArray::mid(int start, int length)
 {
 	ByteArray ret;
 
-	if (length <= 0)
+	if (length < 0)
 		length = size_-start;
 
 	if (start >= size_)

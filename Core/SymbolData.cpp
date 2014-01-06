@@ -23,9 +23,7 @@ struct NocashSymEntry
 	{
 		if (address != other.address)
 			return address < other.address;
-		if (other.text[0] == '.')
-			return true;
-		return false;
+		return text < other.text;
 	}
 };
 

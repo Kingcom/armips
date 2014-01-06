@@ -370,3 +370,35 @@ void CDirectiveHeaderSize::writeTempData(TempData& tempData)
 {
 	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".headersize 0x%08X",headerSize));
 }
+
+
+//
+// DirectiveObjImport
+//
+
+DirectiveObjImport::DirectiveObjImport(ArgumentList& args)
+{
+	if (rel.init(args[0].text))
+	{
+		rel.exportSymbols();
+	}
+}
+
+bool DirectiveObjImport::Validate()
+{
+	int memory = g_fileManager->getVirtualAddress();
+	rel.relocate(memory);
+	g_fileManager->advanceMemory(memory);
+	return rel.hasDataChanged();
+}
+
+void DirectiveObjImport::Encode()
+{
+	ByteArray& data = rel.getData();
+	g_fileManager->write(data.data(),data.size());
+}
+
+void DirectiveObjImport::writeSymData(SymbolData& symData)
+{
+	rel.writeSymbols(symData);
+}
