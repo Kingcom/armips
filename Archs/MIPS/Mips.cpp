@@ -87,6 +87,7 @@ class MipsElfRelocator: public IElfRelocator
 public:
 	virtual bool relocateOpcode(int type, RelocationData& data);
 	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
+	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 };
 
 bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
@@ -122,6 +123,70 @@ void MipsElfRelocator::setSymbolAddress(RelocationData& data, unsigned int symbo
 {
 	data.symbolAddress = symbolAddress;
 	data.targetSymbolType = symbolType;
+}
+
+
+void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
+{
+	if (ctors.size() == 0)
+	{
+		Mips.AssembleOpcode(L"jr",L"ra");
+		Mips.AssembleOpcode(L"nop",L"");
+		return;
+	}
+
+	Mips.AssembleOpcode(L"addiu",L"sp,-32");
+	Mips.AssembleOpcode(L"sw",L"ra,0(sp)");
+	Mips.AssembleOpcode(L"sw",L"s0,4(sp)");
+	Mips.AssembleOpcode(L"sw",L"s1,8(sp)");
+	Mips.AssembleOpcode(L"sw",L"s2,12(sp)");
+	Mips.AssembleOpcode(L"sw",L"s3,16(sp)");
+
+	std::wstring tableLabel = Global.symbolTable.getUniqueLabelName();
+
+	Mips.AssembleOpcode(L"li",formatString(L"s0,%s",tableLabel.c_str()));
+	Mips.AssembleOpcode(L"li",formatString(L"s1,%s+0x%08X",tableLabel.c_str(),ctors.size()*8));
+
+	std::wstring outerLoop = Global.symbolTable.getUniqueLabelName();
+	addAssemblerLabel(outerLoop);
+
+	Mips.AssembleOpcode(L"lw",L"s2,(s0)");
+	Mips.AssembleOpcode(L"lw",L"s3,4(s0)");
+	Mips.AssembleOpcode(L"addiu",L"s0,8");
+
+	std::wstring innerLoop = Global.symbolTable.getUniqueLabelName();
+	addAssemblerLabel(innerLoop);
+
+	Mips.AssembleOpcode(L"lw",L"a0,(s2)");
+	Mips.AssembleOpcode(L"jalr",L"a0");
+	Mips.AssembleOpcode(L"addiu",L"s2,4h");
+
+	Mips.AssembleOpcode(L"bne",formatString(L"s2,s3,%s",innerLoop.c_str()));
+	Mips.AssembleOpcode(L"nop",L"");
+	
+	Mips.AssembleOpcode(L"bne",formatString(L"s0,s1,%s",outerLoop.c_str()));
+	Mips.AssembleOpcode(L"nop",L"");
+	
+	Mips.AssembleOpcode(L"lw",L"ra,0(sp)");
+	Mips.AssembleOpcode(L"lw",L"s0,4(sp)");
+	Mips.AssembleOpcode(L"lw",L"s1,8(sp)");
+	Mips.AssembleOpcode(L"lw",L"s2,12(sp)");
+	Mips.AssembleOpcode(L"lw",L"s3,16(sp)");
+	Mips.AssembleOpcode(L"jr",L"ra");
+	Mips.AssembleOpcode(L"addiu",L"sp,32");
+
+	// add data
+	addAssemblerLabel(tableLabel);
+
+	std::wstring data;
+	for (size_t i = 0; i < ctors.size(); i++)
+	{
+		data += ctors[i].symbolName;
+		data += formatString(L",%s+0x%08X,",ctors[i].symbolName.c_str(),ctors[i].size);
+	}
+
+	data.pop_back();	// remove trailing comma
+	Mips.AssembleDirective(L".word",data);
 }
 
 bool MipsDirectiveResetDelay(ArgumentList& List, int flags)

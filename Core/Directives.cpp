@@ -771,8 +771,8 @@ const tDirective Directives[] = {
 	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
 	{ L".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
 	{ L".sym",				1,	1,	&DirectiveSym,				0 },
-	{ L".importobj",		1,	1,	&DirectiveImportObj,		0 },
-	{ L".importlib",		1,	1,	&DirectiveImportObj,		0 },
+	{ L".importobj",		1,	2,	&DirectiveImportObj,		0 },
+	{ L".importlib",		1,	2,	&DirectiveImportObj,		0 },
 
 	{ L".function",			1,	1,	&DirectiveStartFunction,	0 },
 	{ L".func",				1,	1,	&DirectiveStartFunction,	0 },

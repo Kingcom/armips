@@ -6,6 +6,7 @@ enum {
 	R_ARM_THM_CALL = 10,
 	R_ARM_CALL = 28,
 	R_ARM_JUMP24 = 29,
+	R_ARM_TARGET1 = 38,
 };
 
 
@@ -15,6 +16,7 @@ public:
 	ArmElfRelocator(bool arm9): arm9(arm9) { };
 	virtual bool relocateOpcode(int type, RelocationData& data);
 	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
+	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 private:
 	bool arm9;
 };

@@ -155,12 +155,13 @@ bool ElfRelocator::init(const std::wstring& inputName)
 			if (!(sec->getFlags() & SHF_ALLOC))
 				continue;
 
-			if (sec->getType() == SHT_PROGBITS || sec->getType() == SHT_NOBITS)
+			if (sec->getType() == SHT_PROGBITS || sec->getType() == SHT_NOBITS || sec->getType() == SHT_INIT_ARRAY)
 			{
 				ElfRelocatorSection sectionEntry;
 				sectionEntry.section = sec;
 				sectionEntry.index = s;
 				sectionEntry.relSection = NULL;
+				sectionEntry.label = NULL;
 
 				// search relocation section
 				for (int k = 0; k < elf->getSegmentlessSectionCount(); k++)
@@ -174,6 +175,19 @@ bool ElfRelocator::init(const std::wstring& inputName)
 					// got it
 					sectionEntry.relSection = relSection;
 					break;
+				}
+
+				// keep track of constructor sections
+				if (sec->getName() == ".ctors" || sec->getName() == ".init_array")
+				{
+					ElfRelocatorCtor ctor;
+					ctor.symbolName = Global.symbolTable.getUniqueLabelName();
+					ctor.size = sec->getSize();
+
+					sectionEntry.label = Global.symbolTable.getLabel(ctor.symbolName,-1,-1);
+					sectionEntry.label->setDefined(true);
+
+					ctors.push_back(ctor);
 				}
 
 				file.sections.push_back(sectionEntry);
@@ -250,6 +264,13 @@ bool ElfRelocator::exportSymbols()
 	return !error;
 }
 
+void ElfRelocator::writeCtor(const std::wstring& ctorName)
+{
+	Arch->AssembleDirective(L".func",ctorName);
+	relocator->writeCtorStub(ctors);
+	Arch->AssembleDirective(L".endfunc",L"");
+}
+
 bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 {
 	ElfFile* elf = file.elf;
@@ -264,9 +285,10 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 		int size = section->getSize();
 
 		while (relocationAddress % section->getAlignment())
-		{
 			relocationAddress++;
-		}
+
+		if (entry.label != NULL)
+			entry.label->setValue(relocationAddress);
 
 		relocationOffsets[index] = relocationAddress;
 		relocationAddress += size;

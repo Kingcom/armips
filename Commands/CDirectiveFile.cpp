@@ -381,6 +381,9 @@ DirectiveObjImport::DirectiveObjImport(ArgumentList& args)
 	if (rel.init(args[0].text))
 	{
 		rel.exportSymbols();
+
+		if (args.size() == 2)
+			rel.writeCtor(args[1].text);
 	}
 }
 
