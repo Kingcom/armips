@@ -108,17 +108,23 @@
     <ClCompile Include="Core\FileManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Archs\MIPS\ELF\ElfFile.cpp">
-      <Filter>Archs\MIPS\ELF</Filter>
-    </ClCompile>
-    <ClCompile Include="Archs\MIPS\ELF\PspFile.cpp">
-      <Filter>Archs\MIPS\ELF</Filter>
-    </ClCompile>
     <ClCompile Include="Core\SymbolData.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Util\CRC.cpp">
       <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\PspFile.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ELF\ElfFile.cpp">
+      <Filter>Core\ELF</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\ARM\ArmRelocator.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ELF\ElfRelocator.cpp">
+      <Filter>Core\ELF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -228,20 +234,26 @@
     <ClInclude Include="Core\FileManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Archs\MIPS\ELF\ElfFile.h">
-      <Filter>Archs\MIPS\ELF</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\MIPS\ELF\ElfTypes.h">
-      <Filter>Archs\MIPS\ELF</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\MIPS\ELF\PspFile.h">
-      <Filter>Archs\MIPS\ELF</Filter>
-    </ClInclude>
     <ClInclude Include="Core\SymbolData.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Util\CRC.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\PspFile.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ELF\ElfFile.h">
+      <Filter>Core\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ELF\ElfTypes.h">
+      <Filter>Core\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\ArmRelocator.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ELF\ElfRelocator.h">
+      <Filter>Core\ELF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -266,8 +278,8 @@
     <Filter Include="Archs\Z80">
       <UniqueIdentifier>{30a41603-076b-40f9-8082-d5fdfa8bb8e2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Archs\MIPS\ELF">
-      <UniqueIdentifier>{4de29050-e5ba-46ab-abdc-2834de860504}</UniqueIdentifier>
+    <Filter Include="Core\ELF">
+      <UniqueIdentifier>{845e5bab-6d57-42b0-8bf2-c8a875a7d108}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -2,6 +2,8 @@
 #include <vector>
 #include "Util/FileClasses.h"
 
+class IElfRelocator;
+
 class CArchitecture
 {
 public:
@@ -11,6 +13,7 @@ public:
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;
 	virtual int GetWordSize() = 0;
+	virtual IElfRelocator* getElfRelocator() = 0;
 };
 
 class CInvalidArchitecture: public CArchitecture
@@ -22,6 +25,7 @@ public:
 	virtual void Pass2();
 	virtual void Revalidate();
 	virtual int GetWordSize();
+	virtual IElfRelocator* getElfRelocator();
 };
 
 extern CInvalidArchitecture InvalidArchitecture;

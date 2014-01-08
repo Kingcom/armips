@@ -343,7 +343,8 @@ void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 			}
 		}
 	}
-
+	
+	Logger::printQueue();
 	Global.IncludeNestingLevel--;
 	input.close();
 }

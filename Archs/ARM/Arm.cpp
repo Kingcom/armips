@@ -6,6 +6,7 @@
 #include "CArmInstruction.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Core/FileManager.h"
+#include "ArmRelocator.h"
 
 CArmArchitecture Arm;
 
@@ -60,6 +61,8 @@ const tDirective ArmDirectives[] = {
 	{ L".ideasmsg",		1,	2,	&ArmDirectiveIdeasMsg,	0 },
 	{ NULL,				0,	0,	NULL,					0 }
 };
+
+
 
 
 bool CArmArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
@@ -218,6 +221,11 @@ void CArmArchitecture::AssembleOpcode(const std::wstring& name, const std::wstri
 void CArmArchitecture::NextSection()
 {
 	//
+}
+
+IElfRelocator* CArmArchitecture::getElfRelocator()
+{
+	return new ArmElfRelocator(arm9);
 }
 
 int CArmArchitecture::AddToCurrentPool(int value)

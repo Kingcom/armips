@@ -84,18 +84,17 @@
   <ItemGroup>
     <ClInclude Include="Archs\ARM\Arm.h" />
     <ClInclude Include="Archs\ARM\ArmOpcodes.h" />
+    <ClInclude Include="Archs\ARM\ArmRelocator.h" />
     <ClInclude Include="Archs\ARM\CArmInstruction.h" />
     <ClInclude Include="Archs\ARM\CThumbInstruction.h" />
     <ClInclude Include="Archs\ARM\Pool.h" />
     <ClInclude Include="Archs\ARM\ThumbOpcodes.h" />
     <ClInclude Include="Archs\MIPS\CMipsInstruction.h" />
     <ClInclude Include="Archs\MIPS\CMipsMacro.h" />
-    <ClInclude Include="Archs\MIPS\ELF\ElfFile.h" />
-    <ClInclude Include="Archs\MIPS\ELF\ElfTypes.h" />
-    <ClInclude Include="Archs\MIPS\ELF\PspFile.h" />
     <ClInclude Include="Archs\MIPS\Mips.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
+    <ClInclude Include="Archs\MIPS\PspFile.h" />
     <ClInclude Include="Archs\Z80\CZ80Instruction.h" />
     <ClInclude Include="Archs\Z80\z80.h" />
     <ClInclude Include="Archs\Z80\z80Opcodes.h" />
@@ -111,6 +110,9 @@
     <ClInclude Include="Core\CMacro.h" />
     <ClInclude Include="Core\Common.h" />
     <ClInclude Include="Core\Directives.h" />
+    <ClInclude Include="Core\ELF\ElfFile.h" />
+    <ClInclude Include="Core\ELF\ElfRelocator.h" />
+    <ClInclude Include="Core\ELF\ElfTypes.h" />
     <ClInclude Include="Core\FileManager.h" />
     <ClInclude Include="Core\MathParser.h" />
     <ClInclude Include="Core\Misc.h" />
@@ -127,20 +129,22 @@
   <ItemGroup>
     <ClCompile Include="Archs\ARM\Arm.cpp" />
     <ClCompile Include="Archs\ARM\ArmOpcodes.cpp" />
+    <ClCompile Include="Archs\ARM\ArmRelocator.cpp" />
     <ClCompile Include="Archs\ARM\CArmInstruction.cpp" />
     <ClCompile Include="Archs\ARM\CThumbInstruction.cpp" />
     <ClCompile Include="Archs\ARM\Pool.cpp" />
     <ClCompile Include="Archs\ARM\ThumbOpcodes.cpp" />
     <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp" />
     <ClCompile Include="Archs\MIPS\CMipsMacro.cpp" />
-    <ClCompile Include="Archs\MIPS\ELF\ElfFile.cpp" />
-    <ClCompile Include="Archs\MIPS\ELF\PspFile.cpp" />
     <ClCompile Include="Archs\MIPS\Mips.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
+    <ClCompile Include="Archs\MIPS\PspFile.cpp" />
     <ClCompile Include="Archs\Z80\CZ80Instruction.cpp" />
     <ClCompile Include="Archs\Z80\z80.cpp" />
     <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />
+    <ClCompile Include="Core\ELF\ElfFile.cpp" />
+    <ClCompile Include="Core\ELF\ElfRelocator.cpp" />
     <ClCompile Include="Core\FileManager.cpp" />
     <ClCompile Include="Core\Misc.cpp" />
     <ClCompile Include="Core\SymbolData.cpp" />

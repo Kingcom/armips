@@ -36,6 +36,11 @@ int CInvalidArchitecture::GetWordSize()
 	return 0;
 }
 
+IElfRelocator* CInvalidArchitecture::getElfRelocator()
+{
+	Logger::printError(Logger::FatalError,L"No architecture specified");
+	return NULL;
+}
 
 void TempData::start()
 {

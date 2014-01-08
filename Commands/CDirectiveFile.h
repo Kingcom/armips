@@ -2,6 +2,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
 #include "Core/MathParser.h"
+#include "Core/ELF/ElfRelocator.h"
 
 class GenericAssemblerFile;
 
@@ -75,4 +76,17 @@ public:
 private:
 	void updateFile();
 	int headerSize;
+};
+
+class DirectiveObjImport: public CAssemblerCommand
+{
+public:
+	DirectiveObjImport(ArgumentList& args);
+	~DirectiveObjImport() { };
+	virtual bool Validate();
+	virtual void Encode();
+	virtual void writeTempData(TempData& tempData) { };
+	virtual void writeSymData(SymbolData& symData);
+private:
+	ElfRelocator rel;
 };

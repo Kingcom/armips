@@ -32,6 +32,7 @@ public:
 	virtual void Pass2();
 	virtual void Revalidate();
 	virtual int GetWordSize() { return 4; };
+	virtual IElfRelocator* getElfRelocator();
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };
@@ -47,7 +48,7 @@ private:
 	int CurrentPool;
 };
 
-extern CArmArchitecture Arm;;
+extern CArmArchitecture Arm;
 
 bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result);
 int ArmGetRegister(char* source, int& RetLen);

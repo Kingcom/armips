@@ -13,7 +13,8 @@ class ElfFile
 {
 public:
 
-	bool load(const std::wstring&fileName);
+	bool load(const std::wstring&fileName, bool sort);
+	bool load(ByteArray& data, bool sort);
 	void save(const std::wstring&fileName);
 
 	Elf32_Half getType() { return fileHeader.e_type; };
@@ -24,6 +25,10 @@ public:
 	ElfSection* getSegmentlessSection(int index) { return segmentlessSections[index]; };
 	int getSegmentlessSectionCount() { return segmentlessSections.size(); };
 	ByteArray& getFileData() { return fileData; }
+
+	int getSymbolCount();
+	Elf32_Sym* getSymbol(int index);
+	const char* getStrTableString(int pos);
 private:
 	void loadSectionNames();
 	void determinePartOrder();
@@ -34,6 +39,9 @@ private:
 	std::vector<ElfSection*> segmentlessSections;
 	ByteArray fileData;
 	ElfPart partsOrder[4];
+
+	ElfSection* symTab;
+	ElfSection* strTab;
 };
 
 
@@ -49,12 +57,16 @@ public:
 	void writeHeader(byte* dest);
 	void writeData(ByteArray& output);
 	void setOffsetBase(int base);
+	ByteArray& getData() { return data; };
 	
 	Elf32_Word getType() { return header.sh_type; };
 	Elf32_Off getOffset() { return header.sh_offset; };
 	Elf32_Word getSize() { return header.sh_size; };
 	Elf32_Word getNameOffset() { return header.sh_name; };
 	Elf32_Word getAlignment() { return header.sh_addralign; };
+	Elf32_Addr getAddress() { return header.sh_addr; };
+	Elf32_Half getInfo() { return header.sh_info; };
+	Elf32_Word getFlags() { return header.sh_flags; };
 private:
 	Elf32_Shdr header;
 	std::string name;
@@ -86,4 +98,17 @@ private:
 	ByteArray data;
 	std::vector<ElfSection*> sections;
 	ElfSection* paddrSection;
+};
+
+struct RelocationData
+{
+	unsigned int opcodeOffset;
+	unsigned int opcode;
+	unsigned int relocationBase;
+
+	unsigned int symbolAddress;
+	int targetSymbolType;
+	int targetSymbolInfo;
+
+	std::wstring errorMessage;
 };

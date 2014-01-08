@@ -3,7 +3,7 @@
 #include "Util/FileClasses.h"
 #include "Util/Util.h"
 
-const wchar_t validSymbolCharacters[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+const wchar_t validSymbolCharacters[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
 
 bool operator<(SymbolKey const& lhs, SymbolKey const& rhs)
 {
@@ -16,7 +16,7 @@ bool operator<(SymbolKey const& lhs, SymbolKey const& rhs)
 
 SymbolTable::SymbolTable()
 {
-
+	uniqueCount = 0;
 }
 
 SymbolTable::~SymbolTable()
@@ -201,4 +201,10 @@ void SymbolTable::writeSymFile(const std::string &fileName)
 
 	output.write(L"\x1A");	// write eof character
 	output.close();
+}
+
+// TODO: better
+std::wstring SymbolTable::getUniqueLabelName()
+{
+	return formatString(L"__armips_label_%08X__",uniqueCount++);
 }

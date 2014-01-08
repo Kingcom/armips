@@ -184,7 +184,7 @@ bool PspElfFile::load(const std::wstring& fileName, const std::wstring& outputFi
 {
 	this->outputFileName = outputFileName;
 
-	if (elf.load(fileName) == false)
+	if (elf.load(fileName,true) == false)
 	{
 		Logger::printError(Logger::FatalError,L"Failed to load %s",fileName.c_str());
 		return false;
