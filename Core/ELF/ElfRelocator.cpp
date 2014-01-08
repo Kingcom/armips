@@ -254,6 +254,7 @@ bool ElfRelocator::exportSymbols()
 
 			sym.relativeAddress = data.symbolAddress;
 			sym.label->setInfo(data.targetSymbolInfo);
+			sym.label->setIsData(sym.type == STT_OBJECT);
 			sym.label->setUpdateInfo(false);
 
 			sym.label->setValue(0);
