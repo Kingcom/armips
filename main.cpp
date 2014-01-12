@@ -17,7 +17,6 @@ int wmain(int argc, wchar_t* argv[])
 	Global.FileInfo.TotalLineCount = 0;
 	Global.DebugMessages = 0;
 	Global.relativeInclude = false;
-	Global.warningAsError = false;
 	Global.validationPasses = 0;
 	Arch = &InvalidArchitecture;
 
@@ -57,7 +56,7 @@ int wmain(int argc, wchar_t* argv[])
 			argpos += 2;
 		} else if (arguments[argpos] == L"-erroronwarning")
 		{
-			Global.warningAsError = true;
+			Logger::setErrorOnWarning(true);
 			argpos += 1;
 		} else {
 			Logger::printLine("Invalid parameter %S\n",arguments[argpos].c_str());

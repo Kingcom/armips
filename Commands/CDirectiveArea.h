@@ -17,8 +17,7 @@ private:
 	CExpressionCommandList SizeExpression;
 	int Size;
 	int RamPos;
-	int Fill;
-	bool UseFill;
+	int fillValue;
 	CExpressionCommandList FillExpression;
 };
 

@@ -354,7 +354,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 					}
 					if (label->isDefined() == false)
 					{
-						Logger::queueError(Logger::Error,L"Undefined external symbol %s",symName.c_str());
+						Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",symName.c_str(),file.name.c_str());
 						error = true;
 						continue;
 					}

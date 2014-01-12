@@ -32,7 +32,6 @@ typedef struct {
 	bool Revalidate;
 	bool nocash;
 	bool relativeInclude;
-	bool warningAsError;
 	int DebugMessages;
 	ConditionData conditionData;
 	AreaData areaData;

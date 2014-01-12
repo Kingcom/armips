@@ -7,6 +7,7 @@ std::vector<Logger::QueueEntry> Logger::queue;
 std::vector<std::wstring> Logger::errors;
 bool Logger::error = false;
 bool Logger::fatalError = false;
+bool Logger::errorOnWarning = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
@@ -32,7 +33,7 @@ void Logger::setFlags(ErrorType type)
 	switch (type)
 	{
 	case Warning:
-		if (Global.warningAsError)
+		if (errorOnWarning)
 			error = true;
 		break;
 	case Error:
@@ -221,7 +222,7 @@ bool ConditionData::conditionTrue()
 }
 
 
-void AreaData::startArea(int start, int size, int fileNum, int lineNumber)
+void AreaData::startArea(int start, int size, int fileNum, int lineNumber, int fillValue)
 {
 	Entry entry;
 	entry.start = start;
@@ -229,6 +230,7 @@ void AreaData::startArea(int start, int size, int fileNum, int lineNumber)
 	entry.fileNum = fileNum;
 	entry.lineNumber = lineNumber;
 	entry.overflow = false;
+	entry.fillValue = fillValue;
 	entries.push_back(entry);
 }
 

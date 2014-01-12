@@ -19,6 +19,7 @@ public:
 	static StringList getErrors() { return errors; };
 	static bool hasError() { return error; };
 	static bool hasFatalError() { return fatalError; };
+	static void setErrorOnWarning(bool b) { errorOnWarning = b; };
 private:
 	static std::wstring formatError(ErrorType type, const std::wstring& text);
 	static void setFlags(ErrorType type);
@@ -33,6 +34,7 @@ private:
 	static std::vector<std::wstring> errors;
 	static bool error;
 	static bool fatalError;
+	static bool errorOnWarning;
 };
 
 class ConditionData
@@ -58,9 +60,12 @@ private:
 class AreaData
 {
 public:
-	void startArea(int start, int size, int fileNum, int lineNumber);
+	void startArea(int start, int size, int fileNum, int lineNumber, int fillValue);
 	void endArea();
 	bool checkAreas();
+	int getCurrentFillValue() { return entries.back().fillValue; };
+	int getCurrentMaxAddress() { return entries.back().maxAddress; };
+	int getEntryCount() { return entries.size(); };
 private:
 	struct Entry
 	{
@@ -69,6 +74,7 @@ private:
 		int fileNum;
 		int lineNumber;
 		bool overflow;
+		int fillValue;
 	};
 
 	std::vector<Entry> entries;

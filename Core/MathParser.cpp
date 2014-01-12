@@ -596,6 +596,7 @@ CExpressionCommandList::CExpressionCommandList()
 {
 	Entries = NULL;
 	EntryCount = 0;
+	initialized = false;
 }
 
 CExpressionCommandList::~CExpressionCommandList()
@@ -608,6 +609,7 @@ bool CExpressionCommandList::Load(CStringList &List)
 	free(Entries);
 	Entries = (tExpressionCommandEntry*) malloc(List.GetCount() * sizeof(tExpressionCommandEntry));
 	EntryCount = List.GetCount();
+	initialized = false;
 
 	for (int i = 0; i < List.GetCount(); i++)
 	{
@@ -647,7 +649,7 @@ bool CExpressionCommandList::Load(CStringList &List)
 		}
 	}
 
-
+	initialized = true;
 	return true;
 }
 

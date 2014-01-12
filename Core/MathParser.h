@@ -84,9 +84,11 @@ public:
 	unsigned int GetValue(int i) { return Entries[i].num; };
 	Label* GetLabel(int i) { return Entries[i].label; };
 	int GetCount() { return EntryCount; };
+	bool isInitialized() { return initialized; };
 private:
 	tExpressionCommandEntry* Entries;
 	int EntryCount;
+	bool initialized;
 };
 
 class MathExpression

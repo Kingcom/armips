@@ -492,16 +492,16 @@ bool DirectiveWarningAsError(ArgumentList& List, int flags)
 	{
 		if (List[0].text == L"on")
 		{
-			Global.warningAsError = true;
+			Logger::setErrorOnWarning(true);
 		} else if (List[0].text == L"off")
 		{
-			Global.warningAsError = false;
+			Logger::setErrorOnWarning(false);
 		} else {
 			Logger::printError(Logger::Error,L"Invalid arguments");
 			return false;
 		}
 	} else {
-		Global.warningAsError = true;
+		Logger::setErrorOnWarning(true);
 	}
 	return true;
 }
@@ -747,7 +747,7 @@ const tDirective Directives[] = {
 	{ L".ifarm",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_IFARM },
 	{ L".ifthumb",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_IFTHUMB },
 
-	{ L".area",				1,	1,	&DirectiveArea,				DIRECTIVE_AREA_START },
+	{ L".area",				1,	2,	&DirectiveArea,				DIRECTIVE_AREA_START },
 	{ L".endarea",			0,	0,	&DirectiveArea,				DIRECTIVE_AREA_END },
 
 	{ L".include",			1,	2,	&DirectiveInclude,			0 },

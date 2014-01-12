@@ -6,7 +6,7 @@
 CDirectiveArea::CDirectiveArea()
 {
 	Start = true;
-	UseFill = false;
+	fillValue = -1;
 	Size = 0;
 }
 
@@ -20,7 +20,6 @@ bool CDirectiveArea::LoadStart(ArgumentList &Args)
 	{
 		if (initExpression(FillExpression,Args[1].text) == false)
 			return false;
-		UseFill = true;
 	}
 
 	return true;
@@ -42,7 +41,14 @@ bool CDirectiveArea::Validate()
 	{
 		if (evalExpression(SizeExpression,NewSize,true) == false)
 			return false;
-		Global.areaData.startArea(RamPos,NewSize,FileNum,FileLine);
+
+		if (FillExpression.isInitialized())
+		{
+			if (evalExpression(FillExpression,fillValue,true) == false)
+				return false;
+		}
+
+		Global.areaData.startArea(RamPos,NewSize,FileNum,FileLine,fillValue);
 
 		if (Size != NewSize)
 		{
@@ -52,6 +58,12 @@ bool CDirectiveArea::Validate()
 			return false;
 		}
 	} else {
+		if (Global.areaData.getEntryCount() != 0)
+		{
+			fillValue = Global.areaData.getCurrentFillValue();
+			Size = Global.areaData.getCurrentMaxAddress()-g_fileManager->getVirtualAddress();
+		}
+
 		Global.areaData.endArea();
 		return false;
 	}
@@ -59,6 +71,17 @@ bool CDirectiveArea::Validate()
 
 void CDirectiveArea::Encode()
 {
+	if (Start == false && fillValue != -1)
+	{
+		unsigned char buffer[64];
+		memset(buffer,fillValue,64);
+
+		while (Size > 0)
+		{
+			g_fileManager->write(buffer,min(64,Size));
+			Size -= 64;
+		}
+	}
 	return;
 }
 
