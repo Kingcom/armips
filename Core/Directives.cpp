@@ -20,11 +20,11 @@ bool DirectiveOpen(ArgumentList& list, int flags)
 	if (list.size() == 2)
 	{
 		// open
-		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Open,list);
+		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Open,list);
 		AddAssemblerCommand(command);
 	} else {
 		// copy
-		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Copy,list);
+		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Copy,list);
 		AddAssemblerCommand(command);
 	}
 	return true;
@@ -32,14 +32,14 @@ bool DirectiveOpen(ArgumentList& list, int flags)
 
 bool DirectiveCreate(ArgumentList& list, int flags)
 {
-	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Create,list);
+	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Create,list);
 	AddAssemblerCommand(command);
 	return true;
 }
 
 bool DirectiveClose(ArgumentList& list, int flags)
 {
-	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Close,list);
+	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Close,list);
 	AddAssemblerCommand(command);
 	return true;
 }
@@ -404,20 +404,20 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 
 bool DirectiveConditional(ArgumentList& List, int flags)
 {
-	int value;
+	ConditionType value;
 
 	switch (flags)
 	{
-	case DIRECTIVE_COND_IF:			value = CONDITIONAL_IF; break;
-	case DIRECTIVE_COND_ELSE:		value = CONDITIONAL_ELSE; break;
-	case DIRECTIVE_COND_ELSEIF:		value = CONDITIONAL_ELSEIF; break;
-	case DIRECTIVE_COND_ENDIF:		value = CONDITIONAL_ENDIF; break;
-	case DIRECTIVE_COND_IFDEF:		value = CONDITIONAL_IFDEF; break;
-	case DIRECTIVE_COND_IFNDEF:		value = CONDITIONAL_IFNDEF; break;
-	case DIRECTIVE_COND_ELSEIFDEF:	value = CONDITIONAL_ELSEIFDEF; break;
-	case DIRECTIVE_COND_ELSEIFNDEF:	value = CONDITIONAL_ELSEIFNDEF; break;
-	case DIRECTIVE_COND_IFARM:		value = CONDITIONAL_IFARM; break;
-	case DIRECTIVE_COND_IFTHUMB:	value = CONDITIONAL_IFTHUMB; break;
+	case DIRECTIVE_COND_IF:			value = ConditionType::IF; break;
+	case DIRECTIVE_COND_ELSE:		value = ConditionType::ELSE; break;
+	case DIRECTIVE_COND_ELSEIF:		value = ConditionType::ELSEIF; break;
+	case DIRECTIVE_COND_ENDIF:		value = ConditionType::ENDIF; break;
+	case DIRECTIVE_COND_IFDEF:		value = ConditionType::IFDEF; break;
+	case DIRECTIVE_COND_IFNDEF:		value = ConditionType::IFNDEF; break;
+	case DIRECTIVE_COND_ELSEIFDEF:	value = ConditionType::ELSEIFDEF; break;
+	case DIRECTIVE_COND_ELSEIFNDEF:	value = ConditionType::ELSEIFNDEF; break;
+	case DIRECTIVE_COND_IFARM:		value = ConditionType::IFARM; break;
+	case DIRECTIVE_COND_IFTHUMB:	value = ConditionType::IFTHUMB; break;
 	default: return false;
 	}
 
@@ -468,9 +468,9 @@ bool DirectiveMessage(ArgumentList& List, int flags)
 
 	switch (flags)
 	{
-	case DIRECTIVE_MSG_WARNING:		value = CDirectiveMessage::Warning;	break;
-	case DIRECTIVE_MSG_ERROR:		value = CDirectiveMessage::Error;	break;
-	case DIRECTIVE_MSG_NOTICE:		value = CDirectiveMessage::Notice;	break;
+	case DIRECTIVE_MSG_WARNING:		value = CDirectiveMessage::Type::Warning;	break;
+	case DIRECTIVE_MSG_ERROR:		value = CDirectiveMessage::Type::Error;		break;
+	case DIRECTIVE_MSG_NOTICE:		value = CDirectiveMessage::Type::Notice;	break;
 	default: return false;
 	}
 

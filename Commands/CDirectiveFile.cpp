@@ -21,7 +21,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 	switch (type)
 	{
-	case Open:
+	case Type::Open:
 		fileName = getFullPathName(args[0].text);
 
 		if (fileExists(fileName) == false)
@@ -37,7 +37,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		file = new GenericAssemblerFile(fileName,virtualAddress,false);
 		break;
-	case Create:
+	case Type::Create:
 		fileName = getFullPathName(args[0].text);
 
 		if (ConvertExpression(args[1].text,virtualAddress) == false)
@@ -48,7 +48,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		file = new GenericAssemblerFile(fileName,virtualAddress,true);
 		break;
-	case Copy:
+	case Type::Copy:
 		originalName = getFullPathName(args[0].text);
 		fileName = getFullPathName(args[1].text);
 
@@ -65,7 +65,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		file = new GenericAssemblerFile(fileName,originalName,virtualAddress);
 		break;
-	case Close:
+	case Type::Close:
 		return;
 	}
 
@@ -80,12 +80,12 @@ bool CDirectiveFile::Validate()
 
 	switch (type)
 	{
-	case Open:
-	case Create:
-	case Copy:
+	case Type::Open:
+	case Type::Create:
+	case Type::Copy:
 		g_fileManager->openFile(file,true);
 		return false;
-	case Close:
+	case Type::Close:
 		g_fileManager->closeFile();
 		return false;
 	}
@@ -97,12 +97,12 @@ void CDirectiveFile::Encode()
 {
 	switch (type)
 	{
-	case Open:
-	case Create:
-	case Copy:
+	case Type::Open:
+	case Type::Create:
+	case Type::Copy:
 		g_fileManager->openFile(file,false);
 		break;
-	case Close:
+	case Type::Close:
 		g_fileManager->closeFile();
 		break;
 	}
@@ -113,17 +113,17 @@ void CDirectiveFile::writeTempData(TempData& tempData)
 	std::wstring str;
 	switch (type)
 	{
-	case Open:
+	case Type::Open:
 		str = formatString(L".open \"%s\",0x%08X",file->getFileName().c_str(),file->getOriginalHeaderSize());;
 		break;
-	case Create:
+	case Type::Create:
 		str = formatString(L".create \"%s\",0x%08X",file->getFileName().c_str(),file->getOriginalHeaderSize());
 		break;
-	case Copy:
+	case Type::Copy:
 		str = formatString(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName().c_str(),
 			file->getFileName().c_str(),file->getOriginalHeaderSize());
 		break;
-	case Close:
+	case Type::Close:
 		str = L".close";
 		break;
 	}

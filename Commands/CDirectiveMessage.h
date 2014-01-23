@@ -6,8 +6,8 @@
 class CDirectiveMessage: public CAssemblerCommand
 {
 public:
-	enum Type { Invalid, Warning, Error, Notice };
-	CDirectiveMessage() { errorType = Invalid; };
+	enum class Type { Invalid, Warning, Error, Notice };
+	CDirectiveMessage() { errorType = Type::Invalid; };
 	bool Load(ArgumentList& Args, Type type);
 	virtual bool Validate();
 	virtual void Encode() {};

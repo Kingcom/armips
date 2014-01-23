@@ -9,7 +9,7 @@ class GenericAssemblerFile;
 class CDirectiveFile: public CAssemblerCommand
 {
 public:
-	enum Type { Open, Create, Copy, Close };
+	enum class Type { Open, Create, Copy, Close };
 
 	CDirectiveFile(Type type, ArgumentList& args);
 	virtual bool Validate();

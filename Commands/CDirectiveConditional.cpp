@@ -10,25 +10,23 @@ extern CArmArchitecture Arm;
 CDirectiveConditional::CDirectiveConditional()
 {
 	Value = 0;
-	IsNum = true;
-	IsNumSolved = false;
 }
 
-bool CDirectiveConditional::Load(ArgumentList& Args, int command)
+bool CDirectiveConditional::Load(ArgumentList& Args, ConditionType command)
 {
-	Type = command;
+	type = command;
 
-	switch (Type)
+	switch (type)
 	{
-	case CONDITIONAL_IF:
-	case CONDITIONAL_ELSEIF:
+	case ConditionType::IF:
+	case ConditionType::ELSEIF:
 		if (initExpression(Expression,Args[0].text) == false)
 			return false;
 		break;
-	case CONDITIONAL_IFDEF:
-	case CONDITIONAL_IFNDEF:
-	case CONDITIONAL_ELSEIFDEF:
-	case CONDITIONAL_ELSEIFNDEF:
+	case ConditionType::IFDEF:
+	case ConditionType::IFNDEF:
+	case ConditionType::ELSEIFDEF:
+	case ConditionType::ELSEIFNDEF:
 		if (Global.symbolTable.isValidSymbolName(Args[0].text) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid label name \"%s\"",Args[0].text.c_str());
@@ -36,8 +34,8 @@ bool CDirectiveConditional::Load(ArgumentList& Args, int command)
 		}
 		labelName = Args[0].text;
 		break;
-	case CONDITIONAL_IFARM:
-	case CONDITIONAL_IFTHUMB:
+	case ConditionType::IFARM:
+	case ConditionType::IFTHUMB:
 		Value = (Arch == &Arm);
 		Value |= (Arm.GetThumbMode() << 1);
 		break;
@@ -49,43 +47,43 @@ void CDirectiveConditional::Execute()
 {
 	bool b;
 
-	switch (Type)
+	switch (type)
 	{
-	case CONDITIONAL_IFARM:
+	case ConditionType::IFARM:
 		b = Value == 1;
 		Global.conditionData.addIf(b);
 		break;
-	case CONDITIONAL_IFTHUMB:
+	case ConditionType::IFTHUMB:
 		b = Value == 3;
 		Global.conditionData.addIf(b);
 		break;
-	case CONDITIONAL_IF:
+	case ConditionType::IF:
 		b = Value != 0;
 		Global.conditionData.addIf(b);
 		break;
-	case CONDITIONAL_ELSE:
+	case ConditionType::ELSE:
 		Global.conditionData.addElse();
 		break;
-	case CONDITIONAL_ELSEIF:
+	case ConditionType::ELSEIF:
 		b = Value != 0;
 		Global.conditionData.addElseIf(b);
 		break;
-	case CONDITIONAL_ENDIF:
+	case ConditionType::ENDIF:
 		Global.conditionData.addEndIf();
 		break;
-	case CONDITIONAL_IFDEF:
+	case ConditionType::IFDEF:
 		b = checkLabelDefined(labelName);
 		Global.conditionData.addIf(b);
 		break;
-	case CONDITIONAL_IFNDEF:
+	case ConditionType::IFNDEF:
 		b = !checkLabelDefined(labelName);
 		Global.conditionData.addIf(b);
 		break;
-	case CONDITIONAL_ELSEIFDEF:	
+	case ConditionType::ELSEIFDEF:	
 		b = checkLabelDefined(labelName);
 		Global.conditionData.addElseIf(b);
 		break;
-	case CONDITIONAL_ELSEIFNDEF:
+	case ConditionType::ELSEIFNDEF:
 		b = !checkLabelDefined(labelName);
 		Global.conditionData.addElseIf(b);
 		break;
@@ -97,10 +95,10 @@ bool CDirectiveConditional::Validate()
 	bool Result = false;
 	int num;
 
-	switch (Type)
+	switch (type)
 	{
-	case CONDITIONAL_IF:
-	case CONDITIONAL_ELSEIF:
+	case ConditionType::IF:
+	case ConditionType::ELSEIF:
 		if (ParsePostfix(Expression,NULL,num) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid expression");
