@@ -43,7 +43,6 @@ void Logger::setFlags(ErrorType type)
 	case FatalError:
 		error = true;
 		fatalError = true;
-		exit(2);	// TODO: quit in a less drastic way
 		break;
 	}
 }

@@ -342,6 +342,9 @@ void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 				Arch->AssembleOpcode(Text.name,Text.params);
 			}
 		}
+
+		if (Logger::hasFatalError())
+			return;
 	}
 	
 	Logger::printQueue();

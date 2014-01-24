@@ -77,6 +77,12 @@ bool executeTest(const std::wstring& dir, const std::wstring& testName, std::str
 		}
 	}
 
+	// write errors to file
+	TextFile output;
+	output.open(L"output.txt",TextFile::Write);
+	output.writeLines(errors);
+	output.close();
+
 	if (fileExists(L"expected.bin"))
 	{
 		ByteArray expected = ByteArray::fromFile(L"expected.bin");
@@ -93,8 +99,6 @@ bool executeTest(const std::wstring& dir, const std::wstring& testName, std::str
 			errorString += formatString("Output data size does not match\n");
 			result = false;
 		}
-
-		DeleteFile(L"output.bin");
 	}
 
 	_wchdir(oldDir);
