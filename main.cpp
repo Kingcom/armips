@@ -15,6 +15,7 @@ int wmain(int argc, wchar_t* argv[])
 	if (argc < 2)
 	{
 		Logger::printLine("Not enough arguments");
+		return 1;
 	}
 
 	return !runTests(argv[1]);
