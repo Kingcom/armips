@@ -40,6 +40,7 @@ private:
 class ConditionData
 {
 public:
+	void clear() { conditions.clear(); };
 	void addIf(bool conditionMet);
 	void addElse();
 	void addElseIf(bool conditionMet);
@@ -60,6 +61,7 @@ private:
 class AreaData
 {
 public:
+	void clear() { entries.clear(); };
 	void startArea(int start, int size, int fileNum, int lineNumber, int fillValue);
 	void endArea();
 	bool checkAreas();

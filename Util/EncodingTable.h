@@ -7,6 +7,7 @@ class EncodingTable
 public:
 	EncodingTable();
 	~EncodingTable();
+	void clear();
 	bool load(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
 	bool isLoaded() { return entries.size() != 0; };
 	void addEntry(unsigned char* hex, int hexLength, const std::wstring& value);

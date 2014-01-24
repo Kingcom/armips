@@ -69,6 +69,7 @@ public:
 	enum DataType { Data8, Data16, Data32, DataAscii };
 
 	SymbolData();
+	void clear();
 	void setNocashSymFileName(const std::wstring& name, int version) { nocashSymFileName = name; nocashSymVersion = version; };
 	void setExSymFileName(const std::wstring& name) { exSymFileName = name; };
 	void write();

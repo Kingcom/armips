@@ -5,13 +5,24 @@
 #include "Common.h"
 #include <algorithm>
 
-SymbolData::SymbolData(): enabled(true)
+SymbolData::SymbolData()
 {
+	clear();
+}
+
+void SymbolData::clear()
+{
+	enabled = true;
+	nocashSymFileName.clear();
+	exSymFileName.clear();
+	modules.clear();
+	files.clear();
+	currentModule = 0;
+	currentFunction = -1;
+	
 	SymDataModule defaultModule;
 	defaultModule.file = NULL;
 	modules.push_back(defaultModule);
-	currentModule = 0;
-	currentFunction = -1;
 }
 
 struct NocashSymEntry

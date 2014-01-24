@@ -16,6 +16,13 @@ EncodingTable::~EncodingTable()
 
 }
 
+void EncodingTable::clear()
+{
+	hexData.clear();
+	valueData.clear();
+	entries.clear();
+}
+
 int parseHexString(std::wstring& hex, unsigned char* dest)
 {
 	for (size_t i = 0; i < hex.size(); i++)

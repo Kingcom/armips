@@ -40,6 +40,7 @@ class SymbolTable
 public:
 	SymbolTable();
 	~SymbolTable();
+	void clear();
 	bool symbolExists(const std::wstring& symbol, int file, int section);
 	static bool isValidSymbolName(const std::wstring& symbol);
 	static bool isValidSymbolCharacter(wchar_t character, bool first = false);

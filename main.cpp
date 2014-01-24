@@ -8,17 +8,7 @@
 
 int wmain(int argc, wchar_t* argv[])
 {
-	Global.Radix = 10;
-	Global.Revalidate = true;
-	Global.Section = 0;
-	Global.nocash = false;
-	Global.IncludeNestingLevel = 0;
-	Global.FileInfo.FileCount = 0;
-	Global.FileInfo.TotalLineCount = 0;
-	Global.DebugMessages = 0;
-	Global.relativeInclude = false;
-	Global.validationPasses = 0;
-	Arch = &InvalidArchitecture;
+	AssemblerArguments parameters;
 
 	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
 	StringList arguments = getStringListFromArray(argv,argc);
@@ -29,34 +19,37 @@ int wmain(int argc, wchar_t* argv[])
 		return 1;
 	}
 
-	if (fileExists(arguments[1]) == false)
+	parameters.inputFileName = arguments[1];
+	if (fileExists(parameters.inputFileName) == false)
 	{
-		Logger::printLine("File %S not found\n",arguments[1].c_str());
+		Logger::printLine("File %S not found\n",parameters.inputFileName.c_str());
 		return 1;
 	}
 
-	int argpos = 2;
-	while (argpos < (int)arguments.size())
+	size_t argpos = 2;
+	while (argpos < arguments.size())
 	{
 		if (arguments[argpos] == L"-temp")
 		{
-			Global.tempData.setFileName(arguments[argpos+1]);
+			parameters.tempFileName = arguments[argpos+1];
 			argpos += 2;
 		} else if (arguments[argpos] == L"-sym")
 		{
-			Global.symData.setNocashSymFileName(arguments[argpos+1],1);
+			parameters.symFileName = arguments[argpos+1];
+			parameters.symFileVersion = 1;
 			argpos += 2;
 		} else if (arguments[argpos] == L"-sym2")
 		{
-			Global.symData.setNocashSymFileName(arguments[argpos+1],2);
+			parameters.symFileName = arguments[argpos+1];
+			parameters.symFileVersion = 2;
 			argpos += 2;
 		} else if (arguments[argpos] == L"-exsym")
 		{
-			Global.symData.setExSymFileName(arguments[argpos+1]);
+			parameters.exSymFileName = arguments[argpos+1];
 			argpos += 2;
 		} else if (arguments[argpos] == L"-erroronwarning")
 		{
-			Logger::setErrorOnWarning(true);
+			parameters.errorOnWarning = true;
 			argpos += 1;
 		} else {
 			Logger::printLine("Invalid parameter %S\n",arguments[argpos].c_str());
@@ -64,20 +57,14 @@ int wmain(int argc, wchar_t* argv[])
 		}
 	}
 
-	LoadAssemblyFile(arguments[1]);
-	if (Logger::hasError())
+	bool result = runAssembler(parameters);
+	if (result == false)
 	{
 		Logger::printLine("Aborting.");
 		return 1;
 	}
-
-	if (EncodeAssembly() == true)
-	{
-		Logger::printLine("Done.");
-	} else {
-		Logger::printLine("Aborting.");
-		return 1;
-	}
+	
+	Logger::printLine("Done.");
 	return 0;
 }
 

@@ -21,10 +21,20 @@ SymbolTable::SymbolTable()
 
 SymbolTable::~SymbolTable()
 {
+	clear();
+}
+
+void SymbolTable::clear()
+{
 	for (size_t i = 0; i < labels.size(); i++)
 	{
 		delete labels[i];
 	}
+
+	symbols.clear();
+	labels.clear();
+	equations.clear();
+	uniqueCount = 0;
 }
 
 void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, int& section)

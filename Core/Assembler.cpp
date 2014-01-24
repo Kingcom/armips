@@ -419,6 +419,12 @@ bool EncodeAssembly()
 		delete Global.Commands[i];
 	}
 
+	for (size_t i = 0; i < Global.Macros.size(); i++)
+		delete Global.Macros[i];
+
+	Global.Commands.clear();
+	Global.Macros.clear();
+
 	Global.tempData.end();
 	Global.symData.write();
 
@@ -429,4 +435,54 @@ bool EncodeAssembly()
 	}
 
 	return true;
+}
+
+bool runAssembler(AssemblerArguments& arguments)
+{
+	// initialize and reset global data
+	Global.Radix = 10;
+	Global.Revalidate = true;
+	Global.Section = 0;
+	Global.nocash = false;
+	Global.IncludeNestingLevel = 0;
+	Global.MacroNestingLevel = 0;
+	Global.FileInfo.FileCount = 0;
+	Global.FileInfo.TotalLineCount = 0;
+	Global.DebugMessages = 0;
+	Global.relativeInclude = false;
+	Global.validationPasses = 0;
+	Arch = &InvalidArchitecture;
+
+	Global.symData.clear();
+	Global.Table.clear();
+	Global.symbolTable.clear();
+	Global.tempData.clear();
+	Global.conditionData.clear();
+	Global.areaData.clear();
+
+	Global.FileInfo.FileList.Clear();
+	Global.FileInfo.FileCount = 0;
+	Global.FileInfo.TotalLineCount = 0;
+	Global.FileInfo.LineNumber = 0;
+	Global.FileInfo.FileNum = 0;
+
+	// process arguments
+	Logger::setErrorOnWarning(arguments.errorOnWarning);
+
+	if (!arguments.symFileName.empty())
+		Global.symData.setNocashSymFileName(arguments.symFileName,arguments.symFileVersion);
+
+	if (!arguments.exSymFileName.empty())
+		Global.symData.setExSymFileName(arguments.exSymFileName);
+
+	if (!arguments.tempFileName.empty())
+		Global.tempData.setFileName(arguments.tempFileName);
+
+	// run assembler
+	LoadAssemblyFile(arguments.inputFileName);
+	bool result = !Logger::hasError();
+	if (result == true)
+		result = EncodeAssembly();
+
+	return result;
 }
