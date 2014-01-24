@@ -20,6 +20,8 @@ public:
 	static bool hasError() { return error; };
 	static bool hasFatalError() { return fatalError; };
 	static void setErrorOnWarning(bool b) { errorOnWarning = b; };
+	static void setSilent(bool b) { silent = b; };
+	static bool isSilent() { return silent; }
 private:
 	static std::wstring formatError(ErrorType type, const std::wstring& text);
 	static void setFlags(ErrorType type);
@@ -35,6 +37,7 @@ private:
 	static bool error;
 	static bool fatalError;
 	static bool errorOnWarning;
+	static bool silent;
 };
 
 class ConditionData

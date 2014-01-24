@@ -8,6 +8,7 @@ std::vector<std::wstring> Logger::errors;
 bool Logger::error = false;
 bool Logger::fatalError = false;
 bool Logger::errorOnWarning = false;
+bool Logger::silent = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
@@ -53,6 +54,8 @@ void Logger::clear()
 	errors.clear();
 	error = false;
 	fatalError = false;
+	errorOnWarning = false;
+	silent = false;
 }
 
 void Logger::printLine(const std::wstring& text)
@@ -74,7 +77,10 @@ void Logger::printError(ErrorType type, const std::wstring& text)
 {
 	std::wstring errorText = formatError(type,text);
 	errors.push_back(errorText);
-	printLine(errorText);
+
+	if (!silent)
+		printLine(errorText);
+
 	setFlags(type);
 }
 
@@ -141,7 +147,10 @@ void Logger::printQueue()
 	for (size_t i = 0; i < queue.size(); i++)
 	{
 		errors.push_back(queue[i].text);
-		printLine(queue[i].text);
+
+		if (!silent)
+			printLine(queue[i].text);
+
 		setFlags(queue[i].type);
 	}
 }

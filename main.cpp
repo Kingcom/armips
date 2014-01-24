@@ -5,10 +5,20 @@
 #include "Core/Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CDirectiveFile.h"
+#include "Core/Tests.h"
 
 int wmain(int argc, wchar_t* argv[])
 {
 	AssemblerArguments parameters;
+
+#ifdef ARMIPS_TESTS
+	if (argc < 2)
+	{
+		Logger::printLine("Not enough arguments");
+	}
+
+	return !runTests(argv[1]);
+#endif
 
 	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
 	StringList arguments = getStringListFromArray(argv,argc);

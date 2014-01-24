@@ -1,6 +1,7 @@
 #pragma 
 #include "Util/CommonClasses.h"
 #include "Util/FileClasses.h"
+#include "Util/Util.h"
 
 struct AssemblerArguments
 {
@@ -10,6 +11,15 @@ struct AssemblerArguments
 	int symFileVersion;
 	std::wstring exSymFileName;
 	bool errorOnWarning;
+	bool silent;
+	StringList* errorsResult;
+
+	AssemblerArguments()
+	{
+		errorOnWarning = false;
+		silent = false;
+		errorsResult = NULL;
+	}
 };
 
 bool runAssembler(AssemblerArguments& arguments);

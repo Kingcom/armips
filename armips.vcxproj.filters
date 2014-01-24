@@ -126,6 +126,9 @@
     <ClCompile Include="Core\ELF\ElfRelocator.cpp">
       <Filter>Core\ELF</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Tests.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -254,6 +257,9 @@
     </ClInclude>
     <ClInclude Include="Core\ELF\ElfRelocator.h">
       <Filter>Core\ELF</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Tests.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

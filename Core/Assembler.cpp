@@ -370,7 +370,8 @@ bool EncodeAssembly()
 		Arch->Revalidate();
 
 #ifdef _DEBUG
-		printf("Validate %d...\n",validationPasses);
+		if (!Logger::isSilent())
+			printf("Validate %d...\n",validationPasses);
 #endif
 
 		for (size_t i = 0; i < Global.Commands.size(); i++)
@@ -399,7 +400,8 @@ bool EncodeAssembly()
 	}
 
 #ifdef _DEBUG
-	printf("Encode...\n");
+	if (!Logger::isSilent())
+		printf("Encode...\n");
 #endif
 
 	// and finally encode
@@ -408,7 +410,6 @@ bool EncodeAssembly()
 	{
 		if (Global.Commands[i]->IsConditional() == false && Global.conditionData.conditionTrue() == false)
 		{
-			delete Global.Commands[i];
 			continue;
 		}
 
@@ -416,14 +417,7 @@ bool EncodeAssembly()
 		Global.Commands[i]->writeTempData(Global.tempData);
 		Global.Commands[i]->writeSymData(Global.symData);
 		Global.Commands[i]->Encode();
-		delete Global.Commands[i];
 	}
-
-	for (size_t i = 0; i < Global.Macros.size(); i++)
-		delete Global.Macros[i];
-
-	Global.Commands.clear();
-	Global.Macros.clear();
 
 	Global.tempData.end();
 	Global.symData.write();
@@ -453,12 +447,15 @@ bool runAssembler(AssemblerArguments& arguments)
 	Global.validationPasses = 0;
 	Arch = &InvalidArchitecture;
 
+	Logger::clear();
 	Global.symData.clear();
 	Global.Table.clear();
 	Global.symbolTable.clear();
 	Global.tempData.clear();
 	Global.conditionData.clear();
 	Global.areaData.clear();
+	Global.Commands.clear();
+	Global.Macros.clear();
 
 	Global.FileInfo.FileList.Clear();
 	Global.FileInfo.FileCount = 0;
@@ -467,6 +464,7 @@ bool runAssembler(AssemblerArguments& arguments)
 	Global.FileInfo.FileNum = 0;
 
 	// process arguments
+	Logger::setSilent(arguments.silent);
 	Logger::setErrorOnWarning(arguments.errorOnWarning);
 
 	if (!arguments.symFileName.empty())
@@ -483,6 +481,24 @@ bool runAssembler(AssemblerArguments& arguments)
 	bool result = !Logger::hasError();
 	if (result == true)
 		result = EncodeAssembly();
+
+	// return errors
+	if (arguments.errorsResult != NULL)
+	{
+		StringList errors = Logger::getErrors();
+		for (size_t i = 0; i < errors.size(); i++)
+			arguments.errorsResult->push_back(errors[i]);
+	}
+
+	// cleanup
+	for (size_t i = 0; i < Global.Commands.size(); i++)
+		delete Global.Commands[i];	
+
+	for (size_t i = 0; i < Global.Macros.size(); i++)
+		delete Global.Macros[i];
+
+	Global.Commands.clear();
+	Global.Macros.clear();
 
 	return result;
 }
