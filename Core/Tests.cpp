@@ -110,9 +110,19 @@ bool runTests(const std::wstring& dir)
 		return true;
 	}
 
+	// initialize console
+	HANDLE hstdin = GetStdHandle(STD_INPUT_HANDLE);
+	HANDLE hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	WORD index = 0;
+
+	// Remember how things were when we started
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hstdout,&csbi);
+
 	int successCount = 0;
 	for (size_t i = 0; i < tests.size(); i++)
 	{
+		SetConsoleTextAttribute(hstdout,0x7);
 		std::string line = formatString("Test %d of %d, %S:",i+1,tests.size(),tests[i].c_str());
 		printf("%-50s",line.c_str());
 
@@ -121,15 +131,22 @@ bool runTests(const std::wstring& dir)
 
 		if (executeTest(path,tests[i],errors) == false)
 		{
+			SetConsoleTextAttribute(hstdout,(1 << 2) | (1 << 3));
 			printf("FAILED\n");
 			printf("%s",errors.c_str());
 		} else {
+			SetConsoleTextAttribute(hstdout,(1 << 1) | (1 << 3));
 			printf("PASSED\n");
 			successCount++;
 		}
 	}
-
-	Logger::printLine("\n%d out of %d tests passed.\n",successCount,tests.size());
 	
+	SetConsoleTextAttribute(hstdout,0x7);
+	printf("\n%d out of %d tests passed.\n",successCount,tests.size());
+	
+	// restore console
+	FlushConsoleInputBuffer(hstdin);
+	SetConsoleTextAttribute(hstdout,csbi.wAttributes);
+
 	return successCount == tests.size();
 }

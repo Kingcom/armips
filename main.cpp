@@ -12,13 +12,12 @@ int wmain(int argc, wchar_t* argv[])
 	AssemblerArguments parameters;
 
 #ifdef ARMIPS_TESTS
-	if (argc < 2)
-	{
-		Logger::printLine("Not enough arguments");
-		return 1;
-	}
+	std::wstring name;
 
-	return !runTests(argv[1]);
+	if (argc < 2)
+		return !runTests(L"Tests");
+	else
+		return !runTests(argv[1]);
 #endif
 
 	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
