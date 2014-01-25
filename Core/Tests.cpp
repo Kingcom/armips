@@ -6,14 +6,14 @@
 #include "Assembler.h"
 #include <direct.h>
 
-StringList getTestsList(const std::wstring& dir)
+StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/")
 {
 	StringList tests;
 
 	WIN32_FIND_DATA findFileData;
 	HANDLE hFind;
 
-	std::wstring m = dir + L"/*";
+	std::wstring m = dir + prefix + L"*";
 	hFind = FindFirstFile(m.c_str(),&findFileData);
 	if (hFind != INVALID_HANDLE_VALUE) 
 	{
@@ -23,7 +23,20 @@ StringList getTestsList(const std::wstring& dir)
 			{
 				std::wstring dirName = findFileData.cFileName;
 				if (dirName != L"." && dirName != L"..")
-					tests.push_back(dirName);
+				{
+					std::wstring testName = prefix + dirName;
+					std::wstring fileName = dir + testName + L"/" + dirName + L".asm";
+
+					if (fileExists(fileName))
+					{
+						if (testName[0] == L'/')
+							testName.erase(0,1);
+						tests.push_back(testName);
+					} else {
+						StringList subTests = getTestsList(dir,testName+L"/");
+						tests.insert(tests.end(),subTests.begin(),subTests.end());
+					}
+				}
 			}
 		} while (FindNextFile(hFind,&findFileData));
 	}
@@ -133,7 +146,9 @@ bool runTests(const std::wstring& dir)
 		std::wstring path = dir + L"/" + tests[i];
 		std::string errors;
 
-		if (executeTest(path,tests[i],errors) == false)
+		int n = tests[i].find_last_of('/');
+		std::wstring testName = n == tests[i].npos ? tests[i] : tests[i].substr(n+1);
+		if (executeTest(path,testName,errors) == false)
 		{
 			SetConsoleTextAttribute(hstdout,(1 << 2) | (1 << 3));
 			printf("FAILED\n");
