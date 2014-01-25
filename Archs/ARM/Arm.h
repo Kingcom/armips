@@ -36,6 +36,7 @@ public:
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };
+	bool isArm9() { return arm9; };
 	int NewPool() { return PoolCount++; };
 	ArmPool& GetPool(int num) { return Pools[num]; };
 	int AddToCurrentPool(int value);

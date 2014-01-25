@@ -480,6 +480,9 @@ bool CArmInstruction::Load(char *Name, char *Params)
 
 	for (int z = 0; ArmOpcodes[z].name != NULL; z++)
 	{
+		if ((ArmOpcodes[z].flags & ARM_ARM9) && !Arm.isArm9())
+			continue;
+
 		if (ParseOpcode((char*)ArmOpcodes[z].name,Name) == true)
 		{
 			if (LoadEncoding(ArmOpcodes[z],Params) == true)

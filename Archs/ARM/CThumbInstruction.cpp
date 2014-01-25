@@ -19,6 +19,9 @@ bool CThumbInstruction::Load(char *Name, char *Params)
 
 	for (int z = 0; ThumbOpcodes[z].name != NULL; z++)
 	{
+		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && !Arm.isArm9())
+			continue;
+
 		if (strcmp(Name,ThumbOpcodes[z].name) == 0)
 		{
 			if (LoadEncoding(ThumbOpcodes[z],Params) == true)
