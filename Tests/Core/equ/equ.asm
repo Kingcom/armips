@@ -6,7 +6,7 @@ EQUTEST equ "test"
 ; check if only whole words are replaced
 OTHEREQUTEST equ ".test"
 
-.ascii ' ',EQUTEST,'!'
-.ascii OTHERQUTEST
+.ascii 0x20,EQUTEST,0x21
+.ascii OTHEREQUTEST
 
 .close

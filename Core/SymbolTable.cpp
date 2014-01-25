@@ -124,7 +124,7 @@ bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 	character = towlower(character);
 	if (character >= 'a' && character <= 'z') return true;
 	if (!first && character >= '0' && character <= '9') return true;
-	if (character == '_') return true;
+	if (character == '_' || character == '.') return true;
 	return false;
 }
 
@@ -147,50 +147,45 @@ bool SymbolTable::addEquation(const std::wstring& name, int file, int section, s
 	return true;
 }
 
-// TODO: don't insert if equation matches only the end of a word
 std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, int section)
 {
 	std::wstring result;
 
-	int pos = 0;
-	while (pos < (int)line.size())
+	size_t pos = 0;
+	while (pos < line.size())
 	{
+		if (!isValidSymbolCharacter(line[pos]))
+		{
+			result += line[pos++];
+			continue;
+		}
+
+		size_t start = pos++;
+		while (isValidSymbolCharacter(line[pos]) && pos < line.size())
+			pos++;
+
+		std::wstring word = line.substr(start,pos-start);
+		bool found = false;
 		for (size_t i = 0; i < equations.size(); i++)
 		{
 			const Equation& eq = equations.at(i);
 			if ((eq.file == -1 || eq.file == file) &&
 				(eq.section == -1 || eq.section == section))
 			{
-				size_t size = eq.key.size();
-				if (pos+size > (int)line.size())
+				if (eq.key.size() != word.size())
 					continue;
 
-				bool valid = true;
-				for (size_t k = 0; k < size; k++)
-				{
-					if (eq.key[k] != line[pos+k])
-					{
-						valid = false;
-						break;
-					}
-				}
-
-				if (!valid)
+				if (eq.key != word)
 					continue;
-
-				wchar_t cc = line[pos+size];
-				if ((cc >= 'a' && cc <= 'z') || (cc <= '9' && cc >= '0'))
-					continue;
-
+				
 				result += eq.value;
-				pos += size;
+				found = true;
 				break;
 			}
 		}
 
-		if (pos == (int)line.size())
-			break;
-		result += line[pos++];
+		if (!found)
+			result += word;
 	}
 
 	return result;
