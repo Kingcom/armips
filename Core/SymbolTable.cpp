@@ -154,13 +154,15 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 	size_t pos = 0;
 	while (pos < line.size())
 	{
-		if (!isValidSymbolCharacter(line[pos]))
+		if (line[pos] != '@' && !isValidSymbolCharacter(line[pos]))
 		{
 			result += line[pos++];
 			continue;
 		}
 
 		size_t start = pos++;
+		while (line[pos] == '@' && pos < line.size())
+			pos++;
 		while (isValidSymbolCharacter(line[pos]) && pos < line.size())
 			pos++;
 
@@ -189,23 +191,6 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, in
 	}
 
 	return result;
-}
-
-void SymbolTable::writeSymFile(const std::string &fileName)
-{
-	TextFile output;
-	if (output.open(convertUtf8ToWString(fileName.c_str()),TextFile::Write) == false)
-		return;
-
-	output.writeLine("00000000 0");
-	for (size_t i = 0; i < labels.size(); i++)
-	{
-		std::wstring line = formatString(L"%08X %s",labels[i]->getValue(),labels[i]->getName().c_str());
-		output.writeLine(line);
-	}
-
-	output.write(L"\x1A");	// write eof character
-	output.close();
 }
 
 // TODO: better
