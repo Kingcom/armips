@@ -329,6 +329,8 @@ const tMipsMacro MipsMacros[] = {
 	{ "li.u",	"s,I",		2,	&MipsMacroLi,				MIPSM_IMM|MIPSM_UPPER },
 	{ "li.l",	"s,I",		2,	&MipsMacroLi,				MIPSM_IMM|MIPSM_LOWER },
 	{ "la",		"s,I",		2,	&MipsMacroLi,				MIPSM_IMM },
+	{ "la.u",	"s,I",		2,	&MipsMacroLi,				MIPSM_IMM|MIPSM_UPPER },
+	{ "la.l",	"s,I",		2,	&MipsMacroLi,				MIPSM_IMM|MIPSM_LOWER },
 
 	{ "lb",		"s,I",		2,	&MipsMacroLoad,				MIPSM_B|MIPSM_UPPER|MIPSM_LOWER },
 	{ "lbu",	"s,I",		2,	&MipsMacroLoad,				MIPSM_BU|MIPSM_UPPER|MIPSM_LOWER },

@@ -1,34 +1,37 @@
-ARMIPS assembler v0.7d, released April 1 2013
+ARMIPS assembler v0.8, released whenever
 by Kingcom
+https://github.com/Kingcom/armips
 http://aerie.wingdreams.net/
 
 #################################
 # 0.   TABLE OF CONTENTS        #
 #################################
 
-  1.   Introduction
-   1.1 Motivation
-   1.2 Usage
-   1.3 Change log
-  2.   General Information
-  3.   Features
-   3.1 Files
-   3.2 Comments
-   3.3 Labels
-   3.4 equ
-   3.5 Math Parser
-   3.6 Load delay detection
-   3.7 Strings
-   3.8 Areas
-  4.   Assembler Directives
-   4.1 General Directives
-   4.2 MIPS Directives
-   4.3 ARM Directives
-  5.   Macros
-   5.1 Assembler-defined MIPS macros
-   5.2 Assembler-defined ARM macros
-   5.3 User defined macros
-  6.   Known issues
+  1.    Introduction
+   1.1  Motivation
+   1.2  Usage
+   1.3  Change log
+  2.    General Information
+  3.    Features
+   3.1  Files
+   3.2  Comments
+   3.3  Labels
+   3.4  equ
+   3.5  Math Parser
+   3.6  Load delay detection
+   3.7  Strings
+   3.8  Areas
+   3.9  Symbol files
+   3.10 C/C++ importer
+  4.    Assembler Directives
+   4.1  General Directives
+   4.2  MIPS Directives
+   4.3  ARM Directives
+  5.    Macros
+   5.1  Assembler-defined MIPS macros
+   5.2  Assembler-defined ARM macros
+   5.3  User defined macros
+  6.    Known issues
 
 
 #################################
@@ -86,7 +89,14 @@ details.
 
 1.3  Change log
 
-  0.7e -added .sym directive
+  0.8  -huge rewrite with many enhancements and fixes
+       -can now read from UTF8, UTF16, and Shift-JIS files
+        and convert the input correctly
+       -PSP support, load ELFs with .loadelf
+       -able to import and relocate static C/C++ libraries
+       -new -sym2 format for use with PPSSPP
+       -new directives: .sym, .stringn, .sjis, .sjisn,
+        .function, .endfunction, .importlib, .loadelf
   0.7d -added automatic optimizations for several ARM opcodes
        -many bugfixes and internal changes
        -added static labels
@@ -362,6 +372,19 @@ assemble without problems:
 Here, the area is 32 bytes, which is sufficient for the 20
 bytes used by .word.
 
+Optionally, a second parameter can be given. The free size of
+the area will then be filled with bytes of that value.
+
+
+3.9  Symbol files
+
+Functions.
+
+
+3.10 C/C++ importer
+
+Linker.
+
 
 #################################
 # 4.    ASSEMBLER DIRECTIVES    #
@@ -377,6 +400,11 @@ file.
 .psx
 
 Sets the architecture to PSX.
+
+
+.psp
+
+Sets the architecture to PSP.
 
 
 .gba
@@ -398,12 +426,14 @@ but it can switch to THUMB at any time.
 
 Opens the specified file for output. If two file names
 are specified, then the assembler will copy the first
-file to the second path. All paths are relative to the
-current working directory, so from where the assembler
-was called. RamAddress specifies the difference between
-the first byte of the file and its position in RAM.
-So if file position 0x800 is at position 0x80010000 in
-RAM, the header size is 0x80010000-0x800=0x8000F800.
+file to the second path. If relative include is off, all
+paths are relative to the current working directory, so
+from where the assembler was called. Otherwise the path is
+relative to the including assembly file. RamAddress
+specifies the difference between the first byte of the file
+and its position in RAM. So if file position 0x800 is at
+position 0x80010000 in RAM, the header size is
+0x80010000-0x800=0x8000F800.
 Only the changes specified by the assembly code will
 be inserted, the rest of the file remains untouched.
 
@@ -412,12 +442,13 @@ be inserted, the rest of the file remains untouched.
 .createfile FileName,RamAddress
 
 Creates the specified file for output. If the file already
-exists, it will be erased. All paths are relative to the
-current working directory, so from where the assembler was
-called. RamAddress specifies the difference between the
-first byte of the file and its position in RAM. So if file
-position 0x800 is at position 0x80010000 in RAM, the header
-size is 0x80010000-0x800=0x8000F800.
+exists, it will be erased. If relative include is off, all
+paths are relative to the current working directory, so from
+where the assembler was called. Otherwise the path is relative
+to the including assembly file. RamAddress specifies the
+difference between the first byte of the file and its position
+in RAM. So if file position 0x800 is at position 0x80010000 in
+RAM, the header size is 0x80010000-0x800=0x8000F800.
 
 
 .close
@@ -447,22 +478,39 @@ Sets the output pointer to the specified address. The
 absolute file address is given.
 
 
-.include FileName
+.include FileName[,encoding]
 
-Opens the file called FileName to assemble it. All paths
-are relative to the current working directory, so from
-where the assembler was called. You can include other
-files up to a depth level of 64. This limit was added
-to prevent the assembler from crashing due to two files
+Opens the file called FileName to assemble it. If relative
+include is off, all paths are relative to the current working
+directory, so from where the assembler was called. Otherwise
+the path is relative to the including assembly file. You can
+include other files up to a depth level of 64. This limit was
+added to prevent the assembler from crashing due to two files
 including each other over and over again.
+The encoding of the included file will be automatically
+detected if possible. However, this only works for files
+encoded as UTF8 or UTF16 that have a byte order mark. If the
+file is in another encoding, it must be manually specified as
+the second parameter. This is the list of supported values
+
+  SJIS,Shift-JIS
+  UTF8,UTF-8
+  UTF16,UTF-16,UTF16-BE,UTF-16-BE
+  ASCII
 
 
-.incbin FileName
-.import FileName
+.incbin FileName[,start[,size]]
+.import FileName[,start[,size]]
 
 Inserts the file specified by FileName into the currently
-opened output file. All paths are relative to the current
-working directory, so from where the assembler was called.
+opened output file. If relative include is off, all paths
+are relative to the current working directory, so from
+where the assembler was called. Otherwise the path is
+relative to the including assembly file.
+Optionally, start can specify the start address from where
+the file should be imported, and size can specify the
+number of bytes to read. With this parts of files can be
+imported.
 
 
 .align [num]
@@ -470,6 +518,13 @@ working directory, so from where the assembler was called.
 Writes zeroes into the output file until the output
 position is divisible by num. If num is not given,
 4 will be used by default. num has to be a power of two. 
+
+
+.radix base
+
+Sets the default base of numbers if no other prefix or
+suffix is given. Valid values are 2, 8, 10, and 16. The
+default base is 10.
 
 
 .fill length[,value]
@@ -485,7 +540,7 @@ value are inserted.
 .ascii value[,...]
 dcb value[,...]
 
-Inserts up to 128 bytes specified by the arguments. Value
+Inserts any number of bytes specified by the arguments. Value
 can be any equation, but only the lowest 8 bits are inserted.
 Value can also be a string in quotation marks.
 
@@ -494,19 +549,19 @@ Value can also be a string in quotation marks.
 .dh value[,...]
 dcw value[,...]
 
-Inserts up to 128 halfwords specified by the arguments. Value
-can be any equation, but only the lowest 16 bits are inserted.
-Value can also be a string in quotation marks, in that case,
-every letter is inserted as a halfword.
+Inserts any number of  halfwords specified by the arguments.
+Value can be any equation, but only the lowest 16 bits are
+inserted. Value can also be a string in quotation marks, in
+that case, every letter is inserted as a halfword.
 
 
 .word value[,...]
 .dw value[,...]
 dcd value[,...]
 
-Inserts up to 128 words specified by the arguments. Value can
-be any equation. Value can also be a string in quotation marks,
-in that case, every letter is inserted as a word.
+Inserts any number of words specified by the arguments. Value
+can be any equation. Value can also be a string in quotation
+marks, in that case, every letter is inserted as a word.
 
 
 .if equation
@@ -584,6 +639,28 @@ given, zero is used instead.
 .str "String"
 
 Inserts the given string using the previously opened table.
+The previously specified termination sequence is appended
+at the end.
+
+
+.stringn "String"
+.strn "String"
+
+Inserts the given string using the previously opened table.
+This directive does not append the termination sequence
+at the end.
+
+
+.sjis "String"
+
+Inserts the given string using the Shift-JIS encoding.
+A null byte is appended after the string.
+
+
+.sjisn "String"
+
+Inserts the given string using the Shift-JIS encoding.
+This directive does not append the null byte at the end.
 
 
 .definelabel Label,value
@@ -593,12 +670,14 @@ but you don't have to use this before using the label. It will also
 be added to the sym output.
 
 
-.area SizeEquation
+.area SizeEquation[,value]
 
 Opens a new area with the maximum size of SizeEquation. If the
 data inside the area is bigger than the maximum, the assembler
 will output an error and refuse to assemble the code. It has to
 be closed by a .endarea directive.
+If value is given, the free space of the area will be filled
+with bytes of that value.
 
 
 .endarea
@@ -639,9 +718,38 @@ If set to on, a warning will be treated as an error and prevent
 successful assembling. It defaults to off.
 
 
+.importlib name[,ctorname]
+.importobj name[,ctorname]
+
+Imports the static C/C++ libary or object file name and relocates
+it to the current position. If relative include is off, all paths
+are relative to the current working directory, so from where the
+assembler was called. Otherwise the path is relative to the
+including assembly file.
+If ctorname is given, a global constructor stub with that name
+will be created. For more details about importing libraries,
+see section 3.10.
+
+
 .sym on/off
 
 Enables/disables sym output.
+
+
+.function funcname
+.func funcname
+
+Starts a new function with the name funcname. Funcname is also
+registered as a label. Starting a function without closing
+the previous one will implicitly close it. See section 3.9
+for more about functions.
+
+
+.endfunction
+.endfunc
+
+Closes the currently open function. See section 3.9 for more
+about functions.
 
 
 4.2  MIPS Directives
@@ -658,6 +766,23 @@ as the assembler can't detect that yet.
 Automatically fixes any load delay problems by inserting a
 nop between the instructions. Best used in combination with
 .resetdelay.
+
+
+.loadelf name[,outputname]
+
+Opens the specified ELF file for output. If two file names
+are specified, then the assembler will copy the first
+file to the second path. If relative include is off, all
+paths are relative to the current working directory, so
+from where the assembler was called. Otherwise the path is
+relative to the including assembly file. All segments are
+accessible by their virtual addresses, and all unmapped
+sections can be accessed by their physical position
+(through .orga).
+Currently this is only supported for the PSP architecture,
+and only for non-relocateable files. The internal structure
+of the file may be changed during the process, but this
+should not affect its behavior.
 
 
 4.3  ARM Directives
@@ -800,6 +925,26 @@ At the moment, these are all the MIPS macros included:
 
    Rotates reg2 left/right by Imm and stores the result in
    reg1. A combination of sll, srl and or is used.
+
+
+Additionally, there are upper and lower versions for many
+two opcode macros. They have the same names and parameters
+as the normal versions, but .u or .t is appended at the end
+of the name.
+For example, li.u will output the upper half of the li macro,
+and li.l will output the lower half.
+The following macros support this:
+
+   li,la
+   lb,lbu,lhu,lw
+   sb,sh,sw
+
+This can be used when the two halves of the macros need to be
+used in nonconsesutive positions, for example:
+
+   li.u  a0,address
+   jal   function
+   li.l  a0,address
 
 
 5.2 Assembler-defined ARM macros
