@@ -533,6 +533,8 @@ bool CArmInstruction::Validate()
 	CStringList List;
 
 	RamPos = g_fileManager->getVirtualAddress();
+	g_fileManager->advanceMemory(4);
+
 	Vars.Opcode.UseNewEncoding = false;
 	Vars.Opcode.UseNewType = false;
 
@@ -759,7 +761,6 @@ bool CArmInstruction::Validate()
 		}
 	}
 
-	g_fileManager->advanceMemory(4);
 	return false;
 }
 

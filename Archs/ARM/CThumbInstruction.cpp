@@ -191,6 +191,7 @@ bool CThumbInstruction::Validate()
 {
 	CStringList List;
 	RamPos = g_fileManager->getVirtualAddress();
+	g_fileManager->advanceMemory(OpcodeSize);
 
 	if (RamPos & 1)
 	{
@@ -309,7 +310,6 @@ bool CThumbInstruction::Validate()
 		}
 	}
 
-	g_fileManager->advanceMemory(OpcodeSize);
 	return false;
 }
 
