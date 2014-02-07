@@ -274,7 +274,7 @@ bool CThumbInstruction::Validate()
 				Logger::queueError(Logger::Error,L"Unable to find literal pool");
 				return false;
 			}
-			pos = pos-((g_fileManager->getVirtualAddress()+4) & 0xFFFFFFFD);
+			pos = pos-((RamPos+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
 				Logger::queueError(Logger::Error,L"Literal pool out of range");
@@ -290,7 +290,7 @@ bool CThumbInstruction::Validate()
 				return false;
 			}
 
-			int pos = Vars.Immediate-((g_fileManager->getVirtualAddress()+4) & 0xFFFFFFFD);
+			int pos = Vars.Immediate-((RamPos+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
 				Logger::queueError(Logger::Error,L"PC relative address out of range");

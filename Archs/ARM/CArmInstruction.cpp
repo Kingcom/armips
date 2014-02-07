@@ -649,7 +649,7 @@ bool CArmInstruction::Validate()
 
 			if (Opcode.flags & ARM_PCR)
 			{
-				Vars.Immediate = Vars.Immediate - ((g_fileManager->getVirtualAddress()+8) & ~3);
+				Vars.Immediate = Vars.Immediate - ((RamPos+8) & ~3);
 				if (Vars.Immediate < 0)
 				{
 					Vars.Opcode.NewEncoding = Opcode.encoding ^ 0xC00000;
@@ -698,7 +698,7 @@ bool CArmInstruction::Validate()
 				Logger::queueError(Logger::Error,L"Unable to find literal pool");
 				return false;
 			} else {
-				pos = pos-((g_fileManager->getVirtualAddress()+8) & 0xFFFFFFFD);
+				pos = pos-((RamPos+8) & 0xFFFFFFFD);
 				if (abs(pos) > 4095)
 				{
 					Logger::queueError(Logger::Error,L"Literal pool out of range");
