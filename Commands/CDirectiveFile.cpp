@@ -54,7 +54,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		if (fileExists(originalName) == false)
 		{
-			Logger::printError(Logger::FatalError,L"File %s not found",fileName.c_str());
+			Logger::printError(Logger::FatalError,L"File %s not found",originalName.c_str());
 			return;
 		}
 		if (ConvertExpression(args[2].text,virtualAddress) == false)
@@ -279,7 +279,7 @@ void CDirectiveIncbin::writeSymData(SymbolData& symData)
 
 CDirectiveAlign::CDirectiveAlign(ArgumentList& args)
 {
-	if (args.size() == 1)
+	if (args.size() >= 1)
 	{
 		if (ConvertExpression(args[0].text,alignment) == false)
 		{
