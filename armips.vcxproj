@@ -125,9 +125,9 @@
     <ClInclude Include="Archs\MIPS\CMipsInstruction.h" />
     <ClInclude Include="Archs\MIPS\CMipsMacro.h" />
     <ClInclude Include="Archs\MIPS\Mips.h" />
+    <ClInclude Include="Archs\MIPS\MipsElfFile.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
-    <ClInclude Include="Archs\MIPS\PspFile.h" />
     <ClInclude Include="Archs\Z80\CZ80Instruction.h" />
     <ClInclude Include="Archs\Z80\z80.h" />
     <ClInclude Include="Archs\Z80\z80Opcodes.h" />
@@ -171,9 +171,9 @@
     <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp" />
     <ClCompile Include="Archs\MIPS\CMipsMacro.cpp" />
     <ClCompile Include="Archs\MIPS\Mips.cpp" />
+    <ClCompile Include="Archs\MIPS\MipsElfFile.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
-    <ClCompile Include="Archs\MIPS\PspFile.cpp" />
     <ClCompile Include="Archs\Z80\CZ80Instruction.cpp" />
     <ClCompile Include="Archs\Z80\z80.cpp" />
     <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />

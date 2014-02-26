@@ -3,11 +3,12 @@
 #include "Core/FileManager.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
+#include "Mips.h"
 
-class PspElfFile: public AssemblerFile
+class MipsElfFile: public AssemblerFile
 {
 public:
-	PspElfFile();
+	MipsElfFile();
 	virtual bool open(bool onlyCheck);
 	virtual void close();
 	virtual bool isOpen() { return opened; };
@@ -26,6 +27,7 @@ private:
 	std::wstring fileName;
 	std::wstring outputFileName;
 	bool opened;
+	int platform;
 
 	int segment;
 	int section;
@@ -33,16 +35,16 @@ private:
 };
 
 
-class DirectiveLoadPspElf: public CAssemblerCommand
+class DirectiveLoadMipsElf: public CAssemblerCommand
 {
 public:
-	DirectiveLoadPspElf(ArgumentList& args);
+	DirectiveLoadMipsElf(ArgumentList& args);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData) { };
 private:
-	PspElfFile* file;
+	MipsElfFile* file;
 	std::wstring inputName;
 	std::wstring outputName;
 };

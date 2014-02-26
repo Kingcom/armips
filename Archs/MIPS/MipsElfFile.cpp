@@ -1,23 +1,24 @@
 #include "stdafx.h"
-#include "PspFile.h"
+#include "MipsElfFile.h"
 #include "Core/Misc.h"
 #include "Core/Common.h"
 #include "Util/CRC.h"
 
-PspElfFile::PspElfFile()
+MipsElfFile::MipsElfFile()
 {
+	platform = Mips.GetVersion();
 	section = segment = -1;
 	opened = false;
 }
 
-bool PspElfFile::open(bool onlyCheck)
+bool MipsElfFile::open(bool onlyCheck)
 {
 	opened = !onlyCheck;
 	Global.symData.startModule(this);
 	return true;
 }
 
-void PspElfFile::close()
+void MipsElfFile::close()
 {
 	if (isOpen())
 		save();
@@ -25,7 +26,7 @@ void PspElfFile::close()
 	Global.symData.endModule(this);
 }
 
-size_t PspElfFile::getVirtualAddress()
+size_t MipsElfFile::getVirtualAddress()
 {
 	if (segment != -1)
 	{
@@ -40,7 +41,7 @@ size_t PspElfFile::getVirtualAddress()
 	return -1;
 }
 
-size_t PspElfFile::getPhysicalAddress()
+size_t MipsElfFile::getPhysicalAddress()
 {
 	if (segment != -1)
 	{
@@ -60,7 +61,7 @@ size_t PspElfFile::getPhysicalAddress()
 	return -1;
 }
 
-bool PspElfFile::seekVirtual(size_t virtualAddress)
+bool MipsElfFile::seekVirtual(size_t virtualAddress)
 {
 	// search in segments
 	for (int i = 0; i < elf.getSegmentCount(); i++)
@@ -97,7 +98,7 @@ bool PspElfFile::seekVirtual(size_t virtualAddress)
 	return false;
 }
 
-bool PspElfFile::seekPhysical(size_t physicalAddress)
+bool MipsElfFile::seekPhysical(size_t physicalAddress)
 {
 	// search in segments
 	for (int i = 0; i < elf.getSegmentCount(); i++)
@@ -151,13 +152,13 @@ bool PspElfFile::seekPhysical(size_t physicalAddress)
 	return false;
 }
 
-bool PspElfFile::getModuleInfo(SymDataModuleInfo& info)
+bool MipsElfFile::getModuleInfo(SymDataModuleInfo& info)
 {
 	info.crc32 = getCrc32(elf.getFileData().data(),elf.getFileData().size());
 	return true;
 }
 
-bool PspElfFile::write(void* data, int length)
+bool MipsElfFile::write(void* data, int length)
 {
 	if (segment != -1)
 	{
@@ -180,7 +181,7 @@ bool PspElfFile::write(void* data, int length)
 	return false;
 }
 
-bool PspElfFile::load(const std::wstring& fileName, const std::wstring& outputFileName)
+bool MipsElfFile::load(const std::wstring& fileName, const std::wstring& outputFileName)
 {
 	this->outputFileName = outputFileName;
 
@@ -205,7 +206,7 @@ bool PspElfFile::load(const std::wstring& fileName, const std::wstring& outputFi
 	return true;
 }
 
-bool PspElfFile::setSection(const std::wstring& name)
+bool MipsElfFile::setSection(const std::wstring& name)
 {
 	std::string utf8Name = convertWStringToUtf8(name);
 
@@ -235,7 +236,7 @@ bool PspElfFile::setSection(const std::wstring& name)
 	return false;
 }
 
-void PspElfFile::save()
+void MipsElfFile::save()
 {
 	elf.save(outputFileName);
 }
@@ -244,9 +245,9 @@ void PspElfFile::save()
 // DirectiveLoadPspElf
 //
 
-DirectiveLoadPspElf::DirectiveLoadPspElf(ArgumentList& args)
+DirectiveLoadMipsElf::DirectiveLoadMipsElf(ArgumentList& args)
 {
-	file = new PspElfFile();
+	file = new MipsElfFile();
 
 	if (args.size() == 2)
 	{
@@ -271,19 +272,19 @@ DirectiveLoadPspElf::DirectiveLoadPspElf(ArgumentList& args)
 	g_fileManager->addFile(file);
 }
 
-bool DirectiveLoadPspElf::Validate()
+bool DirectiveLoadMipsElf::Validate()
 {
 	Arch->NextSection();
 	g_fileManager->openFile(file,true);
 	return false;
 }
 
-void DirectiveLoadPspElf::Encode()
+void DirectiveLoadMipsElf::Encode()
 {
 	g_fileManager->openFile(file,false);
 }
 
-void DirectiveLoadPspElf::writeTempData(TempData& tempData)
+void DirectiveLoadMipsElf::writeTempData(TempData& tempData)
 {
 	if (outputName.empty())
 	{

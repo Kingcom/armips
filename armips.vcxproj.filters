@@ -114,9 +114,6 @@
     <ClCompile Include="Util\CRC.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="Archs\MIPS\PspFile.cpp">
-      <Filter>Archs\MIPS</Filter>
-    </ClCompile>
     <ClCompile Include="Core\ELF\ElfFile.cpp">
       <Filter>Core\ELF</Filter>
     </ClCompile>
@@ -128,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="Core\Tests.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsElfFile.cpp">
+      <Filter>Archs\MIPS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,9 +243,6 @@
     <ClInclude Include="Util\CRC.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="Archs\MIPS\PspFile.h">
-      <Filter>Archs\MIPS</Filter>
-    </ClInclude>
     <ClInclude Include="Core\ELF\ElfFile.h">
       <Filter>Core\ELF</Filter>
     </ClInclude>
@@ -260,6 +257,9 @@
     </ClInclude>
     <ClInclude Include="Core\Tests.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsElfFile.h">
+      <Filter>Archs\MIPS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

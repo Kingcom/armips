@@ -102,6 +102,16 @@ void ElfSegment::addSection(ElfSection* section)
 
 void ElfSegment::writeData(ByteArray& output)
 {
+	if (sections.size() == 0)
+	{
+		output.alignSize(header.p_align);
+		if (header.p_offset == header.p_paddr)
+			header.p_paddr = output.size();
+
+		header.p_offset = output.size();
+		return;
+	}
+
 	// align segment to alignment of first section
 	int align = max(sections[0]->getAlignment(),16);
 	output.alignSize(align);
@@ -212,6 +222,8 @@ void ElfFile::determinePartOrder()
 		int start = segmentlessSections[i]->getOffset();
 		int end = start+segmentlessSections[i]->getSize();
 
+		if (start == 0 && end == 0)
+			continue;
 		if (start < firstSectionStart) firstSectionStart = start;
 		if (lastSectionEnd < end) lastSectionEnd = end;
 	}

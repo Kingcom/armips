@@ -5,7 +5,7 @@
 #include "MipsMacros.h"
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
-#include "PspFile.h"
+#include "MipsElfFile.h"
 #include "Core/ELF/ElfRelocator.h"
 
 CMipsArchitecture Mips;
@@ -203,7 +203,7 @@ bool MipsDirectiveFixLoadDelay(ArgumentList& List, int flags)
 
 bool MipsDirectiveLoadElf(ArgumentList& list, int flags)
 {
-	DirectiveLoadPspElf* command = new DirectiveLoadPspElf(list);
+	DirectiveLoadMipsElf* command = new DirectiveLoadMipsElf(list);
 	AddAssemblerCommand(command);
 	return true;
 }
