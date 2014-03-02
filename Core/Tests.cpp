@@ -6,6 +6,8 @@
 #include "Assembler.h"
 #include <direct.h>
 
+#ifdef _WIN32
+
 StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/")
 {
 	StringList tests;
@@ -169,3 +171,12 @@ bool runTests(const std::wstring& dir)
 
 	return successCount == tests.size();
 }
+
+#else
+
+bool runTests(const std::wstring& dir)
+{
+	return false;
+}
+
+#endif

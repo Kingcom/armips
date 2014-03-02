@@ -2,6 +2,7 @@
 #include "Commands/CDirectiveArea.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
+#include <algorithm>
 
 CDirectiveArea::CDirectiveArea()
 {
@@ -78,7 +79,7 @@ void CDirectiveArea::Encode()
 
 		while (Size > 0)
 		{
-			g_fileManager->write(buffer,min(64,Size));
+			g_fileManager->write(buffer,std::min<int>(64,Size));
 			Size -= 64;
 		}
 	}

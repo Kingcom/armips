@@ -12,5 +12,4 @@
 
 #ifdef _MSC_VER
 #include <windows.h>
-#define USE_WINDOWS_FUNCS
 #endif
