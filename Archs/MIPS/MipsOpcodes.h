@@ -1,6 +1,18 @@
 #pragma once
 #include "Mips.h"
 
+#define MA_MIPS1			0x0000001
+#define MA_MIPS2			0x0000002
+#define MA_MIPS3			0x0000004
+#define MA_MIPS4			0x0000008
+#define MA_PS2				0x0000010
+#define MA_PSP				0x0000020
+
+#define MA_EXPSX			0x0000100
+#define MA_EXN64			0x0000200
+#define MA_EXPS2			0x0000400
+#define MA_EXPSP			0x0000800
+
 #define MO_IPCA			0x00000001	// pc >> 2
 #define MO_IPCR			0x00000002	// PC, -> difference >> 2
 #define MO_RSD			0x00000004	// rs = rd
@@ -17,6 +29,8 @@
 #define MO_VFPU_SINGLE	0x00002000	// single vfpu reg
 #define MO_VFPU_QUAD	0x00004000	// quad vfpu reg
 #define MO_VFPU			0x00008000	// vfpu type opcode
+#define MO_64BIT		0x00010000	// only available on 64 bit cpus
+#define MO_FPU			0x00020000	// only available with an fpu
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) << (START)))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
@@ -42,13 +56,22 @@
 #define MIPS_VFPUSIZE(VALUE)			( (((VALUE) & 1) << 7) | (((VALUE) & 2) << 14) )
 #define MIPS_VFPU0(VALUE)				(MIPS_OP(0x18) | BITFIELD(23,3,(VALUE)))
 
+struct MipsArchDefinition
+{
+	char* name;
+	int supportSets;
+	int excludeMask;
+	int flags;
+};
+
+extern const MipsArchDefinition mipsArchs[];
 
 typedef struct {
 	char* name;
 	char* encoding;
 	int destencoding;
-	int ver:4;
-	int flags:28;
+	int archs;
+	int flags;
 } tMipsOpcode;
 
 extern const tMipsOpcode MipsOpcodes[];

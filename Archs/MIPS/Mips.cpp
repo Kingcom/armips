@@ -228,7 +228,7 @@ CMipsArchitecture::CMipsArchitecture()
 	LoadDelay = false;
 	LoadDelayRegister = 0;
 	DelaySlot = false;
-	Version = 0;
+	Version = MARCH_INVALID;
 }
 
 void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)

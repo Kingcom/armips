@@ -2,13 +2,7 @@
 #include "Util/CommonClasses.h"
 #include "Core/MathParser.h"
 
-#define MARCH_PSX			0x0000001
-#define MARCH_N64			0x0000002
-#define MARCH_PS2			0x0000004
-#define MARCH_PSP			0x0000008
-
-#define MARCH_LV2			MARCH_PS2|MARCH_PSP
-#define MARCH_ALL			MARCH_PSX|MARCH_PS2|MARCH_PSP
+enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_INVALID };
 
 enum {
 	R_MIPS_NONE,
@@ -44,8 +38,8 @@ public:
 	void SetIgnoreDelay(bool b) { IgnoreLoadDelay = b; };
 	void SetFixLoadDelay(bool b) { FixLoadDelay = b; };
 	bool GetFixLoadDelay() { return FixLoadDelay; };
-	void SetVersion(int v) { Version = v; };
-	int GetVersion() { return Version; };
+	void SetVersion(MipsArchType v) { Version = v; };
+	MipsArchType GetVersion() { return Version; };
 	bool GetDelaySlot() { return DelaySlot; };
 	void SetDelaySlot(bool b) {DelaySlot = b; };
 	bool hasLoadDelay() { return (Version & MARCH_PSX) != 0; };
@@ -55,7 +49,7 @@ private:
 	bool LoadDelay;
 	int LoadDelayRegister;
 	bool DelaySlot;
-	int Version;
+	MipsArchType Version;
 };
 
 typedef struct {

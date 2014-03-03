@@ -23,19 +23,27 @@ bool CMipsInstruction::Load(char* Name, char* Params)
 	bool paramfail = false;
 	NoCheckError = false;
 
+	const MipsArchDefinition& arch = mipsArchs[Mips.GetVersion()];
 	for (int z = 0; MipsOpcodes[z].name != NULL; z++)
 	{
-		if (MipsOpcodes[z].ver & Mips.GetVersion())
+		if ((MipsOpcodes[z].archs & arch.supportSets) == 0)
+			continue;
+		if ((MipsOpcodes[z].archs & arch.excludeMask) != 0)
+			continue;
+
+		if ((MipsOpcodes[z].flags & MO_64BIT) && !(arch.flags & MO_64BIT))
+			continue;
+		if ((MipsOpcodes[z].flags & MO_FPU) && !(arch.flags & MO_FPU))
+			continue;
+
+		if (parseOpcode(MipsOpcodes[z],Name) == true)
 		{
-			if (parseOpcode(MipsOpcodes[z],Name) == true)
+			if (LoadEncoding(MipsOpcodes[z],Params) == true)
 			{
-				if (LoadEncoding(MipsOpcodes[z],Params) == true)
-				{
-					Loaded = true;
-					return true;
-				}
-				paramfail = true;
+				Loaded = true;
+				return true;
 			}
+			paramfail = true;
 		}
 	}
 
@@ -45,7 +53,7 @@ bool CMipsInstruction::Load(char* Name, char* Params)
 		{
 			Logger::printError(Logger::Error,L"MIPS parameter failure \"%S\"",Params);
 		} else {
-			Logger::printError(Logger::Error,L"Invalid MIPS opcode \"%S\"",Name);
+			Logger::printError(Logger::Error,L"Invalid MIPS %S opcode \"%S\"",arch.name,Name);
 		}
 	}
 	return false;

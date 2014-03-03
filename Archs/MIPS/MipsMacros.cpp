@@ -251,7 +251,7 @@ int MipsMacroRotate(tMipsMacroValues& Values, int Flags, CMipsInstruction* Opcod
 	int OpcodeCount = 0;
 
 	// PSP has its own rotate opcodes, use those
-	if (Mips.GetVersion() & MARCH_PSP)
+	if (Mips.GetVersion() == MARCH_PSP)
 	{
 		if (Flags & MIPSM_IMM)
 		{
