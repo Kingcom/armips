@@ -82,6 +82,53 @@ const tMipsRegister MipsFloatRegister[] = {
 	{ "f31", 31, 3},	{ "$f31", 31, 4 }
 };
 
+const tMipsRegister MipsPs2Cop2FpRegister[] = {
+	{ "vf0", 0, 3},		{ "$vf0", 0, 4 },
+	{ "vf1", 1, 3},		{ "$vf1", 1, 4 },
+	{ "vf2", 2, 3},		{ "$vf2", 2, 4 },
+	{ "vf3", 3, 3},		{ "$vf3", 3, 4 },
+	{ "vf4", 4, 3},		{ "$vf4", 4, 4 },
+	{ "vf5", 5, 3},		{ "$vf5", 5, 4 },
+	{ "vf6", 6, 3},		{ "$vf6", 6, 4 },
+	{ "vf7", 7, 3},		{ "$vf7", 7, 4 },
+	{ "vf8", 8, 3},		{ "$vf8", 8, 4 },
+	{ "vf9", 9, 3},		{ "$vf9", 9, 4 },
+	{ "vf00", 0, 4},	{ "$vf00", 0, 5 },
+	{ "vf01", 1, 4},	{ "$vf01", 1, 5 },
+	{ "vf02", 2, 4},	{ "$vf02", 2, 5 },
+	{ "vf03", 3, 4},	{ "$vf03", 3, 5 },
+	{ "vf04", 4, 4},	{ "$vf04", 4, 5 },
+	{ "vf05", 5, 4},	{ "$vf05", 5, 5 },
+	{ "vf06", 6, 4},	{ "$vf06", 6, 5 },
+	{ "vf07", 7, 4},	{ "$vf07", 7, 5 },
+	{ "vf08", 8, 4},	{ "$vf08", 8, 5 },
+	{ "vf09", 9, 4},	{ "$vf09", 9, 5 },
+	{ "vf10", 10, 4},	{ "$vf10", 10, 5 },
+	{ "vf11", 11, 4},	{ "$vf11", 11, 5 },
+	{ "vf12", 12, 4},	{ "$vf12", 12, 5 },
+	{ "vf13", 13, 4},	{ "$vf13", 13, 5 },
+	{ "vf14", 14, 4},	{ "$vf14", 14, 5 },
+	{ "vf15", 15, 4},	{ "$vf15", 15, 5 },
+	{ "vf16", 16, 4},	{ "$vf16", 16, 5 },
+	{ "vf17", 17, 4},	{ "$vf17", 17, 5 },
+	{ "vf18", 18, 4},	{ "$vf18", 18, 5 },
+	{ "vf19", 19, 4},	{ "$vf19", 19, 5 },
+	{ "vf20", 20, 4},	{ "$vf20", 20, 5 },
+	{ "vf21", 21, 4},	{ "$vf21", 21, 5 },
+	{ "vf22", 22, 4},	{ "$vf22", 22, 5 },
+	{ "vf23", 23, 4},	{ "$vf23", 23, 5 },
+	{ "vf24", 24, 4},	{ "$vf24", 24, 5 },
+	{ "vf25", 25, 4},	{ "$vf25", 25, 5 },
+	{ "vf26", 26, 4},	{ "$vf26", 26, 5 },
+	{ "vf27", 27, 4},	{ "$vf27", 27, 5 },
+	{ "vf28", 28, 4},	{ "$vf28", 28, 5 },
+	{ "vf29", 29, 4},	{ "$vf29", 29, 5 },
+	{ "vf30", 30, 4},	{ "$vf30", 30, 5 },
+	{ "vf31", 31, 4},	{ "$vf31", 31, 5 }
+};
+
+
+
 class MipsElfRelocator: public IElfRelocator
 {
 public:
@@ -332,6 +379,27 @@ bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
 				memcpy(Result.name,source,len);
 				Result.name[len] = 0;
 				Result.num = MipsFloatRegister[z].num;
+				RetLen = len;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool MipsGetPs2VectorRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
+{
+	for (int z = 0; MipsPs2Cop2FpRegister[z].name != NULL; z++)
+	{
+		int len = MipsPs2Cop2FpRegister[z].len;
+		if (strncmp(MipsPs2Cop2FpRegister[z].name,source,len) == 0)	// okay so far
+		{
+			if (source[len] == ',' || source[len] == '\n'  || source[len] == 0
+				|| source[len] == ')'  || source[len] == '(' || source[len] == '-')	// one of these has to come after a register
+			{
+				memcpy(Result.name,source,len);
+				Result.name[len] = 0;
+				Result.num = MipsPs2Cop2FpRegister[z].num;
 				RetLen = len;
 				return true;
 			}

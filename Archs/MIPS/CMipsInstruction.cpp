@@ -163,7 +163,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 				Line += RetLen;
 				SourceEncoding++;
 				break;
-			case 'v':	// vfpu vector register
+			case 'v':	// psp vfpu vector register
 				switch (*(SourceEncoding+1))
 				{
 				case 's':
@@ -185,6 +185,26 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 					return false;
 				}
 				Line += 4;
+				SourceEncoding += 2;
+				break;
+			case 'V':	// ps2 vector registers
+				switch (*(SourceEncoding+1))
+				{
+				case 's':
+					if (MipsGetPs2VectorRegister(Line,RetLen,registers.ps2vrs) == false) return false;
+					Line += RetLen;
+					break;
+				case 't':
+					if (MipsGetPs2VectorRegister(Line,RetLen,registers.ps2vrt) == false) return false;
+					Line += RetLen;
+					break;
+				case 'd':
+					if (MipsGetPs2VectorRegister(Line,RetLen,registers.ps2vrd) == false) return false;
+					Line += RetLen;
+					break;
+				default:
+					return false;
+				}
 				SourceEncoding += 2;
 				break;
 			case 'a':	// 5 bit immediate
@@ -328,6 +348,21 @@ void CMipsInstruction::formatParameters(char* dest)
 				break;
 			case 't':
 				dest += sprintf(dest,"%s",registers.vrt.name);
+				break;
+			}
+			encoding += 2;
+			break;
+		case 'V':
+			switch (*(encoding+1))
+			{
+			case 'd':
+				dest += sprintf(dest,"%s",registers.ps2vrd.name);
+				break;
+			case 's':
+				dest += sprintf(dest,"%s",registers.ps2vrs.name);
+				break;
+			case 't':
+				dest += sprintf(dest,"%s",registers.ps2vrt.name);
 				break;
 			}
 			encoding += 2;
@@ -494,6 +529,10 @@ void CMipsInstruction::encodeNormal()
 	if (registers.frt.num != -1) encoding |= (registers.frt.num << 16);	// float target reg
 	if (registers.frs.num != -1) encoding |= (registers.frs.num << 21);	// float source reg
 	if (registers.frd.num != -1) encoding |= (registers.frd.num << 6);	// float dest reg
+	
+	if (registers.ps2vrt.num != -1) encoding |= (registers.ps2vrt.num << 16);	// ps2 vector target reg
+	if (registers.ps2vrs.num != -1) encoding |= (registers.ps2vrs.num << 21);	// ps2 vector source reg
+	if (registers.ps2vrd.num != -1) encoding |= (registers.ps2vrd.num << 6);	// ps2 vector dest reg
 
 	switch (immediateType)
 	{

@@ -25,7 +25,7 @@ const tMipsOpcode MipsOpcodes[] = {
 // 000 | *1    | *2    | J     | JAL   | BEQ   | BNE   | BLEZ  | BGTZ  | 00..07
 // 001 | ADDI  | ADDIU | SLTI  | SLTIU | ANDI  | ORI   | XORI  | LUI   | 08..0F
 // 010 | *3    | *4    | ---   | ---   | BEQL  | BNEL  | BLEZL | BGTZL | 10..17
-// 011 | DADDI | DADDIU| LDL   | LDR   | ---   | ---   | ---   | ---   | 18..1F
+// 011 | DADDI | DADDIU| LDL   | LDR   | ---   | ---   | LQ    | SQ   | 18..1F
 // 100 | LB    | LH    | LWL   | LW    | LBU   | LHU   | LWR   | LWU   | 20..27
 // 101 | SB    | SH    | SWL   | SW    | SDL   | SDR   | SWR   | CACHE | 28..2F
 // 110 | LL    | LWC1  | LV.S  | ---   | LLD   | ULV.Q | LV.Q  | LD    | 30..37
@@ -70,6 +70,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "ldl",	"t,(s)",		MIPS_OP(0x1A),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "ldr",	"t,i(s)",		MIPS_OP(0x1B),			MA_MIPS3,	MO_64BIT|MO_DELAYRT|MO_IGNORERTD },
 	{ "ldr",	"t,(s)",		MIPS_OP(0x1B),			MA_MIPS3,	MO_64BIT|MO_DELAYRT|MO_IGNORERTD },
+	{ "lq",		"t,i(s)",		MIPS_OP(0x1E),			MA_MIPS1,	MO_DELAYRT },
+	{ "sq",		"t,i(s)",		MIPS_OP(0x1F),			MA_MIPS1,	MO_DELAYRT },
 	{ "lb",		"t,i(s)",		MIPS_OP(0x20),			MA_MIPS1,	MO_DELAYRT },
 	{ "lb",		"t,(s)",		MIPS_OP(0x20),			MA_MIPS1,	MO_DELAYRT },
 	{ "lh",		"t,i(s)",		MIPS_OP(0x21),			MA_MIPS1,	MO_DELAYRT },
@@ -100,6 +102,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "sdr",	"t,(s)",		MIPS_OP(0x2D),			MA_MIPS3,	MO_64BIT|MO_DELAYRT|MO_IGNORERTD },
 	{ "swr",	"t,i(s)",		MIPS_OP(0x2E),			MA_MIPS1,	0 },
 	{ "swr",	"t,(s)",		MIPS_OP(0x2E),			MA_MIPS1,	0 },
+	{ "cache",	"t,i(s)",		MIPS_OP(0x2F),			MA_PS2,		0 },
 	{ "ll",		"t,i(s)",		MIPS_OP(0x30),			MA_MIPS2,	MO_DELAYRT },
 	{ "ll",		"t,(s)",		MIPS_OP(0x30),			MA_MIPS2,	MO_DELAYRT },
 	{ "lwc1",	"T,i(s)",		MIPS_OP(0x31),			MA_MIPS1,	0 },
@@ -116,6 +119,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "lvr.q",	"vt,(s)",		MIPS_OP(0x35)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
 	{ "lv.q",	"vt,i(s)",		MIPS_OP(0x36),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
 	{ "lv.q",	"vt,(s)",		MIPS_OP(0x36),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "lqc2",	"Vt,i(s)",		MIPS_OP(0x36),			MA_PS2,		MO_DELAYRT },
 	{ "ld",		"t,i(s)",		MIPS_OP(0x37),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "ld",		"t,(s)",		MIPS_OP(0x37),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "sc",		"t,i(s)",		MIPS_OP(0x38),			MA_MIPS2,	0 },
@@ -136,6 +140,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "sv.q",	"vt,(s)",		MIPS_OP(0x3E),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
 	{ "sv.q",	"vt,i(s),/w/b",	MIPS_OP(0x3E)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
 	{ "sv.q",	"vt,(s),/w/b",	MIPS_OP(0x3E)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "sqc2",	"Vt,i(s)",		MIPS_OP(0x3E),			MA_PS2,		MO_DELAYRT },
 	{ "sd",		"t,i(s)",		MIPS_OP(0x3F),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "sd",		"t,(s)",		MIPS_OP(0x3F),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 
@@ -176,8 +181,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "jr",		"s",		MIPS_SPECIAL(0x08),				MA_MIPS1,	MO_DELAY|MO_NODELAYSLOT },
 	{ "jalr",	"s,d",		MIPS_SPECIAL(0x09),				MA_MIPS1,	MO_DELAY|MO_NODELAYSLOT },
 	{ "jalr",	"s",		MIPS_SPECIAL(0x09)|MIPS_RD(31),	MA_MIPS1,	MO_DELAY|MO_NODELAYSLOT },
-	{ "movz",	"d,s,t",	MIPS_SPECIAL(0x0A),				MA_MIPS4,	0 },
-	{ "movn",	"d,s,t",	MIPS_SPECIAL(0x0B),				MA_MIPS4,	0 },
+	{ "movz",	"d,s,t",	MIPS_SPECIAL(0x0A),				MA_MIPS4|MA_PS2|MA_PSP,	0 },
+	{ "movn",	"d,s,t",	MIPS_SPECIAL(0x0B),				MA_MIPS4|MA_PS2|MA_PSP,	0 },
 	{ "syscall","b",		MIPS_SPECIAL(0x0C),				MA_MIPS1,	MO_NODELAYSLOT },
 	{ "break",	"b",		MIPS_SPECIAL(0x0D),				MA_MIPS1,	MO_NODELAYSLOT },
 	{ "sync",	"",			MIPS_SPECIAL(0x0F),				MA_MIPS2,	0 },
@@ -201,16 +206,16 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "div",	"r\x0,s,t",	MIPS_SPECIAL(0x1A),				MA_MIPS1,	0 },
 	{ "divu",	"s,t",		MIPS_SPECIAL(0x1B),				MA_MIPS1,	0 },
 	{ "divu",	"r\x0,s,t",	MIPS_SPECIAL(0x1B),				MA_MIPS1,	0 },
-	{ "dmult",	"s,t",		MIPS_SPECIAL(0x1C),				MA_MIPS3,	MO_64BIT },
-	{ "dmult",	"r\x0,s,t",	MIPS_SPECIAL(0x1C),				MA_MIPS3,	MO_64BIT },
+	{ "dmult",	"s,t",		MIPS_SPECIAL(0x1C),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
+	{ "dmult",	"r\x0,s,t",	MIPS_SPECIAL(0x1C),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
 	{ "madd",	"s,t",		MIPS_SPECIAL(0x1C),				MA_PSP,		0 },
-	{ "dmultu",	"s,t",		MIPS_SPECIAL(0x1D),				MA_MIPS3,	MO_64BIT },
-	{ "dmultu",	"r\x0,s,t",	MIPS_SPECIAL(0x1D),				MA_MIPS3,	MO_64BIT },
+	{ "dmultu",	"s,t",		MIPS_SPECIAL(0x1D),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
+	{ "dmultu",	"r\x0,s,t",	MIPS_SPECIAL(0x1D),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
 	{ "maddu",	"s,t",		MIPS_SPECIAL(0x1D),				MA_PSP,		0 },
-	{ "ddiv",	"s,t",		MIPS_SPECIAL(0x1E),				MA_MIPS3,	MO_64BIT },
-	{ "ddiv",	"r\x0,s,t",	MIPS_SPECIAL(0x1E),				MA_MIPS3,	MO_64BIT },
-	{ "ddivu",	"s,t",		MIPS_SPECIAL(0x1F),				MA_MIPS3,	MO_64BIT },
-	{ "ddivu",	"r\x0,s,t",	MIPS_SPECIAL(0x1F),				MA_MIPS3,	MO_64BIT },
+	{ "ddiv",	"s,t",		MIPS_SPECIAL(0x1E),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
+	{ "ddiv",	"r\x0,s,t",	MIPS_SPECIAL(0x1E),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
+	{ "ddivu",	"s,t",		MIPS_SPECIAL(0x1F),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
+	{ "ddivu",	"r\x0,s,t",	MIPS_SPECIAL(0x1F),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
 	{ "add",	"d,s,t",	MIPS_SPECIAL(0x20),				MA_MIPS1,	0 },
 	{ "add",	"s,t",		MIPS_SPECIAL(0x20),				MA_MIPS1,	MO_RSD },
 	{ "addu",	"d,s,t",	MIPS_SPECIAL(0x21),				MA_MIPS1,	0 },

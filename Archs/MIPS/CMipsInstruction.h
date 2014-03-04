@@ -22,6 +22,10 @@ struct MipsOpcodeRegisters {
 	MipsRegisterInfo frs;			// float source reg
 	MipsRegisterInfo frt;			// float target reg
 	MipsRegisterInfo frd;			// float dest reg
+	
+	MipsRegisterInfo ps2vrs;		// ps2 vector source reg
+	MipsRegisterInfo ps2vrt;		// ps2 vector target reg
+	MipsRegisterInfo ps2vrd;		// ps2 vector dest reg
 
 	MipsVFPURegister vrs;			// vfpu source reg
 	MipsVFPURegister vrt;			// vfpu target reg
@@ -32,6 +36,7 @@ struct MipsOpcodeRegisters {
 		grs.num = grt.num = grd.num = -1;
 		frs.num = frt.num = frd.num = -1;
 		vrs.num = vrt.num = vrd.num = -1;
+		ps2vrs.num = ps2vrt.num = ps2vrd.num = -1;
 	}
 };
 
