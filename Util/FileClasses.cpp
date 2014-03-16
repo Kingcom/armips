@@ -728,6 +728,9 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		break;
 	case Write:
 		handle = _wfopen(fileName.c_str(),L"wb");
+		if (handle == NULL)
+			return false;
+
 		if (encoding != ASCII)
 		{
 			encoding = UTF8;
