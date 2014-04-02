@@ -26,6 +26,7 @@ class CArmArchitecture: public CArchitecture
 public:
 	CArmArchitecture();
 	~CArmArchitecture();
+	void clear();
 	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
 	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();

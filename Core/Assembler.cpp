@@ -470,6 +470,8 @@ bool runAssembler(AssemblerArguments& arguments)
 	Global.FileInfo.LineNumber = 0;
 	Global.FileInfo.FileNum = 0;
 
+	Arm.clear();
+
 	// process arguments
 	Logger::setSilent(arguments.silent);
 	Logger::setErrorOnWarning(arguments.errorOnWarning);

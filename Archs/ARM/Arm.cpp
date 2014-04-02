@@ -169,14 +169,24 @@ bool ArmDirectiveIdeasMsg(ArgumentList& List, int flags)
 
 CArmArchitecture::CArmArchitecture()
 {
-	thumb = false;
-	arm9 = false;
-	PoolCount = 0;
+	Pools = NULL;
+	clear();
 }
 
 CArmArchitecture::~CArmArchitecture()
 {
-	delete[] Pools;
+	clear();
+}
+
+void CArmArchitecture::clear()
+{
+	if (Pools != NULL)
+		delete[] Pools;
+
+	thumb = false;
+	arm9 = false;
+	PoolCount = 0;
+	Pools = NULL;
 }
 
 void CArmArchitecture::Pass2()
