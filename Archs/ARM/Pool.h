@@ -39,6 +39,7 @@ public:
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
+	virtual bool IsPool() { return true; };
 private:
 	int RamPos;
 	int PoolId;
