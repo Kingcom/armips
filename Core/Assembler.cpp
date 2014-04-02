@@ -8,7 +8,7 @@
 #include "Core/Directives.h"
 #include "Archs/MIPS/Mips.h"
 #include "Core/FileManager.h"
-
+#include "Archs/ARM/Arm.h"
 #define ASSEMBLER_MACRO_NESTING_LEVEL		128
 #define ASSEMBLER_INCLUDE_NESTING_LEVEL		64
 
@@ -381,6 +381,10 @@ bool EncodeAssembly()
 		{
 			if (Global.Commands[i]->IsConditional() == false)
 			{
+				if ((Global.Commands[i]->IsPool() == true) && (Global.conditionData.conditionTrue() == false))
+				{
+					Arm.NextPool();
+				}
 				if (Global.conditionData.conditionTrue() == false)
 					continue;
 			}
