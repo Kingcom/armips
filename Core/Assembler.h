@@ -13,12 +13,14 @@ struct AssemblerArguments
 	bool errorOnWarning;
 	bool silent;
 	StringList* errorsResult;
+	StringList* equList;
 
 	AssemblerArguments()
 	{
 		errorOnWarning = false;
 		silent = false;
 		errorsResult = NULL;
+		equList = NULL;
 	}
 };
 

@@ -22,6 +22,7 @@ int wmain(int argc, wchar_t* argv[])
 
 	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
 	StringList arguments = getStringListFromArray(argv,argc);
+	parameters.equList = new StringList();
 
 	if (arguments.size() < 2)
 	{
@@ -61,6 +62,12 @@ int wmain(int argc, wchar_t* argv[])
 		{
 			parameters.errorOnWarning = true;
 			argpos += 1;
+		} else if (arguments[argpos] == L"-equ")
+		{
+			std::wstring name = arguments[argpos + 1];
+			std::wstring replacement = arguments[argpos + 2];
+			parameters.equList->push_back(name + L" equ " + replacement);
+			argpos += 3;
 		} else {
 			Logger::printLine("Invalid parameter %S\n",arguments[argpos].c_str());
 			return 1;
