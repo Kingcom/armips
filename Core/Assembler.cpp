@@ -485,9 +485,9 @@ bool runAssembler(AssemblerArguments& arguments)
 	if (!arguments.tempFileName.empty())
 		Global.tempData.setFileName(arguments.tempFileName);
 
-	for (size_t i = 0; i < arguments.equList->size(); i++)
+	for (size_t i = 0; i < arguments.equList.size(); i++)
 	{
-		std::wstring equline = arguments.equList->at(i);
+		std::wstring equline = arguments.equList.at(i);
 		CheckEquLabel(equline);
 	}
 
@@ -514,7 +514,6 @@ bool runAssembler(AssemblerArguments& arguments)
 
 	Global.Commands.clear();
 	Global.Macros.clear();
-	delete arguments.equList;
 
 	return result;
 }
