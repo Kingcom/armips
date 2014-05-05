@@ -263,6 +263,8 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 bool ElfFile::load(const std::wstring& fileName, bool sort)
 {
 	ByteArray data = ByteArray::fromFile(fileName);
+	if (data.size() == 0)
+		return false;
 	return load(data,sort);
 }
 

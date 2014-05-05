@@ -42,7 +42,7 @@ public:
 	MipsArchType GetVersion() { return Version; };
 	bool GetDelaySlot() { return DelaySlot; };
 	void SetDelaySlot(bool b) {DelaySlot = b; };
-	bool hasLoadDelay() { return (Version & MARCH_PSX) != 0; };
+	bool hasLoadDelay() { return Version == MARCH_PSX; };
 private:
 	bool FixLoadDelay;
 	bool IgnoreLoadDelay;

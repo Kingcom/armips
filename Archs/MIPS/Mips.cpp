@@ -303,20 +303,31 @@ void CMipsArchitecture::NextSection()
 
 int CMipsArchitecture::GetWordSize()
 {
-	if (Version & MARCH_PSX) return 4;
-	if (Version & MARCH_N64) return 4;
-	if (Version & MARCH_PS2) return 8;
-	if (Version & MARCH_PSP) return 4;
-	return 0;
+	switch (Version)
+	{
+	case MARCH_PSX:
+	case MARCH_N64:
+	case MARCH_PSP:
+		return 4;
+	case MARCH_PS2:
+		return 8;
+	default:
+		return 0;
+	}
 }
 
 IElfRelocator* CMipsArchitecture::getElfRelocator()
 {
-	if (Version & MARCH_PSX) return NULL;
-	if (Version & MARCH_N64) return NULL;
-	if (Version & MARCH_PS2) return new MipsElfRelocator();
-	if (Version & MARCH_PSP) return new MipsElfRelocator();
-	return NULL;
+	switch (Version)
+	{
+	case MARCH_PS2:
+	case MARCH_PSP:
+		return new MipsElfRelocator();
+	case MARCH_PSX:
+	case MARCH_N64:
+	default:
+		return NULL;
+	}
 }
 
 
