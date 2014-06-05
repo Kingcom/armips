@@ -60,6 +60,7 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 
 	hexData.clear();
 	valueData.clear();
+	entries.clear();
 	setTerminationEntry((unsigned char*)"\0",1);
 
 	while (!input.atEnd())
