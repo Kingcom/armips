@@ -565,80 +565,98 @@ bool DirectiveImportObj(ArgumentList& list, int flags)
 }
 
 
+int loadArgument(ArgumentList& list, const std::wstring& args, size_t pos)
+{
+	std::wstring buffer;
+
+	if (args[pos] == '"')
+	{
+		pos++;
+		while (pos < args.size() && args[pos] != '"')
+		{
+			if (args[pos] == '\\' && pos+1 < args.size())
+			{
+				if (args[pos+1] == '\\')
+				{
+					buffer += '\\';
+					pos += 2;
+					continue;
+				}
+					
+				if (args[pos+1] == '"')
+				{
+					buffer += '"';
+					pos += 2;
+					continue;
+				}
+			}
+			
+			buffer += args[pos++];
+		}
+			
+		if (pos == args.size() || args[pos] != '"')
+		{
+			Logger::printError(Logger::Error,L"Unexpected end of line in string");
+			return false;
+		}
+
+		list.add(buffer,true);
+		pos++;
+	} else {
+		while (pos < args.size() && args[pos] != ',')
+		{
+			if (args[pos] == ' ' || args[pos] == '\t')
+			{
+				pos++;
+				continue;
+			}
+			buffer += args[pos++];
+		}
+		
+		list.add(buffer,false);
+	}
+
+	return pos;
+}
+
 bool splitArguments(ArgumentList& list, const std::wstring& args)
 {
 	std::wstring buffer;
 	size_t pos = 0;
-	bool isString = false;
 
 	list.clear();
 
 	while (pos < args.size())
 	{
-		while (pos < args.size() && (args[pos] == ' ' || args[pos] == '\t')) pos++;
-		if (pos == args.size()) break;
-
-		if (args[pos] == ',')
-		{
-			if (buffer.empty())
-			{
-				Logger::printError(Logger::Error,L"Parameter failure (empty argument)");
-				return false;
-			}
-
-			list.add(buffer,isString);
-			buffer.clear();
-			isString = false;
+		while (pos < args.size() && (args[pos] == ' ' || args[pos] == '\t'))
 			pos++;
-			continue;
-		}
 
-		if (args[pos] == '"')
+		if (pos == args.size())
+			break;
+
+		if (list.size() != 0 && args[pos++] != ',')
 		{
-			pos++;
-			while (args[pos] != '"')
-			{
-				if (pos == args.size())
-				{
-					Logger::printError(Logger::Error,L"Unexpected end of line in string");
-					return false;
-				}
-
-				if (args[pos] == '\\' && pos+1 < args.size())
-				{
-					if (args[pos+1] == '\\')
-					{
-						buffer += '\\';
-						pos += 2;
-						continue;
-					}
-					
-					if (args[pos+1] == '"')
-					{
-						buffer += '"';
-						pos += 2;
-						continue;
-					}
-				}
-
-				buffer += args[pos++];
-			}
-			
-			isString = true;
-			pos++;
-			continue;
-		}
-
-		buffer += args[pos++];
-		if (buffer.size() >= 2048)
-		{
-			Logger::printError(Logger::Error,L"parameter replacement length overflow");
+			Logger::printError(Logger::Error,L"Parameter failure");
 			return false;
 		}
-	}
+		
+		if (args[pos] == ',')
+		{
+			Logger::printError(Logger::Error,L"Parameter failure (empty argument)");
+			return false;
+		}
 
-	if (buffer.empty() == false || isString == true)
-		list.add(buffer,isString);
+		while (pos < args.size() && (args[pos] == ' ' || args[pos] == '\t'))
+			pos++;
+
+		if (pos == args.size())
+		{
+			Logger::printError(Logger::Error,L"Parameter failure (empty argument)");
+			return false;
+		}
+
+		pos = loadArgument(list,args,pos);
+	}
 
 	return true;
 }
