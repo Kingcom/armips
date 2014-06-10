@@ -63,6 +63,9 @@ bool CDirectiveArea::Validate()
 		{
 			fillValue = Global.areaData.getCurrentFillValue();
 			Size = Global.areaData.getCurrentMaxAddress()-g_fileManager->getVirtualAddress();
+
+			if (fillValue != -1)
+				g_fileManager->seekVirtual(Global.areaData.getCurrentMaxAddress());
 		}
 
 		Global.areaData.endArea();
