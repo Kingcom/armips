@@ -20,6 +20,19 @@ public:
 	void reserveBytes(int count, byte value = 0);
 	void alignSize(int alignment);
 
+	int getWord(int pos, bool bigEndian = false)
+	{
+		if (pos+1 >= this->size() || pos < 0) return -1;
+		unsigned char* d = (unsigned char*) this->data();
+
+		if (bigEndian == false)
+		{
+			return d[pos+0] | (d[pos+1] << 8);
+		} else {
+			return d[pos+1] | (d[pos+0] << 8);
+		}
+	}
+
 	int getDoubleWord(int pos, bool bigEndian = false)
 	{
 		if (pos+3 >= this->size() || pos < 0) return -1;

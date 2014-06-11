@@ -129,6 +129,9 @@
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\MIPS\PsxRelocator.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -259,6 +262,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\MipsElfFile.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\PsxRelocator.h">
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
   </ItemGroup>

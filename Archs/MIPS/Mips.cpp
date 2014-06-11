@@ -6,7 +6,8 @@
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
 #include "MipsElfFile.h"
-#include "Core/ELF/ElfRelocator.h"
+#include "Commands/CDirectiveFile.h"
+#include "PsxRelocator.h"
 
 CMipsArchitecture Mips;
 
@@ -127,16 +128,6 @@ const tMipsRegister MipsPs2Cop2FpRegister[] = {
 	{ "vf31", 31, 4},	{ "$vf31", 31, 5 }
 };
 
-
-
-class MipsElfRelocator: public IElfRelocator
-{
-public:
-	virtual bool relocateOpcode(int type, RelocationData& data);
-	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
-	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
-};
-
 bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 {
 	unsigned int p;
@@ -255,17 +246,34 @@ bool MipsDirectiveLoadElf(ArgumentList& list, int flags)
 	return true;
 }
 
+bool MipsDirectiveImportObj(ArgumentList& list, int flags)
+{
+	if (Mips.GetVersion() == MARCH_PSX)
+	{
+		DirectivePsxObjImport* command = new DirectivePsxObjImport(list);
+		AddAssemblerCommand(command);
+		return true;
+	}
+	
+	DirectiveObjImport* command = new DirectiveObjImport(list);
+	AddAssemblerCommand(command);
+	return true;
+}
+
 const tDirective MipsDirectives[] = {
-	{ L".resetdelay",	0,	0,	&MipsDirectiveResetDelay,	0 },
-	{ L".fixloaddelay",	0,	0,	&MipsDirectiveFixLoadDelay,	0 },
-	{ L".loadelf",		1,	2,	&MipsDirectiveLoadElf,		0 },
-	{ NULL,				0,	0,	NULL,	0 }
+	{ L".resetdelay",		0,	0,	&MipsDirectiveResetDelay,	0 },
+	{ L".fixloaddelay",		0,	0,	&MipsDirectiveFixLoadDelay,	0 },
+	{ L".loadelf",			1,	2,	&MipsDirectiveLoadElf,		0 },
+	{ L".importobj",		1,	2,	&MipsDirectiveImportObj,		0 },
+	{ L".importlib",		1,	2,	&MipsDirectiveImportObj,		0 },
+	{ NULL,					0,	0,	NULL,	0 }
 };
 
 bool CMipsArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
 {
-	if (directiveAssembleGlobal(name,args) == true) return true;
-	return directiveAssemble(MipsDirectives,name,args);
+	if (directiveAssemble(MipsDirectives,name,args) == true)
+		return true;
+	return directiveAssembleGlobal(name,args);
 }
 
 CMipsArchitecture::CMipsArchitecture()

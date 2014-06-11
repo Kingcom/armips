@@ -128,6 +128,7 @@
     <ClInclude Include="Archs\MIPS\MipsElfFile.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
+    <ClInclude Include="Archs\MIPS\PsxRelocator.h" />
     <ClInclude Include="Archs\Z80\CZ80Instruction.h" />
     <ClInclude Include="Archs\Z80\z80.h" />
     <ClInclude Include="Archs\Z80\z80Opcodes.h" />
@@ -174,6 +175,7 @@
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
+    <ClCompile Include="Archs\MIPS\PsxRelocator.cpp" />
     <ClCompile Include="Archs\Z80\CZ80Instruction.cpp" />
     <ClCompile Include="Archs\Z80\z80.cpp" />
     <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />

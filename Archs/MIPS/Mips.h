@@ -1,6 +1,7 @@
 #pragma once
 #include "Util/CommonClasses.h"
 #include "Core/MathParser.h"
+#include "Core/ELF/ElfRelocator.h"
 
 enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_INVALID };
 
@@ -82,3 +83,11 @@ bool MipsGetPs2VectorRegister(char* source, int& RetLen, MipsRegisterInfo& Resul
 int MipsGetFloatRegister(char* source, int& RetLen);
 bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen);
 bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size);
+
+class MipsElfRelocator: public IElfRelocator
+{
+public:
+	virtual bool relocateOpcode(int type, RelocationData& data);
+	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
+	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
+};
