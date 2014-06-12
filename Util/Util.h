@@ -34,3 +34,6 @@ int fileSize(const std::wstring& fileName);
 int fileSize(const std::string& fileName);
 bool fileExists(const std::wstring& strFilename);
 bool fileExists(const std::string& strFilename);
+
+std::wstring toWLowercase(const std::string& str);
+std::wstring getFileNameFromPath(const std::wstring& path);

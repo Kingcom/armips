@@ -258,3 +258,22 @@ bool fileExists(const std::string& strFilename)
 	int intStat = _stat(strFilename.c_str(),&stFileInfo);
 	return intStat == 0;
 }
+
+std::wstring toWLowercase(const std::string& str)
+{
+	std::wstring result;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		result += tolower(str[i]);
+	}
+
+	return result;
+}
+
+std::wstring getFileNameFromPath(const std::wstring& path)
+{
+	int n = path.find_last_of(L"/\\");
+	if (n == path.npos)
+		return path;
+	return path.substr(n);
+}

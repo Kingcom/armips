@@ -41,7 +41,7 @@ struct PsxSymbol
 
 struct PsxRelocatorFile
 {
-	std::string name;
+	std::wstring name;
 	std::vector<PsxSegment> segments;
 	std::vector<PsxSymbol> symbols;
 };

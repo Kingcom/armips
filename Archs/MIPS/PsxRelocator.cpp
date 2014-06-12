@@ -5,10 +5,11 @@
 #include <map>
 #include "Util/CRC.h"
 #include "Core/FileManager.h"
+#include "Util/Util.h"
 
 struct PsxLibEntry
 {
-	std::string name;
+	std::wstring name;
 	ByteArray data;
 };
 
@@ -19,13 +20,45 @@ std::vector<PsxLibEntry> loadPsxLibrary(const std::wstring& inputName)
 	ByteArray input = ByteArray::fromFile(inputName);
 	std::vector<PsxLibEntry> result;
 
+	if (input.size() == 0)
+		return result;
+
 	if (memcmp(input.data(),psxObjectFileMagicNum,sizeof(psxObjectFileMagicNum)) == 0)
 	{
 		PsxLibEntry entry;
-		entry.name = "";
+		entry.name = getFileNameFromPath(inputName);
 		entry.data = input;
 		result.push_back(entry);
 		return result;
+	}
+	
+	if (memcmp(input.data(),"LIB\x01",4) != 0)
+		return result;
+
+	int pos = 4;
+	while (pos < input.size())
+	{
+		PsxLibEntry entry;
+		
+		for (int i = 0; i < 16 && input[pos+i] != ' '; i++)
+		{
+			entry.name += input[pos+i];
+		}
+
+		int size = input.getDoubleWord(pos+16);
+		int skip = 20;
+
+		while (input[pos+skip] != 0)
+		{
+			skip += input[pos+skip++];
+		}
+
+		skip++;
+
+		entry.data = input.mid(pos+skip,size-skip);
+		pos += size;
+
+		result.push_back(entry);
 	}
 
 	return result;
@@ -268,6 +301,8 @@ bool PsxRelocator::init(const std::wstring& inputName)
 	for (PsxLibEntry& entry: inputFiles)
 	{
 		PsxRelocatorFile file;
+		file.name = entry.name;
+
 		if (parseObject(entry.data,file) == false)
 		{
 			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name.c_str());
@@ -314,9 +349,13 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 		
 		relocationOffsets[index] = relocationAddress;
 		relocationAddress += size;
+
+		while (relocationAddress % 4)
+			relocationAddress++;
 	}
 	
 	// parse/add/relocate symbols
+	bool error = false;
 	for (PsxSymbol& sym: file.symbols)
 	{
 		int pos;
@@ -338,18 +377,25 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 			sym.label->setDefined(true);
 			symbolOffsets[sym.id] = relocationAddress;
 			relocationAddress += sym.size;
+			
+			while (relocationAddress % 4)
+				relocationAddress++;
 			break;
 		case PsxSymbolType::External:
 			if (sym.label->isDefined() == false)
 			{
 				Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",sym.name.c_str(),file.name.c_str());
-				return false;
+				error = true;
+				continue;
 			}
 			
 			symbolOffsets[sym.id] = sym.label->getValue();
 			break;
 		}
 	}
+
+	if (error)
+		return false;
 
 	int dataStart = outputData.size();
 	outputData.reserveBytes(relocationAddress-start);
