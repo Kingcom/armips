@@ -88,6 +88,7 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 	std::vector<PsxSymbol>& syms = dest.symbols;
 
 	int activeSegment = -1;
+	int lastSegmentPartStart = -1;
 	while (pos < data.size())
 	{
 		switch (data[pos])
@@ -98,14 +99,17 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 				seg.id = data.getDoubleWord(pos+1);
 				segments.push_back(seg);
 				pos += 5;
-			}
-			break;
-		case 0x08:	// segment name
-			{
+
+				if (data[pos] != 8)
+					return false;
+
 				int nameLen = data[pos+1];
 				std::wstring& name = segments[segments.size()-1].name;
 				pos += 1 + loadString(data,pos+1,name);
 			}
+			break;
+		case 0x14:	// group?
+			pos += data[pos+4]+5;
 			break;
 		case 0x1C:	// source file name
 			pos += data[pos+3]+4;
@@ -113,45 +117,42 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 
 		case 0x06:	// set segment id
 			{
-				while (data[pos] == 0x06)
-				{
-					int id = data.getWord(pos+1);
-					pos += 3;
+				int id = data.getWord(pos+1);
+				pos += 3;
 				
-					int num = -1;
-					for (size_t i = 0; i < segments.size(); i++)
+				int num = -1;
+				for (size_t i = 0; i < segments.size(); i++)
 					{
-						if (segments[i].id == id)
-						{
-							num = i;
-							break;
-						}
+					if (segments[i].id == id)
+					{
+						num = i;
+						break;
 					}
-
-					activeSegment = num;
 				}
 
-				switch (data[pos])
-				{
-				case 0x02:	// segment data
-					{
-						int size = data.getWord(pos+1);
-						pos += 3;
+				activeSegment = num;
+			}
+			break;
+		case 0x02:	// append to data segment
+			{
+				int size = data.getWord(pos+1);
+				pos += 3;
 
-						segments[activeSegment].bss = false;
-						segments[activeSegment].data = data.mid(pos,size);
-						pos += size;
-					}
-					break;
-				case 0x08:	// segment size
-					{
-						int size = data.getDoubleWord(pos+1);
-						pos += 5;
-						segments[activeSegment].bss = true;
-						segments[activeSegment].data.reserveBytes(size);
-					}
-					break;
-				}
+				ByteArray d = data.mid(pos,size);
+				pos += size;
+
+				lastSegmentPartStart = segments[activeSegment].data.size();
+				segments[activeSegment].data.append(d);
+			}
+			break;
+		case 0x08:	// append zeroes data segment
+			{
+				int size = data.getWord(pos+1);
+				pos += 3;
+
+				ByteArray d;
+				d.reserveBytes(size);
+				segments[activeSegment].data.append(d);
 			}
 			break;
 		case 0x0A:	// relocation data
@@ -160,6 +161,9 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 				pos += 2;
 
 				PsxRelocation rel;
+				rel.relativeOffset = 0;
+				rel.filePos = pos-2;
+
 				switch (type)
 				{
 				case 0x10:	// 32 bit word
@@ -186,6 +190,8 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 					return false;
 				}
 
+				rel.segmentOffset += lastSegmentPartStart;
+checkothertype:
 				int otherType = data[pos++];
 				switch (otherType)
 				{
@@ -196,21 +202,41 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 					break;
 				case 0x2C:	// ref to other segment?
 					rel.refType = PsxRelocationRefType::SegmentOffset;
-					if (data[pos++] != 0x04)
-					{
-						return false;
-					}
-					
-					rel.referenceId = data.getWord(pos);	// segment id
-					pos += 2;
-					
-					if (data[pos++] != 0x00)
-					{
-						return false;
-					}
 
-					rel.referencePos = data.getDoubleWord(pos);
-					pos += 4;
+					switch (data[pos++])
+					{
+					case 0x00:
+						rel.relativeOffset = data.getDoubleWord(pos);
+						pos += 4;
+						goto checkothertype;
+					case 0x04:					
+						rel.referenceId = data.getWord(pos);	// segment id
+						pos += 2;
+					
+						if (data[pos++] != 0x00)
+						{
+							return false;
+						}
+
+						rel.referencePos = data.getDoubleWord(pos);
+						pos += 4;
+						break;
+					default:
+						return false;
+					}
+					break;
+				case 0x2E:	// negative ref?
+					rel.refType = PsxRelocationRefType::SegmentOffset;
+
+					switch (data[pos++])
+					{
+					case 0x00:
+						rel.relativeOffset = -data.getDoubleWord(pos);
+						pos += 4;
+						goto checkothertype;
+					default:
+						return false;
+					}
 					break;
 				default:
 					return false;
@@ -278,6 +304,12 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 			break;
 		case 0x00:	// ??
 			pos++;
+			break;
+		case 0x32:	// ??
+			pos += 3;
+			break;
+		case 0x3A:	// ??
+			pos += 9;
 			break;
 		default:
 			return false;
@@ -403,12 +435,6 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 	// load code and data
 	for (PsxSegment& seg: file.segments)
 	{
-		if (seg.bss)
-		{
-			// reserveBytes initialized the data to 0 already
-			continue;
-		}
-		
 		// relocate
 		ByteArray sectionData = seg.data;
 		for (PsxRelocation& rel: seg.relocations)
@@ -420,10 +446,10 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 			switch (rel.refType)
 			{
 			case PsxRelocationRefType::SymblId:
-				relData.relocationBase = symbolOffsets[rel.referenceId];
+				relData.relocationBase = symbolOffsets[rel.referenceId]+rel.relativeOffset;
 				break;
 			case PsxRelocationRefType::SegmentOffset:
-				relData.relocationBase = relocationOffsets[rel.referenceId] + rel.referencePos;
+				relData.relocationBase = relocationOffsets[rel.referenceId] + rel.referencePos+rel.relativeOffset;
 				break;
 			}
 			

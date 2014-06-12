@@ -14,6 +14,8 @@ struct PsxRelocation
 	int segmentOffset;
 	int referenceId;
 	int referencePos;
+	int relativeOffset;
+	int filePos;
 };
 
 struct PsxSegment
@@ -22,7 +24,6 @@ struct PsxSegment
 	int id;
 	ByteArray data;
 	std::vector<PsxRelocation> relocations;
-	bool bss;
 };
 
 
