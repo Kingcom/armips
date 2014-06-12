@@ -127,11 +127,18 @@ void SymbolData::addLabel(int memoryAddress, const std::wstring& name)
 {
 	if (!enabled)
 		return;
-	addAddress(memoryAddress);
-
+	
 	SymDataSymbol sym;
 	sym.address = memoryAddress;
 	sym.name = convertWStringToUtf8(name);
+
+	for (SymDataSymbol& symbol: modules[currentModule].symbols)
+	{
+		if (symbol.address == sym.address && symbol.name == sym.name)
+			return;
+	}
+
+	addAddress(memoryAddress);
 	modules[currentModule].symbols.push_back(sym);
 }
 
@@ -139,6 +146,13 @@ void SymbolData::addData(int address, int size, DataType type)
 {
 	if (!enabled)
 		return;
+
+	for (SymDataData& symbol: modules[currentModule].data)
+	{
+		if (symbol.address == address && symbol.size == size && symbol.type == type)
+			return;
+	}
+
 	addAddress(address);
 
 	SymDataData data;
