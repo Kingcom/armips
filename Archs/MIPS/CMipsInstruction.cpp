@@ -522,13 +522,13 @@ void CMipsInstruction::encodeNormal()
 {
 	int encoding = Opcode.destencoding;
 
-	if (registers.grs.num != -1) encoding |= (registers.grs.num << 21);	// source reg
-	if (registers.grt.num != -1) encoding |= (registers.grt.num << 16);	// target reg
-	if (registers.grd.num != -1) encoding |= (registers.grd.num << 11);	// dest reg
+	if (registers.grs.num != -1) encoding |= MIPS_RS(registers.grs.num);	// source reg
+	if (registers.grt.num != -1) encoding |= MIPS_RT(registers.grt.num);	// target reg
+	if (registers.grd.num != -1) encoding |= MIPS_RD(registers.grd.num);	// dest reg
 	
-	if (registers.frt.num != -1) encoding |= (registers.frt.num << 16);	// float target reg
-	if (registers.frs.num != -1) encoding |= (registers.frs.num << 21);	// float source reg
-	if (registers.frd.num != -1) encoding |= (registers.frd.num << 6);	// float dest reg
+	if (registers.frt.num != -1) encoding |= MIPS_FT(registers.frt.num);	// float target reg
+	if (registers.frs.num != -1) encoding |= MIPS_FS(registers.frs.num);	// float source reg
+	if (registers.frd.num != -1) encoding |= MIPS_FD(registers.frd.num);	// float dest reg
 	
 	if (registers.ps2vrt.num != -1) encoding |= (registers.ps2vrt.num << 16);	// ps2 vector target reg
 	if (registers.ps2vrs.num != -1) encoding |= (registers.ps2vrs.num << 21);	// ps2 vector source reg
