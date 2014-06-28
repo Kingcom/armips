@@ -98,6 +98,9 @@ void ArmPoolCommand::writeTempData(TempData& tempData)
 
 void ArmPoolCommand::writeSymData(SymbolData& symData)
 {
-	symData.addLabel(RamPos,L".pool");
-	symData.addData(RamPos,Size*4,SymbolData::Data32);
+	if(Size > 0)
+	{
+		symData.addLabel(RamPos,L".pool");
+		symData.addData(RamPos,Size*4,SymbolData::Data32);
+	}
 }
