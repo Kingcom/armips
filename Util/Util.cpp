@@ -2,35 +2,74 @@
 #include "Util.h"
 #include <sys/stat.h>
 
-Formatter Formatter::arg(const std::wstring& s)
+std::wstring Formatter::getLowestNumString()
 {
-	// only replace first placeholder for now
-	size_t index = str.find(L"%");
+	unsigned int lowest = 0xFFFFFFFF;
+	bool found = false;
+
+	// look for lowest 
+	size_t index = data.find(L"%");
 	while (index != std::string::npos)
 	{
-		if (str[index+1] != '%')
+		if (data[index+1] != '%')
 		{
-			int length = 1;
-			while (index+length < str.size() && str[index+length] >= '0' && str[index+length] <= '9')
-				length++;
+			int num = 0;
 
-			if (length != 1)
+			int length = 1;
+			while (index+length < data.size() && data[index+length] >= '0' && data[index+length] <= '9')
 			{
-				return str.replace(str.begin()+index,str.begin()+index+length,s);
+				num = (num*10) + data[index+length] - '0';
+				length++;
+			}
+
+			if (length != 1 && num < lowest)
+			{
+				lowest = num;
+				found = true;
 			}
 		}
-		index = str.find(L"%",index+1);
+
+		index = data.find(L"%",index+1);
 	}
 
-	return str;
+	if (!found)
+		return L"";
+
+	wchar_t buf[32];
+	swprintf(buf,L"%%%d",lowest);
+	return buf;
 }
 
-Formatter Formatter::arg(const std::string& s)
+Formatter& Formatter::arg(const std::wstring& s)
+{
+	std::wstring numString = getLowestNumString();
+	if (numString.size() == 0)
+		return *this;
+
+	size_t index = data.find(numString);
+	while (index != std::string::npos)
+	{
+		// only replace full sequences
+		if (index+numString.size() < data.size())
+		{
+			wchar_t c = data[index+numString.size()];
+			if (c >= '0' && c <= '9')
+				continue;
+		}
+		
+		data = data.replace(index,numString.size(),s);
+		index = data.find(numString);
+	}
+
+	return *this;
+}
+
+Formatter& Formatter::arg(const std::string& s)
 {
 	return arg(convertUtf8ToWString(s.c_str()));
 }
 
-Formatter Formatter::arg(unsigned int value, int base, int width, wchar_t filler)
+Formatter& Formatter::arg(unsigned int value, int base, int width, wchar_t filler)
 {
 	wchar_t buffer[128];
 	int size;
@@ -45,7 +84,7 @@ Formatter Formatter::arg(unsigned int value, int base, int width, wchar_t filler
 		if (width != 0 && filler == 0) filler = '0'; 
 		break;
 	default:
-		return str;
+		return *this;
 	}
 
 	std::wstring string;

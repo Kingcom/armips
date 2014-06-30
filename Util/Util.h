@@ -12,17 +12,19 @@ std::string formatString(const char* format, ...);
 class Formatter
 {
 public:
-	Formatter(const std::wstring& string): str(string) { };
-	Formatter(const std::string& string) { str = convertUtf8ToWString(string.c_str()); };
+	Formatter(const std::wstring& string): data(string) { };
+	Formatter(const std::string& string) { data = convertUtf8ToWString(string.c_str()); };
 
-	operator std::string() { return convertWStringToUtf8(str); };
-	operator std::wstring() { return str; };
+	operator std::string() { return convertWStringToUtf8(data); };
+	operator std::wstring() { return data; };
 
-	Formatter arg(const std::wstring& s);
-	Formatter arg(const std::string& s);
-	Formatter arg(unsigned int value, int base = 10, int width = 0, wchar_t filler = 0);
+	Formatter& arg(const std::wstring& s);
+	Formatter& arg(const std::string& s);
+	Formatter& arg(unsigned int value, int base = 10, int width = 0, wchar_t filler = 0);
 private:
-	std::wstring str;
+	std::wstring getLowestNumString();
+
+	std::wstring data;
 };
 
 std::wstring intToHexString(unsigned int value, int digits, bool prefix = false);
