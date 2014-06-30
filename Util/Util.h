@@ -39,3 +39,13 @@ bool fileExists(const std::string& strFilename);
 
 std::wstring toWLowercase(const std::string& str);
 std::wstring getFileNameFromPath(const std::wstring& path);
+
+inline unsigned int swapEndianness32(unsigned int value)
+{
+	return ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24);
+}
+
+inline unsigned short swapEndianness16(unsigned short value)
+{
+	return ((value & 0xFF) << 8) | ((value & 0xFF00) >> 8);
+}

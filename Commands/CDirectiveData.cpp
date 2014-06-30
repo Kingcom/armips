@@ -107,6 +107,21 @@ void CDirectiveData::Encode()
 			if (evalExpression(ExpData[Entries[i].num],num) == false)
 				return;
 			totalsize += UnitSize;
+
+			// swap endianess if the output is big endian
+			if (Arch->getEndianness() == Endianness::Big)
+			{
+				switch (UnitSize)
+				{
+				case 2:
+					num = swapEndianness16(num);
+					break;
+				case 4:
+					num = swapEndianness32(num);
+					break;
+				}
+			}
+
 			g_fileManager->write(&num,UnitSize);
 		}
 	}

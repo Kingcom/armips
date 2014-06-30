@@ -32,6 +32,7 @@ public:
 	virtual void Revalidate() { return; };
 	virtual int GetWordSize();
 	virtual IElfRelocator* getElfRelocator();
+	virtual Endianness getEndianness() { return Endianness::Little; };
 	void SetLoadDelay(bool Delay, int Register);
 	bool GetLoadDelay() { return LoadDelay; };
 	int GetLoadDelayRegister() { return LoadDelayRegister; };

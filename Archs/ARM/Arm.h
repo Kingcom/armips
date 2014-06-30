@@ -34,6 +34,7 @@ public:
 	virtual void Revalidate();
 	virtual int GetWordSize() { return 4; };
 	virtual IElfRelocator* getElfRelocator();
+	virtual Endianness getEndianness() { return Endianness::Little; };
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };

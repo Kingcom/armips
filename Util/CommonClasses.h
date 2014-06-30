@@ -4,6 +4,8 @@
 
 class IElfRelocator;
 
+enum class Endianness { Big, Little };
+
 class CArchitecture
 {
 public:
@@ -14,6 +16,7 @@ public:
 	virtual void Revalidate() = 0;
 	virtual int GetWordSize() = 0;
 	virtual IElfRelocator* getElfRelocator() = 0;
+	virtual Endianness getEndianness() = 0;
 };
 
 class CInvalidArchitecture: public CArchitecture
@@ -26,6 +29,7 @@ public:
 	virtual void Revalidate();
 	virtual int GetWordSize();
 	virtual IElfRelocator* getElfRelocator();
+	virtual Endianness getEndianness() { return Endianness::Little; };
 };
 
 extern CInvalidArchitecture InvalidArchitecture;

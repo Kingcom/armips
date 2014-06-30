@@ -25,6 +25,7 @@ public:
 	virtual void Revalidate(){ };
 	virtual int GetWordSize() { return 2; };
 	virtual IElfRelocator* getElfRelocator() { return NULL; };
+	virtual Endianness getEndianness() { return Endianness::Little; };
 };
 
 extern CZ80Architecture z80;;
