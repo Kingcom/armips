@@ -1,4 +1,5 @@
 #pragma once
+#include "Archs/Architecture.h"
 #include "Util/CommonClasses.h"
 
 typedef struct {

@@ -9,6 +9,7 @@
 #include "Util/FileClasses.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
+#include "Archs/Architecture.h"
 
 typedef struct {
 	CStringList FileList;

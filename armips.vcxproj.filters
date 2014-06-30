@@ -132,6 +132,9 @@
     <ClCompile Include="Archs\MIPS\PsxRelocator.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\Architecture.cpp">
+      <Filter>Archs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -266,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="Archs\MIPS\PsxRelocator.h">
       <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\Architecture.h">
+      <Filter>Archs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

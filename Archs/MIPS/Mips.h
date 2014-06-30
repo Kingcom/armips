@@ -1,5 +1,5 @@
 #pragma once
-#include "Util/CommonClasses.h"
+#include "Archs/Architecture.h"
 #include "Core/MathParser.h"
 #include "Core/ELF/ElfRelocator.h"
 
