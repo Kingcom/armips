@@ -414,6 +414,10 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vsbn.S",		"vd,vs,vt",	MIPS_VFPU0(0x02),			MA_PSP,	MO_VFPU },
 	{ "vdiv.S",		"vd,vs,vt",	MIPS_VFPU0(0x07),			MA_PSP,	MO_VFPU },
 
+	// allegrex0
+	{ "seh",		"d,t",		MIPS_ALLEGREX0(16),			MA_PSP },
+	{ "seh",		"d,t",		MIPS_ALLEGREX0(24),			MA_PSP },
+
 	// END
 	{ NULL,		NULL,		0,			0 }
 };

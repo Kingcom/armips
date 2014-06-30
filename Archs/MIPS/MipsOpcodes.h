@@ -56,6 +56,8 @@
 #define MIPS_VFPUSIZE(VALUE)			( (((VALUE) & 1) << 7) | (((VALUE) & 2) << 14) )
 #define MIPS_VFPU0(VALUE)				(MIPS_OP(0x18) | BITFIELD(23,3,(VALUE)))
 
+#define MIPS_ALLEGREX0(VALUE)			(MIPS_SPECIAL(32) | MIPS_SECFUNC(VALUE))
+
 struct MipsArchDefinition
 {
 	char* name;
