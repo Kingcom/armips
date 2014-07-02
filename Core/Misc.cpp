@@ -12,18 +12,18 @@ bool Logger::silent = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
-	std::wstring fileName = convertUtf8ToWString(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
+	const char* fileName = Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum);
 
 	switch (type)
 	{
 	case Warning:
-		return formatString(L"%s(%d) warning: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) warning: %s",fileName,Global.FileInfo.LineNumber,text);
 	case Error:
-		return formatString(L"%s(%d) error: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) error: %s",fileName,Global.FileInfo.LineNumber,text);
 	case FatalError:
-		return formatString(L"%s(%d) fatal error: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) fatal error: %s",fileName,Global.FileInfo.LineNumber,text);
 	case Notice:
-		return formatString(L"%s(%d) notice: %s",fileName.c_str(),Global.FileInfo.LineNumber,text.c_str());
+		return formatString(L"%s(%d) notice: %s",fileName,Global.FileInfo.LineNumber,text);
 	}
 
 	return L"";
@@ -59,16 +59,13 @@ void Logger::clear()
 
 void Logger::printLine(const std::wstring& text)
 {
-	wprintf(L"%s\n",text.c_str());
+	wprintf(text.c_str());
+	printf("\n");
 }
 
-void Logger::printLine(const char* format, ...)
+void Logger::printLine(const std::string& text)
 {
-	va_list args;
-
-	va_start(args,format);
-	vprintf(format,args);
-	va_end(args);
+	printf(text.c_str());
 	printf("\n");
 }
 
@@ -83,62 +80,12 @@ void Logger::printError(ErrorType type, const std::wstring& text)
 	setFlags(type);
 }
 
-void Logger::printError(ErrorType type, const wchar_t* format, ...)
-{
-	std::wstring result;
-	va_list args;
-
-	va_start(args,format);
-
-	int length = _vscwprintf(format,args);
-	if (length < 0) // error
-	{
-		va_end(args);
-		return;
-	}
-
-	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
-	length = _vsnwprintf(buffer,length+1,format,args);
-
-	if (length < 0)
-		return;
-	va_end(args);
-
-	result = buffer;
-	printError(type,result);
-}
-
 void Logger::queueError(ErrorType type, const std::wstring& text)
 {
 	QueueEntry entry;
 	entry.type = type;
 	entry.text = formatError(type,text);
 	queue.push_back(entry);
-}
-
-void Logger::queueError(ErrorType type, const wchar_t* format, ...)
-{
-	std::wstring result;
-	va_list args;
-
-	va_start(args,format);
-
-	int length = _vscwprintf(format,args);
-	if (length < 0) // error
-	{
-		va_end(args);
-		return;
-	}
-
-	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
-	length = _vsnwprintf(buffer,length+1,format,args);
-
-	if (length < 0)
-		return;
-	va_end(args);
-
-	result = buffer;
-	queueError(type,result);
 }
 
 void Logger::printQueue()
@@ -153,7 +100,6 @@ void Logger::printQueue()
 		setFlags(queue[i].type);
 	}
 }
-
 
 void ConditionData::addIf(bool conditionMet)
 {

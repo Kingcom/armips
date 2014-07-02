@@ -10,6 +10,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 
+#include <sstream>
+#include <iomanip>
+
 #ifdef _MSC_VER
 #include <windows.h>
 #endif

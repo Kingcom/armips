@@ -26,12 +26,12 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		if (fileExists(fileName) == false)
 		{
-			Logger::printError(Logger::FatalError,L"File %s not found",fileName.c_str());
+			Logger::printError(Logger::FatalError,L"File %s not found",fileName);
 			return;
 		}
 		if (ConvertExpression(args[1].text,virtualAddress) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text.c_str());
+			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text);
 			return;
 		}
 
@@ -42,7 +42,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		if (ConvertExpression(args[1].text,virtualAddress) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text.c_str());
+			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text);
 			return;
 		}
 
@@ -54,12 +54,12 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 
 		if (fileExists(originalName) == false)
 		{
-			Logger::printError(Logger::FatalError,L"File %s not found",originalName.c_str());
+			Logger::printError(Logger::FatalError,L"File %s not found",originalName);
 			return;
 		}
 		if (ConvertExpression(args[2].text,virtualAddress) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[2].text.c_str());
+			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[2].text);
 			return;
 		}
 
@@ -114,14 +114,14 @@ void CDirectiveFile::writeTempData(TempData& tempData)
 	switch (type)
 	{
 	case Type::Open:
-		str = formatString(L".open \"%s\",0x%08X",file->getFileName().c_str(),file->getOriginalHeaderSize());;
+		str = formatString(L".open \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());;
 		break;
 	case Type::Create:
-		str = formatString(L".create \"%s\",0x%08X",file->getFileName().c_str(),file->getOriginalHeaderSize());
+		str = formatString(L".create \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = formatString(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName().c_str(),
-			file->getFileName().c_str(),file->getOriginalHeaderSize());
+		str = formatString(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName(),
+			file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
 		str = L".close";
@@ -141,7 +141,7 @@ CDirectivePosition::CDirectivePosition(Type type, ArgumentList& Args)
 {
 	if (ConvertExpression(Args[0].text,position) == false)
 	{
-		Logger::printError(Logger::FatalError,L"Invalid ram address %s",Args[0].text.c_str());
+		Logger::printError(Logger::FatalError,L"Invalid ram address %s",Args[0].text);
 	}
 	
 	exec();
@@ -196,7 +196,7 @@ CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
 
 	if (fileExists(fileName) == false)
 	{
-		Logger::printError(Logger::FatalError,L"File %s not found",fileName.c_str());
+		Logger::printError(Logger::FatalError,L"File %s not found",fileName);
 		return;
 	}
 
@@ -206,7 +206,7 @@ CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
 		// load start address
 		if (ConvertExpression(args[1].text,startAddress) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid start address %s",args[1].text.c_str());
+			Logger::printError(Logger::FatalError,L"Invalid start address %s",args[1].text);
 			return;
 		}
 
@@ -221,7 +221,7 @@ CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
 			// load size too
 			if (ConvertExpression(args[2].text,loadSize) == false)
 			{
-				Logger::printError(Logger::FatalError,L"Invalid size %s",args[1].text.c_str());
+				Logger::printError(Logger::FatalError,L"Invalid size %s",args[1].text);
 				return;
 			}
 
@@ -255,7 +255,7 @@ void CDirectiveIncbin::Encode()
 		ByteArray data = ByteArray::fromFile(fileName,startAddress,loadSize);
 		if (data.size() == 0)
 		{
-			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName.c_str());
+			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName);
 			return;
 		}
 		g_fileManager->write(data.data(),data.size());
@@ -264,7 +264,7 @@ void CDirectiveIncbin::Encode()
 
 void CDirectiveIncbin::writeTempData(TempData& tempData)
 {
-	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".incbin \"%s\"",fileName.c_str()));
+	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".incbin \"%s\"",fileName));
 }
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData)
@@ -283,7 +283,7 @@ CDirectiveAlign::CDirectiveAlign(ArgumentList& args)
 	{
 		if (ConvertExpression(args[0].text,alignment) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid alignment %s",args[0].text.c_str());
+			Logger::printError(Logger::FatalError,L"Invalid alignment %s",args[0].text);
 		}
 		if (isPowerOfTwo(alignment) == false)
 		{
@@ -338,7 +338,7 @@ CDirectiveHeaderSize::CDirectiveHeaderSize(ArgumentList& args)
 {
 	if (ConvertExpression(args[0].text,headerSize) == false)
 	{
-		Logger::printError(Logger::FatalError,L"Invalid header size %s",args[0].text.c_str());
+		Logger::printError(Logger::FatalError,L"Invalid header size %s",args[0].text);
 	}
 
 	updateFile();

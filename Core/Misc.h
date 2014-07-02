@@ -9,11 +9,32 @@ public:
 
 	static void clear();
 	static void printLine(const std::wstring& text);
-	static void printLine(const char* text, ...);
+	static void printLine(const std::string& text);
+	
+	template <typename... Args>
+	static void printLine(const wchar_t* text, const Args&... args)
+	{
+		std::wstring message = formatString(text,args...);
+		printLine(message);
+	}
+	
 	static void printError(ErrorType type, const std::wstring& text);
-	static void printError(ErrorType type, const wchar_t* format, ...);
 	static void queueError(ErrorType type, const std::wstring& text);
-	static void queueError(ErrorType type, const wchar_t* format, ...);
+
+	template <typename... Args>
+	static void printError(ErrorType type, const wchar_t* text, const Args&... args)
+	{
+		std::wstring message = formatString(text,args...);
+		printError(type,message);
+	}
+	
+	template <typename... Args>
+	static void queueError(ErrorType type, const wchar_t* text, const Args&... args)
+	{
+		std::wstring message = formatString(text,args...);
+		queueError(type,message);
+	}
+
 	static void printQueue();
 	static void clearQueue() { queue.clear(); };
 	static StringList getErrors() { return errors; };

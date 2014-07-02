@@ -116,13 +116,13 @@ bool CheckEquLabel(std::wstring& str)
 
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid equation name %s",str.c_str());
+			Logger::printError(Logger::Error,L"Invalid equation name %s",name);
 			return true;
 		}
 
 		if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 		{
-			Logger::printError(Logger::Error,L"Equation name %s already defined",str.c_str());
+			Logger::printError(Logger::Error,L"Equation name %s already defined",name);
 			return true;
 		}
 		
@@ -290,7 +290,7 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 	{
 		if (Macro->getName().compare(Global.Macros[i]->getName()) == 0)
 		{
-			Logger::printError(Logger::Error,L"Macro \"%s\" already defined",Macro->getName().c_str());
+			Logger::printError(Logger::Error,L"Macro \"%s\" already defined",Macro->getName());
 			delete Macro;
 			return;
 		}

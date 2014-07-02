@@ -172,8 +172,8 @@ void ArmElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 	Arm.AssembleOpcode(L"push",L"r4-r7,r14");
 
 	std::wstring tableLabel = Global.symbolTable.getUniqueLabelName();
-	Arm.AssembleOpcode(L"ldr",formatString(L"r4,=%s",tableLabel.c_str()));
-	Arm.AssembleOpcode(L"ldr",formatString(L"r5,=%s+0x%08X",tableLabel.c_str(),ctors.size()*8));
+	Arm.AssembleOpcode(L"ldr",formatString(L"r4,=%s",tableLabel));
+	Arm.AssembleOpcode(L"ldr",formatString(L"r5,=%s+0x%08X",tableLabel,ctors.size()*8));
 	
 	// actual function
 	std::wstring loopStartLabel = Global.symbolTable.getUniqueLabelName();
@@ -222,7 +222,7 @@ void ArmElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 	for (size_t i = 0; i < ctors.size(); i++)
 	{
 		data += ctors[i].symbolName;
-		data += formatString(L",%s+0x%08X,",ctors[i].symbolName.c_str(),ctors[i].size);
+		data += formatString(L",%s+0x%08X,",ctors[i].symbolName,ctors[i].size);
 	}
 
 	data.pop_back();	// remove trailing comma

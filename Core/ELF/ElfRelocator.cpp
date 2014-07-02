@@ -114,19 +114,19 @@ bool ElfRelocator::init(const std::wstring& inputName)
 		ElfFile* elf = new ElfFile();
 		if (elf->load(entry.data,false) == false)
 		{
-			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name.c_str());
+			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name);
 			return false;
 		}
 
 		if (elf->getType() != 1)
 		{
-			Logger::printError(Logger::Error,L"Unexpected ELF type %d in object file %s",elf->getType(),entry.name.c_str());
+			Logger::printError(Logger::Error,L"Unexpected ELF type %d in object file %s",elf->getType(),entry.name);
 			return false;
 		}
 
 		if (elf->getSegmentCount() != 0)
 		{
-			Logger::printError(Logger::Error,L"Unexpected segment count %d in object file %s",elf->getSegmentCount(),entry.name.c_str());
+			Logger::printError(Logger::Error,L"Unexpected segment count %d in object file %s",elf->getSegmentCount(),entry.name);
 			return false;
 		}
 
@@ -218,14 +218,14 @@ bool ElfRelocator::exportSymbols()
 			sym.label = Global.symbolTable.getLabel(sym.name,-1,-1);
 			if (sym.label == NULL)
 			{
-				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name.c_str());
+				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
 				error = true;
 				continue;
 			}
 
 			if (sym.label->isDefined())
 			{
-				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name.c_str());
+				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name);
 				error = true;
 				continue;
 			}
@@ -330,13 +330,13 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 					Label* label = Global.symbolTable.getLabel(symName,-1,-1);
 					if (label == NULL)
 					{
-						Logger::queueError(Logger::Error,L"Invalid external symbol %s",symName.c_str());	
+						Logger::queueError(Logger::Error,L"Invalid external symbol %s",symName);	
 						error = true;
 						continue;
 					}
 					if (label->isDefined() == false)
 					{
-						Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",symName.c_str(),file.name.c_str());
+						Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",symName,file.name);
 						error = true;
 						continue;
 					}
@@ -429,7 +429,7 @@ void ElfRelocator::writeSymbols(SymbolData& symData)
 	{
 		for (ElfRelocatorSymbol& sym: file.symbols)
 		{
-			symData.addLabel(sym.relocatedAddress,sym.name.c_str());
+			symData.addLabel(sym.relocatedAddress,sym.name);
 
 			switch (sym.type)
 			{

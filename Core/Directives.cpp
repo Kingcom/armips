@@ -91,7 +91,7 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 	int LineNum = Global.FileInfo.LineNumber;
 	if (fileExists(fileName) == false)
 	{
-		Logger::printError(Logger::Error,L"Included file \"%s\" does not exist",fileName.c_str());
+		Logger::printError(Logger::Error,L"Included file \"%s\" does not exist",fileName);
 		return false;
 	}
 	LoadAssemblyFile(fileName,encoding);
@@ -136,7 +136,7 @@ bool DirectiveRadix(ArgumentList& List, int flags)
 	int rad;
 	if (ConvertExpression(List[0].text,rad) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid expression %s",List[0].text.c_str());
+		Logger::printError(Logger::Error,L"Invalid expression %s",List[0].text);
 		return false;
 	}
 
@@ -158,7 +158,7 @@ bool DirectiveLoadTable(ArgumentList& List, int flags)
 
 	if (fileExists(fileName) == false)
 	{
-		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName.c_str());
+		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
 		return false;
 	}
 
@@ -168,7 +168,7 @@ bool DirectiveLoadTable(ArgumentList& List, int flags)
 
 	if (Global.Table.load(fileName,encoding) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName.c_str());
+		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
 		return false;
 	}
 	return true;
@@ -380,20 +380,20 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 
 	if (ConvertExpression(List[1].text,value) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",List[1].text.c_str());
+		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",List[1].text);
 		return false;
 	}
 	
 	Label* label = Global.symbolTable.getLabel(List[0].text,Global.FileInfo.FileNum,Global.Section);
 	if (label == NULL)
 	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",List[0].text.c_str());
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",List[0].text);
 		return false;
 	}
 
 	if (label->isDefined())
 	{
-		Logger::printError(Logger::Error,L"Label \"%s\" already defined",List[0].text.c_str());
+		Logger::printError(Logger::Error,L"Label \"%s\" already defined",List[0].text);
 		return false;
 	}
 	

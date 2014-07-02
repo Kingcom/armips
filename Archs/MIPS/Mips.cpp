@@ -182,8 +182,8 @@ void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 
 	std::wstring tableLabel = Global.symbolTable.getUniqueLabelName();
 
-	Mips.AssembleOpcode(L"li",formatString(L"s0,%s",tableLabel.c_str()));
-	Mips.AssembleOpcode(L"li",formatString(L"s1,%s+0x%08X",tableLabel.c_str(),ctors.size()*8));
+	Mips.AssembleOpcode(L"li",formatString(L"s0,%s",tableLabel));
+	Mips.AssembleOpcode(L"li",formatString(L"s1,%s+0x%08X",tableLabel,ctors.size()*8));
 
 	std::wstring outerLoop = Global.symbolTable.getUniqueLabelName();
 	addAssemblerLabel(outerLoop);
@@ -199,10 +199,10 @@ void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 	Mips.AssembleOpcode(L"jalr",L"a0");
 	Mips.AssembleOpcode(L"addiu",L"s2,4h");
 
-	Mips.AssembleOpcode(L"bne",formatString(L"s2,s3,%s",innerLoop.c_str()));
+	Mips.AssembleOpcode(L"bne",formatString(L"s2,s3,%s",innerLoop));
 	Mips.AssembleOpcode(L"nop",L"");
 	
-	Mips.AssembleOpcode(L"bne",formatString(L"s0,s1,%s",outerLoop.c_str()));
+	Mips.AssembleOpcode(L"bne",formatString(L"s0,s1,%s",outerLoop));
 	Mips.AssembleOpcode(L"nop",L"");
 	
 	Mips.AssembleOpcode(L"lw",L"ra,0(sp)");
@@ -220,7 +220,7 @@ void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 	for (size_t i = 0; i < ctors.size(); i++)
 	{
 		data += ctors[i].symbolName;
-		data += formatString(L",%s+0x%08X,",ctors[i].symbolName.c_str(),ctors[i].size);
+		data += formatString(L",%s+0x%08X,",ctors[i].symbolName,ctors[i].size);
 	}
 
 	data.pop_back();	// remove trailing comma

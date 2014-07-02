@@ -8,7 +8,7 @@ void TempData::start()
 	{
 		if (file.open(TextFile::Write) == false)
 		{
-			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName().c_str());
+			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName());
 			return;
 		}
 
@@ -39,7 +39,7 @@ void TempData::writeLine(int memoryAddress, const std::wstring& text)
 {
 	if (file.isOpen())
 	{
-		std::wstring str = formatString(L"%08X %ls",memoryAddress,text.c_str());
+		std::wstring str = formatString(L"%08X %s",memoryAddress,text);
 		while (str.size() < 70)
 			str += ' ';
 

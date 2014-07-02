@@ -57,7 +57,7 @@ std::wstring CMacro::getLine(int num, ArgumentList& argumentValues, int macroCou
 	{
 		if (SymbolTable::isLocalSymbol(dest,pos))
 		{
-			dest2 += Formatter("%1_%2_").arg(name).arg(macroCounter,16,8);
+			dest += formatString(L"%s_%08X",name,macroCounter);
 			pos += 2;
 			continue;
 		}

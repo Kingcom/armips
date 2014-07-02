@@ -15,13 +15,13 @@ bool CDirectiveMessage::Validate()
 	switch (errorType)
 	{
 	case Type::Warning:
-		Logger::queueError(Logger::Warning,L"%s",message.c_str());
+		Logger::queueError(Logger::Warning,message);
 		break;
 	case Type::Error:
-		Logger::queueError(Logger::Error,L"%s",message.c_str());
+		Logger::queueError(Logger::Error,message);
 		break;
 	case Type::Notice:
-		Logger::queueError(Logger::Notice,L"%s",message.c_str());
+		Logger::queueError(Logger::Notice,message);
 		break;
 	}
 	return false;

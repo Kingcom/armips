@@ -25,14 +25,14 @@ int wmain(int argc, wchar_t* argv[])
 
 	if (arguments.size() < 2)
 	{
-		Logger::printLine("Usage: armips.exe file.asm [-temp temp.txt] [-sym symfile.sym]");
+		Logger::printLine(L"Usage: armips.exe file.asm [-temp temp.txt] [-sym symfile.sym]");
 		return 1;
 	}
 
 	parameters.inputFileName = arguments[1];
 	if (fileExists(parameters.inputFileName) == false)
 	{
-		Logger::printLine("File %S not found\n",parameters.inputFileName.c_str());
+		Logger::printLine(L"File %S not found\n",parameters.inputFileName);
 		return 1;
 	}
 
@@ -68,7 +68,7 @@ int wmain(int argc, wchar_t* argv[])
 			parameters.equList.push_back(name + L" equ " + replacement);
 			argpos += 3;
 		} else {
-			Logger::printLine("Invalid parameter %S\n",arguments[argpos].c_str());
+			Logger::printLine(L"Invalid parameter %S\n",arguments[argpos]);
 			return 1;
 		}
 	}
@@ -76,11 +76,11 @@ int wmain(int argc, wchar_t* argv[])
 	bool result = runAssembler(parameters);
 	if (result == false)
 	{
-		Logger::printLine("Aborting.");
+		Logger::printLine(L"Aborting.");
 		return 1;
 	}
 	
-	Logger::printLine("Done.");
+	Logger::printLine(L"Done.");
 	return 0;
 }
 

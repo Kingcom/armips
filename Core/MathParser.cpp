@@ -85,13 +85,13 @@ bool MathExpression::check()
 {
 	if (CheckPostfix(postfix,allowLabels) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",originalText.c_str());
+		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",originalText);
 		return false;
 	}
 
 	if (expList.Load(postfix) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",originalText.c_str());
+		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",originalText);
 		return false;
 	}
 	

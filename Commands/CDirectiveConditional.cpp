@@ -29,7 +29,7 @@ bool CDirectiveConditional::Load(ArgumentList& Args, ConditionType command)
 	case ConditionType::ELSEIFNDEF:
 		if (Global.symbolTable.isValidSymbolName(Args[0].text) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid label name \"%s\"",Args[0].text.c_str());
+			Logger::printError(Logger::Error,L"Invalid label name \"%s\"",Args[0].text);
 			return false;
 		}
 		labelName = Args[0].text;

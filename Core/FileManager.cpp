@@ -69,7 +69,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			success = handle.open(fileName,BinaryFile::ReadWrite);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName.c_str());
+				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName);
 				return false;
 			}
 			return true;
@@ -78,7 +78,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			success = handle.open(fileName,BinaryFile::Write);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName.c_str());
+				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
 				return false;
 			}
 			return true;
@@ -87,14 +87,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			success = copyFile(originalName,fileName);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName.c_str());
+				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName);
 				return false;
 			}
 
 			success = handle.open(fileName,BinaryFile::ReadWrite);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName.c_str());
+				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName);
 				return false;
 			}
 			return true;
@@ -113,7 +113,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		success = temp.open(fileName,BinaryFile::ReadWrite);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName.c_str());
+			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName);
 			return false;
 		}
 		temp.close();
@@ -126,7 +126,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName.c_str());
+			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
 			return false;
 		}
 		temp.close();
@@ -141,7 +141,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		success = temp.open(originalName,BinaryFile::ReadWrite);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName.c_str());
+			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName);
 			return false;
 		}
 		temp.close();
@@ -151,7 +151,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName.c_str());
+			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName);
 			return false;
 		}
 		temp.close();

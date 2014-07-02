@@ -337,7 +337,7 @@ bool PsxRelocator::init(const std::wstring& inputName)
 
 		if (parseObject(entry.data,file) == false)
 		{
-			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name.c_str());
+			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name);
 			return false;
 		}
 
@@ -348,14 +348,14 @@ bool PsxRelocator::init(const std::wstring& inputName)
 			sym.label = Global.symbolTable.getLabel(sym.name,-1,-1);
 			if (sym.label == NULL)
 			{
-				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name.c_str());
+				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
 				error = true;
 				continue;
 			}
 
 			if (sym.label->isDefined() && sym.type != PsxSymbolType::External)
 			{
-				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name.c_str());
+				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name);
 				error = true;
 				continue;
 			}
@@ -416,7 +416,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 		case PsxSymbolType::External:
 			if (sym.label->isDefined() == false)
 			{
-				Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",sym.name.c_str(),file.name.c_str());
+				Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",sym.name,file.name);
 				error = true;
 				continue;
 			}

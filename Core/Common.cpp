@@ -57,13 +57,13 @@ bool addAssemblerLabel(const std::wstring& labelName)
 {
 	if (checkValidLabelName(labelName) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",labelName.c_str());
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",labelName);
 		return false;
 	}
 
 	if (checkLabelDefined(labelName) == true)
 	{
-		Logger::printError(Logger::Error,L"Label \"%s\" already defined",labelName.c_str());
+		Logger::printError(Logger::Error,L"Label \"%s\" already defined",labelName);
 		return false;
 	}
 

@@ -160,6 +160,7 @@
     <ClInclude Include="Util\CRC.h" />
     <ClInclude Include="Util\EncodingTable.h" />
     <ClInclude Include="Util\FileClasses.h" />
+    <ClInclude Include="Util\StringFormat.h" />
     <ClInclude Include="Util\Util.h" />
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +213,7 @@
     <ClCompile Include="Util\CRC.cpp" />
     <ClCompile Include="Util\EncodingTable.cpp" />
     <ClCompile Include="Util\FileClasses.cpp" />
+    <ClCompile Include="Util\StringFormat.cpp" />
     <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

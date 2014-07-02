@@ -65,7 +65,7 @@ void SymbolData::writeNocashSym()
 			entry.address = sym.address;
 
 			if (size != 0 && nocashSymVersion >= 2)
-				entry.text = formatString("%s,%08X",sym.name.c_str(),size);
+				entry.text = formatString("%s,%08X",sym.name,size);
 			else
 				entry.text = sym.name;
 
@@ -103,7 +103,7 @@ void SymbolData::writeNocashSym()
 	TextFile file;
 	if (file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII) == false)
 	{
-		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName().c_str());
+		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName());
 		return;
 	}
 	file.writeLine(L"00000000 0");
