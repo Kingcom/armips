@@ -68,53 +68,6 @@ std::string convertWStringToUtf8(const std::wstring& source)
 	return result;
 }
 
-std::wstring formatString(const wchar_t* format, ...)
-{
-	std::wstring result;
-	va_list args;
-
-	va_start(args,format);
-	int length = _vscwprintf(format,args);
-	if (length <= 0) // error
-	{
-		va_end(args);
-		return L"";
-	}
-
-	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
-	length = _vsnwprintf(buffer,length+1,format,args);
-
-	if (length >= 0)
-		result = buffer;
-
-	va_end(args);
-	return result;
-}
-
-std::string formatString(const char* format, ...)
-{
-	std::string result;
-	va_list args;
-
-	va_start(args,format);
-
-	int length = _vscprintf(format,args);
-	if (length < 0) // error
-	{
-		va_end(args);
-		return "";
-	}
-
-	char* buffer = (char*) alloca((length+1)*sizeof(char));
-	length = _vsnprintf(buffer,length+1,format,args);
-
-	if (length >= 0)
-		result = buffer;
-
-	va_end(args);
-	return result;
-}
-
 std::wstring intToHexString(unsigned int value, int digits, bool prefix)
 {
 	std::wstring result;
