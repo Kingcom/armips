@@ -84,3 +84,29 @@ int wmain(int argc, wchar_t* argv[])
 	return 0;
 }
 
+#ifndef _WIN32
+
+int main(int argc, char* argv[])
+{
+	// convert input to wstring
+	std::vector<std::wstring> wideStrings;
+	for (int i = 0; i < argc; i++)
+	{
+		std::wstring str = convertUtf8ToWString(argv[i]);
+		wideStrings.push_back(str);
+	}
+
+	// create argv replacement
+	wchar_t** wargv = new wchar_t*[argc];
+	for (int i = 0; i < argc; i++)
+	{
+		wargv[i] = (wchar_t*) wideStrings[i].c_str();
+	}
+
+	int result = wmain(argc,wargv);
+
+	delete[] wargv;
+	return result;
+}
+
+#endif

@@ -4,9 +4,10 @@
 #include "Util/CommonClasses.h"
 #include "Core/Common.h"
 #include "Assembler.h"
-#include <direct.h>
 
 #ifdef _WIN32
+
+#include <direct.h>
 
 StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/")
 {

@@ -11,7 +11,7 @@
 #include "Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Archs/ARM/Arm.h"
-#include "Archs/Z80/Z80.h"
+#include "Archs/Z80/z80.h"
 #include "Core/MathParser.h"
 #include "Util/Util.h"
 

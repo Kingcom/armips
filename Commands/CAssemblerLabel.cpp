@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Core/Common.h"
 #include "Util/Util.h"

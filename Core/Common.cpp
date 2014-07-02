@@ -11,7 +11,6 @@ FileManager* g_fileManager = &fileManager;
 
 tGlobal Global;
 CArchitecture* Arch;
-#include <direct.h>
 
 std::wstring getFolderNameFromPath(const std::wstring& src)
 {

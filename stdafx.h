@@ -4,7 +4,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
-#include <tchar.h>
 #include <vector>
 #include <stdio.h>
 #include <stdarg.h>

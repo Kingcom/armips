@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "Util/EncodingTable.h"
 #include "Util/Util.h"
 #include "Core/Common.h"

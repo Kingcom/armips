@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CZ80Instruction.h"
-#include "Z80Opcodes.h"
+#include "z80Opcodes.h"
 #include "Core/Common.h"
 
 CZ80Instruction::CZ80Instruction()

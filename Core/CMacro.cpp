@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "CMacro.h"
 #include "Core/SymbolTable.h"
 #include "Util/Util.h"

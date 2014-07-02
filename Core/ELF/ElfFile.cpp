@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <Windows.h>
 #include "ElfFile.h"
 #include <vector>
 #include <algorithm>
