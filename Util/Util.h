@@ -30,3 +30,6 @@ inline unsigned short swapEndianness16(unsigned short value)
 {
 	return ((value & 0xFF) << 8) | ((value & 0xFF00) >> 8);
 }
+
+enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
+FILE* openFile(const std::wstring& fileName, OpenFileMode mode);

@@ -191,6 +191,35 @@ bool deleteFile(const std::wstring& fileName)
 #endif
 }
 
+FILE* openFile(const std::wstring& fileName, OpenFileMode mode)
+{
+#ifdef _WIN32
+	switch (mode)
+	{
+	case OpenFileMode::ReadBinary:
+		return _wfopen(fileName.c_str(),L"rb");
+	case OpenFileMode::WriteBinary:
+		return _wfopen(fileName.c_str(),L"wb");
+	case OpenFileMode::ReadWriteBinary:
+		return _wfopen(fileName.c_str(),L"rb+");
+	}
+#else
+	std::string nameUtf8 = convertWStringToUtf8(fileName);
+	
+	switch (mode)
+	{
+	case OpenFileMode::ReadBinary:
+		return fopen(nameUtf8.c_str(),"rb");
+	case OpenFileMode::WriteBinary:
+		return fopen(nameUtf8.c_str(),"wb");
+	case OpenFileMode::ReadWriteBinary:
+		return fopen(nameUtf8.c_str(),"rb+");
+	}
+#endif
+
+	return NULL;
+}
+
 std::wstring toWLowercase(const std::string& str)
 {
 	std::wstring result;

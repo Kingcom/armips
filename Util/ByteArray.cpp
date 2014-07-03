@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ByteArray.h"
 #include <windows.h>
+#include "Util/Util.h"
 
 ByteArray::ByteArray()
 {
@@ -140,7 +141,7 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, int start, int size)
 {
 	ByteArray ret;
 	
-	FILE* input = _wfopen(fileName.c_str(),L"rb");
+	FILE* input = openFile(fileName,OpenFileMode::ReadBinary);
 	if (input == NULL)
 		return ret;
 
@@ -169,7 +170,7 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, int start, int size)
 
 bool ByteArray::toFile(const std::wstring& fileName)
 {
-	FILE* output = _wfopen(fileName.c_str(),L"wb");
+	FILE* output = openFile(fileName,OpenFileMode::WriteBinary);
 	if (output == NULL) return false;
 	int length = fwrite(data_,1,size_,output);
 	fclose(output);

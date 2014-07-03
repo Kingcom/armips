@@ -642,13 +642,13 @@ bool BinaryFile::open(Mode mode)
 	switch (mode)
 	{
 	case Read:
-		handle = _wfopen(fileName.c_str(),L"rb");
+		handle = openFile(fileName,OpenFileMode::ReadBinary);
 		break;
 	case Write:
-		handle = _wfopen(fileName.c_str(),L"wb");
+		handle = openFile(fileName,OpenFileMode::WriteBinary);
 		break;
 	case ReadWrite:
-		handle = _wfopen(fileName.c_str(),L"rb+");
+		handle = openFile(fileName,OpenFileMode::ReadWriteBinary);
 		break;
 	default:
 		return false;
@@ -724,10 +724,10 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 	switch (mode)
 	{
 	case Read:
-		handle = _wfopen(fileName.c_str(),L"rb");
+		handle = openFile(fileName,OpenFileMode::ReadBinary);
 		break;
 	case Write:
-		handle = _wfopen(fileName.c_str(),L"wb");
+		handle = openFile(fileName,OpenFileMode::WriteBinary);
 		if (handle == NULL)
 			return false;
 
