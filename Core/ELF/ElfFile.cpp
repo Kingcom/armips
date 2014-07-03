@@ -4,6 +4,10 @@
 #include <algorithm>
 #include "Core/Misc.h"
 
+#ifndef _WIN32
+#define strcasecmp _stricmp
+#endif
+
 static bool stringEqualInsensitive(const std::string& a, const std::string& b)
 {
 	if (a.size() != b.size())
