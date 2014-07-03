@@ -5,7 +5,7 @@ class AssemblerFile;
 
 struct SymDataSymbol
 {
-	std::string name;
+	std::wstring name;
 	int address;
 	
 	bool operator<(SymDataSymbol& other)

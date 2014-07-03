@@ -998,31 +998,6 @@ void TextFile::writeLines(StringList& list)
 	}
 }
 
-void TextFile::writeFormat(wchar_t* format, ...)
-{
-	std::wstring result;
-	va_list args;
-
-	va_start(args,format);
-
-	int length = _vscwprintf(format,args);
-	if (length <= 0) // error
-	{
-		va_end(args);
-		return;
-	}
-
-	wchar_t* buffer = (wchar_t*) alloca((length+1)*sizeof(wchar_t));
-	length = _vsnwprintf(buffer,length+1,format,args);
-
-	if (length >= 0)
-		result = buffer;
-
-	va_end(args);
-	write(result);
-}
-
-
 struct EncodingValue
 {
 	const wchar_t* name;

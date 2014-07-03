@@ -47,7 +47,7 @@ StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"
 	return tests;
 }
 
-bool executeTest(const std::wstring& dir, const std::wstring& testName, std::string& errorString)
+bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString)
 {
 	wchar_t oldDir[MAX_PATH];
 	_wgetcwd(oldDir,MAX_PATH-1);
@@ -77,7 +77,7 @@ bool executeTest(const std::wstring& dir, const std::wstring& testName, std::str
 			{
 				if (errors[i] != expectedErrors[i])
 				{
-					errorString += formatString("Unexpected error: %S\n",errors[i].c_str());
+					errorString += formatString(L"Unexpected error: %S\n",errors[i]);
 					result = false;
 				}
 			}
@@ -88,7 +88,7 @@ bool executeTest(const std::wstring& dir, const std::wstring& testName, std::str
 		// if no errors are expected, there should be none
 		for (size_t i = 0; i < errors.size(); i++)
 		{
-			errorString += formatString("Unexpected error: %S\n",errors[i].c_str());
+			errorString += formatString(L"Unexpected error: %S\n",errors[i]);
 			result = false;
 		}
 	}
@@ -108,11 +108,11 @@ bool executeTest(const std::wstring& dir, const std::wstring& testName, std::str
 		{
 			if (memcmp(expected.data(),actual.data(),actual.size()) != 0)
 			{
-				errorString += formatString("Output data does not match\n");
+				errorString += formatString(L"Output data does not match\n");
 				result = false;
 			}
 		} else {
-			errorString += formatString("Output data size does not match\n");
+			errorString += formatString(L"Output data size does not match\n");
 			result = false;
 		}
 	}
@@ -126,7 +126,7 @@ bool runTests(const std::wstring& dir)
 	StringList tests = getTestsList(dir);
 	if (tests.empty())
 	{
-		Logger::printLine("No tests to run");
+		Logger::printLine(L"No tests to run");
 		return true;
 	}
 
@@ -143,28 +143,28 @@ bool runTests(const std::wstring& dir)
 	for (size_t i = 0; i < tests.size(); i++)
 	{
 		SetConsoleTextAttribute(hstdout,0x7);
-		std::string line = formatString("Test %d of %d, %S:",i+1,tests.size(),tests[i].c_str());
-		printf("%-50s",line.c_str());
+		std::wstring line = formatString(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
+		Logger::print(L"%-50s",line);
 
 		std::wstring path = dir + L"/" + tests[i];
-		std::string errors;
+		std::wstring errors;
 
 		int n = tests[i].find_last_of('/');
 		std::wstring testName = n == tests[i].npos ? tests[i] : tests[i].substr(n+1);
 		if (executeTest(path,testName,errors) == false)
 		{
 			SetConsoleTextAttribute(hstdout,(1 << 2) | (1 << 3));
-			printf("FAILED\n");
-			printf("%s",errors.c_str());
+			Logger::printLine(L"FAILED");
+			Logger::print(L"%s",errors);
 		} else {
 			SetConsoleTextAttribute(hstdout,(1 << 1) | (1 << 3));
-			printf("PASSED\n");
+			Logger::printLine(L"PASSED");
 			successCount++;
 		}
 	}
 	
 	SetConsoleTextAttribute(hstdout,0x7);
-	printf("\n%d out of %d tests passed.\n",successCount,tests.size());
+	Logger::printLine(L"\n%d out of %d tests passed.",successCount,tests.size());
 	
 	// restore console
 	FlushConsoleInputBuffer(hstdin);

@@ -28,7 +28,7 @@ void SymbolData::clear()
 struct NocashSymEntry
 {
 	int address;
-	std::string text;
+	std::wstring text;
 
 	bool operator<(NocashSymEntry& other)
 	{
@@ -65,7 +65,7 @@ void SymbolData::writeNocashSym()
 			entry.address = sym.address;
 
 			if (size != 0 && nocashSymVersion >= 2)
-				entry.text = formatString("%s,%08X",sym.name,size);
+				entry.text = formatString(L"%s,%08X",sym.name,size);
 			else
 				entry.text = sym.name;
 
@@ -81,16 +81,16 @@ void SymbolData::writeNocashSym()
 			switch (data.type)
 			{
 			case Data8:
-				entry.text = formatString(".byt:%04X",data.size);
+				entry.text = formatString(L".byt:%04X",data.size);
 				break;
 			case Data16:
-				entry.text = formatString(".wrd:%04X",data.size);
+				entry.text = formatString(L".wrd:%04X",data.size);
 				break;
 			case Data32:
-				entry.text = formatString(".dbl:%04X",data.size);
+				entry.text = formatString(L".dbl:%04X",data.size);
 				break;
 			case DataAscii:
-				entry.text = formatString(".asc:%04X",data.size);
+				entry.text = formatString(L".asc:%04X",data.size);
 				break;
 			}
 
@@ -110,7 +110,7 @@ void SymbolData::writeNocashSym()
 
 	for (size_t i = 0; i < entries.size(); i++)
 	{
-		file.writeFormat(L"%08X %S\n",entries[i].address,entries[i].text.c_str());
+		file.writeFormat(L"%08X %s\n",entries[i].address,entries[i].text);
 	}
 
 	file.write("\x1A");
@@ -130,7 +130,7 @@ void SymbolData::addLabel(int memoryAddress, const std::wstring& name)
 	
 	SymDataSymbol sym;
 	sym.address = memoryAddress;
-	sym.name = convertWStringToUtf8(name);
+	sym.name = name;
 
 	for (SymDataSymbol& symbol: modules[currentModule].symbols)
 	{

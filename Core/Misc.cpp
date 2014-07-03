@@ -69,6 +69,11 @@ void Logger::printLine(const std::string& text)
 	printf("\n");
 }
 
+void Logger::print(const std::wstring& text)
+{
+	wprintf(text.c_str());
+}
+
 void Logger::printError(ErrorType type, const std::wstring& text)
 {
 	std::wstring errorText = formatError(type,text);

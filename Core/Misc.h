@@ -17,7 +17,16 @@ public:
 		std::wstring message = formatString(text,args...);
 		printLine(message);
 	}
+
+	static void print(const std::wstring& text);
 	
+	template <typename... Args>
+	static void print(const wchar_t* text, const Args&... args)
+	{
+		std::wstring message = formatString(text,args...);
+		print(message);
+	}
+
 	static void printError(ErrorType type, const std::wstring& text);
 	static void queueError(ErrorType type, const std::wstring& text);
 

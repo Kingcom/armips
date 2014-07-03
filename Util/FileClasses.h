@@ -64,7 +64,13 @@ public:
 	void writeLine(const char* line);
 	void writeLine(const std::string& line);
 	void writeLines(StringList& list);
-	void writeFormat(wchar_t* format, ...);
+	
+	template <typename... Args>
+	void writeFormat(const wchar_t* text, const Args&... args)
+	{
+		std::wstring message = formatString(text,args...);
+		write(message);
+	}
 
 	bool hasError() { return errorText.size() != 0 && !errorRetrieved; };
 	const std::wstring& getErrorText() { errorRetrieved = true; return errorText; };
