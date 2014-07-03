@@ -2,43 +2,6 @@
 #include "FileManager.h"
 #include "Misc.h"
 
-bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
-{
-#ifdef _WIN32
-	return CopyFileW(existingFile.c_str(),newFile.c_str(),false) != FALSE;
-#else
-	unsigned char buffer[BUFSIZ];
-	bool error = false;
-
-	FILE* input = fopen(convertWStringToUtf8(existingFile).c_str(),"rb");
-	FILE* output = fopen(convertWStringToUtf8(newFile).c_str(),"wb");
-
-	if (input == NULL || output == NULL)
-		return false;
-
-	size_t n;
-	while ((n = fread(buffer,1,BUFSIZ,input)) > 0)
-	{
-		if (fwrite(buffer,1,n,output) != n)
-			error = true;
-	}
-
-	fclose(input);
-	fclose(output);
-	return error;
-#endif
-}
-
-bool deleteFile(const std::wstring& fileName)
-{
-#ifdef _WIN32
-	return DeleteFileW(fileName.c_str()) != FALSE;
-#else
-	return unlink(convertWStringToUtf8(fileName).c_str()) == 0;
-#endif
-}
-
-
 GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int headerSize, bool overwrite)
 {
 	this->fileName = fileName;

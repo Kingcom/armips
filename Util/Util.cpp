@@ -151,6 +151,46 @@ bool fileExists(const std::wstring& strFilename)
 	return intStat == 0;
 }
 
+bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
+{
+#ifdef _WIN32
+	return CopyFileW(existingFile.c_str(),newFile.c_str(),false) != FALSE;
+#else
+	unsigned char buffer[BUFSIZ];
+	bool error = false;
+
+	std::string existingUtf8 = convertWStringToUtf8(existingFile);
+	std::string newUtf8 = convertWStringToUtf8(newFile);
+
+	FILE* input = fopen(existingUtf8.c_str(),"rb");
+	FILE* output = fopen(newUtf8.c_str(),"wb");
+
+	if (input == NULL || output == NULL)
+		return false;
+
+	size_t n;
+	while ((n = fread(buffer,1,BUFSIZ,input)) > 0)
+	{
+		if (fwrite(buffer,1,n,output) != n)
+			error = true;
+	}
+
+	fclose(input);
+	fclose(output);
+	return error;
+#endif
+}
+
+bool deleteFile(const std::wstring& fileName)
+{
+#ifdef _WIN32
+	return DeleteFileW(fileName.c_str()) != FALSE;
+#else
+	std::string utf8 = convertWStringToUtf8(fileName);
+	return unlink(utf8.c_str()) == 0;
+#endif
+}
+
 std::wstring toWLowercase(const std::string& str)
 {
 	std::wstring result;
