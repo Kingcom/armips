@@ -8,7 +8,7 @@ struct SymDataSymbol
 	std::wstring name;
 	int address;
 	
-	bool operator<(SymDataSymbol& other)
+	bool operator<(const SymDataSymbol& other) const
 	{
 		return address < other.address;
 	}
@@ -20,7 +20,7 @@ struct SymDataAddressInfo
 	int fileIndex;
 	int lineNumber;
 	
-	bool operator<(SymDataAddressInfo& other)
+	bool operator<(const SymDataAddressInfo& other) const
 	{
 		return address < other.address;
 	}
@@ -31,7 +31,7 @@ struct SymDataFunction
 	int address;
 	int size;
 	
-	bool operator<(SymDataFunction& other)
+	bool operator<(const SymDataFunction& other) const
 	{
 		return address < other.address;
 	}
@@ -43,7 +43,7 @@ struct SymDataData
 	int size;
 	int type;
 	
-	bool operator<(SymDataData& other)
+	bool operator<(const SymDataData& other) const
 	{
 		return address < other.address;
 	}

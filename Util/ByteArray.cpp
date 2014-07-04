@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "ByteArray.h"
-#include <windows.h>
 #include "Util/Util.h"
 
 ByteArray::ByteArray()

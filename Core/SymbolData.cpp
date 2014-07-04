@@ -30,7 +30,7 @@ struct NocashSymEntry
 	int address;
 	std::wstring text;
 
-	bool operator<(NocashSymEntry& other)
+	bool operator<(const NocashSymEntry& other) const
 	{
 		if (address != other.address)
 			return address < other.address;

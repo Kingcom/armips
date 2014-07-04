@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "Arm.h"
 #include "Core/FileManager.h"
+#include <cstddef>
 
 const char ArmConditions[16][3] = {
 	"eq","ne","cs","cc","mi","pl","vs","vc","hi","ls","ge","lt","gt","le","","nv"

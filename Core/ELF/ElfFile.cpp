@@ -5,7 +5,7 @@
 #include "Core/Misc.h"
 
 #ifndef _WIN32
-#define strcasecmp _stricmp
+#define _stricmp strcasecmp
 #endif
 
 static bool stringEqualInsensitive(const std::string& a, const std::string& b)
@@ -116,7 +116,7 @@ void ElfSegment::writeData(ByteArray& output)
 	}
 
 	// align segment to alignment of first section
-	int align = max(sections[0]->getAlignment(),16);
+	int align = std::max<int>(sections[0]->getAlignment(),16);
 	output.alignSize(align);
 
 	header.p_offset = output.size();
@@ -234,7 +234,7 @@ void ElfFile::determinePartOrder()
 	struct PartsSort {
 		int offset;
 		ElfPart type;
-		bool operator<(PartsSort& other) { return offset < other.offset; };
+		bool operator<(const PartsSort& other) const { return offset < other.offset; };
 	};
 
 	PartsSort temp[4] = {

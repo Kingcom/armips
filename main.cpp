@@ -20,7 +20,7 @@ int wmain(int argc, wchar_t* argv[])
 		return !runTests(argv[1]);
 #endif
 
-	Logger::printLine("ARMIPS Assembler v0.7d ("__DATE__" "__TIME__") by Kingcom");
+	Logger::printLine("ARMIPS Assembler v0.7d (" __DATE__ " " __TIME__ ") by Kingcom");
 	StringList arguments = getStringListFromArray(argv,argc);
 
 	if (arguments.size() < 2)

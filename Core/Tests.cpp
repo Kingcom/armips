@@ -5,6 +5,10 @@
 #include "Core/Common.h"
 #include "Assembler.h"
 
+#ifndef _WIN32
+#include <dirent.h>
+#endif
+
 StringList TestRunner::listSubfolders(const std::wstring& dir)
 {
 	StringList result;
@@ -30,7 +34,24 @@ StringList TestRunner::listSubfolders(const std::wstring& dir)
 		} while (FindNextFile(hFind,&findFileData));
 	}
 #else
+	std::string utf8 = convertWStringToUtf8(dir);
+	auto directory = opendir(utf8.c_str());
 
+	if (directory != NULL)
+	{
+		auto elem = readdir(directory);
+		while (elem != NULL)
+		{
+			if(elem->d_type == DT_DIR)
+			{
+				std::wstring dirName = convertUtf8ToWString(elem
+				if (dirName != L"." && dirName != L"..")
+					result.push_back(dirName);
+			}
+
+			elem = readdir(directory);
+		}
+	}
 #endif
 
 	return result;
@@ -61,6 +82,19 @@ void TestRunner::changeConsoleColor(ConsoleColors color)
 		break;
 	case ConsoleColors::Green:
 		SetConsoleTextAttribute(hstdout,(1 << 1) | (1 << 3));
+		break;
+	}
+#else
+	switch (color)
+	{
+	case ConsoleColors::White:
+		Logger::print(L"\033[1;0m");
+		break;
+	case ConsoleColors::Red:
+		Logger::print(L"\033[1;31m");
+		break;
+	case ConsoleColors::Green:
+		Logger::print(L"\033[1;32m");
 		break;
 	}
 #endif

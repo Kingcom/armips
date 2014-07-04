@@ -3,6 +3,10 @@
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 
+#ifdef _WIN32
+#define snprintf sprintf_s
+#endif
+
 const tExpressionCleanOpcode ExpressionCleanOpcodes[EXOP_COUNT] = {
 	{"", 0},	{"(",0},	{")",0},
 	{"|+",1},	{"|-",1},	{"~",1},
@@ -484,7 +488,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			{
 				if (Errors != NULL)
 				{
-					sprintf_s(str,255,"Undefined label \"%ls\"",label->getName().c_str());
+					snprintf(str,255,"Undefined label \"%ls\"",label->getName().c_str());
 					Errors->AddEntry(str);
 				}
 				Error = true;

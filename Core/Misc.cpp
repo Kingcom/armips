@@ -60,7 +60,7 @@ void Logger::clear()
 void Logger::printLine(const std::wstring& text)
 {
 	wprintf(text.c_str());
-	printf("\n");
+	wprintf(L"\n");
 }
 
 void Logger::printLine(const std::string& text)
