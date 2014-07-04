@@ -65,8 +65,8 @@ public:
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 private:
-	void FormatOpcode(char* Dest, char* Source);
-	void FormatInstruction(char* encoding, char* dest);
+	void FormatOpcode(char* Dest, const char* Source);
+	void FormatInstruction(const char* encoding, char* dest);
 	bool ParseOpcode(char* Encoding, char* Line);
 	bool LoadEncoding(const tArmOpcode& SourceOpcode, char* Line);
 	bool ParseShift(char*& Line, int mode);

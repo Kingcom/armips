@@ -18,7 +18,7 @@ CMipsInstruction::~CMipsInstruction()
 		delete subInstruction;
 }
 
-bool CMipsInstruction::Load(char* Name, char* Params)
+bool CMipsInstruction::Load(const char* Name, const char* Params)
 {
 	bool paramfail = false;
 	NoCheckError = false;
@@ -60,12 +60,12 @@ bool CMipsInstruction::Load(char* Name, char* Params)
 }
 
 
-bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, char* Line)
+bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, const char* Line)
 {
 	vfpuSize = -1;
 
-	char* SourceEncoding = SourceOpcode.name;
-	while (*SourceEncoding != NULL)
+	const char* SourceEncoding = SourceOpcode.name;
+	while (*SourceEncoding != 0)
 	{
 		if (*Line == 0) return false;
 
@@ -102,7 +102,7 @@ bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, char* Line)
 	return true;
 }
 
-bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
+bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char* Line)
 {
 	int RetLen;
 	CStringList List;
@@ -119,14 +119,14 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line)
 			vfpuSize = 3;
 	}
 
-	char* SourceEncoding = SourceOpcode.encoding;
-	char* OriginalLine = Line;
+	const char* SourceEncoding = SourceOpcode.encoding;
+	const char* OriginalLine = Line;
 
 	while (*Line == ' ' || *Line == '\t') Line++;
 
 	if (!(*SourceEncoding == 0 && *Line == 0))
 	{
-		while (*SourceEncoding != NULL)
+		while (*SourceEncoding != 0)
 		{
 			while (*Line == ' ' || *Line == '\t') Line++;
 			if (*Line == 0) return false;
@@ -281,7 +281,7 @@ void CMipsInstruction::setOmittedRegisters()
 
 int CMipsInstruction::formatOpcodeName(char* dest)
 {
-	char* encoding = Opcode.name;
+	const char* encoding = Opcode.name;
 	char* start = dest;
 
 	while (*encoding != 0)
@@ -303,7 +303,7 @@ int CMipsInstruction::formatOpcodeName(char* dest)
 
 void CMipsInstruction::formatParameters(char* dest)
 {
-	char* encoding = Opcode.encoding;
+	const char* encoding = Opcode.encoding;
 
 	while (*encoding != 0)
 	{

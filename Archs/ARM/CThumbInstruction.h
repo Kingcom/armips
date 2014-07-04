@@ -30,7 +30,7 @@ public:
 	int GetSize() { return OpcodeSize; };
 private:
 	bool LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line);
-	void FormatInstruction(char* encoding,tThumbOpcodeVariables& Vars, char* dest);
+	void FormatInstruction(const char* encoding,tThumbOpcodeVariables& Vars, char* dest);
 	void WriteInstruction(unsigned short encoding);
 	tThumbOpcodeVariables Vars;
 	tThumbOpcode Opcode;

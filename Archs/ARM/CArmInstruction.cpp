@@ -765,7 +765,7 @@ bool CArmInstruction::Validate()
 	return false;
 }
 
-void CArmInstruction::FormatOpcode(char* Dest, char* Source)
+void CArmInstruction::FormatOpcode(char* Dest, const char* Source)
 {
 	while (*Source != 0)
 	{
@@ -806,7 +806,7 @@ void CArmInstruction::FormatOpcode(char* Dest, char* Source)
 	*Dest = 0;
 }
 
-void CArmInstruction::FormatInstruction(char* encoding, char* dest)
+void CArmInstruction::FormatInstruction(const char* encoding, char* dest)
 {
 	while (*encoding != 0)
 	{

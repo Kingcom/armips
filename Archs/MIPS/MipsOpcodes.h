@@ -60,7 +60,7 @@
 
 struct MipsArchDefinition
 {
-	char* name;
+	const char* name;
 	int supportSets;
 	int excludeMask;
 	int flags;
@@ -69,8 +69,8 @@ struct MipsArchDefinition
 extern const MipsArchDefinition mipsArchs[];
 
 typedef struct {
-	char* name;
-	char* encoding;
+	const char* name;
+	const char* encoding;
 	int destencoding;
 	int archs;
 	int flags;

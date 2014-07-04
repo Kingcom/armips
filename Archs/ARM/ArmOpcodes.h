@@ -55,8 +55,8 @@
 #define ARM_PCR			   0x100000000	// pc relative
 
 typedef struct {
-	char* name;
-	char* mask;
+	const char* name;
+	const char* mask;
 	unsigned int encoding;
 	unsigned int type:4;
 	u64 flags;

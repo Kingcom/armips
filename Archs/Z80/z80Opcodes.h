@@ -2,8 +2,8 @@
 
 typedef struct
 {
-	char* name;
-	char* mask;
+	const char* name;
+	const char* mask;
 	unsigned char Opcodes[2];
 	unsigned char OpcodeLen;
 	unsigned char TotalLen;

@@ -39,7 +39,7 @@ typedef bool (*directivefunc)(ArgumentList&,int);
 #define DIRECTIVE_STR_NOTERMINATION	0x00000001
 
 typedef struct {
-	wchar_t* name;
+	const wchar_t* name;
 	short minparam;
 	short maxparam;
 	directivefunc Function;

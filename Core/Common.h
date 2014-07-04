@@ -41,7 +41,7 @@ typedef struct {
 	int validationPasses;
 } tGlobal;
 
-typedef enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NOTICE };
+enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NOTICE };
 
 extern tGlobal Global;
 extern CArchitecture* Arch;

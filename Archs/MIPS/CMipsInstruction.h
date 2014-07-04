@@ -4,7 +4,7 @@
 #include "MipsOpcodes.h"
 #include "Core/MathParser.h"
 
-typedef enum MipsImmediateType { MIPS_NOIMMEDIATE, MIPS_IMMEDIATE5,
+enum MipsImmediateType { MIPS_NOIMMEDIATE, MIPS_IMMEDIATE5,
 	MIPS_IMMEDIATE16, MIPS_IMMEDIATE20, MIPS_IMMEDIATE26 };
 
 struct MipsImmediate
@@ -46,15 +46,15 @@ class CMipsInstruction: public CAssemblerCommand
 public:
 	CMipsInstruction();
 	~CMipsInstruction();
-	bool Load(char* Name, char* Params);
+	bool Load(const char* Name, const char* Params);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 private:
 	void encodeNormal();
 	void encodeVfpu();
-	bool parseOpcode(const tMipsOpcode& SourceOpcode, char* Line);
-	bool LoadEncoding(const tMipsOpcode& SourceOpcode, char* Line);
+	bool parseOpcode(const tMipsOpcode& SourceOpcode, const char* Line);
+	bool LoadEncoding(const tMipsOpcode& SourceOpcode, const char* Line);
 	void setOmittedRegisters();
 	int formatOpcodeName(char* dest);
 	void formatParameters(char* dest);

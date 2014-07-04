@@ -75,6 +75,6 @@ const tZ80Opcode Z80Opcodes[] = {
 	{ "jp",		"c,K",		{ 0xDA, 0x00 }, 1, 3, 0 },
 	{ "jp",		"(hl)",		{ 0xE9, 0x00 }, 1, 1, 0 },
 */
-	{ NULL,		NULL,	NULL }
+	{ NULL,		NULL,	0 }
 };
 
