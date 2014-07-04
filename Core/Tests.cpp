@@ -44,7 +44,7 @@ StringList TestRunner::listSubfolders(const std::wstring& dir)
 		{
 			if(elem->d_type == DT_DIR)
 			{
-				std::wstring dirName = convertUtf8ToWString(elem
+				std::wstring dirName = convertUtf8ToWString(elem->d_name);
 				if (dirName != L"." && dirName != L"..")
 					result.push_back(dirName);
 			}
