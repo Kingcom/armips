@@ -2,6 +2,10 @@
 #include "Util.h"
 #include <sys/stat.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 std::wstring convertUtf8ToWString(const char* source)
 {
 	std::wstring result;
@@ -218,6 +222,30 @@ FILE* openFile(const std::wstring& fileName, OpenFileMode mode)
 #endif
 
 	return NULL;
+}
+
+std::wstring getCurrentDirectory()
+{
+#ifdef _WIN32
+	wchar_t dir[MAX_PATH];
+	_wgetcwd(dir,MAX_PATH-1);
+	return dir;
+#else
+	char* dir = getcwd(NULL,0);
+	std::wstring result = convertUtf8ToWString(dir);
+	free(dir);
+	return result;
+#endif
+}
+
+void changeDirectory(const std::wstring& dir)
+{
+#ifdef _WIN32
+	_wchdir(dir.c_str());
+#else
+	std::string utf8 = convertWStringToUtf8(dir);
+	chdir(utf8.c_str());
+#endif
 }
 
 std::wstring toWLowercase(const std::string& str)

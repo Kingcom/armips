@@ -33,3 +33,5 @@ inline unsigned short swapEndianness16(unsigned short value)
 
 enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
 FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
+std::wstring getCurrentDirectory();
+void changeDirectory(const std::wstring& dir);

@@ -5,19 +5,17 @@
 #include "Core/Common.h"
 #include "Assembler.h"
 
-#ifdef _WIN32
-
-#include <direct.h>
-
-StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/")
+StringList TestRunner::listSubfolders(const std::wstring& dir)
 {
-	StringList tests;
-
+	StringList result;
+	
+#ifdef _WIN32
 	WIN32_FIND_DATA findFileData;
 	HANDLE hFind;
 
-	std::wstring m = dir + prefix + L"*";
+	std::wstring m = dir + L"*";
 	hFind = FindFirstFile(m.c_str(),&findFileData);
+	
 	if (hFind != INVALID_HANDLE_VALUE) 
 	{
 		do
@@ -26,32 +24,84 @@ StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"
 			{
 				std::wstring dirName = findFileData.cFileName;
 				if (dirName != L"." && dirName != L"..")
-				{
-					std::wstring testName = prefix + dirName;
-					std::wstring fileName = dir + testName + L"/" + dirName + L".asm";
-
-					if (fileExists(fileName))
-					{
-						if (testName[0] == L'/')
-							testName.erase(0,1);
-						tests.push_back(testName);
-					} else {
-						StringList subTests = getTestsList(dir,testName+L"/");
-						tests.insert(tests.end(),subTests.begin(),subTests.end());
-					}
-				}
+					result.push_back(dirName);
 			}
+			
 		} while (FindNextFile(hFind,&findFileData));
+	}
+#else
+
+#endif
+
+	return result;
+}
+
+void TestRunner::initConsole()
+{
+#ifdef _WIN32
+	// initialize console
+	hstdin = GetStdHandle(STD_INPUT_HANDLE);
+	hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	// Remember how things were when we started
+	GetConsoleScreenBufferInfo(hstdout,&csbi);
+#endif
+}
+
+void TestRunner::changeConsoleColor(ConsoleColors color)
+{
+#ifdef _WIN32
+	switch (color)
+	{
+	case ConsoleColors::White:
+		SetConsoleTextAttribute(hstdout,0x7);
+		break;
+	case ConsoleColors::Red:
+		SetConsoleTextAttribute(hstdout,(1 << 2) | (1 << 3));
+		break;
+	case ConsoleColors::Green:
+		SetConsoleTextAttribute(hstdout,(1 << 1) | (1 << 3));
+		break;
+	}
+#endif
+}
+
+void TestRunner::restoreConsole()
+{
+#ifdef _WIN32
+	FlushConsoleInputBuffer(hstdin);
+	SetConsoleTextAttribute(hstdout,csbi.wAttributes);
+#endif
+}
+
+StringList TestRunner::getTestsList(const std::wstring& dir, const std::wstring& prefix)
+{
+	StringList tests;
+
+	StringList dirs = listSubfolders(dir+prefix);
+	for (std::wstring& dirName: dirs)
+	{
+		std::wstring testName = prefix + dirName;
+		std::wstring fileName = dir + testName + L"/" + dirName + L".asm";
+
+		if (fileExists(fileName))
+		{
+			if (testName[0] == L'/')
+				testName.erase(0,1);
+			tests.push_back(testName);
+		} else {
+			StringList subTests = getTestsList(dir,testName+L"/");
+			tests.insert(tests.end(),subTests.begin(),subTests.end());
+		}
 	}
 
 	return tests;
 }
 
-bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString)
+bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString)
 {
-	wchar_t oldDir[MAX_PATH];
-	_wgetcwd(oldDir,MAX_PATH-1);
-	_wchdir(dir.c_str());
+	std::wstring oldDir = getCurrentDirectory();
+	changeDirectory(dir);
 
 	AssemblerArguments args;
 	StringList errors;
@@ -117,11 +167,11 @@ bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wst
 		}
 	}
 
-	_wchdir(oldDir);
+	changeDirectory(oldDir);
 	return result;
 }
 
-bool runTests(const std::wstring& dir)
+bool TestRunner::runTests(const std::wstring& dir)
 {
 	StringList tests = getTestsList(dir);
 	if (tests.empty())
@@ -130,19 +180,13 @@ bool runTests(const std::wstring& dir)
 		return true;
 	}
 
-	// initialize console
-	HANDLE hstdin = GetStdHandle(STD_INPUT_HANDLE);
-	HANDLE hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	WORD index = 0;
-
-	// Remember how things were when we started
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(hstdout,&csbi);
+	initConsole();
 
 	int successCount = 0;
 	for (size_t i = 0; i < tests.size(); i++)
 	{
-		SetConsoleTextAttribute(hstdout,0x7);
+		changeConsoleColor(ConsoleColors::White);
+
 		std::wstring line = formatString(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
 		Logger::print(L"%-50s",line);
 
@@ -153,31 +197,25 @@ bool runTests(const std::wstring& dir)
 		std::wstring testName = n == tests[i].npos ? tests[i] : tests[i].substr(n+1);
 		if (executeTest(path,testName,errors) == false)
 		{
-			SetConsoleTextAttribute(hstdout,(1 << 2) | (1 << 3));
+			changeConsoleColor(ConsoleColors::Red);
 			Logger::printLine(L"FAILED");
 			Logger::print(L"%s",errors);
 		} else {
-			SetConsoleTextAttribute(hstdout,(1 << 1) | (1 << 3));
+			changeConsoleColor(ConsoleColors::Green);
 			Logger::printLine(L"PASSED");
 			successCount++;
 		}
 	}
 	
-	SetConsoleTextAttribute(hstdout,0x7);
+	changeConsoleColor(ConsoleColors::White);
 	Logger::printLine(L"\n%d out of %d tests passed.",successCount,tests.size());
 	
-	// restore console
-	FlushConsoleInputBuffer(hstdin);
-	SetConsoleTextAttribute(hstdout,csbi.wAttributes);
-
+	restoreConsole();
 	return successCount == tests.size();
 }
 
-#else
-
 bool runTests(const std::wstring& dir)
 {
-	return false;
+	TestRunner runner;
+	return runner.runTests(dir);
 }
-
-#endif
