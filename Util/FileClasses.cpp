@@ -922,11 +922,11 @@ void TextFile::writeCharacter(wchar_t character)
 	{
 		if (character < 0x800)
 		{
-			buffer[0] = 0xC0 | (character >> 6) & 0x1F;
+			buffer[0] = 0xC0 | ((character >> 6) & 0x1F);
 			buffer[1] = 0x80 | (character & 0x3F);
 			length = 2;
 		} else {
-			buffer[0] = 0xE0 | (character >> 12) & 0xF;
+			buffer[0] = 0xE0 | ((character >> 12) & 0xF);
 			buffer[1] = 0x80 | ((character >> 6) & 0x3F);
 			buffer[2] = 0x80 | (character & 0x3F);
 			length = 3;

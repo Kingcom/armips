@@ -60,10 +60,10 @@ std::string convertWStringToUtf8(const std::wstring& source)
 			result.push_back(character & 0x7F);
 		} else if (character < 0x800)
 		{
-			result.push_back(0xC0 | (character >> 6) & 0x1F);
+			result.push_back(0xC0 | ((character >> 6) & 0x1F));
 			result.push_back(0x80 | (character & 0x3F));
 		} else {
-			result.push_back(0xE0 | (character >> 12) & 0xF);
+			result.push_back(0xE0 | ((character >> 12) & 0xF));
 			result.push_back(0x80 | ((character >> 6) & 0x3F));
 			result.push_back(0x80 | (character & 0x3F));
 		}
