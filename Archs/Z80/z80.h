@@ -3,7 +3,7 @@
 #include "Util/CommonClasses.h"
 
 typedef struct {
-	char* name;
+	const char* name;
 	short num;
 	short len;
 } tZ80Register;

@@ -12,8 +12,8 @@
 CMipsArchitecture Mips;
 
 const tMipsRegister MipsRegister[] = {
-	{ "r0", 0, 2 }, { "zero", 0, 4}, { "$0", 0, 2 },
-	{ "at", 1, 2 }, { "r1", 1, 2 }, { "$1", 1, 2 },
+	{ "r0", 0, 2 }, { "zero", 0, 4}, { "$0", 0, 2 }, { "$zero", 0, 5 },
+	{ "at", 1, 2 }, { "r1", 1, 2 }, { "$1", 1, 2 }, { "$at", 1, 3 },
 	{ "v0", 2, 2 }, { "r2", 2, 2 }, { "$v0", 2, 3 },
 	{ "v1", 3, 2 }, { "r3", 3, 2 }, { "$v1", 3, 3 },
 	{ "a0", 4, 2 }, { "r4", 4, 2 }, { "$a0", 4, 3 },
@@ -345,7 +345,7 @@ void CMipsArchitecture::SetLoadDelay(bool Delay, int Register)
 	LoadDelayRegister = Register;
 }
 
-bool MipsGetRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
+bool MipsGetRegister(const char* source, int& RetLen, MipsRegisterInfo& Result)
 {
 	for (int z = 0; MipsRegister[z].name != NULL; z++)
 	{
@@ -366,7 +366,7 @@ bool MipsGetRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
 	return false;
 }
 
-int MipsGetRegister(char* source, int& RetLen)
+int MipsGetRegister(const char* source, int& RetLen)
 {
 	for (int z = 0; MipsRegister[z].name != NULL; z++)
 	{
@@ -385,7 +385,7 @@ int MipsGetRegister(char* source, int& RetLen)
 }
 
 
-bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
+bool MipsGetFloatRegister(const char* source, int& RetLen, MipsRegisterInfo& Result)
 {
 	for (int z = 0; MipsFloatRegister[z].name != NULL; z++)
 	{
@@ -406,7 +406,7 @@ bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
 	return false;
 }
 
-bool MipsGetPs2VectorRegister(char* source, int& RetLen, MipsRegisterInfo& Result)
+bool MipsGetPs2VectorRegister(const char* source, int& RetLen, MipsRegisterInfo& Result)
 {
 	for (int z = 0; MipsPs2Cop2FpRegister[z].name != NULL; z++)
 	{
@@ -427,7 +427,7 @@ bool MipsGetPs2VectorRegister(char* source, int& RetLen, MipsRegisterInfo& Resul
 	return false;
 }
 
-int MipsGetFloatRegister(char* source, int& RetLen)
+int MipsGetFloatRegister(const char* source, int& RetLen)
 {
 	for (int z = 0; MipsFloatRegister[z].name != NULL; z++)
 	{
@@ -446,7 +446,7 @@ int MipsGetFloatRegister(char* source, int& RetLen)
 }
 
 
-bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen)
+bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen)
 {
 	char Buffer[512];
 	int BufferPos = 0;
@@ -511,7 +511,7 @@ static bool decodeDigit(char digit, int& dest)
 	return false;
 }
 
-bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size)
+bool MipsGetVFPURegister(const char* line, MipsVFPURegister& reg, int size)
 {
 	int mtx,col,row;
 	if (decodeDigit(line[1],mtx) == false) return false;

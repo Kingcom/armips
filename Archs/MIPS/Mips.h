@@ -55,7 +55,7 @@ private:
 };
 
 typedef struct {
-	char* name;
+	const char* name;
 	short num;
 	short len;
 } tMipsRegister;
@@ -77,13 +77,13 @@ struct MipsVFPURegister
 extern const tMipsRegister MipsRegister[];
 extern CMipsArchitecture Mips;
 
-bool MipsGetRegister(char* source, int& RetLen, MipsRegisterInfo& Result);
-int MipsGetRegister(char* source, int& RetLen);
-bool MipsGetFloatRegister(char* source, int& RetLen, MipsRegisterInfo& Result);
-bool MipsGetPs2VectorRegister(char* source, int& RetLen, MipsRegisterInfo& Result);
-int MipsGetFloatRegister(char* source, int& RetLen);
-bool MipsCheckImmediate(char* Source, MathExpression& Dest, int& RetLen);
-bool MipsGetVFPURegister(char* line, MipsVFPURegister& reg, int size);
+bool MipsGetRegister(const char* source, int& RetLen, MipsRegisterInfo& Result);
+int MipsGetRegister(const char* source, int& RetLen);
+bool MipsGetFloatRegister(const char* source, int& RetLen, MipsRegisterInfo& Result);
+bool MipsGetPs2VectorRegister(const char* source, int& RetLen, MipsRegisterInfo& Result);
+int MipsGetFloatRegister(const char* source, int& RetLen);
+bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen);
+bool MipsGetVFPURegister(const char* line, MipsVFPURegister& reg, int size);
 
 class MipsElfRelocator: public IElfRelocator
 {

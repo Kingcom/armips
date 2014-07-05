@@ -18,14 +18,14 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 	CStringList List;
 	bool Immediate = false;
 
-	char* SourceEncoding = SourceOpcode.mask;
+	const char* SourceEncoding = SourceOpcode.mask;
 	char* OriginalLine = Line;
 
 	while (*Line == ' ' || *Line == '\t') Line++;
 
 	if (!(*SourceEncoding == 0 && *Line == 0))
 	{
-		while (*SourceEncoding != NULL)
+		while (*SourceEncoding != 0)
 		{
 			while (*Line == ' ' || *Line == '\t') Line++;
 

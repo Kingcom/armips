@@ -10,7 +10,7 @@
 #define ARM_SHIFT_RRX		0x04
 
 typedef struct {
-	char* name;
+	const char* name;
 	short num;
 	short len;
 } tArmRegister;

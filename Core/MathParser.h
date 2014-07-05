@@ -61,7 +61,7 @@ private:
 
 
 
-typedef enum eExpressionCommand { EXCOMM_OP, EXCOMM_CONST, EXCOMM_VAR, EXCOMM_RAMPOS };
+enum eExpressionCommand { EXCOMM_OP, EXCOMM_CONST, EXCOMM_VAR, EXCOMM_RAMPOS };
 
 class Label;
 

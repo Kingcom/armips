@@ -39,8 +39,8 @@
 #define THUMB_NEGATIVE_IMMEDIATE	0x00010000
 
 typedef struct {
-	char* name;
-	char* mask;
+	const char* name;
+	const char* mask;
 	unsigned short encoding;
 	unsigned char type:5;
 	unsigned char length:3;

@@ -6,7 +6,7 @@
 #include "MipsOpcodes.h"
 #include "CMipsMacro.h"
 
-void MipsMacroLoadOpcode(CMipsInstruction& Opcode, char* name, char* argformat, ...)
+void MipsMacroLoadOpcode(CMipsInstruction& Opcode, const char* name, const char* argformat, ...)
 {
 	char str[1024];
 	va_list args;
@@ -386,16 +386,16 @@ const tMipsMacro MipsMacros[] = {
 	{ "ror",	"d,s,t",	4,	&MipsMacroRotate,			MIPSM_RIGHT },
 	{ "ror",	"d,s,i",	4,	&MipsMacroRotate,			MIPSM_RIGHT|MIPSM_IMM },
 
-	{ NULL, NULL, NULL, 0 }
+	{ NULL, NULL, 0, NULL, 0 }
 };
 
-bool MipsCheckMacroParsing(char* Opcode, char* Arguments, tMipsMacroVars& Vars)
+bool MipsCheckMacroParsing(const char* Opcode, const char* Arguments, tMipsMacroVars& Vars)
 {
 	int RetLen;
 
 	while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
 	if (*Opcode == 0 && *Arguments == 0) return true;
-	while (*Opcode != NULL)
+	while (*Opcode != 0)
 	{
 		while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
 		if (*Arguments == 0) return false;

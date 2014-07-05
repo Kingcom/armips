@@ -48,8 +48,8 @@ typedef struct {
 typedef int (*mipsmacrofunc)(tMipsMacroValues&,int,CMipsInstruction*);
 
 typedef struct {
-	char* name;
-	char* args;
+	const char* name;
+	const char* args;
 	int MaxOpcodes;
 	mipsmacrofunc Function;
 	int flags;

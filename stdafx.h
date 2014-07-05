@@ -2,13 +2,15 @@
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
+#undef __STRICT_ANSI__
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
-#include <stdio.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdarg>
+#include <cctype>
+#include <cstring>
+#include <cmath>
 
 #include <sstream>
 #include <iomanip>

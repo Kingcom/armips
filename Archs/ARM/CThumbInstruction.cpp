@@ -71,7 +71,7 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 	CStringList List;
 	bool Immediate = false;
 
-	char* SourceEncoding = SourceOpcode.mask;
+	const char* SourceEncoding = SourceOpcode.mask;
 	char* OriginalLine = Line;
 
 	while (*Line == ' ' || *Line == '\t') Line++;
@@ -79,7 +79,7 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 
 	if (!(*SourceEncoding == 0 && *Line == 0))
 	{
-		while (*SourceEncoding != NULL)
+		while (*SourceEncoding != 0)
 		{
 			while (*Line == ' ' || *Line == '\t') Line++;
 //			if (*Line == 0) return false;
@@ -424,7 +424,7 @@ void CThumbInstruction::Encode()
 	}
 }
 
-void CThumbInstruction::FormatInstruction(char* encoding,tThumbOpcodeVariables& Vars, char* dest)
+void CThumbInstruction::FormatInstruction(const char* encoding,tThumbOpcodeVariables& Vars, char* dest)
 {
 	while (*encoding != 0)
 	{
