@@ -41,36 +41,36 @@ public:
 	SymbolTable();
 	~SymbolTable();
 	void clear();
-	bool symbolExists(const std::wstring& symbol, int file, int section);
+	bool symbolExists(const std::wstring& symbol, unsigned int file, unsigned int section);
 	static bool isValidSymbolName(const std::wstring& symbol);
 	static bool isValidSymbolCharacter(wchar_t character, bool first = false);
 	static bool isLocalSymbol(const std::wstring& symbol, size_t pos = 0) { return symbol.size() >= pos+2 && symbol[pos+0] == '@' && symbol[pos+1] == '@'; };
 	static bool isStaticSymbol(const std::wstring& symbol, size_t pos = 0) { return symbol.size() >= pos+1 && symbol[pos+0] == '@'; };
 	static bool isGlobalSymbol(const std::wstring& symbol, size_t pos = 0) { return !isLocalSymbol(symbol) && !isStaticSymbol(symbol); };
 
-	Label* getLabel(const std::wstring& symbol, int file, int section);
-	bool addEquation(const std::wstring& name, int file, int section, std::wstring& replacement);
-	std::wstring insertEquations(const std::wstring& line, int file, int section);
+	Label* getLabel(const std::wstring& symbol, unsigned int file, unsigned int section);
+	bool addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement);
+	std::wstring insertEquations(const std::wstring& line, unsigned int file, unsigned int section);
 
 	std::wstring getUniqueLabelName();
 	size_t getLabelCount() { return labels.size(); };
 	size_t getEquationCount() { return equations.size(); };
 private:
-	void setFileSectionValues(const std::wstring& symbol, int& file, int& section);
+	void setFileSectionValues(const std::wstring& symbol, unsigned int& file, unsigned int& section);
 
 	enum SymbolType { LabelSymbol, EquationSymbol };
 	struct SymbolInfo
 	{
 		SymbolType type;
-		int index;
+		unsigned int index;
 	};
 
 	struct Equation
 	{
 		std::wstring key;
 		std::wstring value;
-		int file;
-		int section;
+		unsigned int file;
+		unsigned int section;
 	};
 
 	std::map<SymbolKey,SymbolInfo> symbols;

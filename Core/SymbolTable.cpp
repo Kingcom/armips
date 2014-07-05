@@ -37,7 +37,7 @@ void SymbolTable::clear()
 	uniqueCount = 0;
 }
 
-void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, int& section)
+void SymbolTable::setFileSectionValues(const std::wstring& symbol, unsigned int& file, unsigned int& section)
 {
 	if (symbol[0] == '@')
 	{
@@ -52,7 +52,7 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, in
 	}
 }
 
-Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
+Label* SymbolTable::getLabel(const std::wstring& symbol, unsigned int file, unsigned int section)
 {
 	if (isValidSymbolName(symbol) == false)
 		return NULL;
@@ -79,7 +79,7 @@ Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 	return labels[it->second.index];
 }
 
-bool SymbolTable::symbolExists(const std::wstring& symbol, int file, int section)
+bool SymbolTable::symbolExists(const std::wstring& symbol, unsigned int file, unsigned int section)
 {
 	if (isValidSymbolName(symbol) == false)
 		return false;
@@ -128,7 +128,7 @@ bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 	return false;
 }
 
-bool SymbolTable::addEquation(const std::wstring& name, int file, int section, std::wstring& replacement)
+bool SymbolTable::addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement)
 {
 	if (isValidSymbolName(name) == false)
 		return false;
@@ -147,7 +147,7 @@ bool SymbolTable::addEquation(const std::wstring& name, int file, int section, s
 	return true;
 }
 
-std::wstring SymbolTable::insertEquations(const std::wstring& line, int file, int section)
+std::wstring SymbolTable::insertEquations(const std::wstring& line, unsigned int file, unsigned int section)
 {
 	std::wstring result;
 

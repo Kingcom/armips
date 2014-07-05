@@ -2,6 +2,7 @@
 #include "Misc.h"
 #include "Common.h"
 #include "Core/FileManager.h"
+#include <iostream>
 
 std::vector<Logger::QueueEntry> Logger::queue;
 std::vector<std::wstring> Logger::errors;
@@ -59,19 +60,17 @@ void Logger::clear()
 
 void Logger::printLine(const std::wstring& text)
 {
-	wprintf(text.c_str());
-	wprintf(L"\n");
+	std::wcout << text << std::endl;
 }
 
 void Logger::printLine(const std::string& text)
 {
-	printf(text.c_str());
-	printf("\n");
+	std::cout << text << std::endl;
 }
 
 void Logger::print(const std::wstring& text)
 {
-	wprintf(text.c_str());
+	std::wcout << text;
 }
 
 void Logger::printError(ErrorType type, const std::wstring& text)
