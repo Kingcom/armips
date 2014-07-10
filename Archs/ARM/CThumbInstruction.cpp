@@ -48,7 +48,7 @@ bool CThumbInstruction::Load(char *Name, char *Params)
 typedef struct {
 	char Character;
 	char MaxNum;
-	short StructOffset;
+	std::ptrdiff_t StructOffset;
 } tThumbRegisterLookup;
 
 #include <stddef.h>
@@ -92,7 +92,7 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 				{
 					if (RegisterLookup[i].Character == *SourceEncoding)
 					{
-						Info = (tArmRegisterInfo*)((int) (&Vars) + RegisterLookup[i].StructOffset);
+						Info = (tArmRegisterInfo*)((uintptr_t) (&Vars) + RegisterLookup[i].StructOffset);
 						if (ArmGetRegister(Line,RetLen,*Info) == false) return false;
 						if (Info->Number > RegisterLookup[i].MaxNum) return false;
 						Line += RetLen;
