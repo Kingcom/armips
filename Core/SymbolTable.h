@@ -62,7 +62,7 @@ private:
 	struct SymbolInfo
 	{
 		SymbolType type;
-		unsigned int index;
+		size_t index;
 	};
 
 	struct Equation

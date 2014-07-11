@@ -175,7 +175,7 @@ bool CArmInstruction::ParseShift(char*& Line, int mode)
 typedef struct {
 	char Character;
 	bool type;
-	short StructOffset;
+	std::ptrdiff_t StructOffset;
 } tArmRegisterLookup;
 
 const tArmRegisterLookup RegisterLookup[] = {
@@ -228,7 +228,7 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				{
 					if (RegisterLookup[i].Character == *SourceEncoding)
 					{
-						Info = (tArmRegisterInfo*)((int) (&Vars) + RegisterLookup[i].StructOffset);
+						Info = (tArmRegisterInfo*)((uintptr_t) (&Vars) + RegisterLookup[i].StructOffset);
 						if (RegisterLookup[i].type == ARMREG_NORMAL)
 						{
 							if (ArmGetRegister(Line,RetLen,*Info) == false) return false;
