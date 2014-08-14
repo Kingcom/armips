@@ -483,12 +483,11 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			Stack.push(Postfix.GetValue(num++));
 			break;
 		case EXCOMM_VAR:	// label
-			label = Postfix.GetLabel(num);
-			if (label->isDefined() == false)
+			if (Postfix.LabelExists(num) == false)
 			{
 				if (Errors != NULL)
 				{
-					snprintf(str,255,"Undefined label \"%ls\"",label->getName().c_str());
+					snprintf(str,255,"Undefined label \"%ls\"",Postfix.GetLabelName(num).c_str());
 					Errors->AddEntry(str);
 				}
 				Error = true;
@@ -496,7 +495,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				num++;
 				break;
 			}
-
+			label = Postfix.GetLabel(num);
 			Stack.push(label->getValue());
 			num++;
 			break;
@@ -605,13 +604,14 @@ CExpressionCommandList::CExpressionCommandList()
 
 CExpressionCommandList::~CExpressionCommandList()
 {
-	free(Entries);
+	delete[] Entries;
 }
 
 bool CExpressionCommandList::Load(CStringList &List)
 {
-	free(Entries);
-	Entries = (tExpressionCommandEntry*) malloc(List.GetCount() * sizeof(tExpressionCommandEntry));
+	if (Entries != NULL)
+		delete[] Entries;
+	Entries = new tExpressionCommandEntry[List.GetCount()];
 	EntryCount = List.GetCount();
 	initialized = false;
 
@@ -641,15 +641,14 @@ bool CExpressionCommandList::Load(CStringList &List)
 			Entries[i].command = EXCOMM_RAMPOS;
 			Entries[i].num = 0;
 		} else {	// variable
-			Label* label = Global.symbolTable.getLabel(convertUtf8ToWString(str),Global.FileInfo.FileNum,Global.Section);
-			if (label == NULL)
+			if (Global.symbolTable.isValidSymbolName(convertUtf8ToWString(str)) == false)
 			{
 				Logger::printError(Logger::Error,L"Invalid label name \"%S\"",str);
 				return false;
 			}
 
 			Entries[i].command = EXCOMM_VAR;
-			Entries[i].label = label;
+			Entries[i].label = convertUtf8ToWString(str);
 		}
 	}
 

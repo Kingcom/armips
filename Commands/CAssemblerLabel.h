@@ -8,10 +8,12 @@ class CAssemblerLabel: public CAssemblerCommand
 public:
 	CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant);
 	virtual bool Validate();
-	virtual void Encode() { };
+	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
+	std::wstring labelname;
+	int labelvalue;
 	Label* label;
 	bool constant;
 };

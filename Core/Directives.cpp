@@ -384,20 +384,13 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 		return false;
 	}
 	
-	Label* label = Global.symbolTable.getLabel(List[0].text,Global.FileInfo.FileNum,Global.Section);
-	if (label == NULL)
+	if (Global.symbolTable.isValidSymbolName(List[0].text) == false)
 	{
 		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",List[0].text);
 		return false;
 	}
 
-	if (label->isDefined())
-	{
-		Logger::printError(Logger::Error,L"Label \"%s\" already defined",List[0].text);
-		return false;
-	}
-	
-	labelCommand = new CAssemblerLabel(label->getName(),value,Global.Section,true);
+	labelCommand = new CAssemblerLabel(List[0].text, value, Global.Section, true);
 	AddAssemblerCommand(labelCommand);
 	return true;
 }

@@ -7,44 +7,58 @@
 
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant)
 {
-	label = Global.symbolTable.getLabel(name,FileNum,Section);
-	if (label == NULL)
-	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name);
-		return;
-	}
-
-	if (label->isDefined())
-	{
-		Logger::printError(Logger::Error,L"Label \"%s\" already defined",name);
-		return;
-	}
-
-	if (label->getUpdateInfo())
-	{
-		if (Arch == &Arm && Arm.GetThumbMode())
-			label->setInfo(1);
-		else
-			label->setInfo(0);
-	}
-
-	label->setValue(RamPos);
-	label->setDefined(true);
+	this->labelname = name;
+	this->labelvalue = RamPos;
 	this->constant = constant;
-
-	if (Global.symbolTable.isLocalSymbol(name) == false)
-		Global.Section++;
+	this->label = NULL;
 }
 
 bool CAssemblerLabel::Validate()
 {
+	if (label == NULL)
+	{
+		label = Global.symbolTable.getLabel(this->labelname, FileNum, Global.Section);
+		if (label == NULL)
+		{
+			Logger::printError(Logger::Error, L"Invalid label name \"%s\"", this->labelname);
+			return false;
+		}
+
+		if (label->isDefined())
+		{
+			Logger::printError(Logger::Error, L"Label \"%s\" already defined", this->labelname);
+			label = NULL;
+			return false;
+		}
+
+		if (label->getUpdateInfo())
+		{
+			if (Arch == &Arm && Arm.GetThumbMode())
+				label->setInfo(1);
+			else
+				label->setInfo(0);
+		}
+
+		label->setValue(labelvalue);
+		label->setDefined(true);
+		if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
+			Global.Section++;
+		return true;
+	}
+	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
+		Global.Section++;
 	if (constant == false && label->getValue() != g_fileManager->getVirtualAddress())
 	{
 		label->setValue(g_fileManager->getVirtualAddress());
 		return true;
 	}
-	
 	return false;
+}
+
+void CAssemblerLabel::Encode()
+{
+	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
+		Global.Section++;
 }
 
 void CAssemblerLabel::writeTempData(TempData& tempData)

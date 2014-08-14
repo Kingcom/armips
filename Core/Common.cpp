@@ -60,12 +60,6 @@ bool addAssemblerLabel(const std::wstring& labelName)
 		return false;
 	}
 
-	if (checkLabelDefined(labelName) == true)
-	{
-		Logger::printError(Logger::Error,L"Label \"%s\" already defined",labelName);
-		return false;
-	}
-
 	CAssemblerLabel* Label = new CAssemblerLabel(labelName,g_fileManager->getVirtualAddress(),Global.Section,false);
 	AddAssemblerCommand(Label);
 	return true;
