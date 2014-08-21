@@ -42,7 +42,7 @@ std::wstring convertUtf8ToWString(const char* source)
 			value = (value << 6) | (b & 0x3F);
 		}
 
-		result.push_back(value);
+		result += value;
 	}
 
 	return result;
@@ -57,15 +57,15 @@ std::string convertWStringToUtf8(const std::wstring& source)
 		wchar_t character = source[i];
 		if (character < 0x80)
 		{
-			result.push_back(character & 0x7F);
+			result += character & 0x7F;
 		} else if (character < 0x800)
 		{
-			result.push_back(0xC0 | ((character >> 6) & 0x1F));
-			result.push_back(0x80 | (character & 0x3F));
+			result += 0xC0 | ((character >> 6) & 0x1F);
+			result += (0x80 | (character & 0x3F));
 		} else {
-			result.push_back(0xE0 | ((character >> 12) & 0xF));
-			result.push_back(0x80 | ((character >> 6) & 0x3F));
-			result.push_back(0x80 | (character & 0x3F));
+			result += 0xE0 | ((character >> 12) & 0xF);
+			result += 0x80 | ((character >> 6) & 0x3F);
+			result += 0x80 | (character & 0x3F);
 		}
 	}
 
@@ -79,13 +79,13 @@ std::wstring intToHexString(unsigned int value, int digits, bool prefix)
 
 	if (prefix)
 	{
-		result.push_back('0');
-		result.push_back('x');
+		result += '0';
+		result += 'x';
 	}
 
 	while (digits > 8)
 	{
-		result.push_back('0');
+		result += '0';
 		digits--;
 	}
 	
@@ -103,7 +103,7 @@ std::wstring intToString(unsigned int value, int digits)
 
 	while (digits > 8)
 	{
-		result.push_back(' ');
+		result += ' ';
 		digits--;
 	}
 	
