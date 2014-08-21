@@ -181,7 +181,7 @@ bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
 
 	fclose(input);
 	fclose(output);
-	return error;
+	return !error;
 #endif
 }
 
