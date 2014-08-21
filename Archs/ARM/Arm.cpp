@@ -230,7 +230,7 @@ void CArmArchitecture::AssembleOpcode(const std::wstring& name, const std::wstri
 
 void CArmArchitecture::NextSection()
 {
-	//
+	Global.Section++;
 }
 
 IElfRelocator* CArmArchitecture::getElfRelocator()
