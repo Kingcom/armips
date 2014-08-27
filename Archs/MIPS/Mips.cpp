@@ -304,7 +304,6 @@ void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstr
 
 void CMipsArchitecture::NextSection()
 {
-	Global.Section++;
 	LoadDelay = false;
 	LoadDelayRegister = 0;
 	DelaySlot = false;
