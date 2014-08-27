@@ -95,6 +95,7 @@ bool CDirectiveFile::Validate()
 
 void CDirectiveFile::Encode()
 {
+	Arch->NextSection();
 	switch (type)
 	{
 	case Type::Open:
@@ -170,6 +171,7 @@ bool CDirectivePosition::Validate()
 
 void CDirectivePosition::Encode()
 {
+	Arch->NextSection();
 	exec();
 }
 

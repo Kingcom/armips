@@ -1,6 +1,6 @@
 #pragma once
+#include "Common.h"
 #include "Util/CommonClasses.h"
-
 typedef struct {
 	char Name[3];
 	unsigned char Priority;
@@ -63,15 +63,10 @@ private:
 
 enum eExpressionCommand { EXCOMM_OP, EXCOMM_CONST, EXCOMM_VAR, EXCOMM_RAMPOS };
 
-class Label;
-
 typedef struct {
 	eExpressionCommand command;
-	union
-	{
-		int num;
-		Label* label;
-	};
+	std::wstring label;
+	int num;
 } tExpressionCommandEntry;
 
 class CExpressionCommandList
@@ -82,7 +77,9 @@ public:
 	bool Load(CStringList &List);
 	eExpressionCommand GetType(int i) { return Entries[i].command; };
 	unsigned int GetValue(int i) { return Entries[i].num; };
-	Label* GetLabel(int i) { return Entries[i].label; };
+	Label* GetLabel(int i) { return Global.symbolTable.getLabel(Entries[i].label, Global.FileInfo.FileNum, Global.Section); };
+	std::wstring GetLabelName(int i) { return Entries[i].label; };
+	bool LabelExists(int i) { return Global.symbolTable.symbolExists(Entries[i].label, Global.FileInfo.FileNum, Global.Section); };
 	int GetCount() { return EntryCount; };
 	bool isInitialized() { return initialized; };
 private:
