@@ -108,7 +108,8 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 	CStringList List;
 	bool Immediate = false;
 	
-	immediateType = MIPS_NOIMMEDIATE;
+	immediateType = MipsImmediateType::None;
+	extInsType = MipsExtInsSizeType::None;
 	registers.reset();
 
 	if (vfpuSize == -1)
@@ -209,26 +210,40 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				break;
 			case 'a':	// 5 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MIPS_IMMEDIATE5;
+				immediateType = MipsImmediateType::Immediate5;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'i':	// 16 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MIPS_IMMEDIATE16;
+				immediateType = MipsImmediateType::Immediate16;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'b':	// 20 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MIPS_IMMEDIATE20;
+				immediateType = MipsImmediateType::Immediate20;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'I':	// 32 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MIPS_IMMEDIATE26;
+				immediateType = MipsImmediateType::Immediate26;
 				Line += RetLen;
+				SourceEncoding++;
+				break;
+			case 'j':
+				if (MipsCheckImmediate(Line,extInsImmediate.expression,RetLen) == false) return false;
+				Line += RetLen;
+				SourceEncoding++;
+				
+				if (*SourceEncoding == 'e')				
+					extInsType = MipsExtInsSizeType::Ext;
+				else if (*SourceEncoding == 'i')
+					extInsType = MipsExtInsSizeType::Ins;
+				else
+					return false;
+				
 				SourceEncoding++;
 				break;
 			case 'r':	// forced register
@@ -253,6 +268,15 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 	if (immediate.expression.isLoaded())
 	{
 		if (immediate.expression.check() == false)
+		{
+			NoCheckError = true;
+			return false;
+		}
+	}
+	
+	if (extInsImmediate.expression.isLoaded())
+	{
+		if (extInsImmediate.expression.check() == false)
 		{
 			NoCheckError = true;
 			return false;
@@ -395,13 +419,13 @@ int getImmediateBits(MipsImmediateType type)
 {
 	switch (type)
 	{
-	case MIPS_IMMEDIATE5:
+	case MipsImmediateType::Immediate5:
 		return 5;
-	case MIPS_IMMEDIATE16:
+	case MipsImmediateType::Immediate16:
 		return 16;
-	case MIPS_IMMEDIATE20:
+	case MipsImmediateType::Immediate20:
 		return 20;
-	case MIPS_IMMEDIATE26:
+	case MipsImmediateType::Immediate26:
 		return 26;
 	default:
 		return 0;
@@ -424,7 +448,7 @@ bool CMipsInstruction::Validate()
 	}
 
 	// check immediates
-	if (immediateType != MIPS_NOIMMEDIATE)
+	if (immediateType != MipsImmediateType::None)
 	{
 		if (immediate.expression.evaluate(immediate.value,true) == false)
 			return false;
@@ -466,6 +490,24 @@ bool CMipsInstruction::Validate()
 		}
 
 		immediate.value &= mask;
+	}
+
+	if (extInsType != MipsExtInsSizeType::None)
+	{
+		if (extInsImmediate.expression.evaluate(extInsImmediate.value,true) == false)
+			return false;
+
+		extInsImmediate.originalValue = extInsImmediate.value;
+
+		if (extInsImmediate.value > 32 || extInsImmediate.value == 0)
+		{
+			Logger::queueError(Logger::Error,L"Immediate value %02X out of range",extInsImmediate.value);
+			return false;
+		}
+		
+		extInsImmediate.value--;
+		if (extInsType == MipsExtInsSizeType::Ins)
+			extInsImmediate.value += immediate.value;
 	}
 
 	// check load delay
@@ -536,15 +578,18 @@ void CMipsInstruction::encodeNormal()
 
 	switch (immediateType)
 	{
-	case MIPS_IMMEDIATE5:
-	case MIPS_IMMEDIATE20:
+	case MipsImmediateType::Immediate5:
+	case MipsImmediateType::Immediate20:
 		encoding |= immediate.value << 6;
 		break;
-	case MIPS_IMMEDIATE16:
-	case MIPS_IMMEDIATE26:
+	case MipsImmediateType::Immediate16:
+	case MipsImmediateType::Immediate26:
 		encoding |= immediate.value;
 		break;
 	}
+
+	if (extInsType != MipsExtInsSizeType::None)
+		encoding |= extInsImmediate.value << 11;
 
 	if (Opcode.flags & MO_VFPU_MIXED)
 	{

@@ -4,8 +4,8 @@
 #include "MipsOpcodes.h"
 #include "Core/MathParser.h"
 
-enum MipsImmediateType { MIPS_NOIMMEDIATE, MIPS_IMMEDIATE5,
-	MIPS_IMMEDIATE16, MIPS_IMMEDIATE20, MIPS_IMMEDIATE26 };
+enum class MipsImmediateType { None, Immediate5, Immediate16, Immediate20, Immediate26 };
+enum class MipsExtInsSizeType { None, Ext, Ins };
 
 struct MipsImmediate
 {
@@ -71,4 +71,7 @@ private:
 	MipsImmediateType immediateType;
 	MipsImmediate immediate;
 	int vfpuSize;
+
+	MipsExtInsSizeType extInsType;
+	MipsImmediate extInsImmediate;
 };

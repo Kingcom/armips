@@ -418,6 +418,10 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "seh",		"d,t",		MIPS_ALLEGREX0(16),			MA_PSP },
 	{ "seh",		"d,t",		MIPS_ALLEGREX0(24),			MA_PSP },
 
+	// special 3
+	{ "ext",		"t,s,a,je",	MIPS_SPECIAL3(0),			MA_PSP },
+	{ "ins",		"t,s,a,ji",	MIPS_SPECIAL3(4),			MA_PSP },
+
 	// END
 	{ NULL,		NULL,		0,			0 }
 };
