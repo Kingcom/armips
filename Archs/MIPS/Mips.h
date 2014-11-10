@@ -84,6 +84,7 @@ bool MipsGetPs2VectorRegister(const char* source, int& RetLen, MipsRegisterInfo&
 int MipsGetFloatRegister(const char* source, int& RetLen);
 bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen);
 bool MipsGetVFPURegister(const char* line, MipsVFPURegister& reg, int size);
+int MipsGetVectorCondition(const char* source, int& RetLen);
 
 class MipsElfRelocator: public IElfRelocator
 {

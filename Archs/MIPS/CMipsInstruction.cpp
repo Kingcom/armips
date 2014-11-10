@@ -111,6 +111,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 	immediateType = MipsImmediateType::None;
 	extInsType = MipsExtInsSizeType::None;
 	registers.reset();
+	vectorCondition = -1;
 
 	if (vfpuSize == -1)
 	{
@@ -250,6 +251,11 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				if (MipsGetRegister(Line,RetLen) != *(SourceEncoding+1)) return false;
 				Line += RetLen;
 				SourceEncoding += 2;
+				break;
+			case 'C':
+				if ((vectorCondition = MipsGetVectorCondition(Line, RetLen)) == -1) return false;
+				Line += RetLen;
+				SourceEncoding++;
 				break;
 			case '/':	// forced letter
 				SourceEncoding++;	// fallthrough
@@ -604,7 +610,8 @@ void CMipsInstruction::encodeNormal()
 void CMipsInstruction::encodeVfpu()
 {
 	int encoding = Opcode.destencoding;
-
+	
+	if (vectorCondition != -1) encoding |= (vectorCondition << 0);
 	if (registers.vrd.num != -1) encoding |= (registers.vrd.num << 0);
 	if (registers.vrs.num != -1) encoding |= (registers.vrs.num << 8);
 	if (registers.vrt.num != -1) encoding |= (registers.vrt.num << 16);

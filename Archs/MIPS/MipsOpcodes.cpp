@@ -2,7 +2,10 @@
 #include "MipsOpcodes.h"
 
 /* Placeholders for encoding
+   Opcodes
+	S	vfpu size
 
+   Parameters
 	s	source register
 	d	destination register
 	t	target register
@@ -15,6 +18,16 @@
 	n	negative 16 bit immediate (for subi/u aliases)
 	b	26 bit immediate
 	a	5 bit immediate
+	j	5 bit secondary immediate
+	 e	ext
+	 i	ins
+	vs	PSP vfpu source reg
+	vd	PSP vfpu dest reg
+	vt	PSP vfpu target reg
+	Vs	PS2 vector source reg
+	Vd	PS2 vector dest reg
+	Vt	PS2 vector target reg
+	C	PSP vector condition
 */
 
 const tMipsOpcode MipsOpcodes[] = {

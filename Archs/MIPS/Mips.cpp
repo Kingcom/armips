@@ -589,3 +589,26 @@ bool MipsGetVFPURegister(const char* line, MipsVFPURegister& reg, int size)
 	reg.name[4] = 0;
 	return true;
 }
+
+int MipsGetVectorCondition(const char* source, int& RetLen)
+{
+	if (source[0] == 0 || source[1] == 0)
+		return -1;
+
+	if (source[2] == ',' || source[2] == '\n' || source[2] == 0
+		|| source[2] == ')' || source[2] == '(' || source[2] == '-')
+	{
+		static const char *conditions[] = {"fl", "eq", "lt", "le", "tr", "ne", "ge", "gt", "ez", "en", "ei",
+			"es", "nz", "nn", "ni", "ns"};
+		for (int i = 0; i < (int)sizeof(conditions)/sizeof(conditions[0]); ++i)
+		{
+			if (source[0] == conditions[i][0] && source[1] == conditions[i][1])
+			{
+				RetLen = 2;
+				return i;
+			}
+		}
+	}
+
+	return -1;
+}

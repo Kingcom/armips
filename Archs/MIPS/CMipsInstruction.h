@@ -71,6 +71,7 @@ private:
 	MipsImmediateType immediateType;
 	MipsImmediate immediate;
 	int vfpuSize;
+	int vectorCondition;
 
 	MipsExtInsSizeType extInsType;
 	MipsImmediate extInsImmediate;
