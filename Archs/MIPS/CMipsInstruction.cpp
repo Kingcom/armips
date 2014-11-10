@@ -215,6 +215,12 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				Line += RetLen;
 				SourceEncoding++;
 				break;
+			case 'k':	// 8 bit immediate
+				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
+				immediateType = MipsImmediateType::Immediate8;
+				Line += RetLen;
+				SourceEncoding++;
+				break;
 			case 'i':	// 16 bit immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
 				immediateType = MipsImmediateType::Immediate16;
@@ -427,6 +433,8 @@ int getImmediateBits(MipsImmediateType type)
 	{
 	case MipsImmediateType::Immediate5:
 		return 5;
+	case MipsImmediateType::Immediate8:
+		return 8;
 	case MipsImmediateType::Immediate16:
 		return 16;
 	case MipsImmediateType::Immediate20:
@@ -591,6 +599,9 @@ void CMipsInstruction::encodeNormal()
 	case MipsImmediateType::Immediate16:
 	case MipsImmediateType::Immediate26:
 		encoding |= immediate.value;
+		break;
+	case MipsImmediateType::Immediate8:
+		encoding |= immediate.value << 16;
 		break;
 	}
 

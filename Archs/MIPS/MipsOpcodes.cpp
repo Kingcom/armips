@@ -18,6 +18,7 @@
 	n	negative 16 bit immediate (for subi/u aliases)
 	b	26 bit immediate
 	a	5 bit immediate
+	k	8 bit immediate
 	j	5 bit secondary immediate
 	 e	ext
 	 i	ins
