@@ -32,7 +32,7 @@
 #define MO_64BIT		0x00010000	// only available on 64 bit cpus
 #define MO_FPU			0x00020000	// only available with an fpu
 
-#define BITFIELD(START,LENGTH,VALUE)	(((VALUE) << (START)))
+#define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
 #define MIPS_SA(VALUE)					BITFIELD(6,5,(VALUE))
 #define MIPS_SECFUNC(VALUE)				MIPS_SA((VALUE))
