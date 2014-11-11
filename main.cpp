@@ -53,10 +53,6 @@ int wmain(int argc, wchar_t* argv[])
 			parameters.symFileName = arguments[argpos+1];
 			parameters.symFileVersion = 2;
 			argpos += 2;
-		} else if (arguments[argpos] == L"-exsym")
-		{
-			parameters.exSymFileName = arguments[argpos+1];
-			argpos += 2;
 		} else if (arguments[argpos] == L"-erroronwarning")
 		{
 			parameters.errorOnWarning = true;

@@ -9,7 +9,6 @@ struct AssemblerArguments
 	std::wstring tempFileName;
 	std::wstring symFileName;
 	int symFileVersion;
-	std::wstring exSymFileName;
 	bool errorOnWarning;
 	bool silent;
 	StringList* errorsResult;

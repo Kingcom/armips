@@ -480,9 +480,6 @@ bool runAssembler(AssemblerArguments& arguments)
 	if (!arguments.symFileName.empty())
 		Global.symData.setNocashSymFileName(arguments.symFileName,arguments.symFileVersion);
 
-	if (!arguments.exSymFileName.empty())
-		Global.symData.setExSymFileName(arguments.exSymFileName);
-
 	if (!arguments.tempFileName.empty())
 		Global.tempData.setFileName(arguments.tempFileName);
 

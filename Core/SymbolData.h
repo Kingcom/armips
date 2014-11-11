@@ -71,7 +71,6 @@ public:
 	SymbolData();
 	void clear();
 	void setNocashSymFileName(const std::wstring& name, int version) { nocashSymFileName = name; nocashSymVersion = version; };
-	void setExSymFileName(const std::wstring& name) { exSymFileName = name; };
 	void write();
 	void setEnabled(bool b) { enabled = b; };
 
@@ -83,12 +82,10 @@ public:
 	void endFunction(int address);
 private:
 	void writeNocashSym();
-	void writeExSym();
 	int addAddress(int address);
 	int addFileName(const std::string& fileName);
 
 	std::wstring nocashSymFileName;
-	std::wstring exSymFileName;
 	bool enabled;
 	int nocashSymVersion;
 
