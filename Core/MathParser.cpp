@@ -260,6 +260,28 @@ int HexToInt(char* Hex, int length)
 	return result;
 }
 
+// Parse only a float, and return as float bits.
+static bool parseFloat(const char *str, int len, int& result)
+{
+	bool foundDecimal = false;
+	for (int i = 0; i < len; ++i)
+	{
+		if (str[i] == '.')
+		{
+			if (foundDecimal)
+				return false;
+			foundDecimal = true;
+			continue;
+		}
+		if (str[i] < '0' || str[i] > '9')
+		return false;
+	}
+
+	float f = (float)atof(str);
+	memcpy(&result, &f, sizeof(result));
+	return foundDecimal;
+}
+
 int GetOpcode(char* str, int& ReturnLen, int LastOpcode)
 {
 	int longestlen = 0;
@@ -434,7 +456,10 @@ bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 		if (Opcode == EXOP_NONE)	// number/variable
 		{
 			char* str = Postfix.GetEntry(index++);
-			if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$' )	// number
+			if (parseFloat(str,strlen(str),num))
+			{
+				StackPos++;
+			} else if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$' )	// number
 			{
 				if (ConvertToInt(str,Global.Radix,0,num) == false) return false;
 				StackPos++;
@@ -464,11 +489,37 @@ bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 	return true;
 }
 
+inline int f2i(float f)
+{
+	union
+	{
+		float f;
+		int i;
+	} u;
+
+	u.f = f;
+	return u.i;
+}
+
+inline float i2f(int i)
+{
+	union
+	{
+		float f;
+		int i;
+	} u;
+
+	u.i = i;
+	return u.f;
+}
 
 bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Result)
 {
 	IntegerStack Stack;
+	IntegerStack TypeStack;
+
 	unsigned int arg[5];
+	float fArg[5];
 	char str[255];
 	bool Error = false;
 	int num = 0;
@@ -481,6 +532,11 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 		{
 		case EXCOMM_CONST:	// constant
 			Stack.push(Postfix.GetValue(num++));
+			TypeStack.push(EXCOMM_CONST);
+			break;
+		case EXCOMM_FLOAT:	// float constant
+			Stack.push(Postfix.GetValue(num++));
+			TypeStack.push(EXCOMM_FLOAT);
 			break;
 		case EXCOMM_VAR:	// label
 			if (Postfix.LabelExists(num) == false)
@@ -497,26 +553,54 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			}
 			label = Postfix.GetLabel(num);
 			Stack.push(label->getValue());
+			TypeStack.push(EXCOMM_CONST);
 			num++;
 			break;
 		case EXCOMM_RAMPOS:
 			Postfix.GetValue(num++);
 			Stack.push(g_fileManager->getVirtualAddress());
+			TypeStack.push(EXCOMM_CONST);
 			break;
 		case EXCOMM_OP:	// opcode
 			Opcode = Postfix.GetValue(num++);
 			if (Stack.size() < ExpressionCleanOpcodes[Opcode].Arguments) return false;
+
+			int type = EXCOMM_CONST;
 			for (int l = 0; l < ExpressionCleanOpcodes[Opcode].Arguments; l++)
 			{
-				arg[l] = Stack.pop();
+				int value = Stack.pop();
+
+				int argType = TypeStack.pop();
+				if (type == EXCOMM_CONST)
+					type = argType;
+
+				switch (argType)
+				{
+				case EXCOMM_CONST:
+					arg[l] = value;
+					fArg[l] = value;
+					break;
+				case EXCOMM_FLOAT:
+					arg[l] = value;
+					fArg[l] = i2f(value);
+					break;
+				}
 			}
 
+			bool useFloat = type == EXCOMM_FLOAT;
+			int resultType = EXCOMM_CONST;
 			switch (Opcode)
 			{
 			case EXOP_SIGNPLUS:
+				Stack.push(arg[0]);
+				resultType = type;
 				break;
 			case EXOP_SIGNMINUS:	// -0
-				Stack.push(0-arg[0]);
+				if (useFloat)
+					Stack.push(f2i(0.0f-fArg[0]));
+				else
+					Stack.push(0-arg[0]);
+				resultType = type;
 				break;
 			case EXOP_BITNOT:			// ~b
 				Stack.push(~arg[0]);
@@ -525,19 +609,35 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				Stack.push(!arg[0]);
 				break;
 			case EXOP_MUL:			// a*b
-				Stack.push(arg[1]*arg[0]);
+				if (useFloat)
+					Stack.push(f2i(fArg[1]*fArg[0]));
+				else
+					Stack.push(arg[1]*arg[0]);
+				resultType = type;
 				break;
 			case EXOP_DIV:			// a/b
-				Stack.push(arg[1]/arg[0]);
+				if (useFloat)
+					Stack.push(f2i(fArg[1]/fArg[0]));
+				else
+					Stack.push(arg[1]/arg[0]);
+				resultType = type;
 				break;
 			case EXOP_MOD:			// a%b
 				Stack.push(arg[1]%arg[0]);
 				break;
 			case EXOP_ADD:			// a+b
-				Stack.push(arg[1]+arg[0]);
+				if (useFloat)
+					Stack.push(f2i(fArg[1]+fArg[0]));
+				else
+					Stack.push(arg[1]+arg[0]);
+				resultType = type;
 				break;
 			case EXOP_SUB:			// a-b
-				Stack.push(arg[1]-arg[0]);
+				if (useFloat)
+					Stack.push(f2i(fArg[1]-fArg[0]));
+				else
+					Stack.push(arg[1]-arg[0]);
+				resultType = type;
 				break;
 			case EXOP_SHL:			// a<<b
 				Stack.push(arg[1]<<arg[0]);
@@ -546,16 +646,28 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				Stack.push(arg[1]>>arg[0]);
 				break;
 			case EXOP_GREATEREQUAL:		// a >= b
-				Stack.push(arg[1]>=arg[0]);
+				if (useFloat)
+					Stack.push(fArg[1]>=fArg[0]);
+				else
+					Stack.push(arg[1]>=arg[0]);
 				break;
 			case EXOP_GREATER:			// a > b
-				Stack.push(arg[1]>arg[0]);
+				if (useFloat)
+					Stack.push(fArg[1]>fArg[0]);
+				else
+					Stack.push(arg[1]>arg[0]);
 				break;
 			case EXOP_LOWEREQUAL:		// a <= b
-				Stack.push(arg[1]<=arg[0]);
+				if (useFloat)
+					Stack.push(fArg[1]<=fArg[0]);
+				else
+					Stack.push(arg[1]<=arg[0]);
 				break;
 			case EXOP_LOWER:			// a < b
-				Stack.push(arg[1]<arg[0]);
+				if (useFloat)
+					Stack.push(fArg[1]<fArg[0]);
+				else
+					Stack.push(arg[1]<arg[0]);
 				break;
 			case EXOP_EQUAL:		// a == b
 				Stack.push(arg[1]==arg[0]);
@@ -575,7 +687,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 			case EXOP_LOGAND:			// a && b
 				Stack.push(arg[1]&&arg[0]);
 				break;
-			case EXOP_LOGOR:			// a && b
+			case EXOP_LOGOR:			// a || b
 				Stack.push(arg[1]||arg[0]);
 				break;
 			case EXOP_TERTIF:			// must not appear
@@ -585,6 +697,8 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				Stack.push(arg[2]?arg[1]:arg[0]);
 				break;
 			}
+
+			TypeStack.push(resultType);
 			break;
 		}
 	}
@@ -624,6 +738,9 @@ bool CExpressionCommandList::Load(CStringList &List)
 		{
 			Entries[i].command = EXCOMM_OP;
 			Entries[i].num = num;
+		} else if (parseFloat(str,strlen(str),Entries[i].num))
+		{
+			Entries[i].command = EXCOMM_FLOAT;
 		} else if ((str[0] >= '0' && str[0] <= '9') || str[0] == '$')	// constant
 		{
 			Entries[i].command = EXCOMM_CONST;

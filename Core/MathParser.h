@@ -61,7 +61,7 @@ private:
 
 
 
-enum eExpressionCommand { EXCOMM_OP, EXCOMM_CONST, EXCOMM_VAR, EXCOMM_RAMPOS };
+enum eExpressionCommand { EXCOMM_OP, EXCOMM_CONST, EXCOMM_FLOAT, EXCOMM_VAR, EXCOMM_RAMPOS };
 
 typedef struct {
 	eExpressionCommand command;
