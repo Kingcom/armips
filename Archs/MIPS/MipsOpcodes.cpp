@@ -447,9 +447,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vpfxs",		"W",		MIPS_VFPU5(0),				MA_PSP },
 	{ "vpfxt",		"W",		MIPS_VFPU5(2),				MA_PSP },
 	{ "vpfxd",		"W",		MIPS_VFPU5(4),				MA_PSP },
-	{ "viim.s",		"vt,i",		MIPS_VFPU5(6),				MA_PSP },
-	// TODO: This should actually encode a half-float, not integer...
-	{ "vfim.s",		"vt,i",		MIPS_VFPU5(7),				MA_PSP },
+	{ "viim.s",		"vt,i16",	MIPS_VFPU5(6),				MA_PSP,	MO_VFPU_SINGLE },
+	{ "vfim.s",		"vt,ih",	MIPS_VFPU5(7),				MA_PSP,	MO_VFPU_SINGLE },
 
 	// END
 	{ NULL,		NULL,		0,			0 }

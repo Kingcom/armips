@@ -750,6 +750,9 @@ void CMipsInstruction::encodeNormal()
 	if (registers.ps2vrs.num != -1) encoding |= (registers.ps2vrs.num << 21);	// ps2 vector source reg
 	if (registers.ps2vrd.num != -1) encoding |= (registers.ps2vrd.num << 6);	// ps2 vector dest reg
 
+	if (!(Opcode.flags & MO_VFPU_MIXED) && registers.vrt.num != -1)			// vfpu rt
+		encoding |= registers.vrt.num << 16;
+
 	switch (immediateType)
 	{
 	case MipsImmediateType::Immediate5:
