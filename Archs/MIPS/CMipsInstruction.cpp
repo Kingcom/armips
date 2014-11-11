@@ -117,6 +117,43 @@ bool parseVpfxsParameter(const char* text, int& result, int& RetLen)
 	return true;
 }
 
+// http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
+static int floatToHalfFloat(int i)
+{
+	int s = ((i >> 16) & 0x00008000); // sign
+	int e = ((i >> 23) & 0x000000ff) - (127 - 15); // exponent
+	int f = ((i >> 0) & 0x007fffff); // fraction
+
+	// need to handle NaNs and Inf?
+	if (e <= 0) {
+		if (e < -10) {
+			if (s != 0) {
+				// handle -0.0
+				return 0x8000;
+			}
+			return 0;
+		}
+		f = (f | 0x00800000) >> (1 - e);
+		return s | (f >> 13);
+	} else if (e == 0xff - (127 - 15)) {
+		if (f == 0) {
+			// Inf
+			return s | 0x7c00;
+		}
+		// NAN
+		f >>= 13;
+		f = 0x3ff; // PSP always encodes NaN with this value
+		return s | 0x7c00 | f | ((f == 0) ? 1 : 0);
+	}
+
+	if (e > 30) {
+		// Overflow
+		return s | 0x7c00;
+	}
+
+	return s | (e << 10) | (f >> 13);
+}
+
 bool CMipsInstruction::Load(const char* Name, const char* Params)
 {
 	bool paramfail = false;
@@ -308,35 +345,44 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				}
 				SourceEncoding += 2;
 				break;
-			case 'a':	// 5 bit immediate
+			case 'i':	// standard immediate
 				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MipsImmediateType::Immediate5;
 				Line += RetLen;
 				SourceEncoding++;
-				break;
-			case 'k':	// 8 bit immediate
-				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MipsImmediateType::Immediate8;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'i':	// 16 bit immediate
-				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MipsImmediateType::Immediate16;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'b':	// 20 bit immediate
-				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MipsImmediateType::Immediate20;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'I':	// 32 bit immediate
-				if (MipsCheckImmediate(Line,immediate.expression,RetLen) == false) return false;
-				immediateType = MipsImmediateType::Immediate26;
-				Line += RetLen;
-				SourceEncoding++;
+
+				if (*SourceEncoding == 'h')	// half float
+				{
+					SourceEncoding++;
+					immediateType = MipsImmediateType::ImmediateHalfFloat;
+				} else {
+					int num = 0;
+					while (*SourceEncoding >= '0' && *SourceEncoding <= '9')
+					{
+						num = num*10 + *SourceEncoding-'0';
+						SourceEncoding++;
+					}
+
+					switch (num)
+					{
+					case 5:
+						immediateType = MipsImmediateType::Immediate5;
+						break;
+					case 8:
+						immediateType = MipsImmediateType::Immediate8;
+						break;
+					case 16:
+						immediateType = MipsImmediateType::Immediate16;
+						break;
+					case 20:
+						immediateType = MipsImmediateType::Immediate20;
+						break;
+					case 26:
+						immediateType = MipsImmediateType::Immediate26;
+						break;
+					default:
+						return false;
+					}
+				}
 				break;
 			case 'j':
 				if (MipsCheckImmediate(Line,extInsImmediate.expression,RetLen) == false) return false;
@@ -542,6 +588,7 @@ int getImmediateBits(MipsImmediateType type)
 	case MipsImmediateType::Immediate8:
 		return 8;
 	case MipsImmediateType::Immediate16:
+	case MipsImmediateType::ImmediateHalfFloat:
 		return 16;
 	case MipsImmediateType::Immediate20:
 	case MipsImmediateType::Immediate20_0:
@@ -578,6 +625,9 @@ bool CMipsInstruction::Validate()
 
 			immediate.originalValue = immediate.value;
 		}
+
+		if (immediateType == MipsImmediateType::ImmediateHalfFloat)
+			immediate.value = floatToHalfFloat(immediate.originalValue);
 
 		if (Opcode.flags & MO_IMMALIGNED)	// immediate must be aligned
 		{
@@ -709,6 +759,7 @@ void CMipsInstruction::encodeNormal()
 	case MipsImmediateType::Immediate16:
 	case MipsImmediateType::Immediate26:
 	case MipsImmediateType::Immediate20_0:
+	case MipsImmediateType::ImmediateHalfFloat:
 		encoding |= immediate.value;
 		break;
 	case MipsImmediateType::Immediate8:

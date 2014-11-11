@@ -5,7 +5,7 @@
 #include "Core/MathParser.h"
 
 enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
-	Immediate20_0 };
+	Immediate20_0, ImmediateHalfFloat };
 enum class MipsExtInsSizeType { None, Ext, Ins };
 
 struct MipsImmediate
