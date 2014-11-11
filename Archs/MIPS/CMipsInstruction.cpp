@@ -117,6 +117,68 @@ bool parseVpfxsParameter(const char* text, int& result, int& RetLen)
 	return true;
 }
 
+bool parseVpfxdParameter(const char* text, int& result, int& RetLen)
+{
+	const char* start = text;
+	result = 0;
+
+	if (*text++ != '[')
+		return false;
+
+	for (int i = 0; i < 4; i++)
+	{
+		char buffer[64];
+		
+		if (*text == 0 || *text == ']')
+		{
+			if (i == 3)
+				break;
+			return false;
+		}
+
+		// extract element from text, so we don't have to worry about whitespace
+		int pos = 0;
+		while (*text != ',' && *text != 0 &&  *text != ']')
+		{
+			if (*text == ' ' || *text == '\t')
+			{
+				text++;
+				continue;
+			}
+
+			buffer[pos++] = *text++;
+		}
+
+		if (*text == ',')
+			text++;
+
+		if (pos == 0)
+			continue;
+
+		buffer[pos] = 0;
+		int length = pos;
+		pos = 0;
+		
+		if (length > 0 && buffer[length-1] == 'm')
+		{
+			buffer[--length] = 0;
+			result |= 1 << (8+i);
+		}
+
+		if (strcmp(buffer,"0-1") == 0 || strcmp(buffer,"0:1") == 0)
+			result |= 1 << (2*i);
+		else if (strcmp(buffer,"-1-1") == 0 || strcmp(buffer,"-1:1") == 0)
+			result |= 3 << (2*i);
+	}
+	
+	if (*text++ != ']')
+		return false;
+
+	RetLen = text-start;
+	return true;
+}
+
+
 // http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
 static int floatToHalfFloat(int i)
 {
@@ -409,11 +471,23 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				SourceEncoding++;
 				break;
 			case 'W':	// vpfxst argument
-				if (parseVpfxsParameter(Line,immediate.originalValue,RetLen) == false) return false;
-				Line += RetLen;
+				switch (*(SourceEncoding+1))
+				{
+				case 's':
+					if (parseVpfxsParameter(Line,immediate.originalValue,RetLen) == false) return false;
+					immediateType = MipsImmediateType::Immediate20_0;
+					break;
+				case 'd':
+					if (parseVpfxdParameter(Line,immediate.originalValue,RetLen) == false) return false;
+					immediateType = MipsImmediateType::Immediate16;
+					break;
+				default:
+					return false;
+				}
+
 				immediate.value = immediate.originalValue;
-				immediateType = MipsImmediateType::Immediate20_0;
-				SourceEncoding++;
+				Line += RetLen;
+				SourceEncoding += 2;
 				break;
 			case '/':	// forced letter
 				SourceEncoding++;	// fallthrough

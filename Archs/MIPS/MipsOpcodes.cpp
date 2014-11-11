@@ -30,7 +30,9 @@
 	Vd	PS2 vector dest reg
 	Vt	PS2 vector target reg
 	C	PSP vector condition
-	W	vpfxs/t parameters
+	W	weird vfpu parameters
+		s vpfxs/t parameter
+		d vpfxd parameter
 */
 
 const tMipsOpcode MipsOpcodes[] = {
@@ -444,9 +446,9 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
 //     | VPFXS | VPFXS | VPFXT | VPFXT | VPFXD | VPFXD | VIIM  | VFIM  |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "vpfxs",		"W",		MIPS_VFPU5(0),				MA_PSP },
-	{ "vpfxt",		"W",		MIPS_VFPU5(2),				MA_PSP },
-	{ "vpfxd",		"W",		MIPS_VFPU5(4),				MA_PSP },
+	{ "vpfxs",		"Ws",		MIPS_VFPU5(0),				MA_PSP },
+	{ "vpfxt",		"Ws",		MIPS_VFPU5(2),				MA_PSP },
+	{ "vpfxd",		"Wd",		MIPS_VFPU5(4),				MA_PSP },
 	{ "viim.s",		"vt,i16",	MIPS_VFPU5(6),				MA_PSP,	MO_VFPU_SINGLE },
 	{ "vfim.s",		"vt,ih",	MIPS_VFPU5(7),				MA_PSP,	MO_VFPU_SINGLE },
 
