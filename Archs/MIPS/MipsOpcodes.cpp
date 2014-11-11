@@ -29,6 +29,7 @@
 	Vd	PS2 vector dest reg
 	Vt	PS2 vector target reg
 	C	PSP vector condition
+	W	vpfxs/t parameters
 */
 
 const tMipsOpcode MipsOpcodes[] = {
@@ -435,6 +436,19 @@ const tMipsOpcode MipsOpcodes[] = {
 	// special 3
 	{ "ext",		"t,s,a,je",	MIPS_SPECIAL3(0),			MA_PSP },
 	{ "ins",		"t,s,a,ji",	MIPS_SPECIAL3(4),			MA_PSP },
+
+//     31-------26-----23----------------------------------------------0
+//     |= VFPU5| f     |                                               |
+//     -----6-------3---------00----------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//     | VPFXS | VPFXS | VPFXT | VPFXT | VPFXD | VPFXD | VIIM  | VFIM  |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "vpfxs",		"W",		MIPS_VFPU5(0),				MA_PSP },
+	{ "vpfxt",		"W",		MIPS_VFPU5(2),				MA_PSP },
+	{ "vpfxd",		"W",		MIPS_VFPU5(4),				MA_PSP },
+	{ "viim.s",		"vt,i",		MIPS_VFPU5(6),				MA_PSP },
+	// TODO: This should actually encode a half-float, not integer...
+	{ "vfim.s",		"vt,i",		MIPS_VFPU5(7),				MA_PSP },
 
 	// END
 	{ NULL,		NULL,		0,			0 }

@@ -18,6 +18,105 @@ CMipsInstruction::~CMipsInstruction()
 		delete subInstruction;
 }
 
+static const char* vpfxstRegisters = "xyzw";
+static const char* vpfxstConstants[8] = {"0","1","2","1/2","3","1/3","1/4","1/6"};
+
+bool parseVpfxsParameter(const char* text, int& result, int& RetLen)
+{
+	const char* start = text;
+	result = 0;
+
+	if (*text++ != '[')
+		return false;
+
+	for (int i = 0; i < 4; i++)
+	{
+		char buffer[64];
+		
+		if (*text == 0 || *text == ']')
+			return false;
+
+		// extract element from text, so we don't have to worry about whitespace
+		int pos = 0;
+		while (*text != ',' && *text != 0 &&  *text != ']')
+		{
+			if (*text == ' ' || *text == '\t')
+			{
+				text++;
+				continue;
+			}
+
+			buffer[pos++] = *text++;
+		}
+
+		if (*text == ',')
+			text++;
+
+		if (pos == 0)
+			return false;
+
+		buffer[pos] = 0;
+		pos = 0;
+		
+		// negation
+		if (buffer[pos] == '-')
+		{
+			result |= 1 << (16+i);
+			pos++;
+		}
+
+		// abs
+		bool abs = false;
+		if (buffer[pos] == '|')
+		{
+			result |= 1 << (8+i);
+			abs = true;
+			pos++;
+		}
+
+		// check for register
+		const char* reg;
+		if ((reg = strchr(vpfxstRegisters,buffer[pos])) != NULL)
+		{
+			result |= (reg-vpfxstRegisters) << (i*2);
+
+			if (abs && buffer[pos+1] != '|')
+				return false;
+
+			continue;
+		}
+
+		// abs is invalid with constants
+		if (abs)
+			return false;
+
+		result |= 1 << (12+i);
+
+		int constNum = -1;
+		for (int k = 0; k < 8; k++)
+		{
+			if (strcmp(&buffer[pos],vpfxstConstants[k]) == 0)
+			{
+				constNum = k;
+				break;
+			}
+		}
+
+		if (constNum == -1)
+			return false;
+
+		result |= (constNum & 3) << (i*2);
+		if (constNum & 4)
+			result |= 1 << (8+i);
+	}
+	
+	if (*text++ != ']')
+		return false;
+
+	RetLen = text-start;
+	return true;
+}
+
 bool CMipsInstruction::Load(const char* Name, const char* Params)
 {
 	bool paramfail = false;
@@ -263,6 +362,13 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				Line += RetLen;
 				SourceEncoding++;
 				break;
+			case 'W':	// vpfxst argument
+				if (parseVpfxsParameter(Line,immediate.originalValue,RetLen) == false) return false;
+				Line += RetLen;
+				immediate.value = immediate.originalValue;
+				immediateType = MipsImmediateType::Immediate20_0;
+				SourceEncoding++;
+				break;
 			case '/':	// forced letter
 				SourceEncoding++;	// fallthrough
 			default:	// everything else
@@ -438,6 +544,7 @@ int getImmediateBits(MipsImmediateType type)
 	case MipsImmediateType::Immediate16:
 		return 16;
 	case MipsImmediateType::Immediate20:
+	case MipsImmediateType::Immediate20_0:
 		return 20;
 	case MipsImmediateType::Immediate26:
 		return 26;
@@ -464,11 +571,14 @@ bool CMipsInstruction::Validate()
 	// check immediates
 	if (immediateType != MipsImmediateType::None)
 	{
-		if (immediate.expression.evaluate(immediate.value,true) == false)
-			return false;
+		if (immediate.expression.isLoaded())
+		{
+			if (immediate.expression.evaluate(immediate.value,true) == false)
+				return false;
 
-		immediate.originalValue = immediate.value;
-		
+			immediate.originalValue = immediate.value;
+		}
+
 		if (Opcode.flags & MO_IMMALIGNED)	// immediate must be aligned
 		{
 			if (immediate.value % 4)
@@ -598,6 +708,7 @@ void CMipsInstruction::encodeNormal()
 		break;
 	case MipsImmediateType::Immediate16:
 	case MipsImmediateType::Immediate26:
+	case MipsImmediateType::Immediate20_0:
 		encoding |= immediate.value;
 		break;
 	case MipsImmediateType::Immediate8:
