@@ -4,6 +4,7 @@
 /* Placeholders for encoding
    Opcodes
 	S	vfpu size
+	B	cop2 branch condition
 
    Parameters
 	s	source register
@@ -23,6 +24,7 @@
 	j	5 bit secondary immediate
 	 e	ext
 	 i	ins
+	 b	cop2 branch condition
 	vs	PSP vfpu source reg
 	vd	PSP vfpu dest reg
 	vt	PSP vfpu target reg
@@ -421,6 +423,26 @@ const tMipsOpcode MipsOpcodes[] = {
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 	{ "cvt.s.w",	"D,S",		MIPS_COP1W(0x20),			MA_MIPS2,	0 },
+
+
+//     COP2BC: ? indicates any, * indicates all
+//     31---------21-------16------------------------------------------0
+//     |=    COP2BC|  rt   |                                           |
+//     ------11---------5-----------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |  BVFx |  BVTx | BVFLx | BVTLx |  BVFy |  BVTy | BVFLy | BVTLy |
+//  01 |  BVFz |  BVTz | BVFLz | BVTLz |  BVFw |  BVTw | BVFLw | BVTLw |
+//  10 |  BVF? |  BVT? | BVFL? | BVTL? |  BVF* |  BVT* | BVFL* | BVTL* |
+//  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "bvf",		"jb,i16",	MIPS_COP2BC(0x00),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvf.B",		"i16",		MIPS_COP2BC(0x00),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvt",		"jb,i16",	MIPS_COP2BC(0x01),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvt.B",		"i16",		MIPS_COP2BC(0x01),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvfl",		"jb,i16",	MIPS_COP2BC(0x02),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvfl.B",		"i16",		MIPS_COP2BC(0x02),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvtl",		"jb,i16",	MIPS_COP2BC(0x03),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bvtl.B",		"i16",		MIPS_COP2BC(0x03),			MA_PSP,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
 
 //     31---------26-----23--------------------------------------------0
 //     |= VFPU0| VOP | |

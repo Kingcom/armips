@@ -6,7 +6,7 @@
 
 enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
 	Immediate20_0, ImmediateHalfFloat, Immediate7 };
-enum class MipsExtInsSizeType { None, Ext, Ins };
+enum class MipsSecondaryImmediateType { None, Ext, Ins, Cop2BranchType };
 
 struct MipsImmediate
 {
@@ -73,7 +73,8 @@ private:
 	MipsImmediate immediate;
 	int vfpuSize;
 	int vectorCondition;
-
-	MipsExtInsSizeType extInsType;
-	MipsImmediate extInsImmediate;
+	
+	bool hasFixedSecondaryImmediate;
+	MipsSecondaryImmediateType secondaryImmediateType;
+	MipsImmediate secondaryImmediate;
 };

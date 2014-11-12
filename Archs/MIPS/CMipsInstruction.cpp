@@ -217,6 +217,54 @@ bool parseVcstParameter(const char* text, int& result, int& RetLen)
 	return false;
 }
 
+bool parseCop2BranchCondition(const char* text, int& result, int& RetLen)
+{
+	switch (*text)
+	{
+	case '0':
+	case 'x':
+		result = 0;
+		RetLen = 1;
+		return true;
+	case '1':
+	case 'y':
+		result = 1;
+		RetLen = 1;
+		return true;
+	case '2':
+	case 'z':
+		result = 2;
+		RetLen = 1;
+		return true;
+	case '3':
+	case 'w':
+		result = 3;
+		RetLen = 1;
+		return true;
+	case '4':
+	case '5':
+		result = *text - '0';
+		RetLen = 1;
+		return true;
+	}
+
+	if (memcmp(text,"any",3) == 0)
+	{
+		result = 4;
+		RetLen = 3;
+		return true;
+	}
+	
+	if (memcmp(text,"all",3) == 0)
+	{
+		result = 5;
+		RetLen = 3;
+		return true;
+	}
+
+	return false;
+}
+
 // http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
 static int floatToHalfFloat(int i)
 {
@@ -299,12 +347,14 @@ bool CMipsInstruction::Load(const char* Name, const char* Params)
 bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, const char* Line)
 {
 	vfpuSize = -1;
+	hasFixedSecondaryImmediate = false;
 
 	const char* SourceEncoding = SourceOpcode.name;
 	while (*SourceEncoding != 0)
 	{
 		if (*Line == 0) return false;
 
+		int RetLen;
 		switch (*SourceEncoding)
 		{
 		case 'S':	// vfpu size
@@ -328,6 +378,15 @@ bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, const char* 
 			SourceEncoding++;
 			Line++;
 			break;
+		case 'B':	// cop2 branch condition
+			if (parseCop2BranchCondition(Line,secondaryImmediate.originalValue,RetLen) == false) return false;
+			secondaryImmediateType = MipsSecondaryImmediateType::Cop2BranchType;
+			secondaryImmediate.value = secondaryImmediate.originalValue;
+			hasFixedSecondaryImmediate = true;
+
+			SourceEncoding++;
+			Line += RetLen;
+			break;
 		default:
 			if (*SourceEncoding++ != *Line++) return false;
 			break;
@@ -345,7 +404,8 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 	bool Immediate = false;
 	
 	immediateType = MipsImmediateType::None;
-	extInsType = MipsExtInsSizeType::None;
+	if (!hasFixedSecondaryImmediate)
+		secondaryImmediateType = MipsSecondaryImmediateType::None;
 	registers.reset();
 	vectorCondition = -1;
 
@@ -488,18 +548,25 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				}
 				break;
 			case 'j':
-				if (MipsCheckImmediate(Line,extInsImmediate.expression,RetLen) == false) return false;
+				switch (*(SourceEncoding+1))
+				{
+				case 'e':
+					if (MipsCheckImmediate(Line,secondaryImmediate.expression,RetLen) == false) return false;
+					secondaryImmediateType = MipsSecondaryImmediateType::Ext;
+					break;
+				case 'i':
+					if (MipsCheckImmediate(Line,secondaryImmediate.expression,RetLen) == false) return false;
+					secondaryImmediateType = MipsSecondaryImmediateType::Ins;
+					break;
+				case 'b':
+					if (parseCop2BranchCondition(Line,secondaryImmediate.originalValue,RetLen) == false) return false;
+					secondaryImmediateType = MipsSecondaryImmediateType::Cop2BranchType;
+					secondaryImmediate.value = secondaryImmediate.originalValue;
+					break;
+				}
+
 				Line += RetLen;
-				SourceEncoding++;
-				
-				if (*SourceEncoding == 'e')				
-					extInsType = MipsExtInsSizeType::Ext;
-				else if (*SourceEncoding == 'i')
-					extInsType = MipsExtInsSizeType::Ins;
-				else
-					return false;
-				
-				SourceEncoding++;
+				SourceEncoding += 2;
 				break;
 			case 'r':	// forced register
 				if (MipsGetRegister(Line,RetLen) != *(SourceEncoding+1)) return false;
@@ -525,7 +592,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				case 'c':
 					if (parseVcstParameter(Line,immediate.originalValue,RetLen) == false) return false;
 					immediateType = MipsImmediateType::Immediate5;
-					break;					
+					break;
 				default:
 					return false;
 				}
@@ -557,9 +624,9 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 		}
 	}
 	
-	if (extInsImmediate.expression.isLoaded())
+	if (secondaryImmediate.expression.isLoaded())
 	{
-		if (extInsImmediate.expression.check() == false)
+		if (secondaryImmediate.expression.check() == false)
 		{
 			NoCheckError = true;
 			return false;
@@ -787,22 +854,31 @@ bool CMipsInstruction::Validate()
 		immediate.value &= mask;
 	}
 
-	if (extInsType != MipsExtInsSizeType::None)
+	if (secondaryImmediateType != MipsSecondaryImmediateType::None)
 	{
-		if (extInsImmediate.expression.evaluate(extInsImmediate.value,true) == false)
-			return false;
-
-		extInsImmediate.originalValue = extInsImmediate.value;
-
-		if (extInsImmediate.value > 32 || extInsImmediate.value == 0)
+		if (secondaryImmediate.expression.isLoaded())
 		{
-			Logger::queueError(Logger::Error,L"Immediate value %02X out of range",extInsImmediate.value);
-			return false;
+			if (secondaryImmediate.expression.evaluate(secondaryImmediate.value,true) == false)
+				return false;
+
+			secondaryImmediate.originalValue = secondaryImmediate.value;
 		}
+
+		switch (secondaryImmediateType)
+		{
+		case MipsSecondaryImmediateType::Ext:
+		case MipsSecondaryImmediateType::Ins:
+			if (secondaryImmediate.value > 32 || secondaryImmediate.value == 0)
+			{
+				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",secondaryImmediate.value);
+				return false;
+			}
 		
-		extInsImmediate.value--;
-		if (extInsType == MipsExtInsSizeType::Ins)
-			extInsImmediate.value += immediate.value;
+			secondaryImmediate.value--;
+			if (secondaryImmediateType == MipsSecondaryImmediateType::Ins)
+				secondaryImmediate.value += immediate.value;
+			break;
+		}
 	}
 
 	// check load delay
@@ -891,8 +967,16 @@ void CMipsInstruction::encodeNormal()
 		break;
 	}
 
-	if (extInsType != MipsExtInsSizeType::None)
-		encoding |= extInsImmediate.value << 11;
+	switch (secondaryImmediateType)
+	{
+	case MipsSecondaryImmediateType::Ext:
+	case MipsSecondaryImmediateType::Ins:
+		encoding |= secondaryImmediate.value << 11;
+		break;
+	case MipsSecondaryImmediateType::Cop2BranchType:
+		encoding |= secondaryImmediate.value << 18;
+		break;
+	}
 
 	if (Opcode.flags & MO_VFPU_MIXED)
 	{
