@@ -265,6 +265,57 @@ bool parseCop2BranchCondition(const char* text, int& result, int& RetLen)
 	return false;
 }
 
+bool parseVfpuControlRegister(const char* text, MipsVFPURegister& reg, int& RetLen)
+{
+	static const char* vfpuCtrlNames[16] = {
+		"spfx",
+		"tpfx",
+		"dpfx",
+		"cc",
+		"inf4",
+		"rsv5",
+		"rsv6",
+		"rev",
+		"rcx0",
+		"rcx1",
+		"rcx2",
+		"rcx3",
+		"rcx4",
+		"rcx5",
+		"rcx6",
+		"rcx7",
+	};
+
+	for (int i = 0; i < 16; i++)
+	{
+		if (strcmp(text,vfpuCtrlNames[i]) == 0)
+		{
+			reg.num = i;
+			strcpy(reg.name,vfpuCtrlNames[i]);
+			RetLen = strlen(vfpuCtrlNames[i]);
+			return true;
+		}
+	}
+
+	RetLen = 0;
+	reg.num = 0;
+	while (*text != 0 && *text != ',')
+	{
+		if (*text < '0' || *text > '9')
+			return false;
+		reg.num = (reg.num*10) + *text - '0';
+		
+		RetLen++;
+		text++;
+	}
+
+	if (reg.num > 15)
+		return false;
+	
+	strcpy(reg.name,vfpuCtrlNames[reg.num ]);
+	return true;
+}
+
 // http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
 static int floatToHalfFloat(int i)
 {
@@ -468,21 +519,28 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 					if (MipsGetVFPURegister(Line,registers.vrs,vfpuSize) == false) return false;
 					if (registers.vrs.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrs.num & 0x40)) return false;
+					Line += 4;
 					break;
 				case 't':
 					if (MipsGetVFPURegister(Line,registers.vrt,vfpuSize) == false) return false;
 					if (registers.vrt.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrt.num & 0x40)) return false;
+					Line += 4;
 					break;
 				case 'd':
 					if (MipsGetVFPURegister(Line,registers.vrd,vfpuSize) == false) return false;
 					if (registers.vrd.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrd.num & 0x40)) return false;
+					Line += 4;
+					break;
+				case 'c':
+					if (parseVfpuControlRegister(Line,registers.vrd,RetLen) == false) return false;
+					Line += RetLen;
 					break;
 				default:
 					return false;
 				}
-				Line += 4;
+
 				SourceEncoding += 2;
 				break;
 			case 'V':	// ps2 vector registers
@@ -1001,6 +1059,8 @@ void CMipsInstruction::encodeVfpu()
 		if (vfpuSize & 1) encoding |= (1 << 7);
 		if (vfpuSize & 2) encoding |= (1 << 15);
 	}
+
+	if (registers.grt.num != -1) encoding |= (registers.grt.num << 16);
 	
 	switch (immediateType)
 	{

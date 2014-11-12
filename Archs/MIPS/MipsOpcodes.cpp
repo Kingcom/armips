@@ -28,6 +28,7 @@
 	vs	PSP vfpu source reg
 	vd	PSP vfpu dest reg
 	vt	PSP vfpu target reg
+	vc	PSP vfpu control reg
 	Vs	PS2 vector source reg
 	Vd	PS2 vector dest reg
 	Vt	PS2 vector target reg
@@ -423,7 +424,21 @@ const tMipsOpcode MipsOpcodes[] = {
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 	{ "cvt.s.w",	"D,S",		MIPS_COP1W(0x20),			MA_MIPS2,	0 },
-
+	
+//     31-------26------21---------------------------------------------0
+//     |=    COP2|  rs  |                                              |
+//     -----6-------5---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |  ---  |  ---  |  ---  |  MFV  |  ---  |  ---  |  ---  |  MTV  |
+//  01 |  BC*  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	// VVVVVV VVVVV ttttt -------- C DDDDDDD
+	{ "mfv",	"t,vd",			MIPS_COP2(3),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
+	{ "mfvc",	"t,vc",			MIPS_COP2(3) | 0x80,		MA_PSP,	MO_VFPU },
+	{ "mtv",	"t,vd",			MIPS_COP2(7),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
+	{ "mtvc",	"t,vc",			MIPS_COP2(7) | 0x80,		MA_PSP,	MO_VFPU },
 
 //     COP2BC: ? indicates any, * indicates all
 //     31---------21-------16------------------------------------------0
