@@ -474,8 +474,8 @@ const tMipsOpcode MipsOpcodes[] = {
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "ext",		"t,s,a,je",	MIPS_SPECIAL3(0),			MA_PSP },
-	{ "ins",		"t,s,a,ji",	MIPS_SPECIAL3(4),			MA_PSP },
+	{ "ext",	"t,s,i5,je",	MIPS_SPECIAL3(0),			MA_PSP },
+	{ "ins",	"t,s,i5,ji",	MIPS_SPECIAL3(4),			MA_PSP },
 	
 //     31-------26----------------------------------10--------5--------0
 //     |=SPECIAL3|                                 | secfunc |ALLEGREX0|

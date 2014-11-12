@@ -186,7 +186,7 @@ bool parseVcstParameter(const char* text, int& result, int& RetLen)
 		"maxfloat",
 		"sqrt(2)",
 		"sqrt(1/2)",
-		"2/sqrt(PI)",
+		"2/sqrt(pi)",
 		"2/pi",
 		"1/pi",
 		"pi/4",
