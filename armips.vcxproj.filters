@@ -138,6 +138,9 @@
     <ClCompile Include="Util\StringFormat.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsPSP.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -278,6 +281,9 @@
     </ClInclude>
     <ClInclude Include="Util\StringFormat.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsPSP.h">
+      <Filter>Archs\MIPS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

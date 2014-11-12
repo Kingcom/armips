@@ -88,6 +88,8 @@ add_executable(armips
 
 	Archs/MIPS/Mips.cpp
 	Archs/MIPS/Mips.h
+	Archs/MIPS/MipsPSP.cpp
+	Archs/MIPS/MipsPSP.h
 	Archs/MIPS/PsxRelocator.cpp
 	Archs/MIPS/PsxRelocator.h
 	Archs/MIPS/MipsElfFile.cpp

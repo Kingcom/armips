@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "Mips.h"
 #include "MipsOpcodes.h"
+#include "MipsPSP.h"
 #include "Core/FileManager.h"
 
 CMipsInstruction::CMipsInstruction()
@@ -16,341 +17,6 @@ CMipsInstruction::~CMipsInstruction()
 {
 	if (subInstruction != NULL)
 		delete subInstruction;
-}
-
-static const char* vpfxstRegisters = "xyzw";
-static const char* vpfxstConstants[8] = {"0","1","2","1/2","3","1/3","1/4","1/6"};
-
-bool parseVpfxsParameter(const char* text, int& result, int& RetLen)
-{
-	const char* start = text;
-	result = 0;
-
-	if (*text++ != '[')
-		return false;
-
-	for (int i = 0; i < 4; i++)
-	{
-		char buffer[64];
-		
-		if (*text == 0 || *text == ']')
-			return false;
-
-		// extract element from text, so we don't have to worry about whitespace
-		int pos = 0;
-		while (*text != ',' && *text != 0 &&  *text != ']')
-		{
-			if (*text == ' ' || *text == '\t')
-			{
-				text++;
-				continue;
-			}
-
-			buffer[pos++] = *text++;
-		}
-
-		if (*text == ',')
-			text++;
-
-		if (pos == 0)
-			return false;
-
-		buffer[pos] = 0;
-		pos = 0;
-		
-		// negation
-		if (buffer[pos] == '-')
-		{
-			result |= 1 << (16+i);
-			pos++;
-		}
-
-		// abs
-		bool abs = false;
-		if (buffer[pos] == '|')
-		{
-			result |= 1 << (8+i);
-			abs = true;
-			pos++;
-		}
-
-		// check for register
-		const char* reg;
-		if ((reg = strchr(vpfxstRegisters,buffer[pos])) != NULL)
-		{
-			result |= (reg-vpfxstRegisters) << (i*2);
-
-			if (abs && buffer[pos+1] != '|')
-				return false;
-
-			continue;
-		}
-
-		// abs is invalid with constants
-		if (abs)
-			return false;
-
-		result |= 1 << (12+i);
-
-		int constNum = -1;
-		for (int k = 0; k < 8; k++)
-		{
-			if (strcmp(&buffer[pos],vpfxstConstants[k]) == 0)
-			{
-				constNum = k;
-				break;
-			}
-		}
-
-		if (constNum == -1)
-			return false;
-
-		result |= (constNum & 3) << (i*2);
-		if (constNum & 4)
-			result |= 1 << (8+i);
-	}
-	
-	if (*text++ != ']')
-		return false;
-
-	RetLen = text-start;
-	return true;
-}
-
-bool parseVpfxdParameter(const char* text, int& result, int& RetLen)
-{
-	const char* start = text;
-	result = 0;
-
-	if (*text++ != '[')
-		return false;
-
-	for (int i = 0; i < 4; i++)
-	{
-		char buffer[64];
-		
-		if (*text == 0 || *text == ']')
-		{
-			if (i == 3)
-				break;
-			return false;
-		}
-
-		// extract element from text, so we don't have to worry about whitespace
-		int pos = 0;
-		while (*text != ',' && *text != 0 &&  *text != ']')
-		{
-			if (*text == ' ' || *text == '\t')
-			{
-				text++;
-				continue;
-			}
-
-			buffer[pos++] = *text++;
-		}
-
-		if (*text == ',')
-			text++;
-
-		if (pos == 0)
-			continue;
-
-		buffer[pos] = 0;
-		int length = pos;
-		pos = 0;
-		
-		if (length > 0 && buffer[length-1] == 'm')
-		{
-			buffer[--length] = 0;
-			result |= 1 << (8+i);
-		}
-
-		if (strcmp(buffer,"0-1") == 0 || strcmp(buffer,"0:1") == 0)
-			result |= 1 << (2*i);
-		else if (strcmp(buffer,"-1-1") == 0 || strcmp(buffer,"-1:1") == 0)
-			result |= 3 << (2*i);
-	}
-	
-	if (*text++ != ']')
-		return false;
-
-	RetLen = text-start;
-	return true;
-}
-
-bool parseVcstParameter(const char* text, int& result, int& RetLen)
-{
-	static const char *constants[32] = 
-	{
-		"(undef)",
-		"maxfloat",
-		"sqrt(2)",
-		"sqrt(1/2)",
-		"2/sqrt(pi)",
-		"2/pi",
-		"1/pi",
-		"pi/4",
-		"pi/2",
-		"pi",
-		"e",
-		"log2(e)",
-		"log10(e)",
-		"ln(2)",
-		"ln(10)",
-		"2*pi",
-		"pi/6",
-		"log10(2)",
-		"log2(10)",
-		"sqrt(3)/2"
-	};
-
-	for (int i = 1; i < 32; i++)
-	{
-		if (strcmp(text,constants[i]) == 0)
-		{
-			result = i;
-			RetLen = strlen(text);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool parseCop2BranchCondition(const char* text, int& result, int& RetLen)
-{
-	switch (*text)
-	{
-	case '0':
-	case 'x':
-		result = 0;
-		RetLen = 1;
-		return true;
-	case '1':
-	case 'y':
-		result = 1;
-		RetLen = 1;
-		return true;
-	case '2':
-	case 'z':
-		result = 2;
-		RetLen = 1;
-		return true;
-	case '3':
-	case 'w':
-		result = 3;
-		RetLen = 1;
-		return true;
-	case '4':
-	case '5':
-		result = *text - '0';
-		RetLen = 1;
-		return true;
-	}
-
-	if (memcmp(text,"any",3) == 0)
-	{
-		result = 4;
-		RetLen = 3;
-		return true;
-	}
-	
-	if (memcmp(text,"all",3) == 0)
-	{
-		result = 5;
-		RetLen = 3;
-		return true;
-	}
-
-	return false;
-}
-
-bool parseVfpuControlRegister(const char* text, MipsVFPURegister& reg, int& RetLen)
-{
-	static const char* vfpuCtrlNames[16] = {
-		"spfx",
-		"tpfx",
-		"dpfx",
-		"cc",
-		"inf4",
-		"rsv5",
-		"rsv6",
-		"rev",
-		"rcx0",
-		"rcx1",
-		"rcx2",
-		"rcx3",
-		"rcx4",
-		"rcx5",
-		"rcx6",
-		"rcx7",
-	};
-
-	for (int i = 0; i < 16; i++)
-	{
-		if (strcmp(text,vfpuCtrlNames[i]) == 0)
-		{
-			reg.num = i;
-			strcpy(reg.name,vfpuCtrlNames[i]);
-			RetLen = strlen(vfpuCtrlNames[i]);
-			return true;
-		}
-	}
-
-	RetLen = 0;
-	reg.num = 0;
-	while (*text != 0 && *text != ',')
-	{
-		if (*text < '0' || *text > '9')
-			return false;
-		reg.num = (reg.num*10) + *text - '0';
-		
-		RetLen++;
-		text++;
-	}
-
-	if (reg.num > 15)
-		return false;
-	
-	strcpy(reg.name,vfpuCtrlNames[reg.num ]);
-	return true;
-}
-
-// http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
-static int floatToHalfFloat(int i)
-{
-	int s = ((i >> 16) & 0x00008000); // sign
-	int e = ((i >> 23) & 0x000000ff) - (127 - 15); // exponent
-	int f = ((i >> 0) & 0x007fffff); // fraction
-
-	// need to handle NaNs and Inf?
-	if (e <= 0) {
-		if (e < -10) {
-			if (s != 0) {
-				// handle -0.0
-				return 0x8000;
-			}
-			return 0;
-		}
-		f = (f | 0x00800000) >> (1 - e);
-		return s | (f >> 13);
-	} else if (e == 0xff - (127 - 15)) {
-		if (f == 0) {
-			// Inf
-			return s | 0x7c00;
-		}
-		// NAN
-		f >>= 13;
-		f = 0x3ff; // PSP always encodes NaN with this value
-		return s | 0x7c00 | f | ((f == 0) ? 1 : 0);
-	}
-
-	if (e > 30) {
-		// Overflow
-		return s | 0x7c00;
-	}
-
-	return s | (e << 10) | (f >> 13);
 }
 
 bool CMipsInstruction::Load(const char* Name, const char* Params)
@@ -516,19 +182,19 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				switch (*(SourceEncoding+1))
 				{
 				case 's':
-					if (MipsGetVFPURegister(Line,registers.vrs,vfpuSize) == false) return false;
+					if (parseVFPURegister(Line,registers.vrs,vfpuSize) == false) return false;
 					if (registers.vrs.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrs.num & 0x40)) return false;
 					Line += 4;
 					break;
 				case 't':
-					if (MipsGetVFPURegister(Line,registers.vrt,vfpuSize) == false) return false;
+					if (parseVFPURegister(Line,registers.vrt,vfpuSize) == false) return false;
 					if (registers.vrt.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrt.num & 0x40)) return false;
 					Line += 4;
 					break;
 				case 'd':
-					if (MipsGetVFPURegister(Line,registers.vrd,vfpuSize) == false) return false;
+					if (parseVFPURegister(Line,registers.vrd,vfpuSize) == false) return false;
 					if (registers.vrd.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrd.num & 0x40)) return false;
 					Line += 4;
@@ -632,7 +298,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				SourceEncoding += 2;
 				break;
 			case 'C':
-				if ((vectorCondition = MipsGetVectorCondition(Line, RetLen)) == -1) return false;
+				if ((vectorCondition = parseVFPUCondition(Line, RetLen)) == -1) return false;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
