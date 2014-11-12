@@ -178,6 +178,44 @@ bool parseVpfxdParameter(const char* text, int& result, int& RetLen)
 	return true;
 }
 
+bool parseVcstParameter(const char* text, int& result, int& RetLen)
+{
+	static const char *constants[32] = 
+	{
+		"(undef)",
+		"maxfloat",
+		"sqrt(2)",
+		"sqrt(1/2)",
+		"2/sqrt(PI)",
+		"2/pi",
+		"1/pi",
+		"pi/4",
+		"pi/2",
+		"pi",
+		"e",
+		"log2(e)",
+		"log10(e)",
+		"ln(2)",
+		"ln(10)",
+		"2*pi",
+		"pi/6",
+		"log10(2)",
+		"log2(10)",
+		"sqrt(3)/2"
+	};
+
+	for (int i = 1; i < 32; i++)
+	{
+		if (strcmp(text,constants[i]) == 0)
+		{
+			result = i;
+			RetLen = strlen(text);
+			return true;
+		}
+	}
+
+	return false;
+}
 
 // http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
 static int floatToHalfFloat(int i)
@@ -429,6 +467,9 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 					case 5:
 						immediateType = MipsImmediateType::Immediate5;
 						break;
+					case 7:
+						immediateType = MipsImmediateType::Immediate7;
+						break;
 					case 8:
 						immediateType = MipsImmediateType::Immediate8;
 						break;
@@ -470,7 +511,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				Line += RetLen;
 				SourceEncoding++;
 				break;
-			case 'W':	// vpfxst argument
+			case 'W':	// vfpu argument
 				switch (*(SourceEncoding+1))
 				{
 				case 's':
@@ -481,6 +522,10 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 					if (parseVpfxdParameter(Line,immediate.originalValue,RetLen) == false) return false;
 					immediateType = MipsImmediateType::Immediate16;
 					break;
+				case 'c':
+					if (parseVcstParameter(Line,immediate.originalValue,RetLen) == false) return false;
+					immediateType = MipsImmediateType::Immediate5;
+					break;					
 				default:
 					return false;
 				}
@@ -659,6 +704,8 @@ int getImmediateBits(MipsImmediateType type)
 	{
 	case MipsImmediateType::Immediate5:
 		return 5;
+	case MipsImmediateType::Immediate7:
+		return 7;
 	case MipsImmediateType::Immediate8:
 		return 8;
 	case MipsImmediateType::Immediate16:
@@ -871,6 +918,16 @@ void CMipsInstruction::encodeVfpu()
 		if (vfpuSize & 2) encoding |= (1 << 15);
 	}
 	
+	switch (immediateType)
+	{
+	case MipsImmediateType::Immediate5:
+		encoding |= immediate.value << 16;
+		break;
+	case MipsImmediateType::Immediate7:
+		encoding |= immediate.value << 0;
+		break;
+	}
+
 	g_fileManager->write(&encoding,4);
 }
 

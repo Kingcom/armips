@@ -33,6 +33,7 @@
 	W	weird vfpu parameters
 		s vpfxs/t parameter
 		d vpfxd parameter
+		c vcst constant
 */
 
 const tMipsOpcode MipsOpcodes[] = {
@@ -432,13 +433,178 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vsbn.S",		"vd,vs,vt",	MIPS_VFPU0(0x02),			MA_PSP,	MO_VFPU },
 	{ "vdiv.S",		"vd,vs,vt",	MIPS_VFPU0(0x07),			MA_PSP,	MO_VFPU },
 
-	// allegrex0
-	{ "seh",		"d,t",		MIPS_ALLEGREX0(16),			MA_PSP },
-	{ "seh",		"d,t",		MIPS_ALLEGREX0(24),			MA_PSP },
+//     31-------26-----23----------------------------------------------0
+//     |=   VFPU1|  f  |                                               |
+//     -----6-------3---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--|
+//     |  VMUL |  VDOT |  VSCL |  ---  |  VHDP |  VDET |  VCRS |  ---  |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "vmul.S",		"vd,vs,vt",	MIPS_VFPU1(0),			MA_PSP,	MO_VFPU },
+	{ "vdot.S",		"vd,vs,vt",	MIPS_VFPU1(1),			MA_PSP,	MO_VFPU },
+	{ "vscl.S",		"vd,vs,vt",	MIPS_VFPU1(2),			MA_PSP,	MO_VFPU },
+	{ "vhdp.S",		"vd,vs,vt",	MIPS_VFPU1(4),			MA_PSP,	MO_VFPU },
+	{ "vdet.S",		"vd,vs,vt",	MIPS_VFPU1(5),			MA_PSP,	MO_VFPU },
+	{ "vcrs.S",		"vd,vs,vt",	MIPS_VFPU1(6),			MA_PSP,	MO_VFPU },
 
-	// special 3
+//     31-------26-----23----------------------------------------------0
+//     |=   VFPU3|  f  |                                               |
+//     -----6-------3---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--|
+//     |  VCMP |  ---  |  VMIN |  VMAX |  ---  | VSCMP |  VSGE |  VSLT |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	// VVVVVV VVV TTTTTTT z SSSSSSS z --- CCCC
+	{ "vcmp.S",		"C,vs,vt",	MIPS_VFPU3(0),			MA_PSP,	MO_VFPU },
+	{ "vmin.S",		"vd,vs,vt",	MIPS_VFPU3(2),			MA_PSP,	MO_VFPU },
+	{ "vmax.S",		"vd,vs,vt",	MIPS_VFPU3(3),			MA_PSP,	MO_VFPU },
+	{ "vscmp.S",	"vd,vs,vt",	MIPS_VFPU3(5),			MA_PSP,	MO_VFPU },
+	{ "vsge.S",		"vd,vs,vt",	MIPS_VFPU3(6),			MA_PSP,	MO_VFPU },
+	{ "vslt.S",		"vd,vs,vt",	MIPS_VFPU3(7),			MA_PSP,	MO_VFPU },
+
+//     31-------26--------------------------------------------5--------0
+//     |=SPECIAL3|                                           | function|
+//     -----11----------------------------------------------------6-----
+//     -----6-------5---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+// 000 |  EXT  |  ---  |  ---  |  ---  |  INS  |  ---  |  ---  |  ---  |
+// 001 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+// 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+// 011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+// 100 |ALLEGRE|  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+// 101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+// 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+// 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 	{ "ext",		"t,s,a,je",	MIPS_SPECIAL3(0),			MA_PSP },
 	{ "ins",		"t,s,a,ji",	MIPS_SPECIAL3(4),			MA_PSP },
+	
+//     31-------26----------------------------------10--------5--------0
+//     |=SPECIAL3|                                 | secfunc |ALLEGREX0|
+//     ------11---------5-------------------------------5---------6-----
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |  ---  |  ---  | WSBH  | WSBW  |  ---  |  ---  |  ---  |  ---  |
+//  01 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  10 |  SEB  |  ---  |  ---  |  ---  |BITREV |  ---  |  ---  |  ---  |
+//  11 |  SEH  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	// VVVVVV ----- ttttt ddddd VVVVV VVVVVV
+	{ "wsbh",	"d,t",			MIPS_ALLEGREX0(0x02),		MA_PSP },
+	{ "wsbh",	"d",			MIPS_ALLEGREX0(0x02),		MA_PSP },
+	{ "wsbw",	"d,t",			MIPS_ALLEGREX0(0x03),		MA_PSP },
+	{ "wsbw",	"d",			MIPS_ALLEGREX0(0x03),		MA_PSP },
+	{ "seb",	"d,t",			MIPS_ALLEGREX0(0x10),		MA_PSP },
+	{ "seb",	"d",			MIPS_ALLEGREX0(0x10),		MA_PSP },
+	{ "bitrev",	"d,t",			MIPS_ALLEGREX0(0x14),		MA_PSP },
+	{ "bitrev",	"d",			MIPS_ALLEGREX0(0x14),		MA_PSP },
+	{ "seh",	"d,t",			MIPS_ALLEGREX0(0x18),		MA_PSP },
+	{ "seh",	"d",			MIPS_ALLEGREX0(0x18),		MA_PSP },
+
+
+//     VFPU4: This one is a bit messy.
+//     31-------26------21---------------------------------------------0
+//     |=   VFPU4|  rs  |                                              |
+//     -----6-------5---------------------------------------------------
+//  hi |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |VF4-1.1|VF4-1.2|VF4-1.3| VCST  |  ---  |  ---  |  ---  |  ---  |
+//  01 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  10 | VF2IN | VF2IZ | VF2IU | VF2ID | VI2F  | VCMOV |  ---  |  ---  |
+//  11 | VWBN  | VWBN  | VWBN  | VWBN  | VWBN  | VWBN  | VWBN  | VWBN  |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	// VVVVVV VVVVV iiiii z ------- z DDDDDDD
+	// Technically these also have names (as the second arg.)
+	{ "vcst.S",		"vd,Wc",	MIPS_VFPU4(0x03),				MA_PSP, MO_VFPU },
+	{ "vf2in.S",	"vd,vs,i5",	MIPS_VFPU4(0x10),				MA_PSP, MO_VFPU },
+	{ "vf2iz.S",	"vd,vs,i5",	MIPS_VFPU4(0x11),				MA_PSP, MO_VFPU },
+	{ "vf2iu.S",	"vd,vs,i5",	MIPS_VFPU4(0x12),				MA_PSP, MO_VFPU },
+	{ "vf2id.S",	"vd,vs,i5",	MIPS_VFPU4(0x13),				MA_PSP, MO_VFPU },
+	{ "vi2f.S",		"vd,vs,i5",	MIPS_VFPU4(0x14),				MA_PSP, MO_VFPU },
+	{ "vcmovt.S",	"vd,vs,i5",	MIPS_VFPU4(0x15) | 0x00000000,  MA_PSP, MO_VFPU },
+	{ "vcmovf.S",	"vd,vs,i5",	MIPS_VFPU4(0x15) | 0x00080000,  MA_PSP, MO_VFPU },
+	{ "vwbn.S",		"vd,vs,i5",	MIPS_VFPU4(0x18),				MA_PSP, MO_VFPU },
+
+//     31-------------21-------16--------------------------------------0
+//     |= VF4-1.1      |   rt  |                                       |
+//     --------11----------5--------------------------------------------
+//  hi |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 | VMOV  | VABS  | VNEG  | VIDT  | vsAT0 | vsAT1 | VZERO | VONE  |
+//  01 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  10 | VRCP  | VRSQ  | vsIN  | VCOS  | VEXP2 | VLOG2 | vsQRT | VASIN |
+//  11 | VNRCP |  ---  | VNSIN |  ---  |VREXP2 |  ---  |  ---  |  ---  |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "vmov.S",		"vd,vs",	MIPS_VFPU4_11(0x00),  MA_PSP, MO_VFPU },
+	{ "vabs.S",		"vd,vs",	MIPS_VFPU4_11(0x01),  MA_PSP, MO_VFPU },
+	{ "vneg.S",		"vd,vs",	MIPS_VFPU4_11(0x02),  MA_PSP, MO_VFPU },
+	{ "vidt.S",		"vd",		MIPS_VFPU4_11(0x03),  MA_PSP, MO_VFPU },
+	{ "vsat0.S",	"vd,vs",	MIPS_VFPU4_11(0x04),  MA_PSP, MO_VFPU },
+	{ "vsat1.S",	"vd,vs",	MIPS_VFPU4_11(0x05),  MA_PSP, MO_VFPU },
+	{ "vzero.S",	"vd",		MIPS_VFPU4_11(0x06),  MA_PSP, MO_VFPU },
+	{ "vone.S",		"vd",		MIPS_VFPU4_11(0x07),  MA_PSP, MO_VFPU },
+	{ "vrcp.S",		"vd,vs",	MIPS_VFPU4_11(0x10),  MA_PSP, MO_VFPU },
+	{ "vrsq.S",		"vd,vs",	MIPS_VFPU4_11(0x11),  MA_PSP, MO_VFPU },
+	{ "vsin.S",		"vd,vs",	MIPS_VFPU4_11(0x12),  MA_PSP, MO_VFPU },
+	{ "vcos.S",		"vd,vs",	MIPS_VFPU4_11(0x13),  MA_PSP, MO_VFPU },
+	{ "vexp2.S",	"vd,vs",	MIPS_VFPU4_11(0x14),  MA_PSP, MO_VFPU },
+	{ "vlog2.S",	"vd,vs",	MIPS_VFPU4_11(0x15),  MA_PSP, MO_VFPU },
+	{ "vsqrt.S",	"vd,vs",	MIPS_VFPU4_11(0x16),  MA_PSP, MO_VFPU },
+	{ "vasin.S",	"vd,vs",	MIPS_VFPU4_11(0x17),  MA_PSP, MO_VFPU },
+	{ "vnrcp.S",	"vd,vs",	MIPS_VFPU4_11(0x18),  MA_PSP, MO_VFPU },
+	{ "vnsin.S",	"vd,vs",	MIPS_VFPU4_11(0x1a),  MA_PSP, MO_VFPU },
+	{ "vrexp2.S",	"vd,vs",	MIPS_VFPU4_11(0x1c),  MA_PSP, MO_VFPU },
+
+//     VFPU4 1.2: TODO: Unsure where vsBZ goes, no one uses it.
+//     31-------------21-------16--------------------------------------0
+//     |= VF4-1.2      |   rt  |                                       |
+//     --------11----------5--------------------------------------------
+//  hi |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 | VRNDS | VRNDI |VRNDF1 |VRNDF2 |  ---  |  ---  |  ---  |  ---  |
+//  01 |  ---  |  ---  |  ---  |  ---  | vsBZ? |  ---  |  ---  |  ---  |
+//  10 |  ---  |  ---  | VF2H  | VH2F  |  ---  |  ---  | vsBZ? | VLGB  |
+//  11 | VUC2I | VC2I  | VUS2I | vs2I  | VI2UC | VI2C  | VI2US | VI2S  |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "vrnds.S",	"vd",		MIPS_VFPU4_12(0x00),		MA_PSP,	MO_VFPU },
+	{ "vrndi.S",	"vd",		MIPS_VFPU4_12(0x01),		MA_PSP,	MO_VFPU },
+	{ "vrndf1.S",	"vd",		MIPS_VFPU4_12(0x02),		MA_PSP,	MO_VFPU },
+	{ "vrndf2.S",	"vd",		MIPS_VFPU4_12(0x03),		MA_PSP,	MO_VFPU },
+	// TODO: vsBZ?
+	{ "vf2h.S",		"vd,vs",	MIPS_VFPU4_12(0x12),		MA_PSP,	MO_VFPU },
+	{ "vh2f.S",		"vd,vs",	MIPS_VFPU4_12(0x13),		MA_PSP,	MO_VFPU },
+	// TODO: vsBZ?
+	{ "vlgb.S",		"vd,vs",	MIPS_VFPU4_12(0x17),		MA_PSP,	MO_VFPU },
+	{ "vuc2i.S",	"vd,vs",	MIPS_VFPU4_12(0x18),		MA_PSP,	MO_VFPU },
+	{ "vc2i.S",		"vd,vs",	MIPS_VFPU4_12(0x19),		MA_PSP,	MO_VFPU },
+	{ "vus2i.S",	"vd,vs",	MIPS_VFPU4_12(0x1a),		MA_PSP,	MO_VFPU },
+	{ "vs2i.S",		"vd,vs",	MIPS_VFPU4_12(0x1b),		MA_PSP,	MO_VFPU },
+	{ "vi2uc.S",	"vd,vs",	MIPS_VFPU4_12(0x1c),		MA_PSP,	MO_VFPU },
+	{ "vi2c.S",		"vd,vs",	MIPS_VFPU4_12(0x1d),		MA_PSP,	MO_VFPU },
+	{ "vi2us.S",	"vd,vs",	MIPS_VFPU4_12(0x1e),		MA_PSP,	MO_VFPU },
+	{ "vi2s.S",		"vd,vs",	MIPS_VFPU4_12(0x1f),		MA_PSP,	MO_VFPU },
+
+//     31--------------21------16--------------------------------------0
+//     |= VF4-1.3      |   rt  |                                       |
+//     --------11----------5--------------------------------------------
+//  hi |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 | vsRT1 | vsRT2 | VBFY1 | VBFY2 | VOCP  | vsOCP | VFAD  | VAVG  |
+//  01 | vsRT3 | vsRT4 | vsGN  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  10 | VMFVC | VMTVC |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+//  11 |  ---  |VT4444 |VT5551 |VT5650 |  ---  |  ---  |  ---  |  ---  |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "vsrt1.S",	"vd,vs",	MIPS_VFPU4_13(0x00),		MA_PSP,	MO_VFPU },
+	{ "vsrt2.S",	"vd,vs",	MIPS_VFPU4_13(0x01),		MA_PSP,	MO_VFPU },
+	{ "vbfy1.S",	"vd,vs",	MIPS_VFPU4_13(0x02),		MA_PSP,	MO_VFPU },
+	{ "vbfy2.S",	"vd,vs",	MIPS_VFPU4_13(0x03),		MA_PSP,	MO_VFPU },
+	{ "vocp.S",		"vd,vs",	MIPS_VFPU4_13(0x04),		MA_PSP,	MO_VFPU },
+	{ "vsocp.S",	"vd,vs",	MIPS_VFPU4_13(0x05),		MA_PSP,	MO_VFPU },
+	{ "vfad.S",		"vd,vs",	MIPS_VFPU4_13(0x06),		MA_PSP,	MO_VFPU },
+	{ "vavg.S",		"vd,vs",	MIPS_VFPU4_13(0x07),		MA_PSP,	MO_VFPU },
+	{ "vsrt3.S",	"vd,vs",	MIPS_VFPU4_13(0x08),		MA_PSP,	MO_VFPU },
+	{ "vsrt4.S",	"vd,vs",	MIPS_VFPU4_13(0x09),		MA_PSP,	MO_VFPU },
+	{ "vsgn.S",		"vd,vs",	MIPS_VFPU4_13(0x0a),		MA_PSP,	MO_VFPU },
+	{ "vmfv.S",		"vs,i7",	MIPS_VFPU4_13(0x10) | 0x00,	MA_PSP,	MO_VFPU },
+	{ "vmtv.S",		"vs,i7",	MIPS_VFPU4_13(0x11) | 0x00,	MA_PSP,	MO_VFPU },
+	{ "vmfvc.S",	"vs,i7",	MIPS_VFPU4_13(0x10) | 0x80,	MA_PSP,	MO_VFPU },
+	{ "vmtvc.S",	"vs,i7",	MIPS_VFPU4_13(0x11) | 0x80,	MA_PSP,	MO_VFPU },
+	{ "vt4444.S",	"vd,vs",	MIPS_VFPU4_13(0x19),		MA_PSP,	MO_VFPU },
+	{ "vt5551.S",	"vd,vs",	MIPS_VFPU4_13(0x1a),		MA_PSP,	MO_VFPU },
+	{ "vt5650.S",	"vd,vs",	MIPS_VFPU4_13(0x1b),		MA_PSP,	MO_VFPU },
 
 //     31-------26-----23----------------------------------------------0
 //     |= VFPU5| f     |                                               |
