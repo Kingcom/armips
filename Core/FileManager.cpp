@@ -143,6 +143,12 @@ bool GenericAssemblerFile::write(void* data, int length)
 
 bool GenericAssemblerFile::seekVirtual(size_t virtualAddress)
 {
+	if (virtualAddress < headerSize)
+	{
+		Logger::queueError(Logger::Error,L"Seeking to invalid address");
+		return false;
+	}
+
 	this->virtualAddress = virtualAddress;
 	size_t physicalAddress = virtualAddress-headerSize;
 
@@ -154,6 +160,12 @@ bool GenericAssemblerFile::seekVirtual(size_t virtualAddress)
 
 bool GenericAssemblerFile::seekPhysical(size_t physicalAddress)
 {
+	if ((signed)physicalAddress < 0)
+	{
+		Logger::queueError(Logger::Error,L"Seeking to invalid address");
+		return false;
+	}
+
 	virtualAddress = physicalAddress+headerSize;
 
 	if (isOpen())
