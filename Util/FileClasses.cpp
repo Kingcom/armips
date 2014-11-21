@@ -695,11 +695,22 @@ TextFile::TextFile()
 	handle = NULL;
 	recursion = false;
 	errorRetrieved = false;
+	fromMemory = false;
 }
 
 TextFile::~TextFile()
 {
 	close();
+}
+
+void TextFile::openMemory(const std::wstring& content)
+{
+	fromMemory = true;
+	this->content = content;
+	contentPos = 0;
+	size_ = content.size();
+	encoding = UTF16LE;
+	mode = Read;
 }
 
 bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
@@ -716,6 +727,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 	if (isOpen())
 		close();
 
+	fromMemory = false;
 	guessedEncoding = false;
 	encoding = defaultEncoding;
 	this->mode = mode;
@@ -791,11 +803,27 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 
 void TextFile::close()
 {
-	if (isOpen())
+	if (isOpen() && !fromMemory)
 	{
 		fclose(handle);
 		handle = NULL;
 	}
+}
+
+long TextFile::tell()
+{
+	if (fromMemory)
+		return (long) contentPos;
+	else
+		return ftell(handle);
+}
+
+void TextFile::seek(long pos)
+{
+	if (fromMemory)
+		contentPos = pos;
+	else
+		fseek(handle,pos,SEEK_SET);
 }
 
 wchar_t TextFile::readCharacter()
@@ -836,8 +864,13 @@ wchar_t TextFile::readCharacter()
 		}
 		break;
 	case UTF16LE:
-		fread(buf,1,2,handle);
-		value = buf[0] | (buf[1] << 8);
+		if (fromMemory)
+		{
+			value = content[contentPos++];
+		} else {
+			fread(buf,1,2,handle);
+			value = buf[0] | (buf[1] << 8);
+		}
 		break;
 	case UTF16BE:
 		fread(buf,1,2,handle);
@@ -863,16 +896,16 @@ wchar_t TextFile::readCharacter()
 	}
 
 	// convert \r\n to \n
-	if (value == L'\r' && recursion == false)
+	if (value == L'\r' && recursion == false && atEnd() == false)
 	{
 		recursion = true;
-		long pos = ftell(handle);
+		size_t pos = tell();
 		wchar_t nextValue = readCharacter();
 		recursion = false;
 
 		if (nextValue == L'\n')
 			return nextValue;
-		fseek(handle,pos,SEEK_SET);
+		seek(pos);
 	}
 
 	return value;

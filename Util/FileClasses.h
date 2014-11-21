@@ -39,10 +39,11 @@ public:
 	
 	TextFile();
 	~TextFile();
+	void openMemory(const std::wstring& content);
 	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = GUESS);
 	bool open(Mode mode, Encoding defaultEncoding = GUESS);
-	bool isOpen() { return handle != NULL; };
-	bool atEnd() { return isOpen() && mode == Read && ftell(handle) == size_; };
+	bool isOpen() { return fromMemory || handle != NULL; };
+	bool atEnd() { return isOpen() && mode == Read && tell() >= size_; };
 	long size() { return size_; };
 	void close();
 
@@ -75,6 +76,9 @@ public:
 	bool hasError() { return errorText.size() != 0 && !errorRetrieved; };
 	const std::wstring& getErrorText() { errorRetrieved = true; return errorText; };
 private:
+	long tell();
+	void seek(long pos);
+
 	FILE* handle;
 	std::wstring fileName;
 	Encoding encoding;
@@ -84,6 +88,9 @@ private:
 	long size_;
 	std::wstring errorText;
 	bool errorRetrieved;
+	bool fromMemory;
+	std::wstring content;
+	size_t contentPos;
 };
 
 wchar_t sjisToUnicode(unsigned short);
