@@ -689,6 +689,7 @@ int getDirective(const tDirective* DirectiveSet, const std::wstring& name)
 		if (DirectiveSet[z].Flags & DIRECTIVE_DISABLED) continue;
 		if (DirectiveSet[z].Flags & DIRECTIVE_NOCASHOFF && Global.nocash == true) continue;
 		if (DirectiveSet[z].Flags & DIRECTIVE_NOCASHON && Global.nocash == false) continue;
+		if (DirectiveSet[z].Flags & DIRECTIVE_NOTINMEMORY && Global.memoryMode == true) continue;
 		if (wcscmp(name.c_str(),DirectiveSet[z].name) == 0)
 		{
 			num = z;
@@ -708,12 +709,12 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 
 
 const tDirective Directives[] = {
-	{ L".open",				2,	3,	&DirectiveOpen,				0 },
-	{ L".openfile",			2,	3,	&DirectiveOpen,				0 },
-	{ L".create",			2,	2,	&DirectiveCreate,			0 },
-	{ L".createfile",		2,	2,	&DirectiveCreate,			0 },
-	{ L".close",			0,	0,	&DirectiveClose,			0 },
-	{ L".closefile",		0,	0,	&DirectiveClose,			0 },
+	{ L".open",				2,	3,	&DirectiveOpen,				DIRECTIVE_NOTINMEMORY },
+	{ L".openfile",			2,	3,	&DirectiveOpen,				DIRECTIVE_NOTINMEMORY },
+	{ L".create",			2,	2,	&DirectiveCreate,			DIRECTIVE_NOTINMEMORY },
+	{ L".createfile",		2,	2,	&DirectiveCreate,			DIRECTIVE_NOTINMEMORY },
+	{ L".close",			0,	0,	&DirectiveClose,			DIRECTIVE_NOTINMEMORY },
+	{ L".closefile",		0,	0,	&DirectiveClose,			DIRECTIVE_NOTINMEMORY },
 	{ L".incbin",			1,	3,	&DirectiveIncbin,			0 },
 	{ L".import",			1,	3,	&DirectiveIncbin,			0 },
 	{ L".org",				1,	1,	&DirectiveOrg,				0 },

@@ -137,7 +137,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	std::wstring oldDir = getCurrentDirectory();
 	changeDirectory(dir);
 
-	AssemblerArguments args;
+	ArmipsArguments args;
 	StringList errors;
 
 	args.inputFileName = testName + L".asm";
@@ -145,7 +145,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	args.silent = true;
 
 	// may or may not be supposed to cause errors
-	runAssembler(args);
+	runArmips(args);
 
 	// check errors
 	bool result = true;

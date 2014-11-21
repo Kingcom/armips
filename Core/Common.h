@@ -39,6 +39,8 @@ typedef struct {
 	int IncludeNestingLevel;
 	int MacroNestingLevel;
 	int validationPasses;
+	bool memoryMode;
+	AssemblerFile* memoryFile;
 } tGlobal;
 
 enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NOTICE };

@@ -11,6 +11,7 @@ typedef bool (*directivefunc)(ArgumentList&,int);
 #define DIRECTIVE_NOCASHOFF			0x00020000
 #define DIRECTIVE_MIPSRESETDELAY	0x00040000
 #define DIRECTIVE_DISABLED			0x00080000
+#define DIRECTIVE_NOTINMEMORY		0x00100000
 
 // Directive specific flags
 #define DIRECTIVE_COND_IF			0x00000001

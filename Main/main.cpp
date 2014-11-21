@@ -9,7 +9,7 @@
 
 int wmain(int argc, wchar_t* argv[])
 {
-	AssemblerArguments parameters;
+	ArmipsArguments parameters;
 
 #ifdef ARMIPS_TESTS
 	std::wstring name;
@@ -69,7 +69,7 @@ int wmain(int argc, wchar_t* argv[])
 		}
 	}
 
-	bool result = runAssembler(parameters);
+	bool result = runArmips(parameters);
 	if (result == false)
 	{
 		Logger::printLine(L"Aborting.");

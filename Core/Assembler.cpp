@@ -299,26 +299,9 @@ void parseMacroDefinition(TextFile& Input, std::wstring& Args)
 	Global.Macros.push_back(Macro);
 }
 
-void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
+void parseFile(TextFile& input)
 {
 	tTextData Text;
-	int num = 0;
-
-	AddFileName((char*)convertWStringToUtf8(fileName).c_str());
-	Global.IncludeNestingLevel++;
-
-	if (Global.IncludeNestingLevel == ASSEMBLER_INCLUDE_NESTING_LEVEL)
-	{
-		Logger::printError(Logger::Error,L"Maximum include nesting level reached");
-		return;
-	}
-
-	TextFile input;
-	if (input.open(fileName,TextFile::Read,encoding) == false)
-	{
-		Logger::printError(Logger::Error,L"Could not open file");
-		return;
-	}
 
 	while (!input.atEnd())
 	{
@@ -348,8 +331,40 @@ void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 	}
 	
 	Logger::printQueue();
+}
+
+void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
+{
+	AddFileName((char*)convertWStringToUtf8(fileName).c_str());
+	Global.IncludeNestingLevel++;
+
+	if (Global.IncludeNestingLevel == ASSEMBLER_INCLUDE_NESTING_LEVEL)
+	{
+		Logger::printError(Logger::Error,L"Maximum include nesting level reached");
+		return;
+	}
+
+	TextFile input;
+	if (input.open(fileName,TextFile::Read,encoding) == false)
+	{
+		Logger::printError(Logger::Error,L"Could not open file");
+		return;
+	}
+
+	parseFile(input);
+
 	Global.IncludeNestingLevel--;
 	input.close();
+}
+
+void LoadAssemblyContent(const std::wstring& content)
+{
+	AddFileName("Memory");
+	g_fileManager->openFile(Global.memoryFile,true);
+
+	TextFile input;
+	input.openMemory(content);
+	parseFile(input);
 }
 
 bool EncodeAssembly()
@@ -376,6 +391,9 @@ bool EncodeAssembly()
 		if (!Logger::isSilent())
 			printf("Validate %d...\n",validationPasses);
 #endif
+
+		if (Global.memoryMode)
+			g_fileManager->openFile(Global.memoryFile,true);
 
 		for (size_t i = 0; i < Global.Commands.size(); i++)
 		{
@@ -414,6 +432,10 @@ bool EncodeAssembly()
 	// and finally encode
 	Global.Section = 0;
 	Global.tempData.start();
+
+	if (Global.memoryMode)
+		g_fileManager->openFile(Global.memoryFile,false);
+
 	for (size_t i = 0; i < Global.Commands.size(); i++)
 	{
 		if (Global.Commands[i]->IsConditional() == false && Global.conditionData.conditionTrue() == false)
@@ -430,7 +452,7 @@ bool EncodeAssembly()
 	Global.tempData.end();
 	Global.symData.write();
 
-	if (g_fileManager->hasOpenFile())
+	if (g_fileManager->hasOpenFile() && !Global.memoryMode)
 	{
 		Logger::printError(Logger::Warning,L"File not closed");
 		g_fileManager->closeFile();
@@ -439,7 +461,7 @@ bool EncodeAssembly()
 	return true;
 }
 
-bool runAssembler(AssemblerArguments& arguments)
+bool runArmips(ArmipsArguments& arguments)
 {
 	// initialize and reset global data
 	Global.Radix = 10;
@@ -490,7 +512,19 @@ bool runAssembler(AssemblerArguments& arguments)
 	}
 
 	// run assembler
-	LoadAssemblyFile(arguments.inputFileName);
+	switch (arguments.mode)
+	{
+	case ArmipsMode::File:
+		Global.memoryMode = false;
+		LoadAssemblyFile(arguments.inputFileName);
+		break;
+	case ArmipsMode::Memory:
+		Global.memoryMode = true;
+		Global.memoryFile = arguments.memoryFile;
+		LoadAssemblyContent(arguments.content);
+		break;
+	}
+
 	bool result = !Logger::hasError();
 	if (result == true)
 		result = EncodeAssembly();
