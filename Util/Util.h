@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#include "Util/ByteArray.h"
-#include "Util/StringFormat.h"
+#include "ByteArray.h"
+#include "StringFormat.h"
 
 typedef std::vector<std::wstring> StringList;
 

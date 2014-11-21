@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "Util/FileClasses.h"
+#include "FileClasses.h"
 
 class CStringList
 {

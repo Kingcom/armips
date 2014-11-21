@@ -1,6 +1,6 @@
 #pragma once
 #include <list>
-#include "Util/Util.h"
+#include "Util.h"
 
 class BinaryFile
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
-#include "Util/FileClasses.h"
-#include "Core/SymbolData.h"
+#include "../Util/FileClasses.h"
+#include "SymbolData.h"
 
 class AssemblerFile
 {

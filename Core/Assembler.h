@@ -1,7 +1,7 @@
 #pragma 
-#include "Util/CommonClasses.h"
-#include "Util/FileClasses.h"
-#include "Util/Util.h"
+#include "../Util/CommonClasses.h"
+#include "../Util/FileClasses.h"
+#include "../Util/Util.h"
 #include "FileManager.h"
 
 enum class ArmipsMode { File, Memory };
