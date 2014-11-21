@@ -5,7 +5,7 @@
 #include "Core/Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CDirectiveFile.h"
-#include "Core/Tests.h"
+#include "Tests.h"
 
 int wmain(int argc, wchar_t* argv[])
 {

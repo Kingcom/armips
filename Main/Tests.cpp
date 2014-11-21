@@ -3,7 +3,7 @@
 #include "Util/Util.h"
 #include "Util/CommonClasses.h"
 #include "Core/Common.h"
-#include "Assembler.h"
+#include "Core/Assembler.h"
 
 #ifndef _WIN32
 #include <dirent.h>

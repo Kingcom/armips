@@ -6,7 +6,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include_directories(.)
 
 add_executable(armips
-	main.cpp
+	Main/main.cpp
+	Main/Tests.cpp
+	Main/Tests.h
 	stdafx.cpp
 	stdafx.h
 
@@ -38,8 +40,6 @@ add_executable(armips
 	Core/SymbolData.h
 	Core/Common.cpp
 	Core/Common.h
-	Core/Tests.cpp
-	Core/Tests.h
 	Core/Misc.cpp
 	Core/Misc.h
 	Core/MathParser.cpp
