@@ -452,9 +452,10 @@ bool EncodeAssembly()
 	Global.tempData.end();
 	Global.symData.write();
 
-	if (g_fileManager->hasOpenFile() && !Global.memoryMode)
+	if (g_fileManager->hasOpenFile())
 	{
-		Logger::printError(Logger::Warning,L"File not closed");
+		if (!Global.memoryMode)
+			Logger::printError(Logger::Warning,L"File not closed");
 		g_fileManager->closeFile();
 	}
 
