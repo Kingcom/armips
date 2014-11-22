@@ -27,6 +27,8 @@ public:
 	int getInfo() { return info; };
 	void setUpdateInfo(bool b) { updateInfo = b; };
 	bool getUpdateInfo() { return updateInfo; };
+	void setSection(int num) { section = num; }
+	int getSection() { return section; }
 private:
 	std::wstring name;
 	unsigned int value;
@@ -34,6 +36,7 @@ private:
 	bool data;
 	int info;
 	bool updateInfo;
+	int section;
 };
 
 class SymbolTable
@@ -53,6 +56,7 @@ public:
 	bool addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement);
 	std::wstring insertEquations(const std::wstring& line, unsigned int file, unsigned int section);
 	void addLabels(const std::vector<LabelDefinition>& labels);
+	int findSection(unsigned int address);
 
 	std::wstring getUniqueLabelName();
 	size_t getLabelCount() { return labels.size(); };

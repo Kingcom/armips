@@ -58,6 +58,7 @@ Label* SymbolTable::getLabel(const std::wstring& symbol, unsigned int file, unsi
 	if (isValidSymbolName(symbol) == false)
 		return NULL;
 
+	int actualSection = section;
 	setFileSectionValues(symbol,file,section);
 	SymbolKey key = { symbol, file, section };
 
@@ -69,6 +70,10 @@ Label* SymbolTable::getLabel(const std::wstring& symbol, unsigned int file, unsi
 		symbols[key] = value;
 		
 		Label* result = new Label(symbol);
+		if (section == actualSection)
+			result->setSection(section);			// local, set section of parent
+		else
+			result->setSection(actualSection+1);	// global, set section of children
 		labels.push_back(result);
 		return result;
 	}
@@ -213,4 +218,22 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 		label->setDefined(true);
 		label->setValue(def.value);
 	}
+}
+
+int SymbolTable::findSection(unsigned int address)
+{
+	int smallestBefore = -1;
+	int smallestDiff = address;
+
+	for (auto& lab: labels)
+	{
+		int diff = address-lab->getValue();
+		if (diff >= 0 && diff < smallestDiff)
+		{
+			smallestDiff = diff;
+			smallestBefore = lab->getSection();
+		}
+	}
+
+	return smallestBefore;
 }

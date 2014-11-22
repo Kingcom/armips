@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FileManager.h"
 #include "Misc.h"
+#include "Common.h"
 
 GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int headerSize, bool overwrite)
 {
@@ -263,7 +264,16 @@ bool FileManager::seekVirtual(size_t virtualAddress)
 {
 	if (checkActiveFile() == false)
 		return false;
-	return activeFile->seekVirtual(virtualAddress);
+
+	bool result = activeFile->seekVirtual(virtualAddress);
+	if (result && Global.memoryMode)
+	{
+		int sec = Global.symbolTable.findSection(virtualAddress);
+		if (sec != -1)
+			Global.Section = sec;
+	}
+
+	return result;
 }
 
 bool FileManager::seekPhysical(size_t virtualAddress)
