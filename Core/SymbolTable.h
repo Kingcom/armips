@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include "Assembler.h"
 
 struct SymbolKey
 {
@@ -51,6 +52,7 @@ public:
 	Label* getLabel(const std::wstring& symbol, unsigned int file, unsigned int section);
 	bool addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement);
 	std::wstring insertEquations(const std::wstring& line, unsigned int file, unsigned int section);
+	void addLabels(const std::vector<LabelDefinition>& labels);
 
 	std::wstring getUniqueLabelName();
 	size_t getLabelCount() { return labels.size(); };

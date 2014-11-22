@@ -511,6 +511,8 @@ bool runArmips(ArmipsArguments& arguments)
 		CheckEquLabel(equline);
 	}
 
+	Global.symbolTable.addLabels(arguments.labels);
+
 	// run assembler
 	switch (arguments.mode)
 	{

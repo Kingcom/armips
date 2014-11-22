@@ -2,6 +2,7 @@
 #include "Core/SymbolTable.h"
 #include "Util/FileClasses.h"
 #include "Util/Util.h"
+#include "Common.h"
 
 const wchar_t validSymbolCharacters[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
 
@@ -197,4 +198,19 @@ std::wstring SymbolTable::insertEquations(const std::wstring& line, unsigned int
 std::wstring SymbolTable::getUniqueLabelName()
 {
 	return formatString(L"__armips_label_%08X__",uniqueCount++);
+}
+
+void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
+{
+	int lastSection = 0;
+	for (const LabelDefinition& def: labels)
+	{
+		Label* label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
+		
+		if (isLocalSymbol(def.name) == false)
+			Global.Section++;
+
+		label->setDefined(true);
+		label->setValue(def.value);
+	}
 }

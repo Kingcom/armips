@@ -1,10 +1,16 @@
-#pragma 
+#pragma once
 #include "../Util/CommonClasses.h"
 #include "../Util/FileClasses.h"
 #include "../Util/Util.h"
 #include "FileManager.h"
 
 enum class ArmipsMode { File, Memory };
+
+struct LabelDefinition
+{
+	std::wstring name;
+	int value;
+};
 
 struct ArmipsArguments
 {
@@ -15,6 +21,7 @@ struct ArmipsArguments
 	bool silent;
 	StringList* errorsResult;
 	StringList equList;
+	std::vector<LabelDefinition> labels;
 
 	// file mode
 	std::wstring inputFileName;
