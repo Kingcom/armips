@@ -12,16 +12,16 @@ void TempData::start()
 			return;
 		}
 
-		int fileCount = Global.FileInfo.FileList.GetCount();
-		int lineCount = Global.FileInfo.TotalLineCount;
-		int labelCount = Global.symbolTable.getLabelCount();
-		int equCount = Global.symbolTable.getEquationCount();
+		size_t fileCount = Global.FileInfo.FileList.GetCount();
+		size_t lineCount = Global.FileInfo.TotalLineCount;
+		size_t labelCount = Global.symbolTable.getLabelCount();
+		size_t equCount = Global.symbolTable.getEquationCount();
 
 		file.writeFormat(L"; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
 		file.writeFormat(L"; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
 		file.writeFormat(L"; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
 		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
-		for (int i = 0; i < fileCount; i++)
+		for (size_t i = 0; i < fileCount; i++)
 		{
 			file.writeFormat(L"; %S\n",Global.FileInfo.FileList.GetEntry(i));
 		}
@@ -35,7 +35,7 @@ void TempData::end()
 		file.close();
 }
 
-void TempData::writeLine(int memoryAddress, const std::wstring& text)
+void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
 {
 	if (file.isOpen())
 	{
@@ -52,7 +52,7 @@ void TempData::writeLine(int memoryAddress, const std::wstring& text)
 
 CStringList::CStringList()
 {
-	EntryPoses = (int*) malloc(256*4);
+	EntryPoses = (size_t*) malloc(256*4);
 	EntryCount = 0;
 	EntriesAllocated = 256;
 	Data = (char*) malloc(1024);
@@ -68,11 +68,11 @@ CStringList::~CStringList()
 
 void CStringList::AddEntry(char* str)
 {
-	int len = strlen(str)+1;
+	size_t len = strlen(str)+1;
 	if (EntriesAllocated == EntryCount)
 	{
 		EntriesAllocated <<= 1;
-		EntryPoses = (int*) realloc(EntryPoses,EntriesAllocated*4);
+		EntryPoses = (size_t*) realloc(EntryPoses,EntriesAllocated*4);
 	}
 	if (DataPos+len > DataAllocated)
 	{
@@ -85,7 +85,7 @@ void CStringList::AddEntry(char* str)
 	DataPos += len;
 }
 
-char* CStringList::GetEntry(int num)
+char* CStringList::GetEntry(size_t num)
 {
 	if (num >= EntryCount) return NULL;
 	return &Data[EntryPoses[num]];
@@ -108,7 +108,7 @@ CByteList::~CByteList()
 	free(Data);
 }
 
-void CByteList::AddEntry(unsigned char* ByteData, int len)
+void CByteList::AddEntry(unsigned char* ByteData, size_t len)
 {
 	if (EntriesAllocated == EntryCount)
 	{

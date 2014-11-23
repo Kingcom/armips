@@ -227,7 +227,7 @@ bool TestRunner::runTests(const std::wstring& dir)
 		std::wstring path = dir + L"/" + tests[i];
 		std::wstring errors;
 
-		int n = tests[i].find_last_of('/');
+		size_t n = tests[i].find_last_of('/');
 		std::wstring testName = n == tests[i].npos ? tests[i] : tests[i].substr(n+1);
 		if (executeTest(path,testName,errors) == false)
 		{

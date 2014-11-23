@@ -26,7 +26,7 @@ void SymbolData::clear()
 
 struct NocashSymEntry
 {
-	int address;
+	u64 address;
 	std::wstring text;
 
 	bool operator<(const NocashSymEntry& other) const
@@ -50,7 +50,7 @@ void SymbolData::writeNocashSym()
 		{
 			SymDataSymbol& sym = module.symbols[i];
 			
-			int size = 0;
+			size_t size = 0;
 			for (size_t f = 0; f < module.functions.size(); f++)
 			{
 				if (module.functions[f].address == sym.address)
@@ -121,7 +121,7 @@ void SymbolData::write()
 	writeNocashSym();
 }
 
-void SymbolData::addLabel(int memoryAddress, const std::wstring& name)
+void SymbolData::addLabel(u64 memoryAddress, const std::wstring& name)
 {
 	if (!enabled)
 		return;
@@ -140,7 +140,7 @@ void SymbolData::addLabel(int memoryAddress, const std::wstring& name)
 	modules[currentModule].symbols.push_back(sym);
 }
 
-void SymbolData::addData(int address, int size, DataType type)
+void SymbolData::addData(u64 address, size_t size, DataType type)
 {
 	if (!enabled)
 		return;
@@ -160,7 +160,7 @@ void SymbolData::addData(int address, int size, DataType type)
 	modules[currentModule].data.push_back(data);
 }
 
-int SymbolData::addFileName(const std::string& fileName)
+size_t SymbolData::addFileName(const std::string& fileName)
 {
 	for (size_t i = 0; i < files.size(); i++)
 	{
@@ -172,7 +172,7 @@ int SymbolData::addFileName(const std::string& fileName)
 	return files.size()-1;
 }
 
-int SymbolData::addAddress(int address)
+size_t SymbolData::addAddress(u64 address)
 {
 	SymDataModule& module = modules[currentModule];
 
@@ -227,7 +227,7 @@ void SymbolData::endModule(AssemblerFile* file)
 	currentModule = 0;
 }
 
-void SymbolData::startFunction(int address)
+void SymbolData::startFunction(u64 address)
 {
 	if (currentFunction != -1)
 	{
@@ -243,7 +243,7 @@ void SymbolData::startFunction(int address)
 	modules[currentModule].functions.push_back(func);
 }
 
-void SymbolData::endFunction(int address)
+void SymbolData::endFunction(u64 address)
 {
 	if (currentFunction == -1)
 	{
@@ -252,6 +252,6 @@ void SymbolData::endFunction(int address)
 	}
 
 	SymDataFunction& func = modules[currentModule].functions[currentFunction];
-	func.size = address-func.address;
+	func.size = (size_t) (address-func.address);
 	currentFunction = -1;
 }

@@ -35,7 +35,7 @@ std::vector<PsxLibEntry> loadPsxLibrary(const std::wstring& inputName)
 	if (memcmp(input.data(),"LIB\x01",4) != 0)
 		return result;
 
-	int pos = 4;
+	size_t pos = 4;
 	while (pos < input.size())
 	{
 		PsxLibEntry entry;
@@ -64,7 +64,7 @@ std::vector<PsxLibEntry> loadPsxLibrary(const std::wstring& inputName)
 	return result;
 }
 
-int PsxRelocator::loadString(ByteArray& data, int pos, std::wstring& dest)
+size_t PsxRelocator::loadString(ByteArray& data, size_t pos, std::wstring& dest)
 {
 	dest = L"";
 	int len = data[pos++];
@@ -82,7 +82,7 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 	if (memcmp(data.data(),psxObjectFileMagicNum,sizeof(psxObjectFileMagicNum)) != 0)
 		return false;
 
-	int pos = 6;
+	size_t pos = 6;
 
 	std::vector<PsxSegment>& segments = dest.segments;
 	std::vector<PsxSymbol>& syms = dest.symbols;
@@ -125,7 +125,7 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 					{
 					if (segments[i].id == id)
 					{
-						num = i;
+						num = (int) i;
 						break;
 					}
 				}
@@ -141,7 +141,7 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 				ByteArray d = data.mid(pos,size);
 				pos += size;
 
-				lastSegmentPartStart = segments[activeSegment].data.size();
+				lastSegmentPartStart = (int) segments[activeSegment].data.size();
 				segments[activeSegment].data.append(d);
 			}
 			break;
@@ -162,7 +162,7 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 
 				PsxRelocation rel;
 				rel.relativeOffset = 0;
-				rel.filePos = pos-2;
+				rel.filePos = (int) pos-2;
 
 				switch (type)
 				{
@@ -377,10 +377,10 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 	for (PsxSegment& seg: file.segments)
 	{
 		int index = seg.id;
-		int size = seg.data.size();
+		size_t size = seg.data.size();
 		
 		relocationOffsets[index] = relocationAddress;
-		relocationAddress += size;
+		relocationAddress += (int) size;
 
 		while (relocationAddress % 4)
 			relocationAddress++;
@@ -421,7 +421,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 				continue;
 			}
 			
-			symbolOffsets[sym.id] = sym.label->getValue();
+			symbolOffsets[sym.id] = (int) sym.label->getValue();
 			break;
 		}
 	}
@@ -429,7 +429,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 	if (error)
 		return false;
 
-	int dataStart = outputData.size();
+	size_t dataStart = outputData.size();
 	outputData.reserveBytes(relocationAddress-start);
 
 	// load code and data
@@ -472,7 +472,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 			sectionData.replaceDoubleWord(pos,relData.opcode);
 		}
 
-		int arrayStart = dataStart+relocationOffsets[seg.id]-start;
+		size_t arrayStart = dataStart+relocationOffsets[seg.id]-start;
 		memcpy(outputData.data(arrayStart),sectionData.data(),sectionData.size());
 	}
 
@@ -528,7 +528,7 @@ DirectivePsxObjImport::DirectivePsxObjImport(ArgumentList& args)
 
 bool DirectivePsxObjImport::Validate()
 {
-	int memory = g_fileManager->getVirtualAddress();
+	int memory = (int) g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory(memory);
 	return rel.hasDataChanged();

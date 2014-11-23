@@ -35,13 +35,14 @@ void ArmPool::Clear()
 	EntryCount = 0;
 }
 
-int ArmPool::AddEntry(int value)
+u64 ArmPool::AddEntry(u32 value)
 {
 	if (Global.validationPasses < 10)
 	{
-		for (int i = 0; i < EntryCount; i++)
+		for (size_t i = 0; i < EntryCount; i++)
 		{
-			if (Entries[i] == value) return RamPos+i*4;
+			if (Entries[i] == value)
+				return RamPos+i*4;
 		}
 	}
 
@@ -81,7 +82,7 @@ bool ArmPoolCommand::Validate()
 
 void ArmPoolCommand::Encode()
 {
-	for (int i = 0; i < Size; i++)
+	for (size_t i = 0; i < Size; i++)
 	{
 		int num = Arm.GetPool(PoolId).GetEntry(i);
 		g_fileManager->write(&num,4);
@@ -90,7 +91,7 @@ void ArmPoolCommand::Encode()
 
 void ArmPoolCommand::writeTempData(TempData& tempData)
 {
-	for (int i = 0; i < Arm.GetPool(PoolId).GetCount(); i++)
+	for (size_t i = 0; i < Arm.GetPool(PoolId).GetCount(); i++)
 	{
 		tempData.writeLine(RamPos+i*4,formatString(L".word 0x%08X",Arm.GetPool(PoolId).GetEntry(i)));
 	}
@@ -98,7 +99,7 @@ void ArmPoolCommand::writeTempData(TempData& tempData)
 
 void ArmPoolCommand::writeSymData(SymbolData& symData)
 {
-	if(Size > 0)
+	if (Size > 0)
 	{
 		symData.addLabel(RamPos,L".pool");
 		symData.addData(RamPos,Size*4,SymbolData::Data32);

@@ -115,7 +115,7 @@ bool MathExpression::evaluate(int& dest, bool queue)
 			else
 				Logger::printError(Logger::Error,L"Invalid expression");
 		} else {
-			for (int l = 0; l < List.GetCount(); l++)
+			for (size_t l = 0; l < List.GetCount(); l++)
 			{
 				if (queue)
 					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
@@ -157,11 +157,11 @@ bool IsHex(char Hex)
 	return false;
 }
 
-bool ConvertToInt(char* str, int defaultrad, int len, int& Result)
+bool ConvertToInt(char* str, int defaultrad, size_t len, int& Result)
 {
 	int val = 0;
 	int r = 0;
-	if (len == 0) len = (int) strlen(str);
+	if (len == 0) len = strlen(str);
 
 	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
 	{
@@ -249,10 +249,10 @@ bool ConvertToInt(char* str, int defaultrad, int len, int& Result)
 }
 
 
-int HexToInt(char* Hex, int length)
+int HexToInt(char* Hex, size_t length)
 {
 	int result = 0;
-	for (int i = 0; i < length; i++)
+	for (size_t i = 0; i < length; i++)
 	{
 		result = (result << 4) | htd(Hex[i]);
 	}
@@ -261,10 +261,10 @@ int HexToInt(char* Hex, int length)
 }
 
 // Parse only a float, and return as float bits.
-static bool parseFloat(const char *str, int len, int& result)
+static bool parseFloat(const char *str, size_t len, int& result)
 {
 	bool foundDecimal = false;
-	for (int i = 0; i < len; ++i)
+	for (size_t i = 0; i < len; ++i)
 	{
 		if (str[i] == '.')
 		{
@@ -282,12 +282,12 @@ static bool parseFloat(const char *str, int len, int& result)
 	return foundDecimal;
 }
 
-int GetOpcode(char* str, int& ReturnLen, int LastOpcode)
+int GetOpcode(char* str, size_t& ReturnLen, int LastOpcode)
 {
 	int longestlen = 0;
 	int result = EXOP_NONE;
 
-	for (int i = 0; ExpressionOpcodes[i].type != EXOP_NONE; i++)
+	for (size_t i = 0; ExpressionOpcodes[i].type != EXOP_NONE; i++)
 	{
 		if (ExpressionOpcodes[i].IgnoreCheck == true) continue;
 		if (ExpressionOpcodes[i].sign == true &&
@@ -310,7 +310,7 @@ int GetOpcode(char* str, int& ReturnLen, int LastOpcode)
 
 int GetOpcodePriority(char* opcode)
 {
-	for (int i = 0; ExpressionOpcodes[i].type != EXOP_NONE; i++)
+	for (size_t i = 0; ExpressionOpcodes[i].type != EXOP_NONE; i++)
 	{
 		if (ExpressionOpcodes[i].sign == true && ExpressionOpcodes[i].IgnoreCheck == false) continue;
 		if (strcmp(opcode,ExpressionOpcodes[i].Name) == 0)
@@ -324,7 +324,7 @@ int GetOpcodePriority(char* opcode)
 int GetOpcodeNum(const char* opcode)
 {
 	if (opcode == NULL) return EXOP_NONE;
-	for (int i = 0; ExpressionOpcodes[i].type != EXOP_NONE; i++)
+	for (size_t i = 0; ExpressionOpcodes[i].type != EXOP_NONE; i++)
 	{
 		if (ExpressionOpcodes[i].sign == true && ExpressionOpcodes[i].IgnoreCheck == false) continue;
 		if (strcmp(opcode,ExpressionOpcodes[i].Name) == 0)
@@ -355,10 +355,10 @@ bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix)
 	char Buffer[512];
 	Postfix.Clear();
 
-	int InfixPos = 0;
-	int InfixLen = strlen(Infix);
+	size_t InfixPos = 0;
+	size_t InfixLen = strlen(Infix);
 	int LastOpcode = EXOP_NONE;
-	int OpcodeLen = 0;
+	size_t OpcodeLen = 0;
 
 	while (InfixPos < InfixLen)
 	{
@@ -448,7 +448,7 @@ bool CheckPostfix(CStringList& Postfix, bool AllowLabels)
 {
 	int StackPos = 0;
 	int num;
-	int index = 0;
+	size_t index = 0;
 
 	while (index < Postfix.GetCount())
 	{
@@ -522,7 +522,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 	float fArg[5];
 	char str[255];
 	bool Error = false;
-	int num = 0;
+	size_t num = 0;
 	int Opcode;
 	Label* label;
 
@@ -552,13 +552,13 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				break;
 			}
 			label = Postfix.GetLabel(num);
-			Stack.push(label->getValue());
+			Stack.push((unsigned int)label->getValue());
 			TypeStack.push(EXCOMM_CONST);
 			num++;
 			break;
 		case EXCOMM_RAMPOS:
 			Postfix.GetValue(num++);
-			Stack.push(g_fileManager->getVirtualAddress());
+			Stack.push((unsigned int)g_fileManager->getVirtualAddress());
 			TypeStack.push(EXCOMM_CONST);
 			break;
 		case EXCOMM_OP:	// opcode
@@ -578,7 +578,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				{
 				case EXCOMM_CONST:
 					arg[l] = value;
-					fArg[l] = value;
+					fArg[l] = (float) value;
 					break;
 				case EXCOMM_FLOAT:
 					arg[l] = value;
@@ -729,7 +729,7 @@ bool CExpressionCommandList::Load(CStringList &List)
 	EntryCount = List.GetCount();
 	initialized = false;
 
-	for (int i = 0; i < List.GetCount(); i++)
+	for (size_t i = 0; i < List.GetCount(); i++)
 	{
 		char* str = List.GetEntry(i);
 		int num = GetOpcodeNum(str);
@@ -824,7 +824,7 @@ bool evalExpression(CExpressionCommandList& exp, int& dest, bool queue)
 			else
 				Logger::printError(Logger::Error,L"Invalid expression");
 		} else {
-			for (int l = 0; l < List.GetCount(); l++)
+			for (size_t l = 0; l < List.GetCount(); l++)
 			{
 				if (queue)
 					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));

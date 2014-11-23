@@ -40,16 +40,16 @@ public:
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };
 	bool isArm9() { return arm9; };
-	int NewPool() { return PoolCount++; };
-	ArmPool& GetPool(int num) { return Pools[num]; };
+	size_t NewPool() { return PoolCount++; };
+	ArmPool& GetPool(size_t num) { return Pools[num]; };
 	int AddToCurrentPool(int value);
 	void NextPool() { CurrentPool++; };
 private:
 	bool thumb;
 	bool arm9;
 	ArmPool* Pools;
-	int PoolCount;
-	int CurrentPool;
+	size_t PoolCount;
+	size_t CurrentPool;
 };
 
 extern CArmArchitecture Arm;

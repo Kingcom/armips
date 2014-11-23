@@ -6,21 +6,21 @@ class ByteArray
 public:
 	ByteArray();
 	ByteArray(const ByteArray& other);
-	ByteArray(byte* data, int size);
+	ByteArray(byte* data, size_t size);
 	ByteArray(ByteArray&& other);
 	~ByteArray();
 	ByteArray& operator=(ByteArray& other);
 	ByteArray& operator=(ByteArray&& other);
 
-	int append(const ByteArray& other);
-	int append(byte* data, int size);
-	int appendByte(byte b) { return append(&b,1); };
-	void replaceByte(int pos, byte b) { data_[pos] = b; };
-	void replaceBytes(int pos, byte* data, int size);
-	void reserveBytes(int count, byte value = 0);
-	void alignSize(int alignment);
+	size_t append(const ByteArray& other);
+	size_t append(byte* data, size_t size);
+	size_t appendByte(byte b) { return append(&b,1); };
+	void replaceByte(size_t pos, byte b) { data_[pos] = b; };
+	void replaceBytes(size_t pos, byte* data, size_t size);
+	void reserveBytes(size_t count, byte value = 0);
+	void alignSize(size_t alignment);
 
-	int getWord(int pos, bool bigEndian = false)
+	int getWord(size_t pos, bool bigEndian = false)
 	{
 		if (pos+1 >= this->size() || pos < 0) return -1;
 		unsigned char* d = (unsigned char*) this->data();
@@ -33,7 +33,7 @@ public:
 		}
 	}
 
-	int getDoubleWord(int pos, bool bigEndian = false)
+	int getDoubleWord(size_t pos, bool bigEndian = false)
 	{
 		if (pos+3 >= this->size() || pos < 0) return -1;
 		unsigned char* d = (unsigned char*) this->data();
@@ -46,7 +46,7 @@ public:
 		}
 	};
 	
-	void replaceDoubleWord(int pos, unsigned int w, bool bigEndian = false)
+	void replaceDoubleWord(size_t pos, unsigned int w, bool bigEndian = false)
 	{
 		if (pos+3 >= this->size() || pos < 0) return;
 		unsigned char* d = (unsigned char*) this->data();
@@ -65,29 +65,29 @@ public:
 		}
 	}
 
-	byte& operator [](unsigned int index)
+	byte& operator [](size_t index)
 	{
 		return data_[index];
 	};
 	
-	const byte& operator [](unsigned int index) const
+	const byte& operator [](size_t index) const
 	{
 		return data_[index];
 	};
 
-	int size() const { return size_; };
-	byte* data(int pos = 0) const { return &data_[pos]; };
+	size_t size() const { return size_; };
+	byte* data(size_t pos = 0) const { return &data_[pos]; };
 	void clear() { size_ = 0; };
-	void resize(int newSize);
-	ByteArray mid(int start, int length = 0);
-	ByteArray left(int length) { return mid(0,length); };
-	ByteArray right(int length) { return mid(size_-length,length); };
+	void resize(size_t newSize);
+	ByteArray mid(size_t start, size_t length = 0);
+	ByteArray left(size_t length) { return mid(0,length); };
+	ByteArray right(size_t length) { return mid(size_-length,length); };
 
-	static ByteArray fromFile(const std::wstring& fileName, int start = 0, int size = -1);
+	static ByteArray fromFile(const std::wstring& fileName, long start = 0, size_t size = 0);
 	bool toFile(const std::wstring& fileName);
 private:
-	void grow(int neededSize);
+	void grow(size_t neededSize);
 	byte* data_;
-	int size_;
-	int allocatedSize_;
+	size_t size_;
+	size_t allocatedSize_;
 };

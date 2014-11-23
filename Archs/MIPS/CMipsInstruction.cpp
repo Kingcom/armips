@@ -396,7 +396,7 @@ int CMipsInstruction::formatOpcodeName(char* dest)
 		}
 	}
 	*dest = 0;
-	return dest-start;
+	return (int) (dest-start);
 }
 
 void CMipsInstruction::formatParameters(char* dest)
@@ -555,7 +555,7 @@ bool CMipsInstruction::Validate()
 			immediate.value = (immediate.value >> 2) & 0x3FFFFFF;
 		} else if (Opcode.flags & MO_IPCR)	// relative 16 bit value
 		{
-			int num = (immediate.value-RamPos-4);
+			int num = (int) (immediate.value-RamPos-4);
 			
 			if (num > 0x20000 || num < (-0x20000))
 			{

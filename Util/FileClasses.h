@@ -22,8 +22,8 @@ public:
 	void setFileName(const std::wstring& name) { fileName = name; };
 	const std::wstring& getFileName() { return fileName; };
 
-	int read(void* dest, int length);
-	int write(void* source, int length);
+	size_t read(void* dest, size_t length);
+	size_t write(void* source, size_t length);
 private:
 	FILE* handle;
 	std::wstring fileName;

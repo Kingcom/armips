@@ -8,14 +8,14 @@ public:
 	~CMacro(void) { };
 	void loadArguments(ArgumentList& Arguments);
 	void addLine(const std::wstring& str) { lines.push_back(str); };
-	std::wstring getLine(int num, ArgumentList& ArgumentValues, int MacroCounter);
-	int getLineCount() { return lines.size(); };
-	int getArgumentCount() { return arguments.size(); };
+	std::wstring getLine(size_t num, ArgumentList& ArgumentValues, size_t MacroCounter);
+	size_t getLineCount() { return lines.size(); };
+	size_t getArgumentCount() { return arguments.size(); };
 	const std::wstring& getName() { return name; };
-	int getIncreaseCounter() { return counter++; };
+	size_t getIncreaseCounter() { return counter++; };
 private:
 	std::wstring name;
 	std::vector<std::wstring> lines;
 	std::vector<std::wstring> arguments;
-	int counter;
+	size_t counter;
 };

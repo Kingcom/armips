@@ -211,7 +211,7 @@ bool CThumbInstruction::Validate()
 			{
 				Logger::queueError(Logger::Error,L"Invalid expression");
 			} else {
-				for (int l = 0; l < List.GetCount(); l++)
+				for (size_t l = 0; l < List.GetCount(); l++)
 				{
 					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
 				}
@@ -237,7 +237,7 @@ bool CThumbInstruction::Validate()
 				}
 			}
 
-			int num = (Vars.Immediate-RamPos-4);
+			int num = (int) (Vars.Immediate-RamPos-4);
 			
 			if (num >= (1 << Vars.ImmediateBitLen) || num < (0-(1 << Vars.ImmediateBitLen)))
 			{

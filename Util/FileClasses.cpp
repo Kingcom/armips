@@ -676,16 +676,18 @@ void BinaryFile::close()
 	}
 }
 
-int BinaryFile::read(void* dest, int length)
+size_t BinaryFile::read(void* dest, size_t length)
 {
-	if (isOpen() == false || mode == Write) return -1;
+	if (isOpen() == false || mode == Write)
+		return 0;
 
 	return fread(dest,1,length,handle);
 }
 
-int BinaryFile::write(void* source, int length)
+size_t BinaryFile::write(void* source, size_t length)
 {
-	if (isOpen() == false || mode == Read) return -1;
+	if (isOpen() == false || mode == Read)
+		return 0;
 
 	return fwrite(source,1,length,handle);
 }
@@ -708,7 +710,7 @@ void TextFile::openMemory(const std::wstring& content)
 	fromMemory = true;
 	this->content = content;
 	contentPos = 0;
-	size_ = content.size();
+	size_ = (long) content.size();
 	encoding = UTF16LE;
 	mode = Read;
 }
@@ -899,7 +901,7 @@ wchar_t TextFile::readCharacter()
 	if (value == L'\r' && recursion == false && atEnd() == false)
 	{
 		recursion = true;
-		size_t pos = tell();
+		long pos = tell();
 		wchar_t nextValue = readCharacter();
 		recursion = false;
 

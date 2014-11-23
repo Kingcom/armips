@@ -10,9 +10,9 @@ public:
 	void clear();
 	bool load(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
 	bool isLoaded() { return entries.size() != 0; };
-	void addEntry(unsigned char* hex, int hexLength, const std::wstring& value);
-	void addEntry(unsigned char* hex, int hexLength, wchar_t value);
-	void setTerminationEntry(unsigned char* hex, int hexLength);
+	void addEntry(unsigned char* hex, size_t hexLength, const std::wstring& value);
+	void addEntry(unsigned char* hex, size_t hexLength, wchar_t value);
+	void setTerminationEntry(unsigned char* hex, size_t hexLength);
 	ByteArray encodeString(const std::wstring& str, bool writeTermination = true);
 	ByteArray encodeTermination();
 private:
@@ -20,10 +20,10 @@ private:
 
 	struct TableEntry
 	{
-		int hexPos;
-		int hexLen;
-		int valuePos;
-		int valueLen;
+		size_t hexPos;
+		size_t hexLen;
+		size_t valuePos;
+		size_t valueLen;
 	};
 
 	ByteArray hexData;

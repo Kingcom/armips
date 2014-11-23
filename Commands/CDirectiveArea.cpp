@@ -62,7 +62,7 @@ bool CDirectiveArea::Validate()
 		if (Global.areaData.getEntryCount() != 0)
 		{
 			fillValue = Global.areaData.getCurrentFillValue();
-			Size = Global.areaData.getCurrentMaxAddress()-g_fileManager->getVirtualAddress();
+			Size = (size_t) (Global.areaData.getCurrentMaxAddress()-g_fileManager->getVirtualAddress());
 
 			if (fillValue != -1)
 				g_fileManager->seekVirtual(Global.areaData.getCurrentMaxAddress());
@@ -82,7 +82,7 @@ void CDirectiveArea::Encode()
 
 		while (Size > 0)
 		{
-			g_fileManager->write(buffer,std::min<int>(64,Size));
+			g_fileManager->write(buffer,std::min<size_t>(64,Size));
 			Size -= 64;
 		}
 	}

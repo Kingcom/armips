@@ -5,7 +5,7 @@
 #include "Core/FileManager.h"
 #include "Archs/ARM/Arm.h"
 
-CAssemblerLabel::CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant)
+CAssemblerLabel::CAssemblerLabel(const std::wstring& name, u64 RamPos, int Section, bool constant)
 {
 	this->labelname = name;
 	this->labelvalue = RamPos;
@@ -49,7 +49,7 @@ bool CAssemblerLabel::Validate()
 		Global.Section++;
 	if (constant == false && label->getValue() != g_fileManager->getVirtualAddress())
 	{
-		label->setValue(g_fileManager->getVirtualAddress());
+		label->setValue((int)g_fileManager->getVirtualAddress());
 		return true;
 	}
 	return false;

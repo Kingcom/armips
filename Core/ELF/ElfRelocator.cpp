@@ -40,7 +40,7 @@ std::vector<ArFileEntry> loadArArchive(const std::wstring& inputName)
 		return result;
 	}
 
-	int pos = 8;
+	size_t pos = 8;
 	while (pos < input.size())
 	{
 		ArFileHeader* header = (ArFileHeader*) input.data(pos);
@@ -131,7 +131,7 @@ bool ElfRelocator::init(const std::wstring& inputName)
 		}
 
 		// load all relevant sections of this file
-		for (int s = 0; s < elf->getSegmentlessSectionCount(); s++)
+		for (size_t s = 0; s < elf->getSegmentlessSectionCount(); s++)
 		{
 			ElfSection* sec = elf->getSegmentlessSection(s);
 			if (!(sec->getFlags() & SHF_ALLOC))
@@ -146,7 +146,7 @@ bool ElfRelocator::init(const std::wstring& inputName)
 				sectionEntry.label = NULL;
 
 				// search relocation section
-				for (int k = 0; k < elf->getSegmentlessSectionCount(); k++)
+				for (size_t k = 0; k < elf->getSegmentlessSectionCount(); k++)
 				{
 					ElfSection* relSection = elf->getSegmentlessSection(k);
 					if (relSection->getType() != SHT_REL)
@@ -254,17 +254,17 @@ void ElfRelocator::writeCtor(const std::wstring& ctorName)
 	Arch->AssembleDirective(L".endfunc",L"");
 }
 
-bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
+bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 {
 	ElfFile* elf = file.elf;
-	int start = relocationAddress;
+	u64 start = relocationAddress;
 
 	// calculate address for each section
-	std::map<int,int> relocationOffsets;
+	std::map<u64,u64> relocationOffsets;
 	for (ElfRelocatorSection& entry: file.sections)
 	{
 		ElfSection* section = entry.section;
-		int index = entry.index;
+		size_t index = entry.index;
 		int size = section->getSize();
 
 		while (relocationAddress % section->getAlignment())
@@ -277,15 +277,15 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 		relocationAddress += size;
 	}
 
-	int dataStart = outputData.size();
-	outputData.reserveBytes(relocationAddress-start);
+	size_t dataStart = outputData.size();
+	outputData.reserveBytes((size_t)(relocationAddress-start));
 
 	// load sections
 	bool error = false;
 	for (ElfRelocatorSection& entry: file.sections)
 	{
 		ElfSection* section = entry.section;
-		int index = entry.index;
+		size_t index = entry.index;
 
 		if (section->getType() == SHT_NOBITS)
 		{
@@ -341,7 +341,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 						continue;
 					}
 					
-					relData.relocationBase = label->getValue();
+					relData.relocationBase = (unsigned int) label->getValue();
 					relData.targetSymbolType = label->isData() ? STT_OBJECT : STT_FUNC;
 					relData.targetSymbolInfo = label->getInfo();
 				} else {
@@ -359,14 +359,14 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 			}
 		}
 
-		int arrayStart = dataStart+relocationOffsets[index]-start;
+		size_t arrayStart = (size_t) (dataStart+relocationOffsets[index]-start);
 		memcpy(outputData.data(arrayStart),sectionData.data(),sectionData.size());
 	}
 	
 	// now update symbols
 	for (ElfRelocatorSymbol& sym: file.symbols)
 	{
-		int oldAddress = sym.relocatedAddress;
+		u64 oldAddress = sym.relocatedAddress;
 
 		switch (sym.section)
 		{
@@ -375,14 +375,14 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 			break;
 		case SHN_COMMON:	// needs to be allocated. relativeAddress gives alignment constraint
 			{
-				int start = relocationAddress;
+				u64 start = relocationAddress;
 
 				while (relocationAddress % sym.relativeAddress)
 					relocationAddress++;
 
 				sym.relocatedAddress = relocationAddress;
 				relocationAddress += sym.size;
-				outputData.reserveBytes(relocationAddress-start);
+				outputData.reserveBytes((size_t)(relocationAddress-start));
 			}
 			break;
 		default:			// normal relocated symbol
@@ -400,14 +400,14 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int& relocationAddress)
 	return !error;
 }
 
-bool ElfRelocator::relocate(int& memoryAddress)
+bool ElfRelocator::relocate(u64& memoryAddress)
 {
 	int oldCrc = getCrc32(outputData.data(),outputData.size());
 	outputData.clear();
 	dataChanged = false;
 
 	bool error = false;
-	int start = memoryAddress;
+	u64 start = memoryAddress;
 
 	for (ElfRelocatorFile& file: files)
 	{

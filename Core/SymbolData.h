@@ -6,7 +6,7 @@ class AssemblerFile;
 struct SymDataSymbol
 {
 	std::wstring name;
-	int address;
+	u64 address;
 	
 	bool operator<(const SymDataSymbol& other) const
 	{
@@ -16,9 +16,9 @@ struct SymDataSymbol
 
 struct SymDataAddressInfo
 {
-	int address;
-	int fileIndex;
-	int lineNumber;
+	u64 address;
+	size_t fileIndex;
+	size_t lineNumber;
 	
 	bool operator<(const SymDataAddressInfo& other) const
 	{
@@ -28,8 +28,8 @@ struct SymDataAddressInfo
 
 struct SymDataFunction
 {
-	int address;
-	int size;
+	u64 address;
+	size_t size;
 	
 	bool operator<(const SymDataFunction& other) const
 	{
@@ -39,8 +39,8 @@ struct SymDataFunction
 
 struct SymDataData
 {
-	int address;
-	int size;
+	u64 address;
+	size_t size;
 	int type;
 	
 	bool operator<(const SymDataData& other) const
@@ -74,16 +74,16 @@ public:
 	void write();
 	void setEnabled(bool b) { enabled = b; };
 
-	void addLabel(int address, const std::wstring& name);
-	void addData(int address, int size, DataType type);
+	void addLabel(u64 address, const std::wstring& name);
+	void addData(u64 address, size_t size, DataType type);
 	void startModule(AssemblerFile* file);
 	void endModule(AssemblerFile* file);
-	void startFunction(int address);
-	void endFunction(int address);
+	void startFunction(u64 address);
+	void endFunction(u64 address);
 private:
 	void writeNocashSym();
-	int addAddress(int address);
-	int addFileName(const std::string& fileName);
+	size_t addAddress(u64 address);
+	size_t addFileName(const std::string& fileName);
 
 	std::wstring nocashSymFileName;
 	bool enabled;
@@ -92,6 +92,6 @@ private:
 	// entry 0 is for data without parent modules
 	std::vector<SymDataModule> modules;
 	std::vector<std::string> files;
-	int currentModule;
-	int currentFunction;
+	size_t currentModule;
+	size_t currentFunction;
 };

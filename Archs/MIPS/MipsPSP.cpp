@@ -208,7 +208,7 @@ bool parseVpfxsParameter(const char* text, int& result, int& RetLen)
 	if (*text++ != ']')
 		return false;
 
-	RetLen = text-start;
+	RetLen = (int) (text-start);
 	return true;
 }
 
@@ -269,7 +269,7 @@ bool parseVpfxdParameter(const char* text, int& result, int& RetLen)
 	if (*text++ != ']')
 		return false;
 
-	RetLen = text-start;
+	RetLen = (int) (text-start);
 	return true;
 }
 
@@ -304,7 +304,7 @@ bool parseVcstParameter(const char* text, int& result, int& RetLen)
 		if (strcmp(text,constants[i]) == 0)
 		{
 			result = i;
-			RetLen = strlen(text);
+			RetLen = (int) strlen(text);
 			return true;
 		}
 	}
@@ -387,7 +387,7 @@ bool parseVfpuControlRegister(const char* text, MipsVFPURegister& reg, int& RetL
 		{
 			reg.num = i;
 			strcpy(reg.name,vfpuCtrlNames[i]);
-			RetLen = strlen(vfpuCtrlNames[i]);
+			RetLen = (int) strlen(vfpuCtrlNames[i]);
 			return true;
 		}
 	}

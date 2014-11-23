@@ -26,7 +26,7 @@ void MipsElfFile::close()
 	Global.symData.endModule(this);
 }
 
-size_t MipsElfFile::getVirtualAddress()
+u64 MipsElfFile::getVirtualAddress()
 {
 	if (segment != -1)
 	{
@@ -41,7 +41,7 @@ size_t MipsElfFile::getVirtualAddress()
 	return -1;
 }
 
-size_t MipsElfFile::getPhysicalAddress()
+u64 MipsElfFile::getPhysicalAddress()
 {
 	if (segment != -1)
 	{
@@ -61,10 +61,10 @@ size_t MipsElfFile::getPhysicalAddress()
 	return -1;
 }
 
-bool MipsElfFile::seekVirtual(size_t virtualAddress)
+bool MipsElfFile::seekVirtual(u64 virtualAddress)
 {
 	// search in segments
-	for (int i = 0; i < elf.getSegmentCount(); i++)
+	for (size_t i = 0; i < elf.getSegmentCount(); i++)
 	{
 		ElfSegment* seg = elf.getSegment(i);
 		size_t segStart = seg->getVirtualAddress();
@@ -73,7 +73,7 @@ bool MipsElfFile::seekVirtual(size_t virtualAddress)
 		if (segStart <= virtualAddress && virtualAddress < segEnd)
 		{
 			// find section
-			for (int l = 0; l < seg->getSectionCount(); l++)
+			for (size_t l = 0; l < seg->getSectionCount(); l++)
 			{
 				ElfSection* sect = seg->getSection(l);
 				size_t sectStart = segStart+sect->getOffset();
@@ -81,9 +81,9 @@ bool MipsElfFile::seekVirtual(size_t virtualAddress)
 				
 				if (sectStart <= virtualAddress && virtualAddress < sectEnd)
 				{
-					segment = i;
-					section = l;
-					sectionOffset = virtualAddress-sectStart;
+					segment = (int) i;
+					section = (int) l;
+					sectionOffset = (size_t) (virtualAddress-sectStart);
 					return true;
 				}
 			}
@@ -98,10 +98,10 @@ bool MipsElfFile::seekVirtual(size_t virtualAddress)
 	return false;
 }
 
-bool MipsElfFile::seekPhysical(size_t physicalAddress)
+bool MipsElfFile::seekPhysical(u64 physicalAddress)
 {
 	// search in segments
-	for (int i = 0; i < elf.getSegmentCount(); i++)
+	for (size_t i = 0; i < elf.getSegmentCount(); i++)
 	{
 		ElfSegment* seg = elf.getSegment(i);
 		size_t segStart = seg->getOffset();
@@ -110,7 +110,7 @@ bool MipsElfFile::seekPhysical(size_t physicalAddress)
 		if (segStart <= physicalAddress && physicalAddress < segEnd)
 		{
 			// find section
-			for (int l = 0; l < seg->getSectionCount(); l++)
+			for (size_t l = 0; l < seg->getSectionCount(); l++)
 			{
 				ElfSection* sect = seg->getSection(l);
 				size_t sectStart = segStart+sect->getOffset();
@@ -118,9 +118,9 @@ bool MipsElfFile::seekPhysical(size_t physicalAddress)
 				
 				if (sectStart <= physicalAddress && physicalAddress < sectEnd)
 				{
-					segment = i;
-					section = l;
-					sectionOffset = physicalAddress-sectStart;
+					segment = (int) i;
+					section = (int) l;
+					sectionOffset = (size_t) (physicalAddress-sectStart);
 					return true;
 				}
 			}
@@ -131,7 +131,7 @@ bool MipsElfFile::seekPhysical(size_t physicalAddress)
 	}
 
 	// search in segmentless sections
-	for (int i = 0; i < elf.getSegmentlessSectionCount(); i++)
+	for (size_t i = 0; i < elf.getSegmentlessSectionCount(); i++)
 	{
 		ElfSection* sect = elf.getSegmentlessSection(i);
 		size_t sectStart = sect->getOffset();
@@ -140,8 +140,8 @@ bool MipsElfFile::seekPhysical(size_t physicalAddress)
 		if (sectStart <= physicalAddress && physicalAddress < sectEnd)
 		{
 			segment = -1;
-			section = i;
-			sectionOffset = physicalAddress-sectStart;
+			section = (int) i;
+			sectionOffset = (size_t) (physicalAddress-sectStart);
 			return true;
 		}
 	}
@@ -158,14 +158,14 @@ bool MipsElfFile::getModuleInfo(SymDataModuleInfo& info)
 	return true;
 }
 
-bool MipsElfFile::write(void* data, int length)
+bool MipsElfFile::write(void* data, size_t length)
 {
 	if (segment != -1)
 	{
 		ElfSegment* seg = elf.getSegment(segment);
 		ElfSection* sect = seg->getSection(section);
 
-		int pos = sect->getOffset()+sectionOffset;
+		size_t pos = sect->getOffset()+sectionOffset;
 		seg->writeToData(pos,data,length);
 		sectionOffset += length;
 		return true;
@@ -211,13 +211,13 @@ bool MipsElfFile::setSection(const std::wstring& name)
 	std::string utf8Name = convertWStringToUtf8(name);
 
 	// look in segments
-	for (int i = 0; i < elf.getSegmentCount(); i++)
+	for (size_t i = 0; i < elf.getSegmentCount(); i++)
 	{
 		ElfSegment* seg = elf.getSegment(i);
 		int n = seg->findSection(utf8Name);
 		if (n != -1)
 		{
-			segment = i;
+			segment = (int) i;
 			section = n;
 			return true;
 		}

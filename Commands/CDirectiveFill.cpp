@@ -29,7 +29,7 @@ bool CDirectiveFill::Validate()
 {
 	int NewSize;
 
-	RamPos = g_fileManager->getVirtualAddress();
+	RamPos = (int) g_fileManager->getVirtualAddress();
 	if (evalExpression(SizeExpression,NewSize,true) == false)
 		return false;
 

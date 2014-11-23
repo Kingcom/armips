@@ -27,7 +27,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
-	int GetSize() { return OpcodeSize; };
+	size_t GetSize() { return OpcodeSize; };
 private:
 	bool LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line);
 	void FormatInstruction(const char* encoding,tThumbOpcodeVariables& Vars, char* dest);
@@ -36,6 +36,6 @@ private:
 	tThumbOpcode Opcode;
 	bool NoCheckError;
 	bool Loaded;
-	int OpcodeSize;
-	int RamPos;
+	size_t OpcodeSize;
+	u64 RamPos;
 };

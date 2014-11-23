@@ -139,10 +139,10 @@ bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 		op = (op & 0xFC000000) | (((op&0x03FFFFFF)+(data.relocationBase>>2))&0x03FFFFFF);
 		break;
 	case R_MIPS_32:
-		op += data.relocationBase;
+		op += (int) data.relocationBase;
 		break;	
 	case R_MIPS_HI16:
-		p = (op & 0xFFFF) + data.relocationBase;
+		p = (op & 0xFFFF) + (int) data.relocationBase;
 		op = (op&0xffff0000) | (((p >> 16) + ((p & 0x8000) != 0)) & 0xFFFF);
 		break;
 	case R_MIPS_LO16:
@@ -157,7 +157,7 @@ bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 	return true;
 }
 
-void MipsElfRelocator::setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType)
+void MipsElfRelocator::setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType)
 {
 	data.symbolAddress = symbolAddress;
 	data.targetSymbolType = symbolType;

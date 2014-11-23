@@ -18,17 +18,17 @@ public:
 	void save(const std::wstring&fileName);
 
 	Elf32_Half getType() { return fileHeader.e_type; };
-	int getSegmentCount() { return segments.size(); };
-	ElfSegment* getSegment(int index) { return segments[index]; };
+	size_t getSegmentCount() { return segments.size(); };
+	ElfSegment* getSegment(size_t index) { return segments[index]; };
 
 	int findSegmentlessSection(const std::string& name);
-	ElfSection* getSegmentlessSection(int index) { return segmentlessSections[index]; };
-	int getSegmentlessSectionCount() { return segmentlessSections.size(); };
+	ElfSection* getSegmentlessSection(size_t index) { return segmentlessSections[index]; };
+	size_t getSegmentlessSectionCount() { return segmentlessSections.size(); };
 	ByteArray& getFileData() { return fileData; }
 
 	int getSymbolCount();
-	Elf32_Sym* getSymbol(int index);
-	const char* getStrTableString(int pos);
+	Elf32_Sym* getSymbol(size_t index);
+	const char* getStrTableString(size_t pos);
 private:
 	void loadSectionNames();
 	void determinePartOrder();
@@ -84,14 +84,14 @@ public:
 	Elf32_Word getPhysSize() { return header.p_filesz; };
 	Elf32_Word getType() { return header.p_type; };
 	Elf32_Addr getVirtualAddress() { return header.p_vaddr; };
-	int getSectionCount() { return sections.size(); };
+	size_t getSectionCount() { return sections.size(); };
 	void writeHeader(byte* dest);
 	void writeData(ByteArray& output);
 	void splitSections();
 
 	int findSection(const std::string& name);
-	ElfSection* getSection(int index) { return sections[index]; };
-	void writeToData(int offset, void* data, int size);
+	ElfSection* getSection(size_t index) { return sections[index]; };
+	void writeToData(size_t offset, void* data, size_t size);
 	void sortSections();
 private:
 	Elf32_Phdr header;
@@ -102,11 +102,11 @@ private:
 
 struct RelocationData
 {
-	unsigned int opcodeOffset;
+	u64 opcodeOffset;
+	u64 relocationBase;
 	unsigned int opcode;
-	unsigned int relocationBase;
 
-	unsigned int symbolAddress;
+	u64 symbolAddress;
 	int targetSymbolType;
 	int targetSymbolInfo;
 

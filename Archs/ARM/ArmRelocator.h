@@ -15,7 +15,7 @@ class ArmElfRelocator: public IElfRelocator
 public:
 	ArmElfRelocator(bool arm9): arm9(arm9) { };
 	virtual bool relocateOpcode(int type, RelocationData& data);
-	virtual void setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType);
+	virtual void setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType);
 	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 private:
 	bool arm9;

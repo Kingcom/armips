@@ -14,7 +14,7 @@ void CMacro::loadArguments(ArgumentList& argumentList)
 }
 
 
-std::wstring CMacro::getLine(int num, ArgumentList& argumentValues, int macroCounter)
+std::wstring CMacro::getLine(size_t num, ArgumentList& argumentValues, size_t macroCounter)
 {
 	std::wstring dest;
 	const std::wstring& source = lines[num];

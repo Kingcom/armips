@@ -392,9 +392,9 @@ DirectiveObjImport::DirectiveObjImport(ArgumentList& args)
 
 bool DirectiveObjImport::Validate()
 {
-	int memory = g_fileManager->getVirtualAddress();
+	u64 memory = g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
-	g_fileManager->advanceMemory(memory);
+	g_fileManager->advanceMemory((size_t)memory);
 	return rel.hasDataChanged();
 }
 

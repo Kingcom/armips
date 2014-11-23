@@ -12,11 +12,11 @@ public:
 	virtual bool open(bool onlyCheck);
 	virtual void close();
 	virtual bool isOpen() { return opened; };
-	virtual bool write(void* data, int length);
-	virtual size_t getVirtualAddress();
-	virtual size_t getPhysicalAddress();
-	virtual bool seekVirtual(size_t virtualAddress);
-	virtual bool seekPhysical(size_t physicalAddress);
+	virtual bool write(void* data, size_t length);
+	virtual u64 getVirtualAddress();
+	virtual u64 getPhysicalAddress();
+	virtual bool seekVirtual(u64 virtualAddress);
+	virtual bool seekPhysical(u64 physicalAddress);
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
 
 	bool load(const std::wstring& fileName, const std::wstring& outputFileName);
@@ -31,7 +31,7 @@ private:
 
 	int segment;
 	int section;
-	int sectionOffset;
+	size_t sectionOffset;
 };
 
 

@@ -197,7 +197,7 @@ void CArmArchitecture::Pass2()
 
 void CArmArchitecture::Revalidate()
 {
-	for (int i = 0; i < PoolCount; i++)
+	for (size_t i = 0; i < PoolCount; i++)
 	{
 		Pools[i].Clear();
 	}
@@ -244,7 +244,7 @@ int CArmArchitecture::AddToCurrentPool(int value)
 	{
 		return -1;
 	}
-	return Pools[CurrentPool].AddEntry(value);
+	return (int) Pools[CurrentPool].AddEntry(value);
 };
 
 bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result)

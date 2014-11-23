@@ -180,7 +180,7 @@ bool ConditionData::conditionTrue()
 }
 
 
-void AreaData::startArea(int start, int size, int fileNum, int lineNumber, int fillValue)
+void AreaData::startArea(u64 start, size_t size, int fileNum, int lineNumber, int fillValue)
 {
 	Entry entry;
 	entry.start = start;

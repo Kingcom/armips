@@ -17,8 +17,8 @@ class Label
 public:
 	Label(std::wstring name): name(name), defined(false),info(0),data(false),updateInfo(true) { };
 	const std::wstring getName() { return name; };
-	unsigned int getValue() { return value; };
-	void setValue(unsigned int val) { value = val; };
+	u64 getValue() { return value; };
+	void setValue(u64 val) { value = val; };
 	bool isDefined() { return defined; };
 	void setDefined(bool b) { defined = b; };
 	bool isData() { return data; };
@@ -31,7 +31,7 @@ public:
 	int getSection() { return section; }
 private:
 	std::wstring name;
-	unsigned int value;
+	u64 value;
 	bool defined;
 	bool data;
 	int info;
@@ -56,7 +56,7 @@ public:
 	bool addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement);
 	std::wstring insertEquations(const std::wstring& line, unsigned int file, unsigned int section);
 	void addLabels(const std::vector<LabelDefinition>& labels);
-	int findSection(unsigned int address);
+	int findSection(u64 address);
 
 	std::wstring getUniqueLabelName();
 	size_t getLabelCount() { return labels.size(); };

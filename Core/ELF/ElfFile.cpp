@@ -44,12 +44,12 @@ void ElfSection::writeData(ByteArray& output)
 	// nobits sections still get a provisional file address
 	if (header.sh_type == SHT_NOBITS)
 	{
-		header.sh_offset = output.size();
+		header.sh_offset = (Elf32_Off) output.size();
 	}
 
 	if (header.sh_addralign != -1)
 		output.alignSize(header.sh_addralign);
-	header.sh_offset = output.size();
+	header.sh_offset = (Elf32_Off) output.size();
 	output.append(data);
 }
 
@@ -109,9 +109,9 @@ void ElfSegment::writeData(ByteArray& output)
 	{
 		output.alignSize(header.p_align);
 		if (header.p_offset == header.p_paddr)
-			header.p_paddr = output.size();
+			header.p_paddr = (Elf32_Addr) output.size();
 
-		header.p_offset = output.size();
+		header.p_offset = (Elf32_Off) output.size();
 		return;
 	}
 
@@ -119,7 +119,7 @@ void ElfSegment::writeData(ByteArray& output)
 	int align = std::max<int>(sections[0]->getAlignment(),16);
 	output.alignSize(align);
 
-	header.p_offset = output.size();
+	header.p_offset = (Elf32_Off) output.size();
 	for (int i = 0; i < (int)sections.size(); i++)
 	{
 		sections[i]->setOffsetBase(header.p_offset);
@@ -154,9 +154,9 @@ int ElfSegment::findSection(const std::string& name)
 	return -1;
 }
 
-void ElfSegment::writeToData(int offset, void* src, int size)
+void ElfSegment::writeToData(size_t offset, void* src, size_t size)
 {
-	for (int i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		data[offset+i] = ((byte*)src)[i];
 	}
@@ -199,31 +199,31 @@ void ElfFile::loadSectionNames()
 
 void ElfFile::determinePartOrder()
 {
-	int segmentTable = fileHeader.e_phoff;
-	int sectionTable = fileHeader.e_shoff;
+	size_t segmentTable = fileHeader.e_phoff;
+	size_t sectionTable = fileHeader.e_shoff;
 
 	// segments
-	int firstSegmentStart = fileData.size(), lastSegmentEnd = 0;
+	size_t firstSegmentStart = fileData.size(), lastSegmentEnd = 0;
 	for (int i = 0; i < fileHeader.e_phnum; i++)
 	{
-		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
+		size_t pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
 		
 		Elf32_Phdr segmentHeader;
 		memcpy(&segmentHeader,&fileData[pos],sizeof(Elf32_Phdr));
-		int end = segmentHeader.p_offset+segmentHeader.p_filesz;
+		size_t end = segmentHeader.p_offset+segmentHeader.p_filesz;
 
 		if ((int)segmentHeader.p_offset < firstSegmentStart) firstSegmentStart = segmentHeader.p_offset;
 		if (lastSegmentEnd < end) lastSegmentEnd = end;
 	}
 
 	// segmentless sections
-	int firstSectionStart = fileData.size(), lastSectionEnd = 0;
+	size_t firstSectionStart = fileData.size(), lastSectionEnd = 0;
 	for (int i = 0; i < (int)segmentlessSections.size(); i++)
 	{
 		if (segmentlessSections[i]->getType() == SHT_NULL) continue;
 
-		int start = segmentlessSections[i]->getOffset();
-		int end = start+segmentlessSections[i]->getSize();
+		size_t start = segmentlessSections[i]->getOffset();
+		size_t end = start+segmentlessSections[i]->getSize();
 
 		if (start == 0 && end == 0)
 			continue;
@@ -232,7 +232,7 @@ void ElfFile::determinePartOrder()
 	}
 
 	struct PartsSort {
-		int offset;
+		size_t offset;
 		ElfPart type;
 		bool operator<(const PartsSort& other) const { return offset < other.offset; };
 	};
@@ -367,12 +367,12 @@ void ElfFile::save(const std::wstring&fileName)
 		{
 		case ELFPART_SEGMENTTABLE:
 			fileData.alignSize(4);
-			fileHeader.e_phoff = fileData.size();
+			fileHeader.e_phoff = (Elf32_Off) fileData.size();
 			fileData.reserveBytes(segments.size()*fileHeader.e_phentsize);
 			break;
 		case ELFPART_SECTIONTABLE:
 			fileData.alignSize(4);
-			fileHeader.e_shoff = fileData.size();
+			fileHeader.e_shoff = (Elf32_Off) fileData.size();
 			fileData.reserveBytes(sections.size()*fileHeader.e_shentsize);
 			break;
 		case ELFPART_SEGMENTS:
@@ -415,7 +415,7 @@ int ElfFile::getSymbolCount()
 	return symTab->getSize()/sizeof(Elf32_Sym);
 }
 
-Elf32_Sym* ElfFile::getSymbol(int index)
+Elf32_Sym* ElfFile::getSymbol(size_t index)
 {
 	if (symTab == NULL)
 		return NULL;
@@ -423,7 +423,7 @@ Elf32_Sym* ElfFile::getSymbol(int index)
 	return (Elf32_Sym*) &symTab->getData()[index*sizeof(Elf32_Sym)];
 }
 
-const char* ElfFile::getStrTableString(int pos)
+const char* ElfFile::getStrTableString(size_t pos)
 {
 	if (strTab == NULL)
 		return NULL;

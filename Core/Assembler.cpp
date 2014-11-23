@@ -181,7 +181,7 @@ void splitLine(std::wstring& line, std::wstring& name, std::wstring& arguments)
 
 void AddFileName(char* FileName)
 {
-	Global.FileInfo.FileNum = Global.FileInfo.FileList.GetCount();
+	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.GetCount();
 	Global.FileInfo.FileList.AddEntry(FileName);
 	Global.FileInfo.LineNumber = 0;
 }
@@ -208,9 +208,9 @@ void InsertMacro(CMacro* Macro, std::wstring& Args)
 		return;
 	}
 
-	int MacroCounter = Macro->getIncreaseCounter();
+	size_t MacroCounter = Macro->getIncreaseCounter();
 
-	for (int i = 0; i < Macro->getLineCount(); i++)
+	for (size_t i = 0; i < Macro->getLineCount(); i++)
 	{
 		Text.buffer = Macro->getLine(i,Arguments,MacroCounter);
 		Text.buffer = Global.symbolTable.insertEquations(Text.buffer,Global.FileInfo.FileNum,Global.Section);

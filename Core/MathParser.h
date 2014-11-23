@@ -75,16 +75,16 @@ public:
 	CExpressionCommandList();
 	~CExpressionCommandList();
 	bool Load(CStringList &List);
-	eExpressionCommand GetType(int i) { return Entries[i].command; };
-	unsigned int GetValue(int i) { return Entries[i].num; };
-	Label* GetLabel(int i) { return Global.symbolTable.getLabel(Entries[i].label, Global.FileInfo.FileNum, Global.Section); };
-	std::wstring GetLabelName(int i) { return Entries[i].label; };
-	bool LabelExists(int i) { return Global.symbolTable.symbolExists(Entries[i].label, Global.FileInfo.FileNum, Global.Section); };
-	int GetCount() { return EntryCount; };
+	eExpressionCommand GetType(size_t i) { return Entries[i].command; };
+	unsigned int GetValue(size_t i) { return Entries[i].num; };
+	Label* GetLabel(size_t i) { return Global.symbolTable.getLabel(Entries[i].label, Global.FileInfo.FileNum, Global.Section); };
+	std::wstring GetLabelName(size_t i) { return Entries[i].label; };
+	bool LabelExists(size_t i) { return Global.symbolTable.symbolExists(Entries[i].label, Global.FileInfo.FileNum, Global.Section); };
+	size_t GetCount() { return EntryCount; };
 	bool isInitialized() { return initialized; };
 private:
 	tExpressionCommandEntry* Entries;
-	int EntryCount;
+	size_t EntryCount;
 	bool initialized;
 };
 
@@ -112,7 +112,7 @@ private:
 
 bool IsHex(char Hex);
 inline int htd(char Hex);
-bool ConvertToInt(char* str, int defaultrad, int len, int& Result);
+bool ConvertToInt(char* str, int defaultrad, size_t len, int& Result);
 int HexToInt(char* Hex, int length);
 bool ConvertInfixToPostfix(char* Infix, CStringList& Postfix);
 bool CheckPostfix(CStringList& Postfix, bool AllowLabels);

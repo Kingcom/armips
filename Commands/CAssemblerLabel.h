@@ -6,14 +6,14 @@ class Label;
 class CAssemblerLabel: public CAssemblerCommand
 {
 public:
-	CAssemblerLabel(const std::wstring& name, int RamPos, int Section, bool constant);
+	CAssemblerLabel(const std::wstring& name, u64 RamPos, int Section, bool constant);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
 	std::wstring labelname;
-	int labelvalue;
+	u64 labelvalue;
 	Label* label;
 	bool constant;
 };

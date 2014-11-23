@@ -64,7 +64,7 @@ private:
 	bool IgnoreLoadDelay;
 	bool NoCheckError;
 	bool Loaded;
-	int RamPos;
+	u64 RamPos;
 	CMipsInstruction* subInstruction;
 
 	// opcode variables

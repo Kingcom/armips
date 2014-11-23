@@ -19,14 +19,14 @@ inline int signExtend(int value, int bitsLength)
 bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 {
 	int t = (data.targetSymbolType == STT_FUNC && data.targetSymbolInfo != 0) ? 1 : 0;
-	int p = data.opcodeOffset;
-	int s = data.relocationBase;
+	int p = (int) data.opcodeOffset;
+	int s = (int) data.relocationBase;
 
 	switch (type)
 	{
 	case R_ARM_ABS32:		// (S + A) | T
 	case R_ARM_TARGET1:
-		data.opcode = (data.opcode + data.relocationBase) | t;
+		data.opcode = (int) (data.opcode + data.relocationBase) | t;
 		break;
 	case R_ARM_THM_CALL:	// ((S + A) | T) – P
 		{
@@ -138,7 +138,7 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 	return true;
 }
 
-void ArmElfRelocator::setSymbolAddress(RelocationData& data, unsigned int symbolAddress, int symbolType)
+void ArmElfRelocator::setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType)
 {
 	if (symbolType == STT_FUNC)
 	{

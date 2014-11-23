@@ -60,7 +60,7 @@ bool addAssemblerLabel(const std::wstring& labelName)
 		return false;
 	}
 
-	CAssemblerLabel* Label = new CAssemblerLabel(labelName,g_fileManager->getVirtualAddress(),Global.Section,false);
+	CAssemblerLabel* Label = new CAssemblerLabel(labelName,(int)g_fileManager->getVirtualAddress(),Global.Section,false);
 	AddAssemblerCommand(Label);
 	return true;
 }

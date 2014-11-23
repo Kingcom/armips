@@ -261,7 +261,7 @@ std::wstring toWLowercase(const std::string& str)
 
 std::wstring getFileNameFromPath(const std::wstring& path)
 {
-	int n = path.find_last_of(L"/\\");
+	size_t n = path.find_last_of(L"/\\");
 	if (n == path.npos)
 		return path;
 	return path.substr(n);

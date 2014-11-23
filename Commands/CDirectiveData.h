@@ -4,13 +4,13 @@
 
 typedef struct {
 	bool String;
-	int num;
+	size_t num;
 } tDirectiveDataEntry;
 
 class CDirectiveData: public CAssemblerCommand
 {
 public:
-	CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc);
+	CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc);
 	~CDirectiveData();
 	virtual bool Validate();
 	virtual void Encode();
@@ -20,12 +20,12 @@ private:
 	tDirectiveDataEntry* Entries;
 	CExpressionCommandList* ExpData;
 	CByteList StrData;
-	int TotalAmount;
-	int StrAmount;
-	int ExpAmount;
-	int UnitSize;
-	int SpaceNeeded;
-	int RamPos;
+	size_t TotalAmount;
+	size_t StrAmount;
+	size_t ExpAmount;
+	size_t UnitSize;
+	size_t SpaceNeeded;
+	u64 RamPos;
 	bool ascii;
 };
 

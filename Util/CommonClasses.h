@@ -9,15 +9,15 @@ public:
 	~CStringList();
 	void Clear() { EntryCount = 0; DataPos = 0; };
 	void AddEntry(char* str);
-	char* GetEntry(int num);
-	int GetCount() { return EntryCount; };
+	char* GetEntry(size_t num);
+	size_t GetCount() { return EntryCount; };
 private:
-	int* EntryPoses;
-	int EntryCount;
-	int EntriesAllocated;
+	size_t* EntryPoses;
+	size_t EntryCount;
+	size_t EntriesAllocated;
 	char* Data;
-	int DataPos;
-	int DataAllocated;
+	size_t DataPos;
+	size_t DataAllocated;
 };
 
 class ArgumentList
@@ -35,7 +35,7 @@ public:
 		entries.push_back(entry);
 	};
 
-	const ArgumentList::Entry& operator [](unsigned int index) const
+	const ArgumentList::Entry& operator [](size_t index) const
 	{
 		return entries[index];
 	};
@@ -53,7 +53,7 @@ public:
 	void clear() { file.setFileName(L""); }
 	void start();
 	void end();
-	void writeLine(int memoryAddress, const std::wstring& text);
+	void writeLine(u64 memoryAddress, const std::wstring& text);
 private:
 	TextFile file;
 };
@@ -64,7 +64,7 @@ public:
 	void push(unsigned int num) { stack.push_back(num); };
 	unsigned int pop() { unsigned int value = stack.back(); stack.pop_back(); return value; };
 	bool isEmpty() { return stack.size() == 0; };
-	int size() { return stack.size(); };
+	size_t size() { return stack.size(); };
 	void clear() { stack.clear(); };
 private:
 	std::vector<unsigned int> stack;
@@ -72,8 +72,8 @@ private:
 
 
 typedef struct {
-	int Pos;
-	int len;
+	size_t Pos;
+	size_t len;
 } tByteListEntry;
 
 class CByteList
@@ -82,15 +82,15 @@ public:
 	CByteList();
 	~CByteList();
 	void Clear() { EntryCount = 0; DataPos = 0; };
-	void AddEntry(unsigned char* ByteData, int len);
-	unsigned char* GetEntry(int num) { return &Data[Entries[num].Pos]; };
-	int GetLen(int num) { return Entries[num].len; };
-	int GetCount() { return EntryCount; };
+	void AddEntry(unsigned char* ByteData, size_t len);
+	unsigned char* GetEntry(size_t num) { return &Data[Entries[num].Pos]; };
+	size_t GetLen(size_t num) { return Entries[num].len; };
+	size_t GetCount() { return EntryCount; };
 private:
 	tByteListEntry* Entries;
-	int EntryCount;
-	int EntriesAllocated;
+	size_t EntryCount;
+	size_t EntriesAllocated;
 	unsigned char* Data;
-	int DataPos;
-	int DataAllocated;
+	size_t DataPos;
+	size_t DataAllocated;
 };

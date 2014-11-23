@@ -19,6 +19,8 @@
 #include <windows.h>
 
 typedef unsigned __int64 u64;
+typedef unsigned int u32;
 #else
 typedef uint64_t u64;
+typedef uint32_t u32;
 #endif

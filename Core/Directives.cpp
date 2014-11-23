@@ -196,7 +196,7 @@ bool DirectiveString(ArgumentList& List, int flags)
 				return false;
 			}
 
-			for (int i = 0; i < data.size(); i++)
+			for (size_t i = 0; i < data.size(); i++)
 			{
 				wchar_t str[32];
 				swprintf(str,32,L"0x%02X",data[i]);
@@ -210,7 +210,7 @@ bool DirectiveString(ArgumentList& List, int flags)
 	if ((flags & DIRECTIVE_STR_NOTERMINATION) == 0)
 	{
 		ByteArray data = Global.Table.encodeTermination();
-		for (int i = 0; i < data.size(); i++)
+		for (size_t i = 0; i < data.size(); i++)
 		{
 			wchar_t str[32];
 			swprintf(str,32,L"0x%02X",data[i]);
@@ -266,7 +266,7 @@ bool DirectiveSJIS(ArgumentList& List, int flags)
 				return false;
 			}
 
-			for (int i = 0; i < data.size(); i++)
+			for (size_t i = 0; i < data.size(); i++)
 			{
 				wchar_t str[32];
 				swprintf(str,32,L"0x%02X",data[i]);
@@ -280,7 +280,7 @@ bool DirectiveSJIS(ArgumentList& List, int flags)
 	if ((flags & DIRECTIVE_STR_NOTERMINATION) == 0)
 	{
 		ByteArray data = Global.SJISTable.encodeTermination();
-		for (int i = 0; i < data.size(); i++)
+		for (size_t i = 0; i < data.size(); i++)
 		{
 			wchar_t str[32];
 			swprintf(str,32,L"0x%02X",data[i]);
@@ -558,7 +558,7 @@ bool DirectiveImportObj(ArgumentList& list, int flags)
 }
 
 
-int loadArgument(ArgumentList& list, const std::wstring& args, size_t pos)
+size_t loadArgument(ArgumentList& list, const std::wstring& args, size_t pos)
 {
 	std::wstring buffer;
 

@@ -76,5 +76,5 @@ private:
 	tArmOpcode Opcode;
 	bool NoCheckError;
 	bool Loaded;
-	int RamPos;
+	u64 RamPos;
 };

@@ -210,7 +210,7 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 	int lastSection = 0;
 	for (const LabelDefinition& def: labels)
 	{
-		Label* label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
+		Label* label = getLabel(def.name,(unsigned int)Global.FileInfo.FileNum,Global.Section);
 		
 		if (isLocalSymbol(def.name) == false)
 			Global.Section++;
@@ -220,14 +220,14 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 	}
 }
 
-int SymbolTable::findSection(unsigned int address)
+int SymbolTable::findSection(u64 address)
 {
 	int smallestBefore = -1;
-	int smallestDiff = address;
+	int smallestDiff = 0x7FFFFFFF;
 
 	for (auto& lab: labels)
 	{
-		int diff = address-lab->getValue();
+		int diff = (int)(address-lab->getValue());
 		if (diff >= 0 && diff < smallestDiff)
 		{
 			smallestDiff = diff;

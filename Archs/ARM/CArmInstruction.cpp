@@ -517,7 +517,7 @@ bool ParsePostfixExpressionCheck(CExpressionCommandList& Postfix, CStringList* E
 			{
 				Logger::queueError(Logger::Error,L"Invalid expression");
 			} else {
-				for (int l = 0; l < Errors->GetCount(); l++)
+				for (size_t l = 0; l < Errors->GetCount(); l++)
 				{
 					Logger::queueError(Logger::Error,convertUtf8ToWString(Errors->GetEntry(l)));
 				}
@@ -724,7 +724,7 @@ bool CArmInstruction::Validate()
 				}
 			}
 
-			Vars.Immediate = (Vars.Immediate-RamPos-8);
+			Vars.Immediate = (int) (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= 0x2000000)
 			{
 				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.OriginalImmediate);
@@ -732,7 +732,7 @@ bool CArmInstruction::Validate()
 			}
 		} else if (Opcode.flags & ARM_ABSIMM)	// ldr r0,[I]
 		{
-			Vars.Immediate = Vars.Immediate-RamPos-8;
+			Vars.Immediate = (int) (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= (1 << Vars.ImmediateBitLen))
 			{
 				Logger::queueError(Logger::Error,L"Load target %08X out of range",Vars.OriginalImmediate);

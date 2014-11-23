@@ -4,12 +4,12 @@
 #include "Core/MathParser.h"
 #include "Core/FileManager.h"
 
-CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
+CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
 {
 	TotalAmount = Args.size();
 	StrAmount = 0;
 	ExpAmount = 0;
-	for (int i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < TotalAmount; i++)
 	{
 		if (Args[i].isString == true)
 		{
@@ -33,16 +33,16 @@ CDirectiveData::CDirectiveData(ArgumentList& Args, int SizePerUnit, bool asc)
 		return;
 	}
 
-	int ExpNum = 0;
+	size_t ExpNum = 0;
 	SpaceNeeded = 0;
-	for (int i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < TotalAmount; i++)
 	{
 		if (Args[i].isString == true)
 		{
 			std::string tt = convertWStringToUtf8(Args[i].text);
 			char* t = (char*) tt.c_str();
 
-			int len = strlen(t);
+			size_t len = strlen(t);
 			Entries[i].String = true;
 			Entries[i].num = StrData.GetCount();
 			StrData.AddEntry((unsigned char*)t,len);
@@ -71,7 +71,7 @@ bool CDirectiveData::Validate()
 	RamPos = g_fileManager->getVirtualAddress();
 
 	int num;
-	for (int i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < TotalAmount; i++)
 	{
 		if (Entries[i].String == false)
 		{
@@ -89,15 +89,15 @@ bool CDirectiveData::Validate()
 void CDirectiveData::Encode()
 {
 	int num;
-	int totalsize = 0;
+	size_t totalsize = 0;
 
-	for (int i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < TotalAmount; i++)
 	{
 		if (Entries[i].String == true)
 		{
 			unsigned char* Data = StrData.GetEntry(Entries[i].num);
-			int len = StrData.GetLen(Entries[i].num);
-			for (int i = 0; i < len; i++)
+			size_t len = StrData.GetLen(Entries[i].num);
+			for (size_t i = 0; i < len; i++)
 			{
 				num = Data[i];
 				g_fileManager->write(&num,UnitSize);
@@ -148,13 +148,13 @@ void CDirectiveData::writeTempData(TempData& tempData)
 		break;
 	}
 
-	for (int i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < TotalAmount; i++)
 	{
 		if (Entries[i].String == true)
 		{
 			unsigned char* Data = StrData.GetEntry(Entries[i].num);
-			int len = StrData.GetLen(Entries[i].num);
-			for (int i = 0; i < len; i++)
+			size_t len = StrData.GetLen(Entries[i].num);
+			for (size_t i = 0; i < len; i++)
 			{
 				result += formatString(L"0x%0*X,",UnitSize*2,Data[i]);
 			}

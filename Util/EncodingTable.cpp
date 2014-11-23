@@ -40,14 +40,14 @@ int parseHexString(std::wstring& hex, unsigned char* dest)
 			return -1;
 		}
 
-		int index = i/2;
+		size_t index = i/2;
 		if (i % 2)
 			dest[index] = (dest[index] << 4) | value;
 		else
 			dest[index] = value;
 	}
 
-	return hex.size()/2;
+	return (int) hex.size()/2;
 }
 
 bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encoding)
@@ -110,7 +110,7 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 	return true;
 }
 
-void EncodingTable::addEntry(unsigned char* hex, int hexLength, const std::wstring& value)
+void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, const std::wstring& value)
 {
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
@@ -122,7 +122,7 @@ void EncodingTable::addEntry(unsigned char* hex, int hexLength, const std::wstri
 	entries.push_back(entry);
 }
 
-void EncodingTable::addEntry(unsigned char* hex, int hexLength, wchar_t value)
+void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, wchar_t value)
 {
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
@@ -134,7 +134,7 @@ void EncodingTable::addEntry(unsigned char* hex, int hexLength, wchar_t value)
 	entries.push_back(entry);
 }
 
-void EncodingTable::setTerminationEntry(unsigned char* hex, int hexLength)
+void EncodingTable::setTerminationEntry(unsigned char* hex, size_t hexLength)
 {
 	terminationEntry.hexPos = hexData.append(hex,hexLength);
 	terminationEntry.hexLen = hexLength;
@@ -143,7 +143,7 @@ void EncodingTable::setTerminationEntry(unsigned char* hex, int hexLength)
 
 int EncodingTable::searchStringMatch(const std::wstring& str, size_t pos)
 {
-	int longestLength = 0;
+	size_t longestLength = 0;
 	int longestNum = -1;
 
 	for (size_t i = 0; i < entries.size(); i++)
@@ -152,7 +152,7 @@ int EncodingTable::searchStringMatch(const std::wstring& str, size_t pos)
 		if (entry.valueLen < longestLength) continue;
 
 		bool match = true;
-		for (int k = 0; k < entry.valueLen; k++)
+		for (size_t k = 0; k < entry.valueLen; k++)
 		{
 			if (pos+k >= str.size() || valueData[entry.valuePos+k] != str[pos+k])
 			{
@@ -164,7 +164,7 @@ int EncodingTable::searchStringMatch(const std::wstring& str, size_t pos)
 		if (match)
 		{
 			longestLength = entry.valueLen;
-			longestNum = i;
+			longestNum = (int) i;
 		}
 	}
 
@@ -186,7 +186,7 @@ ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermina
 		}
 
 		TableEntry& entry = entries[index];
-		for (int i = 0; i < entry.hexLen; i++)
+		for (size_t i = 0; i < entry.hexLen; i++)
 		{
 			result.appendByte(hexData[entry.hexPos+i]);
 		}
@@ -197,7 +197,7 @@ ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermina
 	if (writeTermination)
 	{
 		TableEntry& entry = terminationEntry;
-		for (int i = 0; i < entry.hexLen; i++)
+		for (size_t i = 0; i < entry.hexLen; i++)
 		{
 			result.appendByte(hexData[entry.hexPos+i]);
 		}
@@ -211,7 +211,7 @@ ByteArray EncodingTable::encodeTermination()
 	ByteArray result;
 
 	TableEntry& entry = terminationEntry;
-	for (int i = 0; i < entry.hexLen; i++)
+	for (size_t i = 0; i < entry.hexLen; i++)
 	{
 		result.appendByte(hexData[entry.hexPos+i]);
 	}

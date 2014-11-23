@@ -56,7 +56,7 @@ public:
 	ByteArray& getData() { return outputData; };
 	void writeSymbols(SymbolData& symData);
 private:
-	int loadString(ByteArray& data, int pos, std::wstring& dest);
+	size_t loadString(ByteArray& data, size_t pos, std::wstring& dest);
 	bool parseObject(ByteArray data, PsxRelocatorFile& dest);
 	bool relocateFile(PsxRelocatorFile& file, int& relocationAddress);
 	

@@ -95,17 +95,17 @@ class AreaData
 {
 public:
 	void clear() { entries.clear(); };
-	void startArea(int start, int size, int fileNum, int lineNumber, int fillValue);
+	void startArea(u64 start, size_t size, int fileNum, int lineNumber, int fillValue);
 	void endArea();
 	bool checkAreas();
 	int getCurrentFillValue() { return entries.back().fillValue; };
-	int getCurrentMaxAddress() { return entries.back().maxAddress; };
-	int getEntryCount() { return entries.size(); };
+	u64 getCurrentMaxAddress() { return entries.back().maxAddress; };
+	size_t getEntryCount() { return entries.size(); };
 private:
 	struct Entry
 	{
-		int start;
-		int maxAddress;
+		u64 start;
+		u64 maxAddress;
 		int fileNum;
 		int lineNumber;
 		bool overflow;
