@@ -153,10 +153,10 @@ void CDirectivePosition::exec()
 	switch (type)
 	{
 	case Physical:
-		g_fileManager->seekPhysical(position);
+		g_fileManager->seekPhysical((u32)position);
 		break;
 	case Virtual:
-		g_fileManager->seekVirtual(position);
+		g_fileManager->seekVirtual((u32)position);
 		break;
 	}
 }
@@ -181,10 +181,10 @@ void CDirectivePosition::writeTempData(TempData& tempData)
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".orga 0x%08X",position));
+		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".orga 0x%08X",(u32)position));
 		break;
 	case Virtual:
-		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".org 0x%08X",position));
+		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".org 0x%08X",(u32)position));
 		break;
 	}
 }
@@ -255,7 +255,7 @@ void CDirectiveIncbin::Encode()
 {
 	if (loadSize != 0)
 	{
-		ByteArray data = ByteArray::fromFile(fileName,startAddress,loadSize);
+		ByteArray data = ByteArray::fromFile(fileName,(u32)startAddress,loadSize);
 		if (data.size() == 0)
 		{
 			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName);
@@ -355,7 +355,7 @@ void CDirectiveHeaderSize::updateFile()
 		Logger::printError(Logger::Error,L"Header size not applicable for this file");
 		return;
 	}
-	file->setHeaderSize(headerSize);
+	file->setHeaderSize((u32)headerSize);
 }
 
 bool CDirectiveHeaderSize::Validate()

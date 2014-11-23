@@ -528,7 +528,7 @@ DirectivePsxObjImport::DirectivePsxObjImport(ArgumentList& args)
 
 bool DirectivePsxObjImport::Validate()
 {
-	int memory = (int) g_fileManager->getVirtualAddress();
+	int memory = (u32) g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory(memory);
 	return rel.hasDataChanged();

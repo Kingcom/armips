@@ -49,7 +49,7 @@ bool CAssemblerLabel::Validate()
 		Global.Section++;
 	if (constant == false && label->getValue() != g_fileManager->getVirtualAddress())
 	{
-		label->setValue((int)g_fileManager->getVirtualAddress());
+		label->setValue(g_fileManager->getVirtualAddress());
 		return true;
 	}
 	return false;

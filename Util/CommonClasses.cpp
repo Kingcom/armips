@@ -50,48 +50,6 @@ void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
 	}
 }
 
-CStringList::CStringList()
-{
-	EntryPoses = (size_t*) malloc(256*4);
-	EntryCount = 0;
-	EntriesAllocated = 256;
-	Data = (char*) malloc(1024);
-	DataPos = 0;
-	DataAllocated = 1024;
-}
-
-CStringList::~CStringList()
-{
-	free(EntryPoses);
-	free(Data);
-}
-
-void CStringList::AddEntry(char* str)
-{
-	size_t len = strlen(str)+1;
-	if (EntriesAllocated == EntryCount)
-	{
-		EntriesAllocated <<= 1;
-		EntryPoses = (size_t*) realloc(EntryPoses,EntriesAllocated*4);
-	}
-	if (DataPos+len > DataAllocated)
-	{
-		DataAllocated <<= 1;
-		Data = (char*) realloc(Data,DataAllocated);
-	}
-
-	EntryPoses[EntryCount++] = DataPos;
-	memcpy(&Data[DataPos],str,len);
-	DataPos += len;
-}
-
-char* CStringList::GetEntry(size_t num)
-{
-	if (num >= EntryCount) return NULL;
-	return &Data[EntryPoses[num]];
-}
-
-
 CByteList::CByteList()
 {
 	Entries = (tByteListEntry*) malloc(256*sizeof(tByteListEntry));

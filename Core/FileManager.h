@@ -21,8 +21,8 @@ public:
 class GenericAssemblerFile: public AssemblerFile
 {
 public:
-	GenericAssemblerFile(const std::wstring& fileName, int headerSize, bool overwrite);
-	GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int headerSize);
+	GenericAssemblerFile(const std::wstring& fileName, u32 headerSize, bool overwrite);
+	GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, u32 headerSize);
 
 	virtual bool open(bool onlyCheck);
 	virtual void close() { handle.close(); };

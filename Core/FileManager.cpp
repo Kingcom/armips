@@ -3,17 +3,21 @@
 #include "Misc.h"
 #include "Common.h"
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int headerSize, bool overwrite)
+GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, u32 headerSize, bool overwrite)
 {
 	this->fileName = fileName;
+	this->headerSize = headerSize;
 	this->originalHeaderSize = headerSize;
+	this->virtualAddress = headerSize;
 	mode = overwrite == true ? Create : Open;
 }
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int headerSize)
+GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, u32 headerSize)
 {
 	this->fileName = fileName;
 	this->originalName = originalFileName;
+	this->headerSize = headerSize;
+	this->virtualAddress = headerSize;
 	originalHeaderSize = headerSize;
 	mode = Copy;
 }

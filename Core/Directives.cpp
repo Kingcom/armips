@@ -390,7 +390,7 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 		return false;
 	}
 
-	labelCommand = new CAssemblerLabel(List[0].text, value, Global.Section, true);
+	labelCommand = new CAssemblerLabel(List[0].text, (u32) value, Global.Section, true);
 	AddAssemblerCommand(labelCommand);
 	return true;
 }

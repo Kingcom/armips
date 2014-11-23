@@ -16,8 +16,8 @@ public:
 private:
 	CExpressionCommandList SizeExpression;
 	CExpressionCommandList ByteExpression;
-	int Size;
+	size_t Size;
 	bool FillByte;
 	int Byte;
-	int RamPos;
+	u64 RamPos;
 };

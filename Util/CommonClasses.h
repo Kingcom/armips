@@ -5,19 +5,12 @@
 class CStringList
 {
 public:
-	CStringList();
-	~CStringList();
-	void Clear() { EntryCount = 0; DataPos = 0; };
-	void AddEntry(char* str);
-	char* GetEntry(size_t num);
-	size_t GetCount() { return EntryCount; };
+	void Clear() { data.clear(); };
+	void AddEntry(char* str) { data.push_back(str); };
+	char* GetEntry(size_t num) { return (char*) data[num].c_str(); };
+	size_t GetCount() { return data.size(); };
 private:
-	size_t* EntryPoses;
-	size_t EntryCount;
-	size_t EntriesAllocated;
-	char* Data;
-	size_t DataPos;
-	size_t DataAllocated;
+	std::vector<std::string> data;
 };
 
 class ArgumentList

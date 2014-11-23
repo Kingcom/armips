@@ -263,6 +263,9 @@ int HexToInt(char* Hex, size_t length)
 // Parse only a float, and return as float bits.
 static bool parseFloat(const char *str, size_t len, int& result)
 {
+	if (!(str[0] >= '0' && str[0] <= '9'))
+		return false;
+
 	bool foundDecimal = false;
 	for (size_t i = 0; i < len; ++i)
 	{
