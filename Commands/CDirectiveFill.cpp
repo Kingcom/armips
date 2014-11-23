@@ -55,7 +55,7 @@ void CDirectiveFill::Encode()
 	unsigned char ByteBuffer[128];
 
 	memset(ByteBuffer,Byte,Size > 128 ? 128 : Size);
-	int n = Size;
+	size_t n = Size;
 	while (n > 128)
 	{
 		g_fileManager->write(ByteBuffer,128);
