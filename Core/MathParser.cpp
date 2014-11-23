@@ -548,6 +548,7 @@ bool ParsePostfix(CExpressionCommandList& Postfix, CStringList* Errors, int& Res
 				}
 				Error = true;
 				Stack.push(-1);
+				TypeStack.push(EXCOMM_CONST);
 				num++;
 				break;
 			}
