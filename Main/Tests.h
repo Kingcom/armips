@@ -1,5 +1,6 @@
 #pragma once
 #include "Util/Util.h"
+#include <Windows.h>
 
 class TestRunner
 {

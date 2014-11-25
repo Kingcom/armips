@@ -16,8 +16,6 @@
 #include <iomanip>
 
 #ifdef _WIN32
-#include <windows.h>
-
 typedef unsigned __int64 u64;
 typedef unsigned int u32;
 #else
