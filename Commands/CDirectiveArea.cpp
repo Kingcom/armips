@@ -82,8 +82,9 @@ void CDirectiveArea::Encode()
 
 		while (Size > 0)
 		{
-			g_fileManager->write(buffer,std::min<size_t>(64,Size));
-			Size -= 64;
+			size_t part = std::min<size_t>(64,Size);
+			g_fileManager->write(buffer,part);
+			Size -= part;
 		}
 	}
 	return;
