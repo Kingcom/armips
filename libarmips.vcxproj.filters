@@ -132,9 +132,6 @@
     <ClCompile Include="Core\Directives.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\MathParser.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\ELF\ElfFile.cpp">
       <Filter>Core\ELF</Filter>
     </ClCompile>
@@ -265,9 +262,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\FileManager.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\MathParser.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Misc.h">

@@ -1,6 +1,7 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
+#include "../Util/CommonClasses.h"
 
 typedef struct {
 	bool String;
@@ -18,7 +19,7 @@ public:
 	virtual void writeSymData(SymbolData& symData);
 private:
 	tDirectiveDataEntry* Entries;
-	CExpressionCommandList* ExpData;
+	Expression* ExpData;
 	CByteList StrData;
 	size_t TotalAmount;
 	size_t StrAmount;

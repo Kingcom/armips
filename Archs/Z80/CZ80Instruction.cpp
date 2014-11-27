@@ -74,13 +74,13 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 
 	if (Opcode.flags & Z80_IMMEDIATE)
 	{
-		if (CheckPostfix(List,true) == false)
+	//	if (CheckPostfix(List,true) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
 			NoCheckError = true;
 			return false;
 		}
-		Vars.ImmediateExpression.Load(List);
+		//Vars.ImmediateExpression.Load(List);
 	}
 
 	OpcodeSize = Opcode.TotalLen;

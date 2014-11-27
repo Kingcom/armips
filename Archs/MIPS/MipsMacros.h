@@ -1,5 +1,4 @@
 #pragma once
-#include "Core/MathParser.h"
 #include "Mips.h"
 #include "CMipsInstruction.h"
 
@@ -21,8 +20,8 @@
 #define MIPSM_LOWER					0x00008000
 
 typedef struct {
-	MathExpression i1;
-	MathExpression i2;
+	Expression i1;
+	Expression i2;
 	MipsRegisterInfo rs;			// source reg
 	MipsRegisterInfo rt;			// target reg
 	MipsRegisterInfo rd;			// dest reg
@@ -30,8 +29,8 @@ typedef struct {
 } tMipsMacroVars;
 
 typedef struct {
-	MathExpression i1;
-	MathExpression i2;
+	Expression i1;
+	Expression i2;
 	MipsRegisterInfo rs;			// source reg
 	MipsRegisterInfo rt;			// target reg
 	MipsRegisterInfo rd;			// dest reg

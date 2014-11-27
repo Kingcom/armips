@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveData.h"
 #include "Core/Common.h"
-#include "Core/MathParser.h"
 #include "Core/FileManager.h"
 
 CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
@@ -20,7 +19,7 @@ CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
 	}
 
 	Entries = (tDirectiveDataEntry*) malloc(TotalAmount*sizeof(tDirectiveDataEntry));
-	ExpData = new CExpressionCommandList[ExpAmount];
+	ExpData = new Expression[ExpAmount];
 	
 	switch (SizePerUnit)
 	{
@@ -51,9 +50,8 @@ CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
 			Entries[i].String = false;
 			Entries[i].num = ExpNum;
 
-			if (initExpression(ExpData[ExpNum++],Args[i].text) == false)
+			if (ExpData[ExpNum++].load(Args[i].text) == false)
 				return;
-
 			SpaceNeeded += UnitSize;
 		}
 	}
@@ -70,12 +68,12 @@ bool CDirectiveData::Validate()
 {
 	RamPos = g_fileManager->getVirtualAddress();
 
-	int num;
+	u64 num;
 	for (size_t i = 0; i < TotalAmount; i++)
 	{
 		if (Entries[i].String == false)
 		{
-			if (evalExpression(ExpData[Entries[i].num],num,true) == false)
+			if (ExpData[Entries[i].num].evaluateInteger(num) == false)
 				return false;
 			g_fileManager->advanceMemory(UnitSize);
 		} else {
@@ -88,7 +86,7 @@ bool CDirectiveData::Validate()
 
 void CDirectiveData::Encode()
 {
-	int num;
+	u64 num;
 	size_t totalsize = 0;
 
 	for (size_t i = 0; i < TotalAmount; i++)
@@ -104,7 +102,7 @@ void CDirectiveData::Encode()
 			}
 			totalsize += len*UnitSize;
 		} else {
-			if (evalExpression(ExpData[Entries[i].num],num) == false)
+			if (ExpData[Entries[i].num].evaluateInteger(num) == false)
 				return;
 			totalsize += UnitSize;
 
@@ -114,10 +112,10 @@ void CDirectiveData::Encode()
 				switch (UnitSize)
 				{
 				case 2:
-					num = swapEndianness16(num);
+					num = swapEndianness16((u16)num);
 					break;
 				case 4:
-					num = swapEndianness32(num);
+					num = swapEndianness32((u32)num);
 					break;
 				}
 			}
@@ -132,7 +130,7 @@ void CDirectiveData::Encode()
 
 void CDirectiveData::writeTempData(TempData& tempData)
 {
-	int num;
+	u64 num;
 
 	std::wstring result;
 	switch (UnitSize)
@@ -159,7 +157,7 @@ void CDirectiveData::writeTempData(TempData& tempData)
 				result += formatString(L"0x%0*X,",UnitSize*2,Data[i]);
 			}
 		} else {
-			if (evalExpression(ExpData[Entries[i].num],num) == false)
+			if (ExpData[Entries[i].num].evaluateInteger(num) == false)
 				return;
 			result += formatString(L"0x%0*X,",UnitSize*2,num);
 		}

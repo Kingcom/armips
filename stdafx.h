@@ -16,9 +16,13 @@
 #include <iomanip>
 
 #ifdef _WIN32
-typedef unsigned __int64 u64;
+typedef unsigned char u8;
+typedef unsigned short u16;
 typedef unsigned int u32;
+typedef unsigned __int64 u64;
 #else
-typedef uint64_t u64;
+typedef uint8_t u8;
+typedef uint16_t u16;
 typedef uint32_t u32;
+typedef uint64_t u64;
 #endif

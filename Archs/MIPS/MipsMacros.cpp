@@ -435,24 +435,6 @@ bool MipsCheckMacroParsing(const char* Opcode, const char* Arguments, tMipsMacro
 	while (*Arguments == ' ' || *Arguments == '\t') Arguments++;
 	if (*Arguments != 0)	return false;	// there's something else, bad
 
-	if (Vars.i1.isLoaded())
-	{
-		if (Vars.i1.check() == false)
-		{
-			Vars.NoCheckError = true;
-			return false;
-		}
-	}
-
-	if (Vars.i2.isLoaded())
-	{
-		if (Vars.i2.check() == false)
-		{
-			Vars.NoCheckError = true;
-			return false;
-		}
-	}
-
 	return true;
 }
 

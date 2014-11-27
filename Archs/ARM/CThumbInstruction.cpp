@@ -65,8 +65,6 @@ const tThumbRegisterLookup RegisterLookup[] = {
 
 bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line)
 {
-	char ImmediateBuffer[512];
-
 	int p,RetLen;
 	CStringList List;
 	bool Immediate = false;
@@ -137,7 +135,7 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 				break;*/
 			case 'I':	// immediate
 			case 'i':
-				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
+				if (ArmParseImmediate(Line,Vars.ImmediateExpression,RetLen) == false) return false;
 				Vars.ImmediateBitLen = *(SourceEncoding+1);
 				Line += RetLen;
 				SourceEncoding += 2;
@@ -171,18 +169,6 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 
 	// opcode is ok - now set all flags
 	Opcode = SourceOpcode;
-
-	if (Opcode.flags & THUMB_IMMEDIATE)
-	{
-		if (CheckPostfix(List,true) == false)
-		{
-			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
-			NoCheckError = true;
-			return false;
-		}
-		Vars.ImmediateExpression.Load(List);
-	}
-
 	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
 	return true;
 }
@@ -205,19 +191,12 @@ bool CThumbInstruction::Validate()
 
 	if (Opcode.flags & THUMB_IMMEDIATE)
 	{
-		if (ParsePostfix(Vars.ImmediateExpression,&List,Vars.Immediate) == false)
+		if (Vars.ImmediateExpression.evaluateInteger(Vars.Immediate) == false)
 		{
-			if (List.GetCount() == 0)
-			{
-				Logger::queueError(Logger::Error,L"Invalid expression");
-			} else {
-				for (size_t l = 0; l < List.GetCount(); l++)
-				{
-					Logger::queueError(Logger::Error,convertUtf8ToWString(List.GetEntry(l)));
-				}
-			}
+			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
 		}
+
 		Vars.OriginalImmediate = Vars.Immediate;
 
 		if (Opcode.flags & THUMB_BRANCH)

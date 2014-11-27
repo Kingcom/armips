@@ -131,6 +131,7 @@ bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 	if (character >= 'a' && character <= 'z') return true;
 	if (!first && character >= '0' && character <= '9') return true;
 	if (character == '_' || character == '.') return true;
+	if (character == '@') return true;
 	return false;
 }
 

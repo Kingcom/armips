@@ -3,7 +3,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "ArmOpcodes.h"
 #include "Arm.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 typedef struct {
 	struct {
@@ -19,7 +19,7 @@ typedef struct {
 		bool ShiftByRegister;
 		bool UseShift;
 		tArmRegisterInfo reg;
-		CExpressionCommandList ShiftExpression;
+		Expression ShiftExpression;
 		int ShiftAmount;
 		unsigned char FinalType;
 		int FinalShiftAmount;
@@ -34,8 +34,8 @@ typedef struct {
 		tArmRegisterInfo cn;	// cop register n
 		tArmRegisterInfo cm;	// cop register m
 		tArmRegisterInfo pn;	// cop number
-		CExpressionCommandList CpopExpression;	// cp opc number
-		CExpressionCommandList CpinfExpression;	// cp information
+		Expression CpopExpression;	// cp opc number
+		Expression CpinfExpression;	// cp information
 		int Cpop;
 		int Cpinf;
 	} CopData;
@@ -47,7 +47,7 @@ typedef struct {
 	bool writeback;
 	bool SignPlus;
 	bool negative;
-	CExpressionCommandList ImmediateExpression;
+	Expression ImmediateExpression;
 	int Immediate;
 	int ImmediateBitLen;
 	int OriginalImmediate;

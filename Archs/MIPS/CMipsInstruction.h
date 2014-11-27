@@ -2,7 +2,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Mips.h"
 #include "MipsOpcodes.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
 	Immediate20_0, ImmediateHalfFloat, Immediate7 };
@@ -10,7 +10,7 @@ enum class MipsSecondaryImmediateType { None, Ext, Ins, Cop2BranchType };
 
 struct MipsImmediate
 {
-	MathExpression expression;
+	Expression expression;
 	int value;
 	int originalValue;
 };

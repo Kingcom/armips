@@ -1,6 +1,5 @@
 ﻿#include "stdafx.h"
 #include "Core/Common.h"
-#include "Core/MathParser.h"
 #include "Util/CommonClasses.h"
 #include "Core/Assembler.h"
 #include "Archs/MIPS/Mips.h"

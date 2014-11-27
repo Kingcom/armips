@@ -1,7 +1,7 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
 
 class GenericAssemblerFile;
@@ -33,7 +33,7 @@ public:
 private:
 	void exec();
 	Type type;
-	int position;
+	u64 position;
 };
 
 class CDirectiveIncbin: public CAssemblerCommand
@@ -46,8 +46,8 @@ public:
 	virtual void writeSymData(SymbolData& symData);
 private:
 	std::wstring fileName;
-	int startAddress;
-	int loadSize;
+	u64 startAddress;
+	u64 loadSize;
 };
 
 class CDirectiveAlign: public CAssemblerCommand
@@ -60,9 +60,9 @@ public:
 	virtual void writeSymData(SymbolData& symData) { };
 private:
 	int computePadding();
-	int alignment;
-	CExpressionCommandList fillExpression;
-	int fillByte;
+	size_t alignment;
+	Expression* fillExpression;
+	u8 fillByte;
 };
 
 class CDirectiveHeaderSize: public CAssemblerCommand
@@ -75,7 +75,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) { };
 private:
 	void updateFile();
-	int headerSize;
+	u64 headerSize;
 };
 
 class DirectiveObjImport: public CAssemblerCommand

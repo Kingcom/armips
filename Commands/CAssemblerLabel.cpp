@@ -11,6 +11,9 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, u64 RamPos, int Secti
 	this->labelvalue = RamPos;
 	this->constant = constant;
 	this->label = NULL;
+	
+	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
+		Global.Section++;
 }
 
 bool CAssemblerLabel::Validate()

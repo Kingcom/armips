@@ -1,7 +1,7 @@
 #pragma once
 #include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 enum class ConditionType
 {
@@ -28,9 +28,9 @@ public:
 	virtual bool IsConditional() { return true; };
 private:
 	void Execute();
-	CExpressionCommandList Expression;
+	Expression Expression;
 	std::wstring labelName;
-	int Value;
-	int RamPos;
+	u64 Value;
+	u64 RamPos;
 	ConditionType type;
 };
