@@ -210,8 +210,13 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 	int lastSection = 0;
 	for (const LabelDefinition& def: labels)
 	{
+		if (!isValidSymbolName(def.name))
+			continue;
+
 		Label* label = getLabel(def.name,(unsigned int)Global.FileInfo.FileNum,Global.Section);
-		
+		if (label == NULL)
+			continue;
+
 		if (isLocalSymbol(def.name) == false)
 			Global.Section++;
 
