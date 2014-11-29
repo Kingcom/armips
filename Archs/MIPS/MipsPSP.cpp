@@ -411,6 +411,125 @@ bool parseVfpuControlRegister(const char* text, MipsVFPURegister& reg, int& RetL
 	return true;
 }
 
+int parseVfpuVrot(const char* text, int& result, int size, int& RetLen)
+{
+	const char* start = text;
+
+	int sin = -1;
+	int cos = -1;
+	bool negSine = false;
+	int sineCount = 0;
+
+	if (*text++ != '[')
+		return false;
+	
+	int numElems = size+1;
+	for (int i = 0; i < numElems; i++)
+	{
+		char buffer[64];
+		
+		if (*text == 0 || *text == ']')
+			return false;
+
+		// extract element from text, so we don't have to worry about whitespace
+		int pos = 0;
+		while (*text != ',' && *text != 0 &&  *text != ']')
+		{
+			if (*text == ' ' || *text == '\t')
+			{
+				text++;
+				continue;
+			}
+
+			buffer[pos++] = *text++;
+		}
+
+		if (*text == ',')
+			text++;
+
+		if (pos == 0)
+			return false;
+
+		buffer[pos] = 0;
+		pos = 0;
+		
+		bool isNeg = buffer[pos] == '-';
+		if (isNeg)
+			pos++;
+
+		switch (buffer[pos++])
+		{
+		case 's':
+			// if one is negative, all have to be
+			if ((!isNeg && negSine) || (isNeg && !negSine && sineCount > 0))
+				return false;
+			sin = i;
+			sineCount++;
+			break;
+		case 'c':
+			// can't be negative, or happen twice
+			if (isNeg || cos != -1)
+				return false;
+			cos = i;
+			break;
+		case '0':
+			if (isNeg)
+				return false;
+			break;
+		default:
+			return false;
+		}
+
+		if (buffer[pos] != 0)
+			return false;
+	}
+	
+	if (*text++ != ']')
+		return false;
+	
+	result = negSine ? 0x10 : 0;
+
+	if (sin == -1)
+	{
+		if (numElems == 4)
+			return false;
+		
+		result |= cos;
+		result |= ((size+1) << 2);
+	} else if (cos == -1)
+	{
+		if (numElems == 4)
+			return false;
+
+		if (sineCount == 1)
+		{
+			result |= (size+1);
+			result |= (sin << 2);
+		} else if (sineCount == numElems)
+		{
+			result |= (size+1);
+			result |= ((size+1) << 2);
+		} else {
+			return false;
+		}
+	} else {
+		if (sineCount > 1)
+		{
+			if (sineCount+1 != numElems)
+				return false;
+			
+			result |= cos;
+			result |= (cos << 2);
+		} else {
+			result |= cos;
+			result |= (sin << 2);
+		}
+	}
+
+	RetLen = (int) (text-start);
+	return true;
+}
+
 // http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
 int floatToHalfFloat(int i)
 {

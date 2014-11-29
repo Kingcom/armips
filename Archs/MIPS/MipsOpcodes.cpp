@@ -37,6 +37,7 @@
 		s vpfxs/t parameter
 		d vpfxd parameter
 		c vcst constant
+		r vrot constant
 */
 
 const tMipsOpcode MipsOpcodes[] = {
@@ -679,7 +680,7 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |VF6-1.2|  ---  |     VROT      |  ---  |  ---  |  ---  |  ---  |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
 	// VVVVVVVVVVV iiiii z SSSSSSS z DDDDDDD
-	// TODO: vrot MIPS_VFPU6_1VROT() to avoid two entries (or just change table above?)
+	{ "vrot.S",		"vd,vSs,Wr",	MIPS_VFPU6_1VROT(),				MA_PSP, MO_VFPU },
 
 //     31--------20----16----------------------------------------------0
 //     |= VF6-1.2 |  f |                                               |

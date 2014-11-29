@@ -8,4 +8,5 @@ bool parseVpfxdParameter(const char* text, int& result, int& RetLen);
 bool parseVcstParameter(const char* text, int& result, int& RetLen);
 bool parseCop2BranchCondition(const char* text, int& result, int& RetLen);
 bool parseVfpuControlRegister(const char* text, MipsVFPURegister& reg, int& RetLen);
+int parseVfpuVrot(const char* text, int& result, int size, int& RetLen);
 int floatToHalfFloat(int i);

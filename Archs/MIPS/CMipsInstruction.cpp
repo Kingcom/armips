@@ -354,6 +354,10 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 					if (parseVcstParameter(Line,immediate.originalValue,RetLen) == false) return false;
 					immediateType = MipsImmediateType::Immediate5;
 					break;
+				case 'r':
+					if (parseVfpuVrot(Line,immediate.originalValue,vfpuSize,RetLen) == false) return false;
+					immediateType = MipsImmediateType::Immediate5;
+					break;
 				default:
 					return false;
 				}
