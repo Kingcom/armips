@@ -489,7 +489,10 @@ int parseVfpuVrot(const char* text, int& result, int size, int& RetLen)
 	
 	result = negSine ? 0x10 : 0;
 
-	if (sin == -1)
+	if (sin == -1 && cos == -1)
+	{
+		return false;
+	} else if (sin == -1)
 	{
 		if (numElems == 4)
 			return false;
