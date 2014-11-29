@@ -31,6 +31,9 @@
 #define MO_VFPU			0x00008000	// vfpu type opcode
 #define MO_64BIT		0x00010000	// only available on 64 bit cpus
 #define MO_FPU			0x00020000	// only available with an fpu
+#define MO_TRANSPOSE_VS	0x00040000	// matrix vs has to be transposed
+#define MO_VFPU_PAIR	0x00080000	// pair vfpu reg
+#define MO_VFPU_TRIPLE	0x00100000	// triple vfpu reg
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
@@ -67,6 +70,7 @@
 #define MIPS_VFPU4_12(VALUE)			(MIPS_VFPU4(1) | MIPS_RT(VALUE))
 #define MIPS_VFPU4_13(VALUE)			(MIPS_VFPU4(2) | MIPS_RT(VALUE))
 #define MIPS_VFPU5(VALUE)				(MIPS_OP(55) | MIPS_VFPUFUNC(VALUE))
+#define MIPS_VFPU6(VALUE)				(MIPS_OP(60) | MIPS_VFPUFUNC(VALUE))
 
 
 struct MipsArchDefinition

@@ -64,12 +64,12 @@ bool parseVFPURegister(const char* line, MipsVFPURegister& reg, int size)
 		// check size
 		switch (size)
 		{
-		case 0:	// 2x2
-		case 2:	// 4x4
+		case 1:	// 2x2
+		case 3:	// 4x4
 			if (row & 1)
 				return false;
 			break;
-		case 1:	// 3x3
+		case 2:	// 3x3
 			if ( row & ~1)
 				return false;
 			row <<= 1;

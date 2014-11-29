@@ -130,6 +130,10 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 	{
 		if (SourceOpcode.flags & MO_VFPU_SINGLE)
 			vfpuSize = 0;
+		else if (SourceOpcode.flags & MO_VFPU_PAIR)
+			vfpuSize = 1;
+		else if (SourceOpcode.flags & MO_VFPU_TRIPLE)
+			vfpuSize = 2;
 		else if (SourceOpcode.flags & MO_VFPU_QUAD)
 			vfpuSize = 3;
 	}
@@ -146,6 +150,7 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 			while (*Line == ' ' || *Line == '\t') Line++;
 			if (*Line == 0) return false;
 
+			int actualSize;
 			switch (*SourceEncoding)
 			{
 			case 'T':	// float reg
@@ -179,22 +184,29 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				SourceEncoding++;
 				break;
 			case 'v':	// psp vfpu vector register
+				actualSize = vfpuSize;
+				if (*(SourceEncoding+1) == 'S')
+				{
+					SourceEncoding++;
+					actualSize = 0;	// single
+				}
+
 				switch (*(SourceEncoding+1))
 				{
 				case 's':
-					if (parseVFPURegister(Line,registers.vrs,vfpuSize) == false) return false;
+					if (parseVFPURegister(Line,registers.vrs,actualSize) == false) return false;
 					if (registers.vrs.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrs.num & 0x40)) return false;
 					Line += 4;
 					break;
 				case 't':
-					if (parseVFPURegister(Line,registers.vrt,vfpuSize) == false) return false;
+					if (parseVFPURegister(Line,registers.vrt,actualSize) == false) return false;
 					if (registers.vrt.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrt.num & 0x40)) return false;
 					Line += 4;
 					break;
 				case 'd':
-					if (parseVFPURegister(Line,registers.vrd,vfpuSize) == false) return false;
+					if (parseVFPURegister(Line,registers.vrd,actualSize) == false) return false;
 					if (registers.vrd.type != MIPSVFPU_VECTOR) return false;
 					if ((SourceOpcode.flags & MO_VFPU_6BIT) && (registers.vrd.num & 0x40)) return false;
 					Line += 4;
@@ -202,6 +214,31 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 				case 'c':
 					if (parseVfpuControlRegister(Line,registers.vrd,RetLen) == false) return false;
 					Line += RetLen;
+					break;
+				default:
+					return false;
+				}
+
+				SourceEncoding += 2;
+				break;
+			case 'm':	// psp vfpu amtrix register
+				switch (*(SourceEncoding+1))
+				{
+				case 's':
+					if (parseVFPURegister(Line,registers.vrs,vfpuSize) == false) return false;
+					if (registers.vrs.type != MIPSVFPU_MATRIX) return false;
+					if (SourceOpcode.flags & MO_TRANSPOSE_VS) registers.vrs.num ^= 0x20;
+					Line += 4;
+					break;
+				case 't':
+					if (parseVFPURegister(Line,registers.vrt,vfpuSize) == false) return false;
+					if (registers.vrt.type != MIPSVFPU_MATRIX) return false;
+					Line += 4;
+					break;
+				case 'd':
+					if (parseVFPURegister(Line,registers.vrd,vfpuSize) == false) return false;
+					if (registers.vrd.type != MIPSVFPU_MATRIX) return false;
+					Line += 4;
 					break;
 				default:
 					return false;
@@ -720,7 +757,7 @@ void CMipsInstruction::encodeVfpu()
 	if (registers.vrd.num != -1) encoding |= (registers.vrd.num << 0);
 	if (registers.vrs.num != -1) encoding |= (registers.vrs.num << 8);
 	if (registers.vrt.num != -1) encoding |= (registers.vrt.num << 16);
-	if (vfpuSize != -1)
+	if (vfpuSize != -1 && (Opcode.flags & (MO_VFPU_PAIR|MO_VFPU_SINGLE|MO_VFPU_TRIPLE|MO_VFPU_QUAD)) == 0)
 	{
 		if (vfpuSize & 1) encoding |= (1 << 7);
 		if (vfpuSize & 2) encoding |= (1 << 15);

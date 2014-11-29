@@ -654,11 +654,28 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vpfxd",		"Wd",		MIPS_VFPU5(4),				MA_PSP },
 	{ "viim.s",		"vt,i16",	MIPS_VFPU5(6),				MA_PSP,	MO_VFPU_SINGLE },
 	{ "vfim.s",		"vt,ih",	MIPS_VFPU5(7),				MA_PSP,	MO_VFPU_SINGLE },
+	
+//     31-------26-----23----------------------------------------------0
+//     |= VFPU6| f     |                                               |
+//     -----6-------3---------00----------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//     | VMMUL |     V(H)TFM2/3/4      | VMSCL |   *1  |  ---  |  VROT |
+//     |-------|-------|-------|-------|-------|-------|-------|-------|
+//		*1: vcrsp.t/vqmul.q
+	{ "vmmul.S",	"md,ms,mt",		MIPS_VFPU6(0),					MA_PSP, MO_VFPU|MO_TRANSPOSE_VS },
+	{ "vtfm2.p",	"vd,ms,vt",		MIPS_VFPU6(1)|MIPS_VFPUSIZE(1),	MA_PSP, MO_VFPU|MO_VFPU_PAIR },
+	{ "vhtfm2.p",	"vd,ms,vt",		MIPS_VFPU6(2)|MIPS_VFPUSIZE(1),	MA_PSP, MO_VFPU|MO_VFPU_PAIR },
+	{ "vtfm3.t",	"vd,ms,vt",		MIPS_VFPU6(2)|MIPS_VFPUSIZE(2),	MA_PSP, MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vhtfm3.t",	"vd,ms,vt",		MIPS_VFPU6(3)|MIPS_VFPUSIZE(2),	MA_PSP, MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vtfm4.q",	"vd,ms,vt",		MIPS_VFPU6(3)|MIPS_VFPUSIZE(3),	MA_PSP, MO_VFPU|MO_VFPU_QUAD },
+	{ "vmscl.S",	"md,ms,vSt",	MIPS_VFPU6(4),					MA_PSP, MO_VFPU },
+	{ "vcrsp.t",	"vd,vs,vt",		MIPS_VFPU6(5)|MIPS_VFPUSIZE(2),	MA_PSP, MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vqmul.q",	"vd,vs,vt",		MIPS_VFPU6(5)|MIPS_VFPUSIZE(3),	MA_PSP, MO_VFPU|MO_VFPU_QUAD },
+	// TODO: vrot
 
 	// END
 	{ NULL,		NULL,		0,			0 }
 };
-
 
 const MipsArchDefinition mipsArchs[] = {
 	// MARCH_PSX
