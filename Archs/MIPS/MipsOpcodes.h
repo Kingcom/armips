@@ -71,6 +71,10 @@
 #define MIPS_VFPU4_13(VALUE)			(MIPS_VFPU4(2) | MIPS_RT(VALUE))
 #define MIPS_VFPU5(VALUE)				(MIPS_OP(55) | MIPS_VFPUFUNC(VALUE))
 #define MIPS_VFPU6(VALUE)				(MIPS_OP(60) | MIPS_VFPUFUNC(VALUE))
+#define MIPS_VFPU6_1(VALUE)				(MIPS_VFPU6(7) | BITFIELD(20, 3, VALUE))
+// This is a bit ugly, VFPU opcodes are encoded strangely.
+#define MIPS_VFPU6_1VROT()				(MIPS_VFPU6(7) | BITFIELD(21, 2, 1))
+#define MIPS_VFPU6_2(VALUE)				(MIPS_VFPU6_1(0) | MIPS_RT(VALUE))
 
 
 struct MipsArchDefinition
