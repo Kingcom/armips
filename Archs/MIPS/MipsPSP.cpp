@@ -463,6 +463,8 @@ int parseVfpuVrot(const char* text, int& result, int size, int& RetLen)
 			// if one is negative, all have to be
 			if ((!isNeg && negSine) || (isNeg && !negSine && sineCount > 0))
 				return false;
+
+			negSine = negSine || isNeg;
 			sin = i;
 			sineCount++;
 			break;
