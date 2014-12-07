@@ -349,12 +349,13 @@ CDirectiveHeaderSize::CDirectiveHeaderSize(ArgumentList& args)
 
 void CDirectiveHeaderSize::updateFile()
 {
-	GenericAssemblerFile* file = dynamic_cast<GenericAssemblerFile*>(g_fileManager->getOpenFile());
-	if (file == NULL)
+	AssemblerFile *openFile = g_fileManager->getOpenFile();
+	if (!openFile->hasFixedVirtualAddress())
 	{
 		Logger::printError(Logger::Error,L"Header size not applicable for this file");
 		return;
 	}
+	GenericAssemblerFile* file = static_cast<GenericAssemblerFile*>(openFile);
 	file->setHeaderSize((u32)headerSize);
 }
 

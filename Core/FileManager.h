@@ -16,6 +16,7 @@ public:
 	virtual bool seekVirtual(u64 virtualAddress) = 0;
 	virtual bool seekPhysical(u64 physicalAddress) = 0;
 	virtual bool getModuleInfo(SymDataModuleInfo& info) { return false; };
+	virtual bool hasFixedVirtualAddress() { return false; };
 };
 
 class GenericAssemblerFile: public AssemblerFile
@@ -32,6 +33,7 @@ public:
 	virtual u64 getPhysicalAddress() { return virtualAddress-headerSize; };
 	virtual bool seekVirtual(u64 virtualAddress);
 	virtual bool seekPhysical(u64 physicalAddress);
+	virtual bool hasFixedVirtualAddress() { return true; };
 
 	const std::wstring& getFileName() { return fileName; };
 	const std::wstring& getOriginalFileName() { return originalName; };
