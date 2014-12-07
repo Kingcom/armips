@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 void doFormatString(std::wstringstream& stream, const wchar_t* format);
 bool doFormatSetup(std::wstringstream& stream, const wchar_t*& format);
 
