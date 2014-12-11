@@ -22,7 +22,7 @@ public:
 
 	int getWord(size_t pos, bool bigEndian = false)
 	{
-		if (pos+1 >= this->size() || pos < 0) return -1;
+		if (pos+1 >= this->size()) return -1;
 		unsigned char* d = (unsigned char*) this->data();
 
 		if (bigEndian == false)
@@ -35,7 +35,7 @@ public:
 
 	int getDoubleWord(size_t pos, bool bigEndian = false)
 	{
-		if (pos+3 >= this->size() || pos < 0) return -1;
+		if (pos+3 >= this->size()) return -1;
 		unsigned char* d = (unsigned char*) this->data();
 
 		if (bigEndian == false)
@@ -48,7 +48,7 @@ public:
 	
 	void replaceDoubleWord(size_t pos, unsigned int w, bool bigEndian = false)
 	{
-		if (pos+3 >= this->size() || pos < 0) return;
+		if (pos+3 >= this->size()) return;
 		unsigned char* d = (unsigned char*) this->data();
 		
 		if (bigEndian == false)
