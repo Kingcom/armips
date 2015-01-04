@@ -517,11 +517,11 @@ bool runArmips(ArmipsArguments& arguments)
 	// run assembler
 	switch (arguments.mode)
 	{
-	case ArmipsMode::File:
+	case ArmipsMode::FILE:
 		Global.memoryMode = false;
 		LoadAssemblyFile(arguments.inputFileName);
 		break;
-	case ArmipsMode::Memory:
+	case ArmipsMode::MEMORY:
 		Global.memoryMode = true;
 		Global.memoryFile = arguments.memoryFile;
 		LoadAssemblyContent(arguments.content);
