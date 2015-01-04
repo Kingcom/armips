@@ -4,7 +4,7 @@
 #include "../Util/Util.h"
 #include "FileManager.h"
 
-enum class ArmipsMode { File, Memory };
+enum class ArmipsMode { FILE, MEMORY };
 
 struct LabelDefinition
 {
@@ -34,7 +34,7 @@ struct ArmipsArguments
 
 	ArmipsArguments()
 	{
-		mode = ArmipsMode::File;
+		mode = ArmipsMode::FILE;
 		errorOnWarning = false;
 		silent = false;
 		errorsResult = NULL;
