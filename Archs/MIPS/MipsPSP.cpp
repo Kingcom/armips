@@ -559,9 +559,7 @@ int floatToHalfFloat(int i)
 			return s | 0x7c00;
 		}
 		// NAN
-		f >>= 13;
-		f = 0x3ff; // PSP always encodes NaN with this value
-		return s | 0x7c00 | f | ((f == 0) ? 1 : 0);
+		return s | 0x7fff;
 	}
 
 	if (e > 30) {
