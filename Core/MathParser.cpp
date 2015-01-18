@@ -152,7 +152,7 @@ inline int htd(char Hex)
 bool IsHex(char Hex)
 {
 	if (Hex >= '0' && Hex <= '9') return true;
-	if (Hex >= 'A' && Hex <= 'f') return true;
+	if (Hex >= 'A' && Hex <= 'F') return true;
 	if (Hex >= 'a' && Hex <= 'f') return true;
 	return false;
 }
