@@ -120,7 +120,7 @@ void ByteArray::resize(size_t newSize)
 	size_ = newSize;
 }
 
-ByteArray ByteArray::mid(size_t start, size_t length)
+ByteArray ByteArray::mid(size_t start, ssize_t length)
 {
 	ByteArray ret;
 

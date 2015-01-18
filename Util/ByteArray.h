@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef _MSC_VER
+typedef SSIZE_T ssize_t;
+#endif
+
 typedef unsigned char byte;
 class ByteArray
 {
@@ -79,7 +83,7 @@ public:
 	byte* data(size_t pos = 0) const { return &data_[pos]; };
 	void clear() { size_ = 0; };
 	void resize(size_t newSize);
-	ByteArray mid(size_t start, size_t length = 0);
+	ByteArray mid(size_t start, ssize_t length = 0);
 	ByteArray left(size_t length) { return mid(0,length); };
 	ByteArray right(size_t length) { return mid(size_-length,length); };
 
