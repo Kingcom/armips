@@ -82,6 +82,11 @@ CDirectiveFunction::CDirectiveFunction(const std::wstring& name, int Section)
 		label = NULL;
 }
 
+CDirectiveFunction::~CDirectiveFunction()
+{
+	delete label;
+}
+
 bool CDirectiveFunction::Validate()
 {
 	if (label == NULL)
