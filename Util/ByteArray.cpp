@@ -159,9 +159,7 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t s
 	fseek(input,start,SEEK_SET);
 
 	ret.grow(size);
-	ret.size_ = size;
-
-	fread(ret.data(),1,size,input);
+	ret.size_ = fread(ret.data(),1,size,input);
 	fclose(input);
 
 	return ret;
