@@ -1,7 +1,9 @@
 #pragma once
 
-#ifdef _MSC_VER
-typedef SSIZE_T ssize_t;
+#include <sys/types.h>
+
+#if defined(_MSC_VER) && !defined(ssize_t)
+typedef intptr_t ssize_t;
 #endif
 
 typedef unsigned char byte;
