@@ -3,7 +3,7 @@
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) && _MSC_VER < 1900
 #define snprintf sprintf_s
 #endif
 
