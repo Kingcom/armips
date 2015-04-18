@@ -11,12 +11,14 @@ CDirectiveFill::CDirectiveFill()
 
 bool CDirectiveFill::Load(ArgumentList &Args)
 {
-	initExpression(SizeExpression,Args[0].text);
+	if (sizeExpression.load(Args[0].text) == false)
+		return false;
 
 	if (Args.size() == 2)	// includes fill byte
 	{
 		FillByte = true;
-		initExpression(ByteExpression,Args[1].text);
+		if (byteExpression.load(Args[1].text) == false)
+			return false;
 	} else {
 		FillByte = false;
 		Byte = 0;
@@ -27,15 +29,15 @@ bool CDirectiveFill::Load(ArgumentList &Args)
 
 bool CDirectiveFill::Validate()
 {
-	int NewSize;
+	u32 NewSize;
 
 	RamPos = g_fileManager->getVirtualAddress();
-	if (evalExpression(SizeExpression,NewSize,true) == false)
+	if (sizeExpression.evaluateInteger(NewSize) == false)
 		return false;
 
 	if (FillByte == true)
 	{
-		if (evalExpression(ByteExpression,Byte,true) == false)
+		if (byteExpression.evaluateInteger(Byte) == false)
 			return false;
 	}
 

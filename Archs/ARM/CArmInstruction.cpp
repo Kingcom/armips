@@ -137,7 +137,6 @@ bool CArmInstruction::ParseOpcode(char* Encoding, char* Line)
 
 bool CArmInstruction::ParseShift(char*& Line, int mode)
 {
-	char ImmediateBuffer[512];
 	CStringList List;
 	int RetLen;
 
@@ -154,15 +153,14 @@ bool CArmInstruction::ParseShift(char*& Line, int mode)
 		Vars.Shift.ShiftByRegister = true;
 	} else {	// shift by immediate
 		if (*Line == '#') Line++;
-		if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
 		Vars.Shift.ShiftByRegister = false;
-		if (CheckPostfix(List,true) == false)
+
+		if (ArmParseImmediate(Line,Vars.Shift.ShiftExpression,RetLen) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid shift expression \"%S\"",ImmediateBuffer);
+			Logger::printError(Logger::Error,L"Invalid shift expression");
 			NoCheckError = true;
 			return false;
 		}
-		Vars.Shift.ShiftExpression.Load(List);
 	}
 	Line += RetLen;
 	Vars.Shift.UseShift = true;
@@ -195,8 +193,6 @@ const tArmRegisterLookup RegisterLookup[] = {
 				SourceEncoding++;*/
 bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 {
-	char ImmediateBuffer[512];
-
 	int RetLen;
 	CStringList List;
 	bool Immediate = false;
@@ -352,13 +348,13 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				break;
 			case 'I':	// immediate
 			case 'i':
-				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
+				if (ArmParseImmediate(Line,Vars.ImmediateExpression,RetLen) == false) return false;
 				Line += RetLen;
 				Vars.ImmediateBitLen = 32;
 				SourceEncoding++;
 				break;
 			case 'j':	// variable bit immediate
-				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
+				if (ArmParseImmediate(Line,Vars.ImmediateExpression,RetLen) == false) return false;
 				Line += RetLen;
 				Vars.ImmediateBitLen = *(SourceEncoding+1);
 				SourceEncoding+=2;
@@ -388,27 +384,23 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				SourceEncoding++;
 				break;
 			case 'Y':	// cop opcode number
-				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
-				if (CheckPostfix(List,true) == false)
+				if (ArmParseImmediate(Line,Vars.CopData.CpopExpression,RetLen) == false)
 				{
-					Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
+					Logger::printError(Logger::Error,L"Invalid expression");
 					NoCheckError = true;
 					return false;
 				}
-				Vars.CopData.CpopExpression.Load(List);
 				Vars.ImmediateBitLen = 4;
 				Line += RetLen;
 				SourceEncoding++;
 				break;
 			case 'Z':	// cop info number
-				if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
-				if (CheckPostfix(List,true) == false)
+				if (ArmParseImmediate(Line,Vars.CopData.CpinfExpression,RetLen) == false)
 				{
-					Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
+					Logger::printError(Logger::Error,L"Invalid expression");
 					NoCheckError = true;
 					return false;
 				}
-				Vars.CopData.CpinfExpression.Load(List);
 				Vars.ImmediateBitLen = 3;
 				Line += RetLen;
 				SourceEncoding++;
@@ -419,15 +411,13 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 				{
 					Vars.Shift.ShiftByRegister = true;
 				} else {	// shift by immediate
-					if (ArmCheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
 					Vars.Shift.ShiftByRegister = false;
-					if (CheckPostfix(List,true) == false)
+					if (ArmParseImmediate(Line,Vars.Shift.ShiftExpression,RetLen) == false)
 					{
-						Logger::printError(Logger::Error,L"Invalid shift expression \"%S\"",ImmediateBuffer);
+						Logger::printError(Logger::Error,L"Invalid shift expression");
 						NoCheckError = true;
 						return false;
 					}
-					Vars.Shift.ShiftExpression.Load(List);
 				}
 				Line += RetLen;
 				Vars.Shift.UseShift = true;
@@ -459,18 +449,6 @@ bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 
 	// opcode is fine - now set all flags
 	Opcode = SourceOpcode;
-
-	if (Opcode.flags & ARM_IMMEDIATE)
-	{
-		if (CheckPostfix(List,true) == false)
-		{
-			Logger::printError(Logger::Error,L"Invalid expression \"%S\"",ImmediateBuffer);
-			NoCheckError = true;
-			return false;
-		}
-		Vars.ImmediateExpression.Load(List);
-	}
-
 	return true;
 }
 
@@ -507,27 +485,6 @@ bool CArmInstruction::Load(char *Name, char *Params)
 	return false;
 }
 
-bool ParsePostfixExpressionCheck(CExpressionCommandList& Postfix, CStringList* Errors, int& Result)
-{
-	if (ParsePostfix(Postfix,Errors,Result) == false)
-	{
-		if (Errors != NULL)	
-		{
-			if (Errors->GetCount() == 0)
-			{
-				Logger::queueError(Logger::Error,L"Invalid expression");
-			} else {
-				for (size_t l = 0; l < Errors->GetCount(); l++)
-				{
-					Logger::queueError(Logger::Error,convertUtf8ToWString(Errors->GetEntry(l)));
-				}
-			}
-		}
-		return false;
-	}
-	return true;
-}
-
 #include <stddef.h>
 bool CArmInstruction::Validate()
 {
@@ -547,8 +504,8 @@ bool CArmInstruction::Validate()
 
 	if (Vars.Shift.UseShift == true && Vars.Shift.ShiftByRegister == false)
 	{
-		if (ParsePostfixExpressionCheck(Vars.Shift.ShiftExpression,&List,
-			Vars.Shift.ShiftAmount) == false) return false;
+		if (Vars.Shift.ShiftExpression.evaluateInteger(Vars.Shift.ShiftAmount) == false)
+			return false;
 
 		int mode = Vars.Shift.Type;
 		int num = Vars.Shift.ShiftAmount;
@@ -586,10 +543,9 @@ bool CArmInstruction::Validate()
 
 	if (Opcode.flags & ARM_COPOP)
 	{
-		if (ParsePostfixExpressionCheck(Vars.CopData.CpopExpression,&List,Vars.CopData.Cpop) == false)
-		{
+		if (Vars.CopData.CpopExpression.evaluateInteger(Vars.CopData.Cpop) == false)
 			return false;
-		}
+
 		if (Vars.CopData.Cpop > 15)
 		{
 			Logger::queueError(Logger::Error,L"CP Opc number %02X too big",Vars.CopData.Cpop);
@@ -599,10 +555,9 @@ bool CArmInstruction::Validate()
 
 	if (Opcode.flags & ARM_COPINF)
 	{
-		if (ParsePostfixExpressionCheck(Vars.CopData.CpinfExpression,&List,Vars.CopData.Cpinf) == false)
-		{
+		if (Vars.CopData.CpinfExpression.evaluateInteger(Vars.CopData.Cpinf) == false)
 			return false;
-		}
+
 		if (Vars.CopData.Cpinf > 7)
 		{
 			Logger::queueError(Logger::Error,L"CP Inf number %02X too big",Vars.CopData.Cpinf);
@@ -631,10 +586,9 @@ bool CArmInstruction::Validate()
 
 	if (Opcode.flags & ARM_IMMEDIATE)
 	{
-		if (ParsePostfixExpressionCheck(Vars.ImmediateExpression,&List,Vars.Immediate) == false)
-		{
+		if (Vars.ImmediateExpression.evaluateInteger(Vars.Immediate) == false)
 			return false;
-		}
+
 		Vars.OriginalImmediate = Vars.Immediate;
 		Vars.negative = false;
 			

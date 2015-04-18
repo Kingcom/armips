@@ -13,13 +13,13 @@ CDirectiveArea::CDirectiveArea()
 
 bool CDirectiveArea::LoadStart(ArgumentList &Args)
 {
-	if (initExpression(SizeExpression,Args[0].text) == false)
+	if (SizeExpression.load(Args[0].text) == false)
 		return false;
 	Start = true;
 
 	if (Args.size() == 2)
 	{
-		if (initExpression(FillExpression,Args[1].text) == false)
+		if (FillExpression.load(Args[1].text) == false)
 			return false;
 	}
 
@@ -34,18 +34,18 @@ bool CDirectiveArea::LoadEnd()
 
 bool CDirectiveArea::Validate()
 {
-	int NewSize;
+	size_t NewSize;
 
 	RamPos = g_fileManager->getVirtualAddress();
 
 	if (Start == true)
 	{
-		if (evalExpression(SizeExpression,NewSize,true) == false)
+		if (SizeExpression.evaluateInteger(NewSize) == false)
 			return false;
 
-		if (FillExpression.isInitialized())
+		if (FillExpression.isLoaded())
 		{
-			if (evalExpression(FillExpression,fillValue,true) == false)
+			if (FillExpression.evaluateInteger(fillValue) == false)
 				return false;
 		}
 

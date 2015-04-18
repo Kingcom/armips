@@ -290,25 +290,22 @@ int ArmGetRegister(char* source, int& RetLen)
 	return -1;
 }
 
-bool ArmCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
+bool ArmParseImmediate(char* Source, Expression& Dest, int& RetLen)
 {
-	int BufferPos = 0;
 	int l;
 
 	if (ArmGetRegister(Source,l) != -1)	// error, quit
-	{
 		return false;
-	}
 
-	int SourceLen = 0;
-
+	size_t SourceLen = 0;
+	std::wstring buffer;
 	while (true)
 	{
 		if (*Source == '\'' && *(Source+2) == '\'')
 		{
-			Dest[BufferPos++] = *Source++;
-			Dest[BufferPos++] = *Source++;
-			Dest[BufferPos++] = *Source++;
+			buffer += *Source++;
+			buffer += *Source++;
+			buffer += *Source++;
 			SourceLen += 3;
 			continue;
 		}
@@ -316,7 +313,6 @@ bool ArmCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 		if (*Source == 0 || *Source == '\n' || *Source == ',' 
 			|| *Source == ']')
 		{
-			Dest[BufferPos] = 0;
 			break;
 		}
 
@@ -326,18 +322,18 @@ bool ArmCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 			SourceLen++;
 			continue;
 		}
-
-		Dest[BufferPos++] = *Source++;
+		
+		buffer += *Source++;
 		SourceLen++;
 	}
 
-	if (BufferPos == 0) return false;
-	if (strcmp(Dest,"cpsr") == 0 || strcmp(Dest,"spsr") == 0) return false;
-
-	if (ConvertInfixToPostfix(Dest,List) == false) return false;
-
-	RetLen = SourceLen;
-	return true;
+	if (buffer.empty())
+		return false;
+	if (buffer == L"cpsr" || buffer == L"spsr")
+		return false;
+	
+	RetLen = (int) SourceLen;
+	return Dest.load(buffer);
 }
 
 bool ArmGetRlist(char* source, int& RetLen, int ValidRegisters, int& Result)

@@ -12,7 +12,7 @@
 #include "Archs/MIPS/Mips.h"
 #include "Archs/ARM/Arm.h"
 #include "Archs/Z80/z80.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 #include "Util/Util.h"
 
 bool DirectiveOpen(ArgumentList& list, int flags)
@@ -128,27 +128,6 @@ bool DirectiveData(ArgumentList& List, int flags)
 
 	CDirectiveData* Data = new CDirectiveData(List,flags,ascii);
 	AddAssemblerCommand(Data);
-	return true;
-}
-
-bool DirectiveRadix(ArgumentList& List, int flags)
-{
-	int rad;
-	if (ConvertExpression(List[0].text,rad) == false)
-	{
-		Logger::printError(Logger::Error,L"Invalid expression %s",List[0].text);
-		return false;
-	}
-
-	switch (rad)
-	{
-	case 2: case 8: case 10: case 16:
-		Global.Radix = rad;
-		break;
-	default:
-		Logger::printError(Logger::Error,L"Invalid radix %d",rad);
-		return false;;
-	}
 	return true;
 }
 
@@ -375,10 +354,10 @@ bool DirectiveFill(ArgumentList& List, int flags)
 
 bool DirectiveDefineLabel(ArgumentList& List, int flags)
 {
-	int value;
+	u64 value;
 	CAssemblerLabel* labelCommand;
 
-	if (ConvertExpression(List[1].text,value) == false)
+	if (convertConstExpression(List[1].text,value) == false)
 	{
 		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",List[1].text);
 		return false;
@@ -390,7 +369,7 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 		return false;
 	}
 
-	labelCommand = new CAssemblerLabel(List[0].text, (u32) value, Global.Section, true);
+	labelCommand = new CAssemblerLabel(List[0].text,value, Global.Section, true);
 	AddAssemblerCommand(labelCommand);
 	return true;
 }
@@ -763,7 +742,6 @@ const tDirective Directives[] = {
 	{ L".endarea",			0,	0,	&DirectiveArea,				DIRECTIVE_AREA_END },
 
 	{ L".include",			1,	2,	&DirectiveInclude,			0 },
-	{ L".radix",			1,	1,	&DirectiveRadix,			0 },
 	{ L".loadtable",		1,	2,	&DirectiveLoadTable,		0 },
 	{ L".table",			1,	2,	&DirectiveLoadTable,		0 },
 	{ L".string",			1,	-1,	&DirectiveString,			0 },

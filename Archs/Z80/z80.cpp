@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Core/Common.h"
 #include "z80.h"
-#include "Core/MathParser.h"
 #include "CZ80Instruction.h"
 #include "Core/Directives.h"
 #include "Core/FileManager.h"
@@ -87,7 +86,7 @@ bool z80CheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
 
 	if (BufferPos == 0) return false;
 
-	if (ConvertInfixToPostfix(Dest,List) == false) return false;
+//	if (ConvertInfixToPostfix(Dest,List) == false) return false;
 
 	RetLen = SourceLen;
 	return true;

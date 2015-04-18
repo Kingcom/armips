@@ -380,24 +380,6 @@ bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char*
 	
 	// opcode is ok - now set all flags
 	Opcode = SourceOpcode;
-	if (immediate.expression.isLoaded())
-	{
-		if (immediate.expression.check() == false)
-		{
-			NoCheckError = true;
-			return false;
-		}
-	}
-	
-	if (secondaryImmediate.expression.isLoaded())
-	{
-		if (secondaryImmediate.expression.check() == false)
-		{
-			NoCheckError = true;
-			return false;
-		}
-	}
-
 	setOmittedRegisters();
 	return true;
 }
@@ -573,7 +555,7 @@ bool CMipsInstruction::Validate()
 	{
 		if (immediate.expression.isLoaded())
 		{
-			if (immediate.expression.evaluate(immediate.value,true) == false)
+			if (immediate.expression.evaluateInteger(immediate.value) == false)
 				return false;
 
 			immediate.originalValue = immediate.value;
@@ -623,7 +605,7 @@ bool CMipsInstruction::Validate()
 	{
 		if (secondaryImmediate.expression.isLoaded())
 		{
-			if (secondaryImmediate.expression.evaluate(secondaryImmediate.value,true) == false)
+			if (secondaryImmediate.expression.evaluateInteger(secondaryImmediate.value) == false)
 				return false;
 
 			secondaryImmediate.originalValue = secondaryImmediate.value;

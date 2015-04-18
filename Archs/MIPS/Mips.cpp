@@ -446,10 +446,8 @@ int MipsGetFloatRegister(const char* source, int& RetLen)
 }
 
 
-bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen)
+bool MipsCheckImmediate(const char* Source, Expression& Dest, int& RetLen)
 {
-	char Buffer[512];
-	int BufferPos = 0;
 	int l;
 
 	if (MipsGetRegister(Source,l) != -1)	// error
@@ -459,20 +457,20 @@ bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen)
 
 	int SourceLen = 0;
 
+	std::wstring buffer;
 	while (true)
 	{
 		if (*Source == '\'' && *(Source+2) == '\'')
 		{
-			Buffer[BufferPos++] = *Source++;
-			Buffer[BufferPos++] = *Source++;
-			Buffer[BufferPos++] = *Source++;
+			buffer += *Source++;
+			buffer += *Source++;
+			buffer += *Source++;
 			SourceLen+=3;
 			continue;
 		}
 
 		if (*Source == 0 || *Source == '\n' || *Source == ',')
 		{
-			Buffer[BufferPos] = 0;
 			break;
 		}
 		if ( *Source == ' ' || *Source == '\t')
@@ -487,16 +485,16 @@ bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen)
 		{
 			if (MipsGetRegister(Source+1,l) != -1)	// end
 			{
-				Buffer[BufferPos] = 0;
 				break;
 			}
 		}
-		Buffer[BufferPos++] = *Source++;
+		buffer += *Source++;
 		SourceLen++;
 	}
 
-	if (BufferPos == 0) return false;
+	if (buffer.empty())
+		return false;
 	RetLen = SourceLen;
 
-	return Dest.init(convertUtf8ToWString(Buffer),true);
+	return Dest.load(buffer);
 }
