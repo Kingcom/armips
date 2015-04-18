@@ -71,19 +71,19 @@ void CDirectiveConditional::Execute()
 		Global.conditionData.addEndIf();
 		break;
 	case ConditionType::IFDEF:
-		b = checkLabelDefined(labelName);
+		b = checkLabelDefined(labelName,getSection());
 		Global.conditionData.addIf(b);
 		break;
 	case ConditionType::IFNDEF:
-		b = !checkLabelDefined(labelName);
+		b = !checkLabelDefined(labelName,getSection());
 		Global.conditionData.addIf(b);
 		break;
 	case ConditionType::ELSEIFDEF:	
-		b = checkLabelDefined(labelName);
+		b = checkLabelDefined(labelName,getSection());
 		Global.conditionData.addElseIf(b);
 		break;
 	case ConditionType::ELSEIFNDEF:
-		b = !checkLabelDefined(labelName);
+		b = !checkLabelDefined(labelName,getSection());
 		Global.conditionData.addElseIf(b);
 		break;
 	}

@@ -386,7 +386,7 @@ bool EncodeAssembly()
 
 		g_fileManager->reset();
 		Arch->Revalidate();
-		Global.Section = 0;
+
 #ifdef _DEBUG
 		if (!Logger::isSilent())
 			printf("Validate %d...\n",validationPasses);
@@ -430,7 +430,6 @@ bool EncodeAssembly()
 #endif
 
 	// and finally encode
-	Global.Section = 0;
 	Global.tempData.start();
 
 	if (Global.memoryMode)

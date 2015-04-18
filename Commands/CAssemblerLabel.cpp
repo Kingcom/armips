@@ -12,15 +12,15 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, u64 RamPos, int Secti
 	this->constant = constant;
 	this->label = NULL;
 	
-	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
-		Global.Section++;
+	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)	
+		updateSection(++Global.Section);
 }
 
 bool CAssemblerLabel::Validate()
 {
 	if (label == NULL)
 	{
-		label = Global.symbolTable.getLabel(this->labelname, FileNum, Global.Section);
+		label = Global.symbolTable.getLabel(this->labelname, FileNum, getSection());
 		if (label == NULL)
 		{
 			Logger::printError(Logger::Error, L"Invalid label name \"%s\"", this->labelname);
@@ -41,15 +41,12 @@ bool CAssemblerLabel::Validate()
 			else
 				label->setInfo(0);
 		}
-
+		
 		label->setValue(labelvalue);
 		label->setDefined(true);
-		if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
-			Global.Section++;
 		return true;
 	}
-	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
-		Global.Section++;
+
 	if (constant == false && label->getValue() != g_fileManager->getVirtualAddress())
 	{
 		label->setValue(g_fileManager->getVirtualAddress());
@@ -60,8 +57,7 @@ bool CAssemblerLabel::Validate()
 
 void CAssemblerLabel::Encode()
 {
-	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)
-		Global.Section++;
+
 }
 
 void CAssemblerLabel::writeTempData(TempData& tempData)

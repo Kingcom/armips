@@ -65,18 +65,19 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 		file = new GenericAssemblerFile(fileName,originalName,virtualAddress);
 		break;
 	case Type::Close:
-		return;
+		break;
 	}
 
-	g_fileManager->addFile(file);
-	Global.Section++;
+	if (file != NULL)
+		g_fileManager->addFile(file);
+
+	updateSection(++Global.Section);
 }
 
 
 bool CDirectiveFile::Validate()
 {
 	Arch->NextSection();
-	Global.Section++;
 
 	switch (type)
 	{
@@ -145,7 +146,7 @@ CDirectivePosition::CDirectivePosition(Type type, ArgumentList& Args)
 	}
 	
 	exec();
-	Global.Section++;
+	updateSection(++Global.Section);
 }
 
 void CDirectivePosition::exec()
@@ -164,7 +165,6 @@ void CDirectivePosition::exec()
 bool CDirectivePosition::Validate()
 {
 	Arch->NextSection();
-	Global.Section++;
 	exec();
 	return false;
 }
@@ -172,7 +172,6 @@ bool CDirectivePosition::Validate()
 void CDirectivePosition::Encode()
 {
 	Arch->NextSection();
-	Global.Section++;
 	exec();
 }
 

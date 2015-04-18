@@ -6,6 +6,7 @@ CAssemblerCommand::CAssemblerCommand()
 {
 	FileNum = Global.FileInfo.FileNum;
 	FileLine = Global.FileInfo.LineNumber;
+	section = Global.Section;
 }
 
 void CAssemblerCommand::SetFileInfo()
