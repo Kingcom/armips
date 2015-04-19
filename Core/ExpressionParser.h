@@ -5,6 +5,7 @@ enum class TokenType
 	Invalid,
 	Identifier,
 	Integer,
+	String,
 	Float,
 	LParen,
 	RParen,

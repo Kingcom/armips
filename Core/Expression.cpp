@@ -3,13 +3,21 @@
 #include "Common.h"
 #include "ExpressionParser.h"
 
-enum class ExpressionValueCombination { II = 0, IF = 1, FI = 2, FF = 3};
+enum class ExpressionValueCombination
+{
+	II = (int(ExpressionValueType::Integer) << 2) | (int(ExpressionValueType::Integer) << 0),
+	IF = (int(ExpressionValueType::Integer) << 2) | (int(ExpressionValueType::Float)   << 0),
+	FI = (int(ExpressionValueType::Float)   << 2) | (int(ExpressionValueType::Integer) << 0),
+	FF = (int(ExpressionValueType::Float)   << 2) | (int(ExpressionValueType::Float)   << 0),
+	IS = (int(ExpressionValueType::Integer) << 2) | (int(ExpressionValueType::String)  << 0),
+	FS = (int(ExpressionValueType::Float)   << 2) | (int(ExpressionValueType::String)  << 0),
+	SI = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::Integer) << 0),
+	SF = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::Float)   << 0),
+};
 
 ExpressionValueCombination getValueCombination(ExpressionValueType a, ExpressionValueType b)
 {
-	u32 b0 = a == ExpressionValueType::Float;
-	u32 b1 = b == ExpressionValueType::Float;
-	return (ExpressionValueCombination) (b1 | (b0 << 1));
+	return (ExpressionValueCombination) ((int(a) << 2) | (int(b) << 0));
 }
 
 ExpressionValue ExpressionValue::operator+(const ExpressionValue& other) const
@@ -32,6 +40,22 @@ ExpressionValue ExpressionValue::operator+(const ExpressionValue& other) const
 	case ExpressionValueCombination::FF:
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue + other.floatValue;
+		break;
+	case ExpressionValueCombination::IS:
+		result.type = ExpressionValueType::String;
+		result.strValue = std::to_wstring(intValue) + other.strValue;
+		break;
+	case ExpressionValueCombination::FS:
+		result.type = ExpressionValueType::String;
+		result.strValue = std::to_wstring(floatValue) + other.strValue;
+		break;
+	case ExpressionValueCombination::SI:
+		result.type = ExpressionValueType::String;
+		result.strValue = strValue + std::to_wstring(other.intValue);
+		break;
+	case ExpressionValueCombination::SF:
+		result.type = ExpressionValueType::String;
+		result.strValue = strValue + std::to_wstring(other.floatValue);
 		break;
 	}
 
@@ -353,10 +377,19 @@ ExpressionInternal::ExpressionInternal(double value)
 	floatValue = value;
 }
 
-ExpressionInternal::ExpressionInternal(const std::wstring& value)
+ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
 {
-	type = OperatorType::Identifier;
-	label = Global.symbolTable.getLabel(value,Global.FileInfo.FileNum,Global.Section);
+	this->type = type;
+
+	switch (type)
+	{
+	case OperatorType::Identifier:
+		label = Global.symbolTable.getLabel(value,Global.FileInfo.FileNum,Global.Section);
+		break;
+	case OperatorType::String:
+		strValue = value;
+		break;
+	}
 }
 
 ExpressionInternal::ExpressionInternal(OperatorType op, ExpressionInternal* a,
@@ -408,6 +441,10 @@ ExpressionValue ExpressionInternal::evaluate()
 
 		val.type = ExpressionValueType::Integer;
 		val.intValue = label->getValue();
+		return val;
+	case OperatorType::String:
+		val.type = ExpressionValueType::String;
+		val.strValue = strValue;
 		return val;
 	case OperatorType::MemoryPos:
 		val.type = ExpressionValueType::Integer;

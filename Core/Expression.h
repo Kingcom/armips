@@ -7,6 +7,7 @@ enum class OperatorType
 	Integer,
 	Float,
 	Identifier,
+	String,
 	MemoryPos,
 	Add,
 	Sub,
@@ -32,7 +33,7 @@ enum class OperatorType
 	TertiaryIf,
 };
 
-enum class ExpressionValueType { Invalid, Integer, Float};
+enum class ExpressionValueType { Invalid, Integer, Float, String};
 
 struct ExpressionValue
 {
@@ -53,11 +54,18 @@ struct ExpressionValue
 		return type == ExpressionValueType::Integer;
 	}
 
+	bool isString() const
+	{
+		return type == ExpressionValueType::String;
+	}
+
 	struct
 	{
 		u64 intValue;
 		double floatValue;
 	};
+
+	std::wstring strValue;
 	
 	ExpressionValue operator!() const;
 	ExpressionValue operator~() const;
@@ -88,7 +96,7 @@ class ExpressionInternal
 public:
 	ExpressionInternal(u64 value);
 	ExpressionInternal(double value);
-	ExpressionInternal(const std::wstring& value);
+	ExpressionInternal(const std::wstring& value, OperatorType type);
 	ExpressionInternal(OperatorType op, ExpressionInternal* a = NULL,
 		ExpressionInternal* b = NULL, ExpressionInternal* c = NULL);
 	ExpressionValue evaluate();
@@ -101,6 +109,7 @@ private:
 		u64 intValue;
 		double floatValue;
 	};
+	std::wstring strValue;
 	Label* label;
 };
 
@@ -123,6 +132,31 @@ public:
 			return false;
 
 		dest = (T) value.intValue;
+		return true;
+	}
+
+	bool evaluateString(std::wstring& dest, bool convert)
+	{
+		if (expression == NULL)
+			return false;
+
+		ExpressionValue value = expression->evaluate();
+		if (convert && value.isInt())
+		{
+			dest = std::to_wstring(value.intValue);
+			return true;
+		}
+
+		if (convert && value.isFloat())
+		{
+			dest = std::to_wstring(value.floatValue);
+			return true;
+		}
+
+		if (value.isString() == false)
+			return false;
+
+		dest = value.strValue;
 		return true;
 	}
 private:

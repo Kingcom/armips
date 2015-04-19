@@ -17,7 +17,10 @@ ExpressionInternal* ExpressionParser::primaryExpression()
 		return new ExpressionInternal(tok.floatNumber);
 	case TokenType::Identifier:
 		eatToken();
-		return new ExpressionInternal(tok.text);
+		return new ExpressionInternal(tok.text,OperatorType::Identifier);
+	case TokenType::String:
+		eatToken();
+		return new ExpressionInternal(tok.text,OperatorType::String);
 	case TokenType::Integer:
 		eatToken();
 		return new ExpressionInternal(tok.intNumber);
@@ -587,6 +590,19 @@ bool ExpressionParser::loadToken()
 		return true;
 	}
 
+	// strings
+	if (first == '"')
+	{
+		size_t end = input.find_first_of('"',inputPos+1);
+		if (end == input.npos)
+			return false;
+		
+		currentToken.type = TokenType::String;
+		currentToken.text = input.substr(inputPos+1,end-inputPos-1);
+		inputPos = end+1;
+		return true;
+	}
+
 	// numbers
 	if ((first >= '0' && first <= '9') || first == '$')
 	{
@@ -673,9 +689,6 @@ ExpressionInternal* ExpressionParser::parse(const std::wstring& text)
 	inputPos = 0;
 	needNewToken = true;
 	error = false;
-
-	if (text == L"'l'")
-		error = false;
 
 	ExpressionInternal* exp = expression();
 	if (exp == NULL || error)
