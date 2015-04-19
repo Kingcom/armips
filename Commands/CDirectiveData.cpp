@@ -5,22 +5,23 @@
 
 CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
 {
-	TotalAmount = Args.size();
-	StrAmount = 0;
-	ExpAmount = 0;
-	for (size_t i = 0; i < TotalAmount; i++)
+	// temporary solution until ArgumentList consists of expressions
+	for (int i = 0; i < Args.size(); i++)
 	{
-		if (Args[i].isString == true)
+		std::wstring text = Args[i].text;
+		if (Args[i].isString)
+			text = L"\"" + text + L"\"";
+
+		Expression exp;
+		if (exp.load(text) == false)
 		{
-			StrAmount++;
-		} else {
-			ExpAmount++;
+			Logger::printError(Logger::Error,L"Invalid expression");
+			return;
 		}
+
+		entries.push_back(exp);
 	}
 
-	Entries = (tDirectiveDataEntry*) malloc(TotalAmount*sizeof(tDirectiveDataEntry));
-	ExpData = new Expression[ExpAmount];
-	
 	switch (SizePerUnit)
 	{
 	case 1: case 2: case 4:
@@ -31,54 +32,32 @@ CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
 		Logger::printError(Logger::Error,L"Invalid data unit size %d",SizePerUnit);
 		return;
 	}
-
-	size_t ExpNum = 0;
-	SpaceNeeded = 0;
-	for (size_t i = 0; i < TotalAmount; i++)
-	{
-		if (Args[i].isString == true)
-		{
-			std::string tt = convertWStringToUtf8(Args[i].text);
-			char* t = (char*) tt.c_str();
-
-			size_t len = strlen(t);
-			Entries[i].String = true;
-			Entries[i].num = StrData.GetCount();
-			StrData.AddEntry((unsigned char*)t,len);
-			SpaceNeeded += len*UnitSize;
-		} else {
-			Entries[i].String = false;
-			Entries[i].num = ExpNum;
-
-			if (ExpData[ExpNum++].load(Args[i].text) == false)
-				return;
-			SpaceNeeded += UnitSize;
-		}
-	}
-	g_fileManager->advanceMemory(SpaceNeeded);
 }
 
 CDirectiveData::~CDirectiveData()
 {
-	free(Entries);
-	delete[] ExpData;
+
 }
 
 bool CDirectiveData::Validate()
 {
 	RamPos = g_fileManager->getVirtualAddress();
 
-	u64 num;
-	for (size_t i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < entries.size(); i++)
 	{
-		if (Entries[i].String == false)
+		ExpressionValue value = entries[i].evaluate();
+		if (!value.isValid())
 		{
-			if (ExpData[Entries[i].num].evaluateInteger(num) == false)
-				return false;
-			g_fileManager->advanceMemory(UnitSize);
-		} else {
-			g_fileManager->advanceMemory(StrData.GetLen(Entries[i].num)*UnitSize);
+			Logger::queueError(Logger::Error,L"Invalid expression");
+			return false;
 		}
+
+		if (value.isInt())
+			g_fileManager->advanceMemory(UnitSize);
+		else if (value.isString())
+			g_fileManager->advanceMemory(value.strValue.size()*UnitSize);
+		else
+			Logger::queueError(Logger::Error,L"Invalid expression type");
 	}
 
 	return false;
@@ -86,27 +65,24 @@ bool CDirectiveData::Validate()
 
 void CDirectiveData::Encode()
 {
-	u64 num;
-	size_t totalsize = 0;
+	;
 
-	for (size_t i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < entries.size(); i++)
 	{
-		if (Entries[i].String == true)
-		{
-			unsigned char* Data = StrData.GetEntry(Entries[i].num);
-			size_t len = StrData.GetLen(Entries[i].num);
-			for (size_t i = 0; i < len; i++)
-			{
-				num = Data[i];
-				g_fileManager->write(&num,UnitSize);
-			}
-			totalsize += len*UnitSize;
-		} else {
-			if (ExpData[Entries[i].num].evaluateInteger(num) == false)
-				return;
-			totalsize += UnitSize;
+		ExpressionValue value = entries[i].evaluate();
 
+		if (value.isString())
+		{
+			for (size_t l = 0; l < value.strValue.size(); l++)
+			{
+				u64 num = value.strValue[l];
+				g_fileManager->write(&num,UnitSize);
+				SpaceNeeded += UnitSize;
+			}
+		} else if (value.isInt())
+		{
 			// swap endianess if the output is big endian
+			u64 num = value.intValue;
 			if (Arch->getEndianness() == Endianness::Big)
 			{
 				switch (UnitSize)
@@ -121,17 +97,14 @@ void CDirectiveData::Encode()
 			}
 
 			g_fileManager->write(&num,UnitSize);
+			SpaceNeeded += UnitSize;
 		}
 	}
-
-	SpaceNeeded = totalsize;
 }
 
 
 void CDirectiveData::writeTempData(TempData& tempData)
 {
-	u64 num;
-
 	std::wstring result;
 	switch (UnitSize)
 	{
@@ -146,20 +119,19 @@ void CDirectiveData::writeTempData(TempData& tempData)
 		break;
 	}
 
-	for (size_t i = 0; i < TotalAmount; i++)
+	for (size_t i = 0; i < entries.size(); i++)
 	{
-		if (Entries[i].String == true)
+		ExpressionValue value = entries[i].evaluate();
+
+		if (value.isString())
 		{
-			unsigned char* Data = StrData.GetEntry(Entries[i].num);
-			size_t len = StrData.GetLen(Entries[i].num);
-			for (size_t i = 0; i < len; i++)
+			for (size_t l = 0; l < value.strValue.size(); l++)
 			{
-				result += formatString(L"0x%0*X,",UnitSize*2,Data[i]);
+				result += formatString(L"0x%0*X,",UnitSize*2,value.strValue[l]);
 			}
-		} else {
-			if (ExpData[Entries[i].num].evaluateInteger(num) == false)
-				return;
-			result += formatString(L"0x%0*X,",UnitSize*2,num);
+		} else if (value.isInt())
+		{
+			result += formatString(L"0x%0*X,",UnitSize*2,value.intValue);
 		}
 	}
 

@@ -18,12 +18,7 @@ public:
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
-	tDirectiveDataEntry* Entries;
-	Expression* ExpData;
-	CByteList StrData;
-	size_t TotalAmount;
-	size_t StrAmount;
-	size_t ExpAmount;
+	std::vector<Expression> entries;
 	size_t UnitSize;
 	size_t SpaceNeeded;
 	u64 RamPos;

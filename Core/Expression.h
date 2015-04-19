@@ -59,6 +59,11 @@ struct ExpressionValue
 		return type == ExpressionValueType::String;
 	}
 
+	bool isValid() const
+	{
+		return type != ExpressionValueType::Invalid;
+	}
+
 	struct
 	{
 		u64 intValue;

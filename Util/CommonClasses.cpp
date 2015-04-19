@@ -49,38 +49,3 @@ void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
 		file.writeLine(str);
 	}
 }
-
-CByteList::CByteList()
-{
-	Entries = (tByteListEntry*) malloc(256*sizeof(tByteListEntry));
-	EntryCount = 0;
-	EntriesAllocated = 256;
-	Data = (unsigned char*) malloc(1024);
-	DataPos = 0;
-	DataAllocated = 1024;
-}
-
-CByteList::~CByteList()
-{
-	free(Entries);
-	free(Data);
-}
-
-void CByteList::AddEntry(unsigned char* ByteData, size_t len)
-{
-	if (EntriesAllocated == EntryCount)
-	{
-		EntriesAllocated <<= 1;
-		Entries = (tByteListEntry*) realloc(Entries,EntriesAllocated*sizeof(tByteListEntry));
-	}
-	if (DataPos+len > DataAllocated)
-	{
-		DataAllocated <<= 1;
-		Data = (unsigned char*) realloc(Data,DataAllocated);
-	}
-
-	Entries[EntryCount].Pos = DataPos;
-	Entries[EntryCount++].len = len;
-	memcpy(&Data[DataPos],ByteData,len);
-	DataPos += len;
-}
