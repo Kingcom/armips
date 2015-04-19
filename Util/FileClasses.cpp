@@ -760,6 +760,8 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 
 	// detect encoding
 	unsigned short num;
+	contentPos = 0;
+
 	if (mode == Read)
 	{
 		fseek(handle,0,SEEK_END);
@@ -772,14 +774,17 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 			{
 			case 0xFFFE:
 				encoding = UTF16BE;
+				contentPos += 2;
 				break;
 			case 0xFEFF:
 				encoding = UTF16LE;
+				contentPos += 2;
 				break;
 			case 0xBBEF:
 				if (fgetc(handle) == 0xBF)
 				{
 					encoding = UTF8;
+					contentPos += 3;
 					break;
 				}
 			default:
@@ -814,10 +819,7 @@ void TextFile::close()
 
 long TextFile::tell()
 {
-	if (fromMemory)
-		return (long) contentPos;
-	else
-		return ftell(handle);
+	return (long) contentPos;
 }
 
 void TextFile::seek(long pos)
@@ -838,6 +840,7 @@ wchar_t TextFile::readCharacter()
 	case UTF8:
 		{
 			value = fgetc(handle);
+			contentPos++;
 			
 			int extraBytes = 0;
 			if ((value & 0xE0) == 0xC0)
@@ -856,6 +859,8 @@ wchar_t TextFile::readCharacter()
 			for (int i = 0; i < extraBytes; i++)
 			{
 				int b = fgetc(handle);
+				contentPos++;
+
 				if ((b & 0xC0) != 0x80)
 				{
 					errorText = formatString(L"One or more invalid UTF-8 characters in this file");
@@ -872,18 +877,22 @@ wchar_t TextFile::readCharacter()
 		} else {
 			fread(buf,1,2,handle);
 			value = buf[0] | (buf[1] << 8);
+			contentPos += 2;
 		}
 		break;
 	case UTF16BE:
 		fread(buf,1,2,handle);
 		value = buf[1] | (buf[0] << 8);
+		contentPos += 2;
 		break;
 	case SJIS:
 		{
 			unsigned short sjis = fgetc(handle);
+			contentPos++;
 			if (sjis >= 0x80)
 			{
 				sjis = (sjis << 8) | fgetc(handle);
+				contentPos++;
 			}
 			value = sjisToUnicode(sjis);
 			if (value == -1)
@@ -894,6 +903,7 @@ wchar_t TextFile::readCharacter()
 		break;
 	case ASCII:
 		value = fgetc(handle);
+		contentPos++;
 		break;
 	}
 
