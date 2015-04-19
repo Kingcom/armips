@@ -9,6 +9,8 @@
 #include "Archs/MIPS/Mips.h"
 #include "Core/FileManager.h"
 #include "Archs/ARM/Arm.h"
+#include <algorithm>
+
 #define ASSEMBLER_MACRO_NESTING_LEVEL		128
 #define ASSEMBLER_INCLUDE_NESTING_LEVEL		64
 
@@ -113,7 +115,8 @@ bool CheckEquLabel(std::wstring& str)
 	{
 		std::wstring name = str.substr(0,s);
 		if (name.back() == ':') name.pop_back();
-
+		
+		std::transform(name.begin(), name.end(), name.begin(), ::towlower);
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid equation name %s",name);
