@@ -177,7 +177,6 @@ bool CThumbInstruction::Validate()
 {
 	CStringList List;
 	RamPos = g_fileManager->getVirtualAddress();
-	g_fileManager->advanceMemory(OpcodeSize);
 
 	if (RamPos & 1)
 	{
@@ -189,6 +188,7 @@ bool CThumbInstruction::Validate()
 		Vars.rs = Vars.rd;
 	}
 
+	bool memoryAdvanced = false;
 	if (Opcode.flags & THUMB_IMMEDIATE)
 	{
 		if (Vars.ImmediateExpression.evaluateInteger(Vars.Immediate) == false)
@@ -198,6 +198,9 @@ bool CThumbInstruction::Validate()
 		}
 
 		Vars.OriginalImmediate = Vars.Immediate;
+	
+		g_fileManager->advanceMemory(OpcodeSize);
+		memoryAdvanced = true;
 
 		if (Opcode.flags & THUMB_BRANCH)
 		{
@@ -288,6 +291,9 @@ bool CThumbInstruction::Validate()
 			Vars.Immediate &= (1 << Vars.ImmediateBitLen)-1;
 		}
 	}
+	
+	if (!memoryAdvanced)
+		g_fileManager->advanceMemory(OpcodeSize);
 
 	return false;
 }

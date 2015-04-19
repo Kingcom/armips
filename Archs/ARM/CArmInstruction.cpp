@@ -491,7 +491,6 @@ bool CArmInstruction::Validate()
 	CStringList List;
 
 	RamPos = g_fileManager->getVirtualAddress();
-	g_fileManager->advanceMemory(4);
 
 	Vars.Opcode.UseNewEncoding = false;
 	Vars.Opcode.UseNewType = false;
@@ -584,6 +583,7 @@ bool CArmInstruction::Validate()
 		}
 	}
 
+	bool memoryAdvanced = false;
 	if (Opcode.flags & ARM_IMMEDIATE)
 	{
 		if (Vars.ImmediateExpression.evaluateInteger(Vars.Immediate) == false)
@@ -591,7 +591,10 @@ bool CArmInstruction::Validate()
 
 		Vars.OriginalImmediate = Vars.Immediate;
 		Vars.negative = false;
-			
+		
+		g_fileManager->advanceMemory(4);
+		memoryAdvanced = true;
+
 		if (Opcode.flags & ARM_SHIFT)	// shifted immediate, eg 4000h
 		{
 			int temp;
@@ -715,6 +718,9 @@ bool CArmInstruction::Validate()
 			}
 		}
 	}
+	
+	if (!memoryAdvanced)
+		g_fileManager->advanceMemory(4);
 
 	return false;
 }
