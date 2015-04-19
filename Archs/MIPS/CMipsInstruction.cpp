@@ -117,7 +117,6 @@ bool CMipsInstruction::parseOpcode(const tMipsOpcode& SourceOpcode, const char* 
 bool CMipsInstruction::LoadEncoding(const tMipsOpcode& SourceOpcode, const char* Line)
 {
 	int RetLen;
-	CStringList List;
 	bool Immediate = false;
 	
 	immediateType = MipsImmediateType::None;
@@ -537,7 +536,6 @@ int getImmediateBits(MipsImmediateType type)
 
 bool CMipsInstruction::Validate()
 {
-	CStringList List;
 	bool Result = false;
 
 	if (subInstruction != NULL)

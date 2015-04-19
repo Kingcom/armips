@@ -15,7 +15,6 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 	char ImmediateBuffer[512];
 
 	int RetLen;
-	CStringList List;
 	bool Immediate = false;
 
 	const char* SourceEncoding = SourceOpcode.mask;
@@ -32,7 +31,7 @@ bool CZ80Instruction::LoadEncoding(const tZ80Opcode& SourceOpcode, char* Line)
 			switch (*SourceEncoding)
 			{
 			case 'I':	// immediate
-				if (z80CheckImmediate(Line,ImmediateBuffer,RetLen,List) == false) return false;
+				if (z80CheckImmediate(Line,ImmediateBuffer,RetLen) == false) return false;
 				Vars.ImmediateBitLen = *(SourceEncoding+1);
 				Line += RetLen;
 				SourceEncoding += 2;

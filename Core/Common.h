@@ -12,7 +12,7 @@
 #include "Archs/Architecture.h"
 
 typedef struct {
-	CStringList FileList;
+	std::vector<std::wstring> FileList;
 	int FileCount;
 	int FileNum;
 	int LineNumber;

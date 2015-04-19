@@ -33,7 +33,7 @@ std::wstring getFullPathName(const std::wstring& path)
 		{
 			return path;
 		} else {
-			std::wstring source = convertUtf8ToWString(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
+			std::wstring source = Global.FileInfo.FileList[Global.FileInfo.FileNum];
 			return getFolderNameFromPath(source) + L"/" + path;
 		}
 	} else {

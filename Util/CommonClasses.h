@@ -2,17 +2,6 @@
 #include <vector>
 #include "FileClasses.h"
 
-class CStringList
-{
-public:
-	void Clear() { data.clear(); };
-	void AddEntry(char* str) { data.push_back(str); };
-	char* GetEntry(size_t num) { return (char*) data[num].c_str(); };
-	size_t GetCount() { return data.size(); };
-private:
-	std::vector<std::string> data;
-};
-
 class ArgumentList
 {
 public:
@@ -49,16 +38,4 @@ public:
 	void writeLine(u64 memoryAddress, const std::wstring& text);
 private:
 	TextFile file;
-};
-
-class IntegerStack
-{
-public:
-	void push(unsigned int num) { stack.push_back(num); };
-	unsigned int pop() { unsigned int value = stack.back(); stack.pop_back(); return value; };
-	bool isEmpty() { return stack.size() == 0; };
-	size_t size() { return stack.size(); };
-	void clear() { stack.clear(); };
-private:
-	std::vector<unsigned int> stack;
 };

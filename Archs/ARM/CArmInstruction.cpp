@@ -137,7 +137,6 @@ bool CArmInstruction::ParseOpcode(char* Encoding, char* Line)
 
 bool CArmInstruction::ParseShift(char*& Line, int mode)
 {
-	CStringList List;
 	int RetLen;
 
 	Vars.Shift.UseShift = false;
@@ -194,7 +193,6 @@ const tArmRegisterLookup RegisterLookup[] = {
 bool CArmInstruction::LoadEncoding(const tArmOpcode& SourceOpcode, char* Line)
 {
 	int RetLen;
-	CStringList List;
 	bool Immediate = false;
 
 	Vars.psr= false;
@@ -488,8 +486,6 @@ bool CArmInstruction::Load(char *Name, char *Params)
 #include <stddef.h>
 bool CArmInstruction::Validate()
 {
-	CStringList List;
-
 	RamPos = g_fileManager->getVirtualAddress();
 
 	Vars.Opcode.UseNewEncoding = false;

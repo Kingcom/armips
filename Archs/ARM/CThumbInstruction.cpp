@@ -66,7 +66,6 @@ const tThumbRegisterLookup RegisterLookup[] = {
 bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line)
 {
 	int p,RetLen;
-	CStringList List;
 	bool Immediate = false;
 
 	const char* SourceEncoding = SourceOpcode.mask;
@@ -175,7 +174,6 @@ bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Lin
 
 bool CThumbInstruction::Validate()
 {
-	CStringList List;
 	RamPos = g_fileManager->getVirtualAddress();
 
 	if (RamPos & 1)

@@ -33,7 +33,6 @@ CMipsMacro::~CMipsMacro()
 bool CMipsMacro::Validate()
 {
 	tMipsMacroValues Values;
-	CStringList List;
 
 	Values.rd = Data.rd;
 	Values.rs = Data.rs;

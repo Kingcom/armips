@@ -46,7 +46,7 @@ void CZ80Architecture::AssembleOpcode(const std::wstring& name, const std::wstri
 	g_fileManager->advanceMemory(Opcode->GetSize());
 }
 
-bool z80CheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List)
+bool z80CheckImmediate(char* Source, char* Dest, int& RetLen)
 {
 	int BufferPos = 0;
 	int l;
