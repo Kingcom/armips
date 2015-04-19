@@ -65,6 +65,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 		file = new GenericAssemblerFile(fileName,originalName,virtualAddress);
 		break;
 	case Type::Close:
+		g_fileManager->closeFile();
 		break;
 	}
 
