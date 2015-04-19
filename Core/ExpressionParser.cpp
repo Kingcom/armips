@@ -593,13 +593,32 @@ bool ExpressionParser::loadToken()
 	// strings
 	if (first == '"')
 	{
-		size_t end = input.find_first_of('"',inputPos+1);
-		if (end == input.npos)
+		inputPos++;
+
+		bool valid = false;
+		while (inputPos < input.size())
+		{
+			if (inputPos+1 < input.size() && input[inputPos] == '\\' && input[inputPos+1] == '"')
+			{
+				currentToken.text += '"';
+				inputPos += 2;
+				continue;
+			}
+
+			if (input[inputPos] == '"')
+			{
+				inputPos++;
+				valid = true;
+				break;
+			}
+
+			currentToken.text += input[inputPos++];
+		}
+
+		if (!valid)
 			return false;
 		
 		currentToken.type = TokenType::String;
-		currentToken.text = input.substr(inputPos+1,end-inputPos-1);
-		inputPos = end+1;
 		return true;
 	}
 

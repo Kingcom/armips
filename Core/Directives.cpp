@@ -548,6 +548,8 @@ size_t loadArgument(ArgumentList& list, const std::wstring& args, size_t pos)
 		{
 			if (args[pos] == '\\' && pos+1 < args.size())
 			{
+				buffer += '\\';
+
 				if (args[pos+1] == '\\')
 				{
 					buffer += '\\';
