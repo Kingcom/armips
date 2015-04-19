@@ -13,7 +13,7 @@ bool Logger::silent = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
-	const char* fileName = Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum);
+	std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
 
 	switch (type)
 	{
@@ -215,7 +215,7 @@ bool AreaData::checkAreas()
 			if (entries[i].overflow == false)
 			{
 				Logger::queueError(Logger::Error,L"Area at %S(%d) overflown",
-					Global.FileInfo.FileList.GetEntry(entries[i].fileNum),
+					Global.FileInfo.FileList[entries[i].fileNum],
 					entries[i].lineNumber);
 				entries[i].overflow = true;
 			}

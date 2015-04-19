@@ -33,7 +33,7 @@ std::wstring getFullPathName(const std::wstring& path)
 		{
 			return path;
 		} else {
-			std::wstring source = convertUtf8ToWString(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
+			std::wstring source = Global.FileInfo.FileList[Global.FileInfo.FileNum];
 			return getFolderNameFromPath(source) + L"/" + path;
 		}
 	} else {
@@ -41,9 +41,9 @@ std::wstring getFullPathName(const std::wstring& path)
 	}
 }
 
-bool checkLabelDefined(const std::wstring& labelName)
+bool checkLabelDefined(const std::wstring& labelName, int section)
 {
-	Label* label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,Global.Section);
+	Label* label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,section);
 	return label->isDefined();
 }
 

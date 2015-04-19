@@ -2,12 +2,12 @@
 #include "z80.h"
 #include "z80Opcodes.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 typedef struct {
 	tZ80RegisterInfo Reg8;
 	tZ80RegisterInfo Reg16;
-	CExpressionCommandList ImmediateExpression;
+	Expression ImmediateExpression;
 	int Immediate;
 	int ImmediateBitLen;
 	int OriginalImmediate;

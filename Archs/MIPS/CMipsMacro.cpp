@@ -33,16 +33,15 @@ CMipsMacro::~CMipsMacro()
 bool CMipsMacro::Validate()
 {
 	tMipsMacroValues Values;
-	CStringList List;
 
 	Values.rd = Data.rd;
 	Values.rs = Data.rs;
 	Values.rt = Data.rt;
 
-	if (Data.i1.isLoaded() && Data.i1.evaluate(Values.i1,true) == false)
+	if (Data.i1.isLoaded() && Data.i1.evaluateInteger(Values.i1) == false)
 		return false;
 	
-	if (Data.i2.isLoaded() && Data.i2.evaluate(Values.i2,true) == false)
+	if (Data.i2.isLoaded() && Data.i2.evaluateInteger(Values.i2) == false)
 		return false;
 
 	int NewNum = MipsMacros[MacroNum].Function(Values,MipsMacros[MacroNum].flags,Instructions);

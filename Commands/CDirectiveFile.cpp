@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveFile.h"
 #include "Core/Common.h"
-#include "Core/MathParser.h"
 #include "Util/FileClasses.h"
 #include "Core/FileManager.h"
 
@@ -17,7 +16,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 	
 	std::wstring originalName;
 	std::wstring fileName;
-	int virtualAddress;
+	u64 virtualAddress;
 
 	switch (type)
 	{
@@ -29,7 +28,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 			Logger::printError(Logger::FatalError,L"File %s not found",fileName);
 			return;
 		}
-		if (ConvertExpression(args[1].text,virtualAddress) == false)
+		if (convertConstExpression(args[1].text,virtualAddress) == false)
 		{
 			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text);
 			return;
@@ -40,7 +39,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 	case Type::Create:
 		fileName = getFullPathName(args[0].text);
 
-		if (ConvertExpression(args[1].text,virtualAddress) == false)
+		if (convertConstExpression(args[1].text,virtualAddress) == false)
 		{
 			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text);
 			return;
@@ -57,7 +56,7 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 			Logger::printError(Logger::FatalError,L"File %s not found",originalName);
 			return;
 		}
-		if (ConvertExpression(args[2].text,virtualAddress) == false)
+		if (convertConstExpression(args[2].text,virtualAddress) == false)
 		{
 			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[2].text);
 			return;
@@ -66,11 +65,14 @@ CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
 		file = new GenericAssemblerFile(fileName,originalName,virtualAddress);
 		break;
 	case Type::Close:
-		return;
+		g_fileManager->closeFile();
+		break;
 	}
 
-	g_fileManager->addFile(file);
-	Global.Section++;
+	if (file != NULL)
+		g_fileManager->addFile(file);
+
+	updateSection(++Global.Section);
 }
 
 
@@ -89,7 +91,7 @@ bool CDirectiveFile::Validate()
 		g_fileManager->closeFile();
 		return false;
 	}
-
+	
 	return false;
 }
 
@@ -139,13 +141,13 @@ void CDirectiveFile::writeTempData(TempData& tempData)
 CDirectivePosition::CDirectivePosition(Type type, ArgumentList& Args)
 	: type(type)
 {
-	if (ConvertExpression(Args[0].text,position) == false)
+	if (convertConstExpression(Args[0].text,position) == false)
 	{
 		Logger::printError(Logger::FatalError,L"Invalid ram address %s",Args[0].text);
 	}
 	
 	exec();
-	Global.Section++;
+	updateSection(++Global.Section);
 }
 
 void CDirectivePosition::exec()
@@ -164,7 +166,6 @@ void CDirectivePosition::exec()
 bool CDirectivePosition::Validate()
 {
 	Arch->NextSection();
-	Global.Section++;
 	exec();
 	return false;
 }
@@ -172,7 +173,6 @@ bool CDirectivePosition::Validate()
 void CDirectivePosition::Encode()
 {
 	Arch->NextSection();
-	Global.Section++;
 	exec();
 }
 
@@ -207,7 +207,7 @@ CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
 	if (args.size() >= 2)
 	{
 		// load start address
-		if (ConvertExpression(args[1].text,startAddress) == false)
+		if (convertConstExpression(args[1].text,startAddress) == false)
 		{
 			Logger::printError(Logger::FatalError,L"Invalid start address %s",args[1].text);
 			return;
@@ -222,7 +222,7 @@ CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
 		if (args.size() >= 3)
 		{
 			// load size too
-			if (ConvertExpression(args[2].text,loadSize) == false)
+			if (convertConstExpression(args[2].text,loadSize) == false)
 			{
 				Logger::printError(Logger::FatalError,L"Invalid size %s",args[1].text);
 				return;
@@ -284,7 +284,7 @@ CDirectiveAlign::CDirectiveAlign(ArgumentList& args)
 {
 	if (args.size() >= 1)
 	{
-		if (ConvertExpression(args[0].text,alignment) == false)
+		if (convertConstExpression(args[0].text,alignment) == false)
 		{
 			Logger::printError(Logger::FatalError,L"Invalid alignment %s",args[0].text);
 		}
@@ -339,7 +339,7 @@ void CDirectiveAlign::writeTempData(TempData& tempData)
 
 CDirectiveHeaderSize::CDirectiveHeaderSize(ArgumentList& args)
 {
-	if (ConvertExpression(args[0].text,headerSize) == false)
+	if (convertConstExpression(args[0].text,headerSize) == false)
 	{
 		Logger::printError(Logger::FatalError,L"Invalid header size %s",args[0].text);
 	}

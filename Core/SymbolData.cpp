@@ -160,7 +160,7 @@ void SymbolData::addData(u64 address, size_t size, DataType type)
 	modules[currentModule].data.push_back(data);
 }
 
-size_t SymbolData::addFileName(const std::string& fileName)
+size_t SymbolData::addFileName(const std::wstring& fileName)
 {
 	for (size_t i = 0; i < files.size(); i++)
 	{
@@ -184,7 +184,7 @@ size_t SymbolData::addAddress(u64 address)
 
 	SymDataAddressInfo info;
 	info.address = address;
-	info.fileIndex = addFileName(Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum));
+	info.fileIndex = addFileName(Global.FileInfo.FileList[Global.FileInfo.FileNum]);
 	info.lineNumber = Global.FileInfo.LineNumber;
 	module.addressInfo.push_back(info);
 	return module.addressInfo.size()-1;

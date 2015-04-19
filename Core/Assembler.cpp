@@ -9,6 +9,8 @@
 #include "Archs/MIPS/Mips.h"
 #include "Core/FileManager.h"
 #include "Archs/ARM/Arm.h"
+#include <algorithm>
+
 #define ASSEMBLER_MACRO_NESTING_LEVEL		128
 #define ASSEMBLER_INCLUDE_NESTING_LEVEL		64
 
@@ -113,7 +115,8 @@ bool CheckEquLabel(std::wstring& str)
 	{
 		std::wstring name = str.substr(0,s);
 		if (name.back() == ':') name.pop_back();
-
+		
+		std::transform(name.begin(), name.end(), name.begin(), ::towlower);
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid equation name %s",name);
@@ -179,10 +182,10 @@ void splitLine(std::wstring& line, std::wstring& name, std::wstring& arguments)
 	}
 }
 
-void AddFileName(char* FileName)
+void AddFileName(const std::wstring& FileName)
 {
-	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.GetCount();
-	Global.FileInfo.FileList.AddEntry(FileName);
+	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.size();
+	Global.FileInfo.FileList.push_back(FileName);
 	Global.FileInfo.LineNumber = 0;
 }
 
@@ -335,7 +338,7 @@ void parseFile(TextFile& input)
 
 void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 {
-	AddFileName((char*)convertWStringToUtf8(fileName).c_str());
+	AddFileName(fileName);
 	Global.IncludeNestingLevel++;
 
 	if (Global.IncludeNestingLevel == ASSEMBLER_INCLUDE_NESTING_LEVEL)
@@ -359,7 +362,7 @@ void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding)
 
 void LoadAssemblyContent(const std::wstring& content)
 {
-	AddFileName("Memory");
+	AddFileName(L"Memory");
 	g_fileManager->openFile(Global.memoryFile,true);
 
 	TextFile input;
@@ -386,7 +389,7 @@ bool EncodeAssembly()
 
 		g_fileManager->reset();
 		Arch->Revalidate();
-		Global.Section = 0;
+
 #ifdef _DEBUG
 		if (!Logger::isSilent())
 			printf("Validate %d...\n",validationPasses);
@@ -430,7 +433,6 @@ bool EncodeAssembly()
 #endif
 
 	// and finally encode
-	Global.Section = 0;
 	Global.tempData.start();
 
 	if (Global.memoryMode)
@@ -488,7 +490,7 @@ bool runArmips(ArmipsArguments& arguments)
 	Global.Commands.clear();
 	Global.Macros.clear();
 
-	Global.FileInfo.FileList.Clear();
+	Global.FileInfo.FileList.clear();
 	Global.FileInfo.FileCount = 0;
 	Global.FileInfo.TotalLineCount = 0;
 	Global.FileInfo.LineNumber = 0;

@@ -83,7 +83,7 @@ public:
 private:
 	void writeNocashSym();
 	size_t addAddress(u64 address);
-	size_t addFileName(const std::string& fileName);
+	size_t addFileName(const std::wstring& fileName);
 
 	std::wstring nocashSymFileName;
 	bool enabled;
@@ -91,7 +91,7 @@ private:
 
 	// entry 0 is for data without parent modules
 	std::vector<SymDataModule> modules;
-	std::vector<std::string> files;
+	std::vector<std::wstring> files;
 	size_t currentModule;
 	size_t currentFunction;
 };

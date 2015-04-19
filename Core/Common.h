@@ -12,7 +12,7 @@
 #include "Archs/Architecture.h"
 
 typedef struct {
-	CStringList FileList;
+	std::vector<std::wstring> FileList;
 	int FileCount;
 	int FileNum;
 	int LineNumber;
@@ -54,7 +54,7 @@ extern FileManager* g_fileManager;
 std::wstring getFolderNameFromPath(const std::wstring& src);
 std::wstring getFullPathName(const std::wstring& path);
 
-bool checkLabelDefined(const std::wstring& labelName);
+bool checkLabelDefined(const std::wstring& labelName, int section);
 bool checkValidLabelName(const std::wstring& labelName);
 bool addAssemblerLabel(const std::wstring& labelName);
 

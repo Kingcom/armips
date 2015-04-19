@@ -3,14 +3,14 @@
 #include "Commands/CAssemblerCommand.h"
 #include "ThumbOpcodes.h"
 #include "Arm.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 typedef struct {
 	tArmRegisterInfo rd;
 	tArmRegisterInfo rs;
 	tArmRegisterInfo rn;
 	tArmRegisterInfo ro;
-	CExpressionCommandList ImmediateExpression;
+	Expression ImmediateExpression;
 	int Immediate;
 	int ImmediateBitLen;
 	int OriginalImmediate;

@@ -15,9 +15,13 @@ public:
 	virtual bool IsConditional() { return false; };
 	virtual bool IsPool() { return false; };
 	void SetFileInfo();
+	int getSection() { return section; }
+	void updateSection(int num) { section = num; }
 protected:
 	int FileNum;
 	int FileLine;
+private:
+	int section;
 };
 
 

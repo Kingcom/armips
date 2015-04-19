@@ -12,7 +12,7 @@ void TempData::start()
 			return;
 		}
 
-		size_t fileCount = Global.FileInfo.FileList.GetCount();
+		size_t fileCount = Global.FileInfo.FileList.size();
 		size_t lineCount = Global.FileInfo.TotalLineCount;
 		size_t labelCount = Global.symbolTable.getLabelCount();
 		size_t equCount = Global.symbolTable.getEquationCount();
@@ -23,7 +23,7 @@ void TempData::start()
 		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
 		for (size_t i = 0; i < fileCount; i++)
 		{
-			file.writeFormat(L"; %S\n",Global.FileInfo.FileList.GetEntry(i));
+			file.writeFormat(L"; %S\n",Global.FileInfo.FileList[i]);
 		}
 		file.writeLine("");
 	}
@@ -44,43 +44,8 @@ void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
 			str += ' ';
 
 		str += formatString(L"; %S line %d",
-			Global.FileInfo.FileList.GetEntry(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
+			Global.FileInfo.FileList[Global.FileInfo.FileNum],Global.FileInfo.LineNumber);
 
 		file.writeLine(str);
 	}
-}
-
-CByteList::CByteList()
-{
-	Entries = (tByteListEntry*) malloc(256*sizeof(tByteListEntry));
-	EntryCount = 0;
-	EntriesAllocated = 256;
-	Data = (unsigned char*) malloc(1024);
-	DataPos = 0;
-	DataAllocated = 1024;
-}
-
-CByteList::~CByteList()
-{
-	free(Entries);
-	free(Data);
-}
-
-void CByteList::AddEntry(unsigned char* ByteData, size_t len)
-{
-	if (EntriesAllocated == EntryCount)
-	{
-		EntriesAllocated <<= 1;
-		Entries = (tByteListEntry*) realloc(Entries,EntriesAllocated*sizeof(tByteListEntry));
-	}
-	if (DataPos+len > DataAllocated)
-	{
-		DataAllocated <<= 1;
-		Data = (unsigned char*) realloc(Data,DataAllocated);
-	}
-
-	Entries[EntryCount].Pos = DataPos;
-	Entries[EntryCount++].len = len;
-	memcpy(&Data[DataPos],ByteData,len);
-	DataPos += len;
 }

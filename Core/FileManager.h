@@ -26,7 +26,7 @@ public:
 	GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, u32 headerSize);
 
 	virtual bool open(bool onlyCheck);
-	virtual void close() { handle.close(); };
+	virtual void close() { if (handle.isOpen()) handle.close(); };
 	virtual bool isOpen() { return handle.isOpen(); };
 	virtual bool write(void* data, size_t length);
 	virtual u64 getVirtualAddress() { return virtualAddress; };

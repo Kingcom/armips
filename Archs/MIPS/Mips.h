@@ -1,6 +1,6 @@
 #pragma once
 #include "Archs/Architecture.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
 
 enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_INVALID };
@@ -82,7 +82,7 @@ int MipsGetRegister(const char* source, int& RetLen);
 bool MipsGetFloatRegister(const char* source, int& RetLen, MipsRegisterInfo& Result);
 bool MipsGetPs2VectorRegister(const char* source, int& RetLen, MipsRegisterInfo& Result);
 int MipsGetFloatRegister(const char* source, int& RetLen);
-bool MipsCheckImmediate(const char* Source, MathExpression& Dest, int& RetLen);
+bool MipsCheckImmediate(const char* Source, Expression& Dest, int& RetLen);
 
 class MipsElfRelocator: public IElfRelocator
 {

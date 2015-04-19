@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveConditional.h"
 #include "Core/Common.h"
-#include "Core/MathParser.h"
 #include "Archs/ARM/Arm.h"
 #include "Util/Util.h"
 
@@ -20,7 +19,7 @@ bool CDirectiveConditional::Load(ArgumentList& Args, ConditionType command)
 	{
 	case ConditionType::IF:
 	case ConditionType::ELSEIF:
-		if (initExpression(Expression,Args[0].text) == false)
+		if (Expression.load(Args[0].text) == false)
 			return false;
 		break;
 	case ConditionType::IFDEF:
@@ -72,19 +71,19 @@ void CDirectiveConditional::Execute()
 		Global.conditionData.addEndIf();
 		break;
 	case ConditionType::IFDEF:
-		b = checkLabelDefined(labelName);
+		b = checkLabelDefined(labelName,getSection());
 		Global.conditionData.addIf(b);
 		break;
 	case ConditionType::IFNDEF:
-		b = !checkLabelDefined(labelName);
+		b = !checkLabelDefined(labelName,getSection());
 		Global.conditionData.addIf(b);
 		break;
 	case ConditionType::ELSEIFDEF:	
-		b = checkLabelDefined(labelName);
+		b = checkLabelDefined(labelName,getSection());
 		Global.conditionData.addElseIf(b);
 		break;
 	case ConditionType::ELSEIFNDEF:
-		b = !checkLabelDefined(labelName);
+		b = !checkLabelDefined(labelName,getSection());
 		Global.conditionData.addElseIf(b);
 		break;
 	}
@@ -93,13 +92,13 @@ void CDirectiveConditional::Execute()
 bool CDirectiveConditional::Validate()
 {
 	bool Result = false;
-	int num;
+	u64 num;
 
 	switch (type)
 	{
 	case ConditionType::IF:
 	case ConditionType::ELSEIF:
-		if (ParsePostfix(Expression,NULL,num) == false)
+		if (Expression.evaluateInteger(num) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid expression");
 			return false;

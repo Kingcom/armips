@@ -31,7 +31,7 @@ public:
 
 extern CZ80Architecture z80;;
 
-bool z80CheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List);
+bool z80CheckImmediate(char* Source, char* Dest, int& RetLen);
 int z80GetRegister8(char* source, int& RetLen);
 bool z80GetRegister8(char* source, int& RetLen, tZ80RegisterInfo& Result);
 int z80GetRegister16(char* source, int& RetLen);

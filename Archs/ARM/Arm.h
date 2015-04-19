@@ -2,6 +2,7 @@
 #include "Archs/Architecture.h"
 #include "Util/CommonClasses.h"
 #include "Pool.h"
+#include "Core/Expression.h"
 
 #define ARM_SHIFT_LSL		0x00
 #define ARM_SHIFT_LSR		0x01
@@ -56,7 +57,7 @@ extern CArmArchitecture Arm;
 
 bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result);
 int ArmGetRegister(char* source, int& RetLen);
-bool ArmCheckImmediate(char* Source, char* Dest, int& RetLen, CStringList& List);
+bool ArmParseImmediate(char* Source, Expression& Dest, int& RetLen);
 bool ArmGetRlist(char* source, int& RetLen, int ValidRegisters, int& Result);
 int ArmGetShiftedImmediate(unsigned int num, int& ShiftAmount);
 bool ArmGetCopNumber(char* source, int& RetLen, tArmRegisterInfo& Result);

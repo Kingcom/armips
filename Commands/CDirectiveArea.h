@@ -1,7 +1,7 @@
 #pragma once
 #include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 class CDirectiveArea: public CAssemblerCommand
 {
@@ -14,10 +14,9 @@ public:
 	virtual void writeTempData(TempData& tempData);
 private:
 	bool Start;
-	CExpressionCommandList SizeExpression;
+	Expression SizeExpression;
 	size_t Size;
 	u64 RamPos;
 	int fillValue;
-	CExpressionCommandList FillExpression;
+	Expression FillExpression;
 };
-

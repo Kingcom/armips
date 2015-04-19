@@ -1,7 +1,7 @@
 #pragma once
 #include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
 
 
 class CDirectiveFill: public CAssemblerCommand
@@ -14,10 +14,10 @@ public:
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
-	CExpressionCommandList SizeExpression;
-	CExpressionCommandList ByteExpression;
+	Expression sizeExpression;
+	Expression byteExpression;
 	size_t Size;
 	bool FillByte;
-	int Byte;
+	u8 Byte;
 	u64 RamPos;
 };

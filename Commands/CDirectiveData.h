@@ -1,6 +1,7 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
-#include "Core/MathParser.h"
+#include "Core/Expression.h"
+#include "../Util/CommonClasses.h"
 
 typedef struct {
 	bool String;
@@ -17,12 +18,7 @@ public:
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
-	tDirectiveDataEntry* Entries;
-	CExpressionCommandList* ExpData;
-	CByteList StrData;
-	size_t TotalAmount;
-	size_t StrAmount;
-	size_t ExpAmount;
+	std::vector<Expression> entries;
 	size_t UnitSize;
 	size_t SpaceNeeded;
 	u64 RamPos;

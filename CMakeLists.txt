@@ -32,6 +32,10 @@ add_executable(armips
 	Core/ELF/ElfRelocator.h
 	Core/ELF/ElfFile.cpp
 	Core/ELF/ElfFile.h
+	Core/Expression.cpp
+	Core/Expression.h
+	Core/ExpressionParser.cpp
+	Core/ExpressionParser.h
 	Core/FileManager.cpp
 	Core/FileManager.h
 	Core/SymbolTable.cpp

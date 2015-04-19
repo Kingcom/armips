@@ -1,11 +1,16 @@
 ﻿#include "stdafx.h"
 #include "Core/Common.h"
-#include "Core/MathParser.h"
 #include "Util/CommonClasses.h"
 #include "Core/Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CDirectiveFile.h"
 #include "Tests.h"
+
+#if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__)
+#define ARMIPSNAME "ARMIPS64"
+#else
+#define ARMIPSNAME "ARMIPS"
+#endif
 
 int wmain(int argc, wchar_t* argv[])
 {
@@ -20,7 +25,7 @@ int wmain(int argc, wchar_t* argv[])
 		return !runTests(argv[1]);
 #endif
 
-	Logger::printLine("ARMIPS Assembler v0.7d (" __DATE__ " " __TIME__ ") by Kingcom");
+	Logger::printLine(ARMIPSNAME " Assembler v0.7d (" __DATE__ " " __TIME__ ") by Kingcom");
 	StringList arguments = getStringListFromArray(argv,argc);
 
 	if (arguments.size() < 2)
