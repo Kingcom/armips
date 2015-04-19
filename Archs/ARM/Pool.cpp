@@ -17,6 +17,10 @@ bool ArmStateCommand::Validate()
 
 void ArmStateCommand::writeSymData(SymbolData& symData)
 {
+	// TODO: find a less ugly way to check for undefined memory positions
+	if (RamPos == (u64)-1)
+		return;
+
 	if (armstate == true)
 	{
 		symData.addLabel(RamPos,L".arm");

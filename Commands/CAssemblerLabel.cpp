@@ -67,6 +67,10 @@ void CAssemblerLabel::writeTempData(TempData& tempData)
 
 void CAssemblerLabel::writeSymData(SymbolData& symData)
 {
+	// TODO: find a less ugly way to check for undefined memory positions
+	if (label->getValue() == (u64)-1)
+		return;
+
 	symData.addLabel(label->getValue(),label->getName());
 }
 
