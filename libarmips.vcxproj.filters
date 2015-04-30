@@ -10,9 +10,6 @@
     <Filter Include="Archs\MIPS">
       <UniqueIdentifier>{b14a90ab-ec40-4a91-b169-81f6e36916a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Archs\Z80">
-      <UniqueIdentifier>{8749652c-eae9-42f5-ad72-86197d31657e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Commands">
       <UniqueIdentifier>{876c84a8-beac-42b9-8372-a1c7bdca6e50}</UniqueIdentifier>
     </Filter>
@@ -80,15 +77,6 @@
     </ClCompile>
     <ClCompile Include="Archs\MIPS\PsxRelocator.cpp">
       <Filter>Archs\MIPS</Filter>
-    </ClCompile>
-    <ClCompile Include="Archs\Z80\CZ80Instruction.cpp">
-      <Filter>Archs\Z80</Filter>
-    </ClCompile>
-    <ClCompile Include="Archs\Z80\z80.cpp">
-      <Filter>Archs\Z80</Filter>
-    </ClCompile>
-    <ClCompile Include="Archs\Z80\z80Opcodes.cpp">
-      <Filter>Archs\Z80</Filter>
     </ClCompile>
     <ClCompile Include="Commands\CAssemblerCommand.cpp">
       <Filter>Commands</Filter>
@@ -218,15 +206,6 @@
     </ClInclude>
     <ClInclude Include="Archs\MIPS\PsxRelocator.h">
       <Filter>Archs\MIPS</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\Z80\CZ80Instruction.h">
-      <Filter>Archs\Z80</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\Z80\z80.h">
-      <Filter>Archs\Z80</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\Z80\z80Opcodes.h">
-      <Filter>Archs\Z80</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CAssemblerCommand.h">
       <Filter>Commands</Filter>

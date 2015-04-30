@@ -11,7 +11,6 @@
 #include "Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Archs/ARM/Arm.h"
-#include "Archs/Z80/z80.h"
 #include "Core/Expression.h"
 #include "Util/Util.h"
 
@@ -315,12 +314,6 @@ bool DirectiveNds(ArgumentList& List, int flags)
 
 	ArmStateCommand* cmd = new ArmStateCommand(true);
 	AddAssemblerCommand(cmd);
-	return true;
-}
-
-bool DirectiveGb(ArgumentList& List, int flags)
-{
-	Arch = &z80;
 	return true;
 }
 
@@ -757,7 +750,6 @@ const tDirective Directives[] = {
 	{ L".psp",				0,	0,	&DirectivePsp,				0 },
 	{ L".gba",				0,	0,	&DirectiveGba,				0 },
 	{ L".nds",				0,	0,	&DirectiveNds,				0 },
-	{ L".gb",				0,	0,	&DirectiveGb,				DIRECTIVE_DISABLED },
 	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
 	{ L".definelabel",		2,	2,	&DirectiveDefineLabel,		0 },
 	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },

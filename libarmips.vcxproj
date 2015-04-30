@@ -231,9 +231,6 @@
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
     <ClCompile Include="Archs\MIPS\MipsPSP.cpp" />
     <ClCompile Include="Archs\MIPS\PsxRelocator.cpp" />
-    <ClCompile Include="Archs\Z80\CZ80Instruction.cpp" />
-    <ClCompile Include="Archs\Z80\z80.cpp" />
-    <ClCompile Include="Archs\Z80\z80Opcodes.cpp" />
     <ClCompile Include="Commands\CAssemblerCommand.cpp" />
     <ClCompile Include="Commands\CAssemblerLabel.cpp" />
     <ClCompile Include="Commands\CDirectiveArea.cpp" />
@@ -286,9 +283,6 @@
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
     <ClInclude Include="Archs\MIPS\MipsPSP.h" />
     <ClInclude Include="Archs\MIPS\PsxRelocator.h" />
-    <ClInclude Include="Archs\Z80\CZ80Instruction.h" />
-    <ClInclude Include="Archs\Z80\z80.h" />
-    <ClInclude Include="Archs\Z80\z80Opcodes.h" />
     <ClInclude Include="Commands\CAssemblerCommand.h" />
     <ClInclude Include="Commands\CAssemblerLabel.h" />
     <ClInclude Include="Commands\CDirectiveArea.h" />
