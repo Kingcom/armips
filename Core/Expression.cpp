@@ -380,14 +380,15 @@ ExpressionInternal::ExpressionInternal(double value)
 ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
 {
 	this->type = type;
+	strValue = value;
 
 	switch (type)
 	{
 	case OperatorType::Identifier:
-		label = Global.symbolTable.getLabel(value,Global.FileInfo.FileNum,Global.Section);
+		fileNum = Global.FileInfo.FileNum;
+		section = Global.Section;
 		break;
 	case OperatorType::String:
-		strValue = value;
 		break;
 	}
 }
@@ -418,10 +419,30 @@ bool ExpressionInternal::hasIdentifierChild()
 	return false;
 }
 
+void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if (children[i] != NULL)
+		{
+			children[i]->replaceMemoryPos(identifierName);
+		}
+	}
+
+	if (type == OperatorType::MemoryPos)
+	{
+		type = OperatorType::Identifier;
+		strValue = identifierName;
+		fileNum = Global.FileInfo.FileNum;
+		section = Global.Section;
+	}
+}
+
 ExpressionValue ExpressionInternal::evaluate()
 {
 	ExpressionValue val;
 
+	Label* label;
 	switch (type)
 	{
 	case OperatorType::Integer:
@@ -433,6 +454,7 @@ ExpressionValue ExpressionInternal::evaluate()
 		val.floatValue = floatValue;
 		return val;
 	case OperatorType::Identifier:
+		label = Global.symbolTable.getLabel(strValue,fileNum,section);
 		if (!label->isDefined())
 		{
 			Logger::queueError(Logger::Error,L"Undefined label \"%s\"",label->getName());
@@ -519,6 +541,69 @@ ExpressionValue ExpressionInternal::evaluate()
 }
 
 
+std::wstring ExpressionInternal::toString()
+{
+	switch (type)
+	{
+	case OperatorType::Integer:
+		return formatString(L"%d",intValue);
+	case OperatorType::Float:
+		return formatString(L"%f",floatValue);
+	case OperatorType::Identifier:
+		return strValue;
+	case OperatorType::String:
+		return formatString(L"\"%s\"",strValue);
+	case OperatorType::MemoryPos:
+		return L".";
+	case OperatorType::Add:
+		return formatString(L"(%s + %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Sub:
+		return formatString(L"(%s - %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Mult:
+		return formatString(L"(%s * %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Div:
+		return formatString(L"(%s / %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Mod:
+		return formatString(L"(%s %% %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Neg:
+		return formatString(L"(-%s)",children[0]->toString());
+	case OperatorType::LogNot:
+		return formatString(L"(!%s)",children[0]->toString());
+	case OperatorType::BitNot:
+		return formatString(L"~!%s)",children[0]->toString());
+	case OperatorType::LeftShift:
+		return formatString(L"(%s << %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::RightShift:
+		return formatString(L"(%s >> %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Less:
+		return formatString(L"(%s < %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Greater:
+		return formatString(L"(%s > %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::LessEqual:
+		return formatString(L"(%s <= %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::GreaterEqual:
+		return formatString(L"(%s >= %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Equal:
+		return formatString(L"(%s == %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::NotEqual:
+		return formatString(L"(%s != %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::BitAnd:
+		return formatString(L"(%s & %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::BitOr:
+		return formatString(L"(%s | %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::LogAnd:
+		return formatString(L"(%s && %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::LogOr:
+		return formatString(L"(%s || %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Xor:
+		return formatString(L"(%s ^ %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::TertiaryIf:
+		return formatString(L"(%s ? %s : %s)",children[0]->toString(),children[2]->toString(),children[1]->toString());
+	default:
+		return L"";
+	}
+}
+
 Expression::Expression()
 {
 	expression = NULL;
@@ -550,3 +635,8 @@ ExpressionValue Expression::evaluate()
 	return expression->evaluate();
 }
 
+void Expression::replaceMemoryPos(const std::wstring& identifierName)
+{
+	if (expression != NULL)
+		expression->replaceMemoryPos(identifierName);
+}

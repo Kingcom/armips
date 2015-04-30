@@ -105,7 +105,11 @@ public:
 	ExpressionInternal(OperatorType op, ExpressionInternal* a = NULL,
 		ExpressionInternal* b = NULL, ExpressionInternal* c = NULL);
 	ExpressionValue evaluate();
+	std::wstring toString();
 	bool hasIdentifierChild();
+	bool isIdentifier() { return type == OperatorType::Identifier; }
+	std::wstring getStringValue() { return strValue; }
+	void replaceMemoryPos(const std::wstring& identifierName);
 private:
 	OperatorType type;
 	std::shared_ptr<ExpressionInternal> children[3];
@@ -115,7 +119,8 @@ private:
 		double floatValue;
 	};
 	std::wstring strValue;
-	Label* label;
+
+	unsigned int fileNum, section;
 };
 
 class Expression
@@ -126,6 +131,7 @@ public:
 	ExpressionValue evaluate();
 	bool isLoaded() { return expression != NULL; }
 	void setExpression(ExpressionInternal* exp) { expression = std::shared_ptr<ExpressionInternal>(exp); }
+	void replaceMemoryPos(const std::wstring& identifierName);
 
 	template<typename T>
 	bool evaluateInteger(T& dest)
@@ -165,6 +171,17 @@ public:
 		dest = value.strValue;
 		return true;
 	}
+	
+	bool evaluateIdentifier(std::wstring& dest)
+	{
+		if (expression == NULL || expression->isIdentifier() == false)
+			return false;
+
+		dest = expression->getStringValue();
+		return true;
+	}
+
+	std::wstring toString() { return expression != NULL ? expression->toString() : L""; };
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;
