@@ -28,6 +28,9 @@
     <Filter Include="ext\tinyformat">
       <UniqueIdentifier>{cca034bb-30ca-48d3-9283-e9def7f9b1bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Parser">
+      <UniqueIdentifier>{d1037c70-bb54-46fc-8b0c-a47c4ea4a252}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Archs\Architecture.cpp">
@@ -159,6 +162,9 @@
     </ClCompile>
     <ClCompile Include="Commands\CommandSequence.cpp">
       <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser\Tokenizer.cpp">
+      <Filter>Parser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -297,6 +303,9 @@
     </ClInclude>
     <ClInclude Include="Commands\CommandSequence.h">
       <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser\Tokenizer.h">
+      <Filter>Parser</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
