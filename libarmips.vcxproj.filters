@@ -157,6 +157,9 @@
     <ClCompile Include="Core\Expression.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Commands\CommandSequence.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Archs\Architecture.h">
@@ -291,6 +294,9 @@
     </ClInclude>
     <ClInclude Include="ext\tinyformat\tinyformat.h">
       <Filter>ext\tinyformat</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\CommandSequence.h">
+      <Filter>Commands</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

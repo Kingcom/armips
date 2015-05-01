@@ -239,6 +239,7 @@
     <ClCompile Include="Commands\CDirectiveFile.cpp" />
     <ClCompile Include="Commands\CDirectiveFill.cpp" />
     <ClCompile Include="Commands\CDirectiveMessage.cpp" />
+    <ClCompile Include="Commands\CommandSequence.cpp" />
     <ClCompile Include="Core\Assembler.cpp" />
     <ClCompile Include="Core\CMacro.cpp" />
     <ClCompile Include="Core\Common.cpp" />
@@ -291,6 +292,7 @@
     <ClInclude Include="Commands\CDirectiveFile.h" />
     <ClInclude Include="Commands\CDirectiveFill.h" />
     <ClInclude Include="Commands\CDirectiveMessage.h" />
+    <ClInclude Include="Commands\CommandSequence.h" />
     <ClInclude Include="Core\Assembler.h" />
     <ClInclude Include="Core\CMacro.h" />
     <ClInclude Include="Core\Common.h" />
