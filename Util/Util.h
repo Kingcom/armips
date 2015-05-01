@@ -21,6 +21,8 @@ bool deleteFile(const std::wstring& fileName);;
 
 std::wstring toWLowercase(const std::string& str);
 std::wstring getFileNameFromPath(const std::wstring& path);
+void replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue);
+bool startsWith(const std::wstring& str, wchar_t* value, size_t stringPos = 0);
 
 inline unsigned int swapEndianness32(unsigned int value)
 {
@@ -36,3 +38,6 @@ enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
 FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
 std::wstring getCurrentDirectory();
 void changeDirectory(const std::wstring& dir);
+
+
+#define ARRAY_SIZE(x) (sizeof((x)) / sizeof((x)[0]))

@@ -6,6 +6,32 @@
 #include "Commands/CAssemblerLabel.h"
 #include "Core/Common.h"
 #include "DirectivesParser.h"
+#include "Util/Util.h"
+
+CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
+{
+	std::wstring fullText = text;
+
+	for (auto& arg: variables)
+	{
+		replaceAll(fullText,arg.variableName,arg.value);
+	}
+
+	return parseString(fullText);
+}
+
+bool matchToken(Tokenizer& tokenizer, TokenType type, bool optional)
+{
+	if (optional)
+	{
+		Token& token = tokenizer.peekToken();
+		if (token.type == type)
+			tokenizer.eatToken();
+		return true;
+	}
+	
+	return tokenizer.nextToken().type == type;
+}
 
 void TokenSequenceParser::addEntry(int result, TokenSequence tokens, TokenValueSequence values)
 {

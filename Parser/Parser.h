@@ -61,4 +61,11 @@ CommandSequence* parseCommandSequence(Tokenizer& tokenizer, std::initializer_lis
 CommandSequence* parseFile(TextFile& file);
 CommandSequence* parseString(const std::wstring& text);
 
+struct AssemblyTemplateArgument
+{
+	const wchar_t* variableName;
+	std::wstring value;
+};
 
+CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables = {});
+bool matchToken(Tokenizer& tokenizer, TokenType type, bool optional = false);

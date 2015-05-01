@@ -267,3 +267,26 @@ std::wstring getFileNameFromPath(const std::wstring& path)
 		return path;
 	return path.substr(n);
 }
+
+void replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue)
+{
+	size_t pos = 0;
+	size_t len = wcslen(oldValue);
+
+	while ((pos = str.find(oldValue, pos)) != std::string::npos)
+	{
+		str.replace(pos,len,newValue);
+		pos += newValue.length();
+	}
+}
+
+bool startsWith(const std::wstring& str, wchar_t* value, size_t stringPos)
+{
+	while (*value != 0 && stringPos < str.size())
+	{
+		if (str[stringPos++] != *value++)
+			return false;
+	}
+
+	return *value == 0;
+}

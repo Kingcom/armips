@@ -4,23 +4,26 @@
 #include "ThumbOpcodes.h"
 #include "Arm.h"
 #include "Core/Expression.h"
+#include "ThumbOpcodes.h"
 
-typedef struct {
-	tArmRegisterInfo rd;
-	tArmRegisterInfo rs;
-	tArmRegisterInfo rn;
-	tArmRegisterInfo ro;
+struct ThumbOpcodeVariables {
+	ArmRegisterValue rd;
+	ArmRegisterValue rs;
+	ArmRegisterValue rn;
+	ArmRegisterValue ro;
 	Expression ImmediateExpression;
 	int Immediate;
 	int ImmediateBitLen;
 	int OriginalImmediate;
 	int rlist;
 	char RlistStr[32];
-} tThumbOpcodeVariables;
+} ;
 
 class CThumbInstruction: public CAssemblerCommand
 {
 public:
+	CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars);
+
 	CThumbInstruction();
 //	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
@@ -29,10 +32,9 @@ public:
 	virtual void writeTempData(TempData& tempData);
 	size_t GetSize() { return OpcodeSize; };
 private:
-	bool LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line);
-	void FormatInstruction(const char* encoding,tThumbOpcodeVariables& Vars, char* dest);
+	void FormatInstruction(const char* encoding, char* dest);
 	void WriteInstruction(unsigned short encoding);
-	tThumbOpcodeVariables Vars;
+	ThumbOpcodeVariables Vars;
 	tThumbOpcode Opcode;
 	bool NoCheckError;
 	bool Loaded;

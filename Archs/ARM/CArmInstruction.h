@@ -5,7 +5,7 @@
 #include "Arm.h"
 #include "Core/Expression.h"
 
-typedef struct {
+struct ArmOpcodeVariables {
 	struct {
 		unsigned char c,a;
 		bool s,x,y;
@@ -14,35 +14,39 @@ typedef struct {
 		bool UseNewEncoding;
 		bool UseNewType;
 	} Opcode;
+
 	struct {
 		unsigned char Type;
 		bool ShiftByRegister;
 		bool UseShift;
-		tArmRegisterInfo reg;
+		ArmRegisterValue reg;
 		Expression ShiftExpression;
 		int ShiftAmount;
 		unsigned char FinalType;
 		int FinalShiftAmount;
 		bool UseFinal;
 	} Shift;
+
 	struct {
 		bool spsr;
 		int field;
 	} PsrData;
-	struct CopData {
-		tArmRegisterInfo cd;	// cop register d
-		tArmRegisterInfo cn;	// cop register n
-		tArmRegisterInfo cm;	// cop register m
-		tArmRegisterInfo pn;	// cop number
+
+	struct {
+		ArmRegisterValue cd;	// cop register d
+		ArmRegisterValue cn;	// cop register n
+		ArmRegisterValue cm;	// cop register m
+		ArmRegisterValue pn;	// cop number
 		Expression CpopExpression;	// cp opc number
 		Expression CpinfExpression;	// cp information
 		int Cpop;
 		int Cpinf;
 	} CopData;
-	tArmRegisterInfo rs;
-	tArmRegisterInfo rm;
-	tArmRegisterInfo rd;
-	tArmRegisterInfo rn;
+
+	ArmRegisterValue rs;
+	ArmRegisterValue rm;
+	ArmRegisterValue rd;
+	ArmRegisterValue rn;
 	bool psr;
 	bool writeback;
 	bool SignPlus;
@@ -53,11 +57,13 @@ typedef struct {
 	int OriginalImmediate;
 	int rlist;
 	char RlistStr[64];
-} tArmOpcodeVariables;
+};
 
 class CArmInstruction: public CAssemblerCommand
 {
 public:
+	CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariables& vars);
+
 	CArmInstruction();
 //	~CArmInstruction();
 	bool Load(char* Name, char* Params);
@@ -67,12 +73,10 @@ public:
 private:
 	void FormatOpcode(char* Dest, const char* Source);
 	void FormatInstruction(const char* encoding, char* dest);
-	bool ParseOpcode(char* Encoding, char* Line);
-	bool LoadEncoding(const tArmOpcode& SourceOpcode, char* Line);
-	bool ParseShift(char*& Line, int mode);
-	void FormatInstruction(char* encoding,tArmOpcodeVariables& Vars, char* dest);
 	void WriteInstruction(unsigned int encoding);
-	tArmOpcodeVariables Vars;
+	int getShiftedImmediate(unsigned int num, int& ShiftAmount);
+
+	ArmOpcodeVariables Vars;
 	tArmOpcode Opcode;
 	bool NoCheckError;
 	bool Loaded;

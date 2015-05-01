@@ -3,6 +3,7 @@
 #include "Util/CommonClasses.h"
 #include "Pool.h"
 #include "Core/Expression.h"
+#include "Parser/Tokenizer.h"
 
 #define ARM_SHIFT_LSL		0x00
 #define ARM_SHIFT_LSR		0x01
@@ -21,6 +22,12 @@ typedef struct {
 	int Number;
 } tArmRegisterInfo;
 
+struct ArmRegisterValue
+{
+	std::wstring name;
+	int num;
+};
+
 extern const tArmRegister ArmRegister[];
 
 class CArmArchitecture: public CArchitecture
@@ -29,6 +36,9 @@ public:
 	CArmArchitecture();
 	~CArmArchitecture();
 	void clear();
+
+	virtual CAssemblerCommand* parseDirective(Tokenizer& tokenizer);
+	virtual CAssemblerCommand* parseOpcode(Tokenizer& tokenizer);
 	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
 	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();
@@ -54,11 +64,3 @@ private:
 };
 
 extern CArmArchitecture Arm;
-
-bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result);
-int ArmGetRegister(char* source, int& RetLen);
-bool ArmParseImmediate(char* Source, Expression& Dest, int& RetLen);
-bool ArmGetRlist(char* source, int& RetLen, int ValidRegisters, int& Result);
-int ArmGetShiftedImmediate(unsigned int num, int& ShiftAmount);
-bool ArmGetCopNumber(char* source, int& RetLen, tArmRegisterInfo& Result);
-bool ArmGetCopRegister(char* source, int& RetLen, tArmRegisterInfo& Result);

@@ -172,6 +172,9 @@
     <ClCompile Include="Parser\Parser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\ARM\ArmParser.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Archs\Architecture.h">
@@ -318,6 +321,9 @@
     </ClInclude>
     <ClInclude Include="Parser\Parser.h">
       <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\ARM\ArmParser.h">
+      <Filter>Archs\ARM</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
