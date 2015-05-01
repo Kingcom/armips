@@ -1,37 +1,37 @@
 #include "stdafx.h"
-#include "ExpressionParser.h"
+#include "OldExpressionParser.h"
 #include "Common.h"
 #include "Expression.h"
 
 ExpressionInternal* ExpressionParser::primaryExpression()
 {
-	Token tok = peekToken();
+	OldToken tok = peekToken();
 
-	if (tok.type == TokenType::Invalid)
+	if (tok.type == OldTokenType::Invalid)
 		return NULL;
 
 	switch (tok.type)
 	{
-	case TokenType::Float:
+	case OldTokenType::Float:
 		eatToken();
 		return new ExpressionInternal(tok.floatNumber);
-	case TokenType::Identifier:
+	case OldTokenType::Identifier:
 		eatToken();
 		return new ExpressionInternal(tok.text,OperatorType::Identifier);
-	case TokenType::String:
+	case OldTokenType::String:
 		eatToken();
 		return new ExpressionInternal(tok.text,OperatorType::String);
-	case TokenType::Integer:
+	case OldTokenType::Integer:
 		eatToken();
 		return new ExpressionInternal(tok.intNumber);
-	case TokenType::Period:
+	case OldTokenType::Period:
 		eatToken();
 		return new ExpressionInternal(OperatorType::MemoryPos);
-	case TokenType::LParen:
+	case OldTokenType::LParen:
 		eatToken();
 		ExpressionInternal* exp = expression();
 			
-		if (nextToken().type != TokenType::RParen)
+		if (nextToken().type != OldTokenType::RParen)
 			return NULL;
 
 		return exp;
@@ -46,20 +46,20 @@ ExpressionInternal* ExpressionParser::unaryExpression()
 	if (exp != NULL)
 		return exp;
 
-	Token op = nextToken();
+	OldToken op = nextToken();
 	exp = primaryExpression();
 	if (exp == NULL)
 		return NULL;
 
 	switch (op.type)
 	{
-	case TokenType::Plus:
+	case OldTokenType::Plus:
 		return exp;
-	case TokenType::Minus:
+	case OldTokenType::Minus:
 		return new ExpressionInternal(OperatorType::Neg,exp);
-	case TokenType::Tilde:
+	case OldTokenType::Tilde:
 		return new ExpressionInternal(OperatorType::BitNot,exp);
-	case TokenType::Exclamation:
+	case OldTokenType::Exclamation:
 		return new ExpressionInternal(OperatorType::LogNot,exp);
 	default:
 		return NULL;
@@ -77,13 +77,13 @@ ExpressionInternal* ExpressionParser::multiplicativeExpression()
 		OperatorType op = OperatorType::Invalid;
 		switch (peekToken().type)
 		{
-		case TokenType::Mult:
+		case OldTokenType::Mult:
 			op = OperatorType::Mult;
 			break;
-		case TokenType::Div:
+		case OldTokenType::Div:
 			op = OperatorType::Div;
 			break;
-		case TokenType::Mod:
+		case OldTokenType::Mod:
 			op = OperatorType::Mod;
 			break;
 		}
@@ -114,10 +114,10 @@ ExpressionInternal* ExpressionParser::additiveExpression()
 		OperatorType op = OperatorType::Invalid;
 		switch (peekToken().type)
 		{
-		case TokenType::Plus:
+		case OldTokenType::Plus:
 			op = OperatorType::Add;
 			break;
-		case TokenType::Minus:
+		case OldTokenType::Minus:
 			op = OperatorType::Sub;
 			break;
 		}
@@ -148,10 +148,10 @@ ExpressionInternal* ExpressionParser::shiftExpression()
 		OperatorType op = OperatorType::Invalid;
 		switch (peekToken().type)
 		{
-		case TokenType::LeftShift:
+		case OldTokenType::LeftShift:
 			op = OperatorType::LeftShift;
 			break;
-		case TokenType::RightShift:
+		case OldTokenType::RightShift:
 			op = OperatorType::RightShift;
 			break;
 		}
@@ -182,16 +182,16 @@ ExpressionInternal* ExpressionParser::relationalExpression()
 		OperatorType op = OperatorType::Invalid;
 		switch (peekToken().type)
 		{
-		case TokenType::Less:
+		case OldTokenType::Less:
 			op = OperatorType::Less;
 			break;
-		case TokenType::LessEqual:
+		case OldTokenType::LessEqual:
 			op = OperatorType::LessEqual;
 			break;
-		case TokenType::Greater:
+		case OldTokenType::Greater:
 			op = OperatorType::Greater;
 			break;
-		case TokenType::GreaterEqual:
+		case OldTokenType::GreaterEqual:
 			op = OperatorType::GreaterEqual;
 			break;
 		}
@@ -222,10 +222,10 @@ ExpressionInternal* ExpressionParser::equalityExpression()
 		OperatorType op = OperatorType::Invalid;
 		switch (peekToken().type)
 		{
-		case TokenType::Equal:
+		case OldTokenType::Equal:
 			op = OperatorType::Equal;
 			break;
-		case TokenType::NotEqual:
+		case OldTokenType::NotEqual:
 			op = OperatorType::NotEqual;
 			break;
 		}
@@ -251,7 +251,7 @@ ExpressionInternal* ExpressionParser::andExpression()
 	if (exp ==  NULL)
 		return NULL;
 
-	while (peekToken().type == TokenType::BitAnd)
+	while (peekToken().type == OldTokenType::BitAnd)
 	{
 		eatToken();
 
@@ -271,7 +271,7 @@ ExpressionInternal* ExpressionParser::exclusiveOrExpression()
 	if (exp ==  NULL)
 		return NULL;
 
-	while (peekToken().type == TokenType::Caret)
+	while (peekToken().type == OldTokenType::Caret)
 	{
 		eatToken();
 
@@ -291,7 +291,7 @@ ExpressionInternal* ExpressionParser::inclusiveOrExpression()
 	if (exp ==  NULL)
 		return NULL;
 
-	while (peekToken().type == TokenType::BitOr)
+	while (peekToken().type == OldTokenType::BitOr)
 	{
 		eatToken();
 
@@ -311,7 +311,7 @@ ExpressionInternal* ExpressionParser::logicalAndExpression()
 	if (exp ==  NULL)
 		return NULL;
 
-	while (peekToken().type == TokenType::LogAnd)
+	while (peekToken().type == OldTokenType::LogAnd)
 	{
 		eatToken();
 
@@ -331,7 +331,7 @@ ExpressionInternal* ExpressionParser::logicalOrExpression()
 	if (exp ==  NULL)
 		return NULL;
 
-	while (peekToken().type == TokenType::LogOr)
+	while (peekToken().type == OldTokenType::LogOr)
 	{
 		eatToken();
 
@@ -347,14 +347,14 @@ ExpressionInternal* ExpressionParser::logicalOrExpression()
 
 ExpressionInternal* ExpressionParser::conditionalExpression()
 {
-	Token tok;
+	OldToken tok;
 
 	ExpressionInternal* exp = logicalOrExpression();
 	if (exp == NULL)
 		return NULL;
 
 	// check a ? b : c
-	if (peekToken().type != TokenType::Question)
+	if (peekToken().type != OldTokenType::Question)
 		return exp;
 
 	eatToken();
@@ -363,7 +363,7 @@ ExpressionInternal* ExpressionParser::conditionalExpression()
 	if (second == NULL)
 		return NULL;
 	
-	if (nextToken().type != TokenType::Colon)
+	if (nextToken().type != OldTokenType::Colon)
 		return NULL;
 
 	ExpressionInternal* third = expression();
@@ -454,7 +454,7 @@ bool ExpressionParser::convertFloat(size_t start, size_t end, double& result)
 	return true;
 }
 
-TokenType ExpressionParser::parseOperator()
+OldTokenType ExpressionParser::parseOperator()
 {
 	wchar_t first = input[inputPos];
 	wchar_t second = inputPos+1 >= input.size() ? '\0' : input[inputPos+1];
@@ -463,107 +463,107 @@ TokenType ExpressionParser::parseOperator()
 	{
 	case '(':
 		inputPos++;
-		return TokenType::LParen;
+		return OldTokenType::LParen;
 	case ')':
 		inputPos++;
-		return TokenType::RParen;
+		return OldTokenType::RParen;
 	case '+':
 		inputPos++;
-		return TokenType::Plus;
+		return OldTokenType::Plus;
 	case '-':
 		inputPos++;
-		return TokenType::Minus;
+		return OldTokenType::Minus;
 	case '*':
 		inputPos++;
-		return TokenType::Mult;
+		return OldTokenType::Mult;
 	case '/':
 		inputPos++;
-		return TokenType::Div;
+		return OldTokenType::Div;
 	case '%':
 		inputPos++;
-		return TokenType::Mod;
+		return OldTokenType::Mod;
 	case '^':
 		inputPos++;
-		return TokenType::Caret;
+		return OldTokenType::Caret;
 	case '~':
 		inputPos++;
-		return TokenType::Tilde;
+		return OldTokenType::Tilde;
 	case '<':
 		if (second == '<')
 		{
 			inputPos += 2;
-			return TokenType::LeftShift;
+			return OldTokenType::LeftShift;
 		}
 
 		if (second == '=')
 		{
 			inputPos += 2;
-			return TokenType::LessEqual;
+			return OldTokenType::LessEqual;
 		}
 	
 		inputPos++;
-		return TokenType::Less;
+		return OldTokenType::Less;
 	case '>':
 		if (second == '>')
 		{
 			inputPos += 2;
-			return TokenType::RightShift;
+			return OldTokenType::RightShift;
 		}
 
 		if (second == '=')
 		{
 			inputPos += 2;
-			return TokenType::GreaterEqual;
+			return OldTokenType::GreaterEqual;
 		}
 		
 		inputPos++;
-		return TokenType::Greater;
+		return OldTokenType::Greater;
 	case '=':
 		if (second == '=')
 		{
 			inputPos += 2;
-			return TokenType::Equal;
+			return OldTokenType::Equal;
 		}
 
-		return TokenType::Invalid;
+		return OldTokenType::Invalid;
 	case '!':
 		if (second == '=')
 		{
 			inputPos += 2;
-			return TokenType::NotEqual;
+			return OldTokenType::NotEqual;
 		}
 		
 		inputPos++;
-		return TokenType::Exclamation;
+		return OldTokenType::Exclamation;
 	case '&':
 		if (second == '&')
 		{
 			inputPos += 2;
-			return TokenType::LogAnd;
+			return OldTokenType::LogAnd;
 		}
 		
 		inputPos++;
-		return TokenType::BitAnd;
+		return OldTokenType::BitAnd;
 	case '|':
 		if (second == '|')
 		{
 			inputPos += 2;
-			return TokenType::LogOr;
+			return OldTokenType::LogOr;
 		}
 		
 		inputPos++;
-		return TokenType::BitOr;
+		return OldTokenType::BitOr;
 	case '?':
 		inputPos++;
-		return TokenType::Question;
+		return OldTokenType::Question;
 	case ':':
 		inputPos++;
-		return TokenType::Colon;
+		return OldTokenType::Colon;
 	case '.':
 		inputPos++;
-		return TokenType::Period;
+		return OldTokenType::Period;
 	default:
-		return TokenType::Invalid;
+		return OldTokenType::Invalid;
 	}
 }
 
@@ -573,7 +573,7 @@ bool ExpressionParser::loadToken()
 	currentToken.text.clear();
 
 	currentToken.type = parseOperator();
-	if (currentToken.type != TokenType::Invalid)
+	if (currentToken.type != OldTokenType::Invalid)
 		return true;
 
 	// character constants
@@ -583,7 +583,7 @@ bool ExpressionParser::loadToken()
 		if (inputPos+3 > input.size() || input[inputPos+2] != '\'')
 			return false;
 
-		currentToken.type = TokenType::Integer;
+		currentToken.type = OldTokenType::Integer;
 		currentToken.intNumber = input[inputPos+1];
 		
 		inputPos += 3;
@@ -618,7 +618,7 @@ bool ExpressionParser::loadToken()
 		if (!valid)
 			return false;
 		
-		currentToken.type = TokenType::String;
+		currentToken.type = OldTokenType::String;
 		return true;
 	}
 
@@ -644,11 +644,11 @@ bool ExpressionParser::loadToken()
 			
 		if (!isFloat)
 		{
-			currentToken.type = TokenType::Integer;
+			currentToken.type = OldTokenType::Integer;
 			if (convertInteger(start,end,currentToken.intNumber) == false)
 				return false;
 		} else { // isFloat
-			currentToken.type = TokenType::Float;
+			currentToken.type = OldTokenType::Float;
 			if (convertFloat(start,end,currentToken.floatNumber) == false)
 				return false;
 		}
@@ -657,7 +657,7 @@ bool ExpressionParser::loadToken()
 	}
 
 	// identifiers
-	currentToken.type = TokenType::Identifier;
+	currentToken.type = OldTokenType::Identifier;
 	bool isFirst = true;
 	while (inputPos < input.size() && Global.symbolTable.isValidSymbolCharacter(input[inputPos],isFirst))
 	{
@@ -667,14 +667,14 @@ bool ExpressionParser::loadToken()
 
 	if (currentToken.text.empty())
 	{
-		currentToken.type = TokenType::Invalid;
+		currentToken.type = OldTokenType::Invalid;
 		return false;
 	}
 
 	return true;
 }
 
-Token& ExpressionParser::nextToken()
+OldToken& ExpressionParser::nextToken()
 {
 	if (needNewToken)
 		loadToken();
@@ -683,7 +683,7 @@ Token& ExpressionParser::nextToken()
 	return currentToken;
 }
 
-Token& ExpressionParser::peekToken()
+OldToken& ExpressionParser::peekToken()
 {
 	if (needNewToken)
 	{

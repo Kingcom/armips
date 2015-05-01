@@ -1,6 +1,6 @@
 #pragma once
 
-enum class TokenType
+enum class OldTokenType
 {
 	Invalid,
 	Identifier,
@@ -34,9 +34,9 @@ enum class TokenType
 	Period,
 };
 
-struct Token
+struct OldToken
 {
-	TokenType type;
+	OldTokenType type;
 	std::wstring text;
 	u64 intNumber;
 	double floatNumber;
@@ -49,14 +49,14 @@ class ExpressionParser
 public:
 	ExpressionInternal* parse(const std::wstring& text);
 private:
-	bool getToken(size_t index, Token& dest);
+	bool getToken(size_t index, OldToken& dest);
 	bool convertInteger(size_t start, size_t end, u64& result);
 	bool convertFloat(size_t start, size_t end, double& result);
-	TokenType parseOperator();
+	OldTokenType parseOperator();
 
 	bool loadToken();
-	Token& nextToken();
-	Token& peekToken();
+	OldToken& nextToken();
+	OldToken& peekToken();
 	void eatToken();
 
 	ExpressionInternal* primaryExpression();
@@ -74,7 +74,7 @@ private:
 	ExpressionInternal* conditionalExpression();
 	ExpressionInternal* expression();
 
-	Token currentToken;
+	OldToken currentToken;
 	bool needNewToken;
 	std::wstring input;
 	size_t inputPos;
