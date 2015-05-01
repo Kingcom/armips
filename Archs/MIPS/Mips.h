@@ -25,6 +25,8 @@ class CMipsArchitecture: public CArchitecture
 {
 public:
 	CMipsArchitecture();
+	virtual CAssemblerCommand* parseDirective(Tokenizer& tokenizer);
+	virtual CAssemblerCommand* parseOpcode(Tokenizer& tokenizer);
 	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
 	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();

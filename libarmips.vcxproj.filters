@@ -75,9 +75,6 @@
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
-    <ClCompile Include="Archs\MIPS\MipsPSP.cpp">
-      <Filter>Archs\MIPS</Filter>
-    </ClCompile>
     <ClCompile Include="Archs\MIPS\PsxRelocator.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
@@ -175,6 +172,9 @@
     <ClCompile Include="Archs\ARM\ArmParser.cpp">
       <Filter>Archs\ARM</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsParser.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Archs\Architecture.h">
@@ -217,9 +217,6 @@
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h">
-      <Filter>Archs\MIPS</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\MIPS\MipsPSP.h">
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\PsxRelocator.h">
@@ -324,6 +321,9 @@
     </ClInclude>
     <ClInclude Include="Archs\ARM\ArmParser.h">
       <Filter>Archs\ARM</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsParser.h">
+      <Filter>Archs\MIPS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

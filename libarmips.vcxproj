@@ -230,7 +230,7 @@
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
-    <ClCompile Include="Archs\MIPS\MipsPSP.cpp" />
+    <ClCompile Include="Archs\MIPS\MipsParser.cpp" />
     <ClCompile Include="Archs\MIPS\PsxRelocator.cpp" />
     <ClCompile Include="Commands\CAssemblerCommand.cpp" />
     <ClCompile Include="Commands\CAssemblerLabel.cpp" />
@@ -287,7 +287,7 @@
     <ClInclude Include="Archs\MIPS\MipsElfFile.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />
-    <ClInclude Include="Archs\MIPS\MipsPSP.h" />
+    <ClInclude Include="Archs\MIPS\MipsParser.h" />
     <ClInclude Include="Archs\MIPS\PsxRelocator.h" />
     <ClInclude Include="Commands\CAssemblerCommand.h" />
     <ClInclude Include="Commands\CAssemblerLabel.h" />

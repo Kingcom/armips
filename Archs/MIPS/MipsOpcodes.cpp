@@ -38,6 +38,7 @@
 		d vpfxd parameter
 		c vcst constant
 		r vrot constant
+	w	'wb' characters
 */
 
 const tMipsOpcode MipsOpcodes[] = {
@@ -161,8 +162,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "svr.q",	"vt,(s)",			MIPS_OP(0x3D)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
 	{ "sv.q",	"vt,i16(s)",		MIPS_OP(0x3E),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
 	{ "sv.q",	"vt,(s)",			MIPS_OP(0x3E),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
-	{ "sv.q",	"vt,i16(s),/w/b",	MIPS_OP(0x3E)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
-	{ "sv.q",	"vt,(s),/w/b",		MIPS_OP(0x3E)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
+	{ "sv.q",	"vt,i16(s),w",		MIPS_OP(0x3E)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
+	{ "sv.q",	"vt,(s),w",			MIPS_OP(0x3E)|0x02,		MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT },
 	{ "sqc2",	"Vt,i16(s)",		MIPS_OP(0x3E),			MA_PS2,		MO_DELAYRT },
 	{ "sd",		"t,i16(s)",			MIPS_OP(0x3F),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "sd",		"t,(s)",			MIPS_OP(0x3F),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },

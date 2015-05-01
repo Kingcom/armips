@@ -8,6 +8,7 @@
 #include "MipsElfFile.h"
 #include "Commands/CDirectiveFile.h"
 #include "PsxRelocator.h"
+#include "MipsParser.h"
 
 CMipsArchitecture Mips;
 
@@ -269,13 +270,6 @@ const tDirective MipsDirectives[] = {
 	{ NULL,					0,	0,	NULL,	0 }
 };
 
-bool CMipsArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
-{
-	if (directiveAssemble(MipsDirectives,name,args) == true)
-		return true;
-	return directiveAssembleGlobal(name,args);
-}
-
 CMipsArchitecture::CMipsArchitecture()
 {
 	FixLoadDelay = false;
@@ -286,20 +280,29 @@ CMipsArchitecture::CMipsArchitecture()
 	Version = MARCH_INVALID;
 }
 
+CAssemblerCommand* CMipsArchitecture::parseDirective(Tokenizer& tokenizer)
+{
+	MipsParser parser;
+	return parser.parseDirective(tokenizer);
+}
+
+CAssemblerCommand* CMipsArchitecture::parseOpcode(Tokenizer& tokenizer)
+{
+	MipsParser parser;
+	return parser.parseOpcode(tokenizer);
+}
+
+
+bool CMipsArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
+{
+	Logger::printError(Logger::FatalError,L"Unsupported operation");
+	return false;
+}
+
 void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
 {
-	if (MipsCheckMacro((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
-	{
-		CMipsInstruction* Opcode = new CMipsInstruction();
-		if (Opcode->Load((char*)convertWStringToUtf8(name).c_str(),(char*)convertWStringToUtf8(args).c_str()) == false)
-		{
-			delete Opcode;
-			return;
-		}
-		AddAssemblerCommand(Opcode);
-		g_fileManager->advanceMemory(4);
-	}
-	SetIgnoreDelay(false);
+	Logger::printError(Logger::FatalError,L"Unsupported operation");
+	return;
 }
 
 void CMipsArchitecture::NextSection()
