@@ -7,6 +7,64 @@
 #include "Core/Common.h"
 #include "DirectivesParser.h"
 
+void TokenSequenceParser::addEntry(int result, TokenSequence tokens, TokenValueSequence values)
+{
+	Entry entry = { tokens, values, result };
+	entries.push_back(entry);
+}
+
+bool TokenSequenceParser::parse(Tokenizer& tokenizer, int& result)
+{
+	for (Entry& entry: entries)
+	{
+		size_t pos = tokenizer.getPosition();
+		auto values = entry.values.begin();
+
+		bool valid = true;
+		for (TokenType type: entry.tokens)
+		{
+			// check of token type matches
+			Token& token = tokenizer.nextToken();
+			if (token.type != type)
+			{
+				valid = false;
+				break;
+			}
+
+			// if necessary, check if the value of the token also matches
+			if (type == TokenType::Identifier)
+			{
+				if (values == entry.values.end() || values->textValue != token.stringValue)
+				{
+					valid = false;
+					break;
+				}
+				
+				values++;
+			} else if (type == TokenType::Integer)
+			{
+				if (values == entry.values.end() || values->intValue != token.intValue)
+				{
+					valid = false;
+					break;
+				}
+				
+				values++;
+			} 
+		}
+
+		if (valid && values == entry.values.end())
+		{
+			result = entry.result;
+			return true;
+		}
+
+		tokenizer.setPosition(pos);
+	}
+
+	return false;
+}
+
 bool checkEquLabel(Tokenizer& tokenizer)
 {
 	if (tokenizer.peekToken(0).type == TokenType::Identifier)
