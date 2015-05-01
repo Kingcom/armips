@@ -169,6 +169,12 @@
     <ClCompile Include="Parser\ExpressionParser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
+    <ClCompile Include="Parser\DirectivesParser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser\Parser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Archs\Architecture.h">
@@ -311,6 +317,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Parser\ExpressionParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser\DirectivesParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser\Parser.h">
       <Filter>Parser</Filter>
     </ClInclude>
   </ItemGroup>

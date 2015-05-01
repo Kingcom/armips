@@ -2,17 +2,23 @@
 #include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Common.h"
+#include "Core/Expression.h"
 
 class CDirectiveMessage: public CAssemblerCommand
 {
 public:
 	enum class Type { Invalid, Warning, Error, Notice };
 	CDirectiveMessage() { errorType = Type::Invalid; };
+
+	
+	CDirectiveMessage(Type type, Expression exp) { errorType = type; this->exp = exp; };
+
 	bool Load(ArgumentList& Args, Type type);
 	virtual bool Validate();
 	virtual void Encode() {};
 	virtual void writeTempData(TempData& tempData) { };
 private:
+	Expression exp;
 	std::wstring message;
 	Type errorType;
 };

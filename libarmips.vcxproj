@@ -252,7 +252,9 @@
     <ClCompile Include="Core\Misc.cpp" />
     <ClCompile Include="Core\SymbolData.cpp" />
     <ClCompile Include="Core\SymbolTable.cpp" />
+    <ClCompile Include="Parser\DirectivesParser.cpp" />
     <ClCompile Include="Parser\ExpressionParser.cpp" />
+    <ClCompile Include="Parser\Parser.cpp" />
     <ClCompile Include="Parser\Tokenizer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -309,7 +311,9 @@
     <ClInclude Include="Core\SymbolData.h" />
     <ClInclude Include="Core\SymbolTable.h" />
     <ClInclude Include="ext\tinyformat\tinyformat.h" />
+    <ClInclude Include="Parser\DirectivesParser.h" />
     <ClInclude Include="Parser\ExpressionParser.h" />
+    <ClInclude Include="Parser\Parser.h" />
     <ClInclude Include="Parser\Tokenizer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\ByteArray.h" />
