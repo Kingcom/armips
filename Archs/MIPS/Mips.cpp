@@ -9,6 +9,7 @@
 #include "Commands/CDirectiveFile.h"
 #include "PsxRelocator.h"
 #include "MipsParser.h"
+#include "Parser/Parser.h"
 
 CMipsArchitecture Mips;
 
@@ -47,68 +48,66 @@ void MipsElfRelocator::setSymbolAddress(RelocationData& data, u64 symbolAddress,
 	data.targetSymbolType = symbolType;
 }
 
+const wchar_t* mipsCtorTemplate = LR"(
+	addiu	sp,-32
+	sw		ra,0(sp)
+	sw		s0,4(sp)
+	sw		s1,8(sp)
+	sw		s2,12(sp)
+	sw		s3,16(sp)
+	li		s0,%ctorTable%
+	li		s1,%ctorTable%+%ctorTableSize%
+	%outerLoopLabel%:
+	lw		s2,(s0)
+	lw		s3,4(s0)
+	addiu	s0,8
+	%innerLoopLabel%:
+	lw		a0,(s2)
+	jalr	a0
+	addiu	s2,4h
+	bne		s2,s3,%innerLoopLabel%
+	nop
+	bne		s0,s1,%outerLoopLabel%
+	nop
+	lw		ra,0(sp)
+	lw		s0,4(sp)
+	lw		s1,8(sp)
+	lw		s2,12(sp)
+	lw		s3,16(sp)
+	jr		ra
+	addiu	sp,32
+	%ctorTable%:
+	.word	%ctorContent%
+)";
+
+CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
+{
+	if (ctors.size() != 0)
+	{
+		// create constructor table
+		std::wstring table;
+		for (size_t i = 0; i < ctors.size(); i++)
+		{
+			if (i != 0)
+				table += ',';
+			table += formatString(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+		}
+
+		return parseTemplate(mipsCtorTemplate,{
+			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
+			{ L"%ctorTableSize%",	formatString(L"%d",ctors.size()*8) },
+			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
+			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
+			{ L"%ctorContent%",		table },
+		});
+	} else {
+		return parseTemplate(L"jr ra nop");
+	}
+}
 
 void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 {
-	if (ctors.size() == 0)
-	{
-		Mips.AssembleOpcode(L"jr",L"ra");
-		Mips.AssembleOpcode(L"nop",L"");
-		return;
-	}
-
-	Mips.AssembleOpcode(L"addiu",L"sp,-32");
-	Mips.AssembleOpcode(L"sw",L"ra,0(sp)");
-	Mips.AssembleOpcode(L"sw",L"s0,4(sp)");
-	Mips.AssembleOpcode(L"sw",L"s1,8(sp)");
-	Mips.AssembleOpcode(L"sw",L"s2,12(sp)");
-	Mips.AssembleOpcode(L"sw",L"s3,16(sp)");
-
-	std::wstring tableLabel = Global.symbolTable.getUniqueLabelName();
-
-	Mips.AssembleOpcode(L"li",formatString(L"s0,%s",tableLabel));
-	Mips.AssembleOpcode(L"li",formatString(L"s1,%s+0x%08X",tableLabel,ctors.size()*8));
-
-	std::wstring outerLoop = Global.symbolTable.getUniqueLabelName();
-	addAssemblerLabel(outerLoop);
-
-	Mips.AssembleOpcode(L"lw",L"s2,(s0)");
-	Mips.AssembleOpcode(L"lw",L"s3,4(s0)");
-	Mips.AssembleOpcode(L"addiu",L"s0,8");
-
-	std::wstring innerLoop = Global.symbolTable.getUniqueLabelName();
-	addAssemblerLabel(innerLoop);
-
-	Mips.AssembleOpcode(L"lw",L"a0,(s2)");
-	Mips.AssembleOpcode(L"jalr",L"a0");
-	Mips.AssembleOpcode(L"addiu",L"s2,4h");
-
-	Mips.AssembleOpcode(L"bne",formatString(L"s2,s3,%s",innerLoop));
-	Mips.AssembleOpcode(L"nop",L"");
-	
-	Mips.AssembleOpcode(L"bne",formatString(L"s0,s1,%s",outerLoop));
-	Mips.AssembleOpcode(L"nop",L"");
-	
-	Mips.AssembleOpcode(L"lw",L"ra,0(sp)");
-	Mips.AssembleOpcode(L"lw",L"s0,4(sp)");
-	Mips.AssembleOpcode(L"lw",L"s1,8(sp)");
-	Mips.AssembleOpcode(L"lw",L"s2,12(sp)");
-	Mips.AssembleOpcode(L"lw",L"s3,16(sp)");
-	Mips.AssembleOpcode(L"jr",L"ra");
-	Mips.AssembleOpcode(L"addiu",L"sp,32");
-
-	// add data
-	addAssemblerLabel(tableLabel);
-
-	std::wstring data;
-	for (size_t i = 0; i < ctors.size(); i++)
-	{
-		data += ctors[i].symbolName;
-		data += formatString(L",%s+0x%08X,",ctors[i].symbolName,ctors[i].size);
-	}
-
-	data.pop_back();	// remove trailing comma
-	Mips.AssembleDirective(L".word",data);
+	Logger::printError(Logger::FatalError,L"Unsupported operation");
 }
 
 bool MipsDirectiveResetDelay(ArgumentList& List, int flags)
@@ -228,7 +227,6 @@ IElfRelocator* CMipsArchitecture::getElfRelocator()
 		return NULL;
 	}
 }
-
 
 void CMipsArchitecture::SetLoadDelay(bool Delay, int Register)
 {
