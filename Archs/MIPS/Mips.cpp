@@ -289,6 +289,11 @@ CAssemblerCommand* CMipsArchitecture::parseDirective(Tokenizer& tokenizer)
 CAssemblerCommand* CMipsArchitecture::parseOpcode(Tokenizer& tokenizer)
 {
 	MipsParser parser;
+
+	CAssemblerCommand* macro = parser.parseMacro(tokenizer);
+	if (macro != nullptr)
+		return macro;
+
 	return parser.parseOpcode(tokenizer);
 }
 

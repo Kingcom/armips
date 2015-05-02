@@ -60,9 +60,6 @@
     <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
-    <ClCompile Include="Archs\MIPS\CMipsMacro.cpp">
-      <Filter>Archs\MIPS</Filter>
-    </ClCompile>
     <ClCompile Include="Archs\MIPS\Mips.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
@@ -202,9 +199,6 @@
       <Filter>Archs\ARM</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\CMipsInstruction.h">
-      <Filter>Archs\MIPS</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\MIPS\CMipsMacro.h">
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\Mips.h">

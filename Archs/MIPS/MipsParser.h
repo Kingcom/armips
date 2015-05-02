@@ -1,6 +1,7 @@
 #pragma once
 #include "Parser/Tokenizer.h"
 #include "CMipsInstruction.h"
+#include "MipsMacros.h"
 
 struct MipsRegisterDescriptor {
 	const wchar_t* name;
@@ -12,6 +13,7 @@ class MipsParser
 public:
 	CAssemblerCommand* parseDirective(Tokenizer& tokenizer);
 	CMipsInstruction* parseOpcode(Tokenizer& tokenizer);
+	CAssemblerCommand* parseMacro(Tokenizer& tokenizer);
 private:
 	bool parseRegisterTable(Tokenizer& tokenizer, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);
 	bool parseRegister(Tokenizer& tokenizer, MipsRegisterValue& dest);
@@ -36,6 +38,7 @@ private:
 	void setOmittedRegisters(const tMipsOpcode& opcode);
 	bool matchSymbol(Tokenizer& tokenizer, wchar_t symbol);
 	bool parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode);
+	bool parseMacroParameters(Tokenizer& tokenizer, const MipsMacroDefinition& macro);
 
 	MipsRegisterData registers;
 	MipsImmediateData immediate;

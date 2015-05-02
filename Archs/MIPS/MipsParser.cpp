@@ -1086,3 +1086,64 @@ CMipsInstruction* MipsParser::parseOpcode(Tokenizer& tokenizer)
 
 	return nullptr;
 }
+
+bool MipsParser::parseMacroParameters(Tokenizer& tokenizer, const MipsMacroDefinition& macro)
+{
+	const wchar_t* encoding = (const wchar_t*) macro.args;
+
+	while (*encoding != 0)
+	{
+		switch (*encoding++)
+		{
+		case 't':	// register
+			CHECK(parseRegister(tokenizer,registers.grt));
+			break;
+		case 'd':	// register
+			CHECK(parseRegister(tokenizer,registers.grd));
+			break;
+		case 's':	// register
+			CHECK(parseRegister(tokenizer,registers.grs));
+			break;
+		case 'i':	// primary immediate
+			CHECK(parseImmediate(tokenizer,immediate.primary.expression));
+			break;
+		case 'I':	// secondary immediate
+			CHECK(parseImmediate(tokenizer,immediate.secondary.expression));
+			break;
+		default:
+			CHECK(matchSymbol(tokenizer,*(encoding-1)));
+			break;
+		}
+	}
+
+	return true;
+}
+
+CAssemblerCommand* MipsParser::parseMacro(Tokenizer& tokenizer)
+{
+	size_t startPos = tokenizer.getPosition();
+
+	Token token = tokenizer.peekToken();
+	if (token.type != TokenType::Identifier)
+		return nullptr;
+	
+	tokenizer.eatToken();
+	for (int z = 0; mipsMacros[z].name != NULL; z++)
+	{
+		if (token.stringValue == mipsMacros[z].name)
+		{
+			size_t tokenPos = tokenizer.getPosition();
+
+			if (parseMacroParameters(tokenizer,mipsMacros[z]) == true)
+			{
+				return mipsMacros[z].function(registers,immediate,mipsMacros[z].flags);
+			}
+
+			tokenizer.setPosition(tokenPos);
+		}
+	}
+
+	// no matching macro found, restore state
+	tokenizer.setPosition(startPos);
+	return nullptr;
+}

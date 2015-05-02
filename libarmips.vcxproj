@@ -225,7 +225,6 @@
     <ClCompile Include="Archs\ARM\Pool.cpp" />
     <ClCompile Include="Archs\ARM\ThumbOpcodes.cpp" />
     <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp" />
-    <ClCompile Include="Archs\MIPS\CMipsMacro.cpp" />
     <ClCompile Include="Archs\MIPS\Mips.cpp" />
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
@@ -282,7 +281,6 @@
     <ClInclude Include="Archs\ARM\Pool.h" />
     <ClInclude Include="Archs\ARM\ThumbOpcodes.h" />
     <ClInclude Include="Archs\MIPS\CMipsInstruction.h" />
-    <ClInclude Include="Archs\MIPS\CMipsMacro.h" />
     <ClInclude Include="Archs\MIPS\Mips.h" />
     <ClInclude Include="Archs\MIPS\MipsElfFile.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
