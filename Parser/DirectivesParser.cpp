@@ -20,6 +20,63 @@
 #include <algorithm>
 #include "Parser.h"
 
+CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
+{
+	std::wstring name;
+	Expression exp;
+
+	CDirectiveConditional* cond;
+
+	switch (flags)
+	{
+	case DIRECTIVE_COND_IF:
+		exp = parseExpression(tokenizer);
+		cond = new CDirectiveConditional(ConditionType::IF,exp);
+		break;
+	case DIRECTIVE_COND_IFDEF:
+		if (parseIdentifier(tokenizer,name) == false)
+			return nullptr;		
+		cond = new CDirectiveConditional(ConditionType::IFDEF,name);
+		break;
+	case DIRECTIVE_COND_IFNDEF:
+		if (parseIdentifier(tokenizer,name) == false)
+			return nullptr;
+		cond = new CDirectiveConditional(ConditionType::IFNDEF,name);
+		break;
+	case DIRECTIVE_COND_IFARM:
+		cond = new CDirectiveConditional(ConditionType::IFARM);
+		break;
+	case DIRECTIVE_COND_IFTHUMB:
+		cond = new CDirectiveConditional(ConditionType::IFTHUMB);
+		break;
+	}
+
+	CommandSequence* ifBlock = parseCommandSequence(tokenizer,{L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	
+	CAssemblerCommand* elseBlock = nullptr;
+	Token next = tokenizer.nextToken();
+
+	if (next.stringValue == L".else")
+	{
+		elseBlock = parseCommandSequence(tokenizer,{L".endif"});
+	} else if (next.stringValue == L".elseif")
+	{
+		elseBlock = parseDirectiveConditional(tokenizer,DIRECTIVE_COND_IF);
+	} else if (next.stringValue == L".elseifdef")
+	{
+		elseBlock = parseDirectiveConditional(tokenizer,DIRECTIVE_COND_IFDEF);
+	} else if (next.stringValue == L".elseifndef")
+	{
+		elseBlock = parseDirectiveConditional(tokenizer,DIRECTIVE_COND_IFNDEF);
+	} else if (next.stringValue != L".endif")
+	{
+		return nullptr;
+	}
+
+	cond->setContent(ifBlock,elseBlock);
+	return cond;
+}
+
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet)
 {
 	Token tok = tokenizer.peekToken();
@@ -51,6 +108,12 @@ CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* di
 }
 
 const DirectiveEntry directives[] = {
+	{ L".if",				&parseDirectiveConditional,		DIRECTIVE_COND_IF },
+	{ L".ifdef",			&parseDirectiveConditional,		DIRECTIVE_COND_IFDEF },
+	{ L".ifndef",			&parseDirectiveConditional,		DIRECTIVE_COND_IFNDEF },
+	{ L".ifarm",			&parseDirectiveConditional,		DIRECTIVE_COND_IFARM },
+	{ L".ifthumb",			&parseDirectiveConditional,		DIRECTIVE_COND_IFTHUMB },
+
 	{ nullptr,				nullptr,						0 }
 };
 

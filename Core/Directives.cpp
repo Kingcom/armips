@@ -367,36 +367,6 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveConditional(ArgumentList& List, int flags)
-{
-	ConditionType value;
-
-	switch (flags)
-	{
-	case DIRECTIVE_COND_IF:			value = ConditionType::IF; break;
-	case DIRECTIVE_COND_ELSE:		value = ConditionType::ELSE; break;
-	case DIRECTIVE_COND_ELSEIF:		value = ConditionType::ELSEIF; break;
-	case DIRECTIVE_COND_ENDIF:		value = ConditionType::ENDIF; break;
-	case DIRECTIVE_COND_IFDEF:		value = ConditionType::IFDEF; break;
-	case DIRECTIVE_COND_IFNDEF:		value = ConditionType::IFNDEF; break;
-	case DIRECTIVE_COND_ELSEIFDEF:	value = ConditionType::ELSEIFDEF; break;
-	case DIRECTIVE_COND_ELSEIFNDEF:	value = ConditionType::ELSEIFNDEF; break;
-	case DIRECTIVE_COND_IFARM:		value = ConditionType::IFARM; break;
-	case DIRECTIVE_COND_IFTHUMB:	value = ConditionType::IFTHUMB; break;
-	default: return false;
-	}
-
-	CDirectiveConditional* Command = new CDirectiveConditional();
-	if (Command->Load(List,value) == false)
-	{
-		delete Command;
-		return false;
-	}
-
-	AddAssemblerCommand(Command);
-	return true;
-}
-
 bool DirectiveArea(ArgumentList& List, int flags)
 {
 	CDirectiveArea* Command;
@@ -721,17 +691,6 @@ const tDirective Directives[] = {
 	{ L"dcw",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16 },
 	{ L"dcd",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32 },
 	{ L".ascii",			1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8|DIRECTIVE_DATA_ASCII },
-
-	{ L".if",				1,	1,	&DirectiveConditional,		DIRECTIVE_COND_IF },
-	{ L".else",				0,	0,	&DirectiveConditional,		DIRECTIVE_COND_ELSE },
-	{ L".elseif",			1,	1,	&DirectiveConditional,		DIRECTIVE_COND_ELSEIF },
-	{ L".endif",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_ENDIF },
-	{ L".ifdef",			1,	1,	&DirectiveConditional,		DIRECTIVE_COND_IFDEF },
-	{ L".ifndef",			1,	1,	&DirectiveConditional,		DIRECTIVE_COND_IFNDEF },
-	{ L".elseifdef",		1,	1,	&DirectiveConditional,		DIRECTIVE_COND_ELSEIFDEF },
-	{ L".elseifndef",		1,	1,	&DirectiveConditional,		DIRECTIVE_COND_ELSEIFNDEF },
-	{ L".ifarm",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_IFARM },
-	{ L".ifthumb",			0,	0,	&DirectiveConditional,		DIRECTIVE_COND_IFTHUMB },
 
 	{ L".area",				1,	2,	&DirectiveArea,				DIRECTIVE_AREA_START },
 	{ L".endarea",			0,	0,	&DirectiveArea,				DIRECTIVE_AREA_END },

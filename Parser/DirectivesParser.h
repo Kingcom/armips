@@ -19,5 +19,11 @@ typedef struct {
 #define DIRECTIVE_DISABLED			0x00080000
 #define DIRECTIVE_NOTINMEMORY		0x00100000
 
+// conditional directive flags
+#define DIRECTIVE_COND_IF			0x00000001
+#define DIRECTIVE_COND_IFDEF		0x00000002
+#define DIRECTIVE_COND_IFNDEF		0x00000003
+#define DIRECTIVE_COND_IFARM		0x00000004
+#define DIRECTIVE_COND_IFTHUMB		0x00000005
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet);
 CAssemblerCommand* parseGlobalDirective(Tokenizer& tokenizer);

@@ -20,17 +20,23 @@ enum class ConditionType
 class CDirectiveConditional: public CAssemblerCommand
 {
 public:
-	CDirectiveConditional();
-	bool Load(ArgumentList& Args, ConditionType command);
+	CDirectiveConditional(ConditionType type);
+	CDirectiveConditional(ConditionType type, const std::wstring& name);
+	CDirectiveConditional(ConditionType type, const Expression& exp);
+	~CDirectiveConditional();
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData) { };
-	virtual bool IsConditional() { return true; };
+	void setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock);
 private:
-	void Execute();
-	Expression Expression;
-	std::wstring labelName;
-	u64 Value;
-	u64 RamPos;
+	bool evaluate();
+
+	Expression expression;
+	Label* label;
+	u32 armState;
+	bool previousResult;
+
 	ConditionType type;
+	CAssemblerCommand* ifBlock;
+	CAssemblerCommand* elseBlock;
 };
