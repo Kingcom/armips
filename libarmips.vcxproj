@@ -267,7 +267,6 @@
     <ClCompile Include="Util\CRC.cpp" />
     <ClCompile Include="Util\EncodingTable.cpp" />
     <ClCompile Include="Util\FileClasses.cpp" />
-    <ClCompile Include="Util\StringFormat.cpp" />
     <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -311,13 +310,13 @@
     <ClInclude Include="Core\Misc.h" />
     <ClInclude Include="Core\SymbolData.h" />
     <ClInclude Include="Core\SymbolTable.h" />
+    <ClInclude Include="ext\tinyformat\tinyformat.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\ByteArray.h" />
     <ClInclude Include="Util\CommonClasses.h" />
     <ClInclude Include="Util\CRC.h" />
     <ClInclude Include="Util\EncodingTable.h" />
     <ClInclude Include="Util\FileClasses.h" />
-    <ClInclude Include="Util\StringFormat.h" />
     <ClInclude Include="Util\Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "ByteArray.h"
-#include "StringFormat.h"
 
 typedef std::vector<std::wstring> StringList;
 

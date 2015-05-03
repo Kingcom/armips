@@ -25,6 +25,12 @@
     <Filter Include="Util">
       <UniqueIdentifier>{b5ae6780-190b-480d-a356-20b3c69e6a7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ext">
+      <UniqueIdentifier>{f5bcf5e1-9ad8-4f34-ab14-6c04ef80f1c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ext\tinyformat">
+      <UniqueIdentifier>{cca034bb-30ca-48d3-9283-e9def7f9b1bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Archs\Architecture.cpp">
@@ -151,9 +157,6 @@
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="Util\FileClasses.cpp">
-      <Filter>Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Util\StringFormat.cpp">
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="Util\Util.cpp">
@@ -297,9 +300,6 @@
     <ClInclude Include="Util\FileClasses.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="Util\StringFormat.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="Util\Util.h">
       <Filter>Util</Filter>
     </ClInclude>
@@ -309,6 +309,9 @@
     </ClInclude>
     <ClInclude Include="Core\Expression.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\tinyformat\tinyformat.h">
+      <Filter>ext\tinyformat</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
