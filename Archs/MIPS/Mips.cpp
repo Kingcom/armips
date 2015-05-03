@@ -110,48 +110,6 @@ void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 	Logger::printError(Logger::FatalError,L"Unsupported operation");
 }
 
-bool MipsDirectiveResetDelay(ArgumentList& List, int flags)
-{
-	Mips.SetIgnoreDelay(true);
-	return true;
-}
-
-bool MipsDirectiveFixLoadDelay(ArgumentList& List, int flags)
-{
-	Mips.SetFixLoadDelay(true);
-	return true;
-}
-
-bool MipsDirectiveLoadElf(ArgumentList& list, int flags)
-{
-	DirectiveLoadMipsElf* command = new DirectiveLoadMipsElf(list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool MipsDirectiveImportObj(ArgumentList& list, int flags)
-{
-	if (Mips.GetVersion() == MARCH_PSX)
-	{
-		DirectivePsxObjImport* command = new DirectivePsxObjImport(list);
-		AddAssemblerCommand(command);
-		return true;
-	}
-	
-	DirectiveObjImport* command = new DirectiveObjImport(list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-const tDirective MipsDirectives[] = {
-	{ L".resetdelay",		0,	0,	&MipsDirectiveResetDelay,	0 },
-	{ L".fixloaddelay",		0,	0,	&MipsDirectiveFixLoadDelay,	0 },
-	{ L".loadelf",			1,	2,	&MipsDirectiveLoadElf,		0 },
-	{ L".importobj",		1,	2,	&MipsDirectiveImportObj,		0 },
-	{ L".importlib",		1,	2,	&MipsDirectiveImportObj,		0 },
-	{ NULL,					0,	0,	NULL,	0 }
-};
-
 CMipsArchitecture::CMipsArchitecture()
 {
 	FixLoadDelay = false;

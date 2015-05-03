@@ -69,7 +69,7 @@ private:
 class DirectivePsxObjImport: public CAssemblerCommand
 {
 public:
-	DirectivePsxObjImport(ArgumentList& args);
+	DirectivePsxObjImport(const std::wstring& fileName);
 	~DirectivePsxObjImport() { };
 	virtual bool Validate();
 	virtual void Encode();

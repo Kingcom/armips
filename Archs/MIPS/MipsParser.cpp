@@ -4,6 +4,10 @@
 #include "Parser/ExpressionParser.h"
 #include "Util/Util.h"
 #include "Core/Common.h"
+#include "PsxRelocator.h"
+#include "MipsElfFile.h"
+#include "Commands/CDirectiveFile.h"
+#include "Parser/DirectivesParser.h"
 
 #define CHECK(exp) if (!(exp)) return false;
 
@@ -54,9 +58,72 @@ const MipsRegisterDescriptor mipsPs2Cop2FpRegisters[] = {
 	{ L"vf30", 30 },	{ L"vf31", 31 },
 };
 
+CAssemblerCommand* parseDirectiveResetDelay(Tokenizer& tokenizer, int flags)
+{
+	Mips.SetIgnoreDelay(true);
+	return new DummyCommand();
+}
+
+CAssemblerCommand* parseDirectiveFixLoadDelay(Tokenizer& tokenizer, int flags)
+{
+	Mips.SetFixLoadDelay(true);
+	return new DummyCommand();
+}
+
+CAssemblerCommand* parseDirectiveLoadElf(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+
+	if (checkExpressionListSize(list,1,2) == false)
+		return nullptr;
+
+	std::wstring inputName, outputName;
+	if (list[0].evaluateString(inputName,true) == false)
+		return nullptr;
+
+	if (list.size() == 2)
+	{
+		if (list[1].evaluateString(outputName,true) == false)
+			return nullptr;
+		return new DirectiveLoadMipsElf(inputName,outputName);
+	} else {
+		return new DirectiveLoadMipsElf(inputName);
+	}
+}
+
+CAssemblerCommand* parseDirectiveImportObj(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+
+	if (checkExpressionListSize(list,1,1) == false)
+		return nullptr;
+
+	std::wstring inputName;
+	if (list[0].evaluateString(inputName,true) == false)
+		return nullptr;
+
+	if (Mips.GetVersion() == MARCH_PSX)
+		return new DirectivePsxObjImport(inputName);
+	else
+		return new DirectiveObjImport(inputName);
+}
+
+const DirectiveEntry mipsDirectives[] = {
+	{ L".resetdelay",		&parseDirectiveResetDelay,		0 },
+	{ L".fixloaddelay",		&parseDirectiveFixLoadDelay,	0 },
+	{ L".loadelf",			&parseDirectiveLoadElf,			0 },
+	{ L".importobj",		&parseDirectiveImportObj,		0 },
+	{ L".importlib",		&parseDirectiveImportObj,		0 },
+	{ NULL,					NULL,							0 }
+};
+
 CAssemblerCommand* MipsParser::parseDirective(Tokenizer& tokenizer)
 {
-	return nullptr;
+	return ::parseDirective(tokenizer,mipsDirectives);
 }
 
 bool MipsParser::parseRegisterTable(Tokenizer& tokenizer, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)

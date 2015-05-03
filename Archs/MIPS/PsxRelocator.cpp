@@ -519,9 +519,9 @@ void PsxRelocator::writeSymbols(SymbolData& symData)
 // DirectivePsxObjImport
 //
 
-DirectivePsxObjImport::DirectivePsxObjImport(ArgumentList& args)
+DirectivePsxObjImport::DirectivePsxObjImport(const std::wstring& fileName)
 {
-	if (rel.init(args[0].text))
+	if (rel.init(fileName))
 	{
 	}
 }

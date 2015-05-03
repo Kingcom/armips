@@ -38,7 +38,8 @@ private:
 class DirectiveLoadMipsElf: public CAssemblerCommand
 {
 public:
-	DirectiveLoadMipsElf(ArgumentList& args);
+	DirectiveLoadMipsElf(const std::wstring& fileName);
+	DirectiveLoadMipsElf(const std::wstring& inputName, const std::wstring& outputName);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);

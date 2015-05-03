@@ -245,30 +245,34 @@ void MipsElfFile::save()
 // DirectiveLoadPspElf
 //
 
-DirectiveLoadMipsElf::DirectiveLoadMipsElf(ArgumentList& args)
+DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& fileName)
 {
 	file = new MipsElfFile();
 
-	if (args.size() == 2)
+	this->inputName = getFullPathName(fileName);
+	if (file->load(this->inputName,this->inputName) == false)
 	{
-		inputName = getFullPathName(args[0].text);
-		outputName = getFullPathName(args[1].text);
-		if (file->load(inputName,outputName) == false)
-		{
-			delete file;
-			file = NULL;
-			return;
-		}
-	} else {
-		inputName = getFullPathName(args[0].text);
-		if (file->load(inputName,inputName) == false)
-		{
-			delete file;
-			file = NULL;
-			return;
-		}
+		delete file;
+		file = NULL;
+		return;
 	}
+	
+	g_fileManager->addFile(file);
+}
 
+DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& inputName, const std::wstring& outputName)
+{
+	file = new MipsElfFile();
+
+	this->inputName = getFullPathName(inputName);
+	this->outputName = getFullPathName(outputName);
+	if (file->load(this->inputName,this->outputName) == false)
+	{
+		delete file;
+		file = NULL;
+		return;
+	}
+	
 	g_fileManager->addFile(file);
 }
 
