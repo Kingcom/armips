@@ -41,3 +41,17 @@ public:
 	virtual void writeTempData(TempData& tempData) { };
 	virtual void writeSymData(SymbolData& symData) { };
 };
+
+class CommentCommand: public CAssemblerCommand
+{
+public:
+	CommentCommand(const std::wstring& tempText, const std::wstring& symText);
+	virtual bool Validate();
+	virtual void Encode() { };
+	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData);
+private:
+	u64 position;
+	std::wstring tempText;
+	std::wstring symText;
+};

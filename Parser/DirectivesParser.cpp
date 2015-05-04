@@ -236,6 +236,46 @@ CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 	return cond;
 }
 
+CAssemblerCommand* parseDirectivePsx(Tokenizer& tokenizer, int flags)
+{
+	Arch = &Mips;
+	Mips.SetLoadDelay(false,0);
+	Mips.SetVersion(MARCH_PSX);
+	return new CommentCommand(L".psx",L"");
+}
+
+CAssemblerCommand* parseDirectivePs2(Tokenizer& tokenizer, int flags)
+{
+	Arch = &Mips;
+	Mips.SetLoadDelay(false,0);
+	Mips.SetVersion(MARCH_PS2);
+	return new CommentCommand(L".ps2",L"");
+}
+
+CAssemblerCommand* parseDirectivePsp(Tokenizer& tokenizer, int flags)
+{
+	Arch = &Mips;
+	Mips.SetLoadDelay(false,0);
+	Mips.SetVersion(MARCH_PSP);
+	return new CommentCommand(L".psp",L"");
+}
+
+CAssemblerCommand* parseDirectiveGba(Tokenizer& tokenizer, int flags)
+{
+	Arch = &Arm;
+	Arm.SetThumbMode(true);
+	Arm.SetArm9(false);
+	return new CommentCommand(L".gba\n.thumb",L".thumb");
+}
+
+CAssemblerCommand* parseDirectiveNds(Tokenizer& tokenizer, int flags)
+{
+	Arch = &Arm;
+	Arm.SetThumbMode(false);
+	Arm.SetArm9(true);
+	return new CommentCommand(L".nds\n.arm",L".arm");
+}
+
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet)
 {
 	Token tok = tokenizer.peekToken();
@@ -289,6 +329,12 @@ const DirectiveEntry directives[] = {
 	{ L".ifndef",			&parseDirectiveConditional,		DIRECTIVE_COND_IFNDEF },
 	{ L".ifarm",			&parseDirectiveConditional,		DIRECTIVE_COND_IFARM },
 	{ L".ifthumb",			&parseDirectiveConditional,		DIRECTIVE_COND_IFTHUMB },
+
+	{ L".psx",				&parseDirectivePsx,				0 },
+	{ L".ps2",				&parseDirectivePs2,				0 },
+	{ L".psp",				&parseDirectivePsp,				0 },
+	{ L".gba",				&parseDirectiveGba,				0 },
+	{ L".nds",				&parseDirectiveNds,				0 },
 
 	{ nullptr,				nullptr,						0 }
 };

@@ -206,52 +206,6 @@ bool DirectiveSJIS(ArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectivePsx(ArgumentList& List, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false,0);
-	Mips.SetVersion(MARCH_PSX);
-	return true;
-}
-
-bool DirectivePs2(ArgumentList& List, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false,0);
-	Mips.SetVersion(MARCH_PS2);
-	return true;
-}
-
-bool DirectivePsp(ArgumentList& List, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false,0);
-	Mips.SetVersion(MARCH_PSP);
-	return true;
-}
-
-bool DirectiveGba(ArgumentList& List, int flags)
-{
-	Arch = &Arm;
-	Arm.SetThumbMode(true);
-	Arm.SetArm9(false);
-	
-	ArmStateCommand* cmd = new ArmStateCommand(false);
-	AddAssemblerCommand(cmd);
-	return true;
-}
-
-bool DirectiveNds(ArgumentList& List, int flags)
-{
-	Arch = &Arm;
-	Arm.SetThumbMode(false);
-	Arm.SetArm9(true);
-
-	ArmStateCommand* cmd = new ArmStateCommand(true);
-	AddAssemblerCommand(cmd);
-	return true;
-}
-
 bool DirectiveNocash(ArgumentList& List, int flags)
 {
 	if (List.size() == 1)
@@ -613,11 +567,6 @@ const tDirective Directives[] = {
 	{ L".strn",				1,	-1,	&DirectiveString,			DIRECTIVE_STR_NOTERMINATION },
 	{ L".sjis",				1,	-1,	&DirectiveSJIS,				0 },
 	{ L".sjisn",			1,	-1,	&DirectiveSJIS,				DIRECTIVE_STR_NOTERMINATION },
-	{ L".psx",				0,	0,	&DirectivePsx,				0 },
-	{ L".ps2",				0,	0,	&DirectivePs2,				0 },
-	{ L".psp",				0,	0,	&DirectivePsp,				0 },
-	{ L".gba",				0,	0,	&DirectiveGba,				0 },
-	{ L".nds",				0,	0,	&DirectiveNds,				0 },
 	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
 	{ L".definelabel",		2,	2,	&DirectiveDefineLabel,		0 },
 	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
