@@ -34,107 +34,6 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveNocash(ArgumentList& List, int flags)
-{
-	if (List.size() == 1)
-	{
-		if (List[0].text == L"on")
-		{
-			Global.nocash = true;
-		} else if (List[0].text == L"off")
-		{
-			Global.nocash = false;
-		} else {
-			Logger::printError(Logger::Error,L"Invalid arguments");
-			return false;
-		}
-	} else {
-		Global.nocash = true;
-	}
-	return true;
-}
-
-bool DirectiveMessage(ArgumentList& List, int flags)
-{
-	CDirectiveMessage::Type value;
-
-	switch (flags)
-	{
-	case DIRECTIVE_MSG_WARNING:		value = CDirectiveMessage::Type::Warning;	break;
-	case DIRECTIVE_MSG_ERROR:		value = CDirectiveMessage::Type::Error;		break;
-	case DIRECTIVE_MSG_NOTICE:		value = CDirectiveMessage::Type::Notice;	break;
-	default: return false;
-	}
-
-	CDirectiveMessage* Command = new CDirectiveMessage();
-	if (Command->Load(List,value) == false)
-	{
-		delete Command;
-		return false;
-	}
-
-	AddAssemblerCommand(Command);
-	return true;
-}
-
-
-bool DirectiveWarningAsError(ArgumentList& List, int flags)
-{
-	if (List.size() == 1)
-	{
-		if (List[0].text == L"on")
-		{
-			Logger::setErrorOnWarning(true);
-		} else if (List[0].text == L"off")
-		{
-			Logger::setErrorOnWarning(false);
-		} else {
-			Logger::printError(Logger::Error,L"Invalid arguments");
-			return false;
-		}
-	} else {
-		Logger::setErrorOnWarning(true);
-	}
-	return true;
-}
-
-bool DirectiveRelativeInclude(ArgumentList& List, int flags)
-{
-	if (List.size() == 1)
-	{
-		if (List[0].text == L"on")
-		{
-			Global.relativeInclude = true;
-		} else if (List[0].text == L"off")
-		{
-			Global.relativeInclude = false;
-		} else {
-			Logger::printError(Logger::Error,L"Invalid arguments");
-			return false;
-		}
-	} else {
-		Global.relativeInclude = true;
-	}
-	return true;
-}
-
-bool DirectiveSym(ArgumentList& List, int flags)
-{
-	if (List[0].text == L"on")
-	{
-		CDirectiveSym* sym = new CDirectiveSym(true);
-		AddAssemblerCommand(sym);
-	} else if (List[0].text == L"off")
-	{
-		CDirectiveSym* sym = new CDirectiveSym(false);
-		AddAssemblerCommand(sym);
-	} else {
-		Logger::printError(Logger::Error,L"Invalid arguments");
-		return false;
-	}
-	return true;
-}
-
 bool DirectiveImportObj(ArgumentList& list, int flags)
 {
 	DirectiveObjImport* command = new DirectiveObjImport(list);
@@ -297,16 +196,8 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 
 const tDirective Directives[] = {
 	{ L".include",			1,	2,	&DirectiveInclude,			0 },
-	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
-	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
-	{ L".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
-	{ L".sym",				1,	1,	&DirectiveSym,				0 },
 	{ L".importobj",		1,	2,	&DirectiveImportObj,		0 },
 	{ L".importlib",		1,	2,	&DirectiveImportObj,		0 },
-
-	{ L".warning",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_WARNING },
-	{ L".error",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_ERROR },
-	{ L".notice",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_NOTICE },
 
 	{ NULL,					0,	0,	NULL,						0 }
 };

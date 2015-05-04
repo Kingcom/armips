@@ -372,6 +372,89 @@ CAssemblerCommand* parseDirectiveArea(Tokenizer& tokenizer, int flags)
 	return area;
 }
 
+CAssemblerCommand* parseDirectiveErrorWarning(Tokenizer& tokenizer, int flags)
+{
+	Token tok = tokenizer.nextToken();
+
+	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+		return nullptr;
+
+	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+
+	if (tok.stringValue == L"on")
+	{	
+		Logger::setErrorOnWarning(true);
+		return new DummyCommand();
+	} else if (tok.stringValue == L"off")
+	{
+		Logger::setErrorOnWarning(false);
+		return new DummyCommand();
+	}
+
+	return nullptr;
+}
+
+CAssemblerCommand* parseDirectiveRelativeInclude(Tokenizer& tokenizer, int flags)
+{
+	Token tok = tokenizer.nextToken();
+
+	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+		return nullptr;
+
+	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+
+	if (tok.stringValue == L"on")
+	{	
+		Global.relativeInclude = true;
+		return new DummyCommand();
+	} else if (tok.stringValue == L"off")
+	{
+		Global.relativeInclude = false;
+		return new DummyCommand();
+	}
+
+	return nullptr;
+}
+
+CAssemblerCommand* parseDirectiveNocash(Tokenizer& tokenizer, int flags)
+{
+	Token tok = tokenizer.nextToken();
+
+	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+		return nullptr;
+
+	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+
+	if (tok.stringValue == L"on")
+	{	
+		Global.nocash = true;
+		return new DummyCommand();
+	} else if (tok.stringValue == L"off")
+	{
+		Global.nocash = false;
+		return new DummyCommand();
+	}
+
+	return nullptr;
+}
+
+CAssemblerCommand* parseDirectiveSym(Tokenizer& tokenizer, int flags)
+{
+	Token tok = tokenizer.nextToken();
+
+	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+		return nullptr;
+
+	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+
+	if (tok.stringValue == L"on")
+		return new CDirectiveSym(true);
+	else if (tok.stringValue == L"off")
+		return new CDirectiveSym(false);
+	else
+		return nullptr;
+}
+
 CAssemblerCommand* parseDirectiveDefineLabel(Tokenizer& tokenizer, int flags)
 {
 	Token tok = tokenizer.nextToken();
@@ -411,6 +494,22 @@ CAssemblerCommand* parseDirectiveFunction(Tokenizer& tokenizer, int flags)
 	return nullptr;
 }
 
+CAssemblerCommand* parseDirectiveMessage(Tokenizer& tokenizer, int flags)
+{
+	Expression exp = parseExpression(tokenizer);
+	
+	switch (flags)
+	{
+	case DIRECTIVE_MSG_WARNING:
+		return new CDirectiveMessage(CDirectiveMessage::Type::Warning,exp);
+	case DIRECTIVE_MSG_ERROR:
+		return new CDirectiveMessage(CDirectiveMessage::Type::Error,exp);
+	case DIRECTIVE_MSG_NOTICE:
+		return new CDirectiveMessage(CDirectiveMessage::Type::Notice,exp);
+	}
+
+	return nullptr;
+}
 
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet)
 {
@@ -503,11 +602,19 @@ const DirectiveEntry directives[] = {
 
 	{ L".area",				&parseDirectiveArea,			0 },
 
-
+	{ L".erroronwarning",	&parseDirectiveErrorWarning,	0 },
+	{ L".relativeinclude",	&parseDirectiveRelativeInclude,	0 },
+	{ L".nocash",			&parseDirectiveNocash,			0 },
+	{ L".sym",				&parseDirectiveSym,				0 },
+	
 	{ L".definelabel",		&parseDirectiveDefineLabel,		0 },
 	{ L".function",			&parseDirectiveFunction,		0 },
 	{ L".func",				&parseDirectiveFunction,		0 },
 	
+	{ L".warning",			&parseDirectiveMessage,			DIRECTIVE_MSG_WARNING },
+	{ L".error",			&parseDirectiveMessage,			DIRECTIVE_MSG_ERROR },
+	{ L".notice",			&parseDirectiveMessage,			DIRECTIVE_MSG_NOTICE },
+
 	{ nullptr,				nullptr,						0 }
 };
 

@@ -7,20 +7,14 @@
 class CDirectiveMessage: public CAssemblerCommand
 {
 public:
-	enum class Type { Invalid, Warning, Error, Notice };
-	CDirectiveMessage() { errorType = Type::Invalid; };
-
-	
-	CDirectiveMessage(Type type, Expression exp) { errorType = type; this->exp = exp; };
-
-	bool Load(ArgumentList& Args, Type type);
+	enum class Type { Invalid, Warning, Error, Notice };	
+	CDirectiveMessage(Type type, Expression exp);
 	virtual bool Validate();
 	virtual void Encode() {};
 	virtual void writeTempData(TempData& tempData) { };
 private:
-	Expression exp;
-	std::wstring message;
 	Type errorType;
+	Expression exp;
 };
 
 class CDirectiveSym: public CAssemblerCommand

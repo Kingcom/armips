@@ -41,5 +41,10 @@ typedef struct {
 #define DIRECTIVE_DATA_CUSTOM		0x00000006
 #define DIRECTIVE_DATA_TERMINATION	0x00000100
 
+// message directive flags
+#define DIRECTIVE_MSG_WARNING		0x00000001
+#define DIRECTIVE_MSG_ERROR			0x00000002
+#define DIRECTIVE_MSG_NOTICE		0x00000003
+
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet);
 CAssemblerCommand* parseGlobalDirective(Tokenizer& tokenizer);
