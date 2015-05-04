@@ -3,35 +3,40 @@
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 
-CDirectiveData::CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc)
+//
+// TableCommand
+//
+
+TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding encoding)
 {
-	// temporary solution until ArgumentList consists of expressions
-	for (int i = 0; i < Args.size(); i++)
+	if (fileExists(fileName) == false)
 	{
-		std::wstring text = Args[i].text;
-		if (Args[i].isString)
-			text = L"\"" + text + L"\"";
-
-		Expression exp;
-		if (exp.load(text) == false)
-		{
-			Logger::printError(Logger::Error,L"Invalid expression");
-			return;
-		}
-
-		entries.push_back(exp);
-	}
-
-	switch (SizePerUnit)
-	{
-	case 1: case 2: case 4:
-		UnitSize = SizePerUnit;
-		ascii = asc;
-		break;
-	default:
-		Logger::printError(Logger::Error,L"Invalid data unit size %d",SizePerUnit);
+		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
 		return;
 	}
+
+	if (table.load(fileName,encoding) == false)
+	{
+		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
+		return;
+	}
+}
+
+bool TableCommand::Validate()
+{
+	Global.Table = table;
+	return false;
+}
+
+
+//
+// CDirectiveData
+//
+
+CDirectiveData::CDirectiveData()
+{
+	mode = EncodingMode::Invalid;
+	writeTermination = false;
 }
 
 CDirectiveData::~CDirectiveData()
@@ -39,45 +44,154 @@ CDirectiveData::~CDirectiveData()
 
 }
 
-bool CDirectiveData::Validate()
+void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize, bool ascii)
 {
-	RamPos = g_fileManager->getVirtualAddress();
+	switch (unitSize)
+	{
+	case 1:
+		if (ascii)
+			this->mode = EncodingMode::Ascii;
+		else
+			this->mode = EncodingMode::U8;
+		break;
+	case 2:
+		this->mode = EncodingMode::U16;
+		break;
+	case 4:
+		this->mode = EncodingMode::U32;
+		break;
+	default:
+		Logger::printError(Logger::Error,L"Invalid data unit size %d",unitSize);
+		return;
+	}
+	
+	this->entries = entries;
+	this->writeTermination = false;
+}
 
+void CDirectiveData::setSjis(std::vector<Expression>& entries, bool terminate)
+{
+	this->mode = EncodingMode::Sjis;
+	this->entries = entries;
+	this->writeTermination = terminate;
+}
+
+void CDirectiveData::setCustom(std::vector<Expression>& entries, bool terminate)
+{
+	this->mode = EncodingMode::Custom;
+	this->entries = entries;
+	this->writeTermination = terminate;
+}
+
+size_t CDirectiveData::getUnitSize()
+{
+	switch (mode)
+	{
+	case EncodingMode::U8:
+	case EncodingMode::Ascii:
+	case EncodingMode::Sjis:
+	case EncodingMode::Custom:
+		return 1;
+	case EncodingMode::U16:
+		return 2;
+	case EncodingMode::U32:
+		return 4;
+	}
+
+	return 0;
+}
+
+void CDirectiveData::encodeCustom(EncodingTable& table)
+{
+	data.clear();
 	for (size_t i = 0; i < entries.size(); i++)
 	{
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
 			Logger::queueError(Logger::Error,L"Invalid expression");
-			return false;
+			continue;
 		}
-
+		
 		if (value.isInt())
-			g_fileManager->advanceMemory(UnitSize);
-		else if (value.isString())
-			g_fileManager->advanceMemory(value.strValue.size()*UnitSize);
-		else
+		{
+			data.appendByte((u8)value.intValue);
+		} else if (value.isString())
+		{
+			ByteArray encoded = table.encodeString(value.strValue,false);
+			data.append(encoded);
+		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
+		}
 	}
 
-	return false;
+	if (writeTermination)
+	{
+		ByteArray encoded = table.encodeTermination();
+		data.append(encoded);
+	}
 }
 
-void CDirectiveData::Encode()
+void CDirectiveData::encodeSjis()
 {
-	;
+	static EncodingTable sjisTable;
+	if (sjisTable.isLoaded() == false)
+	{
+		unsigned char hexBuffer[2];
+		
+		sjisTable.setTerminationEntry((unsigned char*)"\0",1);
 
+		for (unsigned short SJISValue = 0x0000; SJISValue < 0x0100; SJISValue++)
+		{
+			wchar_t unicodeValue = sjisToUnicode(SJISValue);
+			if (unicodeValue != 0xFFFF)
+			{
+				hexBuffer[0] = SJISValue & 0xFF;
+				sjisTable.addEntry(hexBuffer, 1, unicodeValue);
+			}
+		}
+		for (unsigned short SJISValue = 0x8100; SJISValue < 0xEF00; SJISValue++)
+		{
+			wchar_t unicodeValue = sjisToUnicode(SJISValue);
+			if (unicodeValue != 0xFFFF)
+			{
+				hexBuffer[0] = (SJISValue >> 8) & 0xFF;
+				hexBuffer[1] = SJISValue & 0xFF;
+				sjisTable.addEntry(hexBuffer, 2, unicodeValue);
+			}
+		}
+	}
+
+	encodeCustom(sjisTable);
+}
+
+void CDirectiveData::encodeNormal()
+{
+	size_t unitSize = getUnitSize();
+
+	data.clear();
 	for (size_t i = 0; i < entries.size(); i++)
 	{
 		ExpressionValue value = entries[i].evaluate();
+		if (!value.isValid())
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
+			continue;
+		}
 
 		if (value.isString())
 		{
+			bool hadNonAscii = false;
 			for (size_t l = 0; l < value.strValue.size(); l++)
 			{
 				u64 num = value.strValue[l];
-				g_fileManager->write(&num,UnitSize);
-				SpaceNeeded += UnitSize;
+				data.append(&num,unitSize);
+
+				if (num >= 0x80 && hadNonAscii == false)
+				{
+					Logger::printError(Logger::Warning,L"Non-ASCII character in data directive. Use .string instead");
+					hadNonAscii = true;
+				}
 			}
 		} else if (value.isInt())
 		{
@@ -85,7 +199,7 @@ void CDirectiveData::Encode()
 			u64 num = value.intValue;
 			if (Arch->getEndianness() == Endianness::Big)
 			{
-				switch (UnitSize)
+				switch (unitSize)
 				{
 				case 2:
 					num = swapEndianness16((u16)num);
@@ -96,66 +210,91 @@ void CDirectiveData::Encode()
 				}
 			}
 
-			g_fileManager->write(&num,UnitSize);
-			SpaceNeeded += UnitSize;
+			data.append(&num,unitSize);
+		} else {
+			Logger::queueError(Logger::Error,L"Invalid expression type");
 		}
 	}
 }
 
+bool CDirectiveData::Validate()
+{
+	position = g_fileManager->getVirtualAddress();
+
+	size_t oldSize = data.size();
+	switch (mode)
+	{
+	case EncodingMode::U8:
+	case EncodingMode::U16:
+	case EncodingMode::U32:
+		encodeNormal();
+		break;
+	case EncodingMode::Sjis:
+		encodeSjis();
+		break;
+	case EncodingMode::Custom:
+		encodeCustom(Global.Table);
+		break;
+	default:
+		Logger::queueError(Logger::Error,L"Invalid encoding type");
+		break;
+	}
+
+	g_fileManager->advanceMemory(data.size());
+	return oldSize != data.size();
+}
+
+void CDirectiveData::Encode()
+{
+	g_fileManager->write(data.data(),data.size());
+}
 
 void CDirectiveData::writeTempData(TempData& tempData)
 {
 	std::wstring result;
-	switch (UnitSize)
+	switch (mode)
 	{
-	case 1:
+	case EncodingMode::U8:
+	case EncodingMode::Ascii:
+	case EncodingMode::Sjis:
+	case EncodingMode::Custom:
 		result = L".byte ";
 		break;
-	case 2:
+	case EncodingMode::U16:
 		result = L".halfword ";
 		break;
-	case 4:
+	case EncodingMode::U32:
 		result = L".word ";
 		break;
 	}
 
-	for (size_t i = 0; i < entries.size(); i++)
+	size_t unitSize = getUnitSize();
+	for (size_t i = 0; i < data.size(); i++)
 	{
-		ExpressionValue value = entries[i].evaluate();
-
-		if (value.isString())
-		{
-			for (size_t l = 0; l < value.strValue.size(); l++)
-			{
-				result += formatString(L"0x%0*X,",UnitSize*2,value.strValue[l]);
-			}
-		} else if (value.isInt())
-		{
-			result += formatString(L"0x%0*X,",UnitSize*2,value.intValue);
-		}
+		result += formatString(L"0x%0*X,",unitSize*2,data[i]);
 	}
 
 	result.pop_back();
-	tempData.writeLine(RamPos,result);
+	tempData.writeLine(position,result);
 }
 
 void CDirectiveData::writeSymData(SymbolData& symData)
 {
-	if (ascii == true)
+	switch (mode)
 	{
-		symData.addData(RamPos,SpaceNeeded,SymbolData::DataAscii);
-	} else {
-		switch (UnitSize)
-		{
-		case 1:
-			symData.addData(RamPos,SpaceNeeded,SymbolData::Data8);
-			break;
-		case 2:
-			symData.addData(RamPos,SpaceNeeded,SymbolData::Data16);
-			break;
-		case 4:
-			symData.addData(RamPos,SpaceNeeded,SymbolData::Data32);
-			break;
-		}
+	case EncodingMode::Ascii:
+		symData.addData(position,data.size(),SymbolData::DataAscii);
+		break;
+	case EncodingMode::U8:
+	case EncodingMode::Sjis:
+	case EncodingMode::Custom:
+		symData.addData(position,data.size(),SymbolData::Data8);
+		break;
+	case EncodingMode::U16:
+		symData.addData(position,data.size(),SymbolData::Data16);
+		break;
+	case EncodingMode::U32:
+		symData.addData(position,data.size(),SymbolData::Data32);
+		break;
 	}
 }

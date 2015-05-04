@@ -19,7 +19,7 @@ public:
 	ByteArray& operator=(ByteArray&& other);
 
 	size_t append(const ByteArray& other);
-	size_t append(byte* data, size_t size);
+	size_t append(void* data, size_t size);
 	size_t appendByte(byte b) { return append(&b,1); };
 	void replaceByte(size_t pos, byte b) { data_[pos] = b; };
 	void replaceBytes(size_t pos, byte* data, size_t size);

@@ -1,27 +1,43 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
-#include "../Util/CommonClasses.h"
+#include "Util/EncodingTable.h"
 
-typedef struct {
-	bool String;
-	size_t num;
-} tDirectiveDataEntry;
+enum class EncodingMode { Invalid, U8, U16, U32, Ascii, Sjis, Custom };
+
+class TableCommand: public CAssemblerCommand
+{
+public:
+	TableCommand(const std::wstring& fileName, TextFile::Encoding encoding);
+	virtual bool Validate();
+	virtual void Encode() { };
+	virtual void writeTempData(TempData& tempData) { };
+	virtual void writeSymData(SymbolData& symData) { };
+private:
+	EncodingTable table;
+};
 
 class CDirectiveData: public CAssemblerCommand
 {
 public:
-	CDirectiveData(ArgumentList& Args, size_t SizePerUnit, bool asc);
+	CDirectiveData();
 	~CDirectiveData();
+	void setNormal(std::vector<Expression>& entries, size_t unitSize, bool ascii);
+	void setSjis(std::vector<Expression>& entries, bool terminate);
+	void setCustom(std::vector<Expression>& entries, bool terminate);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
+	void encodeCustom(EncodingTable& table);
+	void encodeSjis();
+	void encodeNormal();
+	size_t getUnitSize();
+	
+	u64 position;
+	EncodingMode mode;
+	bool writeTermination;
 	std::vector<Expression> entries;
-	size_t UnitSize;
-	size_t SpaceNeeded;
-	u64 RamPos;
-	bool ascii;
+	ByteArray data;
 };
-

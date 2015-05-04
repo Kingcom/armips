@@ -236,6 +236,80 @@ CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 	return cond;
 }
 
+CAssemblerCommand* parseDirectiveTable(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,2) == false)
+		return nullptr;
+
+	std::wstring fileName;
+	if (list[0].evaluateString(fileName,true) == false)
+	{
+		Logger::printError(Logger::Error,L"Invalid file name");
+		return nullptr;
+	}
+
+	TextFile::Encoding encoding = TextFile::GUESS;
+	if (list.size() == 2)
+	{
+		std::wstring encodingName;
+		if (list[1].evaluateString(encodingName,true) == false)
+		{
+			Logger::printError(Logger::Error,L"Invalid encoding name");
+			return nullptr;
+		}
+
+		encoding = getEncodingFromString(encodingName);
+	}
+
+	return new TableCommand(fileName,encoding);
+}
+
+CAssemblerCommand* parseDirectiveData(Tokenizer& tokenizer, int flags)
+{
+	bool terminate = false;
+	if (flags & DIRECTIVE_DATA_TERMINATION)
+	{
+		terminate = true;
+		flags &= ~DIRECTIVE_DATA_TERMINATION;
+	}
+
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,-1) == false)
+		return nullptr;
+
+	CDirectiveData* data = new CDirectiveData();
+	switch (flags & DIRECTIVE_USERMASK)
+	{
+	case DIRECTIVE_DATA_8:
+		data->setNormal(list,1,false);
+		break;
+	case DIRECTIVE_DATA_16:
+		data->setNormal(list,2,false);
+		break;
+	case DIRECTIVE_DATA_32:
+		data->setNormal(list,4,false);
+		break;
+	case DIRECTIVE_DATA_ASCII:
+		data->setNormal(list,1,true);
+		break;
+	case DIRECTIVE_DATA_SJIS:
+		data->setSjis(list,terminate);
+		break;
+	case DIRECTIVE_DATA_CUSTOM:
+		data->setCustom(list,terminate);
+		break;
+	}
+	
+	return data;
+}
+
 CAssemblerCommand* parseDirectivePsx(Tokenizer& tokenizer, int flags)
 {
 	Arch = &Mips;
@@ -329,6 +403,35 @@ const DirectiveEntry directives[] = {
 	{ L".ifndef",			&parseDirectiveConditional,		DIRECTIVE_COND_IFNDEF },
 	{ L".ifarm",			&parseDirectiveConditional,		DIRECTIVE_COND_IFARM },
 	{ L".ifthumb",			&parseDirectiveConditional,		DIRECTIVE_COND_IFTHUMB },
+
+	{ L".loadtable",		&parseDirectiveTable,			0 },
+	{ L".table",			&parseDirectiveTable,			0 },
+	{ L".byte",				&parseDirectiveData,			DIRECTIVE_DATA_8 },
+	{ L".halfword",			&parseDirectiveData,			DIRECTIVE_DATA_16 },
+	{ L".word",				&parseDirectiveData,			DIRECTIVE_DATA_32 },
+	{ L".db",				&parseDirectiveData,			DIRECTIVE_DATA_8 },
+	{ L".dh",				&parseDirectiveData,			DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF },
+	{ L".dw",				&parseDirectiveData,			DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF },
+	{ L".dw",				&parseDirectiveData,			DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON },
+	{ L".dd",				&parseDirectiveData,			DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON },
+	{ L".dcb",				&parseDirectiveData,			DIRECTIVE_DATA_8 },
+	{ L".dcw",				&parseDirectiveData,			DIRECTIVE_DATA_16 },
+	{ L".dcd",				&parseDirectiveData,			DIRECTIVE_DATA_32 },
+	{ L"db",				&parseDirectiveData,			DIRECTIVE_DATA_8 },
+	{ L"dh",				&parseDirectiveData,			DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF },
+	{ L"dw",				&parseDirectiveData,			DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF },
+	{ L"dw",				&parseDirectiveData,			DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON },
+	{ L"dd",				&parseDirectiveData,			DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON },
+	{ L"dcb",				&parseDirectiveData,			DIRECTIVE_DATA_8 },
+	{ L"dcw",				&parseDirectiveData,			DIRECTIVE_DATA_16 },
+	{ L"dcd",				&parseDirectiveData,			DIRECTIVE_DATA_32 },
+	{ L".ascii",			&parseDirectiveData,			DIRECTIVE_DATA_8|DIRECTIVE_DATA_ASCII },
+	{ L".string",			&parseDirectiveData,			DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION },
+	{ L".str",				&parseDirectiveData,			DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION },
+	{ L".stringn",			&parseDirectiveData,			DIRECTIVE_DATA_CUSTOM },
+	{ L".strn",				&parseDirectiveData,			DIRECTIVE_DATA_CUSTOM },
+	{ L".sjis",				&parseDirectiveData,			DIRECTIVE_DATA_SJIS|DIRECTIVE_DATA_TERMINATION },
+	{ L".sjisn",			&parseDirectiveData,			DIRECTIVE_DATA_SJIS },
 
 	{ L".psx",				&parseDirectivePsx,				0 },
 	{ L".ps2",				&parseDirectivePs2,				0 },

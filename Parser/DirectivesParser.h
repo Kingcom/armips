@@ -31,5 +31,15 @@ typedef struct {
 #define DIRECTIVE_COND_IFNDEF		0x00000003
 #define DIRECTIVE_COND_IFARM		0x00000004
 #define DIRECTIVE_COND_IFTHUMB		0x00000005
+
+// data directive flags
+#define DIRECTIVE_DATA_8			0x00000001
+#define DIRECTIVE_DATA_16			0x00000002
+#define DIRECTIVE_DATA_32			0x00000003
+#define DIRECTIVE_DATA_ASCII		0x00000004
+#define DIRECTIVE_DATA_SJIS			0x00000005
+#define DIRECTIVE_DATA_CUSTOM		0x00000006
+#define DIRECTIVE_DATA_TERMINATION	0x00000100
+
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet);
 CAssemblerCommand* parseGlobalDirective(Tokenizer& tokenizer);
