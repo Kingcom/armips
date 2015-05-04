@@ -6,17 +6,19 @@
 class CDirectiveArea: public CAssemblerCommand
 {
 public:
-	CDirectiveArea();
-	bool LoadStart(ArgumentList& Args);
-	bool LoadEnd();
+	CDirectiveArea(CAssemblerCommand* content, Expression& size);
+	~CDirectiveArea();
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
+	virtual void writeSymData(SymbolData& symData);
+	void setFillExpression(Expression& exp);
 private:
-	bool Start;
-	Expression SizeExpression;
-	size_t Size;
-	u64 RamPos;
-	int fillValue;
-	Expression FillExpression;
+	u64 position;
+	Expression sizeExpression;
+	size_t areaSize;
+	size_t contentSize;
+	Expression fillExpression;
+	u8 fillValue;
+	CAssemblerCommand* content;
 };

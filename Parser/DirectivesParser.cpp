@@ -350,6 +350,28 @@ CAssemblerCommand* parseDirectiveNds(Tokenizer& tokenizer, int flags)
 	return new CommentCommand(L".nds\n.arm",L".arm");
 }
 
+CAssemblerCommand* parseDirectiveArea(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> parameters;
+	if (parseExpressionList(tokenizer,parameters) == false)
+		return nullptr;
+	
+	bool valid = checkExpressionListSize(parameters,1,2);
+	
+	CommandSequence* content = parseCommandSequence(tokenizer,{L".endarea"});
+	tokenizer.eatToken();
+
+	// area is invalid, return content anyway
+	if (valid == false)
+		return content;
+
+	CDirectiveArea* area = new CDirectiveArea(content,parameters[0]);
+	if (parameters.size() == 2)
+		area->setFillExpression(parameters[1]);
+
+	return area;
+}
+
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet)
 {
 	Token tok = tokenizer.peekToken();
@@ -438,6 +460,8 @@ const DirectiveEntry directives[] = {
 	{ L".psp",				&parseDirectivePsp,				0 },
 	{ L".gba",				&parseDirectiveGba,				0 },
 	{ L".nds",				&parseDirectiveNds,				0 },
+
+	{ L".area",				&parseDirectiveArea,			0 },
 
 	{ nullptr,				nullptr,						0 }
 };

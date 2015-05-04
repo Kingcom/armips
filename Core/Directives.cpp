@@ -76,36 +76,6 @@ bool DirectiveDefineLabel(ArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveArea(ArgumentList& List, int flags)
-{
-	CDirectiveArea* Command;
-
-	switch (flags)
-	{
-	case DIRECTIVE_AREA_START:
-		Command = new CDirectiveArea();
-		if (Command->LoadStart(List) == false)
-		{
-			delete Command;
-			return false;
-		}
-		break;
-	case DIRECTIVE_AREA_END:
-		Command = new CDirectiveArea();
-		if (Command->LoadEnd() == false)
-		{
-			delete Command;
-			return false;
-		}
-		break;
-	default: return false;
-	}
-
-	AddAssemblerCommand(Command);
-	return true;
-}
-
-
 bool DirectiveMessage(ArgumentList& List, int flags)
 {
 	CDirectiveMessage::Type value;
@@ -362,9 +332,6 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 
 
 const tDirective Directives[] = {
-	{ L".area",				1,	2,	&DirectiveArea,				DIRECTIVE_AREA_START },
-	{ L".endarea",			0,	0,	&DirectiveArea,				DIRECTIVE_AREA_END },
-
 	{ L".include",			1,	2,	&DirectiveInclude,			0 },
 	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
 	{ L".definelabel",		2,	2,	&DirectiveDefineLabel,		0 },
