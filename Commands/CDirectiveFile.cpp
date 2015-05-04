@@ -4,77 +4,68 @@
 #include "Util/FileClasses.h"
 #include "Core/FileManager.h"
 
-
 //
 // CDirectiveFile
 //
 
-CDirectiveFile::CDirectiveFile(Type type, ArgumentList& args)
-	: type(type)
+CDirectiveFile::CDirectiveFile()
 {
-	file = NULL;
-	
-	std::wstring originalName;
-	std::wstring fileName;
-	u64 virtualAddress;
+	type = Type::Invalid;
+	file = nullptr;
+}
 
-	switch (type)
+void CDirectiveFile::initOpen(const std::wstring& fileName, u64 memory)
+{
+	type = Type::Open;
+	std::wstring fullName = getFullPathName(fileName);
+
+	if (fileExists(fullName) == false)
 	{
-	case Type::Open:
-		fileName = getFullPathName(args[0].text);
-
-		if (fileExists(fileName) == false)
-		{
-			Logger::printError(Logger::FatalError,L"File %s not found",fileName);
-			return;
-		}
-		if (convertConstExpression(args[1].text,virtualAddress) == false)
-		{
-			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text);
-			return;
-		}
-
-		file = new GenericAssemblerFile(fileName,virtualAddress,false);
-		break;
-	case Type::Create:
-		fileName = getFullPathName(args[0].text);
-
-		if (convertConstExpression(args[1].text,virtualAddress) == false)
-		{
-			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[1].text);
-			return;
-		}
-
-		file = new GenericAssemblerFile(fileName,virtualAddress,true);
-		break;
-	case Type::Copy:
-		originalName = getFullPathName(args[0].text);
-		fileName = getFullPathName(args[1].text);
-
-		if (fileExists(originalName) == false)
-		{
-			Logger::printError(Logger::FatalError,L"File %s not found",originalName);
-			return;
-		}
-		if (convertConstExpression(args[2].text,virtualAddress) == false)
-		{
-			Logger::printError(Logger::FatalError,L"Invalid ram address %s",args[2].text);
-			return;
-		}
-
-		file = new GenericAssemblerFile(fileName,originalName,virtualAddress);
-		break;
-	case Type::Close:
-		g_fileManager->closeFile();
-		break;
+		Logger::printError(Logger::Error,L"File %s not found",fullName);
+		return;
 	}
 
-	if (file != NULL)
-		g_fileManager->addFile(file);
+	file = new GenericAssemblerFile(fileName,memory,false);
+	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
 }
 
+void CDirectiveFile::initCreate(const std::wstring& fileName, u64 memory)
+{
+	type = Type::Create;
+	std::wstring fullName = getFullPathName(fileName);
+
+	file = new GenericAssemblerFile(fullName,memory,true);
+	g_fileManager->addFile(file);
+
+	updateSection(++Global.Section);
+}
+
+void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring& outputName, u64 memory)
+{
+	type = Type::Copy;
+	std::wstring fullInputName = getFullPathName(inputName);
+	std::wstring fullOutputName = getFullPathName(outputName);
+
+	if (fileExists(fullInputName) == false)
+	{
+		Logger::printError(Logger::Error,L"File %s not found",fullInputName);
+		return;
+	}
+	
+	file = new GenericAssemblerFile(fullOutputName,fullInputName,memory);
+	g_fileManager->addFile(file);
+
+	updateSection(++Global.Section);
+}
+
+void CDirectiveFile::initClose()
+{
+	type = Type::Close;
+	g_fileManager->closeFile();
+	updateSection(++Global.Section);
+}
 
 bool CDirectiveFile::Validate()
 {
@@ -138,14 +129,9 @@ void CDirectiveFile::writeTempData(TempData& tempData)
 // CDirectivePosition
 //
 
-CDirectivePosition::CDirectivePosition(Type type, ArgumentList& Args)
+CDirectivePosition::CDirectivePosition(Type type, u64 position)
 	: type(type)
 {
-	if (convertConstExpression(Args[0].text,position) == false)
-	{
-		Logger::printError(Logger::FatalError,L"Invalid ram address %s",Args[0].text);
-	}
-	
 	exec();
 	updateSection(++Global.Section);
 }
@@ -193,70 +179,69 @@ void CDirectivePosition::writeTempData(TempData& tempData)
 // CDirectiveIncbin
 //
 
-CDirectiveIncbin::CDirectiveIncbin(ArgumentList& args)
+CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
+	: size(0), start(0)
 {
-	fileName = getFullPathName(args[0].text);
-
-	if (fileExists(fileName) == false)
+	this->fileName = getFullPathName(fileName);
+	
+	if (fileExists(this->fileName) == false)
 	{
-		Logger::printError(Logger::FatalError,L"File %s not found",fileName);
-		return;
+		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName);
 	}
 
-	int inputFileSize = fileSize(fileName);
-	if (args.size() >= 2)
-	{
-		// load start address
-		if (convertConstExpression(args[1].text,startAddress) == false)
-		{
-			Logger::printError(Logger::FatalError,L"Invalid start address %s",args[1].text);
-			return;
-		}
-
-		if (startAddress >= inputFileSize)
-		{
-			Logger::printError(Logger::Error,L"Start address 0x%08X after end of file",startAddress);
-			return;
-		}
-
-		if (args.size() >= 3)
-		{
-			// load size too
-			if (convertConstExpression(args[2].text,loadSize) == false)
-			{
-				Logger::printError(Logger::FatalError,L"Invalid size %s",args[1].text);
-				return;
-			}
-
-			if (startAddress+loadSize > inputFileSize)
-			{
-				Logger::printError(Logger::Warning,L"Loading beyond file end, truncating");
-				loadSize =  inputFileSize-startAddress;
-			}
-		} else {
-			loadSize =  inputFileSize-startAddress;
-		}
-	} else {
-		startAddress = 0;
-		loadSize = inputFileSize;
-	}
-
-	g_fileManager->advanceMemory(loadSize);
+	this->fileSize = ::fileSize(this->fileName);
 }
 
 bool CDirectiveIncbin::Validate()
 {
+	u64 oldStart = start;
+	u64 oldSize = size;
+
+	if (startExpression.isLoaded())
+	{
+		if (startExpression.evaluateInteger(start) == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid position expression");
+			return false;
+		}
+
+		if (start > fileSize)
+		{
+			Logger::queueError(Logger::Error,L"Start position past end of file");
+			return false;
+		}
+	} else {
+		start = 0;
+	}
+
+	if (sizeExpression.isLoaded())
+	{
+		if (sizeExpression.evaluateInteger(size) == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid size expression");
+			return false;
+		}
+	} else {
+		size = fileSize-start;
+	}
+
+	if (start+size > fileSize)
+	{
+		Logger::queueError(Logger::Warning,L"Read size truncated due to file size");
+		size = fileSize-start;
+	}
+
 	Arch->NextSection();
-	g_fileManager->advanceMemory(loadSize);
+	g_fileManager->advanceMemory(size);
 	return false;
 }
 
 void CDirectiveIncbin::Encode()
 {
-	if (loadSize != 0)
+	if (size != 0)
 	{
-		ByteArray data = ByteArray::fromFile(fileName,(u32)startAddress,loadSize);
-		if (data.size() == 0)
+		ByteArray data = ByteArray::fromFile(fileName,(long)start,size);
+		if (data.size() != size)
 		{
 			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName);
 			return;
@@ -272,91 +257,141 @@ void CDirectiveIncbin::writeTempData(TempData& tempData)
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData)
 {
-	symData.addData(g_fileManager->getVirtualAddress(),loadSize,SymbolData::Data8);
+	symData.addData(g_fileManager->getVirtualAddress(),size,SymbolData::Data8);
 }
 
 
 //
-// CDirectiveAlign
+// CDirectiveAlignFill
 //
 
-CDirectiveAlign::CDirectiveAlign(ArgumentList& args)
+CDirectiveAlignFill::CDirectiveAlignFill(u64 value, Mode mode)
 {
-	if (args.size() >= 1)
+	this->mode = mode;
+	this->value = value;
+	this->finalSize = 0;
+	this->fillByte = 0;
+}
+
+CDirectiveAlignFill::CDirectiveAlignFill(Expression& value, Mode mode)
+	: CDirectiveAlignFill(0,mode)
+{
+	valueExpression = value;
+}
+
+CDirectiveAlignFill::CDirectiveAlignFill(Expression& value, Expression& fillValue, Mode mode)
+	: CDirectiveAlignFill(value,mode)
+{
+	fillExpression = fillValue;
+}
+
+bool CDirectiveAlignFill::Validate()
+{
+	if (valueExpression.isLoaded())
 	{
-		if (convertConstExpression(args[0].text,alignment) == false)
+		if (valueExpression.evaluateInteger(value) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid alignment %s",args[0].text);
+			Logger::printError(Logger::FatalError,L"Invalid %s",mode == Fill ? L"size" : L"alignment");
+			return false;
 		}
-		if (isPowerOfTwo(alignment) == false)
-		{
-			Logger::printError(Logger::Error,L"Invalid alignment %d",alignment);
-		}
-	} else {
-		alignment = Arch->GetWordSize();
 	}
 
-	int num = computePadding();
-}
+	u64 oldSize = finalSize;
+	u64 mod;
+	switch (mode)
+	{
+	case Align:
+		if (isPowerOfTwo(value) == false)
+		{
+			Logger::printError(Logger::Error,L"Invalid alignment %d",value);
+			return false;
+		}
 
-int CDirectiveAlign::computePadding()
-{
-	unsigned int mod = g_fileManager->getVirtualAddress() % alignment;
-	return mod ? alignment-mod : 0;
-}
+		mod = g_fileManager->getVirtualAddress() % value;
+		finalSize = mod ? value-mod : 0;
+		break;
+	case Fill:
+		finalSize = value;
+		break;
+	}
 
-bool CDirectiveAlign::Validate()
-{
+	if (fillExpression.isLoaded())
+	{
+		if (fillExpression.evaluateInteger(fillByte) == false)
+		{
+			Logger::printError(Logger::FatalError,L"Invalid fill value");
+			return false;
+		}
+	}
+
 	Arch->NextSection();
-	int num = computePadding();
-	g_fileManager->advanceMemory(num);
-	return false;
+	g_fileManager->advanceMemory(finalSize);
+
+	bool result = oldSize != finalSize;
+	oldSize = finalSize;
+	return result;
 }
 
-void CDirectiveAlign::Encode()
+void CDirectiveAlignFill::Encode()
 {
-	unsigned char AlignBuffer[128];
-	
-	int n = computePadding();
-	memset(AlignBuffer,0,n > 128 ? 128 : n);
+	unsigned char buffer[128];
+	u64 n = finalSize;
+
+	memset(buffer,fillByte,n > 128 ? 128 : n);
 	while (n > 128)
 	{
-		g_fileManager->write(AlignBuffer,128);
+		g_fileManager->write(buffer,128);
 		n -= 128;
 	}
-	g_fileManager->write(AlignBuffer,n);
+
+	g_fileManager->write(buffer,n);
 }
 
-void CDirectiveAlign::writeTempData(TempData& tempData)
+void CDirectiveAlignFill::writeTempData(TempData& tempData)
 {
-	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".align 0x%08X",alignment));
+	switch (mode)
+	{
+	case Align:
+		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".align 0x%08X",value));
+		break;
+	case Fill:
+		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".fill 0x%08X,0x%02X",value,fillByte));
+		break;
+	}
 }
 
+void CDirectiveAlignFill::writeSymData(SymbolData& symData)
+{
+	switch (mode)
+	{
+	case Align:	// ?
+		break;
+	case Fill:
+		symData.addData(g_fileManager->getVirtualAddress(),value,SymbolData::Data8);
+		break;
+	}
+}
 
 //
 // CDirectiveHeaderSize
 //
 
-CDirectiveHeaderSize::CDirectiveHeaderSize(ArgumentList& args)
+CDirectiveHeaderSize::CDirectiveHeaderSize(u64 size)
 {
-	if (convertConstExpression(args[0].text,headerSize) == false)
-	{
-		Logger::printError(Logger::FatalError,L"Invalid header size %s",args[0].text);
-	}
-
+	headerSize = size;
 	updateFile();
 }
 
 void CDirectiveHeaderSize::updateFile()
 {
-	AssemblerFile *openFile = g_fileManager->getOpenFile();
+	AssemblerFile* openFile = g_fileManager->getOpenFile();
 	if (!openFile->hasFixedVirtualAddress())
 	{
 		Logger::printError(Logger::Error,L"Header size not applicable for this file");
 		return;
 	}
 	GenericAssemblerFile* file = static_cast<GenericAssemblerFile*>(openFile);
-	file->setHeaderSize((u32)headerSize);
+	file->setHeaderSize(headerSize);
 }
 
 bool CDirectiveHeaderSize::Validate()

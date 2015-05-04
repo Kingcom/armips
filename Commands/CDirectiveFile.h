@@ -9,9 +9,14 @@ class GenericAssemblerFile;
 class CDirectiveFile: public CAssemblerCommand
 {
 public:
-	enum class Type { Open, Create, Copy, Close };
+	enum class Type { Invalid, Open, Create, Copy, Close };
 
-	CDirectiveFile(Type type, ArgumentList& args);
+	CDirectiveFile();
+	void initOpen(const std::wstring& fileName, u64 memory);
+	void initCreate(const std::wstring& fileName, u64 memory);
+	void initCopy(const std::wstring& inputName, const std::wstring& outputName, u64 memory);
+	void initClose();
+
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
@@ -25,7 +30,7 @@ class CDirectivePosition: public CAssemblerCommand
 {
 public:
 	enum Type { Physical, Virtual };
-	CDirectivePosition(Type type, ArgumentList& args);
+	CDirectivePosition(Type type, u64 position);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
@@ -39,36 +44,50 @@ private:
 class CDirectiveIncbin: public CAssemblerCommand
 {
 public:
-	CDirectiveIncbin(ArgumentList& args);
+	CDirectiveIncbin(const std::wstring& fileName);
+	void setStart(Expression& exp) { startExpression = exp; };
+	void setSize(Expression& exp) { sizeExpression = exp; };
+
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
 	std::wstring fileName;
-	u64 startAddress;
-	u64 loadSize;
+	size_t fileSize;
+
+	Expression startExpression;
+	Expression sizeExpression;
+	u64 start;
+	u64 size;
 };
 
-class CDirectiveAlign: public CAssemblerCommand
+class CDirectiveAlignFill: public CAssemblerCommand
 {
 public:
-	CDirectiveAlign(ArgumentList& args);
+	enum Mode { Align, Fill };
+
+	CDirectiveAlignFill(u64 value, Mode mode);
+	CDirectiveAlignFill(Expression& value, Mode mode);
+	CDirectiveAlignFill(Expression& value, Expression& fillValue, Mode mode);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData) { };
+	virtual void writeSymData(SymbolData& symData);
 private:
-	int computePadding();
-	size_t alignment;
-	Expression* fillExpression;
+
+	Mode mode;
+	Expression valueExpression;
+	Expression fillExpression;
+	u64 value;
+	u64 finalSize;
 	u8 fillByte;
 };
 
 class CDirectiveHeaderSize: public CAssemblerCommand
 {
 public:
-	CDirectiveHeaderSize(ArgumentList& args);
+	CDirectiveHeaderSize(u64 size);
 	virtual bool Validate();
 	virtual void Encode();
 	virtual void writeTempData(TempData& tempData);
@@ -81,6 +100,7 @@ private:
 class DirectiveObjImport: public CAssemblerCommand
 {
 public:
+	DirectiveObjImport(const std::wstring& inputName) { };
 	DirectiveObjImport(ArgumentList& args);
 	~DirectiveObjImport() { };
 	virtual bool Validate();

@@ -5,7 +5,6 @@
 #include "Commands/CDirectiveData.h"
 #include "Commands/CDirectiveConditional.h"
 #include "Commands/CDirectiveMessage.h"
-#include "Commands/CDirectiveFill.h"
 #include "Commands/CDirectiveArea.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CommandSequence.h"
@@ -19,6 +18,166 @@
 #include <initializer_list>
 #include <algorithm>
 #include "Parser.h"
+
+CAssemblerCommand* parseDirectiveOpen(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+
+	u64 memoryAddress;
+	std::wstring inputName, outputName;
+
+	if (checkExpressionListSize(list,2,3) == false)
+		return nullptr;
+
+	if (list[0].evaluateString(inputName,false) == false)
+		return nullptr;
+
+	if (list.back().evaluateInteger(memoryAddress) == false)
+		return nullptr;
+
+	if (list.size() == 3)
+	{
+		if (list[1].evaluateString(outputName,false) == false)
+			return false;
+		
+		CDirectiveFile* file = new CDirectiveFile();
+		file->initCopy(inputName,outputName,memoryAddress);
+		return file;
+	} else {
+		CDirectiveFile* file = new CDirectiveFile();
+		file->initOpen(inputName,memoryAddress);
+		return file;
+	}
+}
+
+CAssemblerCommand* parseDirectiveCreate(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+
+	u64 memoryAddress;
+	std::wstring inputName, outputName;
+
+	if (checkExpressionListSize(list,2,2) == false)
+		return nullptr;
+
+	if (list[0].evaluateString(inputName,false) == false)
+		return nullptr;
+
+	if (list.back().evaluateInteger(memoryAddress) == false)
+		return nullptr;
+
+	CDirectiveFile* file = new CDirectiveFile();
+	file->initCreate(inputName,memoryAddress);
+	return file;
+}
+
+CAssemblerCommand* parseDirectiveClose(Tokenizer& tokenizer, int flags)
+{
+	CDirectiveFile* file = new CDirectiveFile();
+	file->initClose();
+	return file;
+}
+
+CAssemblerCommand* parseDirectiveIncbin(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,3) == false)
+		return nullptr;
+
+	std::wstring fileName;
+	if (list[0].evaluateString(fileName,false) == false)
+		return nullptr;
+
+	CDirectiveIncbin* incbin = new CDirectiveIncbin(fileName);
+	if (list.size() >= 2)
+		incbin->setStart(list[1]);
+
+	if (list.size() == 3)
+		incbin->setSize(list[2]);
+
+	return incbin;
+}
+
+CAssemblerCommand* parseDirectivePosition(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,1) == false)
+		return nullptr;
+
+	u64 position;
+	if (list[0].evaluateInteger(position) == false)
+	{
+		Logger::printError(Logger::Error,L"Invalid ram address");
+		return nullptr;
+	}
+
+	switch (flags & DIRECTIVE_USERMASK)
+	{
+	case DIRECTIVE_POS_PHYSICAL:
+		return new CDirectivePosition(CDirectivePosition::Physical,position);
+	case DIRECTIVE_POS_VIRTUAL:
+		return new CDirectivePosition(CDirectivePosition::Virtual,position);
+	}
+
+	return nullptr;
+}
+
+CAssemblerCommand* parseDirectiveAlignFill(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,2) == false)
+		return nullptr;
+
+	CDirectiveAlignFill::Mode mode;
+	switch (flags & DIRECTIVE_USERMASK)
+	{
+	case DIRECTIVE_FILE_ALIGN:
+		mode = CDirectiveAlignFill::Align;
+		break;
+	case DIRECTIVE_FILE_FILL:
+		mode = CDirectiveAlignFill::Fill;
+		break;
+	default:
+		return nullptr;
+	}
+
+	if (list.size() == 2)
+		return new CDirectiveAlignFill(list[0],list[1],mode);
+	else
+		return new CDirectiveAlignFill(list[0],mode);
+}
+
+CAssemblerCommand* parseDirectiveHeaderSize(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,1) == false)
+		return nullptr;
+
+	u64 size;
+	if (list[0].evaluateInteger(size) == false)
+	{
+		Logger::printError(Logger::FatalError,L"Invalid header size");
+		return nullptr;
+	}
+
+	return new CDirectiveHeaderSize(size);
+}
 
 CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 {
@@ -108,6 +267,23 @@ CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* di
 }
 
 const DirectiveEntry directives[] = {
+	{ L".open",				&parseDirectiveOpen,			DIRECTIVE_NOTINMEMORY },
+	{ L".openfile",			&parseDirectiveOpen,			DIRECTIVE_NOTINMEMORY },
+	{ L".create",			&parseDirectiveCreate,			DIRECTIVE_NOTINMEMORY },
+	{ L".createfile",		&parseDirectiveCreate,			DIRECTIVE_NOTINMEMORY },
+	{ L".close",			&parseDirectiveClose,			DIRECTIVE_NOTINMEMORY },
+	{ L".closefile",		&parseDirectiveClose,			DIRECTIVE_NOTINMEMORY },
+	{ L".incbin",			&parseDirectiveIncbin,			0 },
+	{ L".import",			&parseDirectiveIncbin,			0 },
+	{ L".org",				&parseDirectivePosition,		DIRECTIVE_POS_VIRTUAL },
+	{ L"org",				&parseDirectivePosition,		DIRECTIVE_POS_VIRTUAL },
+	{ L".orga",				&parseDirectivePosition,		DIRECTIVE_POS_PHYSICAL },
+	{ L"orga",				&parseDirectivePosition,		DIRECTIVE_POS_PHYSICAL },
+	{ L".align",			&parseDirectiveAlignFill,		DIRECTIVE_FILE_ALIGN },
+	{ L".fill",				&parseDirectiveAlignFill,		DIRECTIVE_FILE_FILL },
+	{ L"defs",				&parseDirectiveAlignFill,		DIRECTIVE_FILE_FILL },
+	{ L".headersize",		&parseDirectiveHeaderSize,		0 },
+
 	{ L".if",				&parseDirectiveConditional,		DIRECTIVE_COND_IF },
 	{ L".ifdef",			&parseDirectiveConditional,		DIRECTIVE_COND_IFDEF },
 	{ L".ifndef",			&parseDirectiveConditional,		DIRECTIVE_COND_IFNDEF },

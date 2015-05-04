@@ -127,7 +127,7 @@ StringList getStringListFromArray(wchar_t** source, int count)
 }
 
 
-int fileSize(const std::wstring& fileName)
+size_t fileSize(const std::wstring& fileName)
 {
 #ifdef _WIN32
 	struct _stat fileStat; 

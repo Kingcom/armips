@@ -5,7 +5,6 @@
 #include "Commands/CDirectiveData.h"
 #include "Commands/CDirectiveConditional.h"
 #include "Commands/CDirectiveMessage.h"
-#include "Commands/CDirectiveFill.h"
 #include "Commands/CDirectiveArea.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Assembler.h"
@@ -13,70 +12,6 @@
 #include "Archs/ARM/Arm.h"
 #include "Core/Expression.h"
 #include "Util/Util.h"
-
-bool DirectiveOpen(ArgumentList& list, int flags)
-{
-	if (list.size() == 2)
-	{
-		// open
-		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Open,list);
-		AddAssemblerCommand(command);
-	} else {
-		// copy
-		CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Copy,list);
-		AddAssemblerCommand(command);
-	}
-	return true;
-}
-
-bool DirectiveCreate(ArgumentList& list, int flags)
-{
-	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Create,list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool DirectiveClose(ArgumentList& list, int flags)
-{
-	CDirectiveFile* command = new CDirectiveFile(CDirectiveFile::Type::Close,list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool DirectiveOrg(ArgumentList& list, int flags)
-{
-	CDirectivePosition* command = new CDirectivePosition(CDirectivePosition::Virtual,list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool DirectiveOrga(ArgumentList& list, int flags)
-{
-	CDirectivePosition* command = new CDirectivePosition(CDirectivePosition::Physical,list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool DirectiveIncbin(ArgumentList& list, int flags)
-{
-	CDirectiveIncbin* command = new CDirectiveIncbin(list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool DirectiveAlign(ArgumentList& list, int flags)
-{
-	CDirectiveAlign* command = new CDirectiveAlign(list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-bool DirectiveHeaderSize(ArgumentList& list, int flags)
-{
-	CDirectiveHeaderSize* command = new CDirectiveHeaderSize(list);
-	AddAssemblerCommand(command);
-	return true;
-}
 
 bool DirectiveInclude(ArgumentList& List, int flags)
 {
@@ -334,14 +269,6 @@ bool DirectiveNocash(ArgumentList& List, int flags)
 	} else {
 		Global.nocash = true;
 	}
-	return true;
-}
-
-bool DirectiveFill(ArgumentList& List, int flags)
-{
-	CDirectiveFill* Command = new CDirectiveFill();
-	if (Command->Load(List) == false) return false;
-	AddAssemblerCommand(Command);
 	return true;
 }
 
@@ -653,24 +580,6 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 
 
 const tDirective Directives[] = {
-	{ L".open",				2,	3,	&DirectiveOpen,				DIRECTIVE_NOTINMEMORY },
-	{ L".openfile",			2,	3,	&DirectiveOpen,				DIRECTIVE_NOTINMEMORY },
-	{ L".create",			2,	2,	&DirectiveCreate,			DIRECTIVE_NOTINMEMORY },
-	{ L".createfile",		2,	2,	&DirectiveCreate,			DIRECTIVE_NOTINMEMORY },
-	{ L".close",			0,	0,	&DirectiveClose,			DIRECTIVE_NOTINMEMORY },
-	{ L".closefile",		0,	0,	&DirectiveClose,			DIRECTIVE_NOTINMEMORY },
-	{ L".incbin",			1,	3,	&DirectiveIncbin,			0 },
-	{ L".import",			1,	3,	&DirectiveIncbin,			0 },
-	{ L".org",				1,	1,	&DirectiveOrg,				0 },
-	{ L"org",				1,	1,	&DirectiveOrg,				0 },
-	{ L".orga",				1,	1,	&DirectiveOrga,				0 },
-	{ L"orga",				1,	1,	&DirectiveOrga,				0 },
-	{ L".align",			0,	1,	&DirectiveAlign,			0 },
-	{ L".headersize",		1,	1,	&DirectiveHeaderSize,		0 },
-
-	{ L".fill",				1,	2,	&DirectiveFill,				0 },
-	{ L"defs",				1,	2,	&DirectiveFill,				0 },
-
 	{ L".byte",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_8 },
 	{ L".halfword",			1,	-1,	&DirectiveData,				DIRECTIVE_DATA_16 },
 	{ L".word",				1,	-1,	&DirectiveData,				DIRECTIVE_DATA_32 },

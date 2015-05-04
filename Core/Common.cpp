@@ -70,7 +70,7 @@ void AddAssemblerCommand(CAssemblerCommand* Command)
 	Global.Commands.push_back(Command);
 }
 
-bool isPowerOfTwo(int n)
+bool isPowerOfTwo(u64 n)
 {
 	if (n == 0) return false;
 	return !(n & (n - 1));

@@ -59,4 +59,4 @@ bool checkValidLabelName(const std::wstring& labelName);
 bool addAssemblerLabel(const std::wstring& labelName);
 
 void AddAssemblerCommand(CAssemblerCommand* Command);
-bool isPowerOfTwo(int n);
+bool isPowerOfTwo(u64 n);

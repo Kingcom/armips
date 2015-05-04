@@ -99,9 +99,6 @@
     <ClCompile Include="Commands\CDirectiveFile.cpp">
       <Filter>Commands</Filter>
     </ClCompile>
-    <ClCompile Include="Commands\CDirectiveFill.cpp">
-      <Filter>Commands</Filter>
-    </ClCompile>
     <ClCompile Include="Commands\CDirectiveMessage.cpp">
       <Filter>Commands</Filter>
     </ClCompile>
@@ -241,9 +238,6 @@
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CDirectiveFile.h">
-      <Filter>Commands</Filter>
-    </ClInclude>
-    <ClInclude Include="Commands\CDirectiveFill.h">
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="Commands\CDirectiveMessage.h">

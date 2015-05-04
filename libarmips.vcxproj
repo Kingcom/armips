@@ -237,7 +237,6 @@
     <ClCompile Include="Commands\CDirectiveConditional.cpp" />
     <ClCompile Include="Commands\CDirectiveData.cpp" />
     <ClCompile Include="Commands\CDirectiveFile.cpp" />
-    <ClCompile Include="Commands\CDirectiveFill.cpp" />
     <ClCompile Include="Commands\CDirectiveMessage.cpp" />
     <ClCompile Include="Commands\CommandSequence.cpp" />
     <ClCompile Include="Core\Assembler.cpp" />
@@ -294,7 +293,6 @@
     <ClInclude Include="Commands\CDirectiveConditional.h" />
     <ClInclude Include="Commands\CDirectiveData.h" />
     <ClInclude Include="Commands\CDirectiveFile.h" />
-    <ClInclude Include="Commands\CDirectiveFill.h" />
     <ClInclude Include="Commands\CDirectiveMessage.h" />
     <ClInclude Include="Commands\CommandSequence.h" />
     <ClInclude Include="Core\Assembler.h" />

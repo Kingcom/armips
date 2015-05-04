@@ -14,6 +14,9 @@ typedef bool (*directivefunc)(ArgumentList&,int);
 #define DIRECTIVE_NOTINMEMORY		0x00100000
 
 // Directive specific flags
+#define DIRECTIVE_POS_PHYSICAL		0x00000001
+#define DIRECTIVE_POS_VIRTUAL		0x00000002
+
 #define DIRECTIVE_COND_IF			0x00000001
 #define DIRECTIVE_COND_ELSE			0x00000002
 #define DIRECTIVE_COND_ELSEIF		0x00000003
