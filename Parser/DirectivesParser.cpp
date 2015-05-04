@@ -372,6 +372,46 @@ CAssemblerCommand* parseDirectiveArea(Tokenizer& tokenizer, int flags)
 	return area;
 }
 
+CAssemblerCommand* parseDirectiveDefineLabel(Tokenizer& tokenizer, int flags)
+{
+	Token tok = tokenizer.nextToken();
+	if (tok.type != TokenType::Identifier)
+		return nullptr;
+
+	if (tokenizer.nextToken().type != TokenType::Comma)
+		return nullptr;
+
+	Expression value = parseExpression(tokenizer);
+	if (value.isLoaded() == false)
+		return nullptr;
+
+	if (Global.symbolTable.isValidSymbolName(tok.stringValue) == false)
+	{
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",tok.stringValue);
+		return false;
+	}
+
+	return new CAssemblerLabel(tok.stringValue,value);
+}
+
+CAssemblerCommand* parseDirectiveFunction(Tokenizer& tokenizer, int flags)
+{
+	std::wstring name;
+	if (parseIdentifier(tokenizer,name) == false)
+		return false;
+
+	CommandSequence* seq = parseCommandSequence(tokenizer,{L".endfunc",L".endfunction",L".func",L".function"});
+
+	if (tokenizer.peekToken().stringValue == L".endfunc" ||
+		tokenizer.peekToken().stringValue == L".endfunction")
+	{
+		tokenizer.eatToken();
+	}
+
+	return nullptr;
+}
+
+
 CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet)
 {
 	Token tok = tokenizer.peekToken();
@@ -463,6 +503,11 @@ const DirectiveEntry directives[] = {
 
 	{ L".area",				&parseDirectiveArea,			0 },
 
+
+	{ L".definelabel",		&parseDirectiveDefineLabel,		0 },
+	{ L".function",			&parseDirectiveFunction,		0 },
+	{ L".func",				&parseDirectiveFunction,		0 },
+	
 	{ nullptr,				nullptr,						0 }
 };
 

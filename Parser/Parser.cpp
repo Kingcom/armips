@@ -53,7 +53,7 @@ CAssemblerCommand* parseLabel(Tokenizer& tokenizer, bool allLocal)
 		if (allLocal == true && Global.symbolTable.isGlobalSymbol(name))
 			name = L"@@" + name;
 			
-		return new CAssemblerLabel(name,Global.Section);
+		return new CAssemblerLabel(name);
 	}
 
 	return nullptr;

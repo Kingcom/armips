@@ -54,28 +54,6 @@ bool DirectiveNocash(ArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveDefineLabel(ArgumentList& List, int flags)
-{
-	u64 value;
-	CAssemblerLabel* labelCommand;
-
-	if (convertConstExpression(List[1].text,value) == false)
-	{
-		Logger::printError(Logger::Error,L"Invalid expression \"%s\"",List[1].text);
-		return false;
-	}
-	
-	if (Global.symbolTable.isValidSymbolName(List[0].text) == false)
-	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",List[0].text);
-		return false;
-	}
-
-	labelCommand = new CAssemblerLabel(List[0].text,value, Global.Section, true);
-	AddAssemblerCommand(labelCommand);
-	return true;
-}
-
 bool DirectiveMessage(ArgumentList& List, int flags)
 {
 	CDirectiveMessage::Type value;
@@ -154,20 +132,6 @@ bool DirectiveSym(ArgumentList& List, int flags)
 		Logger::printError(Logger::Error,L"Invalid arguments");
 		return false;
 	}
-	return true;
-}
-
-bool DirectiveStartFunction(ArgumentList& List, int flags)
-{
-	CDirectiveFunction* func = new CDirectiveFunction(List[0].text,Global.Section);
-	AddAssemblerCommand(func);
-	return true;
-}
-
-bool DirectiveEndFunction(ArgumentList& List, int flags)
-{
-	CDirectiveFunction* func = new CDirectiveFunction(L"",Global.Section);
-	AddAssemblerCommand(func);
 	return true;
 }
 
@@ -334,17 +298,11 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 const tDirective Directives[] = {
 	{ L".include",			1,	2,	&DirectiveInclude,			0 },
 	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
-	{ L".definelabel",		2,	2,	&DirectiveDefineLabel,		0 },
 	{ L".relativeinclude",	1,	1,	&DirectiveRelativeInclude,	0 },
 	{ L".erroronwarning",	1,	1,	&DirectiveWarningAsError,	0 },
 	{ L".sym",				1,	1,	&DirectiveSym,				0 },
 	{ L".importobj",		1,	2,	&DirectiveImportObj,		0 },
 	{ L".importlib",		1,	2,	&DirectiveImportObj,		0 },
-
-	{ L".function",			1,	1,	&DirectiveStartFunction,	0 },
-	{ L".func",				1,	1,	&DirectiveStartFunction,	0 },
-	{ L".endfunction",		0,	0,	&DirectiveEndFunction,		0 },
-	{ L".endfunc",			0,	0,	&DirectiveEndFunction,		0 },
 
 	{ L".warning",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_WARNING },
 	{ L".error",			1,	1,	&DirectiveMessage,			DIRECTIVE_MSG_ERROR },
