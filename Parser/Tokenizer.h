@@ -63,6 +63,7 @@ struct Token
 class Tokenizer
 {
 public:
+	Tokenizer();
 	Token& nextToken();
 	Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
@@ -72,12 +73,24 @@ public:
 	void setPosition(size_t pos) { tokenIndex = pos; }
 	void skipLookahead();
 	std::vector<Token> getTokens(size_t start, size_t count);
+	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
+	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
 protected:
 	virtual Token loadToken() = 0;
 	virtual bool isInputAtEnd() = 0;
-
+private:
+	void readTokens(size_t maxIndex);
 	std::vector<Token> tokens;
 	size_t tokenIndex;
+
+	struct Replacement
+	{
+		std::wstring identifier;
+		std::vector<Token> value;
+	};
+
+	Token invalidToken;
+	std::vector<Replacement> replacements;
 };
 
 class FileTokenizer: public Tokenizer
@@ -105,4 +118,20 @@ protected:
 	
 	Token token;
 	bool equActive;
+};
+
+class TokenStreamTokenizer: public Tokenizer
+{
+public:
+	void init(std::vector<Token>& tokens)
+	{
+		this->tokens = tokens;
+		pos = 0;
+	}
+protected:
+	virtual Token loadToken() { return tokens[pos++]; }
+	virtual bool isInputAtEnd() { return pos == tokens.size(); }
+
+	std::vector<Token> tokens;
+	size_t pos;
 };

@@ -8,24 +8,28 @@
 // Tokenizer
 //
 
+Tokenizer::Tokenizer()
+{
+	tokenIndex = 0;
+	invalidToken.type = TokenType::Invalid;
+}
+
 Token& Tokenizer::nextToken()
 {
-	while (tokenIndex >= tokens.size())
-	{
-		Token tok = loadToken();
-		tokens.push_back(tok);
-	}
+	readTokens(tokenIndex);
+	
+	if (tokenIndex >= tokens.size())
+		return invalidToken;
 
 	return tokens[tokenIndex++];
 }
 
 Token& Tokenizer::peekToken(int ahead)
 {
-	while (tokenIndex+ahead >= tokens.size())
-	{
-		Token tok = loadToken();
-		tokens.push_back(tok);
-	}
+	readTokens(tokenIndex+ahead);
+
+	if (tokenIndex+ahead >= tokens.size())
+		return invalidToken;
 
 	return tokens[tokenIndex+ahead];
 }
@@ -47,7 +51,6 @@ std::vector<Token> Tokenizer::getTokens(size_t start, size_t count)
 	size_t oldPos = getPosition();
 	setPosition(start);
 
-
 	for (size_t i = 0; i < count; i++)
 	{
 		result.push_back(nextToken());
@@ -55,6 +58,59 @@ std::vector<Token> Tokenizer::getTokens(size_t start, size_t count)
 
 	setPosition(oldPos);
 	return result;
+}
+
+void Tokenizer::registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens)
+{
+	Replacement replacement { identifier, tokens };
+	replacements.push_back(replacement);
+}
+
+void Tokenizer::registerReplacement(const std::wstring& identifier, const std::wstring& newValue)
+{
+	Token tok;
+	tok.type = TokenType::Identifier;
+	tok.stringValue = newValue;
+
+	Replacement replacement;
+	replacement.identifier = identifier;
+	replacement.value.push_back(tok);
+
+	replacements.push_back(replacement);
+}
+
+void Tokenizer::readTokens(size_t maxIndex)
+{
+	while (maxIndex >= tokens.size())
+	{
+		if (isInputAtEnd())
+			return;
+
+		Token token = loadToken();
+
+		// check replacements
+		bool replaced = false;
+		if (token.type == TokenType::Identifier)
+		{
+			for (Replacement& replacement: replacements)
+			{
+				// if the identifier matches, add all of its tokens
+				if (replacement.identifier == token.stringValue)
+				{
+					for (size_t i = 0; i < replacement.value.size(); i++)
+					{
+						tokens.push_back(replacement.value[i]);
+					}
+
+					replaced = true;
+					break;
+				}
+			}
+		}
+
+		if (replaced == false)
+			tokens.push_back(token);
+	}
 }
 
 

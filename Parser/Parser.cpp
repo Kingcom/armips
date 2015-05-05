@@ -18,6 +18,11 @@ inline bool isPartOfList(const std::wstring& value, std::initializer_list<wchar_
 	return false;
 }
 
+Parser::Parser()
+{
+	initializingMacro = false;
+}
+
 Expression Parser::parseExpression()
 {
 	return ::parseExpression(*getTokenizer());
@@ -85,7 +90,7 @@ CAssemblerCommand* Parser::parseFile(TextFile& file)
 	if (tokenizer.init(&file) == false)
 		return nullptr;
 
-	return parse(&tokenizer,true,true);
+	return parse(&tokenizer);
 }
 
 CAssemblerCommand* Parser::parseString(const std::wstring& text)
@@ -150,13 +155,9 @@ bool Parser::matchToken(TokenType type, bool optional)
 	return nextToken().type == type;
 }
 
-CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool allowEqu, bool allowMacro)
+CAssemblerCommand* Parser::parse(Tokenizer* tokenizer)
 {
-	Entry entry;
-	entry.tokenizer = tokenizer;
-	entry.allowEqu = allowEqu;
-	entry.allowMacro = allowMacro;
-	entries.push_back(entry);
+	entries.push_back(tokenizer);
 
 	CAssemblerCommand* sequence = parseCommandSequence();
 	entries.pop_back();
@@ -166,9 +167,6 @@ CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool allowEqu, bool allow
 
 bool Parser::checkEquLabel()
 {
-	if (isEquAllowed() == false)
-		return false;
-
 	if (peekToken(0).type == TokenType::Identifier)
 	{
 		int pos = 1;
@@ -182,6 +180,13 @@ bool Parser::checkEquLabel()
 			std::wstring value = peekToken(pos+1).stringValue;
 			eatTokens(pos+2);
 		
+			// equs are not allowed in macros
+			if (initializingMacro)
+			{
+				Logger::printError(Logger::Error,L"equ not allowed in macro");
+				return true;
+			}
+
 			if (Global.symbolTable.isValidSymbolName(name) == false)
 			{
 				Logger::printError(Logger::Error,L"Invalid equation name %s",name);
@@ -202,6 +207,181 @@ bool Parser::checkEquLabel()
 	return false;
 }
 
+bool Parser::checkMacroDefinition()
+{
+	ParserMacro macro;
+
+	Token& first = peekToken();
+	if (first.type != TokenType::Identifier)
+		return false;
+
+	if (first.stringValue != L".macro")
+		return false;
+
+	eatToken();
+
+	// nested macro definitions are not allowed
+	if (initializingMacro)
+	{
+		Logger::printError(Logger::Error,L"Nested macro definitions not allowed");
+		while (!atEnd())
+		{
+			Token& token = nextToken();
+			if (token.type == TokenType::Identifier && token.stringValue == L".endmacro")
+				break;
+		}
+
+		return true;
+	}
+
+	std::vector<Expression> parameters;
+	if (parseExpressionList(parameters) == false)
+		return false;
+	
+	if (checkExpressionListSize(parameters,1,-1) == false)
+		return false;
+	
+	// load name
+	if (parameters[0].evaluateIdentifier(macro.name) == false)
+		return false;
+
+	// load parameters
+	for (size_t i = 1; i < parameters.size(); i++)
+	{
+		std::wstring name;
+		if (parameters[i].evaluateIdentifier(name) == false)
+			return false;
+
+		macro.parameters.push_back(name);
+	}
+
+	// load macro content
+	if (macros.find(macro.name) != macros.end())
+	{
+		Logger::printError(Logger::Error,L"Macro \"%s\" already defined",macro.name);
+		return false;
+	}
+
+	initializingMacro = true;
+
+	size_t start = getTokenizer()->getPosition();
+	bool valid = false;
+	while (atEnd() == false)
+	{
+		Token& tok = peekToken();
+		if (tok.type == TokenType::Identifier && tok.stringValue == L".endmacro")
+		{
+			valid = true;
+			break;
+		}
+
+		// parse the short lived next command
+		CAssemblerCommand* command = parseCommand();
+		delete command;
+	}
+	
+	// no .endmacro, not valid
+	if (valid == false)
+		return true;
+
+	// get content
+	size_t end = getTokenizer()->getPosition();;
+	macro.content = getTokenizer()->getTokens(start,end-start);
+	eatToken();
+
+	// and initialize the rest
+	macro.labels = macroLabels;
+	macro.counter = 0;
+	macroLabels.clear();
+	
+	macros[macro.name] = macro;
+	initializingMacro = false;
+
+	return true;
+}
+
+CAssemblerCommand* Parser::parseMacroCall()
+{
+	Token& start = peekToken();
+	if (start.type != TokenType::Identifier)
+		return nullptr;
+
+	auto it = macros.find(start.stringValue);
+	if (it == macros.end())
+		return nullptr;
+
+	ParserMacro& macro = it->second;
+	eatToken();
+
+	// create a token stream for the macro content,
+	// registering replacements for parameter values
+	TokenStreamTokenizer macroTokenizer;
+	macroTokenizer.init(macro.content);
+
+	for (size_t i = 0; i < macro.parameters.size(); i++)
+	{
+		if (i != 0)
+		{
+			if (nextToken().type != TokenType::Comma)
+				return nullptr;
+		}
+
+		if (i == macro.parameters.size())
+		{
+			size_t count = macro.parameters.size();
+			while (peekToken().type == TokenType::Comma)
+			{
+				eatToken();
+				parseExpression();
+			}
+
+			Logger::printError(Logger::Error,L"Not enough macro arguments (%d vs %d)",count,macro.parameters.size());		
+			return nullptr;
+		}
+
+		size_t startPos = getTokenizer()->getPosition();
+		Expression exp = parseExpression();
+		if (exp.isLoaded() == false)
+			return false;
+
+		size_t tokenCount = getTokenizer()->getPosition()-startPos;
+		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,tokenCount);
+
+		// give them as a replacement to new tokenizer
+		macroTokenizer.registerReplacement(macro.parameters[i],tokens);
+	}
+
+	if (peekToken().type == TokenType::Comma)
+	{
+		size_t count = macro.parameters.size();
+		while (peekToken().type == TokenType::Comma)
+		{
+			eatToken();
+			parseExpression();
+			count++;
+		}
+
+		Logger::printError(Logger::Error,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
+		return nullptr;
+	}
+
+	// a macro is fully parsed once when it's loaded
+	// to gather all labels. it's not necessary to
+	// instantiate other macros at that time
+	if (initializingMacro)
+		return new DummyCommand();
+
+	// register labels and replacements
+	for (const std::wstring& label: macro.labels)
+	{
+		std::wstring fullName = formatString(L"%s_%s_%08X",macro.name,label,macro.counter);
+		macroTokenizer.registerReplacement(label,fullName);
+	}
+	
+	macro.counter++;
+	return parse(&macroTokenizer);
+}
+
 CAssemblerCommand* Parser::parseLabel()
 {
 	if (peekToken(0).type == TokenType::Identifier &&
@@ -209,6 +389,15 @@ CAssemblerCommand* Parser::parseLabel()
 	{
 		std::wstring name = peekToken(0).stringValue;
 		eatTokens(2);
+		
+		if (initializingMacro)
+			macroLabels.insert(name);
+		
+		if (Global.symbolTable.isValidSymbolName(name) == false)
+		{
+			Logger::printError(Logger::Error,L"Invalid label name");
+			return nullptr;
+		}
 
 		return new CAssemblerLabel(name);
 	}
@@ -220,15 +409,18 @@ CAssemblerCommand* Parser::parseCommand()
 {
 	CAssemblerCommand* command;
 
-	while (checkEquLabel())
+	while (checkEquLabel() || checkMacroDefinition())
 	{
-		// do nothing, just parse all the equs there are
+		// do nothing, just parse all the equs and macros there are
 	}
 
 	if (atEnd())
 		return nullptr;
 
 	if ((command = parseLabel()) != nullptr)
+		return command;
+
+	if ((command = parseMacroCall()) != nullptr)
 		return command;
 
 	if ((command = Arch->parseDirective(*this)) != nullptr)

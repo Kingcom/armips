@@ -3,6 +3,8 @@
 #include "Core/Expression.h"
 #include "Commands/CommandSequence.h"
 #include "DirectivesParser.h"
+#include <set>
+#include <map>
 
 struct AssemblyTemplateArgument
 {
@@ -10,10 +12,20 @@ struct AssemblyTemplateArgument
 	std::wstring value;
 };
 
+struct ParserMacro
+{
+	std::wstring name;
+	std::vector<std::wstring> parameters;
+	std::set<std::wstring> labels;
+	std::vector<Token> content;
+	size_t counter;
+};
+
 class Parser
 {
 public:
-	bool atEnd() { return entries.back().tokenizer->atEnd(); }
+	Parser();
+	bool atEnd() { return entries.back()->atEnd(); }
 
 	Expression parseExpression();
 	bool parseExpressionList(std::vector<Expression>& list);
@@ -26,27 +38,23 @@ public:
 	CAssemblerCommand* parseDirective(const DirectiveEntry* directiveSet);
 	bool matchToken(TokenType type, bool optional = false);
 
-	Tokenizer* getTokenizer() { return entries.back().tokenizer; };
+	Tokenizer* getTokenizer() { return entries.back(); };
 	Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
 	Token& nextToken() { return getTokenizer()->nextToken(); };
 	void eatToken() { getTokenizer()->eatToken(); };
 	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
 protected:
-	CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool allowEqu, bool allowMacro);
+	CAssemblerCommand* Parser::parse(Tokenizer* tokenizer);
 	CAssemblerCommand* parseLabel();
 	bool parseMacro();
 	bool checkEquLabel();
-	bool isEquAllowed() { return entries.back().allowEqu; }
-	bool isMacroAllowed() { return entries.back().allowMacro; }
+	bool checkMacroDefinition();
+	CAssemblerCommand* parseMacroCall();
 
-	struct Entry
-	{
-		Tokenizer* tokenizer;
-		bool allowEqu;
-		bool allowMacro;
-	};
-
-	std::vector<Entry> entries;
+	std::vector<Tokenizer*> entries;
+	std::map<std::wstring,ParserMacro> macros;
+	std::set<std::wstring> macroLabels;
+	bool initializingMacro;
 };
 
 struct TokenSequenceValue
