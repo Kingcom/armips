@@ -4,6 +4,7 @@
 #include "Core/Misc.h"
 #include "Util/CRC.h"
 #include "Util/Util.h"
+#include "Commands/CAssemblerLabel.h"
 
 struct ArFileHeader
 {
@@ -246,11 +247,10 @@ bool ElfRelocator::exportSymbols()
 	return !error;
 }
 
-void ElfRelocator::writeCtor(const std::wstring& ctorName)
+CAssemblerCommand* ElfRelocator::generateCtor(const std::wstring& ctorName)
 {
-	Arch->AssembleDirective(L".func",ctorName);
-	relocator->writeCtorStub(ctors);
-	Arch->AssembleDirective(L".endfunc",L"");
+	CAssemblerCommand* content = relocator->generateCtorStub(ctors);
+	return new CDirectiveFunction(ctorName,content);
 }
 
 bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)

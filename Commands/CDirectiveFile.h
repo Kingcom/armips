@@ -100,13 +100,14 @@ private:
 class DirectiveObjImport: public CAssemblerCommand
 {
 public:
-	DirectiveObjImport(const std::wstring& inputName) { };
-	DirectiveObjImport(ArgumentList& args);
+	DirectiveObjImport(const std::wstring& inputName);
+	DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName);
 	~DirectiveObjImport() { };
 	virtual bool Validate();
 	virtual void Encode();
-	virtual void writeTempData(TempData& tempData) { };
+	virtual void writeTempData(TempData& tempData);
 	virtual void writeSymData(SymbolData& symData);
 private:
 	ElfRelocator rel;
+	CAssemblerCommand* ctor;
 };

@@ -179,6 +179,31 @@ CAssemblerCommand* parseDirectiveHeaderSize(Tokenizer& tokenizer, int flags)
 	return new CDirectiveHeaderSize(size);
 }
 
+CAssemblerCommand* parseDirectiveObjImport(Tokenizer& tokenizer, int flags)
+{
+	std::vector<Expression> list;
+	if (parseExpressionList(tokenizer,list) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(list,1,2) == false)
+		return nullptr;
+
+	std::wstring fileName;
+	if (list[0].evaluateString(fileName,true) == false)
+		return nullptr;
+
+	if (list.size() == 2)
+	{
+		std::wstring ctorName;
+		if (list[1].evaluateIdentifier(ctorName) == false)
+			return nullptr;
+
+		return new DirectiveObjImport(fileName,ctorName);
+	}
+	
+	return new DirectiveObjImport(fileName);
+}
+
 CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 {
 	std::wstring name;
@@ -601,6 +626,9 @@ const DirectiveEntry directives[] = {
 	{ L".nds",				&parseDirectiveNds,				0 },
 
 	{ L".area",				&parseDirectiveArea,			0 },
+
+	{ L".importobj",		&parseDirectiveObjImport,		0 },
+	{ L".importlib",		&parseDirectiveObjImport,		0 },
 
 	{ L".erroronwarning",	&parseDirectiveErrorWarning,	0 },
 	{ L".relativeinclude",	&parseDirectiveRelativeInclude,	0 },

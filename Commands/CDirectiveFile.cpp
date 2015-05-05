@@ -415,32 +415,56 @@ void CDirectiveHeaderSize::writeTempData(TempData& tempData)
 // DirectiveObjImport
 //
 
-DirectiveObjImport::DirectiveObjImport(ArgumentList& args)
+DirectiveObjImport::DirectiveObjImport(const std::wstring& inputName)
 {
-	if (rel.init(args[0].text))
+	ctor = nullptr;
+	if (rel.init(inputName))
 	{
 		rel.exportSymbols();
+	}
+}
 
-		if (args.size() == 2)
-			rel.writeCtor(args[1].text);
+DirectiveObjImport::DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName)
+{
+	if (rel.init(inputName))
+	{
+		rel.exportSymbols();
+		ctor = rel.generateCtor(ctorName);
 	}
 }
 
 bool DirectiveObjImport::Validate()
 {
+	bool result = false;
+	if (ctor != nullptr && ctor->Validate())
+		result = true;
+
 	u64 memory = g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory((size_t)memory);
-	return rel.hasDataChanged();
+
+	return rel.hasDataChanged() || result;
 }
 
 void DirectiveObjImport::Encode()
 {
+	if (ctor != nullptr)
+		ctor->Encode();
+
 	ByteArray& data = rel.getData();
 	g_fileManager->write(data.data(),data.size());
 }
 
+void DirectiveObjImport::writeTempData(TempData& tempData)
+{
+	if (ctor != nullptr)
+		ctor->writeTempData(tempData);
+}
+
 void DirectiveObjImport::writeSymData(SymbolData& symData)
 {
+	if (ctor != nullptr)
+		ctor->writeSymData(symData);
+
 	rel.writeSymbols(symData);
 }

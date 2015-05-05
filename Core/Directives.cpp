@@ -34,14 +34,6 @@ bool DirectiveInclude(ArgumentList& List, int flags)
 	return true;
 }
 
-bool DirectiveImportObj(ArgumentList& list, int flags)
-{
-	DirectiveObjImport* command = new DirectiveObjImport(list);
-	AddAssemblerCommand(command);
-	return true;
-}
-
-
 size_t loadArgument(ArgumentList& list, const std::wstring& args, size_t pos)
 {
 	std::wstring buffer;
@@ -196,8 +188,6 @@ bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name,
 
 const tDirective Directives[] = {
 	{ L".include",			1,	2,	&DirectiveInclude,			0 },
-	{ L".importobj",		1,	2,	&DirectiveImportObj,		0 },
-	{ L".importlib",		1,	2,	&DirectiveImportObj,		0 },
 
 	{ NULL,					0,	0,	NULL,						0 }
 };
