@@ -31,19 +31,19 @@ const ArmRegisterDescriptor armCopNumbers[] = {
 	{ L"p12", 12 },	{ L"p13", 13 },	{ L"p14", 14 },	{ L"p15", 15 },
 };
 
-CAssemblerCommand* parseDirectiveThumb(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveThumb(Parser& parser, int flags)
 {
 	Arm.SetThumbMode(true);
 	return new ArmStateCommand(false);
 }
 
-CAssemblerCommand* parseDirectiveArm(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveArm(Parser& parser, int flags)
 {
 	Arm.SetThumbMode(false);
 	return new ArmStateCommand(true);
 }
 
-CAssemblerCommand* parseDirectivePool(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectivePool(Parser& parser, int flags)
 {
 	CommandSequence* seq = new CommandSequence();
 	seq->addCommand(new CDirectiveAlignFill(4,CDirectiveAlignFill::Align));
@@ -61,13 +61,13 @@ const wchar_t* msgTemplate =
 	L"%after%:"
 ;
 
-CAssemblerCommand* parseDirectiveMsg(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveMsg(Parser& parser, int flags)
 {
-	Expression text = parseExpression(tokenizer);
+	Expression text = parser.parseExpression();
 	if (text.isLoaded() == false)
 		return nullptr;
 
-	return parseTemplate(msgTemplate, {
+	return parser.parseTemplate(msgTemplate, {
 		{ L"%after%", Global.symbolTable.getUniqueLabelName() },
 		{ L"%text%", text.toString() },
 		{ L"%alignment%", Arm.GetThumbMode() == true ? L"2" : L"4" }
@@ -82,14 +82,14 @@ const DirectiveEntry armDirectives[] = {
 	{ NULL,			NULL,					0 }
 };
 
-CAssemblerCommand* ArmParser::parseDirective(Tokenizer& tokenizer)
+CAssemblerCommand* ArmParser::parseDirective(Parser& parser)
 {
-	return ::parseDirective(tokenizer,armDirectives);
+	return parser.parseDirective(armDirectives);
 }
 
-bool ArmParser::parseRegisterTable(Tokenizer& tokenizer, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count)
+bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count)
 {
-	Token& token = tokenizer.peekToken();
+	Token& token = parser.peekToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
@@ -99,7 +99,7 @@ bool ArmParser::parseRegisterTable(Tokenizer& tokenizer, ArmRegisterValue& dest,
 		{
 			dest.name = token.stringValue;
 			dest.num = table[i].num;
-			tokenizer.eatToken();
+			parser.eatToken();
 			return true;
 		}
 	}
@@ -107,39 +107,39 @@ bool ArmParser::parseRegisterTable(Tokenizer& tokenizer, ArmRegisterValue& dest,
 	return false;
 }
 
-bool ArmParser::parseRegister(Tokenizer& tokenizer, ArmRegisterValue& dest, int max)
+bool ArmParser::parseRegister(Parser& parser, ArmRegisterValue& dest, int max)
 {
-	if (parseRegisterTable(tokenizer,dest,armRegisters,ARRAY_SIZE(armRegisters)) == false)
+	if (parseRegisterTable(parser,dest,armRegisters,ARRAY_SIZE(armRegisters)) == false)
 		return false;
 
 	return dest.num <= max;
 }
 
-bool ArmParser::parseCopRegister(Tokenizer& tokenizer, ArmRegisterValue& dest)
+bool ArmParser::parseCopRegister(Parser& parser, ArmRegisterValue& dest)
 {
-	return parseRegisterTable(tokenizer,dest,armCopRegisters,ARRAY_SIZE(armCopRegisters));
+	return parseRegisterTable(parser,dest,armCopRegisters,ARRAY_SIZE(armCopRegisters));
 }
 
-bool ArmParser::parseCopNumber(Tokenizer& tokenizer, ArmRegisterValue& dest)
+bool ArmParser::parseCopNumber(Parser& parser, ArmRegisterValue& dest)
 {
-	return parseRegisterTable(tokenizer,dest,armCopNumbers,ARRAY_SIZE(armCopNumbers));
+	return parseRegisterTable(parser,dest,armCopNumbers,ARRAY_SIZE(armCopNumbers));
 }
 
-bool ArmParser::parseRegisterList(Tokenizer& tokenizer, int& dest, int validMask)
+bool ArmParser::parseRegisterList(Parser& parser, int& dest, int validMask)
 {
 	ArmRegisterValue reg, reg2;
 
 	dest = 0;
 	while (true)
 	{
-		if (parseRegister(tokenizer,reg) == false)
+		if (parseRegister(parser,reg) == false)
 			return false;
 
-		if (tokenizer.peekToken().type == TokenType::Minus)
+		if (parser.peekToken().type == TokenType::Minus)
 		{
-			tokenizer.eatToken();
+			parser.eatToken();
 
-			if (parseRegister(tokenizer,reg2) == false || reg2.num < reg.num)
+			if (parseRegister(parser,reg2) == false || reg2.num < reg.num)
 				return false;
 			
 			for (int i = reg.num; i <= reg2.num; i++)
@@ -150,57 +150,57 @@ bool ArmParser::parseRegisterList(Tokenizer& tokenizer, int& dest, int validMask
 			dest |= (1 << reg.num);
 		}
 
-		if (tokenizer.peekToken().type != TokenType::Comma)
+		if (parser.peekToken().type != TokenType::Comma)
 			break;
 
-		tokenizer.eatToken();
+		parser.eatToken();
 	}
 
 	return (validMask & dest) == dest;
 }
 
-bool ArmParser::parseImmediate(Tokenizer& tokenizer, Expression& dest)
+bool ArmParser::parseImmediate(Parser& parser, Expression& dest)
 {
-	dest = parseExpression(tokenizer);
+	dest = parser.parseExpression();
 	return dest.isLoaded();
 }
 
-bool ArmParser::matchSymbol(Tokenizer& tokenizer, wchar_t symbol, bool optional)
+bool ArmParser::matchSymbol(Parser& parser, wchar_t symbol, bool optional)
 {
 	switch (symbol)
 	{
 	case '[':
-		return matchToken(tokenizer,TokenType::LBrack,optional);
+		return parser.matchToken(TokenType::LBrack,optional);
 	case ']':
-		return matchToken(tokenizer,TokenType::RBrack,optional);
+		return parser.matchToken(TokenType::RBrack,optional);
 	case ',':
-		return matchToken(tokenizer,TokenType::Comma,optional);
+		return parser.matchToken(TokenType::Comma,optional);
 	case '!':
-		return matchToken(tokenizer,TokenType::Exclamation,optional);
+		return parser.matchToken(TokenType::Exclamation,optional);
 	case '{':
-		return matchToken(tokenizer,TokenType::LBrace,optional);
+		return parser.matchToken(TokenType::LBrace,optional);
 	case '}':
-		return matchToken(tokenizer,TokenType::RBrace,optional);
+		return parser.matchToken(TokenType::RBrace,optional);
 	case '#':
-		return matchToken(tokenizer,TokenType::Hash,optional);
+		return parser.matchToken(TokenType::Hash,optional);
 	case '=':
-		return matchToken(tokenizer,TokenType::Assign,optional);
+		return parser.matchToken(TokenType::Assign,optional);
 	}
 
 	return false;
 }
 
-bool ArmParser::parseShift(Tokenizer& tokenizer, ArmOpcodeVariables& vars, bool immediateOnly)
+bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immediateOnly)
 {
 	// no shift is also valid
 	vars.Shift.UseShift = false;
-	if (tokenizer.peekToken().type != TokenType::Comma)
+	if (parser.peekToken().type != TokenType::Comma)
 		return true;
 
-	tokenizer.eatToken();
+	parser.eatToken();
 
 	// load shift mode
-	Token& shiftMode = tokenizer.nextToken();
+	Token& shiftMode = parser.nextToken();
 	if (shiftMode.type != TokenType::Identifier)
 		return false;
 
@@ -217,17 +217,17 @@ bool ArmParser::parseShift(Tokenizer& tokenizer, ArmOpcodeVariables& vars, bool 
 	else 
 		return false;
 
-	if (parseRegister(tokenizer,vars.Shift.reg) == true)
+	if (parseRegister(parser,vars.Shift.reg) == true)
 	{
 		if (immediateOnly)
 			return false;
 
 		vars.Shift.ShiftByRegister = true;
 	} else {
-		if (tokenizer.peekToken().type == TokenType::Hash)
-			tokenizer.eatToken();
+		if (parser.peekToken().type == TokenType::Hash)
+			parser.eatToken();
 		
-		if (parseImmediate(tokenizer,vars.Shift.ShiftExpression) == false)
+		if (parseImmediate(parser,vars.Shift.ShiftExpression) == false)
 			return false;
 
 		vars.Shift.ShiftByRegister = false;
@@ -237,18 +237,18 @@ bool ArmParser::parseShift(Tokenizer& tokenizer, ArmOpcodeVariables& vars, bool 
 	return true;
 }
 
-bool ArmParser::parsePseudoShift(Tokenizer& tokenizer, ArmOpcodeVariables& vars, int type)
+bool ArmParser::parsePseudoShift(Parser& parser, ArmOpcodeVariables& vars, int type)
 {
 	vars.Shift.Type = type;
 
-	if (parseRegister(tokenizer,vars.Shift.reg) == true)
+	if (parseRegister(parser,vars.Shift.reg) == true)
 	{
 		vars.Shift.ShiftByRegister = true;
 	} else {
-		if (tokenizer.peekToken().type == TokenType::Hash)
-			tokenizer.eatToken();
+		if (parser.peekToken().type == TokenType::Hash)
+			parser.eatToken();
 		
-		if (parseImmediate(tokenizer,vars.Shift.ShiftExpression) == false)
+		if (parseImmediate(parser,vars.Shift.ShiftExpression) == false)
 			return false;
 
 		vars.Shift.ShiftByRegister = false;
@@ -373,31 +373,31 @@ bool ArmParser::decodeArmOpcode(const std::wstring& name, const tArmOpcode& opco
 	return pos >= name.size();
 }
 
-void ArmParser::parseWriteback(Tokenizer& tokenizer, bool& dest)
+void ArmParser::parseWriteback(Parser& parser, bool& dest)
 {
-	dest = tokenizer.peekToken().type == TokenType::Exclamation;
+	dest = parser.peekToken().type == TokenType::Exclamation;
 	if (dest)
-		tokenizer.eatToken();
+		parser.eatToken();
 }
 
-void ArmParser::parsePsr(Tokenizer& tokenizer, bool& dest)
+void ArmParser::parsePsr(Parser& parser, bool& dest)
 {
-	dest = tokenizer.peekToken().type == TokenType::Caret;
+	dest = parser.peekToken().type == TokenType::Caret;
 	if (dest)
-		tokenizer.eatToken();
+		parser.eatToken();
 }
 
-void ArmParser::parseSign(Tokenizer& tokenizer, bool& dest)
+void ArmParser::parseSign(Parser& parser, bool& dest)
 {
-	switch (tokenizer.peekToken().type)
+	switch (parser.peekToken().type)
 	{
 	case TokenType::Plus:
 		dest = true;
-		tokenizer.eatToken();
+		parser.eatToken();
 		break;
 	case TokenType::Minus:
 		dest = false;
-		tokenizer.eatToken();
+		parser.eatToken();
 		break;
 	default:
 		dest = true;
@@ -405,9 +405,9 @@ void ArmParser::parseSign(Tokenizer& tokenizer, bool& dest)
 	}
 }
 
-bool ArmParser::parsePsrTransfer(Tokenizer& tokenizer, ArmOpcodeVariables& vars, bool shortVersion)
+bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool shortVersion)
 {
-	Token& token = tokenizer.nextToken();
+	Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
@@ -484,7 +484,7 @@ bool ArmParser::parsePsrTransfer(Tokenizer& tokenizer, ArmOpcodeVariables& vars,
 	return true;
 }
 
-bool ArmParser::parseArmParameters(Tokenizer& tokenizer, const tArmOpcode& opcode, ArmOpcodeVariables& vars)
+bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, ArmOpcodeVariables& vars)
 {
 	const u8* encoding = (const u8*) opcode.mask;
 
@@ -499,70 +499,70 @@ bool ArmParser::parseArmParameters(Tokenizer& tokenizer, const tArmOpcode& opcod
 		switch (*encoding++)
 		{
 		case 'd': // register
-			CHECK(parseRegister(tokenizer,vars.rd,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser,vars.rd,*encoding++ == '1' ? 14 : 15));
 			break;
 		case 's': // register
-			CHECK(parseRegister(tokenizer,vars.rs,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser,vars.rs,*encoding++ == '1' ? 14 : 15));
 			break;
 		case 'n': // register
-			CHECK(parseRegister(tokenizer,vars.rn,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser,vars.rn,*encoding++ == '1' ? 14 : 15));
 			break;
 		case 'm': // register
-			CHECK(parseRegister(tokenizer,vars.rm,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser,vars.rm,*encoding++ == '1' ? 14 : 15));
 			break;
 		case 'D': // cop register
-			CHECK(parseCopRegister(tokenizer,vars.CopData.cd));
+			CHECK(parseCopRegister(parser,vars.CopData.cd));
 			break;
 		case 'N': // cop register
-			CHECK(parseCopRegister(tokenizer,vars.CopData.cn));
+			CHECK(parseCopRegister(parser,vars.CopData.cn));
 			break;
 		case 'M': // cop register
-			CHECK(parseCopRegister(tokenizer,vars.CopData.cm));
+			CHECK(parseCopRegister(parser,vars.CopData.cm));
 			break;
 		case 'W':	// writeback
-			parseWriteback(tokenizer,vars.writeback);
+			parseWriteback(parser,vars.writeback);
 			break;
 		case 'p':	// psr
-			parsePsr(tokenizer,vars.psr);
+			parsePsr(parser,vars.psr);
 			break;
 		case 'P':	// msr/mrs psr data
-			CHECK(parsePsrTransfer(tokenizer,vars,*encoding++ == '1'));
+			CHECK(parsePsrTransfer(parser,vars,*encoding++ == '1'));
 			break;
 		case 'R':	// register list
-			CHECK(parseRegisterList(tokenizer,vars.rlist,0xFFFF));
+			CHECK(parseRegisterList(parser,vars.rlist,0xFFFF));
 			encoding += 2;
 			break;
 		case 'S':	// shift
-			CHECK(parseShift(tokenizer,vars,*encoding++ == '1'));
+			CHECK(parseShift(parser,vars,*encoding++ == '1'));
 			break;
 		case 'I':	// immediate
 		case 'i':
-			CHECK(parseImmediate(tokenizer,vars.ImmediateExpression));
+			CHECK(parseImmediate(parser,vars.ImmediateExpression));
 			vars.ImmediateBitLen = 32;
 			break;
 		case 'j':	// variable bit immediate
-			CHECK(parseImmediate(tokenizer,vars.ImmediateExpression));
+			CHECK(parseImmediate(parser,vars.ImmediateExpression));
 			vars.ImmediateBitLen = *encoding++;
 			break;
 		case 'X': // cop number
-			CHECK(parseCopNumber(tokenizer,vars.CopData.cm));
+			CHECK(parseCopNumber(parser,vars.CopData.cm));
 			break;
 		case 'Y':	// cop opcode number
-			CHECK(parseImmediate(tokenizer,vars.CopData.CpopExpression));
+			CHECK(parseImmediate(parser,vars.CopData.CpopExpression));
 			vars.ImmediateBitLen = 4;
 			break;
 		case 'Z':	// cop info number
-			CHECK(parseImmediate(tokenizer,vars.CopData.CpinfExpression));
+			CHECK(parseImmediate(parser,vars.CopData.CpinfExpression));
 			vars.ImmediateBitLen = 3;
 			break;
 		case 'z':	// shift for pseudo opcodes
-			CHECK(parsePseudoShift(tokenizer,vars,*encoding++));
+			CHECK(parsePseudoShift(parser,vars,*encoding++));
 			break;
 		case 'v':	// sign for register index parameter
-			parseSign(tokenizer,vars.SignPlus);
+			parseSign(parser,vars.SignPlus);
 			break;
 		default:
-			CHECK(matchSymbol(tokenizer,*(encoding-1),optional));
+			CHECK(matchSymbol(parser,*(encoding-1),optional));
 			break;
 		}
 	}
@@ -570,9 +570,9 @@ bool ArmParser::parseArmParameters(Tokenizer& tokenizer, const tArmOpcode& opcod
 	return true;
 }
 
-CArmInstruction* ArmParser::parseArmOpcode(Tokenizer& tokenizer)
+CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 {
-	Token token = tokenizer.nextToken();
+	Token token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
@@ -586,15 +586,15 @@ CArmInstruction* ArmParser::parseArmOpcode(Tokenizer& tokenizer)
 
 		if (decodeArmOpcode(token.stringValue,ArmOpcodes[z],vars) == true)
 		{
-			size_t tokenPos = tokenizer.getPosition();
+			size_t tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseArmParameters(tokenizer,ArmOpcodes[z],vars) == true)
+			if (parseArmParameters(parser,ArmOpcodes[z],vars) == true)
 			{
 				// success, return opcode
 				return new CArmInstruction(ArmOpcodes[z],vars);
 			}
 
-			tokenizer.setPosition(tokenPos);
+			parser.getTokenizer()->setPosition(tokenPos);
 			paramFail = true;
 		}
 	}
@@ -607,7 +607,7 @@ CArmInstruction* ArmParser::parseArmOpcode(Tokenizer& tokenizer)
 	return nullptr;
 }
 
-bool ArmParser::parseThumbParameters(Tokenizer& tokenizer, const tThumbOpcode& opcode, ThumbOpcodeVariables& vars)
+bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode, ThumbOpcodeVariables& vars)
 {
 	const u8* encoding = (const u8*) opcode.mask;
 
@@ -623,39 +623,39 @@ bool ArmParser::parseThumbParameters(Tokenizer& tokenizer, const tThumbOpcode& o
 		switch (*encoding++)
 		{
 		case 'd': // register
-			CHECK(parseRegister(tokenizer,vars.rd,7));
+			CHECK(parseRegister(parser,vars.rd,7));
 			break;
 		case 's': // register
-			CHECK(parseRegister(tokenizer,vars.rs,7));
+			CHECK(parseRegister(parser,vars.rs,7));
 			break;
 		case 'n': // register
-			CHECK(parseRegister(tokenizer,vars.rn,7));
+			CHECK(parseRegister(parser,vars.rn,7));
 			break;
 		case 'o': // register
-			CHECK(parseRegister(tokenizer,vars.ro,7));
+			CHECK(parseRegister(parser,vars.ro,7));
 			break;
 		case 'D': // register
-			CHECK(parseRegister(tokenizer,vars.rd,15));
+			CHECK(parseRegister(parser,vars.rd,15));
 			break;
 		case 'S': // register
-			CHECK(parseRegister(tokenizer,vars.rs,15));
+			CHECK(parseRegister(parser,vars.rs,15));
 			break;
 		case 'r': // forced register
-			CHECK(parseRegister(tokenizer,tempRegister,15));
+			CHECK(parseRegister(parser,tempRegister,15));
 			CHECK(*encoding++ == tempRegister.num);
 			break;
 		case 'R':	// register list
 			value = encoding[0] | (encoding[1] << 8);
-			CHECK(parseRegisterList(tokenizer,vars.rlist,value));
+			CHECK(parseRegisterList(parser,vars.rlist,value));
 			encoding += 2;
 			break;
 		case 'I':	// immediate
 		case 'i':
-			CHECK(parseImmediate(tokenizer,vars.ImmediateExpression));
+			CHECK(parseImmediate(parser,vars.ImmediateExpression));
 			vars.ImmediateBitLen = *encoding++;
 			break;
 		default:
-			CHECK(matchSymbol(tokenizer,*(encoding-1),optional));
+			CHECK(matchSymbol(parser,*(encoding-1),optional));
 			break;
 		}
 	}
@@ -663,9 +663,9 @@ bool ArmParser::parseThumbParameters(Tokenizer& tokenizer, const tThumbOpcode& o
 	return true;
 }
 
-CThumbInstruction* ArmParser::parseThumbOpcode(Tokenizer& tokenizer)
+CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 {
-	Token token = tokenizer.nextToken();
+	Token token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
@@ -682,15 +682,15 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Tokenizer& tokenizer)
 
 		if (token.stringValue == name)
 		{
-			size_t tokenPos = tokenizer.getPosition();
+			size_t tokenPos = parser.getTokenizer()->getPosition();
 			
-			if (parseThumbParameters(tokenizer,ThumbOpcodes[z],vars) == true)
+			if (parseThumbParameters(parser,ThumbOpcodes[z],vars) == true)
 			{
 				// success, return opcode
 				return new CThumbInstruction(ThumbOpcodes[z],vars);
 			}
 
-			tokenizer.setPosition(tokenPos);
+			parser.getTokenizer()->setPosition(tokenPos);
 			paramFail = true;
 		}
 	}

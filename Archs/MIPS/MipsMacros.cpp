@@ -60,13 +60,13 @@ std::wstring preprocessMacro(const wchar_t* text, MipsImmediateData& immediates)
 	return formatString(L"%s: %s",labelName,text);
 }
 
-CAssemblerCommand* createMacro(const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)
+CAssemblerCommand* createMacro(Parser& parser, const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)
 {
-	CAssemblerCommand* content = parseTemplate(text,variables);
+	CAssemblerCommand* content = parser.parseTemplate(text,variables);
 	return new MipsMacroCommand(content,flags);
 }
 
-CAssemblerCommand* generateMipsMacroLi(MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLi = LR"(
 		.if %imm% > 0xFFFF
@@ -94,7 +94,7 @@ CAssemblerCommand* generateMipsMacroLi(MipsRegisterData& registers, MipsImmediat
 	)";
 
 	std::wstring macroText = preprocessMacro(templateLi,immediates);
-	return createMacro(macroText,flags, {
+	return createMacro(parser,macroText,flags, {
 			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
 			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
 			{ L"%rs%",		registers.grs.name },
@@ -102,7 +102,7 @@ CAssemblerCommand* generateMipsMacroLi(MipsRegisterData& registers, MipsImmediat
 	});
 }
 
-CAssemblerCommand* generateMipsMacroLoadStore(MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateStore = LR"(
 		.if %upper%
@@ -128,7 +128,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(MipsRegisterData& registers, MipsI
 	}
 
 	std::wstring macroText = preprocessMacro(templateStore,immediates);
-	return createMacro(macroText,flags, {
+	return createMacro(parser,macroText,flags, {
 			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
 			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
 			{ L"%rs%",		registers.grs.name },
@@ -137,7 +137,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(MipsRegisterData& registers, MipsI
 	});
 }
 
-CAssemblerCommand* generateMipsMacroLoadUnaligned(MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -166,7 +166,7 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(MipsRegisterData& registers, M
 	}
 
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(macroText,flags, {
+	return createMacro(parser,macroText,flags, {
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rd%",		registers.grd.name },
 			{ L"%off%",		immediates.primary.expression.toString() },
@@ -174,7 +174,7 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(MipsRegisterData& registers, M
 	});
 }
 
-CAssemblerCommand* generateMipsMacroStoreUnaligned(MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -200,14 +200,14 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(MipsRegisterData& registers, 
 	}
 
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(macroText,flags, {
+	return createMacro(parser,macroText,flags, {
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rd%",		registers.grd.name },
 			{ L"%off%",		immediates.primary.expression.toString() },
 	});
 }
 
-CAssemblerCommand* generateMipsMacroBranch(MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -255,7 +255,7 @@ CAssemblerCommand* generateMipsMacroBranch(MipsRegisterData& registers, MipsImme
 	}
 	
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(macroText,flags, {
+	return createMacro(parser,macroText,flags, {
 			{ L"%op%",		op},
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rt%",		registers.grt.name },
@@ -264,7 +264,7 @@ CAssemblerCommand* generateMipsMacroBranch(MipsRegisterData& registers, MipsImme
 	});
 }
 
-CAssemblerCommand* generateMipsMacroRotate(MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	bool left = (flags & MIPSM_LEFT) != 0;
 	bool immediate = (flags & MIPSM_IMM) != 0;
@@ -325,7 +325,7 @@ CAssemblerCommand* generateMipsMacroRotate(MipsRegisterData& registers, MipsImme
 	}
 	
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(macroText,flags, {
+	return createMacro(parser,macroText,flags, {
 			{ L"%left%",	left ? L"1" : L"0" },
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rd%",		registers.grd.name },

@@ -9,6 +9,7 @@ struct ElfRelocatorCtor
 };
 
 class CAssemblerCommand;
+class Parser;
 
 class IElfRelocator
 {

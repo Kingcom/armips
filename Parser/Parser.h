@@ -2,6 +2,52 @@
 #include "Tokenizer.h"
 #include "Core/Expression.h"
 #include "Commands/CommandSequence.h"
+#include "DirectivesParser.h"
+
+struct AssemblyTemplateArgument
+{
+	const wchar_t* variableName;
+	std::wstring value;
+};
+
+class Parser
+{
+public:
+	bool atEnd() { return entries.back().tokenizer->atEnd(); }
+
+	Expression parseExpression();
+	bool parseExpressionList(std::vector<Expression>& list);
+	bool parseIdentifier(std::wstring& dest);
+	CAssemblerCommand* parseCommand();
+	CAssemblerCommand* parseCommandSequence(std::initializer_list<wchar_t*> terminators = {});
+	CAssemblerCommand* parseFile(TextFile& file);
+	CAssemblerCommand* parseString(const std::wstring& text);
+	CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables = {});
+	CAssemblerCommand* parseDirective(const DirectiveEntry* directiveSet);
+	bool matchToken(TokenType type, bool optional = false);
+
+	Tokenizer* getTokenizer() { return entries.back().tokenizer; };
+	Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
+	Token& nextToken() { return getTokenizer()->nextToken(); };
+	void eatToken() { getTokenizer()->eatToken(); };
+	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
+protected:
+	CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool allowEqu, bool allowMacro);
+	CAssemblerCommand* parseLabel();
+	bool parseMacro();
+	bool checkEquLabel();
+	bool isEquAllowed() { return entries.back().allowEqu; }
+	bool isMacroAllowed() { return entries.back().allowMacro; }
+
+	struct Entry
+	{
+		Tokenizer* tokenizer;
+		bool allowEqu;
+		bool allowMacro;
+	};
+
+	std::vector<Entry> entries;
+};
 
 struct TokenSequenceValue
 {
@@ -40,7 +86,7 @@ class TokenSequenceParser
 {
 public:
 	void addEntry(int result, TokenSequence tokens, TokenValueSequence values);
-	bool parse(Tokenizer& tokenizer, int& result);
+	bool parse(Parser& parser, int& result);
 	size_t getEntryCount() { return entries.size(); }
 private:
 	struct Entry
@@ -53,19 +99,4 @@ private:
 	std::vector<Entry> entries;
 };
 
-CAssemblerCommand* parseCommand(Tokenizer& tokenizer);
-bool parseExpressionList(Tokenizer& tokenizer, std::vector<Expression>& list);
-bool parseIdentifier(Tokenizer& tokenizer, std::wstring& dest);
 bool checkExpressionListSize(std::vector<Expression>& list, int min, int max);
-CommandSequence* parseCommandSequence(Tokenizer& tokenizer, std::initializer_list<wchar_t*> terminators);
-CommandSequence* parseFile(TextFile& file);
-CommandSequence* parseString(const std::wstring& text);
-
-struct AssemblyTemplateArgument
-{
-	const wchar_t* variableName;
-	std::wstring value;
-};
-
-CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables = {});
-bool matchToken(Tokenizer& tokenizer, TokenType type, bool optional = false);

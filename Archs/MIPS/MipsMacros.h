@@ -25,7 +25,9 @@
 #define MIPSM_LOAD					0x00010000
 #define MIPSM_STORE					0x00020000
 
-typedef CAssemblerCommand* (*MipsMacroFunc)(MipsRegisterData&,MipsImmediateData&,int);
+class Parser;
+
+typedef CAssemblerCommand* (*MipsMacroFunc)(Parser&,MipsRegisterData&,MipsImmediateData&,int);
 
 struct MipsMacroDefinition {
 	const wchar_t* name;

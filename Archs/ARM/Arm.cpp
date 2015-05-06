@@ -17,21 +17,21 @@ CArmArchitecture::~CArmArchitecture()
 	clear();
 }
 
-CAssemblerCommand* CArmArchitecture::parseDirective(Tokenizer& tokenizer)
+CAssemblerCommand* CArmArchitecture::parseDirective(Parser& parser)
 {
-	ArmParser parser;
+	ArmParser armParser;
 
-	return parser.parseDirective(tokenizer);
+	return armParser.parseDirective(parser);
 }
 
-CAssemblerCommand* CArmArchitecture::parseOpcode(Tokenizer& tokenizer)
+CAssemblerCommand* CArmArchitecture::parseOpcode(Parser& parser)
 {
-	ArmParser parser;
+	ArmParser armParser;
 
 	if (thumb)
-		return parser.parseThumbOpcode(tokenizer);
+		return armParser.parseThumbOpcode(parser);
 	else
-		return parser.parseArmOpcode(tokenizer);
+		return armParser.parseArmOpcode(parser);
 }
 
 bool CArmArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)

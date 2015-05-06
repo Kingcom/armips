@@ -58,22 +58,22 @@ const MipsRegisterDescriptor mipsPs2Cop2FpRegisters[] = {
 	{ L"vf30", 30 },	{ L"vf31", 31 },
 };
 
-CAssemblerCommand* parseDirectiveResetDelay(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveResetDelay(Parser& parser, int flags)
 {
 	Mips.SetIgnoreDelay(true);
 	return new DummyCommand();
 }
 
-CAssemblerCommand* parseDirectiveFixLoadDelay(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveFixLoadDelay(Parser& parser, int flags)
 {
 	Mips.SetFixLoadDelay(true);
 	return new DummyCommand();
 }
 
-CAssemblerCommand* parseDirectiveLoadElf(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveLoadElf(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 
 	if (checkExpressionListSize(list,1,2) == false)
@@ -93,10 +93,10 @@ CAssemblerCommand* parseDirectiveLoadElf(Tokenizer& tokenizer, int flags)
 	}
 }
 
-CAssemblerCommand* parseDirectiveImportObj(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 
 	if (checkExpressionListSize(list,1,1) == false)
@@ -121,17 +121,17 @@ const DirectiveEntry mipsDirectives[] = {
 	{ NULL,					NULL,							0 }
 };
 
-CAssemblerCommand* MipsParser::parseDirective(Tokenizer& tokenizer)
+CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 {
-	return ::parseDirective(tokenizer,mipsDirectives);
+	return parser.parseDirective(mipsDirectives);
 }
 
-bool MipsParser::parseRegisterTable(Tokenizer& tokenizer, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)
+bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)
 {
-	Token& token = tokenizer.peekToken();
+	Token& token = parser.peekToken();
 	bool hasDollar = token.type == TokenType::Dollar;
 	if (hasDollar)
-		token = tokenizer.peekToken(1);
+		token = parser.peekToken(1);
 
 	if (token.type != TokenType::Identifier)
 		return false;
@@ -142,7 +142,7 @@ bool MipsParser::parseRegisterTable(Tokenizer& tokenizer, MipsRegisterValue& des
 		{
 			dest.name = token.stringValue;
 			dest.num = table[i].num;
-			tokenizer.eatTokens(hasDollar ? 2 : 1);
+			parser.eatTokens(hasDollar ? 2 : 1);
 			return true;
 		}
 	}
@@ -150,22 +150,22 @@ bool MipsParser::parseRegisterTable(Tokenizer& tokenizer, MipsRegisterValue& des
 	return false;
 }
 
-bool MipsParser::parseRegister(Tokenizer& tokenizer, MipsRegisterValue& dest)
+bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Normal;
-	return parseRegisterTable(tokenizer,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
+	return parseRegisterTable(parser,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
 }
 
-bool MipsParser::parseFpuRegister(Tokenizer& tokenizer, MipsRegisterValue& dest)
+bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Float;
-	return parseRegisterTable(tokenizer,dest,mipsFloatRegisters,ARRAY_SIZE(mipsFloatRegisters));
+	return parseRegisterTable(parser,dest,mipsFloatRegisters,ARRAY_SIZE(mipsFloatRegisters));
 }
 
-bool MipsParser::parsePs2Cop2Register(Tokenizer& tokenizer, MipsRegisterValue& dest)
+bool MipsParser::parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Ps2Cop2;
-	return parseRegisterTable(tokenizer,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
+	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
 }
 
 static bool decodeDigit(wchar_t digit, int& dest)
@@ -178,9 +178,9 @@ static bool decodeDigit(wchar_t digit, int& dest)
 	return false;
 }
 
-bool MipsParser::parseVfpuRegister(Tokenizer& tokenizer, MipsRegisterValue& reg, int size)
+bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int size)
 {
-	Token& token = tokenizer.peekToken();
+	Token& token = parser.peekToken();
 	if (token.type != TokenType::Identifier || token.stringValue.size() != 4)
 		return false;
 
@@ -261,7 +261,7 @@ bool MipsParser::parseVfpuRegister(Tokenizer& tokenizer, MipsRegisterValue& reg,
 	return true;
 }
 
-bool MipsParser::parseVfpuControlRegister(Tokenizer& tokenizer, MipsRegisterValue& reg)
+bool MipsParser::parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg)
 {
 	static const wchar_t* vfpuCtrlNames[16] = {
 		L"spfx",	L"tpfx",	L"dpfx",	L"cc",
@@ -270,7 +270,7 @@ bool MipsParser::parseVfpuControlRegister(Tokenizer& tokenizer, MipsRegisterValu
 		L"rcx4",	L"rcx5",	L"rcx6",	L"rcx7",
 	};
 
-	Token& token = tokenizer.peekToken();
+	Token& token = parser.peekToken();
 
 	if (token.type == TokenType::Identifier)
 	{
@@ -281,7 +281,7 @@ bool MipsParser::parseVfpuControlRegister(Tokenizer& tokenizer, MipsRegisterValu
 				reg.num = i;
 				reg.name = vfpuCtrlNames[i];
 
-				tokenizer.eatToken();
+				parser.eatToken();
 				return true;
 			}
 		}
@@ -290,50 +290,50 @@ bool MipsParser::parseVfpuControlRegister(Tokenizer& tokenizer, MipsRegisterValu
 		reg.num = (int) token.intValue;
 		reg.name = vfpuCtrlNames[reg.num];
 
-		tokenizer.eatToken();
+		parser.eatToken();
 		return true;
 	}
 
 	return false;
 }
 
-bool MipsParser::parseImmediate(Tokenizer& tokenizer, Expression& dest)
+bool MipsParser::parseImmediate(Parser& parser, Expression& dest)
 {
 	// check for (reg) sequence
-	if (tokenizer.peekToken().type == TokenType::LParen)
+	if (parser.peekToken().type == TokenType::LParen)
 	{
 		MipsRegisterValue tempValue;
 		
-		size_t pos = tokenizer.getPosition();
-		tokenizer.eatToken();
+		size_t pos = parser.getTokenizer()->getPosition();
+		parser.eatToken();
 
-		bool isRegister = parseRegister(tokenizer,tempValue);
-		tokenizer.setPosition(pos);
+		bool isRegister = parseRegister(parser,tempValue);
+		parser.getTokenizer()->setPosition(pos);
 
 		if (isRegister)
 			return false;
 	}
 
-	dest = parseExpression(tokenizer);
+	dest = parser.parseExpression();
 	return dest.isLoaded();
 }
 
-bool MipsParser::matchSymbol(Tokenizer& tokenizer, wchar_t symbol)
+bool MipsParser::matchSymbol(Parser& parser, wchar_t symbol)
 {
 	switch (symbol)
 	{
 	case '(':
-		return matchToken(tokenizer,TokenType::LParen);
+		return parser.matchToken(TokenType::LParen);
 	case ')':
-		return matchToken(tokenizer,TokenType::RParen);
+		return parser.matchToken(TokenType::RParen);
 	case ',':
-		return matchToken(tokenizer,TokenType::Comma);
+		return parser.matchToken(TokenType::Comma);
 	}
 
 	return false;
 }
 
-bool MipsParser::parseVcstParameter(Tokenizer& tokenizer, int& result)
+bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 {
 	static TokenSequenceParser sequenceParser;
 
@@ -442,35 +442,35 @@ bool MipsParser::parseVcstParameter(Tokenizer& tokenizer, int& result)
 		);
 	}
 
-	return sequenceParser.parse(tokenizer,result);
+	return sequenceParser.parse(parser,result);
 }
 
-bool MipsParser::parseVfpuVrot(Tokenizer& tokenizer, int& result, int size)
+bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 {
 	int sin = -1;
 	int cos = -1;
 	bool negSine = false;
 	int sineCount = 0;
 
-	if (tokenizer.nextToken().type != TokenType::LBrack)
+	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
 	
 	int numElems = size+1;
 	for (int i = 0; i < numElems; i++)
 	{
-		Token& token = tokenizer.nextToken();
+		Token& token = parser.nextToken();
 		
 		if (i != 0)
 		{
 			if (token.type != TokenType::Comma)
 				return false;
 
-			token = tokenizer.nextToken();
+			token = parser.nextToken();
 		}
 
 		bool isNeg = token.type == TokenType::Minus;
 		if (isNeg)
-			token = tokenizer.nextToken();
+			token = parser.nextToken();
 
 		if (token.type != TokenType::Identifier || token.stringValue.size() != 1)
 			return false;
@@ -501,7 +501,7 @@ bool MipsParser::parseVfpuVrot(Tokenizer& tokenizer, int& result, int size)
 		}
 	}
 	
-	if (tokenizer.nextToken().type != TokenType::RBrack)
+	if (parser.nextToken().type != TokenType::RBrack)
 		return false;
 	
 	result = negSine ? 0x10 : 0;
@@ -549,14 +549,14 @@ bool MipsParser::parseVfpuVrot(Tokenizer& tokenizer, int& result, int size)
 	return true;
 }
 
-bool MipsParser::parseVfpuCondition(Tokenizer& tokenizer, int& result)
+bool MipsParser::parseVfpuCondition(Parser& parser, int& result)
 {
 	static const wchar_t* conditions[] = {
 		L"fl", L"eq", L"lt", L"le", L"tr", L"ne", L"ge", L"gt",
 		L"ez", L"en", L"ei", L"es", L"nz", L"nn", L"ni", L"ns"
 	};
 
-	Token& token = tokenizer.nextToken();
+	Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
@@ -572,7 +572,7 @@ bool MipsParser::parseVfpuCondition(Tokenizer& tokenizer, int& result)
 	return false;
 }
 
-bool MipsParser::parseVpfxsParameter(Tokenizer& tokenizer, int& result)
+bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 {
 	static TokenSequenceParser sequenceParser;
 
@@ -597,26 +597,26 @@ bool MipsParser::parseVpfxsParameter(Tokenizer& tokenizer, int& result)
 		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {1ull, 6ull} );
 	}
 
-	if (tokenizer.nextToken().type != TokenType::LBrack)
+	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
 	
 	for (int i = 0; i < 4; i++)
 	{
-		Token& token = tokenizer.nextToken();
+		Token& token = parser.nextToken();
 
 		if (i != 0)
 		{
 			if (token.type != TokenType::Comma)
 				return false;
 
-			token = tokenizer.nextToken();
+			token = parser.nextToken();
 		}
 		
 		// negation
 		if (token.type == TokenType::Minus)
 		{
 			result |= 1 << (16+i);
-			token = tokenizer.nextToken();
+			token = parser.nextToken();
 		}
 
 		// abs
@@ -625,7 +625,7 @@ bool MipsParser::parseVpfxsParameter(Tokenizer& tokenizer, int& result)
 		{
 			result |= 1 << (8+i);
 			abs = true;
-			token = tokenizer.nextToken();
+			token = parser.nextToken();
 		}
 		
 		// check for register
@@ -635,7 +635,7 @@ bool MipsParser::parseVpfxsParameter(Tokenizer& tokenizer, int& result)
 		{
 			result |= (reg-vpfxstRegisters) << (i*2);
 
-			if (abs && tokenizer.nextToken().type != TokenType::BitOr)
+			if (abs && parser.nextToken().type != TokenType::BitOr)
 				return false;
 
 			continue;
@@ -648,7 +648,7 @@ bool MipsParser::parseVpfxsParameter(Tokenizer& tokenizer, int& result)
 		result |= 1 << (12+i);
 
 		int constNum = -1;
-		if (sequenceParser.parse(tokenizer,constNum) == false)
+		if (sequenceParser.parse(parser,constNum) == false)
 			return false;
 		
 		result |= (constNum & 3) << (i*2);
@@ -656,10 +656,10 @@ bool MipsParser::parseVpfxsParameter(Tokenizer& tokenizer, int& result)
 			result |= 1 << (8+i);
 	}
 
-	return tokenizer.nextToken().type == TokenType::RBrack;
+	return parser.nextToken().type == TokenType::RBrack;
 }
 
-bool MipsParser::parseVpfxdParameter(Tokenizer& tokenizer, int& result)
+bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 {
 	static TokenSequenceParser sequenceParser;
 
@@ -702,18 +702,18 @@ bool MipsParser::parseVpfxdParameter(Tokenizer& tokenizer, int& result)
 
 	for (int i = 0; i < 4; i++)
 	{
-		Token& token = tokenizer.nextToken();
+		Token& token = parser.nextToken();
 
 		if (i != 0)
 		{
 			if (token.type != TokenType::Comma)
 				return false;
 
-			token = tokenizer.nextToken();
+			token = parser.nextToken();
 		}
 		
 		int num = 0;
-		if (sequenceParser.parse(tokenizer,num) == false)
+		if (sequenceParser.parse(parser,num) == false)
 			return false;
 
 		// m versions
@@ -726,7 +726,7 @@ bool MipsParser::parseVpfxdParameter(Tokenizer& tokenizer, int& result)
 		result |= num << (2*i);
 	}
 	
-	return tokenizer.nextToken().type == TokenType::RBrack;
+	return parser.nextToken().type == TokenType::RBrack;
 }
 
 
@@ -781,9 +781,9 @@ bool MipsParser::decodeCop2BranchCondition(const std::wstring& text, size_t& pos
 	return false;
 }
 
-bool MipsParser::parseCop2BranchCondition(Tokenizer& tokenizer, int& result)
+bool MipsParser::parseCop2BranchCondition(Parser& parser, int& result)
 {
-	Token& token = tokenizer.nextToken();
+	Token& token = parser.nextToken();
 
 	if (token.type == TokenType::Integer)
 	{
@@ -798,9 +798,9 @@ bool MipsParser::parseCop2BranchCondition(Tokenizer& tokenizer, int& result)
 	return decodeCop2BranchCondition(token.stringValue,pos,result);
 }
 
-bool MipsParser::parseWb(Tokenizer& tokenizer)
+bool MipsParser::parseWb(Parser& parser)
 {
-	Token& token = tokenizer.nextToken();
+	Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
@@ -923,7 +923,7 @@ void MipsParser::setOmittedRegisters(const tMipsOpcode& opcode)
 		registers.frd = registers.frs;
 }
 
-bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode)
+bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 {
 	const u8* encoding = (const u8*) opcode.encoding;
 
@@ -953,22 +953,22 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 		switch (*encoding++)
 		{
 		case 't':	// register
-			CHECK(parseRegister(tokenizer,registers.grt));
+			CHECK(parseRegister(parser,registers.grt));
 			break;
 		case 'd':	// register
-			CHECK(parseRegister(tokenizer,registers.grd));
+			CHECK(parseRegister(parser,registers.grd));
 			break;
 		case 's':	// register
-			CHECK(parseRegister(tokenizer,registers.grs));
+			CHECK(parseRegister(parser,registers.grs));
 			break;
 		case 'T':	// float register
-			CHECK(parseRegister(tokenizer,registers.frt));
+			CHECK(parseRegister(parser,registers.frt));
 			break;
 		case 'D':	// float register
-			CHECK(parseRegister(tokenizer,registers.frd));
+			CHECK(parseRegister(parser,registers.frd));
 			break;
 		case 'S':	// float register
-			CHECK(parseRegister(tokenizer,registers.frs));
+			CHECK(parseRegister(parser,registers.frs));
 			break;
 		case 'v':	// psp vfpu reg
 			if (*encoding == 'S')
@@ -980,22 +980,22 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 			switch (*encoding++)
 			{
 			case 's':
-				CHECK(parseVfpuRegister(tokenizer,registers.vrs,actualSize));
+				CHECK(parseVfpuRegister(parser,registers.vrs,actualSize));
 				CHECK(registers.vrs.type == MipsRegisterType::VfpuVector);
 				if (opcode.flags & MO_VFPU_6BIT) CHECK(!(registers.vrs.num & 0x40));
 				break;
 			case 't':
-				CHECK(parseVfpuRegister(tokenizer,registers.vrt,actualSize));
+				CHECK(parseVfpuRegister(parser,registers.vrt,actualSize));
 				CHECK(registers.vrt.type == MipsRegisterType::VfpuVector);
 				if (opcode.flags & MO_VFPU_6BIT) CHECK(!(registers.vrt.num & 0x40));
 				break;
 			case 'd':
-				CHECK(parseVfpuRegister(tokenizer,registers.vrd,actualSize));
+				CHECK(parseVfpuRegister(parser,registers.vrd,actualSize));
 				CHECK(registers.vrd.type == MipsRegisterType::VfpuVector);
 				if (opcode.flags & MO_VFPU_6BIT) CHECK(!(registers.vrd.num & 0x40));
 				break;
 			case 'c':
-				CHECK(parseVfpuControlRegister(tokenizer,registers.vrd));
+				CHECK(parseVfpuControlRegister(parser,registers.vrd));
 				break;
 			default:
 				return false;
@@ -1005,17 +1005,17 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 			switch (*encoding++)
 			{
 			case 's':
-				CHECK(parseVfpuRegister(tokenizer,registers.vrs,opcodeData.vfpuSize));
+				CHECK(parseVfpuRegister(parser,registers.vrs,opcodeData.vfpuSize));
 				CHECK(registers.vrs.type == MipsRegisterType::VfpuMatrix);
 				if (opcode.flags & MO_TRANSPOSE_VS)
 					registers.vrs.num ^= 0x20;
 				break;
 			case 't':
-				CHECK(parseVfpuRegister(tokenizer,registers.vrt,opcodeData.vfpuSize));
+				CHECK(parseVfpuRegister(parser,registers.vrt,opcodeData.vfpuSize));
 				CHECK(registers.vrt.type == MipsRegisterType::VfpuMatrix);
 				break;
 			case 'd':
-				CHECK(parseVfpuRegister(tokenizer,registers.vrd,opcodeData.vfpuSize));
+				CHECK(parseVfpuRegister(parser,registers.vrd,opcodeData.vfpuSize));
 				CHECK(registers.vrd.type == MipsRegisterType::VfpuMatrix);
 				break;
 			default:
@@ -1026,39 +1026,39 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 			switch (*encoding++)
 			{
 			case 't':	// register
-				CHECK(parseRegister(tokenizer,registers.ps2vrt));
+				CHECK(parseRegister(parser,registers.ps2vrt));
 				break;
 			case 'd':	// register
-				CHECK(parseRegister(tokenizer,registers.ps2vrd));
+				CHECK(parseRegister(parser,registers.ps2vrd));
 				break;
 			case 's':	// register
-				CHECK(parseRegister(tokenizer,registers.ps2vrs));
+				CHECK(parseRegister(parser,registers.ps2vrs));
 				break;
 			default:
 				return false;
 			}
 			break;
 		case 'r':	// forced register
-			CHECK(parseRegister(tokenizer,tempRegister));
+			CHECK(parseRegister(parser,tempRegister));
 			CHECK(tempRegister.num == *encoding++);
 			break;
 		case 'i':	// primary immediate
-			CHECK(parseImmediate(tokenizer,immediate.primary.expression));
+			CHECK(parseImmediate(parser,immediate.primary.expression));
 			CHECK(decodeImmediateSize(encoding,immediate.primary.type));
 			break;
 		case 'j':	// secondary immediate
 			switch (*encoding++)
 			{
 			case 'e':
-				CHECK(parseImmediate(tokenizer,immediate.secondary.expression));
+				CHECK(parseImmediate(parser,immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::Ext;
 				break;
 			case 'i':
-				CHECK(parseImmediate(tokenizer,immediate.secondary.expression));
+				CHECK(parseImmediate(parser,immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::Ins;
 				break;
 			case 'b':
-				CHECK(parseCop2BranchCondition(tokenizer,immediate.secondary.originalValue));
+				CHECK(parseCop2BranchCondition(parser,immediate.secondary.originalValue));
 				immediate.secondary.type = MipsImmediateType::Cop2BranchType;
 				immediate.secondary.value = immediate.secondary.originalValue;
 				break;
@@ -1067,28 +1067,28 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 			}
 			break;
 		case 'C':	// vfpu condition
-			CHECK(parseVfpuCondition(tokenizer,opcodeData.vectorCondition));
+			CHECK(parseVfpuCondition(parser,opcodeData.vectorCondition));
 			break;
 		case 'W':	// vfpu argument
 			switch (*encoding++)
 			{
 			case 's':
-				CHECK(parseVpfxsParameter(tokenizer,immediate.primary.originalValue));
+				CHECK(parseVpfxsParameter(parser,immediate.primary.originalValue));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate20_0;
 				break;
 			case 'd':
-				CHECK(parseVpfxdParameter(tokenizer,immediate.primary.originalValue));
+				CHECK(parseVpfxdParameter(parser,immediate.primary.originalValue));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate16;
 				break;
 			case 'c':
-				CHECK(parseVcstParameter(tokenizer,immediate.primary.originalValue));
+				CHECK(parseVcstParameter(parser,immediate.primary.originalValue));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate5;
 				break;
 			case 'r':
-				CHECK(parseVfpuVrot(tokenizer,immediate.primary.originalValue,opcodeData.vfpuSize));
+				CHECK(parseVfpuVrot(parser,immediate.primary.originalValue,opcodeData.vfpuSize));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate5;
 				break;
@@ -1097,10 +1097,10 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 			}
 			break;
 		case 'w':	// 'wb' characters
-			CHECK(parseWb(tokenizer));
+			CHECK(parseWb(parser));
 			break;
 		default:
-			CHECK(matchSymbol(tokenizer,*(encoding-1)));
+			CHECK(matchSymbol(parser,*(encoding-1)));
 			break;
 		}
 	}
@@ -1110,9 +1110,9 @@ bool MipsParser::parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode
 	return true;
 }
 
-CMipsInstruction* MipsParser::parseOpcode(Tokenizer& tokenizer)
+CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 {
-	Token token = tokenizer.nextToken();
+	Token token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
@@ -1133,15 +1133,15 @@ CMipsInstruction* MipsParser::parseOpcode(Tokenizer& tokenizer)
 
 		if (decodeOpcode(token.stringValue,MipsOpcodes[z]) == true)
 		{
-			size_t tokenPos = tokenizer.getPosition();
+			size_t tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseParameters(tokenizer,MipsOpcodes[z]) == true)
+			if (parseParameters(parser,MipsOpcodes[z]) == true)
 			{
 				// success, return opcode
 				return new CMipsInstruction(opcodeData,immediate,registers);
 			}
 
-			tokenizer.setPosition(tokenPos);
+			parser.getTokenizer()->setPosition(tokenPos);
 			paramFail = true;
 		}
 	}
@@ -1154,7 +1154,7 @@ CMipsInstruction* MipsParser::parseOpcode(Tokenizer& tokenizer)
 	return nullptr;
 }
 
-bool MipsParser::parseMacroParameters(Tokenizer& tokenizer, const MipsMacroDefinition& macro)
+bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition& macro)
 {
 	const wchar_t* encoding = (const wchar_t*) macro.args;
 
@@ -1163,22 +1163,22 @@ bool MipsParser::parseMacroParameters(Tokenizer& tokenizer, const MipsMacroDefin
 		switch (*encoding++)
 		{
 		case 't':	// register
-			CHECK(parseRegister(tokenizer,registers.grt));
+			CHECK(parseRegister(parser,registers.grt));
 			break;
 		case 'd':	// register
-			CHECK(parseRegister(tokenizer,registers.grd));
+			CHECK(parseRegister(parser,registers.grd));
 			break;
 		case 's':	// register
-			CHECK(parseRegister(tokenizer,registers.grs));
+			CHECK(parseRegister(parser,registers.grs));
 			break;
 		case 'i':	// primary immediate
-			CHECK(parseImmediate(tokenizer,immediate.primary.expression));
+			CHECK(parseImmediate(parser,immediate.primary.expression));
 			break;
 		case 'I':	// secondary immediate
-			CHECK(parseImmediate(tokenizer,immediate.secondary.expression));
+			CHECK(parseImmediate(parser,immediate.secondary.expression));
 			break;
 		default:
-			CHECK(matchSymbol(tokenizer,*(encoding-1)));
+			CHECK(matchSymbol(parser,*(encoding-1)));
 			break;
 		}
 	}
@@ -1186,31 +1186,31 @@ bool MipsParser::parseMacroParameters(Tokenizer& tokenizer, const MipsMacroDefin
 	return true;
 }
 
-CAssemblerCommand* MipsParser::parseMacro(Tokenizer& tokenizer)
+CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
 {
-	size_t startPos = tokenizer.getPosition();
+	size_t startPos = parser.getTokenizer()->getPosition();
 
-	Token token = tokenizer.peekToken();
+	Token token = parser.peekToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 	
-	tokenizer.eatToken();
+	parser.eatToken();
 	for (int z = 0; mipsMacros[z].name != NULL; z++)
 	{
 		if (token.stringValue == mipsMacros[z].name)
 		{
-			size_t tokenPos = tokenizer.getPosition();
+			size_t tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseMacroParameters(tokenizer,mipsMacros[z]) == true)
+			if (parseMacroParameters(parser,mipsMacros[z]) == true)
 			{
-				return mipsMacros[z].function(registers,immediate,mipsMacros[z].flags);
+				return mipsMacros[z].function(parser,registers,immediate,mipsMacros[z].flags);
 			}
 
-			tokenizer.setPosition(tokenPos);
+			parser.getTokenizer()->setPosition(tokenPos);
 		}
 	}
 
 	// no matching macro found, restore state
-	tokenizer.setPosition(startPos);
+	parser.getTokenizer()->setPosition(startPos);
 	return nullptr;
 }

@@ -19,10 +19,10 @@
 #include <algorithm>
 #include "Parser.h"
 
-CAssemblerCommand* parseDirectiveOpen(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveOpen(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 
 	u64 memoryAddress;
@@ -52,10 +52,10 @@ CAssemblerCommand* parseDirectiveOpen(Tokenizer& tokenizer, int flags)
 	}
 }
 
-CAssemblerCommand* parseDirectiveCreate(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveCreate(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 
 	u64 memoryAddress;
@@ -75,17 +75,17 @@ CAssemblerCommand* parseDirectiveCreate(Tokenizer& tokenizer, int flags)
 	return file;
 }
 
-CAssemblerCommand* parseDirectiveClose(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveClose(Parser& parser, int flags)
 {
 	CDirectiveFile* file = new CDirectiveFile();
 	file->initClose();
 	return file;
 }
 
-CAssemblerCommand* parseDirectiveIncbin(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveIncbin(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,3) == false)
@@ -105,10 +105,10 @@ CAssemblerCommand* parseDirectiveIncbin(Tokenizer& tokenizer, int flags)
 	return incbin;
 }
 
-CAssemblerCommand* parseDirectivePosition(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,1) == false)
@@ -132,10 +132,10 @@ CAssemblerCommand* parseDirectivePosition(Tokenizer& tokenizer, int flags)
 	return nullptr;
 }
 
-CAssemblerCommand* parseDirectiveAlignFill(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,2) == false)
@@ -160,10 +160,10 @@ CAssemblerCommand* parseDirectiveAlignFill(Tokenizer& tokenizer, int flags)
 		return new CDirectiveAlignFill(list[0],mode);
 }
 
-CAssemblerCommand* parseDirectiveHeaderSize(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveHeaderSize(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,1) == false)
@@ -179,10 +179,10 @@ CAssemblerCommand* parseDirectiveHeaderSize(Tokenizer& tokenizer, int flags)
 	return new CDirectiveHeaderSize(size);
 }
 
-CAssemblerCommand* parseDirectiveObjImport(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveObjImport(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,2) == false)
@@ -204,7 +204,7 @@ CAssemblerCommand* parseDirectiveObjImport(Tokenizer& tokenizer, int flags)
 	return new DirectiveObjImport(fileName);
 }
 
-CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 {
 	std::wstring name;
 	Expression exp;
@@ -214,16 +214,16 @@ CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 	switch (flags)
 	{
 	case DIRECTIVE_COND_IF:
-		exp = parseExpression(tokenizer);
+		exp = parser.parseExpression();
 		cond = new CDirectiveConditional(ConditionType::IF,exp);
 		break;
 	case DIRECTIVE_COND_IFDEF:
-		if (parseIdentifier(tokenizer,name) == false)
+		if (parser.parseIdentifier(name) == false)
 			return nullptr;		
 		cond = new CDirectiveConditional(ConditionType::IFDEF,name);
 		break;
 	case DIRECTIVE_COND_IFNDEF:
-		if (parseIdentifier(tokenizer,name) == false)
+		if (parser.parseIdentifier(name) == false)
 			return nullptr;
 		cond = new CDirectiveConditional(ConditionType::IFNDEF,name);
 		break;
@@ -235,23 +235,23 @@ CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 		break;
 	}
 
-	CommandSequence* ifBlock = parseCommandSequence(tokenizer,{L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	CAssemblerCommand* ifBlock = parser.parseCommandSequence({L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
 	
 	CAssemblerCommand* elseBlock = nullptr;
-	Token next = tokenizer.nextToken();
+	Token next = parser.nextToken();
 
 	if (next.stringValue == L".else")
 	{
-		elseBlock = parseCommandSequence(tokenizer,{L".endif"});
+		elseBlock = parser.parseCommandSequence({L".endif"});
 	} else if (next.stringValue == L".elseif")
 	{
-		elseBlock = parseDirectiveConditional(tokenizer,DIRECTIVE_COND_IF);
+		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IF);
 	} else if (next.stringValue == L".elseifdef")
 	{
-		elseBlock = parseDirectiveConditional(tokenizer,DIRECTIVE_COND_IFDEF);
+		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFDEF);
 	} else if (next.stringValue == L".elseifndef")
 	{
-		elseBlock = parseDirectiveConditional(tokenizer,DIRECTIVE_COND_IFNDEF);
+		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFNDEF);
 	} else if (next.stringValue != L".endif")
 	{
 		return nullptr;
@@ -261,10 +261,10 @@ CAssemblerCommand* parseDirectiveConditional(Tokenizer& tokenizer, int flags)
 	return cond;
 }
 
-CAssemblerCommand* parseDirectiveTable(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveTable(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,2) == false)
@@ -293,7 +293,7 @@ CAssemblerCommand* parseDirectiveTable(Tokenizer& tokenizer, int flags)
 	return new TableCommand(fileName,encoding);
 }
 
-CAssemblerCommand* parseDirectiveData(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 {
 	bool terminate = false;
 	if (flags & DIRECTIVE_DATA_TERMINATION)
@@ -303,7 +303,7 @@ CAssemblerCommand* parseDirectiveData(Tokenizer& tokenizer, int flags)
 	}
 
 	std::vector<Expression> list;
-	if (parseExpressionList(tokenizer,list) == false)
+	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 	
 	if (checkExpressionListSize(list,1,-1) == false)
@@ -335,7 +335,7 @@ CAssemblerCommand* parseDirectiveData(Tokenizer& tokenizer, int flags)
 	return data;
 }
 
-CAssemblerCommand* parseDirectivePsx(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectivePsx(Parser& parser, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
@@ -343,7 +343,7 @@ CAssemblerCommand* parseDirectivePsx(Tokenizer& tokenizer, int flags)
 	return new CommentCommand(L".psx",L"");
 }
 
-CAssemblerCommand* parseDirectivePs2(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectivePs2(Parser& parser, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
@@ -351,7 +351,7 @@ CAssemblerCommand* parseDirectivePs2(Tokenizer& tokenizer, int flags)
 	return new CommentCommand(L".ps2",L"");
 }
 
-CAssemblerCommand* parseDirectivePsp(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectivePsp(Parser& parser, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
@@ -359,7 +359,7 @@ CAssemblerCommand* parseDirectivePsp(Tokenizer& tokenizer, int flags)
 	return new CommentCommand(L".psp",L"");
 }
 
-CAssemblerCommand* parseDirectiveGba(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveGba(Parser& parser, int flags)
 {
 	Arch = &Arm;
 	Arm.SetThumbMode(true);
@@ -367,7 +367,7 @@ CAssemblerCommand* parseDirectiveGba(Tokenizer& tokenizer, int flags)
 	return new CommentCommand(L".gba\n.thumb",L".thumb");
 }
 
-CAssemblerCommand* parseDirectiveNds(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveNds(Parser& parser, int flags)
 {
 	Arch = &Arm;
 	Arm.SetThumbMode(false);
@@ -375,16 +375,16 @@ CAssemblerCommand* parseDirectiveNds(Tokenizer& tokenizer, int flags)
 	return new CommentCommand(L".nds\n.arm",L".arm");
 }
 
-CAssemblerCommand* parseDirectiveArea(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
-	if (parseExpressionList(tokenizer,parameters) == false)
+	if (parser.parseExpressionList(parameters) == false)
 		return nullptr;
 	
 	bool valid = checkExpressionListSize(parameters,1,2);
 	
-	CommandSequence* content = parseCommandSequence(tokenizer,{L".endarea"});
-	tokenizer.eatToken();
+	CAssemblerCommand* content = parser.parseCommandSequence({L".endarea"});
+	parser.eatToken();
 
 	// area is invalid, return content anyway
 	if (valid == false)
@@ -397,9 +397,9 @@ CAssemblerCommand* parseDirectiveArea(Tokenizer& tokenizer, int flags)
 	return area;
 }
 
-CAssemblerCommand* parseDirectiveErrorWarning(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveErrorWarning(Parser& parser, int flags)
 {
-	Token tok = tokenizer.nextToken();
+	Token tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -419,9 +419,9 @@ CAssemblerCommand* parseDirectiveErrorWarning(Tokenizer& tokenizer, int flags)
 	return nullptr;
 }
 
-CAssemblerCommand* parseDirectiveRelativeInclude(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveRelativeInclude(Parser& parser, int flags)
 {
-	Token tok = tokenizer.nextToken();
+	Token tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -441,9 +441,9 @@ CAssemblerCommand* parseDirectiveRelativeInclude(Tokenizer& tokenizer, int flags
 	return nullptr;
 }
 
-CAssemblerCommand* parseDirectiveNocash(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveNocash(Parser& parser, int flags)
 {
-	Token tok = tokenizer.nextToken();
+	Token tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -463,9 +463,9 @@ CAssemblerCommand* parseDirectiveNocash(Tokenizer& tokenizer, int flags)
 	return nullptr;
 }
 
-CAssemblerCommand* parseDirectiveSym(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveSym(Parser& parser, int flags)
 {
-	Token tok = tokenizer.nextToken();
+	Token tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -480,16 +480,16 @@ CAssemblerCommand* parseDirectiveSym(Tokenizer& tokenizer, int flags)
 		return nullptr;
 }
 
-CAssemblerCommand* parseDirectiveDefineLabel(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 {
-	Token tok = tokenizer.nextToken();
+	Token tok = parser.nextToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
-	if (tokenizer.nextToken().type != TokenType::Comma)
+	if (parser.nextToken().type != TokenType::Comma)
 		return nullptr;
 
-	Expression value = parseExpression(tokenizer);
+	Expression value = parser.parseExpression();
 	if (value.isLoaded() == false)
 		return nullptr;
 
@@ -502,26 +502,26 @@ CAssemblerCommand* parseDirectiveDefineLabel(Tokenizer& tokenizer, int flags)
 	return new CAssemblerLabel(tok.stringValue,value);
 }
 
-CAssemblerCommand* parseDirectiveFunction(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 {
 	std::wstring name;
-	if (parseIdentifier(tokenizer,name) == false)
+	if (parser.parseIdentifier(name) == false)
 		return false;
 
-	CommandSequence* seq = parseCommandSequence(tokenizer,{L".endfunc",L".endfunction",L".func",L".function"});
+	CAssemblerCommand* seq = parser.parseCommandSequence({L".endfunc",L".endfunction",L".func",L".function"});
 
-	if (tokenizer.peekToken().stringValue == L".endfunc" ||
-		tokenizer.peekToken().stringValue == L".endfunction")
+	if (parser.peekToken().stringValue == L".endfunc" ||
+		parser.peekToken().stringValue == L".endfunction")
 	{
-		tokenizer.eatToken();
+		parser.eatToken();
 	}
 
 	return nullptr;
 }
 
-CAssemblerCommand* parseDirectiveMessage(Tokenizer& tokenizer, int flags)
+CAssemblerCommand* parseDirectiveMessage(Parser& parser, int flags)
 {
-	Expression exp = parseExpression(tokenizer);
+	Expression exp = parser.parseExpression();
 	
 	switch (flags)
 	{
@@ -531,36 +531,6 @@ CAssemblerCommand* parseDirectiveMessage(Tokenizer& tokenizer, int flags)
 		return new CDirectiveMessage(CDirectiveMessage::Type::Error,exp);
 	case DIRECTIVE_MSG_NOTICE:
 		return new CDirectiveMessage(CDirectiveMessage::Type::Notice,exp);
-	}
-
-	return nullptr;
-}
-
-CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet)
-{
-	Token tok = tokenizer.peekToken();
-	if (tok.type != TokenType::Identifier)
-		return nullptr;
-
-	for (size_t i = 0; directiveSet[i].name != nullptr; i++)
-	{
-		if (tok.stringValue == directiveSet[i].name)
-		{
-			if (directiveSet[i].flags & DIRECTIVE_DISABLED)
-				continue;
-			if ((directiveSet[i].flags & DIRECTIVE_NOCASHOFF) && Global.nocash == true)
-				continue;
-			if ((directiveSet[i].flags & DIRECTIVE_NOCASHON) && Global.nocash == false)
-				continue;
-			if ((directiveSet[i].flags & DIRECTIVE_NOTINMEMORY) && Global.memoryMode == true)
-				continue;
-
-			if (directiveSet[i].flags & DIRECTIVE_MIPSRESETDELAY)
-				Arch->NextSection();
-
-			tokenizer.eatToken();
-			return directiveSet[i].function(tokenizer,directiveSet[i].flags);
-		}
 	}
 
 	return nullptr;
@@ -645,8 +615,3 @@ const DirectiveEntry directives[] = {
 
 	{ nullptr,				nullptr,						0 }
 };
-
-CAssemblerCommand* parseGlobalDirective(Tokenizer& tokenizer)
-{
-	return parseDirective(tokenizer,directives);
-}

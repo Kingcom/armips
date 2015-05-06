@@ -188,6 +188,7 @@ CAssemblerCommand* ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCto
 {
 	std::wstring ctorText;
 
+	Parser parser;
 	if (ctors.size() != 0)
 	{
 		bool simpleMode = arm9 == false && Arm.GetThumbMode();
@@ -201,7 +202,7 @@ CAssemblerCommand* ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCto
 			table += formatString(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
 		}
 
-		return parseTemplate(ctorTemplate,{
+		return parser.parseTemplate(ctorTemplate,{
 			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
 			{ L"%ctorTableSize%",	formatString(L"%d",ctors.size()*8) },
 			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
@@ -211,7 +212,7 @@ CAssemblerCommand* ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCto
 			{ L"%ctorContent%",		table },
 		});
 	} else {
-		return parseTemplate(L"bx r14");
+		return parser.parseTemplate(L"bx r14");
 	}
 }
 

@@ -3,7 +3,6 @@
 #include "CMipsInstruction.h"
 #include "Core/Common.h"
 #include "MipsMacros.h"
-#include "Core/Directives.h"
 #include "Core/FileManager.h"
 #include "MipsElfFile.h"
 #include "Commands/CDirectiveFile.h"
@@ -82,6 +81,7 @@ const wchar_t* mipsCtorTemplate = LR"(
 
 CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 {
+	Parser parser;
 	if (ctors.size() != 0)
 	{
 		// create constructor table
@@ -93,7 +93,7 @@ CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCt
 			table += formatString(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
 		}
 
-		return parseTemplate(mipsCtorTemplate,{
+		return parser.parseTemplate(mipsCtorTemplate,{
 			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
 			{ L"%ctorTableSize%",	formatString(L"%d",ctors.size()*8) },
 			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
@@ -101,7 +101,7 @@ CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCt
 			{ L"%ctorContent%",		table },
 		});
 	} else {
-		return parseTemplate(L"jr ra nop");
+		return parser.parseTemplate(L"jr ra nop");
 	}
 }
 
@@ -120,21 +120,21 @@ CMipsArchitecture::CMipsArchitecture()
 	Version = MARCH_INVALID;
 }
 
-CAssemblerCommand* CMipsArchitecture::parseDirective(Tokenizer& tokenizer)
+CAssemblerCommand* CMipsArchitecture::parseDirective(Parser& parser)
 {
-	MipsParser parser;
-	return parser.parseDirective(tokenizer);
+	MipsParser mipsParser;
+	return mipsParser.parseDirective(parser);
 }
 
-CAssemblerCommand* CMipsArchitecture::parseOpcode(Tokenizer& tokenizer)
+CAssemblerCommand* CMipsArchitecture::parseOpcode(Parser& parser)
 {
-	MipsParser parser;
+	MipsParser mipsParser;
 
-	CAssemblerCommand* macro = parser.parseMacro(tokenizer);
+	CAssemblerCommand* macro = mipsParser.parseMacro(parser);
 	if (macro != nullptr)
 		return macro;
 
-	return parser.parseOpcode(tokenizer);
+	return mipsParser.parseOpcode(parser);
 }
 
 

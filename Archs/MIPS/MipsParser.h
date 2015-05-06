@@ -11,24 +11,24 @@ struct MipsRegisterDescriptor {
 class MipsParser
 {
 public:
-	CAssemblerCommand* parseDirective(Tokenizer& tokenizer);
-	CMipsInstruction* parseOpcode(Tokenizer& tokenizer);
-	CAssemblerCommand* parseMacro(Tokenizer& tokenizer);
+	CAssemblerCommand* parseDirective(Parser& parser);
+	CMipsInstruction* parseOpcode(Parser& parser);
+	CAssemblerCommand* parseMacro(Parser& parser);
 private:
-	bool parseRegisterTable(Tokenizer& tokenizer, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);
-	bool parseRegister(Tokenizer& tokenizer, MipsRegisterValue& dest);
-	bool parseFpuRegister(Tokenizer& tokenizer, MipsRegisterValue& dest);
-	bool parsePs2Cop2Register(Tokenizer& tokenizer, MipsRegisterValue& dest);
-	bool parseVfpuRegister(Tokenizer& tokenizer, MipsRegisterValue& reg, int size);
-	bool parseVfpuControlRegister(Tokenizer& tokenizer, MipsRegisterValue& reg);
-	bool parseImmediate(Tokenizer& tokenizer, Expression& dest);
-	bool parseVcstParameter(Tokenizer& tokenizer, int& result);
-	bool parseVfpuVrot(Tokenizer& tokenizer, int& result, int size);
-	bool parseVfpuCondition(Tokenizer& tokenizer, int& result);
-	bool parseVpfxsParameter(Tokenizer& tokenizer, int& result);
-	bool parseVpfxdParameter(Tokenizer& tokenizer, int& result);
-	bool parseCop2BranchCondition(Tokenizer& tokenizer, int& result);
-	bool parseWb(Tokenizer& tokenizer);
+	bool parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);
+	bool parseRegister(Parser& parser, MipsRegisterValue& dest);
+	bool parseFpuRegister(Parser& parser, MipsRegisterValue& dest);
+	bool parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest);
+	bool parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int size);
+	bool parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg);
+	bool parseImmediate(Parser& parser, Expression& dest);
+	bool parseVcstParameter(Parser& parser, int& result);
+	bool parseVfpuVrot(Parser& parser, int& result, int size);
+	bool parseVfpuCondition(Parser& parser, int& result);
+	bool parseVpfxsParameter(Parser& parser, int& result);
+	bool parseVpfxdParameter(Parser& parser, int& result);
+	bool parseCop2BranchCondition(Parser& parser, int& result);
+	bool parseWb(Parser& parser);
 
 	bool decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest);
 	bool decodeCop2BranchCondition(const std::wstring& text, size_t& pos, int& result);
@@ -36,9 +36,9 @@ private:
 	bool decodeOpcode(const std::wstring& name, const tMipsOpcode& opcode);
 
 	void setOmittedRegisters(const tMipsOpcode& opcode);
-	bool matchSymbol(Tokenizer& tokenizer, wchar_t symbol);
-	bool parseParameters(Tokenizer& tokenizer, const tMipsOpcode& opcode);
-	bool parseMacroParameters(Tokenizer& tokenizer, const MipsMacroDefinition& macro);
+	bool matchSymbol(Parser& parser, wchar_t symbol);
+	bool parseParameters(Parser& parser, const tMipsOpcode& opcode);
+	bool parseMacroParameters(Parser& parser, const MipsMacroDefinition& macro);
 
 	MipsRegisterData registers;
 	MipsImmediateData immediate;

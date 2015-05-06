@@ -1,14 +1,15 @@
 #pragma once
-#include "Tokenizer.h"
 
 class CAssemblerCommand;
-typedef CAssemblerCommand* (*DirectiveFunc)(Tokenizer&,int);
+class Parser;
 
-typedef struct {
+typedef CAssemblerCommand* (*DirectiveFunc)(Parser&,int);
+
+struct DirectiveEntry {
 	const wchar_t* name;
 	DirectiveFunc function;
 	int flags;
-} DirectiveEntry;
+};
 
 #define DIRECTIVE_USERMASK			0x0000FFFF
 
@@ -46,5 +47,4 @@ typedef struct {
 #define DIRECTIVE_MSG_ERROR			0x00000002
 #define DIRECTIVE_MSG_NOTICE		0x00000003
 
-CAssemblerCommand* parseDirective(Tokenizer& tokenizer, const DirectiveEntry* directiveSet);
-CAssemblerCommand* parseGlobalDirective(Tokenizer& tokenizer);
+extern const DirectiveEntry directives[];
