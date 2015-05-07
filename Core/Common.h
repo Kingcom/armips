@@ -4,7 +4,6 @@
 #include "SymbolTable.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Util/CommonClasses.h"
-#include "CMacro.h"
 #include "Util/EncodingTable.h"
 #include "Util/FileClasses.h"
 #include "Core/Misc.h"
@@ -20,8 +19,6 @@ typedef struct {
 } tFileInfo;
 
 typedef struct {
-	std::vector<CAssemblerCommand*> Commands;
-	std::vector<CMacro*> Macros;
 	tFileInfo FileInfo;
 	TempData tempData;
 	SymbolData symData;
@@ -55,7 +52,5 @@ std::wstring getFullPathName(const std::wstring& path);
 
 bool checkLabelDefined(const std::wstring& labelName, int section);
 bool checkValidLabelName(const std::wstring& labelName);
-bool addAssemblerLabel(const std::wstring& labelName);
 
-void AddAssemblerCommand(CAssemblerCommand* Command);
 bool isPowerOfTwo(u64 n);

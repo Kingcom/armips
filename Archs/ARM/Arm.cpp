@@ -34,17 +34,6 @@ CAssemblerCommand* CArmArchitecture::parseOpcode(Parser& parser)
 		return armParser.parseArmOpcode(parser);
 }
 
-bool CArmArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
-{
-	Logger::printError(Logger::FatalError,L"Unsupported operation");
-	return false;
-}
-
-void CArmArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
-{
-	Logger::printError(Logger::FatalError,L"Unsupported operation");
-}
-
 void CArmArchitecture::clear()
 {
 	if (Pools != NULL)

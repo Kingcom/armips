@@ -90,6 +90,10 @@ CAssemblerCommand* Parser::parseFile(TextFile& file)
 	if (tokenizer.init(&file) == false)
 		return nullptr;
 
+	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.size();
+	Global.FileInfo.FileList.push_back(file.getFileName());
+	Global.FileInfo.LineNumber = 0;
+
 	return parse(&tokenizer);
 }
 

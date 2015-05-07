@@ -50,8 +50,3 @@ typedef struct {
 	int Flags;
 } tDirective;
 
-extern const tDirective Directives[];
-bool executeDirective(const tDirective& Directive, const std::wstring& args);
-bool splitArguments(ArgumentList& list, const std::wstring& args);
-bool directiveAssemble(const tDirective* directiveSet, const std::wstring& name, const std::wstring& arguments);
-bool directiveAssembleGlobal(const std::wstring& name, const std::wstring& arguments);

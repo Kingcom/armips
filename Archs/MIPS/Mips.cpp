@@ -137,19 +137,6 @@ CAssemblerCommand* CMipsArchitecture::parseOpcode(Parser& parser)
 	return mipsParser.parseOpcode(parser);
 }
 
-
-bool CMipsArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
-{
-	Logger::printError(Logger::FatalError,L"Unsupported operation");
-	return false;
-}
-
-void CMipsArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
-{
-	Logger::printError(Logger::FatalError,L"Unsupported operation");
-	return;
-}
-
 void CMipsArchitecture::NextSection()
 {
 	LoadDelay = false;

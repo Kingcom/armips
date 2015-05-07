@@ -5,16 +5,6 @@
 
 CInvalidArchitecture InvalidArchitecture;
 
-void CInvalidArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
-{
-	Logger::printError(Logger::FatalError,L"No architecture specified");
-}
-
-bool CInvalidArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
-{
-	return directiveAssembleGlobal(name,args);
-}
-
 void CInvalidArchitecture::NextSection()
 {
 	Logger::printError(Logger::FatalError,L"No architecture specified");

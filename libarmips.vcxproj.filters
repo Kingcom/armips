@@ -111,9 +111,6 @@
     <ClCompile Include="Core\Assembler.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\CMacro.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Common.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -238,9 +235,6 @@
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="Core\Assembler.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\CMacro.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Common.h">

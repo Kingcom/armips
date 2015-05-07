@@ -42,6 +42,3 @@ struct ArmipsArguments
 };
 
 bool runArmips(ArmipsArguments& arguments);
-void parseMacroDefinition(TextFile& Input, std::wstring& Args);
-void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
-bool EncodeAssembly();

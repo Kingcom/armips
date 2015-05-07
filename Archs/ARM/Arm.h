@@ -39,8 +39,6 @@ public:
 
 	virtual CAssemblerCommand* parseDirective(Parser& parser);
 	virtual CAssemblerCommand* parseOpcode(Parser& parser);
-	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
-	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
