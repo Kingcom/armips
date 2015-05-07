@@ -1,5 +1,5 @@
 .ps2
-.create output.bin,0
+.create "output.bin",0
 
 	move r0,r0
 	move r0,zero
