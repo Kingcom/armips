@@ -366,7 +366,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 
 	// the first time a macro is instantiated, it needs to be analyzed
 	// for labels
-	if (macro.labels.size() == 0)
+	if (macro.counter == 0)
 	{
 		initializingMacro = true;
 		

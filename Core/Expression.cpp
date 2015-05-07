@@ -125,18 +125,42 @@ ExpressionValue ExpressionValue::operator/(const ExpressionValue& other) const
 	switch (getValueCombination(type,other.type))
 	{
 	case ExpressionValueCombination::II:
+		if (other.intValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue / other.intValue;
 		break;
 	case ExpressionValueCombination::FI:
+		if (other.intValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.intValue;
 		break;
 	case ExpressionValueCombination::IF:
+		if (other.floatValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = intValue / other.floatValue;
 		break;
 	case ExpressionValueCombination::FF:
+		if (other.floatValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.floatValue;
 		break;
@@ -151,6 +175,12 @@ ExpressionValue ExpressionValue::operator%(const ExpressionValue& other) const
 	switch (getValueCombination(type,other.type))
 	{
 	case ExpressionValueCombination::II:
+		if (other.intValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue % other.intValue;
 		break;
@@ -269,6 +299,16 @@ bool ExpressionValue::operator==(const ExpressionValue& other) const
 		return intValue == other.floatValue;
 	case ExpressionValueCombination::FF:
 		return floatValue == other.floatValue;
+	case ExpressionValueCombination::IS:
+		return std::to_wstring(intValue) == other.strValue;
+	case ExpressionValueCombination::FS:
+		return std::to_wstring(floatValue) == other.strValue;
+	case ExpressionValueCombination::SI:
+		return strValue == std::to_wstring(other.intValue);
+	case ExpressionValueCombination::SF:
+		return strValue == std::to_wstring(other.floatValue);
+	case ExpressionValueCombination::SS:
+		return strValue == other.strValue;
 	}
 
 	return false;
@@ -483,6 +523,10 @@ ExpressionValue ExpressionInternal::evaluate()
 		val.type = ExpressionValueType::Integer;
 		val.intValue = g_fileManager->getVirtualAddress();
 		return val;
+	case OperatorType::ToString:
+		val.type = ExpressionValueType::String;
+		val.strValue = children[0]->toString();
+		return val;
 	case OperatorType::Add:
 		return children[0]->evaluate() + children[1]->evaluate();
 	case OperatorType::Sub:
@@ -559,7 +603,7 @@ std::wstring ExpressionInternal::toString()
 	case OperatorType::Integer:
 		return formatString(L"%d",intValue);
 	case OperatorType::Float:
-		return formatString(L"%f",floatValue);
+		return formatString(L"%g",floatValue);
 	case OperatorType::Identifier:
 		return strValue;
 	case OperatorType::String:
@@ -581,7 +625,7 @@ std::wstring ExpressionInternal::toString()
 	case OperatorType::LogNot:
 		return formatString(L"(!%s)",children[0]->toString());
 	case OperatorType::BitNot:
-		return formatString(L"~!%s)",children[0]->toString());
+		return formatString(L"(~%s)",children[0]->toString());
 	case OperatorType::LeftShift:
 		return formatString(L"(%s << %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::RightShift:
@@ -609,7 +653,9 @@ std::wstring ExpressionInternal::toString()
 	case OperatorType::Xor:
 		return formatString(L"(%s ^ %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::TertiaryIf:
-		return formatString(L"(%s ? %s : %s)",children[0]->toString(),children[2]->toString(),children[1]->toString());
+		return formatString(L"(%s ? %s : %s)",children[0]->toString(),children[1]->toString(),children[2]->toString());
+	case OperatorType::ToString:
+		return formatString(L"(%c%s)",L'\U000000B0',children[0]->toString());
 	default:
 		return L"";
 	}

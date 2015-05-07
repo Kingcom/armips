@@ -31,6 +31,7 @@ enum class OperatorType
 	LogAnd,
 	LogOr,
 	TertiaryIf,
+	ToString
 };
 
 enum class ExpressionValueType { Invalid, Integer, Float, String};

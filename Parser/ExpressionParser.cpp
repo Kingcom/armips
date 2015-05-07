@@ -61,6 +61,8 @@ static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
 		return new ExpressionInternal(OperatorType::BitNot,exp);
 	case TokenType::Exclamation:
 		return new ExpressionInternal(OperatorType::LogNot,exp);
+	case TokenType::Degree:
+		return new ExpressionInternal(OperatorType::ToString,exp);
 	default:
 		return NULL;
 	}

@@ -319,6 +319,9 @@ bool FileTokenizer::parseOperator()
 	case '$':
 		createToken(TokenType::Dollar,1);
 		return true;
+	case L'\U000000B0':	// degree sign
+		createToken(TokenType::Degree,1);
+		return true;
 	}
 
 	return false;

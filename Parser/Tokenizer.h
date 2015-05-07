@@ -42,7 +42,8 @@ enum class TokenType
 	LBrace,
 	RBrace,
 	Dollar,
-	NumberString
+	NumberString,
+	Degree
 };
 
 struct Token
