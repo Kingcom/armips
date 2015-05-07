@@ -151,9 +151,6 @@
     <ClCompile Include="Parser\Tokenizer.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
-    <ClCompile Include="Core\OldExpressionParser.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Parser\ExpressionParser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
@@ -294,9 +291,6 @@
     </ClInclude>
     <ClInclude Include="Parser\Tokenizer.h">
       <Filter>Parser</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\OldExpressionParser.h">
-      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Parser\ExpressionParser.h">
       <Filter>Parser</Filter>

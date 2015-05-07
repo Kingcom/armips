@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Expression.h"
 #include "Common.h"
-#include "OldExpressionParser.h"
 
 enum class ExpressionValueCombination
 {
@@ -664,21 +663,6 @@ std::wstring ExpressionInternal::toString()
 Expression::Expression()
 {
 	expression = NULL;
-}
-
-bool Expression::load(const std::wstring& text, bool allowLabels)
-{
-	ExpressionParser parser;
-	expression = std::shared_ptr<ExpressionInternal>(parser.parse(text));
-
-	if (expression == NULL)
-		return false;
-
-	if (!allowLabels && expression->hasIdentifierChild())
-		return false;
-
-	originalText = text;
-	return true;
 }
 
 ExpressionValue Expression::evaluate()

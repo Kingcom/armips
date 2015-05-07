@@ -128,7 +128,6 @@ class Expression
 {
 public:
 	Expression();
-	bool load(const std::wstring& text, bool allowLabels = true);
 	ExpressionValue evaluate();
 	bool isLoaded() { return expression != NULL; }
 	void setExpression(ExpressionInternal* exp) { expression = std::shared_ptr<ExpressionInternal>(exp); }

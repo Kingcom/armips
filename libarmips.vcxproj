@@ -245,7 +245,6 @@
     <ClCompile Include="Core\ELF\ElfFile.cpp" />
     <ClCompile Include="Core\ELF\ElfRelocator.cpp" />
     <ClCompile Include="Core\Expression.cpp" />
-    <ClCompile Include="Core\OldExpressionParser.cpp" />
     <ClCompile Include="Core\FileManager.cpp" />
     <ClCompile Include="Core\Misc.cpp" />
     <ClCompile Include="Core\SymbolData.cpp" />
@@ -301,7 +300,6 @@
     <ClInclude Include="Core\ELF\ElfRelocator.h" />
     <ClInclude Include="Core\ELF\ElfTypes.h" />
     <ClInclude Include="Core\Expression.h" />
-    <ClInclude Include="Core\OldExpressionParser.h" />
     <ClInclude Include="Core\FileManager.h" />
     <ClInclude Include="Core\Misc.h" />
     <ClInclude Include="Core\SymbolData.h" />
