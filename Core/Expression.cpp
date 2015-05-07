@@ -13,6 +13,7 @@ enum class ExpressionValueCombination
 	FS = (int(ExpressionValueType::Float)   << 2) | (int(ExpressionValueType::String)  << 0),
 	SI = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::Integer) << 0),
 	SF = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::Float)   << 0),
+	SS = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::String)  << 0),
 };
 
 ExpressionValueCombination getValueCombination(ExpressionValueType a, ExpressionValueType b)
@@ -56,6 +57,10 @@ ExpressionValue ExpressionValue::operator+(const ExpressionValue& other) const
 	case ExpressionValueCombination::SF:
 		result.type = ExpressionValueType::String;
 		result.strValue = strValue + std::to_wstring(other.floatValue);
+		break;
+	case ExpressionValueCombination::SS:
+		result.type = ExpressionValueType::String;
+		result.strValue = strValue + other.strValue;
 		break;
 	}
 
@@ -455,6 +460,12 @@ ExpressionValue ExpressionInternal::evaluate()
 		return val;
 	case OperatorType::Identifier:
 		label = Global.symbolTable.getLabel(strValue,fileNum,section);
+		if (label == nullptr)
+		{
+			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",strValue);
+			return val;
+		}
+
 		if (!label->isDefined())
 		{
 			Logger::queueError(Logger::Error,L"Undefined label \"%s\"",label->getName());

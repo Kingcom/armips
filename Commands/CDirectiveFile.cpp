@@ -133,6 +133,7 @@ CDirectivePosition::CDirectivePosition(Type type, u64 position)
 	: type(type)
 {
 	exec();
+	this->position = position;
 	updateSection(++Global.Section);
 }
 
@@ -141,10 +142,10 @@ void CDirectivePosition::exec()
 	switch (type)
 	{
 	case Physical:
-		g_fileManager->seekPhysical((u32)position);
+		g_fileManager->seekPhysical(position);
 		break;
 	case Virtual:
-		g_fileManager->seekVirtual((u32)position);
+		g_fileManager->seekVirtual(position);
 		break;
 	}
 }

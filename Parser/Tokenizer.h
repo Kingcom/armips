@@ -68,7 +68,7 @@ public:
 	Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
 	void eatTokens(int num);
-	bool atEnd() { return isInputAtEnd() && tokenIndex == tokens.size(); }
+	bool atEnd() { return isInputAtEnd() && tokenIndex >= tokens.size(); }
 	size_t getPosition() { return tokenIndex; }
 	void setPosition(size_t pos) { tokenIndex = pos; }
 	void skipLookahead();

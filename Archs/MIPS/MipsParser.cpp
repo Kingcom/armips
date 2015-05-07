@@ -1165,7 +1165,7 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 	if (paramFail == true)
 		Logger::printError(Logger::Error,L"MIPS parameter failure");
 	else
-		Logger::printError(Logger::Error,L"Invalid MIPS opcode");
+		Logger::printError(Logger::Error,L"Invalid MIPS opcode '%s'",token.stringValue);
 
 	return nullptr;
 }
@@ -1198,6 +1198,10 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 			break;
 		}
 	}
+
+	// lw rx,imm is a prefix of lw rx,imm(ry)
+	if (parser.peekToken().type == TokenType::LParen)
+		return false;
 
 	return true;
 }

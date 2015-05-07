@@ -266,22 +266,16 @@ bool Parser::checkMacroDefinition()
 		return false;
 	}
 
-	initializingMacro = true;
-
 	size_t start = getTokenizer()->getPosition();
 	bool valid = false;
 	while (atEnd() == false)
 	{
-		Token& tok = peekToken();
+		Token& tok = nextToken();
 		if (tok.type == TokenType::Identifier && tok.stringValue == L".endmacro")
 		{
 			valid = true;
 			break;
 		}
-
-		// parse the short lived next command
-		CAssemblerCommand* command = parseCommand();
-		delete command;
 	}
 	
 	// no .endmacro, not valid
@@ -289,17 +283,12 @@ bool Parser::checkMacroDefinition()
 		return true;
 
 	// get content
-	size_t end = getTokenizer()->getPosition();;
+	size_t end = getTokenizer()->getPosition()-1;
 	macro.content = getTokenizer()->getTokens(start,end-start);
-	eatToken();
 
-	// and initialize the rest
-	macro.labels = macroLabels;
+	// and register it
 	macro.counter = 0;
-	macroLabels.clear();
-	
 	macros[macro.name] = macro;
-	initializingMacro = false;
 
 	return true;
 }
@@ -375,6 +364,25 @@ CAssemblerCommand* Parser::parseMacroCall()
 	if (initializingMacro)
 		return new DummyCommand();
 
+	// the first time a macro is instantiated, it needs to be analyzed
+	// for labels
+	if (macro.labels.size() == 0)
+	{
+		initializingMacro = true;
+		
+		// parse the short lived next command
+		CAssemblerCommand* command =  parse(&macroTokenizer);
+		delete command;
+
+		macro.labels = macroLabels;
+		macroLabels.clear();
+		
+		initializingMacro = false;
+
+		// reset tokenizer
+		macroTokenizer.init(macro.content);
+	}
+
 	// register labels and replacements
 	for (const std::wstring& label: macro.labels)
 	{
@@ -436,9 +444,7 @@ CAssemblerCommand* Parser::parseCommand()
 	if ((command = Arch->parseOpcode(*this)) != nullptr)
 		return command;
 
-	Logger::printError(Logger::Error,L"Parse error");
-	eatToken();
-
+	Logger::printError(Logger::Error,L"Parse error '%s'",nextToken().stringValue);
 	return nullptr;
 }
 

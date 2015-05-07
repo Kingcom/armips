@@ -63,10 +63,12 @@ struct MipsImmediateData
 	void reset()
 	{
 		primary.type = MipsImmediateType::None;
-		primary.expression = Expression();
+		if (primary.expression.isLoaded())
+			primary.expression = Expression();
 		
 		secondary.type = MipsImmediateType::None;
-		secondary.expression = Expression();
+		if (secondary.expression.isLoaded())
+			secondary.expression = Expression();
 	}
 };
 

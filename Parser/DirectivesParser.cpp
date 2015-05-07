@@ -243,6 +243,7 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 	if (next.stringValue == L".else")
 	{
 		elseBlock = parser.parseCommandSequence({L".endif"});
+		parser.eatToken();	// eat .endif
 	} else if (next.stringValue == L".elseif")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IF);
