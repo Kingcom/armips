@@ -128,7 +128,7 @@ CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 
 bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)
 {
-	Token& token = parser.peekToken();
+	Token token = parser.peekToken();
 	bool hasDollar = token.type == TokenType::Dollar;
 	if (hasDollar)
 		token = parser.peekToken(1);
@@ -153,6 +153,22 @@ bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, con
 bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Normal;
+
+	// check for $0 and $1
+	if (parser.peekToken().type == TokenType::Dollar)
+	{
+		Token& number = parser.peekToken(1);
+		if (number.type == TokenType::Integer && number.intValue <= 31)
+		{
+			dest.name = formatString(L"$%d",number.intValue);
+			dest.num = number.intValue;
+
+			parser.eatTokens(2);
+			return true;
+		}
+	}
+
+
 	return parseRegisterTable(parser,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
 }
 
@@ -258,6 +274,7 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 	reg.num |= row << 5;
 
 	reg.name = token.stringValue;
+	parser.eatToken();
 	return true;
 }
 
@@ -299,20 +316,19 @@ bool MipsParser::parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg
 
 bool MipsParser::parseImmediate(Parser& parser, Expression& dest)
 {
-	// check for (reg) sequence
-	if (parser.peekToken().type == TokenType::LParen)
-	{
-		MipsRegisterValue tempValue;
-		
-		size_t pos = parser.getTokenizer()->getPosition();
+	// check for (reg) or reg sequence
+	size_t pos = parser.getTokenizer()->getPosition();
+
+	bool hasParen = parser.peekToken().type == TokenType::LParen;
+	if (hasParen)
 		parser.eatToken();
 
-		bool isRegister = parseRegister(parser,tempValue);
-		parser.getTokenizer()->setPosition(pos);
+	MipsRegisterValue tempValue;
+	bool isRegister = parseRegister(parser,tempValue);
+	parser.getTokenizer()->setPosition(pos);
 
-		if (isRegister)
-			return false;
-	}
+	if (isRegister)
+		return false;
 
 	dest = parser.parseExpression();
 	return dest.isLoaded();
@@ -962,13 +978,13 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			CHECK(parseRegister(parser,registers.grs));
 			break;
 		case 'T':	// float register
-			CHECK(parseRegister(parser,registers.frt));
+			CHECK(parseFpuRegister(parser,registers.frt));
 			break;
 		case 'D':	// float register
-			CHECK(parseRegister(parser,registers.frd));
+			CHECK(parseFpuRegister(parser,registers.frd));
 			break;
 		case 'S':	// float register
-			CHECK(parseRegister(parser,registers.frs));
+			CHECK(parseFpuRegister(parser,registers.frs));
 			break;
 		case 'v':	// psp vfpu reg
 			if (*encoding == 'S')
@@ -1026,13 +1042,13 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			switch (*encoding++)
 			{
 			case 't':	// register
-				CHECK(parseRegister(parser,registers.ps2vrt));
+				CHECK(parsePs2Cop2Register(parser,registers.ps2vrt));
 				break;
 			case 'd':	// register
-				CHECK(parseRegister(parser,registers.ps2vrd));
+				CHECK(parsePs2Cop2Register(parser,registers.ps2vrd));
 				break;
 			case 's':	// register
-				CHECK(parseRegister(parser,registers.ps2vrs));
+				CHECK(parsePs2Cop2Register(parser,registers.ps2vrs));
 				break;
 			default:
 				return false;
