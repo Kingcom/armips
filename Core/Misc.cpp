@@ -4,6 +4,10 @@
 #include "Core/FileManager.h"
 #include <iostream>
 
+#ifdef _MSC_VER
+#include <Windows.h>
+#endif
+
 std::vector<Logger::QueueEntry> Logger::queue;
 std::vector<std::wstring> Logger::errors;
 bool Logger::error = false;
@@ -61,16 +65,30 @@ void Logger::clear()
 void Logger::printLine(const std::wstring& text)
 {
 	std::wcout << text << std::endl;
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+	OutputDebugStringW(text.c_str());
+	OutputDebugStringW(L"\n");
+#endif
 }
 
 void Logger::printLine(const std::string& text)
 {
 	std::cout << text << std::endl;
+	
+#if defined(_MSC_VER) && defined(_DEBUG)
+	OutputDebugStringA(text.c_str());
+	OutputDebugStringA("\n");
+#endif
 }
 
 void Logger::print(const std::wstring& text)
 {
 	std::wcout << text;
+	
+#if defined(_MSC_VER) && defined(_DEBUG)
+	OutputDebugStringW(text.c_str());
+#endif
 }
 
 void Logger::printError(ErrorType type, const std::wstring& text)
