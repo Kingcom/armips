@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Architecture.h"
 #include "Core/Common.h"
-#include "Core/Directives.h"
 
 CInvalidArchitecture InvalidArchitecture;
 

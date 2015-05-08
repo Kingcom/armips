@@ -123,122 +123,50 @@ void Logger::printQueue()
 	}
 }
 
-void ConditionData::addIf(bool conditionMet)
+void TempData::start()
 {
-	Entry entry;
-	entry.currentConditionMet = conditionMet;
-	entry.matchingCaseExecuted = conditionMet;
-	entry.isInElseCase = false;
-	conditions.push_back(entry);
-}
-
-void ConditionData::addElse()
-{
-	if (conditions.size() == 0)
+	if (file.getFileName().empty() == false)
 	{
-		Logger::queueError(Logger::Error,L"No if clause active");
-		return;
-	}
-
-	Entry& entry = conditions.back();
-	if (entry.isInElseCase)
-	{
-		Logger::queueError(Logger::Error,L"Else case already defined");
-		return;
-	}
-
-	entry.currentConditionMet = !entry.matchingCaseExecuted;
-	entry.isInElseCase = true;
-}
-
-void ConditionData::addElseIf(bool conditionMet)
-{
-	if (conditions.size() == 0)
-	{
-		Logger::queueError(Logger::Error,L"No if clause active");
-		return;
-	}
-
-	Entry& entry = conditions.back();
-	if (entry.isInElseCase)
-	{
-		Logger::queueError(Logger::Error,L"Else case already defined");
-		return;
-	}
-
-	if (entry.matchingCaseExecuted)
-	{
-		entry.currentConditionMet = false;
-	} else {
-		entry.currentConditionMet = conditionMet;
-		entry.matchingCaseExecuted = conditionMet;
-	}
-}
-
-void ConditionData::addEndIf()
-{
-	if (conditions.size() == 0)
-	{
-		Logger::queueError(Logger::Error,L"No if clause active");
-		return;
-	}
-
-	conditions.pop_back();
-}
-
-bool ConditionData::conditionTrue()
-{
-	for (size_t i = 0; i < conditions.size(); i++)
-	{
-		if (conditions[i].currentConditionMet == false)
-			return false;
-	}
-
-	return true;
-}
-
-
-void AreaData::startArea(u64 start, size_t size, int fileNum, int lineNumber, int fillValue)
-{
-	Entry entry;
-	entry.start = start;
-	entry.maxAddress = start+size;
-	entry.fileNum = fileNum;
-	entry.lineNumber = lineNumber;
-	entry.overflow = false;
-	entry.fillValue = fillValue;
-	entries.push_back(entry);
-}
-
-void AreaData::endArea()
-{
-	if (entries.size() == 0)
-	{
-		Logger::queueError(Logger::Error,L"No active area");
-		return;
-	}
-
-	entries.pop_back();
-}
-
-bool AreaData::checkAreas()
-{
-	bool error = false;
-
-	for (size_t i = 0; i < entries.size(); i++)
-	{
-		if ((size_t)entries[i].maxAddress < g_fileManager->getVirtualAddress())
+		if (file.open(TextFile::Write) == false)
 		{
-			error = true;
-			if (entries[i].overflow == false)
-			{
-				Logger::queueError(Logger::Error,L"Area at %S(%d) overflown",
-					Global.FileInfo.FileList[entries[i].fileNum],
-					entries[i].lineNumber);
-				entries[i].overflow = true;
-			}
+			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName());
+			return;
 		}
-	}
 
-	return error;
+		size_t fileCount = Global.FileInfo.FileList.size();
+		size_t lineCount = Global.FileInfo.TotalLineCount;
+		size_t labelCount = Global.symbolTable.getLabelCount();
+		size_t equCount = Global.symbolTable.getEquationCount();
+
+		file.writeFormat(L"; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
+		file.writeFormat(L"; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
+		file.writeFormat(L"; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
+		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
+		for (size_t i = 0; i < fileCount; i++)
+		{
+			file.writeFormat(L"; %S\n",Global.FileInfo.FileList[i]);
+		}
+		file.writeLine("");
+	}
+}
+
+void TempData::end()
+{
+	if (file.isOpen())
+		file.close();
+}
+
+void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
+{
+	if (file.isOpen())
+	{
+		std::wstring str = formatString(L"%08X %s",memoryAddress,text);
+		while (str.size() < 70)
+			str += ' ';
+
+		str += formatString(L"; %S line %d",
+			Global.FileInfo.FileList[Global.FileInfo.FileNum],Global.FileInfo.LineNumber);
+
+		file.writeLine(str);
+	}
 }

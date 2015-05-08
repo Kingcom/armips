@@ -1,6 +1,5 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
-#include "Util/CommonClasses.h"
 #include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
 

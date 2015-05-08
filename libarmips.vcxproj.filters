@@ -114,9 +114,6 @@
     <ClCompile Include="Core\Common.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Directives.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\ELF\ElfFile.cpp">
       <Filter>Core\ELF</Filter>
     </ClCompile>
@@ -124,9 +121,6 @@
       <Filter>Core\ELF</Filter>
     </ClCompile>
     <ClCompile Include="Util\ByteArray.cpp">
-      <Filter>Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Util\CommonClasses.cpp">
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="Util\CRC.cpp">
@@ -237,9 +231,6 @@
     <ClInclude Include="Core\Common.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Directives.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\FileManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -262,9 +253,6 @@
       <Filter>Core\ELF</Filter>
     </ClInclude>
     <ClInclude Include="Util\ByteArray.h">
-      <Filter>Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\CommonClasses.h">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Util\CRC.h">

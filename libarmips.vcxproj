@@ -241,7 +241,6 @@
     <ClCompile Include="Commands\CommandSequence.cpp" />
     <ClCompile Include="Core\Assembler.cpp" />
     <ClCompile Include="Core\Common.cpp" />
-    <ClCompile Include="Core\Directives.cpp" />
     <ClCompile Include="Core\ELF\ElfFile.cpp" />
     <ClCompile Include="Core\ELF\ElfRelocator.cpp" />
     <ClCompile Include="Core\Expression.cpp" />
@@ -262,7 +261,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Util\ByteArray.cpp" />
-    <ClCompile Include="Util\CommonClasses.cpp" />
     <ClCompile Include="Util\CRC.cpp" />
     <ClCompile Include="Util\EncodingTable.cpp" />
     <ClCompile Include="Util\FileClasses.cpp" />
@@ -295,7 +293,6 @@
     <ClInclude Include="Commands\CommandSequence.h" />
     <ClInclude Include="Core\Assembler.h" />
     <ClInclude Include="Core\Common.h" />
-    <ClInclude Include="Core\Directives.h" />
     <ClInclude Include="Core\ELF\ElfFile.h" />
     <ClInclude Include="Core\ELF\ElfRelocator.h" />
     <ClInclude Include="Core\ELF\ElfTypes.h" />
@@ -311,7 +308,6 @@
     <ClInclude Include="Parser\Tokenizer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\ByteArray.h" />
-    <ClInclude Include="Util\CommonClasses.h" />
     <ClInclude Include="Util\CRC.h" />
     <ClInclude Include="Util\EncodingTable.h" />
     <ClInclude Include="Util\FileClasses.h" />

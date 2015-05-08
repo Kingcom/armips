@@ -3,7 +3,6 @@
 #include <vector>
 #include "SymbolTable.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Util/CommonClasses.h"
 #include "Util/EncodingTable.h"
 #include "Util/FileClasses.h"
 #include "Core/Misc.h"
@@ -30,8 +29,6 @@ typedef struct {
 	bool nocash;
 	bool relativeInclude;
 	int DebugMessages;
-	ConditionData conditionData;
-	AreaData areaData;
 	int IncludeNestingLevel;
 	int MacroNestingLevel;
 	int validationPasses;

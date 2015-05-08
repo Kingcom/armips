@@ -2,7 +2,6 @@
 #include "Assembler.h"
 #include "Core/Common.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Util/CommonClasses.h"
 #include "Core/FileManager.h"
 #include "Parser/Parser.h"
 #include "Archs/ARM/Arm.h"
@@ -101,8 +100,6 @@ bool runArmips(ArmipsArguments& arguments)
 	Global.Table.clear();
 	Global.symbolTable.clear();
 	Global.tempData.clear();
-	Global.conditionData.clear();
-	Global.areaData.clear();
 
 	Global.FileInfo.FileList.clear();
 	Global.FileInfo.FileCount = 0;
