@@ -36,7 +36,7 @@ public:
 class InvalidCommand: public CAssemblerCommand
 {
 public:
-	virtual bool Validate() { };
+	virtual bool Validate() { return false; };
 	virtual void Encode() { };
 	virtual void writeTempData(TempData& tempData) { };
 	virtual void writeSymData(SymbolData& symData) { };

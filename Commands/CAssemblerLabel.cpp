@@ -38,6 +38,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, Expression& value)
 
 bool CAssemblerLabel::Validate()
 {
+	bool result = false;
 	if (defined == false)
 	{
 		if (label->isDefined())
@@ -48,6 +49,7 @@ bool CAssemblerLabel::Validate()
 		
 		label->setDefined(true);
 		defined = true;
+		result = true;
 	}
 	
 	u64 value;
@@ -57,7 +59,7 @@ bool CAssemblerLabel::Validate()
 		if (labelValue.evaluateInteger(value) == false)
 		{
 			Logger::printError(Logger::Error, L"Invalid expression");
-			return false;
+			return result;
 		}
 	} else {
 		// label value is given by current address
@@ -67,10 +69,10 @@ bool CAssemblerLabel::Validate()
 	if (label->getValue() != value)
 	{
 		label->setValue(value);
-		return true;
+		result = true;
 	}
 
-	return false;
+	return result;
 }
 
 void CAssemblerLabel::Encode()

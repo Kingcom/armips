@@ -408,20 +408,30 @@ ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
 	return result;
 }
 
+ExpressionInternal::ExpressionInternal()
+{
+	for (size_t i = 0; i < ARRAY_SIZE(children); i++)
+	{
+		children[i] = nullptr;
+	}
+}
 
 ExpressionInternal::ExpressionInternal(u64 value)
+	: ExpressionInternal()
 {
 	type = OperatorType::Integer;
 	intValue = value;
 }
 
 ExpressionInternal::ExpressionInternal(double value)
+	: ExpressionInternal()
 {
 	type = OperatorType::Float;
 	floatValue = value;
 }
 
 ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
+	: ExpressionInternal()
 {
 	this->type = type;
 	strValue = value;
@@ -439,11 +449,12 @@ ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType t
 
 ExpressionInternal::ExpressionInternal(OperatorType op, ExpressionInternal* a,
 	ExpressionInternal* b, ExpressionInternal* c)
+	: ExpressionInternal()
 {
 	type = op;
-	children[0] = std::shared_ptr<ExpressionInternal>(a);
-	children[1] = std::shared_ptr<ExpressionInternal>(b);
-	children[2] = std::shared_ptr<ExpressionInternal>(c);
+	children[0] = a;
+	children[1] = b;
+	children[2] = c;
 }
 
 

@@ -100,6 +100,7 @@ class Label;
 class ExpressionInternal
 {
 public:
+	ExpressionInternal();
 	ExpressionInternal(u64 value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
@@ -113,7 +114,7 @@ public:
 	void replaceMemoryPos(const std::wstring& identifierName);
 private:
 	OperatorType type;
-	std::shared_ptr<ExpressionInternal> children[3];
+	ExpressionInternal* children[3];
 	union
 	{
 		u64 intValue;

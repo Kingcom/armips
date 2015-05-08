@@ -90,11 +90,14 @@ CAssemblerCommand* Parser::parseFile(TextFile& file)
 	if (tokenizer.init(&file) == false)
 		return nullptr;
 
+	int oldNum = Global.FileInfo.FileNum;
 	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.size();
 	Global.FileInfo.FileList.push_back(file.getFileName());
 	Global.FileInfo.LineNumber = 0;
 
-	return parse(&tokenizer);
+	CAssemblerCommand* result = parse(&tokenizer);
+	Global.FileInfo.FileNum = oldNum;
+	return result;
 }
 
 CAssemblerCommand* Parser::parseString(const std::wstring& text)
@@ -110,7 +113,12 @@ CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initiali
 
 	for (auto& arg: variables)
 	{
-		replaceAll(fullText,arg.variableName,arg.value);
+		size_t count = replaceAll(fullText,arg.variableName,arg.value);
+
+#ifdef _DEBUG
+		if (count != 0 && arg.value.empty())
+			Logger::printError(Logger::Warning,L"Empty replacement for %s",arg.variableName);
+#endif
 	}
 
 	return parseString(fullText);
@@ -139,7 +147,15 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveEntry* directiveSet)
 				Arch->NextSection();
 
 			eatToken();
-			return directiveSet[i].function(*this,directiveSet[i].flags);
+			CAssemblerCommand* result = directiveSet[i].function(*this,directiveSet[i].flags);
+			if (result == nullptr)
+			{
+				Logger::printError(Logger::Error,L"Invalid directive");
+				result = directiveSet[i].function(*this,directiveSet[i].flags);
+		return new InvalidCommand();
+			}
+
+			return result;
 		}
 	}
 
@@ -427,7 +443,7 @@ CAssemblerCommand* Parser::parseCommand()
 	}
 
 	if (atEnd())
-		return nullptr;
+		return new DummyCommand();
 
 	if ((command = parseLabel()) != nullptr)
 		return command;

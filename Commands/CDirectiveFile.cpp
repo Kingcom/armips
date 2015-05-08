@@ -132,8 +132,8 @@ void CDirectiveFile::writeTempData(TempData& tempData)
 CDirectivePosition::CDirectivePosition(Type type, u64 position)
 	: type(type)
 {
-	exec();
 	this->position = position;
+	exec();
 	updateSection(++Global.Section);
 }
 

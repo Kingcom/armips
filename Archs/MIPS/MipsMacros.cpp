@@ -132,7 +132,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
 			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
 			{ L"%rs%",		registers.grs.name },
-			{ L"%imm%",		immediates.primary.expression.toString() },
+			{ L"%imm%",		immediates.secondary.expression.toString() },
 			{ L"%op%",		op },
 	});
 }
@@ -222,7 +222,7 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	{
 		const wchar_t* templateNeEq = LR"(
 			li		r1,%imm%
-			"%op%	%rs%,r1,%dest%
+			%op%	%rs%,r1,%dest%
 		)";
 
 		selectedTemplate = templateNeEq;

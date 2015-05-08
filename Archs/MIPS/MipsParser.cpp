@@ -99,12 +99,27 @@ CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 	if (parser.parseExpressionList(list) == false)
 		return nullptr;
 
-	if (checkExpressionListSize(list,1,1) == false)
+	if (checkExpressionListSize(list,1,2) == false)
 		return nullptr;
 
 	std::wstring inputName;
 	if (list[0].evaluateString(inputName,true) == false)
 		return nullptr;
+	
+	if (list.size() == 2)
+	{
+		std::wstring ctorName;
+		if (list[1].evaluateIdentifier(ctorName) == false)
+			return nullptr;
+		
+		if (Mips.GetVersion() == MARCH_PSX)
+		{
+			Logger::printError(Logger::Error,L"Constructor not supported for PSX libraries");
+			return new InvalidCommand();
+		}
+
+		return new DirectiveObjImport(inputName,ctorName);
+	}
 
 	if (Mips.GetVersion() == MARCH_PSX)
 		return new DirectivePsxObjImport(inputName);
