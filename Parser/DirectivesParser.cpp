@@ -505,9 +505,16 @@ CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 {
+	std::vector<Expression> parameters;
+	if (parser.parseExpressionList(parameters) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(parameters,1,1) == false)
+		return nullptr;
+
 	std::wstring name;
-	if (parser.parseIdentifier(name) == false)
-		return false;
+	if (parameters[0].evaluateIdentifier(name) == false)
+		return nullptr;
 
 	CAssemblerCommand* seq = parser.parseCommandSequence({L".endfunc",L".endfunction",L".func",L".function"});
 
@@ -517,7 +524,7 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 		parser.eatToken();
 	}
 
-	return nullptr;
+	return new CDirectiveFunction(name,seq);
 }
 
 CAssemblerCommand* parseDirectiveMessage(Parser& parser, int flags)
@@ -535,6 +542,48 @@ CAssemblerCommand* parseDirectiveMessage(Parser& parser, int flags)
 	}
 
 	return nullptr;
+}
+
+CAssemblerCommand* parseDirectiveInclude(Parser& parser, int flags)
+{
+	std::vector<Expression> parameters;
+	if (parser.parseExpressionList(parameters) == false)
+		return nullptr;
+	
+	if (checkExpressionListSize(parameters,1,2) == false)
+		return nullptr;
+
+	std::wstring fileName;
+	if (parameters[0].evaluateString(fileName,true) == false)
+		return nullptr;
+
+	fileName = getFullPathName(fileName);
+
+	TextFile::Encoding encoding = TextFile::GUESS;
+	if (parameters.size() == 2)
+	{
+		std::wstring encodingName;
+		if (parameters[1].evaluateString(encodingName,true) == false
+			&& parameters[1].evaluateIdentifier(encodingName) == false)
+			return nullptr;
+		
+		encoding = getEncodingFromString(encodingName);
+	}
+
+	if (fileExists(fileName) == false)
+	{
+		Logger::printError(Logger::Error,L"Included file \"%s\" does not exist",fileName);
+		return nullptr;
+	}
+
+	TextFile f;
+	if (f.open(fileName,TextFile::Read,encoding) == false)
+	{
+		Logger::printError(Logger::Error,L"Could not open included file \"%s\"",fileName);
+		return nullptr;
+	}
+
+	return parser.parseFile(f);
 }
 
 const DirectiveEntry directives[] = {
@@ -613,6 +662,8 @@ const DirectiveEntry directives[] = {
 	{ L".warning",			&parseDirectiveMessage,			DIRECTIVE_MSG_WARNING },
 	{ L".error",			&parseDirectiveMessage,			DIRECTIVE_MSG_ERROR },
 	{ L".notice",			&parseDirectiveMessage,			DIRECTIVE_MSG_NOTICE },
+
+	{ L".include",			&parseDirectiveInclude,			0 },
 
 	{ nullptr,				nullptr,						0 }
 };
