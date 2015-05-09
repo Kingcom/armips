@@ -18,20 +18,9 @@ inline bool isPartOfList(const std::wstring& value, std::initializer_list<wchar_
 	return false;
 }
 
-std::unordered_multimap<std::wstring, const DirectiveEntry*> Parser::directiveMap;
-
 Parser::Parser()
 {
 	initializingMacro = false;
-
-	if (directiveMap.empty())
-		buildDirectiveMap();
-}
-
-void Parser::buildDirectiveMap()
-{
-	for (size_t i = 0; directives[i].name != nullptr; i++)
-		directiveMap.emplace(directives[i].name, &directives[i]);
 }
 
 Expression Parser::parseExpression()
@@ -139,7 +128,7 @@ CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initiali
 	return parseString(fullText);
 }
 
-CAssemblerCommand* Parser::parseDirective(const std::unordered_multimap<std::wstring, const DirectiveEntry*> &directiveSet)
+CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
 {
 	const Token &tok = peekToken();
 	if (tok.type != TokenType::Identifier)
@@ -150,7 +139,7 @@ CAssemblerCommand* Parser::parseDirective(const std::unordered_multimap<std::wst
 	auto matchRange = directiveSet.equal_range(stringValue);
 	for (auto it = matchRange.first; it != matchRange.second; ++it)
 	{
-		const DirectiveEntry &directive = *it->second;
+		const DirectiveEntry &directive = it->second;
 
 		if (directive.flags & DIRECTIVE_DISABLED)
 			return nullptr;
@@ -473,7 +462,7 @@ CAssemblerCommand* Parser::parseCommand()
 	if ((command = Arch->parseDirective(*this)) != nullptr)
 		return command;
 
-	if ((command = parseDirective(directiveMap)) != nullptr)
+	if ((command = parseDirective(directives)) != nullptr)
 		return command;
 
 	if ((command = Arch->parseOpcode(*this)) != nullptr)

@@ -74,27 +74,16 @@ CAssemblerCommand* parseDirectiveMsg(Parser& parser, int flags)
 	});
 }
 
-const DirectiveEntry armDirectives[] = {
-	{ L".thumb",	&parseDirectiveThumb,	0 },
-	{ L".arm",		&parseDirectiveArm,		0 },
-	{ L".pool",		&parseDirectivePool,	0 },
-	{ L".msg",		&parseDirectiveMsg,		0 },
-	{ NULL,			NULL,					0 }
+const DirectiveMap armDirectives = {
+	{ L".thumb",	{ &parseDirectiveThumb,	0 } },
+	{ L".arm",		{ &parseDirectiveArm,	0 } },
+	{ L".pool",		{ &parseDirectivePool,	0 } },
+	{ L".msg",		{ &parseDirectiveMsg,	0 } },
 };
-
-std::unordered_multimap<std::wstring, const DirectiveEntry*> ArmParser::armDirectiveMap;
-
-void ArmParser::buildDirectiveMap()
-{
-	for (size_t i = 0; armDirectives[i].name != nullptr; i++)
-		armDirectiveMap.emplace(armDirectives[i].name, &armDirectives[i]);
-}
 
 CAssemblerCommand* ArmParser::parseDirective(Parser& parser)
 {
-	if (armDirectiveMap.empty())
-		buildDirectiveMap();
-	return parser.parseDirective(armDirectiveMap);
+	return parser.parseDirective(armDirectives);
 }
 
 bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count)

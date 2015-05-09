@@ -36,7 +36,7 @@ public:
 	CAssemblerCommand* parseFile(TextFile& file);
 	CAssemblerCommand* parseString(const std::wstring& text);
 	CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables = {});
-	CAssemblerCommand* parseDirective(const std::unordered_multimap<std::wstring, const DirectiveEntry*> &directiveSet);
+	CAssemblerCommand* parseDirective(const DirectiveMap &directiveSet);
 	bool matchToken(TokenType type, bool optional = false);
 
 	Tokenizer* getTokenizer() { return entries.back(); };
@@ -56,9 +56,6 @@ protected:
 	std::map<std::wstring,ParserMacro> macros;
 	std::set<std::wstring> macroLabels;
 	bool initializingMacro;
-
-	static void buildDirectiveMap();
-	static std::unordered_multimap<std::wstring, const DirectiveEntry*> directiveMap;
 };
 
 struct TokenSequenceValue

@@ -127,28 +127,17 @@ CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 		return new DirectiveObjImport(inputName);
 }
 
-const DirectiveEntry mipsDirectives[] = {
-	{ L".resetdelay",		&parseDirectiveResetDelay,		0 },
-	{ L".fixloaddelay",		&parseDirectiveFixLoadDelay,	0 },
-	{ L".loadelf",			&parseDirectiveLoadElf,			0 },
-	{ L".importobj",		&parseDirectiveImportObj,		0 },
-	{ L".importlib",		&parseDirectiveImportObj,		0 },
-	{ NULL,					NULL,							0 }
+const DirectiveMap mipsDirectives = {
+	{ L".resetdelay",		{ &parseDirectiveResetDelay,	0 } },
+	{ L".fixloaddelay",		{ &parseDirectiveFixLoadDelay,	0 } },
+	{ L".loadelf",			{ &parseDirectiveLoadElf,		0 } },
+	{ L".importobj",		{ &parseDirectiveImportObj,		0 } },
+	{ L".importlib",		{ &parseDirectiveImportObj,		0 } },
 };
-
-std::unordered_multimap<std::wstring, const DirectiveEntry*> MipsParser::mipsDirectiveMap;
-
-void MipsParser::buildDirectiveMap()
-{
-	for (size_t i = 0; mipsDirectives[i].name != nullptr; i++)
-		mipsDirectiveMap.emplace(mipsDirectives[i].name, &mipsDirectives[i]);
-}
 
 CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 {
-	if (mipsDirectiveMap.empty())
-		buildDirectiveMap();
-	return parser.parseDirective(mipsDirectiveMap);
+	return parser.parseDirective(mipsDirectives);
 }
 
 bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)

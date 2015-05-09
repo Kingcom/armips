@@ -1,15 +1,18 @@
 #pragma once
 
+#include <unordered_map>
+
 class CAssemblerCommand;
 class Parser;
 
 typedef CAssemblerCommand* (*DirectiveFunc)(Parser&,int);
 
 struct DirectiveEntry {
-	const wchar_t* name;
 	DirectiveFunc function;
 	int flags;
 };
+
+typedef std::unordered_multimap<std::wstring, const DirectiveEntry> DirectiveMap;
 
 #define DIRECTIVE_USERMASK			0x0000FFFF
 
@@ -47,4 +50,4 @@ struct DirectiveEntry {
 #define DIRECTIVE_MSG_ERROR			0x00000002
 #define DIRECTIVE_MSG_NOTICE		0x00000003
 
-extern const DirectiveEntry directives[];
+extern const DirectiveMap directives;

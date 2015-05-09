@@ -40,7 +40,4 @@ private:
 	
 	bool parseArmParameters(Parser& parser, const tArmOpcode& opcode, ArmOpcodeVariables& vars);
 	bool parseThumbParameters(Parser& parser, const tThumbOpcode& opcode, ThumbOpcodeVariables& vars);
-
-	static void buildDirectiveMap();
-	static std::unordered_multimap<std::wstring, const DirectiveEntry*> armDirectiveMap;
 };
