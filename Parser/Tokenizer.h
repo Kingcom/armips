@@ -159,7 +159,7 @@ public:
 	const Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
 	void eatTokens(int num);
-	bool atEnd() { return isInputAtEnd() && tokenIndex >= tokens.size(); }
+	bool atEnd() { return tokenIndex >= tokens.size(); }
 	size_t getPosition() { return tokenIndex; }
 	void setPosition(size_t pos) { tokenIndex = pos; }
 	void skipLookahead();
@@ -167,10 +167,9 @@ public:
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
 	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
 protected:
-	virtual Token loadToken() = 0;
-	virtual bool isInputAtEnd() = 0;
+	void clearTokens() { tokens.clear(); tokenIndex = 0; };
+	void addToken(Token token);
 private:
-	void readTokens(size_t maxIndex);
 	std::vector<Token> tokens;
 	size_t tokenIndex;
 
@@ -189,8 +188,8 @@ class FileTokenizer: public Tokenizer
 public:
 	bool init(TextFile* input);
 protected:
-	virtual Token loadToken();
-	virtual bool isInputAtEnd() { return linePos >= currentLine.size() && input->atEnd(); };
+	Token loadToken();
+	bool isInputAtEnd() { return linePos >= currentLine.size() && input->atEnd(); };
 
 	void skipWhitespace();
 	void createToken(TokenType type, size_t length);
@@ -217,15 +216,9 @@ class TokenStreamTokenizer: public Tokenizer
 public:
 	void init(const std::vector<Token>& tokens)
 	{
-		this->tokens.clear();
-		for (const Token &tok: tokens)
-			this->tokens.push_back(tok);
-		pos = 0;
-	}
-protected:
-	virtual Token loadToken() { return tokens[pos++]; }
-	virtual bool isInputAtEnd() { return pos == tokens.size(); }
+		clearTokens();
 
-	std::vector<Token> tokens;
-	size_t pos;
+		for (const Token &tok: tokens)
+			addToken(tok);
+	}
 };

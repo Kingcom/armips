@@ -333,7 +333,6 @@ CAssemblerCommand* Parser::parseMacroCall()
 	// create a token stream for the macro content,
 	// registering replacements for parameter values
 	TokenStreamTokenizer macroTokenizer;
-	macroTokenizer.init(macro.content);
 
 	for (size_t i = 0; i < macro.parameters.size(); i++)
 	{
@@ -395,6 +394,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 		initializingMacro = true;
 		
 		// parse the short lived next command
+		macroTokenizer.init(macro.content);
 		CAssemblerCommand* command =  parse(&macroTokenizer);
 		delete command;
 
@@ -402,9 +402,6 @@ CAssemblerCommand* Parser::parseMacroCall()
 		macroLabels.clear();
 		
 		initializingMacro = false;
-
-		// reset tokenizer
-		macroTokenizer.init(macro.content);
 	}
 
 	// register labels and replacements
@@ -414,7 +411,9 @@ CAssemblerCommand* Parser::parseMacroCall()
 		macroTokenizer.registerReplacement(label,fullName);
 	}
 	
+	macroTokenizer.init(macro.content);
 	macro.counter++;
+
 	return parse(&macroTokenizer);
 }
 

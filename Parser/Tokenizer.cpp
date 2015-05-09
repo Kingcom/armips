@@ -16,8 +16,6 @@ Tokenizer::Tokenizer()
 
 const Token& Tokenizer::nextToken()
 {
-	readTokens(tokenIndex);
-	
 	if (tokenIndex >= tokens.size())
 		return invalidToken;
 
@@ -26,8 +24,6 @@ const Token& Tokenizer::nextToken()
 
 const Token& Tokenizer::peekToken(int ahead)
 {
-	readTokens(tokenIndex+ahead);
-
 	if (tokenIndex+ahead >= tokens.size())
 		return invalidToken;
 
@@ -79,39 +75,31 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, const std::w
 	replacements.push_back(replacement);
 }
 
-void Tokenizer::readTokens(size_t maxIndex)
+void Tokenizer::addToken(Token token)
 {
-	while (maxIndex >= tokens.size())
+	// check replacements
+	bool replaced = false;
+	if (token.type == TokenType::Identifier)
 	{
-		if (isInputAtEnd())
-			return;
-
-		Token token = loadToken();
-
-		// check replacements
-		bool replaced = false;
-		if (token.type == TokenType::Identifier)
+		const std::wstring stringValue = token.getStringValue();
+		for (const Replacement& replacement: replacements)
 		{
-			const std::wstring stringValue = token.getStringValue();
-			for (const Replacement& replacement: replacements)
+			// if the identifier matches, add all of its tokens
+			if (replacement.identifier == stringValue)
 			{
-				// if the identifier matches, add all of its tokens
-				if (replacement.identifier == stringValue)
+				for (size_t i = 0; i < replacement.value.size(); i++)
 				{
-					for (size_t i = 0; i < replacement.value.size(); i++)
-					{
-						tokens.push_back(replacement.value[i]);
-					}
-
-					replaced = true;
-					break;
+					tokens.push_back(replacement.value[i]);
 				}
+
+				replaced = true;
+				break;
 			}
 		}
-
-		if (replaced == false)
-			tokens.push_back(std::move(token));
 	}
+
+	if (replaced == false)
+		tokens.push_back(std::move(token));
 }
 
 
@@ -553,6 +541,8 @@ Token FileTokenizer::loadToken()
 
 bool FileTokenizer::init(TextFile* input)
 {
+	clearTokens();
+
 	currentLine.clear();
 	lineNumber = 0;
 	linePos = 0;
@@ -562,6 +552,12 @@ bool FileTokenizer::init(TextFile* input)
 	if (input != NULL && input->isOpen())
 	{
 		skipWhitespace();
+
+		while (!isInputAtEnd())
+		{
+			addToken(std::move(loadToken()));
+		}
+
 		return true;
 	}
 
