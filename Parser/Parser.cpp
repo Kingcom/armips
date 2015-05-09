@@ -18,9 +18,20 @@ inline bool isPartOfList(const std::wstring& value, std::initializer_list<wchar_
 	return false;
 }
 
+std::unordered_multimap<std::wstring, const DirectiveEntry*> Parser::directiveMap;
+
 Parser::Parser()
 {
 	initializingMacro = false;
+
+	if (directiveMap.empty())
+		buildDirectiveMap();
+}
+
+void Parser::buildDirectiveMap()
+{
+	for (size_t i = 0; directives[i].name != nullptr; i++)
+		directiveMap.emplace(directives[i].name, &directives[i]);
 }
 
 Expression Parser::parseExpression()
@@ -128,40 +139,41 @@ CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initiali
 	return parseString(fullText);
 }
 
-CAssemblerCommand* Parser::parseDirective(const DirectiveEntry* directiveSet)
+CAssemblerCommand* Parser::parseDirective(const std::unordered_multimap<std::wstring, const DirectiveEntry*> &directiveSet)
 {
 	const Token &tok = peekToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
 	const std::wstring stringValue = tok.getStringValue();
-	for (size_t i = 0; directiveSet[i].name != nullptr; i++)
+
+	auto matchRange = directiveSet.equal_range(stringValue);
+	for (auto it = matchRange.first; it != matchRange.second; ++it)
 	{
-		if (stringValue == directiveSet[i].name)
+		const DirectiveEntry &directive = *it->second;
+
+		if (directive.flags & DIRECTIVE_DISABLED)
+			return nullptr;
+		if ((directive.flags & DIRECTIVE_NOCASHOFF) && Global.nocash == true)
+			return nullptr;
+		if ((directive.flags & DIRECTIVE_NOCASHON) && Global.nocash == false)
+			return nullptr;
+		if ((directive.flags & DIRECTIVE_NOTINMEMORY) && Global.memoryMode == true)
+			return nullptr;
+
+		if (directive.flags & DIRECTIVE_MIPSRESETDELAY)
+			Arch->NextSection();
+
+		eatToken();
+		CAssemblerCommand* result = directive.function(*this,directive.flags);
+		if (result == nullptr)
 		{
-			if (directiveSet[i].flags & DIRECTIVE_DISABLED)
-				continue;
-			if ((directiveSet[i].flags & DIRECTIVE_NOCASHOFF) && Global.nocash == true)
-				continue;
-			if ((directiveSet[i].flags & DIRECTIVE_NOCASHON) && Global.nocash == false)
-				continue;
-			if ((directiveSet[i].flags & DIRECTIVE_NOTINMEMORY) && Global.memoryMode == true)
-				continue;
-
-			if (directiveSet[i].flags & DIRECTIVE_MIPSRESETDELAY)
-				Arch->NextSection();
-
-			eatToken();
-			CAssemblerCommand* result = directiveSet[i].function(*this,directiveSet[i].flags);
-			if (result == nullptr)
-			{
-				Logger::printError(Logger::Error,L"Invalid directive");
-				result = directiveSet[i].function(*this,directiveSet[i].flags);
-		return new InvalidCommand();
-			}
-
-			return result;
+			Logger::printError(Logger::Error,L"Invalid directive");
+			result = directive.function(*this,directive.flags);
+			return new InvalidCommand();
 		}
+
+		return result;
 	}
 
 	return nullptr;
@@ -461,7 +473,7 @@ CAssemblerCommand* Parser::parseCommand()
 	if ((command = Arch->parseDirective(*this)) != nullptr)
 		return command;
 
-	if ((command = parseDirective(directives)) != nullptr)
+	if ((command = parseDirective(directiveMap)) != nullptr)
 		return command;
 
 	if ((command = Arch->parseOpcode(*this)) != nullptr)

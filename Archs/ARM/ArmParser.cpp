@@ -82,9 +82,19 @@ const DirectiveEntry armDirectives[] = {
 	{ NULL,			NULL,					0 }
 };
 
+std::unordered_multimap<std::wstring, const DirectiveEntry*> ArmParser::armDirectiveMap;
+
+void ArmParser::buildDirectiveMap()
+{
+	for (size_t i = 0; armDirectives[i].name != nullptr; i++)
+		armDirectiveMap.emplace(armDirectives[i].name, &armDirectives[i]);
+}
+
 CAssemblerCommand* ArmParser::parseDirective(Parser& parser)
 {
-	return parser.parseDirective(armDirectives);
+	if (armDirectiveMap.empty())
+		buildDirectiveMap();
+	return parser.parseDirective(armDirectiveMap);
 }
 
 bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count)

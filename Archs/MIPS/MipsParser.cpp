@@ -136,9 +136,19 @@ const DirectiveEntry mipsDirectives[] = {
 	{ NULL,					NULL,							0 }
 };
 
+std::unordered_multimap<std::wstring, const DirectiveEntry*> MipsParser::mipsDirectiveMap;
+
+void MipsParser::buildDirectiveMap()
+{
+	for (size_t i = 0; mipsDirectives[i].name != nullptr; i++)
+		mipsDirectiveMap.emplace(mipsDirectives[i].name, &mipsDirectives[i]);
+}
+
 CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 {
-	return parser.parseDirective(mipsDirectives);
+	if (mipsDirectiveMap.empty())
+		buildDirectiveMap();
+	return parser.parseDirective(mipsDirectiveMap);
 }
 
 bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)

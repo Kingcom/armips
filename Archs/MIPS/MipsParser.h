@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+#include "Parser/DirectivesParser.h"
 #include "Parser/Tokenizer.h"
 #include "CMipsInstruction.h"
 #include "MipsMacros.h"
@@ -44,4 +46,7 @@ private:
 	MipsImmediateData immediate;
 	MipsOpcodeData opcodeData;
 	bool hasFixedSecondaryImmediate;
+
+	static void buildDirectiveMap();
+	static std::unordered_multimap<std::wstring, const DirectiveEntry*> mipsDirectiveMap;
 };
