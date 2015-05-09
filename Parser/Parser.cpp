@@ -234,7 +234,7 @@ bool Parser::checkMacroDefinition()
 	if (first.type != TokenType::Identifier)
 		return false;
 
-	if (first.getStringValue() != L".macro")
+	if (!first.stringValueStartsWith(L'.') || first.getStringValue() != L".macro")
 		return false;
 
 	eatToken();

@@ -129,6 +129,13 @@ struct Token
 		return L"";
 	}
 
+	bool stringValueStartsWith(wchar_t c) const
+	{
+		if (stringValue)
+			return stringValue[0] == c;
+		return false;
+	}
+
 	TokenType type;
 	size_t line;
 	size_t column;
