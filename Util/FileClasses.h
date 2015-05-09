@@ -91,6 +91,34 @@ private:
 	bool fromMemory;
 	std::wstring content;
 	size_t contentPos;
+
+	std::string readBuf;
+	size_t readBufPos;
+
+	inline char readbufGetChar()
+	{
+		if (readBuf.size() <= readBufPos)
+		{
+			readbufFill();
+			if (readBuf.size() == 0)
+				return 0;
+		}
+		return readBuf[readBufPos++];
+	}
+	inline short readbufGet16LE()
+	{
+		char c1 = readbufGetChar();
+		char c2 = readbufGetChar();
+		return c1 | (c2 << 8);
+	}
+	inline short readbufGet16BE()
+	{
+		char c1 = readbufGetChar();
+		char c2 = readbufGetChar();
+		return c2 | (c1 << 8);
+	}
+
+	void readbufFill();
 };
 
 wchar_t sjisToUnicode(unsigned short);
