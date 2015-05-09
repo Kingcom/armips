@@ -928,9 +928,12 @@ std::wstring TextFile::readLine()
 	std::wstring result;
 	wchar_t value;
 
-	while (!atEnd() && (value = readCharacter()) != L'\n')
+	if (isOpen())
 	{
-		result += value;
+		while (tell() < size() && (value = readCharacter()) != L'\n')
+		{
+			result += value;
+		}
 	}
 
 	return result;
