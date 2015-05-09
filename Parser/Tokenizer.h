@@ -110,11 +110,16 @@ struct Token
 
 	void setStringValue(const std::wstring& t)
 	{
+		setStringValue(t, 0, t.length());
+	}
+
+	void setStringValue(const std::wstring& t, const size_t pos, const size_t len)
+	{
 		if (stringValue)
 			delete [] stringValue;
-		stringValue = new wchar_t[t.length() + 1];
-		wmemcpy(stringValue, t.data(), t.length());
-		stringValue[t.length()] = 0;
+		stringValue = new wchar_t[len + 1];
+		wmemcpy(stringValue, t.data() + pos, len);
+		stringValue[len] = 0;
 	}
 
 	std::wstring getStringValue() const
@@ -185,6 +190,7 @@ protected:
 	void createToken(TokenType type, size_t length, u64 value);
 	void createToken(TokenType type, size_t length, double value);
 	void createToken(TokenType type, size_t length, const std::wstring& value);
+	void createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength);
 
 	bool convertInteger(size_t start, size_t end, u64& result);
 	bool convertFloat(size_t start, size_t end, double& result);

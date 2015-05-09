@@ -207,11 +207,16 @@ void FileTokenizer::createToken(TokenType type, size_t length, double value)
 
 void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value)
 {
+	createToken(type, length, value, 0, value.length());
+}
+
+void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength)
+{
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
 	token.setOriginalText(currentLine,linePos,length);
-	token.setStringValue(value);
+	token.setStringValue(value,valuePos,valueLength);
 
 	linePos += length;
 	
@@ -414,8 +419,7 @@ Token FileTokenizer::loadToken()
 		while (pos < currentLine.size() && !isComment(currentLine,pos))
 			pos++;
 
-		std::wstring text = currentLine.substr(linePos,pos-linePos);
-		createToken(TokenType::EquValue,pos-linePos,text);
+		createToken(TokenType::EquValue,pos-linePos,currentLine,linePos,pos-linePos);
 
 		equActive = false;
 		return std::move(token);
@@ -493,7 +497,7 @@ Token FileTokenizer::loadToken()
 			u64 value;
 			if (convertInteger(start,end,value) == false)
 			{
-				createToken(TokenType::NumberString,end-start,currentLine.substr(start,end-start));
+				createToken(TokenType::NumberString,end-start,currentLine,start,end-start);
 				return std::move(token);
 			}
 
@@ -508,7 +512,7 @@ Token FileTokenizer::loadToken()
 
 			if (convertFloat(start,end,value) == false)
 			{
-				createToken(TokenType::NumberString,end-start,currentLine.substr(start,end-start));
+				createToken(TokenType::NumberString,end-start,currentLine,start,end-start);
 				return std::move(token);
 			}
 
