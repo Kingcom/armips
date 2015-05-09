@@ -539,14 +539,22 @@ Token FileTokenizer::loadToken()
 	}
 
 	std::wstring text = currentLine.substr(linePos,pos-linePos);
-	std::transform(text.begin(), text.end(), text.begin(), ::towlower);
+	bool textLowered = false;
+	// Lowercase is common, let's try to avoid a copy.
+	if (std::any_of(text.begin(), text.end(), ::iswupper))
+	{
+		std::transform(text.begin(), text.end(), text.begin(), ::towlower);
+		textLowered = true;
+	}
 
 	if (text == L"equ")
 	{
 		createToken(TokenType::Equ,pos-linePos);
 		equActive = true;
-	} else {
+	} else if (textLowered) {
 		createToken(TokenType::Identifier,pos-linePos,text);
+	} else {
+		createTokenCurrentString(TokenType::Identifier,pos-linePos);
 	}
 
 	return std::move(token);
