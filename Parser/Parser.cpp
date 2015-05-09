@@ -67,7 +67,7 @@ bool Parser::parseIdentifier(std::wstring& dest)
 	if (tok.type != TokenType::Identifier)
 		return false;
 
-	dest = tok.stringValue;
+	dest = tok.getStringValue();
 	return true;
 }
 
@@ -75,7 +75,7 @@ CAssemblerCommand* Parser::parseCommandSequence(std::initializer_list<wchar_t*> 
 {
 	CommandSequence* sequence = new CommandSequence();
 
-	while (atEnd() == false && isPartOfList(peekToken().stringValue,terminators) == false)
+	while (atEnd() == false && isPartOfList(peekToken().getStringValue(),terminators) == false)
 	{
 		CAssemblerCommand* cmd = parseCommand();
 		sequence->addCommand(cmd);
@@ -130,9 +130,10 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveEntry* directiveSet)
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
+	const std::wstring stringValue = tok.getStringValue();
 	for (size_t i = 0; directiveSet[i].name != nullptr; i++)
 	{
-		if (tok.stringValue == directiveSet[i].name)
+		if (stringValue == directiveSet[i].name)
 		{
 			if (directiveSet[i].flags & DIRECTIVE_DISABLED)
 				continue;
@@ -196,8 +197,8 @@ bool Parser::checkEquLabel()
 		if (peekToken(pos).type == TokenType::Equ &&
 			peekToken(pos+1).type == TokenType::EquValue)
 		{
-			std::wstring name = peekToken(0).stringValue;
-			std::wstring value = peekToken(pos+1).stringValue;
+			std::wstring name = peekToken(0).getStringValue();
+			std::wstring value = peekToken(pos+1).getStringValue();
 			eatTokens(pos+2);
 		
 			// equs are not allowed in macros
@@ -235,7 +236,7 @@ bool Parser::checkMacroDefinition()
 	if (first.type != TokenType::Identifier)
 		return false;
 
-	if (first.stringValue != L".macro")
+	if (first.getStringValue() != L".macro")
 		return false;
 
 	eatToken();
@@ -247,7 +248,7 @@ bool Parser::checkMacroDefinition()
 		while (!atEnd())
 		{
 			Token& token = nextToken();
-			if (token.type == TokenType::Identifier && token.stringValue == L".endmacro")
+			if (token.type == TokenType::Identifier && token.getStringValue() == L".endmacro")
 				break;
 		}
 
@@ -287,7 +288,7 @@ bool Parser::checkMacroDefinition()
 	while (atEnd() == false)
 	{
 		Token& tok = nextToken();
-		if (tok.type == TokenType::Identifier && tok.stringValue == L".endmacro")
+		if (tok.type == TokenType::Identifier && tok.getStringValue() == L".endmacro")
 		{
 			valid = true;
 			break;
@@ -315,7 +316,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 	if (start.type != TokenType::Identifier)
 		return nullptr;
 
-	auto it = macros.find(start.stringValue);
+	auto it = macros.find(start.getStringValue());
 	if (it == macros.end())
 		return nullptr;
 
@@ -415,7 +416,7 @@ CAssemblerCommand* Parser::parseLabel()
 	if (peekToken(0).type == TokenType::Identifier &&
 		peekToken(1).type == TokenType::Colon)
 	{
-		std::wstring name = peekToken(0).stringValue;
+		const std::wstring name = peekToken(0).getStringValue();
 		eatTokens(2);
 		
 		if (initializingMacro)
@@ -460,7 +461,7 @@ CAssemblerCommand* Parser::parseCommand()
 	if ((command = Arch->parseOpcode(*this)) != nullptr)
 		return command;
 
-	Logger::printError(Logger::Error,L"Parse error '%s'",nextToken().stringValue);
+	Logger::printError(Logger::Error,L"Parse error '%s'",nextToken().getStringValue());
 	return nullptr;
 }
 
@@ -491,7 +492,7 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 			// if necessary, check if the value of the token also matches
 			if (type == TokenType::Identifier)
 			{
-				if (values == entry.values.end() || values->textValue != token.stringValue)
+				if (values == entry.values.end() || values->textValue != token.getStringValue())
 				{
 					valid = false;
 					break;

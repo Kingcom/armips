@@ -16,14 +16,17 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 		tokenizer.eatToken();
 		return new ExpressionInternal(tok.floatValue);
 	case TokenType::Identifier:
-		tokenizer.eatToken();
-		if (tok.stringValue == L".")
-			return new ExpressionInternal(OperatorType::MemoryPos);
-		else
-			return new ExpressionInternal(tok.stringValue,OperatorType::Identifier);
+		{
+			const std::wstring stringValue = tok.getStringValue();
+			tokenizer.eatToken();
+			if (stringValue == L".")
+				return new ExpressionInternal(OperatorType::MemoryPos);
+			else
+				return new ExpressionInternal(stringValue,OperatorType::Identifier);
+		}
 	case TokenType::String:
 		tokenizer.eatToken();
-		return new ExpressionInternal(tok.stringValue,OperatorType::String);
+		return new ExpressionInternal(tok.getStringValue(),OperatorType::String);
 	case TokenType::Integer:
 		tokenizer.eatToken();
 		return new ExpressionInternal(tok.intValue);

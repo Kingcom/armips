@@ -48,17 +48,44 @@ enum class TokenType
 
 struct Token
 {
+	void setOriginalText(const std::wstring& t)
+	{
+		originalText = t;
+	}
+
+	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
+	{
+		originalText = t.substr(pos, len);
+	}
+
+	std::wstring getOriginalText() const
+	{
+		return originalText;
+	}
+
+	void setStringValue(const std::wstring& t)
+	{
+		stringValue = t;
+	}
+
+	std::wstring getStringValue() const
+	{
+		return stringValue;
+	}
+
 	TokenType type;
-	std::wstring originalText;
 	size_t line;
 	size_t column;
 
-	std::wstring stringValue;
 	union
 	{
 		u64 intValue;
 		double floatValue;
 	};
+
+protected:
+	std::wstring originalText;
+	std::wstring stringValue;
 };
 
 class Tokenizer
