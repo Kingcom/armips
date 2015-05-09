@@ -48,14 +48,59 @@ enum class TokenType
 
 struct Token
 {
+	Token() : originalText(nullptr), stringValue(nullptr)
+	{
+	}
+
+	Token(Token &&src)
+	{
+		// Move strings.
+		originalText = src.originalText;
+		src.originalText = nullptr;
+		stringValue = src.stringValue;
+		src.stringValue = nullptr;
+
+		// Just copy the rest.
+		type = src.type;
+		line = src.line;
+		column = src.column;
+		floatValue = src.floatValue;
+	}
+
+	Token(const Token &src) {
+		// Copy strings.
+		originalText = nullptr;
+		if (src.originalText)
+			setOriginalText(src.originalText);
+		stringValue = nullptr;
+		if (src.stringValue)
+			setStringValue(src.stringValue);
+
+		// And copy the rest.
+		type = src.type;
+		line = src.line;
+		column = src.column;
+		floatValue = src.floatValue;
+	}
+
+	~Token()
+	{
+		delete [] originalText;
+		delete [] stringValue;
+	}
+
 	void setOriginalText(const std::wstring& t)
 	{
-		originalText = t;
+		setOriginalText(t, 0, t.length());
 	}
 
 	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
 	{
-		originalText = t.substr(pos, len);
+		if (originalText)
+			delete [] originalText;
+		originalText = new wchar_t[len + 1];
+		wmemcpy(originalText, t.data() + pos, len);
+		originalText[len] = 0;
 	}
 
 	std::wstring getOriginalText() const
@@ -65,12 +110,18 @@ struct Token
 
 	void setStringValue(const std::wstring& t)
 	{
-		stringValue = t;
+		if (stringValue)
+			delete [] stringValue;
+		stringValue = new wchar_t[t.length() + 1];
+		wmemcpy(stringValue, t.data(), t.length());
+		stringValue[t.length()] = 0;
 	}
 
 	std::wstring getStringValue() const
 	{
-		return stringValue;
+		if (stringValue)
+			return stringValue;
+		return L"";
 	}
 
 	TokenType type;
@@ -84,8 +135,8 @@ struct Token
 	};
 
 protected:
-	std::wstring originalText;
-	std::wstring stringValue;
+	wchar_t* originalText;
+	wchar_t* stringValue;
 };
 
 class Tokenizer
