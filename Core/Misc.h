@@ -79,6 +79,7 @@ public:
 	void start();
 	void end();
 	void writeLine(u64 memoryAddress, const std::wstring& text);
+	bool isOpen() { return file.isOpen(); }
 private:
 	TextFile file;
 };

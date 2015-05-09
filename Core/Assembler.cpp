@@ -5,12 +5,34 @@
 #include "Core/FileManager.h"
 #include "Parser/Parser.h"
 #include "Archs/ARM/Arm.h"
+#include <thread>
 
 void AddFileName(const std::wstring& FileName)
 {
 	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.size();
 	Global.FileInfo.FileList.push_back(FileName);
 	Global.FileInfo.LineNumber = 0;
+}
+
+CAssemblerCommand* assemblyContent;
+
+void writeTempData()
+{
+	Global.tempData.start();
+	if (Global.tempData.isOpen())
+		assemblyContent->writeTempData(Global.tempData);
+	Global.tempData.end();
+}
+
+void writeSymData()
+{
+	assemblyContent->writeSymData(Global.symData);
+	Global.symData.write();
+}
+
+void encodeAssemblyData()
+{
+	assemblyContent->Encode();
 }
 
 bool encodeAssembly(CAssemblerCommand* content)
@@ -57,17 +79,17 @@ bool encodeAssembly(CAssemblerCommand* content)
 #endif
 
 	// and finally encode
-	Global.tempData.start();
-
 	if (Global.memoryMode)
 		g_fileManager->openFile(Global.memoryFile,false);
 
-	content->writeTempData(Global.tempData);
-	content->writeSymData(Global.symData);
-	content->Encode();
+	assemblyContent = content;
+	std::thread encodeThread(encodeAssemblyData);
+	std::thread tempThread(writeTempData);
+	std::thread symThread(writeSymData);
 
-	Global.tempData.end();
-	Global.symData.write();
+	encodeThread.join();
+	tempThread.join();
+	symThread.join();
 
 	if (g_fileManager->hasOpenFile())
 	{
