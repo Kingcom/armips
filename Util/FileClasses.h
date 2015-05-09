@@ -92,33 +92,36 @@ private:
 	std::wstring content;
 	size_t contentPos;
 
-	std::string readBuf;
-	size_t readBufPos;
+	std::string buf;
+	size_t bufPos;
 
-	inline char readbufGetChar()
+	inline char bufGetChar()
 	{
-		if (readBuf.size() <= readBufPos)
+		if (buf.size() <= bufPos)
 		{
-			readbufFill();
-			if (readBuf.size() == 0)
+			bufFillRead();
+			if (buf.size() == 0)
 				return 0;
 		}
-		return readBuf[readBufPos++];
+		return buf[bufPos++];
 	}
-	inline short readbufGet16LE()
+	inline short bufGet16LE()
 	{
-		char c1 = readbufGetChar();
-		char c2 = readbufGetChar();
+		char c1 = bufGetChar();
+		char c2 = bufGetChar();
 		return c1 | (c2 << 8);
 	}
-	inline short readbufGet16BE()
+	inline short bufGet16BE()
 	{
-		char c1 = readbufGetChar();
-		char c2 = readbufGetChar();
+		char c1 = bufGetChar();
+		char c2 = bufGetChar();
 		return c2 | (c1 << 8);
 	}
 
-	void readbufFill();
+	void bufPut(const void *p, const size_t len);
+
+	void bufFillRead();
+	void bufDrainWrite();
 };
 
 wchar_t sjisToUnicode(unsigned short);

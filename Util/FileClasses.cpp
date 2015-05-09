@@ -692,13 +692,15 @@ size_t BinaryFile::write(void* source, size_t length)
 	return fwrite(source,1,length,handle);
 }
 
+const size_t TEXTFILE_BUF_MAX_SIZE = 4096;
+
 TextFile::TextFile()
 {
 	handle = NULL;
 	recursion = false;
 	errorRetrieved = false;
 	fromMemory = false;
-	readBufPos = 0;
+	bufPos = 0;
 }
 
 TextFile::~TextFile()
@@ -813,9 +815,12 @@ void TextFile::close()
 {
 	if (isOpen() && !fromMemory)
 	{
+		bufDrainWrite();
 		fclose(handle);
 		handle = NULL;
 	}
+	buf.clear();
+	bufPos = 0;
 }
 
 long TextFile::tell()
@@ -831,14 +836,15 @@ void TextFile::seek(long pos)
 		fseek(handle,pos,SEEK_SET);
 }
 
-void TextFile::readbufFill()
+void TextFile::bufFillRead()
 {
-	const size_t READBUF_MAX_SIZE = 4096;
-	readBuf.resize(READBUF_MAX_SIZE);
-	size_t read = fread(&readBuf[0], 1, READBUF_MAX_SIZE, handle);
-	readBuf.resize(read);
+	assert(mode == Read);
 
-	readBufPos = 0;
+	buf.resize(TEXTFILE_BUF_MAX_SIZE);
+	size_t read = fread(&buf[0], 1, TEXTFILE_BUF_MAX_SIZE, handle);
+	buf.resize(read);
+
+	bufPos = 0;
 }
 
 wchar_t TextFile::readCharacter()
@@ -849,7 +855,7 @@ wchar_t TextFile::readCharacter()
 	{
 	case UTF8:
 		{
-			value = readbufGetChar();
+			value = bufGetChar();
 			contentPos++;
 			
 			int extraBytes = 0;
@@ -868,7 +874,7 @@ wchar_t TextFile::readCharacter()
 
 			for (int i = 0; i < extraBytes; i++)
 			{
-				int b = readbufGetChar();
+				int b = bufGetChar();
 				contentPos++;
 
 				if ((b & 0xC0) != 0x80)
@@ -885,21 +891,21 @@ wchar_t TextFile::readCharacter()
 		{
 			value = content[contentPos++];
 		} else {
-			value = readbufGet16LE();
+			value = bufGet16LE();
 			contentPos += 2;
 		}
 		break;
 	case UTF16BE:
-		value = readbufGet16BE();
+		value = bufGet16BE();
 		contentPos += 2;
 		break;
 	case SJIS:
 		{
-			unsigned short sjis = readbufGetChar();
+			unsigned short sjis = bufGetChar();
 			contentPos++;
 			if (sjis >= 0x80)
 			{
-				sjis = (sjis << 8) | readbufGetChar();
+				sjis = (sjis << 8) | bufGetChar();
 				contentPos++;
 			}
 			value = sjisToUnicode(sjis);
@@ -910,7 +916,7 @@ wchar_t TextFile::readCharacter()
 		}
 		break;
 	case ASCII:
-		value = readbufGetChar();
+		value = bufGetChar();
 		contentPos++;
 		break;
 	}
@@ -958,6 +964,38 @@ StringList TextFile::readAll()
 	return result;
 }
 
+void TextFile::bufPut(const void *p, const size_t len)
+{
+	assert(mode == Write);
+
+	if (buf.size() < TEXTFILE_BUF_MAX_SIZE)
+	{
+		buf.resize(TEXTFILE_BUF_MAX_SIZE);
+		bufPos = 0;
+	}
+
+	if (len > TEXTFILE_BUF_MAX_SIZE)
+	{
+		// Lots of data.  Let's write directly.
+		bufDrainWrite();
+		fwrite(p, 1, len, handle);
+	}
+	else
+	{
+		if (bufPos + len > TEXTFILE_BUF_MAX_SIZE)
+			bufDrainWrite();
+
+		memcpy(&buf[bufPos], p, len);
+		bufPos += len;
+	}
+}
+
+void TextFile::bufDrainWrite()
+{
+	fwrite(&buf[0], 1, bufPos, handle);
+	bufPos = 0;
+}
+
 void TextFile::writeCharacter(wchar_t character)
 {
 	unsigned char buffer[4];
@@ -989,7 +1027,7 @@ void TextFile::writeCharacter(wchar_t character)
 		}
 	}
 
-	fwrite(buffer,1,length,handle);
+	bufPut(buffer, length);
 }
 
 void TextFile::write(const wchar_t* line)
