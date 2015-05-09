@@ -235,7 +235,7 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		break;
 	}
 
-	CAssemblerCommand* ifBlock = parser.parseCommandSequence({L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	CAssemblerCommand* ifBlock = parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
 	
 	CAssemblerCommand* elseBlock = nullptr;
 	const Token &next = parser.nextToken();
@@ -243,7 +243,7 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 
 	if (stringValue == L".else")
 	{
-		elseBlock = parser.parseCommandSequence({L".endif"});
+		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
 		parser.eatToken();	// eat .endif
 	} else if (stringValue == L".elseif")
 	{
@@ -385,7 +385,7 @@ CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 	
 	bool valid = checkExpressionListSize(parameters,1,2);
 	
-	CAssemblerCommand* content = parser.parseCommandSequence({L".endarea"});
+	CAssemblerCommand* content = parser.parseCommandSequence(L'.', {L".endarea"});
 	parser.eatToken();
 
 	// area is invalid, return content anyway
@@ -523,7 +523,7 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 	if (parameters[0].evaluateIdentifier(name) == false)
 		return nullptr;
 
-	CAssemblerCommand* seq = parser.parseCommandSequence({L".endfunc",L".endfunction",L".func",L".function"});
+	CAssemblerCommand* seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
 
 	const std::wstring stringValue = parser.peekToken().getStringValue();
 	if (stringValue == L".endfunc" ||

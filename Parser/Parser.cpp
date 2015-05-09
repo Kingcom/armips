@@ -71,12 +71,16 @@ bool Parser::parseIdentifier(std::wstring& dest)
 	return true;
 }
 
-CAssemblerCommand* Parser::parseCommandSequence(std::initializer_list<wchar_t*> terminators)
+CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, std::initializer_list<wchar_t*> terminators)
 {
 	CommandSequence* sequence = new CommandSequence();
 
-	while (atEnd() == false && isPartOfList(peekToken().getStringValue(),terminators) == false)
+	while (atEnd() == false)
 	{
+		const Token &next = peekToken();
+		if (next.stringValueStartsWith(indicator) && isPartOfList(next.getStringValue(), terminators))
+			break;
+
 		CAssemblerCommand* cmd = parseCommand();
 		sequence->addCommand(cmd);
 	}
