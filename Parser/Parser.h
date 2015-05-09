@@ -5,6 +5,7 @@
 #include "DirectivesParser.h"
 #include <set>
 #include <map>
+#include <unordered_map>
 
 struct AssemblyTemplateArgument
 {
@@ -35,7 +36,7 @@ public:
 	CAssemblerCommand* parseFile(TextFile& file);
 	CAssemblerCommand* parseString(const std::wstring& text);
 	CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables = {});
-	CAssemblerCommand* parseDirective(const DirectiveEntry* directiveSet);
+	CAssemblerCommand* parseDirective(const DirectiveMap &directiveSet);
 	bool matchToken(TokenType type, bool optional = false);
 
 	Tokenizer* getTokenizer() { return entries.back(); };

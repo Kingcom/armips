@@ -74,12 +74,11 @@ CAssemblerCommand* parseDirectiveMsg(Parser& parser, int flags)
 	});
 }
 
-const DirectiveEntry armDirectives[] = {
-	{ L".thumb",	&parseDirectiveThumb,	0 },
-	{ L".arm",		&parseDirectiveArm,		0 },
-	{ L".pool",		&parseDirectivePool,	0 },
-	{ L".msg",		&parseDirectiveMsg,		0 },
-	{ NULL,			NULL,					0 }
+const DirectiveMap armDirectives = {
+	{ L".thumb",	{ &parseDirectiveThumb,	0 } },
+	{ L".arm",		{ &parseDirectiveArm,	0 } },
+	{ L".pool",		{ &parseDirectivePool,	0 } },
+	{ L".msg",		{ &parseDirectiveMsg,	0 } },
 };
 
 CAssemblerCommand* ArmParser::parseDirective(Parser& parser)

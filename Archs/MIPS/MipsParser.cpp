@@ -127,13 +127,12 @@ CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 		return new DirectiveObjImport(inputName);
 }
 
-const DirectiveEntry mipsDirectives[] = {
-	{ L".resetdelay",		&parseDirectiveResetDelay,		0 },
-	{ L".fixloaddelay",		&parseDirectiveFixLoadDelay,	0 },
-	{ L".loadelf",			&parseDirectiveLoadElf,			0 },
-	{ L".importobj",		&parseDirectiveImportObj,		0 },
-	{ L".importlib",		&parseDirectiveImportObj,		0 },
-	{ NULL,					NULL,							0 }
+const DirectiveMap mipsDirectives = {
+	{ L".resetdelay",		{ &parseDirectiveResetDelay,	0 } },
+	{ L".fixloaddelay",		{ &parseDirectiveFixLoadDelay,	0 } },
+	{ L".loadelf",			{ &parseDirectiveLoadElf,		0 } },
+	{ L".importobj",		{ &parseDirectiveImportObj,		0 } },
+	{ L".importlib",		{ &parseDirectiveImportObj,		0 } },
 };
 
 CAssemblerCommand* MipsParser::parseDirective(Parser& parser)

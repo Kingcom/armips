@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+#include "Parser/DirectivesParser.h"
 #include "Parser/Tokenizer.h"
 #include "CThumbInstruction.h"
 #include "CArmInstruction.h"
