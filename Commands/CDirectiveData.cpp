@@ -251,31 +251,35 @@ void CDirectiveData::Encode()
 
 void CDirectiveData::writeTempData(TempData& tempData)
 {
-	std::wstring result;
+	size_t size = (getUnitSize()*2+3)*data.size()+20;
+	wchar_t* str = new wchar_t[size];
+	wchar_t* start = str;
+
 	switch (mode)
 	{
 	case EncodingMode::U8:
 	case EncodingMode::Ascii:
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		result = L".byte ";
+		str += swprintf(str,20,L".byte ");
 		break;
 	case EncodingMode::U16:
-		result = L".halfword ";
+		str += swprintf(str,20,L".halfword ");
 		break;
 	case EncodingMode::U32:
-		result = L".word ";
+		str += swprintf(str,20,L".word ");
 		break;
 	}
 
 	size_t unitSize = getUnitSize();
 	for (size_t i = 0; i < data.size(); i++)
 	{
-		result += formatString(L"0x%0*X,",unitSize*2,data[i]);
+		str += swprintf(str,20,L"0x%0*X,",unitSize*2,data[i]);
 	}
 
-	result.pop_back();
-	tempData.writeLine(position,result);
+	*(str-1) = 0;
+	tempData.writeLine(position,start);
+	delete[] start;
 }
 
 void CDirectiveData::writeSymData(SymbolData& symData)
