@@ -211,7 +211,6 @@ public:
 	void init(const std::vector<Token>& tokens)
 	{
 		this->tokens.clear();
-		this->tokens.reserve(tokens.size());
 		for (const Token &tok: tokens)
 			this->tokens.push_back(tok);
 		pos = 0;
