@@ -5,7 +5,7 @@ static ExpressionInternal* expression(Tokenizer& tokenizer);
 
 static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 {
-	Token tok = tokenizer.peekToken();
+	const Token &tok = tokenizer.peekToken();
 
 	if (tok.type == TokenType::Invalid)
 		return NULL;
@@ -49,12 +49,12 @@ static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
 	if (exp != NULL)
 		return exp;
 
-	Token op = tokenizer.nextToken();
+	const TokenType opType = tokenizer.nextToken().type;
 	exp = primaryExpression(tokenizer);
 	if (exp == NULL)
 		return NULL;
 
-	switch (op.type)
+	switch (opType)
 	{
 	case TokenType::Plus:
 		return exp;
@@ -352,8 +352,6 @@ static ExpressionInternal* logicalOrExpression(Tokenizer& tokenizer)
 
 static ExpressionInternal* conditionalExpression(Tokenizer& tokenizer)
 {
-	Token tok;
-
 	ExpressionInternal* exp = logicalOrExpression(tokenizer);
 	if (exp == NULL)
 		return NULL;

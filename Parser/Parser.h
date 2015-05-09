@@ -39,8 +39,8 @@ public:
 	bool matchToken(TokenType type, bool optional = false);
 
 	Tokenizer* getTokenizer() { return entries.back(); };
-	Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
-	Token& nextToken() { return getTokenizer()->nextToken(); };
+	const Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
+	const Token& nextToken() { return getTokenizer()->nextToken(); };
 	void eatToken() { getTokenizer()->eatToken(); };
 	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
 protected:

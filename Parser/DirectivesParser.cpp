@@ -238,7 +238,7 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 	CAssemblerCommand* ifBlock = parser.parseCommandSequence({L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
 	
 	CAssemblerCommand* elseBlock = nullptr;
-	Token next = parser.nextToken();
+	const Token &next = parser.nextToken();
 	const std::wstring stringValue = next.getStringValue();
 
 	if (stringValue == L".else")
@@ -401,7 +401,7 @@ CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveErrorWarning(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -424,7 +424,7 @@ CAssemblerCommand* parseDirectiveErrorWarning(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveRelativeInclude(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -447,7 +447,7 @@ CAssemblerCommand* parseDirectiveRelativeInclude(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveNocash(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -470,7 +470,7 @@ CAssemblerCommand* parseDirectiveNocash(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveSym(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
@@ -488,7 +488,8 @@ CAssemblerCommand* parseDirectiveSym(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	// Cannot be a reference, we read more tokens below.
+	const Token tok = parser.nextToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
@@ -524,7 +525,7 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 
 	CAssemblerCommand* seq = parser.parseCommandSequence({L".endfunc",L".endfunction",L".func",L".function"});
 
-	std::wstring stringValue = parser.peekToken().getStringValue();
+	const std::wstring stringValue = parser.peekToken().getStringValue();
 	if (stringValue == L".endfunc" ||
 		stringValue == L".endfunction")
 	{

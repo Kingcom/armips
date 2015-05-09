@@ -92,8 +92,8 @@ class Tokenizer
 {
 public:
 	Tokenizer();
-	Token& nextToken();
-	Token& peekToken(int ahead = 0);
+	const Token& nextToken();
+	const Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
 	void eatTokens(int num);
 	bool atEnd() { return isInputAtEnd() && tokenIndex >= tokens.size(); }
@@ -151,9 +151,12 @@ protected:
 class TokenStreamTokenizer: public Tokenizer
 {
 public:
-	void init(std::vector<Token>& tokens)
+	void init(const std::vector<Token>& tokens)
 	{
-		this->tokens = tokens;
+		this->tokens.clear();
+		this->tokens.reserve(tokens.size());
+		for (const Token &tok: tokens)
+			this->tokens.push_back(tok);
 		pos = 0;
 	}
 protected:

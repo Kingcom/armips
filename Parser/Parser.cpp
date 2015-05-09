@@ -63,7 +63,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list)
 
 bool Parser::parseIdentifier(std::wstring& dest)
 {
-	Token& tok = nextToken();
+	const Token& tok = nextToken();
 	if (tok.type != TokenType::Identifier)
 		return false;
 
@@ -126,7 +126,7 @@ CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initiali
 
 CAssemblerCommand* Parser::parseDirective(const DirectiveEntry* directiveSet)
 {
-	Token tok = peekToken();
+	const Token &tok = peekToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
@@ -167,7 +167,7 @@ bool Parser::matchToken(TokenType type, bool optional)
 {
 	if (optional)
 	{
-		Token& token = peekToken();
+		const Token& token = peekToken();
 		if (token.type == type)
 			eatToken();
 		return true;
@@ -230,9 +230,7 @@ bool Parser::checkEquLabel()
 
 bool Parser::checkMacroDefinition()
 {
-	ParserMacro macro;
-
-	Token& first = peekToken();
+	const Token& first = peekToken();
 	if (first.type != TokenType::Identifier)
 		return false;
 
@@ -247,7 +245,7 @@ bool Parser::checkMacroDefinition()
 		Logger::printError(Logger::Error,L"Nested macro definitions not allowed");
 		while (!atEnd())
 		{
-			Token& token = nextToken();
+			const Token& token = nextToken();
 			if (token.type == TokenType::Identifier && token.getStringValue() == L".endmacro")
 				break;
 		}
@@ -263,8 +261,21 @@ bool Parser::checkMacroDefinition()
 		return false;
 	
 	// load name
-	if (parameters[0].evaluateIdentifier(macro.name) == false)
+	std::wstring macroName;
+	if (parameters[0].evaluateIdentifier(macroName) == false)
 		return false;
+
+	// duplicate check the macro
+	ParserMacro &macro = macros[macroName];
+	if (macro.name.length() != 0)
+	{
+		Logger::printError(Logger::Error,L"Macro \"%s\" already defined",macro.name);
+		return false;
+	}
+
+	// and register it
+	macro.name = macroName;
+	macro.counter = 0;
 
 	// load parameters
 	for (size_t i = 1; i < parameters.size(); i++)
@@ -277,17 +288,12 @@ bool Parser::checkMacroDefinition()
 	}
 
 	// load macro content
-	if (macros.find(macro.name) != macros.end())
-	{
-		Logger::printError(Logger::Error,L"Macro \"%s\" already defined",macro.name);
-		return false;
-	}
 
 	size_t start = getTokenizer()->getPosition();
 	bool valid = false;
 	while (atEnd() == false)
 	{
-		Token& tok = nextToken();
+		const Token& tok = nextToken();
 		if (tok.type == TokenType::Identifier && tok.getStringValue() == L".endmacro")
 		{
 			valid = true;
@@ -303,16 +309,12 @@ bool Parser::checkMacroDefinition()
 	size_t end = getTokenizer()->getPosition()-1;
 	macro.content = getTokenizer()->getTokens(start,end-start);
 
-	// and register it
-	macro.counter = 0;
-	macros[macro.name] = macro;
-
 	return true;
 }
 
 CAssemblerCommand* Parser::parseMacroCall()
 {
-	Token& start = peekToken();
+	const Token& start = peekToken();
 	if (start.type != TokenType::Identifier)
 		return nullptr;
 
@@ -482,7 +484,7 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 		for (TokenType type: entry.tokens)
 		{
 			// check of token type matches
-			Token& token = parser.nextToken();
+			const Token& token = parser.nextToken();
 			if (token.type != type)
 			{
 				valid = false;

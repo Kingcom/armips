@@ -89,7 +89,7 @@ CAssemblerCommand* ArmParser::parseDirective(Parser& parser)
 
 bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count)
 {
-	Token& token = parser.peekToken();
+	const Token& token = parser.peekToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
@@ -201,7 +201,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	parser.eatToken();
 
 	// load shift mode
-	Token& shiftMode = parser.nextToken();
+	const Token& shiftMode = parser.nextToken();
 	if (shiftMode.type != TokenType::Identifier)
 		return false;
 
@@ -409,7 +409,7 @@ void ArmParser::parseSign(Parser& parser, bool& dest)
 
 bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool shortVersion)
 {
-	Token& token = parser.nextToken();
+	const Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
@@ -575,7 +575,7 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 
 CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 {
-	Token token = parser.nextToken();
+	const Token &token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
@@ -669,7 +669,7 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 
 CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 {
-	Token token = parser.nextToken();
+	const Token &token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
