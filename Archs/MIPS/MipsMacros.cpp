@@ -80,7 +80,7 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 				.endif
 			.else
 				.if %upper%
-					lui	%rs%,(%imm% >> 16) + (%imm% & 0x8000) != 0
+					lui	%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
 				.endif
 				.if %lower%
 					addiu %rs%,%imm% & 0xFFFF
@@ -106,7 +106,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 {
 	const wchar_t* templateStore = LR"(
 		.if %upper%
-			lui	r1,(%imm% >> 16) + (%imm% & 0x8000) != 0
+			lui	r1,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
 		.endif
 		.if %lower%
 			%op%	%rs%,%imm% & 0xFFFF(r1)
@@ -145,10 +145,14 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 	if ((flags & MIPSM_HW) || (flags & MIPSM_HWU))
 	{
 		const wchar_t* templateHalfword = LR"(
-			%op%	r1,%off%+1(%rs%)
-			%op%	%rd%,%off%(%rs%)
-			sll		r1,8
-			or		%rd%,r1
+			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
+				.error "Immediate offset too big"
+			.else
+				%op%	r1,%off%+1(%rs%)
+				%op%	%rd%,%off%(%rs%)
+				sll		r1,8
+				or		%rd%,r1
+			.endif
 		)";
 		
 		op = (flags & MIPSM_HWU) ? L"lbu" : L"lb";
@@ -156,8 +160,12 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 	} else if (flags & MIPSM_W)
 	{
 		const wchar_t* templateWord = LR"(
-			lwl	%rd%,%off%+3(%rs%)
-			lwr	%rd%,%off%(%rs%)
+			.if (%off% < 0x8000) && ((%off%+3) >= 0x8000)
+				.error "Immediate offset too big"
+			.else
+				lwl	%rd%,%off%+3(%rs%)
+				lwr	%rd%,%off%(%rs%)
+			.endif
 		)";
 
 		selectedTemplate = templateWord;
@@ -181,17 +189,25 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 	if ((flags & MIPSM_HW))
 	{
 		const wchar_t* templateHalfword = LR"(
-			sb	%rd%,%off%(%rs%)
-			srl	r1,%rd%,8
-			sb	r1,%off%+1(%rs%)
+			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
+				.error "Immediate offset too big"
+			.else
+				sb	%rd%,%off%(%rs%)
+				srl	r1,%rd%,8
+				sb	r1,%off%+1(%rs%)
+			.endif
 		)";
 
 		selectedTemplate = templateHalfword;
 	} else if ( (flags & MIPSM_W))
 	{
 		const wchar_t* templateWord = LR"(
-			swl	%rd%,%off%+3(%rs%)
-			swr	%rd%,%off%(%rs%)
+			.if (%off% < 0x8000) && ((%off%+3) >= 0x8000)
+				.error "Immediate offset too big"
+			.else
+				swl	%rd%,%off%+3(%rs%)
+				swr	%rd%,%off%(%rs%)
+			.endif
 		)";
 
 		selectedTemplate = templateWord;
