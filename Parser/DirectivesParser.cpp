@@ -235,25 +235,26 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		break;
 	}
 
-	CAssemblerCommand* ifBlock = parser.parseCommandSequence({L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	CAssemblerCommand* ifBlock = parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
 	
 	CAssemblerCommand* elseBlock = nullptr;
-	Token next = parser.nextToken();
+	const Token &next = parser.nextToken();
+	const std::wstring stringValue = next.getStringValue();
 
-	if (next.stringValue == L".else")
+	if (stringValue == L".else")
 	{
-		elseBlock = parser.parseCommandSequence({L".endif"});
+		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
 		parser.eatToken();	// eat .endif
-	} else if (next.stringValue == L".elseif")
+	} else if (stringValue == L".elseif")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IF);
-	} else if (next.stringValue == L".elseifdef")
+	} else if (stringValue == L".elseifdef")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFDEF);
-	} else if (next.stringValue == L".elseifndef")
+	} else if (stringValue == L".elseifndef")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFNDEF);
-	} else if (next.stringValue != L".endif")
+	} else if (stringValue != L".endif")
 	{
 		return nullptr;
 	}
@@ -384,7 +385,7 @@ CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 	
 	bool valid = checkExpressionListSize(parameters,1,2);
 	
-	CAssemblerCommand* content = parser.parseCommandSequence({L".endarea"});
+	CAssemblerCommand* content = parser.parseCommandSequence(L'.', {L".endarea"});
 	parser.eatToken();
 
 	// area is invalid, return content anyway
@@ -400,18 +401,19 @@ CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveErrorWarning(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
-	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+	std::wstring stringValue = tok.getStringValue();
+	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
-	if (tok.stringValue == L"on")
+	if (stringValue == L"on")
 	{	
 		Logger::setErrorOnWarning(true);
 		return new DummyCommand();
-	} else if (tok.stringValue == L"off")
+	} else if (stringValue == L"off")
 	{
 		Logger::setErrorOnWarning(false);
 		return new DummyCommand();
@@ -422,18 +424,19 @@ CAssemblerCommand* parseDirectiveErrorWarning(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveRelativeInclude(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
-	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+	std::wstring stringValue = tok.getStringValue();
+	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
-	if (tok.stringValue == L"on")
+	if (stringValue == L"on")
 	{	
 		Global.relativeInclude = true;
 		return new DummyCommand();
-	} else if (tok.stringValue == L"off")
+	} else if (stringValue == L"off")
 	{
 		Global.relativeInclude = false;
 		return new DummyCommand();
@@ -444,18 +447,19 @@ CAssemblerCommand* parseDirectiveRelativeInclude(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveNocash(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
-	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+	std::wstring stringValue = tok.getStringValue();
+	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
-	if (tok.stringValue == L"on")
+	if (stringValue == L"on")
 	{	
 		Global.nocash = true;
 		return new DummyCommand();
-	} else if (tok.stringValue == L"off")
+	} else if (stringValue == L"off")
 	{
 		Global.nocash = false;
 		return new DummyCommand();
@@ -466,16 +470,17 @@ CAssemblerCommand* parseDirectiveNocash(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveSym(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	const Token &tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
-	std::transform(tok.stringValue.begin(),tok.stringValue.end(),tok.stringValue.begin(),::towlower);
+	std::wstring stringValue = tok.getStringValue();
+	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
-	if (tok.stringValue == L"on")
+	if (stringValue == L"on")
 		return new CDirectiveSym(true);
-	else if (tok.stringValue == L"off")
+	else if (stringValue == L"off")
 		return new CDirectiveSym(false);
 	else
 		return nullptr;
@@ -483,7 +488,8 @@ CAssemblerCommand* parseDirectiveSym(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 {
-	Token tok = parser.nextToken();
+	// Cannot be a reference, we read more tokens below.
+	const Token tok = parser.nextToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
@@ -494,13 +500,14 @@ CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 	if (value.isLoaded() == false)
 		return nullptr;
 
-	if (Global.symbolTable.isValidSymbolName(tok.stringValue) == false)
+	const std::wstring stringValue = tok.getStringValue();
+	if (Global.symbolTable.isValidSymbolName(stringValue) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",tok.stringValue);
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",stringValue);
 		return false;
 	}
 
-	return new CAssemblerLabel(tok.stringValue,value);
+	return new CAssemblerLabel(stringValue,value);
 }
 
 CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
@@ -516,10 +523,11 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 	if (parameters[0].evaluateIdentifier(name) == false)
 		return nullptr;
 
-	CAssemblerCommand* seq = parser.parseCommandSequence({L".endfunc",L".endfunction",L".func",L".function"});
+	CAssemblerCommand* seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
 
-	if (parser.peekToken().stringValue == L".endfunc" ||
-		parser.peekToken().stringValue == L".endfunction")
+	const std::wstring stringValue = parser.peekToken().getStringValue();
+	if (stringValue == L".endfunc" ||
+		stringValue == L".endfunction")
 	{
 		parser.eatToken();
 	}

@@ -14,7 +14,7 @@ Tokenizer::Tokenizer()
 	invalidToken.type = TokenType::Invalid;
 }
 
-Token& Tokenizer::nextToken()
+const Token& Tokenizer::nextToken()
 {
 	readTokens(tokenIndex);
 	
@@ -24,7 +24,7 @@ Token& Tokenizer::nextToken()
 	return tokens[tokenIndex++];
 }
 
-Token& Tokenizer::peekToken(int ahead)
+const Token& Tokenizer::peekToken(int ahead)
 {
 	readTokens(tokenIndex+ahead);
 
@@ -70,7 +70,7 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, const std::w
 {
 	Token tok;
 	tok.type = TokenType::Identifier;
-	tok.stringValue = newValue;
+	tok.setStringValue(newValue);
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -92,10 +92,11 @@ void Tokenizer::readTokens(size_t maxIndex)
 		bool replaced = false;
 		if (token.type == TokenType::Identifier)
 		{
-			for (Replacement& replacement: replacements)
+			const std::wstring stringValue = token.getStringValue();
+			for (const Replacement& replacement: replacements)
 			{
 				// if the identifier matches, add all of its tokens
-				if (replacement.identifier == token.stringValue)
+				if (replacement.identifier == stringValue)
 				{
 					for (size_t i = 0; i < replacement.value.size(); i++)
 					{
@@ -109,7 +110,7 @@ void Tokenizer::readTokens(size_t maxIndex)
 		}
 
 		if (replaced == false)
-			tokens.push_back(token);
+			tokens.push_back(std::move(token));
 	}
 }
 
@@ -168,7 +169,7 @@ void FileTokenizer::createToken(TokenType type, size_t length)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.originalText = currentLine.substr(linePos,length);
+	token.setOriginalText(currentLine,linePos,length);
 
 	linePos += length;
 
@@ -181,7 +182,7 @@ void FileTokenizer::createToken(TokenType type, size_t length, u64 value)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.originalText = currentLine.substr(linePos,length);
+	token.setOriginalText(currentLine,linePos,length);
 	token.intValue = value;
 
 	linePos += length;
@@ -195,7 +196,7 @@ void FileTokenizer::createToken(TokenType type, size_t length, double value)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.originalText = currentLine.substr(linePos,length);
+	token.setOriginalText(currentLine,linePos,length);
 	token.floatValue = value;
 
 	linePos += length;
@@ -206,11 +207,16 @@ void FileTokenizer::createToken(TokenType type, size_t length, double value)
 
 void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value)
 {
+	createToken(type, length, value, 0, value.length());
+}
+
+void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength)
+{
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.originalText = currentLine.substr(linePos,length);
-	token.stringValue = value;
+	token.setOriginalText(currentLine,linePos,length);
+	token.setStringValue(value,valuePos,valueLength);
 
 	linePos += length;
 	
@@ -403,7 +409,7 @@ Token FileTokenizer::loadToken()
 	if (isInputAtEnd())
 	{
 		createToken(TokenType::Invalid,0);
-		return token;
+		return std::move(token);
 	}
 
 	size_t pos = linePos;
@@ -413,22 +419,21 @@ Token FileTokenizer::loadToken()
 		while (pos < currentLine.size() && !isComment(currentLine,pos))
 			pos++;
 
-		std::wstring text = currentLine.substr(linePos,pos-linePos);
-		createToken(TokenType::EquValue,pos-linePos,text);
+		createToken(TokenType::EquValue,pos-linePos,currentLine,linePos,pos-linePos);
 
 		equActive = false;
-		return token;
+		return std::move(token);
 	}
 
 	if (parseOperator())
-		return token;
+		return std::move(token);
 
 	// character constants
 	wchar_t first = currentLine[pos];
 	if (first == '\'' && pos+2 < currentLine.size() && currentLine[pos+2] == '\'')
 	{
 		createToken(TokenType::Integer,3,(u64)currentLine[pos+1]);
-		return token;
+		return std::move(token);
 	}
 
 	// strings
@@ -460,11 +465,11 @@ Token FileTokenizer::loadToken()
 		if (!valid)
 		{
 			createToken(TokenType::Invalid,pos-linePos,L"Unexpected end of line in string constant");
-			return token;
+			return std::move(token);
 		}
 		
 		createToken(TokenType::String,pos-linePos,text);
-		return token;
+		return std::move(token);
 	}
 
 	// numbers
@@ -492,8 +497,8 @@ Token FileTokenizer::loadToken()
 			u64 value;
 			if (convertInteger(start,end,value) == false)
 			{
-				createToken(TokenType::NumberString,end-start,currentLine.substr(start,end-start));
-				return token;
+				createToken(TokenType::NumberString,end-start,currentLine,start,end-start);
+				return std::move(token);
 			}
 
 			createToken(TokenType::Integer,end-start,value);
@@ -502,19 +507,19 @@ Token FileTokenizer::loadToken()
 			if (isValid == false)
 			{
 				createToken(TokenType::Invalid,end-start,L"Invalid floating point number");
-				return token;
+				return std::move(token);
 			}
 
 			if (convertFloat(start,end,value) == false)
 			{
-				createToken(TokenType::NumberString,end-start,currentLine.substr(start,end-start));
-				return token;
+				createToken(TokenType::NumberString,end-start,currentLine,start,end-start);
+				return std::move(token);
 			}
 
 			createToken(TokenType::Float,end-start,value);
 		}
 		
-		return token;
+		return std::move(token);
 	}
 
 	// identifiers
@@ -529,7 +534,7 @@ Token FileTokenizer::loadToken()
 	{
 		std::wstring text = formatString(L"Invalid input '%c'",currentLine[pos]);
 		createToken(TokenType::Invalid,1,text);
-		return token;
+		return std::move(token);
 	}
 
 	std::wstring text = currentLine.substr(linePos,pos-linePos);
@@ -543,7 +548,7 @@ Token FileTokenizer::loadToken()
 		createToken(TokenType::Identifier,pos-linePos,text);
 	}
 
-	return token;
+	return std::move(token);
 }
 
 bool FileTokenizer::init(TextFile* input)

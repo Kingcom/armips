@@ -48,25 +48,115 @@ enum class TokenType
 
 struct Token
 {
+	Token() : originalText(nullptr), stringValue(nullptr)
+	{
+	}
+
+	Token(Token &&src)
+	{
+		// Move strings.
+		originalText = src.originalText;
+		src.originalText = nullptr;
+		stringValue = src.stringValue;
+		src.stringValue = nullptr;
+
+		// Just copy the rest.
+		type = src.type;
+		line = src.line;
+		column = src.column;
+		floatValue = src.floatValue;
+	}
+
+	Token(const Token &src) {
+		// Copy strings.
+		originalText = nullptr;
+		if (src.originalText)
+			setOriginalText(src.originalText);
+		stringValue = nullptr;
+		if (src.stringValue)
+			setStringValue(src.stringValue);
+
+		// And copy the rest.
+		type = src.type;
+		line = src.line;
+		column = src.column;
+		floatValue = src.floatValue;
+	}
+
+	~Token()
+	{
+		delete [] originalText;
+		delete [] stringValue;
+	}
+
+	void setOriginalText(const std::wstring& t)
+	{
+		setOriginalText(t, 0, t.length());
+	}
+
+	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
+	{
+		if (originalText)
+			delete [] originalText;
+		originalText = new wchar_t[len + 1];
+		wmemcpy(originalText, t.data() + pos, len);
+		originalText[len] = 0;
+	}
+
+	std::wstring getOriginalText() const
+	{
+		return originalText;
+	}
+
+	void setStringValue(const std::wstring& t)
+	{
+		setStringValue(t, 0, t.length());
+	}
+
+	void setStringValue(const std::wstring& t, const size_t pos, const size_t len)
+	{
+		if (stringValue)
+			delete [] stringValue;
+		stringValue = new wchar_t[len + 1];
+		wmemcpy(stringValue, t.data() + pos, len);
+		stringValue[len] = 0;
+	}
+
+	std::wstring getStringValue() const
+	{
+		if (stringValue)
+			return stringValue;
+		return L"";
+	}
+
+	bool stringValueStartsWith(wchar_t c) const
+	{
+		if (stringValue)
+			return stringValue[0] == c;
+		return false;
+	}
+
 	TokenType type;
-	std::wstring originalText;
 	size_t line;
 	size_t column;
 
-	std::wstring stringValue;
 	union
 	{
 		u64 intValue;
 		double floatValue;
 	};
+
+protected:
+	wchar_t* originalText;
+	wchar_t* stringValue;
 };
 
 class Tokenizer
 {
 public:
 	Tokenizer();
-	Token& nextToken();
-	Token& peekToken(int ahead = 0);
+	const Token& nextToken();
+	const Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
 	void eatTokens(int num);
 	bool atEnd() { return isInputAtEnd() && tokenIndex >= tokens.size(); }
@@ -107,6 +197,7 @@ protected:
 	void createToken(TokenType type, size_t length, u64 value);
 	void createToken(TokenType type, size_t length, double value);
 	void createToken(TokenType type, size_t length, const std::wstring& value);
+	void createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength);
 
 	bool convertInteger(size_t start, size_t end, u64& result);
 	bool convertFloat(size_t start, size_t end, double& result);
@@ -124,9 +215,11 @@ protected:
 class TokenStreamTokenizer: public Tokenizer
 {
 public:
-	void init(std::vector<Token>& tokens)
+	void init(const std::vector<Token>& tokens)
 	{
-		this->tokens = tokens;
+		this->tokens.clear();
+		for (const Token &tok: tokens)
+			this->tokens.push_back(tok);
 		pos = 0;
 	}
 protected:

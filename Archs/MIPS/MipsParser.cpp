@@ -143,19 +143,22 @@ CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 
 bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)
 {
-	Token token = parser.peekToken();
-	bool hasDollar = token.type == TokenType::Dollar;
+	int offset = 0;
+	bool hasDollar = parser.peekToken().type == TokenType::Dollar;
 	if (hasDollar)
-		token = parser.peekToken(1);
+		offset = 1;
+
+	const Token &token = parser.peekToken(offset);
 
 	if (token.type != TokenType::Identifier)
 		return false;
 
+	const std::wstring stringValue = token.getStringValue();
 	for (size_t i = 0; i < count; i++)
 	{
-		if (token.stringValue == table[i].name)
+		if (stringValue == table[i].name)
 		{
-			dest.name = token.stringValue;
+			dest.name = stringValue;
 			dest.num = table[i].num;
 			parser.eatTokens(hasDollar ? 2 : 1);
 			return true;
@@ -172,7 +175,7 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 	// check for $0 and $1
 	if (parser.peekToken().type == TokenType::Dollar)
 	{
-		Token& number = parser.peekToken(1);
+		const Token& number = parser.peekToken(1);
 		if (number.type == TokenType::Integer && number.intValue <= 31)
 		{
 			dest.name = formatString(L"$%d",number.intValue);
@@ -211,15 +214,16 @@ static bool decodeDigit(wchar_t digit, int& dest)
 
 bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int size)
 {
-	Token& token = parser.peekToken();
-	if (token.type != TokenType::Identifier || token.stringValue.size() != 4)
+	const Token& token = parser.peekToken();
+	const std::wstring stringValue = token.getStringValue();
+	if (token.type != TokenType::Identifier || stringValue.size() != 4)
 		return false;
 
 	int mtx,col,row;
-	if (decodeDigit(token.stringValue[1],mtx) == false) return false;
-	if (decodeDigit(token.stringValue[2],col) == false) return false;
-	if (decodeDigit(token.stringValue[3],row) == false) return false;
-	wchar_t mode = towlower(token.stringValue[0]);
+	if (decodeDigit(stringValue[1],mtx) == false) return false;
+	if (decodeDigit(stringValue[2],col) == false) return false;
+	if (decodeDigit(stringValue[3],row) == false) return false;
+	wchar_t mode = towlower(stringValue[0]);
 
 	if (size < 0 || size > 3)
 		return false;
@@ -272,7 +276,7 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 				return false;
 			break;
 		case 2:	// 3x3
-			if ( row & ~1)
+			if (row & ~1)
 				return false;
 			row <<= 1;
 			break;
@@ -288,7 +292,7 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 	reg.num |= col;
 	reg.num |= row << 5;
 
-	reg.name = token.stringValue;
+	reg.name = stringValue;
 	parser.eatToken();
 	return true;
 }
@@ -302,13 +306,14 @@ bool MipsParser::parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg
 		L"rcx4",	L"rcx5",	L"rcx6",	L"rcx7",
 	};
 
-	Token& token = parser.peekToken();
+	const Token& token = parser.peekToken();
+	const std::wstring stringValue = token.getStringValue();
 
 	if (token.type == TokenType::Identifier)
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			if (token.stringValue == vfpuCtrlNames[i])
+			if (stringValue == vfpuCtrlNames[i])
 			{
 				reg.num = i;
 				reg.name = vfpuCtrlNames[i];
@@ -489,24 +494,27 @@ bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 	int numElems = size+1;
 	for (int i = 0; i < numElems; i++)
 	{
-		Token& token = parser.nextToken();
+		const Token* tokenFinder = &parser.nextToken();
 		
 		if (i != 0)
 		{
-			if (token.type != TokenType::Comma)
+			if (tokenFinder->type != TokenType::Comma)
 				return false;
 
-			token = parser.nextToken();
+			tokenFinder = &parser.nextToken();
 		}
 
-		bool isNeg = token.type == TokenType::Minus;
+		bool isNeg = tokenFinder->type == TokenType::Minus;
 		if (isNeg)
-			token = parser.nextToken();
+			tokenFinder = &parser.nextToken();
 
-		if (token.type != TokenType::Identifier || token.stringValue.size() != 1)
+		const Token& token = *tokenFinder;
+
+		const std::wstring stringValue = token.getStringValue();
+		if (token.type != TokenType::Identifier || stringValue.size() != 1)
 			return false;
 
-		switch (token.stringValue[0])
+		switch (stringValue[0])
 		{
 		case 's':
 			// if one is negative, all have to be
@@ -587,13 +595,14 @@ bool MipsParser::parseVfpuCondition(Parser& parser, int& result)
 		L"ez", L"en", L"ei", L"es", L"nz", L"nn", L"ni", L"ns"
 	};
 
-	Token& token = parser.nextToken();
+	const Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
+	const std::wstring stringValue = token.getStringValue();
 	for (int i = 0; i < ARRAY_SIZE(conditions); i++)
 	{
-		if (token.stringValue == conditions[i])
+		if (stringValue == conditions[i])
 		{
 			result = i;
 			return true;
@@ -633,36 +642,39 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 	
 	for (int i = 0; i < 4; i++)
 	{
-		Token& token = parser.nextToken();
+		const Token *tokenFinder = &parser.nextToken();
 
 		if (i != 0)
 		{
-			if (token.type != TokenType::Comma)
+			if (tokenFinder->type != TokenType::Comma)
 				return false;
 
-			token = parser.nextToken();
+			tokenFinder = &parser.nextToken();
 		}
 		
 		// negation
-		if (token.type == TokenType::Minus)
+		if (tokenFinder->type == TokenType::Minus)
 		{
 			result |= 1 << (16+i);
-			token = parser.nextToken();
+			tokenFinder = &parser.nextToken();
 		}
 
 		// abs
 		bool abs = false;
-		if (token.type == TokenType::BitOr)
+		if (tokenFinder->type == TokenType::BitOr)
 		{
 			result |= 1 << (8+i);
 			abs = true;
-			token = parser.nextToken();
+			tokenFinder = &parser.nextToken();
 		}
+
+		const Token& token = *tokenFinder;
 		
 		// check for register
 		const wchar_t* reg;
 		static const wchar_t* vpfxstRegisters = L"xyzw";
-		if (token.stringValue.size() == 1 && (reg = wcschr(vpfxstRegisters,token.stringValue[0])) != nullptr)
+		const std::wstring stringValue = token.getStringValue();
+		if (stringValue.size() == 1 && (reg = wcschr(vpfxstRegisters,stringValue[0])) != nullptr)
 		{
 			result |= (reg-vpfxstRegisters) << (i*2);
 
@@ -733,15 +745,13 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 
 	for (int i = 0; i < 4; i++)
 	{
-		Token& token = parser.nextToken();
-
 		if (i != 0)
 		{
-			if (token.type != TokenType::Comma)
+			if (parser.nextToken().type != TokenType::Comma)
 				return false;
-
-			token = parser.nextToken();
 		}
+
+		const Token& token = parser.nextToken();
 		
 		int num = 0;
 		if (sequenceParser.parse(parser,num) == false)
@@ -814,7 +824,7 @@ bool MipsParser::decodeCop2BranchCondition(const std::wstring& text, size_t& pos
 
 bool MipsParser::parseCop2BranchCondition(Parser& parser, int& result)
 {
-	Token& token = parser.nextToken();
+	const Token& token = parser.nextToken();
 
 	if (token.type == TokenType::Integer)
 	{
@@ -826,16 +836,16 @@ bool MipsParser::parseCop2BranchCondition(Parser& parser, int& result)
 		return false;
 
 	size_t pos = 0;
-	return decodeCop2BranchCondition(token.stringValue,pos,result);
+	return decodeCop2BranchCondition(token.getStringValue(),pos,result);
 }
 
 bool MipsParser::parseWb(Parser& parser)
 {
-	Token& token = parser.nextToken();
+	const Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
-	return token.stringValue == L"wb";
+	return token.getStringValue() == L"wb";
 }
 
 bool MipsParser::decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest)
@@ -1143,12 +1153,13 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 
 CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 {
-	Token token = parser.nextToken();
+	const Token &token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
 	bool paramFail = false;
 	const MipsArchDefinition& arch = mipsArchs[Mips.GetVersion()];
+	const std::wstring stringValue = token.getStringValue();
 
 	for (int z = 0; MipsOpcodes[z].name != NULL; z++)
 	{
@@ -1162,7 +1173,7 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 		if ((MipsOpcodes[z].flags & MO_FPU) && !(arch.flags & MO_FPU))
 			continue;
 
-		if (decodeOpcode(token.stringValue,MipsOpcodes[z]) == true)
+		if (decodeOpcode(stringValue,MipsOpcodes[z]) == true)
 		{
 			size_t tokenPos = parser.getTokenizer()->getPosition();
 
@@ -1180,7 +1191,7 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 	if (paramFail == true)
 		Logger::printError(Logger::Error,L"MIPS parameter failure");
 	else
-		Logger::printError(Logger::Error,L"Invalid MIPS opcode '%s'",token.stringValue);
+		Logger::printError(Logger::Error,L"Invalid MIPS opcode '%s'",stringValue);
 
 	return nullptr;
 }
@@ -1225,14 +1236,16 @@ CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
 {
 	size_t startPos = parser.getTokenizer()->getPosition();
 
-	Token token = parser.peekToken();
+	// Cannot be a reference (we eat below.)
+	const Token token = parser.peekToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 	
 	parser.eatToken();
+	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; mipsMacros[z].name != NULL; z++)
 	{
-		if (token.stringValue == mipsMacros[z].name)
+		if (stringValue == mipsMacros[z].name)
 		{
 			size_t tokenPos = parser.getTokenizer()->getPosition();
 

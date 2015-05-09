@@ -698,6 +698,7 @@ TextFile::TextFile()
 	recursion = false;
 	errorRetrieved = false;
 	fromMemory = false;
+	readBufPos = 0;
 }
 
 TextFile::~TextFile()
@@ -830,16 +831,25 @@ void TextFile::seek(long pos)
 		fseek(handle,pos,SEEK_SET);
 }
 
+void TextFile::readbufFill()
+{
+	const size_t READBUF_MAX_SIZE = 4096;
+	readBuf.resize(READBUF_MAX_SIZE);
+	size_t read = fread(&readBuf[0], 1, READBUF_MAX_SIZE, handle);
+	readBuf.resize(read);
+
+	readBufPos = 0;
+}
+
 wchar_t TextFile::readCharacter()
 {
-	unsigned char buf[4];
 	wchar_t value;
 
 	switch (encoding)
 	{
 	case UTF8:
 		{
-			value = fgetc(handle);
+			value = readbufGetChar();
 			contentPos++;
 			
 			int extraBytes = 0;
@@ -858,7 +868,7 @@ wchar_t TextFile::readCharacter()
 
 			for (int i = 0; i < extraBytes; i++)
 			{
-				int b = fgetc(handle);
+				int b = readbufGetChar();
 				contentPos++;
 
 				if ((b & 0xC0) != 0x80)
@@ -875,23 +885,21 @@ wchar_t TextFile::readCharacter()
 		{
 			value = content[contentPos++];
 		} else {
-			fread(buf,1,2,handle);
-			value = buf[0] | (buf[1] << 8);
+			value = readbufGet16LE();
 			contentPos += 2;
 		}
 		break;
 	case UTF16BE:
-		fread(buf,1,2,handle);
-		value = buf[1] | (buf[0] << 8);
+		value = readbufGet16BE();
 		contentPos += 2;
 		break;
 	case SJIS:
 		{
-			unsigned short sjis = fgetc(handle);
+			unsigned short sjis = readbufGetChar();
 			contentPos++;
 			if (sjis >= 0x80)
 			{
-				sjis = (sjis << 8) | fgetc(handle);
+				sjis = (sjis << 8) | readbufGetChar();
 				contentPos++;
 			}
 			value = sjisToUnicode(sjis);
@@ -902,7 +910,7 @@ wchar_t TextFile::readCharacter()
 		}
 		break;
 	case ASCII:
-		value = fgetc(handle);
+		value = readbufGetChar();
 		contentPos++;
 		break;
 	}
@@ -928,9 +936,12 @@ std::wstring TextFile::readLine()
 	std::wstring result;
 	wchar_t value;
 
-	while (!atEnd() && (value = readCharacter()) != L'\n')
+	if (isOpen())
 	{
-		result += value;
+		while (tell() < size() && (value = readCharacter()) != L'\n')
+		{
+			result += value;
+		}
 	}
 
 	return result;

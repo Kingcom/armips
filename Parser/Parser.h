@@ -31,7 +31,7 @@ public:
 	bool parseExpressionList(std::vector<Expression>& list);
 	bool parseIdentifier(std::wstring& dest);
 	CAssemblerCommand* parseCommand();
-	CAssemblerCommand* parseCommandSequence(std::initializer_list<wchar_t*> terminators = {});
+	CAssemblerCommand* parseCommandSequence(wchar_t indicator = 0, std::initializer_list<wchar_t*> terminators = {});
 	CAssemblerCommand* parseFile(TextFile& file);
 	CAssemblerCommand* parseString(const std::wstring& text);
 	CAssemblerCommand* parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables = {});
@@ -39,8 +39,8 @@ public:
 	bool matchToken(TokenType type, bool optional = false);
 
 	Tokenizer* getTokenizer() { return entries.back(); };
-	Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
-	Token& nextToken() { return getTokenizer()->nextToken(); };
+	const Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
+	const Token& nextToken() { return getTokenizer()->nextToken(); };
 	void eatToken() { getTokenizer()->eatToken(); };
 	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
 protected:

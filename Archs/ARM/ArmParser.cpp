@@ -89,15 +89,16 @@ CAssemblerCommand* ArmParser::parseDirective(Parser& parser)
 
 bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count)
 {
-	Token& token = parser.peekToken();
+	const Token& token = parser.peekToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
+	const std::wstring stringValue = token.getStringValue();
 	for (size_t i = 0; i < count; i++)
 	{
-		if (token.stringValue == table[i].name)
+		if (stringValue == table[i].name)
 		{
-			dest.name = token.stringValue;
+			dest.name = stringValue;
 			dest.num = table[i].num;
 			parser.eatToken();
 			return true;
@@ -200,19 +201,20 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	parser.eatToken();
 
 	// load shift mode
-	Token& shiftMode = parser.nextToken();
+	const Token& shiftMode = parser.nextToken();
 	if (shiftMode.type != TokenType::Identifier)
 		return false;
 
-	if (shiftMode.stringValue == L"lsl")
+	const std::wstring stringValue = shiftMode.getStringValue();
+	if (stringValue == L"lsl")
 		vars.Shift.Type = 0;
-	else if (shiftMode.stringValue == L"lsr")
+	else if (stringValue == L"lsr")
 		vars.Shift.Type = 1;
-	else if (shiftMode.stringValue == L"asr")
+	else if (stringValue == L"asr")
 		vars.Shift.Type = 2;
-	else if (shiftMode.stringValue == L"ror")
+	else if (stringValue == L"ror")
 		vars.Shift.Type = 3;
-	else if (shiftMode.stringValue == L"rrx")
+	else if (stringValue == L"rrx")
 		vars.Shift.Type = 4;
 	else 
 		return false;
@@ -407,16 +409,17 @@ void ArmParser::parseSign(Parser& parser, bool& dest)
 
 bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool shortVersion)
 {
-	Token& token = parser.nextToken();
+	const Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return false;
 
+	const std::wstring stringValue = token.getStringValue();
 	size_t pos = 0;
-	if (startsWith(token.stringValue,L"cpsr"))
+	if (startsWith(stringValue,L"cpsr"))
 	{
 		vars.PsrData.spsr = false;
 		pos = 4;
-	} else if (startsWith(token.stringValue,L"spsr"))
+	} else if (startsWith(stringValue,L"spsr"))
 	{
 		vars.PsrData.spsr = true;
 		pos = 4;
@@ -425,36 +428,36 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 	}
 
 	if (shortVersion)
-		return pos == token.stringValue.size();
+		return pos == stringValue.size();
 
-	if (pos == token.stringValue.size())
+	if (pos == stringValue.size())
 	{
 		vars.PsrData.field = 0xF;
 		return true;
 	}
 
-	if (token.stringValue[pos++] != '_')
+	if (stringValue[pos++] != '_')
 		return false;
 
-	if (startsWith(token.stringValue,L"ctl",pos))
+	if (startsWith(stringValue,L"ctl",pos))
 	{
 		vars.PsrData.field = 1;
-		return pos+3 == token.stringValue.size();
+		return pos+3 == stringValue.size();
 	} 
 	
-	if (startsWith(token.stringValue,L"flg",pos))
+	if (startsWith(stringValue,L"flg",pos))
 	{
 		vars.PsrData.field = 8;
-		return pos+3 == token.stringValue.size();
+		return pos+3 == stringValue.size();
 	}
 	
 	vars.PsrData.field = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		if (pos == token.stringValue.size())
+		if (pos == stringValue.size())
 			break;
 
-		switch(token.stringValue[pos++])
+		switch(stringValue[pos++])
 		{
 		case 'f':
 			if (vars.PsrData.field & 8)
@@ -572,19 +575,20 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 
 CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 {
-	Token token = parser.nextToken();
+	const Token &token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
 	ArmOpcodeVariables vars;
 	bool paramFail = false;
 
+	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; ArmOpcodes[z].name != NULL; z++)
 	{
 		if ((ArmOpcodes[z].flags & ARM_ARM9) && !Arm.isArm9())
 			continue;
 
-		if (decodeArmOpcode(token.stringValue,ArmOpcodes[z],vars) == true)
+		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars) == true)
 		{
 			size_t tokenPos = parser.getTokenizer()->getPosition();
 
@@ -665,13 +669,14 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 
 CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 {
-	Token token = parser.nextToken();
+	const Token &token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
 
 	ThumbOpcodeVariables vars;
 	bool paramFail = false;
 
+	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; ThumbOpcodes[z].name != NULL; z++)
 	{
 		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && !Arm.isArm9())
@@ -680,7 +685,7 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 		// todo: save as wchar
 		std::wstring name = convertUtf8ToWString(ThumbOpcodes[z].name);
 
-		if (token.stringValue == name)
+		if (stringValue == name)
 		{
 			size_t tokenPos = parser.getTokenizer()->getPosition();
 			
