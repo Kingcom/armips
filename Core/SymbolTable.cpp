@@ -127,8 +127,7 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 
 bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 {
-	character = towlower(character);
-	if (character >= 'a' && character <= 'z') return true;
+	if ((character >= 'a' && character <= 'z') || character >= 'A' && character <= 'Z') return true;
 	if (!first && character >= '0' && character <= '9') return true;
 	if (character == '_' || character == '.') return true;
 	if (character == '@') return true;
