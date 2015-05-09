@@ -55,6 +55,9 @@ bool CDirectiveArea::Validate()
 			Global.FileInfo.FileList[FileNum],FileLine);
 	}
 
+	if (fillExpression.isLoaded())
+		g_fileManager->advanceMemory(areaSize-contentSize);
+
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
 		result = true;
 
