@@ -160,7 +160,9 @@ void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
 {
 	if (file.isOpen())
 	{
-		std::wstring str = formatString(L"%08X %s",memoryAddress,text);
+		wchar_t hexbuf[10] = {0};
+		swprintf(hexbuf, 10, L"%08X ", memoryAddress);
+		std::wstring str = hexbuf + text;
 		while (str.size() < 70)
 			str += ' ';
 
