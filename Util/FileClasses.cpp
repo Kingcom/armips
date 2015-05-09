@@ -748,6 +748,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		if (handle == NULL)
 			return false;
 
+		buf.resize(TEXTFILE_BUF_MAX_SIZE);
 		if (encoding != ASCII)
 		{
 			encoding = UTF8;
@@ -819,7 +820,6 @@ void TextFile::close()
 		fclose(handle);
 		handle = NULL;
 	}
-	buf.clear();
 	bufPos = 0;
 }
 
@@ -968,12 +968,6 @@ void TextFile::bufPut(const void *p, const size_t len)
 {
 	assert(mode == Write);
 
-	if (buf.size() < TEXTFILE_BUF_MAX_SIZE)
-	{
-		buf.resize(TEXTFILE_BUF_MAX_SIZE);
-		bufPos = 0;
-	}
-
 	if (len > TEXTFILE_BUF_MAX_SIZE)
 	{
 		// Lots of data.  Let's write directly.
@@ -990,6 +984,16 @@ void TextFile::bufPut(const void *p, const size_t len)
 	}
 }
 
+void TextFile::bufPut(const char c)
+{
+	assert(mode == Write);
+
+	if (bufPos >= TEXTFILE_BUF_MAX_SIZE)
+		bufDrainWrite();
+
+	buf[bufPos++] = c;
+}
+
 void TextFile::bufDrainWrite()
 {
 	fwrite(&buf[0], 1, bufPos, handle);
@@ -998,7 +1002,6 @@ void TextFile::bufDrainWrite()
 
 void TextFile::writeCharacter(wchar_t character)
 {
-	unsigned char buffer[4];
 	if (mode != Write) return;
 
 	// only support utf8 for now
@@ -1008,26 +1011,22 @@ void TextFile::writeCharacter(wchar_t character)
 #ifdef WIN32
 		if (character == L'\n')
 		{
-			buffer[length++] = '\r';
+			bufPut('\r');
 		}
 #endif
-		buffer[length++] = character & 0x7F;
+		bufPut(character & 0x7F);
 	} else if (encoding != ASCII)
 	{
 		if (character < 0x800)
 		{
-			buffer[0] = 0xC0 | ((character >> 6) & 0x1F);
-			buffer[1] = 0x80 | (character & 0x3F);
-			length = 2;
+			bufPut(0xC0 | ((character >> 6) & 0x1F));
+			bufPut(0x80 | (character & 0x3F));
 		} else {
-			buffer[0] = 0xE0 | ((character >> 12) & 0xF);
-			buffer[1] = 0x80 | ((character >> 6) & 0x3F);
-			buffer[2] = 0x80 | (character & 0x3F);
-			length = 3;
+			bufPut(0xE0 | ((character >> 12) & 0xF));
+			bufPut(0x80 | ((character >> 6) & 0x3F));
+			bufPut(0x80 | (character & 0x3F));
 		}
 	}
-
-	bufPut(buffer, length);
 }
 
 void TextFile::write(const wchar_t* line)

@@ -119,6 +119,7 @@ private:
 	}
 
 	void bufPut(const void *p, const size_t len);
+	void bufPut(const char c);
 
 	void bufFillRead();
 	void bufDrainWrite();
