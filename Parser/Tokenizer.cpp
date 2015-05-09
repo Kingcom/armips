@@ -212,6 +212,19 @@ void FileTokenizer::createToken(TokenType type, size_t length, const std::wstrin
 	skipWhitespace();
 }
 
+void FileTokenizer::createTokenCurrentString(TokenType type, size_t length)
+{
+	token.type = type;
+	token.line = lineNumber;
+	token.column = linePos+1;
+	token.setStringAndOriginalValue(currentLine,linePos,length);
+
+	linePos += length;
+
+	// advance to start of next token
+	skipWhitespace();
+}
+
 bool FileTokenizer::parseOperator()
 {
 	wchar_t first = currentLine[linePos];
@@ -407,7 +420,7 @@ Token FileTokenizer::loadToken()
 		while (pos < currentLine.size() && !isComment(currentLine,pos))
 			pos++;
 
-		createToken(TokenType::EquValue,pos-linePos,currentLine,linePos,pos-linePos);
+		createTokenCurrentString(TokenType::EquValue,pos-linePos);
 
 		equActive = false;
 		return std::move(token);
@@ -485,7 +498,7 @@ Token FileTokenizer::loadToken()
 			u64 value;
 			if (convertInteger(start,end,value) == false)
 			{
-				createToken(TokenType::NumberString,end-start,currentLine,start,end-start);
+				createTokenCurrentString(TokenType::NumberString,end-start);
 				return std::move(token);
 			}
 
@@ -500,7 +513,7 @@ Token FileTokenizer::loadToken()
 
 			if (convertFloat(start,end,value) == false)
 			{
-				createToken(TokenType::NumberString,end-start,currentLine,start,end-start);
+				createTokenCurrentString(TokenType::NumberString,end-start);
 				return std::move(token);
 			}
 

@@ -85,8 +85,8 @@ struct Token
 
 	~Token()
 	{
-		delete [] originalText;
-		delete [] stringValue;
+		clearOriginalText();
+		clearStringValue();
 	}
 
 	void setOriginalText(const std::wstring& t)
@@ -96,8 +96,7 @@ struct Token
 
 	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
 	{
-		if (originalText)
-			delete [] originalText;
+		clearOriginalText();
 		originalText = new wchar_t[len + 1];
 		wmemcpy(originalText, t.data() + pos, len);
 		originalText[len] = 0;
@@ -115,11 +114,22 @@ struct Token
 
 	void setStringValue(const std::wstring& t, const size_t pos, const size_t len)
 	{
-		if (stringValue)
-			delete [] stringValue;
+		clearStringValue();
 		stringValue = new wchar_t[len + 1];
 		wmemcpy(stringValue, t.data() + pos, len);
 		stringValue[len] = 0;
+	}
+
+	void setStringAndOriginalValue(const std::wstring& t)
+	{
+		setStringAndOriginalValue(t, 0, t.length());
+	}
+
+	void setStringAndOriginalValue(const std::wstring& t, const size_t pos, const size_t len)
+	{
+		setStringValue(t, pos, len);
+		clearOriginalText();
+		originalText = stringValue;
 	}
 
 	std::wstring getStringValue() const
@@ -147,6 +157,20 @@ struct Token
 	};
 
 protected:
+	void clearOriginalText()
+	{
+		if (originalText != stringValue)
+			delete [] originalText;
+		originalText = nullptr;
+	}
+
+	void clearStringValue()
+	{
+		if (stringValue != originalText)
+			delete [] stringValue;
+		stringValue = nullptr;
+	}
+
 	wchar_t* originalText;
 	wchar_t* stringValue;
 };
@@ -197,6 +221,7 @@ protected:
 	void createToken(TokenType type, size_t length, double value);
 	void createToken(TokenType type, size_t length, const std::wstring& value);
 	void createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength);
+	void createTokenCurrentString(TokenType type, size_t length);
 
 	bool convertInteger(size_t start, size_t end, u64& result);
 	bool convertFloat(size_t start, size_t end, double& result);
