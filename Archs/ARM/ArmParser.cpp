@@ -517,6 +517,14 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 	const u8* encoding = (const u8*) opcode.mask;
 
 	ArmRegisterValue tempRegister;
+	
+	vars.Shift.UseShift = false;
+	vars.Shift.UseFinal = false;
+	vars.psr = false;
+	vars.writeback = false;
+	vars.SignPlus = false;
+	vars.Opcode.UseNewEncoding = false;
+	vars.Opcode.UseNewType = false;
 
 	while (*encoding != 0)
 	{
@@ -558,7 +566,6 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 			break;
 		case 'R':	// register list
 			CHECK(parseRegisterList(parser,vars.rlist,0xFFFF));
-			encoding += 2;
 			break;
 		case 'S':	// shift
 			CHECK(parseShift(parser,vars,*encoding++ == '1'));
@@ -595,7 +602,9 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 		}
 	}
 
-	return true;
+	// the next token has to be an identifier, else the parameters aren't
+	// completely parsed
+	return parser.atEnd() || parser.peekToken().type == TokenType::Identifier;
 }
 
 CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
@@ -688,8 +697,10 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 			break;
 		}
 	}
-
-	return true;
+	
+	// the next token has to be an identifier, else the parameters aren't
+	// completely parsed
+	return parser.atEnd() || parser.peekToken().type == TokenType::Identifier;
 }
 
 CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)

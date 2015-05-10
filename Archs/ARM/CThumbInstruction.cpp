@@ -7,8 +7,6 @@
 
 CThumbInstruction::CThumbInstruction()
 {
-	NoCheckError = false;
-	Loaded = false;
 	OpcodeSize = 0;
 }
 
@@ -21,7 +19,6 @@ CThumbInstruction::CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpco
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
-	Loaded = true;
 	
 	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
 }

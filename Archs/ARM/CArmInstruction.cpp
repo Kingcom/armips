@@ -18,10 +18,6 @@ const char ArmPsrModes[16][5] = {
 
 CArmInstruction::CArmInstruction()
 {
-	NoCheckError = false;
-	Loaded = false;
-	Vars.Shift.UseShift = false;
-	Vars.Shift.UseFinal = false;
 }
 
 bool CArmInstruction::Load(char *Name, char *Params)
@@ -33,8 +29,6 @@ CArmInstruction::CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariab
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
-	
-	Loaded = true;
 }
 
 int CArmInstruction::getShiftedImmediate(unsigned int num, int& ShiftAmount)

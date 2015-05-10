@@ -77,7 +77,5 @@ private:
 
 	ArmOpcodeVariables Vars;
 	tArmOpcode Opcode;
-	bool NoCheckError;
-	bool Loaded;
 	u64 RamPos;
 };

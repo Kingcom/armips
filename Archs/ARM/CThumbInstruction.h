@@ -35,8 +35,6 @@ private:
 	void WriteInstruction(unsigned short encoding) const;
 	ThumbOpcodeVariables Vars;
 	tThumbOpcode Opcode;
-	bool NoCheckError;
-	bool Loaded;
 	size_t OpcodeSize;
 	u64 RamPos;
 };
