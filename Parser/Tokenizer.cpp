@@ -8,6 +8,8 @@
 // Tokenizer
 //
 
+std::vector<std::vector<Token>> Tokenizer::equValues;
+
 Tokenizer::Tokenizer()
 {
 	position.it = tokens.begin();
@@ -42,6 +44,26 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 					replaced = true;
 					break;
 				}
+			}
+
+			if (replaced)
+				continue;
+
+			// check for equs
+			size_t index;
+			if (Global.symbolTable.findEquation(stringValue,Global.FileInfo.FileNum,Global.Section,index))
+			{
+				TokenList::iterator insertIt = it;
+				insertIt++;
+				
+				// replace old token with the new tokens
+				// replace the first token manually so that any iterators
+				// are still guaranteed to be valid
+				std::vector<Token>& replacement = equValues[index];
+				(*it) = replacement[0];
+				tokens.insert(insertIt,replacement.begin()+1, replacement.end());
+				replaced = true;
+				continue;
 			}
 		}
 
@@ -130,6 +152,22 @@ void Tokenizer::addToken(Token token)
 	tokens.push_back(std::move(token));
 }
 
+size_t Tokenizer::addEquValue(const std::vector<Token>& tokens)
+{
+	size_t index = equValues.size();
+	equValues.push_back(tokens);
+	return index;
+}
+
+void Tokenizer::resetLookaheadCheckMarks()
+{
+	auto it = position.it;
+	while (it != tokens.end() && it->checked)
+	{
+		it->checked = false;
+		it++;
+	}
+}
 
 //
 // FileTokenizer

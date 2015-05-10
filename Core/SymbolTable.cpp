@@ -34,7 +34,7 @@ void SymbolTable::clear()
 
 	symbols.clear();
 	labels.clear();
-	equations.clear();
+	equationsCount = 0;
 	uniqueCount = 0;
 }
 
@@ -134,7 +134,7 @@ bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 	return false;
 }
 
-bool SymbolTable::addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement)
+bool SymbolTable::addEquation(const std::wstring& name, unsigned int file, unsigned int section, size_t referenceIndex)
 {
 	if (isValidSymbolName(name) == false)
 		return false;
@@ -145,58 +145,24 @@ bool SymbolTable::addEquation(const std::wstring& name, unsigned int file, unsig
 	setFileSectionValues(name,file,section);
 
 	SymbolKey key = { name, file, section };
-	SymbolInfo value = { EquationSymbol, equations.size() };
+	SymbolInfo value = { EquationSymbol, referenceIndex };
 	symbols[key] = value;
 
-	Equation equation = { name, replacement, file, section };
-	equations.push_back(equation);
+	equationsCount++;
 	return true;
 }
 
-std::wstring SymbolTable::insertEquations(const std::wstring& line, unsigned int file, unsigned int section)
+bool SymbolTable::findEquation(const std::wstring& name, unsigned int file, unsigned int section, size_t& dest)
 {
-	std::wstring result;
+	setFileSectionValues(name,file,section);
+	
+	SymbolKey key = { name, file, section };
+	auto it = symbols.find(key);
+	if (it == symbols.end() || it->second.type != EquationSymbol)
+		return false;
 
-	size_t pos = 0;
-	while (pos < line.size())
-	{
-		if (line[pos] != '@' && !isValidSymbolCharacter(line[pos]))
-		{
-			result += line[pos++];
-			continue;
-		}
-
-		size_t start = pos++;
-		while (line[pos] == '@' && pos < line.size())
-			pos++;
-		while (isValidSymbolCharacter(line[pos]) && pos < line.size())
-			pos++;
-
-		std::wstring word = line.substr(start,pos-start);
-		bool found = false;
-		for (size_t i = 0; i < equations.size(); i++)
-		{
-			const Equation& eq = equations.at(i);
-			if ((eq.file == -1 || eq.file == file) &&
-				(eq.section == -1 || eq.section == section))
-			{
-				if (eq.key.size() != word.size())
-					continue;
-
-				if (eq.key != word)
-					continue;
-				
-				result += eq.value;
-				found = true;
-				break;
-			}
-		}
-
-		if (!found)
-			result += word;
-	}
-
-	return result;
+	dest = it->second.index;
+	return true;
 }
 
 // TODO: better

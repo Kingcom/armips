@@ -232,6 +232,9 @@ public:
 	std::vector<Token> getTokens(TokenizerPosition start, TokenizerPosition end) const;
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
 	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
+	static size_t addEquValue(const std::vector<Token>& tokens);
+	static void clearEquValues() { equValues.clear(); }
+	void resetLookaheadCheckMarks();
 protected:
 	void clearTokens() { tokens.clear(); };
 	void resetPosition() { position.it = tokens.begin(); } 
@@ -250,6 +253,7 @@ private:
 
 	Token invalidToken;
 	std::vector<Replacement> replacements;
+	static std::vector<std::vector<Token>> equValues;
 };
 
 class FileTokenizer: public Tokenizer

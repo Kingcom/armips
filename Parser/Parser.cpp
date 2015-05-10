@@ -224,8 +224,29 @@ bool Parser::checkEquLabel()
 				Logger::printError(Logger::Error,L"Equation name %s already defined",name);
 				return true;
 			}
-		
-			Global.symbolTable.addEquation(name,Global.FileInfo.FileNum,Global.Section,value);
+
+			// parse value string
+			TextFile f;
+			f.openMemory(value);
+
+			FileTokenizer tok;
+			tok.init(&f);
+
+			TokenizerPosition start = tok.getPosition();
+			while (tok.atEnd() == false)
+				tok.nextToken();
+
+			// extract tokens
+			TokenizerPosition end = tok.getPosition();
+			std::vector<Token> tokens = tok.getTokens(start,end);
+			size_t index = Tokenizer::addEquValue(tokens);
+
+			for (Tokenizer* tokenizer: entries)
+				tokenizer->resetLookaheadCheckMarks();
+
+			// register equation
+			Global.symbolTable.addEquation(name,Global.FileInfo.FileNum,Global.Section,index);
+
 			return true;
 		}
 	}

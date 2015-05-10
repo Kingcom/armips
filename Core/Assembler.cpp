@@ -114,6 +114,7 @@ bool runArmips(ArmipsArguments& arguments)
 	Global.validationPasses = 0;
 	Arch = &InvalidArchitecture;
 
+	Tokenizer::clearEquValues();
 	Logger::clear();
 	Global.symData.clear();
 	Global.Table.clear();
