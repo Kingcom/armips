@@ -488,7 +488,7 @@ CAssemblerCommand* Parser::parseCommand()
 	if ((command = Arch->parseOpcode(*this)) != nullptr)
 		return command;
 
-	Logger::printError(Logger::Error,L"Parse error '%s'",nextToken().getStringValue());
+	Logger::printError(Logger::Error,L"Parse error '%s'",nextToken().getOriginalText());
 	return nullptr;
 }
 

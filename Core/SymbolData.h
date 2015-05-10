@@ -1,5 +1,6 @@
 #pragma once
 #include "../Util/FileClasses.h"
+#include <set>
 
 class AssemblerFile;
 
@@ -45,17 +46,22 @@ struct SymDataData
 	
 	bool operator<(const SymDataData& other) const
 	{
-		return address < other.address;
+		if (address != other.address)
+			return address < other.address;
+
+		if (size != other.size)
+			return size < other.size;
+
+		return type < other.type;
 	}
 };
 
 struct SymDataModule
 {
 	AssemblerFile* file;
-	std::vector<SymDataAddressInfo> addressInfo;
 	std::vector<SymDataSymbol> symbols;
 	std::vector<SymDataFunction> functions;
-	std::vector<SymDataData> data;
+	std::set<SymDataData> data;
 };
 
 struct SymDataModuleInfo
@@ -82,7 +88,6 @@ public:
 	void endFunction(u64 address);
 private:
 	void writeNocashSym();
-	size_t addAddress(u64 address);
 	size_t addFileName(const std::wstring& fileName);
 
 	std::wstring nocashSymFileName;
