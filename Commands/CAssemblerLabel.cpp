@@ -101,6 +101,7 @@ CDirectiveFunction::CDirectiveFunction(const std::wstring& name, CAssemblerComma
 {
 	this->label = new CAssemblerLabel(name);
 	this->content = content;
+	this->start = this->end = 0;
 }
 
 CDirectiveFunction::~CDirectiveFunction()
@@ -111,10 +112,13 @@ CDirectiveFunction::~CDirectiveFunction()
 
 bool CDirectiveFunction::Validate()
 {
+	start = g_fileManager->getVirtualAddress();
+
 	bool result = label->Validate();
 	if (content->Validate())
 		result = true;
 
+	end = g_fileManager->getVirtualAddress();
 	return result;
 }
 
@@ -132,8 +136,8 @@ void CDirectiveFunction::writeTempData(TempData& tempData) const
 
 void CDirectiveFunction::writeSymData(SymbolData& symData) const
 {
-	symData.startFunction(g_fileManager->getVirtualAddress());
+	symData.startFunction(start);
 	label->writeSymData(symData);
 	content->writeSymData(symData);
-	symData.endFunction(g_fileManager->getVirtualAddress());
+	symData.endFunction(end);
 }
