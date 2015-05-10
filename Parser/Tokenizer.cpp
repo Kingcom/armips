@@ -10,49 +10,45 @@
 
 Tokenizer::Tokenizer()
 {
-	tokenIndex = 0;
+	position.index = 0;
 	invalidToken.type = TokenType::Invalid;
 }
 
 const Token& Tokenizer::nextToken()
 {
-	if (tokenIndex >= tokens.size())
+	if (position.index >= tokens.size())
 		return invalidToken;
 
-	return tokens[tokenIndex++];
+	return tokens[position.index++];
 }
 
 const Token& Tokenizer::peekToken(int ahead)
 {
-	if (tokenIndex+ahead >= tokens.size())
+	if (position.index+ahead >= tokens.size())
 		return invalidToken;
 
-	return tokens[tokenIndex+ahead];
+	return tokens[position.index+ahead];
 }
 
 void Tokenizer::eatTokens(int num)
 {
-	tokenIndex += num;
+	position.index += num;
 }
 
 void Tokenizer::skipLookahead()
 {
-	tokenIndex = tokens.size();
+	position.index = tokens.size();
 }
 
-std::vector<Token> Tokenizer::getTokens(size_t start, size_t count)
+std::vector<Token> Tokenizer::getTokens(TokenizerPosition start, TokenizerPosition end) const
 {
 	std::vector<Token> result;
 
-	size_t oldPos = getPosition();
-	setPosition(start);
-
-	for (size_t i = 0; i < count; i++)
+	for (size_t i = start.index; i < end.index; i++)
 	{
-		result.push_back(nextToken());
+		result.push_back(tokens[i]);
 	}
 
-	setPosition(oldPos);
 	return result;
 }
 

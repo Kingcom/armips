@@ -384,7 +384,7 @@ static ExpressionInternal* expression(Tokenizer& tokenizer)
 
 Expression parseExpression(Tokenizer& tokenizer)
 {
-	size_t pos = tokenizer.getPosition();
+	TokenizerPosition pos = tokenizer.getPosition();
 
 	// parse expression, revert tokenizer to previous position
 	// if it failed

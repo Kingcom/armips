@@ -294,7 +294,7 @@ bool Parser::checkMacroDefinition()
 
 	// load macro content
 
-	size_t start = getTokenizer()->getPosition();
+	TokenizerPosition start = getTokenizer()->getPosition();
 	bool valid = false;
 	while (atEnd() == false)
 	{
@@ -311,8 +311,8 @@ bool Parser::checkMacroDefinition()
 		return true;
 
 	// get content
-	size_t end = getTokenizer()->getPosition()-1;
-	macro.content = getTokenizer()->getTokens(start,end-start);
+	TokenizerPosition end = getTokenizer()->getPosition().previous();
+	macro.content = getTokenizer()->getTokens(start,end);
 
 	return true;
 }
@@ -355,13 +355,13 @@ CAssemblerCommand* Parser::parseMacroCall()
 			return nullptr;
 		}
 
-		size_t startPos = getTokenizer()->getPosition();
+		TokenizerPosition startPos = getTokenizer()->getPosition();
 		Expression exp = parseExpression();
 		if (exp.isLoaded() == false)
 			return false;
 
-		size_t tokenCount = getTokenizer()->getPosition()-startPos;
-		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,tokenCount);
+		TokenizerPosition endPos = getTokenizer()->getPosition();
+		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
 
 		// give them as a replacement to new tokenizer
 		macroTokenizer.registerReplacement(macro.parameters[i],tokens);
@@ -481,7 +481,7 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 {
 	for (Entry& entry: entries)
 	{
-		size_t pos = parser.getTokenizer()->getPosition();
+		TokenizerPosition pos = parser.getTokenizer()->getPosition();
 		auto values = entry.values.begin();
 
 		bool valid = true;

@@ -336,7 +336,7 @@ bool MipsParser::parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg
 bool MipsParser::parseImmediate(Parser& parser, Expression& dest)
 {
 	// check for (reg) or reg sequence
-	size_t pos = parser.getTokenizer()->getPosition();
+	TokenizerPosition pos = parser.getTokenizer()->getPosition();
 
 	bool hasParen = parser.peekToken().type == TokenType::LParen;
 	if (hasParen)
@@ -1174,7 +1174,7 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 
 		if (decodeOpcode(stringValue,MipsOpcodes[z]) == true)
 		{
-			size_t tokenPos = parser.getTokenizer()->getPosition();
+			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
 			if (parseParameters(parser,MipsOpcodes[z]) == true)
 			{
@@ -1233,7 +1233,7 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 
 CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
 {
-	size_t startPos = parser.getTokenizer()->getPosition();
+	TokenizerPosition startPos = parser.getTokenizer()->getPosition();
 
 	// Cannot be a reference (we eat below.)
 	const Token token = parser.peekToken();
@@ -1246,7 +1246,7 @@ CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
 	{
 		if (stringValue == mipsMacros[z].name)
 		{
-			size_t tokenPos = parser.getTokenizer()->getPosition();
+			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
 			if (parseMacroParameters(parser,mipsMacros[z]) == true)
 			{

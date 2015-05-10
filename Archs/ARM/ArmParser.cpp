@@ -589,7 +589,7 @@ CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 
 		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars) == true)
 		{
-			size_t tokenPos = parser.getTokenizer()->getPosition();
+			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
 			if (parseArmParameters(parser,ArmOpcodes[z],vars) == true)
 			{
@@ -686,7 +686,7 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 
 		if (stringValue == name)
 		{
-			size_t tokenPos = parser.getTokenizer()->getPosition();
+			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 			
 			if (parseThumbParameters(parser,ThumbOpcodes[z],vars) == true)
 			{

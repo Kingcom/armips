@@ -175,6 +175,20 @@ protected:
 	wchar_t* stringValue;
 };
 
+struct TokenizerPosition
+{
+	friend class Tokenizer;
+
+	TokenizerPosition previous()
+	{
+		TokenizerPosition pos;
+		pos.index = index > 0 ? index-1 : 0;
+		return pos;
+	}
+private:
+	size_t index;
+};
+
 class Tokenizer
 {
 public:
@@ -183,19 +197,19 @@ public:
 	const Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
 	void eatTokens(int num);
-	bool atEnd() { return tokenIndex >= tokens.size(); }
-	size_t getPosition() { return tokenIndex; }
-	void setPosition(size_t pos) { tokenIndex = pos; }
+	bool atEnd() { return position.index >= tokens.size(); }
+	TokenizerPosition getPosition() { return position; }
+	void setPosition(TokenizerPosition pos) { position = pos; }
 	void skipLookahead();
-	std::vector<Token> getTokens(size_t start, size_t count);
+	std::vector<Token> getTokens(TokenizerPosition start, TokenizerPosition end) const;
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
 	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
 protected:
-	void clearTokens() { tokens.clear(); tokenIndex = 0; };
+	void clearTokens() { tokens.clear(); position.index = 0; };
 	void addToken(Token token);
 private:
 	std::vector<Token> tokens;
-	size_t tokenIndex;
+	TokenizerPosition position;
 
 	struct Replacement
 	{
