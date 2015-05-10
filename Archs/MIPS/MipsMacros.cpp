@@ -37,12 +37,12 @@ bool MipsMacroCommand::Validate()
 	return result;
 }
 
-void MipsMacroCommand::Encode()
+void MipsMacroCommand::Encode() const
 {
 	content->Encode();
 }
 
-void MipsMacroCommand::writeTempData(TempData& tempData)
+void MipsMacroCommand::writeTempData(TempData& tempData) const
 {
 	content->writeTempData(tempData);
 }

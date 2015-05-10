@@ -10,9 +10,9 @@ class TableCommand: public CAssemblerCommand
 public:
 	TableCommand(const std::wstring& fileName, TextFile::Encoding encoding);
 	virtual bool Validate();
-	virtual void Encode() { };
-	virtual void writeTempData(TempData& tempData) { };
-	virtual void writeSymData(SymbolData& symData) { };
+	virtual void Encode() const { };
+	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeSymData(SymbolData& symData) const { };
 private:
 	EncodingTable table;
 };
@@ -26,14 +26,14 @@ public:
 	void setSjis(std::vector<Expression>& entries, bool terminate);
 	void setCustom(std::vector<Expression>& entries, bool terminate);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	void encodeCustom(EncodingTable& table);
 	void encodeSjis();
 	void encodeNormal();
-	size_t getUnitSize();
+	size_t getUnitSize() const;
 	
 	u64 position;
 	EncodingMode mode;

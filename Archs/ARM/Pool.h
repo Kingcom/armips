@@ -6,9 +6,9 @@ class ArmStateCommand: public CAssemblerCommand
 public:
 	ArmStateCommand(bool state);
 	virtual bool Validate();
-	virtual void Encode() { };
-	virtual void writeTempData(TempData& tempData) { };
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const { };
+	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	u64 RamPos;
 	bool armstate;
@@ -36,9 +36,9 @@ class ArmPoolCommand: public CAssemblerCommand
 public:
 	ArmPoolCommand();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 	virtual bool IsPool() { return true; };
 private:
 	u64 RamPos;

@@ -83,7 +83,7 @@ void CDirectiveData::setCustom(std::vector<Expression>& entries, bool terminate)
 	this->writeTermination = terminate;
 }
 
-size_t CDirectiveData::getUnitSize()
+size_t CDirectiveData::getUnitSize() const
 {
 	switch (mode)
 	{
@@ -244,12 +244,12 @@ bool CDirectiveData::Validate()
 	return oldSize != data.size();
 }
 
-void CDirectiveData::Encode()
+void CDirectiveData::Encode() const
 {
 	g_fileManager->write(data.data(),data.size());
 }
 
-void CDirectiveData::writeTempData(TempData& tempData)
+void CDirectiveData::writeTempData(TempData& tempData) const
 {
 	size_t size = (getUnitSize()*2+3)*data.size()+20;
 	wchar_t* str = new wchar_t[size];
@@ -282,7 +282,7 @@ void CDirectiveData::writeTempData(TempData& tempData)
 	delete[] start;
 }
 
-void CDirectiveData::writeSymData(SymbolData& symData)
+void CDirectiveData::writeSymData(SymbolData& symData) const
 {
 	switch (mode)
 	{

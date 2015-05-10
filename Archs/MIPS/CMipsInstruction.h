@@ -90,13 +90,13 @@ public:
 	CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers);
 	~CMipsInstruction();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
 private:
-	void encodeNormal();
-	void encodeVfpu();
-	int formatOpcodeName(char* dest);
-	void formatParameters(char* dest);
+	void encodeNormal() const;
+	void encodeVfpu() const;
+	int formatOpcodeName(char* dest) const;
+	void formatParameters(char* dest) const;
 	int floatToHalfFloat(int i);
 
 	bool IgnoreLoadDelay;

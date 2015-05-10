@@ -55,11 +55,11 @@ class ElfRelocator
 public:
 	bool init(const std::wstring& inputName);
 	bool exportSymbols();
-	void writeSymbols(SymbolData& symData);
+	void writeSymbols(SymbolData& symData) const;
 	CAssemblerCommand* generateCtor(const std::wstring& ctorName);
 	bool relocate(u64& memoryAddress);
 	bool hasDataChanged() { return dataChanged; };
-	ByteArray& getData() { return outputData; };
+	const ByteArray& getData() const { return outputData; };
 private:
 	bool relocateFile(ElfRelocatorFile& file, u64& relocationAddress);
 

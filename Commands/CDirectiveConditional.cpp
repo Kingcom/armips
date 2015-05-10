@@ -96,7 +96,7 @@ bool CDirectiveConditional::Validate()
 	return returnValue;
 }
 
-void CDirectiveConditional::Encode()
+void CDirectiveConditional::Encode() const
 {
 	if (previousResult)
 		ifBlock->Encode();

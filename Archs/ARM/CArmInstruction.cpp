@@ -289,7 +289,7 @@ bool CArmInstruction::Validate()
 	return false;
 }
 
-void CArmInstruction::FormatOpcode(char* Dest, const char* Source)
+void CArmInstruction::FormatOpcode(char* Dest, const char* Source) const
 {
 	while (*Source != 0)
 	{
@@ -330,7 +330,7 @@ void CArmInstruction::FormatOpcode(char* Dest, const char* Source)
 	*Dest = 0;
 }
 
-void CArmInstruction::FormatInstruction(const char* encoding, char* dest)
+void CArmInstruction::FormatInstruction(const char* encoding, char* dest) const
 {
 /*	while (*encoding != 0)
 	{
@@ -431,7 +431,7 @@ void CArmInstruction::FormatInstruction(const char* encoding, char* dest)
 	*dest = 0;*/
 }
 
-void CArmInstruction::writeTempData(TempData& tempData)
+void CArmInstruction::writeTempData(TempData& tempData) const
 {
 	char OpcodeName[32];
 	char str[256];
@@ -445,24 +445,28 @@ void CArmInstruction::writeTempData(TempData& tempData)
 	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }
 
-void CArmInstruction::WriteInstruction(unsigned int encoding)
+void CArmInstruction::WriteInstruction(unsigned int encoding) const
 {
 	g_fileManager->write(&encoding,4);
 }
 
-void CArmInstruction::Encode()
+void CArmInstruction::Encode() const
 {
 	unsigned int encoding = Vars.Opcode.UseNewEncoding == true ? Vars.Opcode.NewEncoding : Opcode.encoding;
 
 	if ((Opcode.flags & ARM_UNCOND) == 0) encoding |= Vars.Opcode.c << 28;
 	if (Vars.Opcode.s == true) encoding |= (1 << 20);
 
+	unsigned char shiftType;
+	int shiftAmount;
 	if (Vars.Shift.UseFinal == true)
 	{
-		Vars.Shift.Type = Vars.Shift.FinalType;
-		Vars.Shift.ShiftAmount = Vars.Shift.FinalShiftAmount;
+		shiftType = Vars.Shift.FinalType;
+		shiftAmount = Vars.Shift.FinalShiftAmount;
+	} else {
+		shiftType = Vars.Shift.Type;
+		shiftAmount = Vars.Shift.ShiftAmount;
 	}
-
 
 	switch (Vars.Opcode.UseNewType == true ? Vars.Opcode.NewType : Opcode.type)
 	{
@@ -479,7 +483,7 @@ void CArmInstruction::Encode()
 
 		if (Opcode.flags & ARM_IMMEDIATE)	// immediate als op2
 		{
-			encoding |= (Vars.Shift.ShiftAmount << 7);
+			encoding |= (shiftAmount << 7);
 			encoding |= Vars.Immediate;
 		} else if (Opcode.flags & ARM_REGISTER) {	// shifted register als op2
 			if (Vars.Shift.UseShift == true)
@@ -489,9 +493,9 @@ void CArmInstruction::Encode()
 					encoding |= (Vars.Shift.reg.num << 8);
 					encoding |= (1 << 4);
 				} else {	// shiftbyimmediate
-					encoding |= (Vars.Shift.ShiftAmount << 7);
+					encoding |= (shiftAmount << 7);
 				}
-				encoding |= (Vars.Shift.Type << 5);
+				encoding |= (shiftType << 5);
 			}
 			encoding |= (Vars.rm.num << 0);
 		}
@@ -510,7 +514,7 @@ void CArmInstruction::Encode()
 				encoding |= (Vars.rm.num << 0);
 			} else if (Opcode.flags & ARM_IMMEDIATE)
 			{
-				encoding |= (Vars.Shift.ShiftAmount << 7);
+				encoding |= (shiftAmount << 7);
 				encoding |= Vars.Immediate;
 			}
 		}
@@ -531,18 +535,19 @@ void CArmInstruction::Encode()
 		if ((Opcode.flags & ARM_ABS) && Vars.negative == true) encoding &= ~(1 << 23);
 		if (Opcode.flags & ARM_IMMEDIATE)
 		{
-			if (Vars.Immediate < 0)
+			int immediate = Vars.Immediate;
+			if (immediate < 0)
 			{
 				encoding &= ~(1 << 23);
-				Vars.Immediate = abs(Vars.Immediate);
+				immediate = abs(immediate);
 			}
-			encoding |= (Vars.Immediate << 0);
+			encoding |= (immediate << 0);
 		} else if (Opcode.flags & ARM_REGISTER)	// ... heißt der opcode nutzt shifts, mit immediates
 		{
 			if (Vars.Shift.UseShift == true)
 			{
-				encoding |= (Vars.Shift.ShiftAmount << 7);
-				encoding |= (Vars.Shift.Type << 5);
+				encoding |= (shiftAmount << 7);
+				encoding |= (shiftType << 5);
 			}
 			encoding |= (Vars.rm.num << 0);
 		}
@@ -555,13 +560,14 @@ void CArmInstruction::Encode()
 		if ((Opcode.flags & ARM_ABS) && Vars.negative == true) encoding &= ~(1 << 23);
 		if (Opcode.flags & ARM_IMMEDIATE)
 		{
-			if (Vars.Immediate < 0)
+			int immediate = Vars.Immediate;
+			if (immediate < 0)
 			{
 				encoding &= ~(1 << 23);
-				Vars.Immediate = abs(Vars.Immediate);
+				immediate = abs(immediate);
 			}
-			encoding |= ((Vars.Immediate & 0xF0) << 4);
-			encoding |= (Vars.Immediate & 0xF);
+			encoding |= ((immediate & 0xF0) << 4);
+			encoding |= (immediate & 0xF);
 		} else if (Opcode.flags & ARM_REGISTER)
 		{
 			encoding |= (Vars.rm.num << 0);

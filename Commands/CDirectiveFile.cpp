@@ -86,7 +86,7 @@ bool CDirectiveFile::Validate()
 	return false;
 }
 
-void CDirectiveFile::Encode()
+void CDirectiveFile::Encode() const
 {
 	switch (type)
 	{
@@ -101,7 +101,7 @@ void CDirectiveFile::Encode()
 	}
 }
 
-void CDirectiveFile::writeTempData(TempData& tempData)
+void CDirectiveFile::writeTempData(TempData& tempData) const
 {
 	std::wstring str;
 	switch (type)
@@ -137,7 +137,7 @@ CDirectivePosition::CDirectivePosition(Type type, u64 position)
 	updateSection(++Global.Section);
 }
 
-void CDirectivePosition::exec()
+void CDirectivePosition::exec() const
 {
 	switch (type)
 	{
@@ -157,13 +157,13 @@ bool CDirectivePosition::Validate()
 	return false;
 }
 
-void CDirectivePosition::Encode()
+void CDirectivePosition::Encode() const
 {
 	Arch->NextSection();
 	exec();
 }
 
-void CDirectivePosition::writeTempData(TempData& tempData)
+void CDirectivePosition::writeTempData(TempData& tempData) const
 {
 	switch (type)
 	{
@@ -237,7 +237,7 @@ bool CDirectiveIncbin::Validate()
 	return false;
 }
 
-void CDirectiveIncbin::Encode()
+void CDirectiveIncbin::Encode() const
 {
 	if (size != 0)
 	{
@@ -251,12 +251,12 @@ void CDirectiveIncbin::Encode()
 	}
 }
 
-void CDirectiveIncbin::writeTempData(TempData& tempData)
+void CDirectiveIncbin::writeTempData(TempData& tempData) const
 {
 	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".incbin \"%s\"",fileName));
 }
 
-void CDirectiveIncbin::writeSymData(SymbolData& symData)
+void CDirectiveIncbin::writeSymData(SymbolData& symData) const
 {
 	symData.addData(g_fileManager->getVirtualAddress(),size,SymbolData::Data8);
 }
@@ -333,7 +333,7 @@ bool CDirectiveAlignFill::Validate()
 	return result;
 }
 
-void CDirectiveAlignFill::Encode()
+void CDirectiveAlignFill::Encode() const
 {
 	unsigned char buffer[128];
 	u64 n = finalSize;
@@ -348,7 +348,7 @@ void CDirectiveAlignFill::Encode()
 	g_fileManager->write(buffer,n);
 }
 
-void CDirectiveAlignFill::writeTempData(TempData& tempData)
+void CDirectiveAlignFill::writeTempData(TempData& tempData) const
 {
 	switch (mode)
 	{
@@ -361,7 +361,7 @@ void CDirectiveAlignFill::writeTempData(TempData& tempData)
 	}
 }
 
-void CDirectiveAlignFill::writeSymData(SymbolData& symData)
+void CDirectiveAlignFill::writeSymData(SymbolData& symData) const
 {
 	switch (mode)
 	{
@@ -383,7 +383,7 @@ CDirectiveHeaderSize::CDirectiveHeaderSize(u64 size)
 	updateFile();
 }
 
-void CDirectiveHeaderSize::updateFile()
+void CDirectiveHeaderSize::updateFile() const
 {
 	AssemblerFile* openFile = g_fileManager->getOpenFile();
 	if (!openFile->hasFixedVirtualAddress())
@@ -401,12 +401,12 @@ bool CDirectiveHeaderSize::Validate()
 	return false;
 }
 
-void CDirectiveHeaderSize::Encode()
+void CDirectiveHeaderSize::Encode() const
 {
 	updateFile();
 }
 
-void CDirectiveHeaderSize::writeTempData(TempData& tempData)
+void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
 	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".headersize 0x%08X",headerSize));
 }
@@ -447,22 +447,22 @@ bool DirectiveObjImport::Validate()
 	return rel.hasDataChanged() || result;
 }
 
-void DirectiveObjImport::Encode()
+void DirectiveObjImport::Encode() const
 {
 	if (ctor != nullptr)
 		ctor->Encode();
 
-	ByteArray& data = rel.getData();
+	const ByteArray& data = rel.getData();
 	g_fileManager->write(data.data(),data.size());
 }
 
-void DirectiveObjImport::writeTempData(TempData& tempData)
+void DirectiveObjImport::writeTempData(TempData& tempData) const
 {
 	if (ctor != nullptr)
 		ctor->writeTempData(tempData);
 }
 
-void DirectiveObjImport::writeSymData(SymbolData& symData)
+void DirectiveObjImport::writeSymData(SymbolData& symData) const
 {
 	if (ctor != nullptr)
 		ctor->writeSymData(symData);

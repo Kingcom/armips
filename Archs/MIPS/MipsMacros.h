@@ -44,8 +44,8 @@ public:
 	MipsMacroCommand(CAssemblerCommand* content, int macroFlags);
 	~MipsMacroCommand();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
 private:
 	CAssemblerCommand* content;
 	int macroFlags;

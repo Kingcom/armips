@@ -27,7 +27,7 @@ bool CommentCommand::Validate()
 	return false;
 }
 
-void CommentCommand::writeTempData(TempData& tempData)
+void CommentCommand::writeTempData(TempData& tempData) const
 {
 	if (tempText.size() != 0)
 	{
@@ -42,7 +42,7 @@ void CommentCommand::writeTempData(TempData& tempData)
 	}
 }
 
-void CommentCommand::writeSymData(SymbolData& symData)
+void CommentCommand::writeSymData(SymbolData& symData) const
 {
 	if (symText.size() != 0)
 		symData.addLabel(position,symText);

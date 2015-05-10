@@ -17,9 +17,9 @@ public:
 	void initClose();
 
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData) { };
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const { };
 private:
 	Type type;
 	GenericAssemblerFile* file;
@@ -31,11 +31,11 @@ public:
 	enum Type { Physical, Virtual };
 	CDirectivePosition(Type type, u64 position);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData) { };
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const { };
 private:
-	void exec();
+	void exec() const;
 	Type type;
 	u64 position;
 };
@@ -48,9 +48,9 @@ public:
 	void setSize(Expression& exp) { sizeExpression = exp; };
 
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	std::wstring fileName;
 	size_t fileSize;
@@ -70,9 +70,9 @@ public:
 	CDirectiveAlignFill(Expression& value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Expression& fillValue, Mode mode);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 
 	Mode mode;
@@ -88,11 +88,11 @@ class CDirectiveHeaderSize: public CAssemblerCommand
 public:
 	CDirectiveHeaderSize(u64 size);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData) { };
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const { };
 private:
-	void updateFile();
+	void updateFile() const;
 	u64 headerSize;
 };
 
@@ -103,9 +103,9 @@ public:
 	DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName);
 	~DirectiveObjImport() { };
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	ElfRelocator rel;
 	CAssemblerCommand* ctor;

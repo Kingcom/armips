@@ -27,12 +27,12 @@ public:
 //	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
 	size_t GetSize() { return OpcodeSize; };
 private:
-	void FormatInstruction(const char* encoding, char* dest);
-	void WriteInstruction(unsigned short encoding);
+	void FormatInstruction(const char* encoding, char* dest) const;
+	void WriteInstruction(unsigned short encoding) const;
 	ThumbOpcodeVariables Vars;
 	tThumbOpcode Opcode;
 	bool NoCheckError;

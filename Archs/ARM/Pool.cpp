@@ -15,7 +15,7 @@ bool ArmStateCommand::Validate()
 	return false;
 }
 
-void ArmStateCommand::writeSymData(SymbolData& symData)
+void ArmStateCommand::writeSymData(SymbolData& symData) const
 {
 	// TODO: find a less ugly way to check for undefined memory positions
 	if (RamPos == (u64)-1)
@@ -84,7 +84,7 @@ bool ArmPoolCommand::Validate()
 	return Result;
 }
 
-void ArmPoolCommand::Encode()
+void ArmPoolCommand::Encode() const
 {
 	for (size_t i = 0; i < Size; i++)
 	{
@@ -93,7 +93,7 @@ void ArmPoolCommand::Encode()
 	}
 }
 
-void ArmPoolCommand::writeTempData(TempData& tempData)
+void ArmPoolCommand::writeTempData(TempData& tempData) const
 {
 	for (size_t i = 0; i < Arm.GetPool(PoolId).GetCount(); i++)
 	{
@@ -101,7 +101,7 @@ void ArmPoolCommand::writeTempData(TempData& tempData)
 	}
 }
 
-void ArmPoolCommand::writeSymData(SymbolData& symData)
+void ArmPoolCommand::writeSymData(SymbolData& symData) const
 {
 	if (Size > 0)
 	{

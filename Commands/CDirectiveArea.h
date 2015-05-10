@@ -8,9 +8,9 @@ public:
 	CDirectiveArea(CAssemblerCommand* content, Expression& size);
 	~CDirectiveArea();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 	void setFillExpression(Expression& exp);
 private:
 	u64 position;

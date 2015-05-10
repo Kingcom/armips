@@ -9,8 +9,8 @@ public:
 	enum class Type { Invalid, Warning, Error, Notice };	
 	CDirectiveMessage(Type type, Expression exp);
 	virtual bool Validate();
-	virtual void Encode() {};
-	virtual void writeTempData(TempData& tempData) { };
+	virtual void Encode() const {};
+	virtual void writeTempData(TempData& tempData) const { };
 private:
 	Type errorType;
 	Expression exp;
@@ -21,9 +21,9 @@ class CDirectiveSym: public CAssemblerCommand
 public:
 	CDirectiveSym(bool enable) {enabled = enable; };
 	virtual bool Validate() { return false; };
-	virtual void Encode() { };
-	virtual void writeTempData(TempData& tempData) { };
-	virtual void writeSymData(SymbolData& symData) { symData.setEnabled(enabled); }
+	virtual void Encode() const { };
+	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeSymData(SymbolData& symData) const { symData.setEnabled(enabled); }
 private:
 	bool enabled;
 };

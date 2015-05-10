@@ -67,12 +67,12 @@ public:
 //	~CArmInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
 private:
-	void FormatOpcode(char* Dest, const char* Source);
-	void FormatInstruction(const char* encoding, char* dest);
-	void WriteInstruction(unsigned int encoding);
+	void FormatOpcode(char* Dest, const char* Source) const;
+	void FormatInstruction(const char* encoding, char* dest) const;
+	void WriteInstruction(unsigned int encoding) const;
 	int getShiftedImmediate(unsigned int num, int& ShiftAmount);
 
 	ArmOpcodeVariables Vars;

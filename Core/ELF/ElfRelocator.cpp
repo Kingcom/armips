@@ -422,11 +422,11 @@ bool ElfRelocator::relocate(u64& memoryAddress)
 	return !error;
 }
 
-void ElfRelocator::writeSymbols(SymbolData& symData)
+void ElfRelocator::writeSymbols(SymbolData& symData) const
 {
-	for (ElfRelocatorFile& file: files)
+	for (const ElfRelocatorFile& file: files)
 	{
-		for (ElfRelocatorSymbol& sym: file.symbols)
+		for (const ElfRelocatorSymbol& sym: file.symbols)
 		{
 			symData.addLabel(sym.relocatedAddress,sym.name);
 

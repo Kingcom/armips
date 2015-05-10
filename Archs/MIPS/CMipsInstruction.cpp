@@ -20,7 +20,7 @@ CMipsInstruction::~CMipsInstruction()
 
 }
 
-int CMipsInstruction::formatOpcodeName(char* dest)
+int CMipsInstruction::formatOpcodeName(char* dest) const
 {
 /*	const char* encoding = Opcode.name;
 	char* start = dest;
@@ -43,7 +43,7 @@ int CMipsInstruction::formatOpcodeName(char* dest)
 	return 0;
 }
 
-void CMipsInstruction::formatParameters(char* dest)
+void CMipsInstruction::formatParameters(char* dest) const
 {
 /*	const char* encoding = Opcode.encoding;
 
@@ -327,7 +327,7 @@ bool CMipsInstruction::Validate()
 	return Result;
 }
 
-void CMipsInstruction::encodeNormal()
+void CMipsInstruction::encodeNormal() const
 {
 	int encoding = opcodeData.opcode.destencoding;
 
@@ -384,7 +384,7 @@ void CMipsInstruction::encodeNormal()
 	g_fileManager->write(&encoding,4);
 }
 
-void CMipsInstruction::encodeVfpu()
+void CMipsInstruction::encodeVfpu() const
 {
 	int encoding = opcodeData.opcode.destencoding;
 	
@@ -413,7 +413,7 @@ void CMipsInstruction::encodeVfpu()
 	g_fileManager->write(&encoding,4);
 }
 
-void CMipsInstruction::Encode()
+void CMipsInstruction::Encode() const
 {
 	if (addNop)
 	{
@@ -427,7 +427,7 @@ void CMipsInstruction::Encode()
 		encodeNormal();
 }
 
-void CMipsInstruction::writeTempData(TempData& tempData)
+void CMipsInstruction::writeTempData(TempData& tempData) const
 {
 /*	char str[256];
 

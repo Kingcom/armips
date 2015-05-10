@@ -28,7 +28,7 @@ bool CommandSequence::Validate()
 	return result;
 }
 
-void CommandSequence::Encode()
+void CommandSequence::Encode() const
 {
 	for (CAssemblerCommand* cmd: commands)
 	{
@@ -36,7 +36,7 @@ void CommandSequence::Encode()
 	}
 }
 
-void CommandSequence::writeTempData(TempData& tempData)
+void CommandSequence::writeTempData(TempData& tempData) const
 {
 	for (CAssemblerCommand* cmd: commands)
 	{
@@ -44,7 +44,7 @@ void CommandSequence::writeTempData(TempData& tempData)
 	}
 }
 
-void CommandSequence::writeSymData(SymbolData& symData)
+void CommandSequence::writeSymData(SymbolData& symData) const
 {
 	for (CAssemblerCommand* cmd: commands)
 	{

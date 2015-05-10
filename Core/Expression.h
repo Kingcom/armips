@@ -130,7 +130,7 @@ class Expression
 public:
 	Expression();
 	ExpressionValue evaluate();
-	bool isLoaded() { return expression != NULL; }
+	bool isLoaded() const { return expression != NULL; }
 	void setExpression(ExpressionInternal* exp) { expression = std::shared_ptr<ExpressionInternal>(exp); }
 	void replaceMemoryPos(const std::wstring& identifierName);
 

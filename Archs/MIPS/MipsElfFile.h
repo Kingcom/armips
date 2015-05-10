@@ -40,9 +40,9 @@ public:
 	DirectiveLoadMipsElf(const std::wstring& fileName);
 	DirectiveLoadMipsElf(const std::wstring& inputName, const std::wstring& outputName);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData) { };
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const { };
 private:
 	MipsElfFile* file;
 	std::wstring inputName;

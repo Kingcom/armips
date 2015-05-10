@@ -24,8 +24,8 @@ public:
 	CDirectiveConditional(ConditionType type, const Expression& exp);
 	~CDirectiveConditional();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData) { };
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const { };
 	void setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock);
 private:
 	bool evaluate();

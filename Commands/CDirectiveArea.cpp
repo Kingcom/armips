@@ -64,7 +64,7 @@ bool CDirectiveArea::Validate()
 	return result;
 }
 
-void CDirectiveArea::Encode()
+void CDirectiveArea::Encode() const
 {
 	content->Encode();
 
@@ -83,7 +83,7 @@ void CDirectiveArea::Encode()
 	}
 }
 
-void CDirectiveArea::writeTempData(TempData& tempData)
+void CDirectiveArea::writeTempData(TempData& tempData) const
 {
 	tempData.writeLine(position,formatString(L".area 0x%08X",areaSize));
 	content->writeTempData(tempData);
@@ -98,7 +98,7 @@ void CDirectiveArea::writeTempData(TempData& tempData)
 	}
 }
 
-void CDirectiveArea::writeSymData(SymbolData& symData)
+void CDirectiveArea::writeSymData(SymbolData& symData) const
 {
 	content->writeSymData(symData);
 

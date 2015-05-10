@@ -283,12 +283,12 @@ bool DirectiveLoadMipsElf::Validate()
 	return false;
 }
 
-void DirectiveLoadMipsElf::Encode()
+void DirectiveLoadMipsElf::Encode() const
 {
 	g_fileManager->openFile(file,false);
 }
 
-void DirectiveLoadMipsElf::writeTempData(TempData& tempData)
+void DirectiveLoadMipsElf::writeTempData(TempData& tempData) const
 {
 	if (outputName.empty())
 	{

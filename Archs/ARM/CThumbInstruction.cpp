@@ -150,14 +150,15 @@ bool CThumbInstruction::Validate()
 	return false;
 }
 
-void CThumbInstruction::WriteInstruction(unsigned short encoding)
+void CThumbInstruction::WriteInstruction(unsigned short encoding) const
 {
 	g_fileManager->write(&encoding,2);
 }
 
-void CThumbInstruction::Encode()
+void CThumbInstruction::Encode() const
 {
 	unsigned int encoding = Opcode.encoding;;
+	int immediate;
 
 	if (Opcode.type == THUMB_TYPE19)	// THUMB.19: long branch with link
 	{
@@ -234,14 +235,15 @@ void CThumbInstruction::Encode()
 			encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE13:	// THUMB.13: add offset to stack pointer
+			immediate = Vars.Immediate;
 			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE) 
-				Vars.Immediate = (unsigned char)~Vars.Immediate;
-			if (Vars.Immediate & 0x80)	// sub
+				immediate = (unsigned char)~immediate;
+			if (immediate & 0x80)	// sub
 			{
 				encoding |= 1 << 7;
-				Vars.Immediate = 0x100-Vars.Immediate;
+				immediate = 0x100-immediate;
 			}
-			encoding |= (Vars.Immediate << 0);
+			encoding |= (immediate << 0);
 			break;
 		case THUMB_TYPE14:	// THUMB.14: push/pop registers
 			if (Vars.rlist & 0xC000) encoding |= (1 << 8); // r14 oder r15
@@ -261,7 +263,7 @@ void CThumbInstruction::Encode()
 	}
 }
 
-void CThumbInstruction::FormatInstruction(const char* encoding, char* dest)
+void CThumbInstruction::FormatInstruction(const char* encoding, char* dest) const
 {
 /*	while (*encoding != 0)
 	{
@@ -312,7 +314,7 @@ void CThumbInstruction::FormatInstruction(const char* encoding, char* dest)
 	*dest = 0;*/
 }
 
-void CThumbInstruction::writeTempData(TempData& tempData)
+void CThumbInstruction::writeTempData(TempData& tempData) const
 {
 	char str[256];
 

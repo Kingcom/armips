@@ -75,17 +75,17 @@ bool CAssemblerLabel::Validate()
 	return result;
 }
 
-void CAssemblerLabel::Encode()
+void CAssemblerLabel::Encode() const
 {
 
 }
 
-void CAssemblerLabel::writeTempData(TempData& tempData)
+void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
 	tempData.writeLine(label->getValue(),formatString(L"%s:",label->getName()));
 }
 
-void CAssemblerLabel::writeSymData(SymbolData& symData)
+void CAssemblerLabel::writeSymData(SymbolData& symData) const
 {
 	// TODO: find a less ugly way to check for undefined memory positions
 	if (label->getValue() == (u64)-1)
@@ -118,19 +118,19 @@ bool CDirectiveFunction::Validate()
 	return result;
 }
 
-void CDirectiveFunction::Encode()
+void CDirectiveFunction::Encode() const
 {
 	label->Encode();
 	content->Encode();
 }
 
-void CDirectiveFunction::writeTempData(TempData& tempData)
+void CDirectiveFunction::writeTempData(TempData& tempData) const
 {
 	label->writeTempData(tempData);
 	content->writeTempData(tempData);
 }
 
-void CDirectiveFunction::writeSymData(SymbolData& symData)
+void CDirectiveFunction::writeSymData(SymbolData& symData) const
 {
 	symData.startFunction(g_fileManager->getVirtualAddress());
 	label->writeSymData(symData);
