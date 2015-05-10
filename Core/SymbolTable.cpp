@@ -171,7 +171,7 @@ bool SymbolTable::findEquation(const std::wstring& name, unsigned int file, unsi
 // TODO: better
 std::wstring SymbolTable::getUniqueLabelName()
 {
-	return formatString(L"__armips_label_%08X__",uniqueCount++);
+	return formatString(L"__armips_label_%08x__",uniqueCount++);
 }
 
 void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
