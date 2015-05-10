@@ -46,6 +46,9 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, unsigned int&
 		{
 			// static label, @. the section doesn't matter
 			section = -1;
+		} else {
+			// local label, @@. the file doesn't matter
+			file = -1;
 		}
 	} else {
 		// global label. neither file nor section matters
