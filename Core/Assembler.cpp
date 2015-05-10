@@ -30,11 +30,6 @@ void writeSymData()
 	Global.symData.write();
 }
 
-void encodeAssemblyData()
-{
-	assemblyContent->Encode();
-}
-
 bool encodeAssembly(CAssemblerCommand* content)
 {
 	bool Revalidate;
@@ -82,12 +77,14 @@ bool encodeAssembly(CAssemblerCommand* content)
 	if (Global.memoryMode)
 		g_fileManager->openFile(Global.memoryFile,false);
 
+	// writeTempData, writeSymData and encode all access the same
+	// memory but never change, so they can run in parallel
 	assemblyContent = content;
-	std::thread encodeThread(encodeAssemblyData);
 	std::thread tempThread(writeTempData);
 	std::thread symThread(writeSymData);
 
-	encodeThread.join();
+	content->Encode();
+
 	tempThread.join();
 	symThread.join();
 
