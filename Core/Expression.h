@@ -202,3 +202,5 @@ bool convertConstExpression(const std::wstring& text, T& dest)
 	dest = (T) value.intValue;
 	return true;
 }
+
+Expression createConstExpression(u64 value);

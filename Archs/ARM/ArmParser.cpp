@@ -190,6 +190,11 @@ bool ArmParser::matchSymbol(Parser& parser, wchar_t symbol, bool optional)
 	return false;
 }
 
+inline bool isNumber(wchar_t value)
+{
+	return (value >= '0' && value <= '9');
+}
+
 bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immediateOnly)
 {
 	// no shift is also valid
@@ -204,7 +209,24 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	if (shiftMode.type != TokenType::Identifier)
 		return false;
 
-	const std::wstring stringValue = shiftMode.getStringValue();
+	std::wstring stringValue = shiftMode.getStringValue();
+	
+	bool hasNumber = isNumber(stringValue.back());
+	u64 number;
+
+	// handle modeXX syntax
+	if (hasNumber)
+	{
+		number = 0;
+		u64 multiplier = 1;
+		while (isNumber(stringValue.back()))
+		{
+			number += multiplier*(stringValue.back() - '0');
+			multiplier *= 10;
+			stringValue.pop_back();
+		}
+	}
+
 	if (stringValue == L"lsl")
 		vars.Shift.Type = 0;
 	else if (stringValue == L"lsr")
@@ -218,7 +240,11 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	else 
 		return false;
 
-	if (parseRegister(parser,vars.Shift.reg) == true)
+	if (hasNumber)
+	{
+		vars.Shift.ShiftExpression = createConstExpression(number);
+		vars.Shift.ShiftByRegister = false;
+	} else if (parseRegister(parser,vars.Shift.reg) == true)
 	{
 		if (immediateOnly)
 			return false;

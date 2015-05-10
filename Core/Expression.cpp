@@ -692,3 +692,11 @@ void Expression::replaceMemoryPos(const std::wstring& identifierName)
 	if (expression != NULL)
 		expression->replaceMemoryPos(identifierName);
 }
+
+Expression createConstExpression(u64 value)
+{
+	Expression exp;
+	ExpressionInternal* num = new ExpressionInternal(value);
+	exp.setExpression(num);
+	return exp;
+}
