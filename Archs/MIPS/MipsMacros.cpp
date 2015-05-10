@@ -104,6 +104,15 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 
 CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
+	const wchar_t* templateLoad = LR"(
+		.if %upper%
+			lui	%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+		.endif
+		.if %lower%
+			%op%	%rs%,%imm% & 0xFFFF(%rs%)
+		.endif
+	)";
+	
 	const wchar_t* templateStore = LR"(
 		.if %upper%
 			lui	r1,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
@@ -127,7 +136,13 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 	default: return nullptr;
 	}
 
-	std::wstring macroText = preprocessMacro(templateStore,immediates);
+	const wchar_t* selectedTemplate;
+	if (flags & MIPSM_LOAD)
+		selectedTemplate = templateLoad;
+	else
+		selectedTemplate = templateStore;
+
+	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
 	return createMacro(parser,macroText,flags, {
 			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
 			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
