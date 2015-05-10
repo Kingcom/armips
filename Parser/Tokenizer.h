@@ -48,7 +48,9 @@ enum class TokenType
 
 struct Token
 {
-	Token() : originalText(nullptr), stringValue(nullptr)
+	friend class Tokenizer;
+
+	Token() : originalText(nullptr), stringValue(nullptr), checked(false)
 	{
 	}
 
@@ -65,6 +67,7 @@ struct Token
 		line = src.line;
 		column = src.column;
 		floatValue = src.floatValue;
+		checked = src.checked;
 	}
 
 	Token(const Token &src) {
@@ -81,12 +84,33 @@ struct Token
 		line = src.line;
 		column = src.column;
 		floatValue = src.floatValue;
+		checked = src.checked;
 	}
 
 	~Token()
 	{
 		clearOriginalText();
 		clearStringValue();
+	}
+
+	Token& Token::operator=(const Token& src)
+	{
+		// Copy strings.
+		originalText = nullptr;
+		if (src.originalText)
+			setOriginalText(src.originalText);
+		stringValue = nullptr;
+		if (src.stringValue)
+			setStringValue(src.stringValue);
+
+		// And copy the rest.
+		type = src.type;
+		line = src.line;
+		column = src.column;
+		floatValue = src.floatValue;
+		checked = src.checked;
+
+		return *this;
 	}
 
 	void setOriginalText(const std::wstring& t)
@@ -173,7 +197,11 @@ protected:
 
 	wchar_t* originalText;
 	wchar_t* stringValue;
+
+	bool checked;
 };
+
+typedef std::list<Token> TokenList;
 
 struct TokenizerPosition
 {
@@ -181,12 +209,12 @@ struct TokenizerPosition
 
 	TokenizerPosition previous()
 	{
-		TokenizerPosition pos;
-		pos.index = index > 0 ? index-1 : 0;
+		TokenizerPosition pos = *this;
+		pos.it--;
 		return pos;
 	}
 private:
-	size_t index;
+	TokenList::iterator it;
 };
 
 class Tokenizer
@@ -197,7 +225,7 @@ public:
 	const Token& peekToken(int ahead = 0);
 	void eatToken() { eatTokens(1); }
 	void eatTokens(int num);
-	bool atEnd() { return position.index >= tokens.size(); }
+	bool atEnd() { return position.it == tokens.end(); }
 	TokenizerPosition getPosition() { return position; }
 	void setPosition(TokenizerPosition pos) { position = pos; }
 	void skipLookahead();
@@ -205,10 +233,13 @@ public:
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
 	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
 protected:
-	void clearTokens() { tokens.clear(); position.index = 0; };
+	void clearTokens() { tokens.clear(); };
+	void resetPosition() { position.it = tokens.begin(); } 
 	void addToken(Token token);
 private:
-	std::vector<Token> tokens;
+	bool processElement(TokenList::iterator& it);
+
+	TokenList tokens;
 	TokenizerPosition position;
 
 	struct Replacement
@@ -259,5 +290,7 @@ public:
 
 		for (const Token &tok: tokens)
 			addToken(tok);
+		
+		resetPosition();
 	}
 };

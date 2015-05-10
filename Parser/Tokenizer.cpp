@@ -10,43 +10,97 @@
 
 Tokenizer::Tokenizer()
 {
-	position.index = 0;
+	position.it = tokens.begin();
 	invalidToken.type = TokenType::Invalid;
+}
+
+bool Tokenizer::processElement(TokenList::iterator& it)
+{
+	if (it == tokens.end())
+		return false;
+
+	while ((*it).checked == false)
+	{
+		bool replaced = false;
+		if ((*it).type == TokenType::Identifier)
+		{
+			const std::wstring stringValue = (*it).getStringValue();
+			for (const Replacement& replacement: replacements)
+			{
+				// if the identifier matches, add all of its tokens
+				if (replacement.identifier == stringValue)
+				{
+					TokenList::iterator insertIt = it;
+					insertIt++;
+				
+					// replace old token with the new tokens
+					// replace the first token manually so that any iterators
+					// are still guaranteed to be valid
+					(*it) = replacement.value[0];
+					tokens.insert(insertIt,replacement.value.begin()+1, replacement.value.end());
+
+					replaced = true;
+					break;
+				}
+			}
+		}
+
+		if (replaced == false)
+			(*it).checked = true;
+	}
+
+	return true;
 }
 
 const Token& Tokenizer::nextToken()
 {
-	if (position.index >= tokens.size())
+	if (processElement(position.it) == false)
 		return invalidToken;
 
-	return tokens[position.index++];
+	return *position.it++;
 }
 
 const Token& Tokenizer::peekToken(int ahead)
 {
-	if (position.index+ahead >= tokens.size())
+	auto it = position.it;
+	for (int i = 0; i < ahead; i++)
+	{
+		if (processElement(it) == false)
+			return invalidToken;
+
+		it++;
+	}
+	
+	if (processElement(it) == false)
 		return invalidToken;
 
-	return tokens[position.index+ahead];
+	return *it;
 }
 
 void Tokenizer::eatTokens(int num)
 {
-	position.index += num;
+	for (int i = 0; i < num; i++)
+	{
+		if (processElement(position.it) == false)
+			break;
+		position.it++;
+	}
 }
 
 void Tokenizer::skipLookahead()
 {
-	position.index = tokens.size();
+	//position.index = tokens.size();
 }
 
 std::vector<Token> Tokenizer::getTokens(TokenizerPosition start, TokenizerPosition end) const
 {
 	std::vector<Token> result;
 
-	for (size_t i = start.index; i < end.index; i++)
+	for (auto it = start.it; it != end.it; it++)
 	{
-		result.push_back(tokens[i]);
+		Token tok = *it;
+		tok.checked = false;
+		result.push_back(tok);
 	}
 
 	return result;
@@ -73,29 +127,7 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, const std::w
 
 void Tokenizer::addToken(Token token)
 {
-	// check replacements
-	bool replaced = false;
-	if (token.type == TokenType::Identifier)
-	{
-		const std::wstring stringValue = token.getStringValue();
-		for (const Replacement& replacement: replacements)
-		{
-			// if the identifier matches, add all of its tokens
-			if (replacement.identifier == stringValue)
-			{
-				for (size_t i = 0; i < replacement.value.size(); i++)
-				{
-					tokens.push_back(replacement.value[i]);
-				}
-
-				replaced = true;
-				break;
-			}
-		}
-	}
-
-	if (replaced == false)
-		tokens.push_back(std::move(token));
+	tokens.push_back(std::move(token));
 }
 
 
@@ -574,7 +606,8 @@ bool FileTokenizer::init(TextFile* input)
 		{
 			addToken(std::move(loadToken()));
 		}
-
+		
+		resetPosition();
 		return true;
 	}
 
