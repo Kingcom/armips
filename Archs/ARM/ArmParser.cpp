@@ -638,9 +638,9 @@ CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 	}
 
 	if (paramFail == true)
-		Logger::printError(Logger::Error,L"ARM parameter failure");
+		parser.printError(token,L"ARM parameter failure");
 	else
-		Logger::printError(Logger::Error,L"Invalid ARM opcode");
+		parser.printError(token,L"Invalid ARM opcode");
 
 	return nullptr;
 }
@@ -737,9 +737,9 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 	}
 
 	if (paramFail == true)
-		Logger::printError(Logger::Error,L"THUMB parameter failure");
+		parser.printError(token,L"THUMB parameter failure");
 	else
-		Logger::printError(Logger::Error,L"Invalid THUMB opcode");
+		parser.printError(token,L"Invalid THUMB opcode");
 	
 	return false;
 }

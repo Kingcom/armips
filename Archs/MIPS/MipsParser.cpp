@@ -73,10 +73,7 @@ CAssemblerCommand* parseDirectiveFixLoadDelay(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveLoadElf(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
-
-	if (checkExpressionListSize(list,1,2) == false)
+	if (parser.parseExpressionList(list,1,2) == false)
 		return nullptr;
 
 	std::wstring inputName, outputName;
@@ -95,11 +92,10 @@ CAssemblerCommand* parseDirectiveLoadElf(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 {
-	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
+	const Token& start = parser.peekToken();
 
-	if (checkExpressionListSize(list,1,2) == false)
+	std::vector<Expression> list;
+	if (parser.parseExpressionList(list,1,2) == false)
 		return nullptr;
 
 	std::wstring inputName;
@@ -114,7 +110,7 @@ CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 		
 		if (Mips.GetVersion() == MARCH_PSX)
 		{
-			Logger::printError(Logger::Error,L"Constructor not supported for PSX libraries");
+			parser.printError(start,L"Constructor not supported for PSX libraries");
 			return new InvalidCommand();
 		}
 
@@ -1188,9 +1184,9 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 	}
 
 	if (paramFail == true)
-		Logger::printError(Logger::Error,L"MIPS parameter failure");
+		parser.printError(token,L"MIPS parameter failure");
 	else
-		Logger::printError(Logger::Error,L"Invalid MIPS opcode '%s'",stringValue);
+		parser.printError(token,L"Invalid MIPS opcode '%s'",stringValue);
 
 	return nullptr;
 }

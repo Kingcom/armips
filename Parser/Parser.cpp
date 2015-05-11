@@ -21,6 +21,7 @@ inline bool isPartOfList(const std::wstring& value, std::initializer_list<wchar_
 Parser::Parser()
 {
 	initializingMacro = false;
+	clearError();
 }
 
 Expression Parser::parseExpression()
@@ -28,17 +29,19 @@ Expression Parser::parseExpression()
 	return ::parseExpression(*getTokenizer());
 }
 
-bool Parser::parseExpressionList(std::vector<Expression>& list)
+bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max)
 {
 	bool valid = true;
 	list.clear();
+
+	const Token& start = peekToken();
 
 	Expression exp = parseExpression();
 	list.push_back(exp);
 
 	if (exp.isLoaded() == false)
 	{
-		Logger::printError(Logger::Error,L"Parameter failure");
+		printError(start,L"Parameter failure");
 		getTokenizer()->skipLookahead();
 		valid = false;
 	}
@@ -52,10 +55,22 @@ bool Parser::parseExpressionList(std::vector<Expression>& list)
 
 		if (exp.isLoaded() == false)
 		{
-			Logger::printError(Logger::Error,L"Parameter failure");
+			printError(start,L"Parameter failure");
 			getTokenizer()->skipLookahead();
 			valid = false;
 		}
+	}
+
+	if (list.size() < (size_t) min)
+	{
+		printError(start,L"Not enough parameters (min %d)",min);
+		return false;
+	}
+
+	if (max != -1 && (size_t) max < list.size())
+	{
+		printError(start,L"Too many parameters (max %d)",max);
+		return false;
 	}
 
 	return valid;
@@ -157,11 +172,11 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
 		CAssemblerCommand* result = directive.function(*this,directive.flags);
 		if (result == nullptr)
 		{
-			Logger::printError(Logger::Error,L"Invalid directive");
-			result = directive.function(*this,directive.flags);
-			return new InvalidCommand();
+			if (hasError() == false)
+				printError(tok,L"Directive parameter failure");
+			return nullptr;
 		}
-
+		
 		return result;
 	}
 
@@ -193,7 +208,8 @@ CAssemblerCommand* Parser::parse(Tokenizer* tokenizer)
 
 bool Parser::checkEquLabel()
 {
-	if (peekToken(0).type == TokenType::Identifier)
+	const Token& start = peekToken();
+	if (start.type == TokenType::Identifier)
 	{
 		int pos = 1;
 		if (peekToken(pos).type == TokenType::Colon)
@@ -209,19 +225,19 @@ bool Parser::checkEquLabel()
 			// equs are not allowed in macros
 			if (initializingMacro)
 			{
-				Logger::printError(Logger::Error,L"equ not allowed in macro");
+				printError(start,L"equ not allowed in macro");
 				return true;
 			}
 
 			if (Global.symbolTable.isValidSymbolName(name) == false)
 			{
-				Logger::printError(Logger::Error,L"Invalid equation name %s",name);
+				printError(start,L"Invalid equation name %s",name);
 				return true;
 			}
 
 			if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 			{
-				Logger::printError(Logger::Error,L"Equation name %s already defined",name);
+				printError(start,L"Equation name %s already defined",name);
 				return true;
 			}
 
@@ -268,7 +284,7 @@ bool Parser::checkMacroDefinition()
 	// nested macro definitions are not allowed
 	if (initializingMacro)
 	{
-		Logger::printError(Logger::Error,L"Nested macro definitions not allowed");
+		printError(first,L"Nested macro definitions not allowed");
 		while (!atEnd())
 		{
 			const Token& token = nextToken();
@@ -280,10 +296,7 @@ bool Parser::checkMacroDefinition()
 	}
 
 	std::vector<Expression> parameters;
-	if (parseExpressionList(parameters) == false)
-		return false;
-	
-	if (checkExpressionListSize(parameters,1,-1) == false)
+	if (parseExpressionList(parameters,1,-1) == false)
 		return false;
 	
 	// load name
@@ -295,7 +308,7 @@ bool Parser::checkMacroDefinition()
 	ParserMacro &macro = macros[macroName];
 	if (macro.name.length() != 0)
 	{
-		Logger::printError(Logger::Error,L"Macro \"%s\" already defined",macro.name);
+		printError(first,L"Macro \"%s\" already defined",macro.name);
 		return false;
 	}
 
@@ -372,7 +385,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 				parseExpression();
 			}
 
-			Logger::printError(Logger::Error,L"Not enough macro arguments (%d vs %d)",count,macro.parameters.size());		
+			printError(start,L"Not enough macro arguments (%d vs %d)",count,macro.parameters.size());		
 			return nullptr;
 		}
 
@@ -398,7 +411,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 			count++;
 		}
 
-		Logger::printError(Logger::Error,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
+		printError(start,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
 		return nullptr;
 	}
 
@@ -440,6 +453,8 @@ CAssemblerCommand* Parser::parseMacroCall()
 
 CAssemblerCommand* Parser::parseLabel()
 {
+	const Token& start = peekToken(0);
+
 	if (peekToken(0).type == TokenType::Identifier &&
 		peekToken(1).type == TokenType::Colon)
 	{
@@ -451,7 +466,7 @@ CAssemblerCommand* Parser::parseLabel()
 		
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid label name");
+			printError(start,L"Invalid label name");
 			return nullptr;
 		}
 
@@ -461,6 +476,17 @@ CAssemblerCommand* Parser::parseLabel()
 	return nullptr;
 }
 
+CAssemblerCommand* Parser::handleError()
+{
+	// skip the rest of the line
+	const Token& token = nextToken();
+	while (peekToken().line == token.line)
+		eatToken();
+
+	clearError();
+	return new InvalidCommand();
+}
+
 CAssemblerCommand* Parser::parseCommand()
 {
 	CAssemblerCommand* command;
@@ -468,28 +494,41 @@ CAssemblerCommand* Parser::parseCommand()
 	while (checkEquLabel() || checkMacroDefinition())
 	{
 		// do nothing, just parse all the equs and macros there are
+		if (hasError())
+			return handleError();
 	}
-
+	
 	if (atEnd())
 		return new DummyCommand();
-
+	
 	if ((command = parseLabel()) != nullptr)
 		return command;
+	if (hasError())
+		return handleError();
 
 	if ((command = parseMacroCall()) != nullptr)
 		return command;
+	if (hasError())
+		return handleError();
 
 	if ((command = Arch->parseDirective(*this)) != nullptr)
 		return command;
+	if (hasError())
+		return handleError();
 
 	if ((command = parseDirective(directives)) != nullptr)
 		return command;
+	if (hasError())
+		return handleError();
 
 	if ((command = Arch->parseOpcode(*this)) != nullptr)
 		return command;
+	if (hasError())
+		return handleError();
 
-	Logger::printError(Logger::Error,L"Parse error '%s'",nextToken().getOriginalText());
-	return nullptr;
+	const Token& token = peekToken();
+	printError(token,L"Parse error '%s'",token.getOriginalText());
+	return handleError();
 }
 
 void TokenSequenceParser::addEntry(int result, TokenSequence tokens, TokenValueSequence values)
@@ -548,21 +587,4 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 	}
 
 	return false;
-}
-
-bool checkExpressionListSize(std::vector<Expression>& list, int min, int max)
-{
-	if (list.size() < (size_t) min)
-	{
-		Logger::printError(Logger::Error,L"Not enough parameters (min %d)",min);
-		return false;
-	}
-
-	if (max != -1 && (size_t) max < list.size())
-	{
-		Logger::printError(Logger::Error,L"Too many parameters (max %d)",max);
-		return false;
-	}
-
-	return true;
 }

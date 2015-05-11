@@ -22,14 +22,11 @@
 CAssemblerCommand* parseDirectiveOpen(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
+	if (parser.parseExpressionList(list,2,3) == false)
 		return nullptr;
 
 	u64 memoryAddress;
 	std::wstring inputName, outputName;
-
-	if (checkExpressionListSize(list,2,3) == false)
-		return nullptr;
 
 	if (list[0].evaluateString(inputName,false) == false)
 		return nullptr;
@@ -55,14 +52,11 @@ CAssemblerCommand* parseDirectiveOpen(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveCreate(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
+	if (parser.parseExpressionList(list,2,2) == false)
 		return nullptr;
 
 	u64 memoryAddress;
 	std::wstring inputName, outputName;
-
-	if (checkExpressionListSize(list,2,2) == false)
-		return nullptr;
 
 	if (list[0].evaluateString(inputName,false) == false)
 		return nullptr;
@@ -85,12 +79,9 @@ CAssemblerCommand* parseDirectiveClose(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveIncbin(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
+	if (parser.parseExpressionList(list,1,3) == false)
 		return nullptr;
 	
-	if (checkExpressionListSize(list,1,3) == false)
-		return nullptr;
-
 	std::wstring fileName;
 	if (list[0].evaluateString(fileName,false) == false)
 		return nullptr;
@@ -107,17 +98,16 @@ CAssemblerCommand* parseDirectiveIncbin(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 {
+	const Token& start = parser.peekToken();
+
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
-	
-	if (checkExpressionListSize(list,1,1) == false)
+	if (parser.parseExpressionList(list,1,1) == false)
 		return nullptr;
 
 	u64 position;
 	if (list[0].evaluateInteger(position) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid ram address");
+		parser.printError(start,L"Invalid ram address");
 		return nullptr;
 	}
 
@@ -135,10 +125,7 @@ CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
-	
-	if (checkExpressionListSize(list,1,2) == false)
+	if (parser.parseExpressionList(list,1,2) == false)
 		return nullptr;
 
 	CDirectiveAlignFill::Mode mode;
@@ -162,17 +149,16 @@ CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveHeaderSize(Parser& parser, int flags)
 {
+	const Token& start = parser.peekToken();
+
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
-	
-	if (checkExpressionListSize(list,1,1) == false)
+	if (parser.parseExpressionList(list,1,1) == false)
 		return nullptr;
 
 	u64 size;
 	if (list[0].evaluateInteger(size) == false)
 	{
-		Logger::printError(Logger::FatalError,L"Invalid header size");
+		parser.printError(start,L"Invalid header size");
 		return nullptr;
 	}
 
@@ -182,10 +168,7 @@ CAssemblerCommand* parseDirectiveHeaderSize(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveObjImport(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
-	
-	if (checkExpressionListSize(list,1,2) == false)
+	if (parser.parseExpressionList(list,1,2) == false)
 		return nullptr;
 
 	std::wstring fileName;
@@ -265,17 +248,16 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveTable(Parser& parser, int flags)
 {
+	const Token& start = parser.peekToken();
+
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
-		return nullptr;
-	
-	if (checkExpressionListSize(list,1,2) == false)
+	if (parser.parseExpressionList(list,1,2) == false)
 		return nullptr;
 
 	std::wstring fileName;
 	if (list[0].evaluateString(fileName,true) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid file name");
+		parser.printError(start,L"Invalid file name");
 		return nullptr;
 	}
 
@@ -285,7 +267,7 @@ CAssemblerCommand* parseDirectiveTable(Parser& parser, int flags)
 		std::wstring encodingName;
 		if (list[1].evaluateString(encodingName,true) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid encoding name");
+			parser.printError(start,L"Invalid encoding name");
 			return nullptr;
 		}
 
@@ -305,12 +287,9 @@ CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 	}
 
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list) == false)
+	if (parser.parseExpressionList(list,1,-1) == false)
 		return nullptr;
 	
-	if (checkExpressionListSize(list,1,-1) == false)
-		return nullptr;
-
 	CDirectiveData* data = new CDirectiveData();
 	switch (flags & DIRECTIVE_USERMASK)
 	{
@@ -380,17 +359,11 @@ CAssemblerCommand* parseDirectiveNds(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
-	if (parser.parseExpressionList(parameters) == false)
+	if (parser.parseExpressionList(parameters,1,2) == false)
 		return nullptr;
-	
-	bool valid = checkExpressionListSize(parameters,1,2);
 	
 	CAssemblerCommand* content = parser.parseCommandSequence(L'.', {L".endarea"});
 	parser.eatToken();
-
-	// area is invalid, return content anyway
-	if (valid == false)
-		return content;
 
 	CDirectiveArea* area = new CDirectiveArea(content,parameters[0]);
 	if (parameters.size() == 2)
@@ -488,8 +461,7 @@ CAssemblerCommand* parseDirectiveSym(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 {
-	// Cannot be a reference, we read more tokens below.
-	const Token tok = parser.nextToken();
+	const Token& tok = parser.nextToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
@@ -503,7 +475,7 @@ CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 	const std::wstring stringValue = tok.getStringValue();
 	if (Global.symbolTable.isValidSymbolName(stringValue) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",stringValue);
+		parser.printError(tok,L"Invalid label name \"%s\"",stringValue);
 		return false;
 	}
 
@@ -513,12 +485,9 @@ CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
-	if (parser.parseExpressionList(parameters) == false)
+	if (parser.parseExpressionList(parameters,1,1) == false)
 		return nullptr;
 	
-	if (checkExpressionListSize(parameters,1,1) == false)
-		return nullptr;
-
 	std::wstring name;
 	if (parameters[0].evaluateIdentifier(name) == false)
 		return nullptr;
@@ -554,11 +523,10 @@ CAssemblerCommand* parseDirectiveMessage(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveInclude(Parser& parser, int flags)
 {
+	const Token& start = parser.peekToken();
+
 	std::vector<Expression> parameters;
-	if (parser.parseExpressionList(parameters) == false)
-		return nullptr;
-	
-	if (checkExpressionListSize(parameters,1,2) == false)
+	if (parser.parseExpressionList(parameters,1,2) == false)
 		return nullptr;
 
 	std::wstring fileName;
@@ -580,14 +548,14 @@ CAssemblerCommand* parseDirectiveInclude(Parser& parser, int flags)
 
 	if (fileExists(fileName) == false)
 	{
-		Logger::printError(Logger::Error,L"Included file \"%s\" does not exist",fileName);
+		parser.printError(start,L"Included file \"%s\" does not exist",fileName);
 		return nullptr;
 	}
 
 	TextFile f;
 	if (f.open(fileName,TextFile::Read,encoding) == false)
 	{
-		Logger::printError(Logger::Error,L"Could not open included file \"%s\"",fileName);
+		parser.printError(start,L"Could not open included file \"%s\"",fileName);
 		return nullptr;
 	}
 

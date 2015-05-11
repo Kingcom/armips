@@ -29,7 +29,7 @@ public:
 	bool atEnd() { return entries.back()->atEnd(); }
 
 	Expression parseExpression();
-	bool parseExpressionList(std::vector<Expression>& list);
+	bool parseExpressionList(std::vector<Expression>& list, int min = -1, int max = -1);
 	bool parseIdentifier(std::wstring& dest);
 	CAssemblerCommand* parseCommand();
 	CAssemblerCommand* parseCommandSequence(wchar_t indicator = 0, std::initializer_list<wchar_t*> terminators = {});
@@ -44,7 +44,21 @@ public:
 	const Token& nextToken() { return getTokenizer()->nextToken(); };
 	void eatToken() { getTokenizer()->eatToken(); };
 	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
+	
+	template <typename... Args>
+	void printError(const Token& token, const wchar_t* text, const Args&... args)
+	{
+		Global.FileInfo.LineNumber = (int) token.line;
+		std::wstring errorText = formatString(text,args...);
+		Logger::printError(Logger::Error,errorText);
+		error = true;
+	}
+
+	bool hasError() { return error; }
 protected:
+	void clearError() { error = false; }
+	CAssemblerCommand* handleError();
+
 	CAssemblerCommand* Parser::parse(Tokenizer* tokenizer);
 	CAssemblerCommand* parseLabel();
 	bool parseMacro();
@@ -56,6 +70,7 @@ protected:
 	std::map<std::wstring,ParserMacro> macros;
 	std::set<std::wstring> macroLabels;
 	bool initializingMacro;
+	bool error;
 };
 
 struct TokenSequenceValue
@@ -107,5 +122,3 @@ private:
 
 	std::vector<Entry> entries;
 };
-
-bool checkExpressionListSize(std::vector<Expression>& list, int min, int max);
