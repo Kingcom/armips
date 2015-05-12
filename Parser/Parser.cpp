@@ -157,13 +157,13 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
 		const DirectiveEntry &directive = it->second;
 
 		if (directive.flags & DIRECTIVE_DISABLED)
-			return nullptr;
+			continue;
 		if ((directive.flags & DIRECTIVE_NOCASHOFF) && Global.nocash == true)
-			return nullptr;
+			continue;
 		if ((directive.flags & DIRECTIVE_NOCASHON) && Global.nocash == false)
-			return nullptr;
+			continue;
 		if ((directive.flags & DIRECTIVE_NOTINMEMORY) && Global.memoryMode == true)
-			return nullptr;
+			continue;
 
 		if (directive.flags & DIRECTIVE_MIPSRESETDELAY)
 			Arch->NextSection();
