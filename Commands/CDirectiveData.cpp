@@ -119,6 +119,10 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 		} else if (value.isString())
 		{
 			ByteArray encoded = table.encodeString(value.strValue,false);
+			if (encoded.size() == 0 && value.strValue.size() > 0)
+			{
+				Logger::queueError(Logger::Error,L"Failed to encode string in parameter %d",i);
+			}
 			data.append(encoded);
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");

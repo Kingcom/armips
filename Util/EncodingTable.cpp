@@ -231,7 +231,6 @@ ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermina
 		if (lookup.findLongestPrefix(utf8.c_str()+pos,index) == false)
 		{
 			// error
-			lookup.findLongestPrefix(utf8.c_str()+pos,index);
 			return ByteArray();
 		}
 
