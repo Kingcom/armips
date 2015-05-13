@@ -121,7 +121,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 			ByteArray encoded = table.encodeString(value.strValue,false);
 			if (encoded.size() == 0 && value.strValue.size() > 0)
 			{
-				Logger::queueError(Logger::Error,L"Failed to encode string in parameter %d",i);
+				Logger::queueError(Logger::Error,L"Failed to encode \"%s\"",value.strValue);
 			}
 			data.append(encoded);
 		} else {
