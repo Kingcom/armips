@@ -145,7 +145,7 @@ void CDirectiveData::encodeSjis()
 		
 		sjisTable.setTerminationEntry((unsigned char*)"\0",1);
 
-		for (unsigned short SJISValue = 0x0020; SJISValue < 0x0100; SJISValue++)
+		for (unsigned short SJISValue = 0x0001; SJISValue < 0x0100; SJISValue++)
 		{
 			wchar_t unicodeValue = sjisToUnicode(SJISValue);
 			if (unicodeValue != 0xFFFF)
