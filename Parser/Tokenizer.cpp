@@ -512,11 +512,21 @@ Token FileTokenizer::loadToken()
 		bool valid = false;
 		while (pos < currentLine.size())
 		{
-			if (pos+1 < currentLine.size() && currentLine[pos] == '\\' && currentLine[pos+1] == '"')
+			if (pos+1 < currentLine.size() && currentLine[pos] == '\\')
 			{
-				text += '"';
-				pos += 2;
-				continue;
+				if (currentLine[pos+1] == '"')
+				{
+					text += '"';
+					pos += 2;
+					continue;
+				}
+				
+				if (currentLine[pos+1] == '\\')
+				{
+					text += '\\';
+					pos += 2;
+					continue;
+				}
 			}
 
 			if (currentLine[pos] == '"')
