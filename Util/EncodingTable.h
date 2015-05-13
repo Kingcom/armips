@@ -7,13 +7,14 @@ class Trie
 {
 public:
 	Trie();
-	void insert(const char* text, size_t value);
-	bool findLongestPrefix(const char* text, size_t& result);
+	void insert(const wchar_t* text, size_t value);
+	void insert(wchar_t character, size_t value);
+	bool findLongestPrefix(const wchar_t* text, size_t& result);
 private:
 	struct LookupEntry
 	{
 		size_t node;
-		u8 input;
+		wchar_t input;
 
 		bool operator<(const LookupEntry& other) const
 		{

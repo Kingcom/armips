@@ -11,7 +11,7 @@ Trie::Trie()
 	nodes.push_back(root);
 }
 
-void Trie::insert(const char* text, size_t value)
+void Trie::insert(const wchar_t* text, size_t value)
 {
 	size_t node = 0;	// root node
 
@@ -44,7 +44,15 @@ void Trie::insert(const char* text, size_t value)
 	nodes[node].value = value;
 }
 
-bool Trie::findLongestPrefix(const char* text, size_t& result)
+void Trie::insert(wchar_t character, size_t value)
+{
+	wchar_t str[2];
+	str[0] = character;
+	str[1] = 0;
+	insert(str,value);
+}
+
+bool Trie::findLongestPrefix(const wchar_t* text, size_t& result)
 {
 	size_t node = 0;		// root node
 	size_t valueNode = 0;	// remember last node that had a value
@@ -179,14 +187,13 @@ void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, const std::ws
 	
 	// insert into trie
 	size_t index = entries.size();
-	std::string utf8 = convertWStringToUtf8(value);
-	lookup.insert(utf8.c_str(),index);
+	lookup.insert(value.c_str(),index);
 
 	// add entry
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
 	entry.hexLen = hexLength;
-	entry.valueLen = utf8.size();
+	entry.valueLen = value.size();
 
 	entries.push_back(entry);
 }
@@ -198,14 +205,13 @@ void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, wchar_t value
 	
 	// insert into trie
 	size_t index = entries.size();
-	std::string utf8 = convertWCharToUtf8(value);
-	lookup.insert(utf8.c_str(),index);
+	lookup.insert(value,index);
 	
 	// add entry
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
 	entry.hexLen = hexLength;
-	entry.valueLen = utf8.size();;
+	entry.valueLen = 1;
 	
 	entries.push_back(entry);
 
@@ -222,13 +228,11 @@ ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermina
 {
 	ByteArray result;
 
-	std::string utf8 = convertWStringToUtf8(str);
 	size_t pos = 0;
-
-	while (pos < utf8.size())
+	while (pos < str.size())
 	{
 		size_t index;
-		if (lookup.findLongestPrefix(utf8.c_str()+pos,index) == false)
+		if (lookup.findLongestPrefix(str.c_str()+pos,index) == false)
 		{
 			// error
 			return ByteArray();
