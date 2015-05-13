@@ -161,6 +161,26 @@ bool ArmParser::parseRegisterList(Parser& parser, int& dest, int validMask)
 
 bool ArmParser::parseImmediate(Parser& parser, Expression& dest)
 {
+	TokenizerPosition pos = parser.getTokenizer()->getPosition();
+
+	// check if it really is an immediate
+	ArmOpcodeVariables tempVars;
+	if (parsePsrTransfer(parser,tempVars,false))
+		return false;
+
+	parser.getTokenizer()->setPosition(pos);
+	if (parseRegister(parser,tempVars.rd))
+		return false;
+	
+	parser.getTokenizer()->setPosition(pos);
+	if (parseCopNumber(parser,tempVars.rd))
+		return false;
+	
+	parser.getTokenizer()->setPosition(pos);
+	if (parseCopRegister(parser,tempVars.rd))
+		return false;
+	
+	parser.getTokenizer()->setPosition(pos);
 	dest = parser.parseExpression();
 	return dest.isLoaded();
 }
