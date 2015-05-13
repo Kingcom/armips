@@ -909,7 +909,7 @@ wchar_t TextFile::readCharacter()
 				contentPos++;
 			}
 			value = sjisToUnicode(sjis);
-			if (value == -1)
+			if (value == (wchar_t)-1)
 			{
 				errorText = formatString(L"One or more invalid Shift-JIS characters in this file");
 			}

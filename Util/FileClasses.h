@@ -95,7 +95,7 @@ private:
 	std::string buf;
 	size_t bufPos;
 
-	inline char bufGetChar()
+	inline unsigned char bufGetChar()
 	{
 		if (buf.size() <= bufPos)
 		{
@@ -105,13 +105,13 @@ private:
 		}
 		return buf[bufPos++];
 	}
-	inline short bufGet16LE()
+	inline unsigned short bufGet16LE()
 	{
 		char c1 = bufGetChar();
 		char c2 = bufGetChar();
 		return c1 | (c2 << 8);
 	}
-	inline short bufGet16BE()
+	inline unsigned short bufGet16BE()
 	{
 		char c1 = bufGetChar();
 		char c2 = bufGetChar();
