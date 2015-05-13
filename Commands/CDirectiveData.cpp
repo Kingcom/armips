@@ -231,6 +231,7 @@ bool CDirectiveData::Validate()
 	case EncodingMode::U8:
 	case EncodingMode::U16:
 	case EncodingMode::U32:
+	case EncodingMode::Ascii:
 		encodeNormal();
 		break;
 	case EncodingMode::Sjis:

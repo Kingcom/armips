@@ -607,7 +607,7 @@ const DirectiveMap directives = {
 	{ L"dcb",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
 	{ L"dcw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16 } },
 	{ L"dcd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32 } },
-	{ L".ascii",			{ &parseDirectiveData,				DIRECTIVE_DATA_8|DIRECTIVE_DATA_ASCII } },
+	{ L".ascii",			{ &parseDirectiveData,				DIRECTIVE_DATA_ASCII } },
 	{ L".string",			{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
 	{ L".str",				{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
 	{ L".stringn",			{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM } },
