@@ -605,6 +605,14 @@ ExpressionValue ExpressionInternal::evaluate()
 	}
 }
 
+static std::wstring escapeString(const std::wstring& text)
+{
+	std::wstring result = text;
+	replaceAll(result,LR"(\)",LR"(\\)");
+	replaceAll(result,LR"(")",LR"(\")");
+
+	return formatString(LR"("%s")",text);
+}
 
 std::wstring ExpressionInternal::toString()
 {
@@ -617,7 +625,7 @@ std::wstring ExpressionInternal::toString()
 	case OperatorType::Identifier:
 		return strValue;
 	case OperatorType::String:
-		return formatString(L"\"%s\"",strValue);
+		return escapeString(strValue);
 	case OperatorType::MemoryPos:
 		return L".";
 	case OperatorType::Add:
