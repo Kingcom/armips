@@ -1,6 +1,38 @@
 #pragma once
 #include "Util/ByteArray.h"
 #include "Util/FileClasses.h"
+#include <map>
+
+class Trie
+{
+public:
+	Trie();
+	void insert(const char* text, size_t value);
+	bool findLongestPrefix(const char* text, size_t& result);
+private:
+	struct LookupEntry
+	{
+		size_t node;
+		u8 input;
+
+		bool operator<(const LookupEntry& other) const
+		{
+			if (node != other.node)
+				return node < other.node;
+			return input < other.input;
+		}
+	};
+
+	struct Node
+	{
+		size_t index;
+		bool hasValue;
+		size_t value;
+	};
+
+	std::vector<Node> nodes;
+	std::map<LookupEntry,size_t> lookup;
+};
 
 class EncodingTable
 {
@@ -16,18 +48,15 @@ public:
 	ByteArray encodeString(const std::wstring& str, bool writeTermination = true);
 	ByteArray encodeTermination();
 private:
-	int searchStringMatch(const std::wstring& str, size_t pos = 0);
-
 	struct TableEntry
 	{
 		size_t hexPos;
 		size_t hexLen;
-		size_t valuePos;
 		size_t valueLen;
 	};
 
 	ByteArray hexData;
-	std::wstring valueData;
 	std::vector<TableEntry> entries;
+	Trie lookup;
 	TableEntry terminationEntry;
 };

@@ -7,7 +7,8 @@
 typedef std::vector<std::wstring> StringList;
 
 std::wstring convertUtf8ToWString(const char* source);
-std::string convertWStringToUtf8(const std::wstring& source);
+std::string convertWCharToUtf8(wchar_t character);
+;std::string convertWStringToUtf8(const std::wstring& source);
 
 std::wstring intToHexString(unsigned int value, int digits, bool prefix = false);
 std::wstring intToString(unsigned int value, int digits);

@@ -49,6 +49,26 @@ std::wstring convertUtf8ToWString(const char* source)
 	return result;
 }
 
+std::string convertWCharToUtf8(wchar_t character)
+{
+	std::string result;
+	
+	if (character < 0x80)
+	{
+		result += character & 0x7F;
+	} else if (character < 0x800)
+	{
+		result += 0xC0 | ((character >> 6) & 0x1F);
+		result += (0x80 | (character & 0x3F));
+	} else {
+		result += 0xE0 | ((character >> 12) & 0xF);
+		result += 0x80 | ((character >> 6) & 0x3F);
+		result += 0x80 | (character & 0x3F);
+	}
+
+	return result;
+}
+
 std::string convertWStringToUtf8(const std::wstring& source)
 {
 	std::string result;
