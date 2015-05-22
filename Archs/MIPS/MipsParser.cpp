@@ -379,12 +379,12 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 		// sqrt(2)
 		sequenceParser.addEntry(2,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"sqrt", 2ull}
+			{L"sqrt", UINT64_C(2)}
 		);
 		// sqrt(1/2)
 		sequenceParser.addEntry(3,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::Div, TokenType::Integer, TokenType::RParen},
-			{L"sqrt", 1ull, 2ull}
+			{L"sqrt", UINT64_C(1), UINT64_C(2)}
 		);
 		// sqrt(0.5)
 		sequenceParser.addEntry(3,
@@ -394,32 +394,32 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 		// 2/sqrt(pi)
 		sequenceParser.addEntry(4,
 			{TokenType::Integer, TokenType::Div, TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
-			{2ull, L"sqrt", L"pi"}
+			{UINT64_C(2), L"sqrt", L"pi"}
 		);
 		// 2/pi
 		sequenceParser.addEntry(5,
 			{TokenType::Integer, TokenType::Div, TokenType::Identifier},
-			{2ull, L"pi"}
+			{UINT64_C(2), L"pi"}
 		);
 		// 1/pi
 		sequenceParser.addEntry(6,
 			{TokenType::Integer, TokenType::Div, TokenType::Identifier},
-			{1ull, L"pi"}
+			{UINT64_C(1), L"pi"}
 		);
 		// pi/4
 		sequenceParser.addEntry(7,
 			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", 4ull}
+			{L"pi", UINT64_C(4)}
 		);
 		// pi/2
 		sequenceParser.addEntry(8,
 			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", 2ull}
+			{L"pi", UINT64_C(2)}
 		);
 		// pi/6 - early because "pi" is a prefix of it
 		sequenceParser.addEntry(16,
 			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", 6ull}
+			{L"pi", UINT64_C(6)}
 		);
 		// pi
 		sequenceParser.addEntry(9,
@@ -444,32 +444,32 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 		// ln(2)
 		sequenceParser.addEntry(13,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"ln", 2ull}
+			{L"ln", UINT64_C(2)}
 		);
 		// ln(10)
 		sequenceParser.addEntry(14,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"ln", 10ull}
+			{L"ln", UINT64_C(10)}
 		);
 		// 2*pi
 		sequenceParser.addEntry(15,
 			{TokenType::Integer, TokenType::Mult, TokenType::Identifier},
-			{2ull, L"pi"}
+			{UINT64_C(2), L"pi"}
 		);
 		// log10(2)
 		sequenceParser.addEntry(17,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"log10", 2ull}
+			{L"log10", UINT64_C(2)}
 		);
 		// log2(10)
 		sequenceParser.addEntry(18,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"log2", 10ull}
+			{L"log2", UINT64_C(10)}
 		);
 		// sqrt(3)/2
 		sequenceParser.addEntry(19,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen, TokenType::Div, TokenType::Integer},
-			{L"sqrt", 3ull, 2ull}
+			{L"sqrt", UINT64_C(3), UINT64_C(2)}
 		);
 	}
 
@@ -615,21 +615,21 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 	if (sequenceParser.getEntryCount() == 0)
 	{
 		// 0
-		sequenceParser.addEntry(0, {TokenType::Integer}, {0ull} );
+		sequenceParser.addEntry(0, {TokenType::Integer}, {UINT64_C(0)} );
 		// 1
-		sequenceParser.addEntry(1, {TokenType::Integer}, {1ull} );
+		sequenceParser.addEntry(1, {TokenType::Integer}, {UINT64_C(1)} );
 		// 2
-		sequenceParser.addEntry(2, {TokenType::Integer}, {2ull} );
+		sequenceParser.addEntry(2, {TokenType::Integer}, {UINT64_C(2)} );
 		// 1/2
-		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {1ull, 2ull} );
+		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(2)} );
 		// 3
-		sequenceParser.addEntry(4, {TokenType::Integer}, {3ull} );
+		sequenceParser.addEntry(4, {TokenType::Integer}, {UINT64_C(3)} );
 		// 1/3
-		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {1ull, 3ull} );
+		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(3)} );
 		// 1/4
-		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {1ull, 4ull} );
+		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(4)} );
 		// 1/6
-		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {1ull, 6ull} );
+		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(6)} );
 	}
 
 	if (parser.nextToken().type != TokenType::LBrack)
@@ -707,35 +707,35 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 		// 0-1
 		sequenceParser.addEntry(1,
 			{TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{0ull, 1ull} );
+			{UINT64_C(0), UINT64_C(1)} );
 		// 0-1
 		sequenceParser.addEntry(-1,
 			{TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{0ull, L"1m"} );
+			{UINT64_C(0), L"1m"} );
 		// 0:1
 		sequenceParser.addEntry(1,
 			{TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{0ull, 1ull} );
+			{UINT64_C(0), UINT64_C(1)} );
 		// 0:1
 		sequenceParser.addEntry(-1,
 			{TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{0ull, L"1m"} );
+			{UINT64_C(0), L"1m"} );
 		// -1-1
 		sequenceParser.addEntry(3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{1ull, 1ull} );
+			{UINT64_C(1), UINT64_C(1)} );
 		// -1-1m
 		sequenceParser.addEntry(-3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{1ull, L"1m"} );
+			{UINT64_C(1), L"1m"} );
 		// -1:1
 		sequenceParser.addEntry(3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{1ull, 1ull} );
+			{UINT64_C(1), UINT64_C(1)} );
 		// -1:1m
 		sequenceParser.addEntry(-3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{1ull, L"1m"} );
+			{UINT64_C(1), L"1m"} );
 	}
 
 	for (int i = 0; i < 4; i++)

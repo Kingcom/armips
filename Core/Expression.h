@@ -188,19 +188,4 @@ private:
 	std::wstring originalText;
 };
 
-template<typename T>
-bool convertConstExpression(const std::wstring& text, T& dest)
-{
-	Expression exp;
-	if (exp.load(text,false) == false)
-		return false;
-
-	ExpressionValue value = exp.evaluate();
-	if (value.isInt() == false)
-		return false;
-
-	dest = (T) value.intValue;
-	return true;
-}
-
 Expression createConstExpression(u64 value);

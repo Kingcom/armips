@@ -93,7 +93,7 @@ struct Token
 		clearStringValue();
 	}
 
-	Token& Token::operator=(const Token& src)
+	Token& operator=(const Token& src)
 	{
 		// Copy strings.
 		originalText = nullptr;

@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+#include "Core/Common.h"
 
 struct AssemblyTemplateArgument
 {
@@ -59,7 +60,7 @@ protected:
 	void clearError() { error = false; }
 	CAssemblerCommand* handleError();
 
-	CAssemblerCommand* Parser::parse(Tokenizer* tokenizer);
+	CAssemblerCommand* parse(Tokenizer* tokenizer);
 	CAssemblerCommand* parseLabel();
 	bool parseMacro();
 	bool checkEquLabel();
