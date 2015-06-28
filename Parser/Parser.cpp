@@ -441,7 +441,14 @@ CAssemblerCommand* Parser::parseMacroCall()
 	// register labels and replacements
 	for (const std::wstring& label: macro.labels)
 	{
-		std::wstring fullName = formatString(L"%s_%s_%08X",macro.name,label,macro.counter);
+		std::wstring fullName;
+		if (Global.symbolTable.isLocalSymbol(label))
+			fullName = formatString(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
+		else if (Global.symbolTable.isStaticSymbol(label))
+			fullName = formatString(L"@%s_%s_%08X",macro.name,label.substr(1),macro.counter);
+		else
+			fullName = formatString(L"%s_%s_%08X",macro.name,label,macro.counter);
+
 		macroTokenizer.registerReplacement(label,fullName);
 	}
 	
