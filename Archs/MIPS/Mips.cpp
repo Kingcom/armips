@@ -80,7 +80,8 @@ const tMipsRegister MipsFloatRegister[] = {
 	{ "f28", 28, 3},	{ "$f28", 28, 4 },
 	{ "f29", 29, 3},	{ "$f29", 29, 4 },
 	{ "f30", 30, 3},	{ "$f30", 30, 4 },
-	{ "f31", 31, 3},	{ "$f31", 31, 4 }
+	{ "f31", 31, 3},	{ "$f31", 31, 4 },
+	{ NULL, -1, 0}
 };
 
 const tMipsRegister MipsPs2Cop2FpRegister[] = {
@@ -125,7 +126,8 @@ const tMipsRegister MipsPs2Cop2FpRegister[] = {
 	{ "vf28", 28, 4},	{ "$vf28", 28, 5 },
 	{ "vf29", 29, 4},	{ "$vf29", 29, 5 },
 	{ "vf30", 30, 4},	{ "$vf30", 30, 5 },
-	{ "vf31", 31, 4},	{ "$vf31", 31, 5 }
+	{ "vf31", 31, 4},	{ "$vf31", 31, 5 },
+	{ NULL, -1, 0}
 };
 
 bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
