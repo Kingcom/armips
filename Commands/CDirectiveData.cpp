@@ -267,19 +267,28 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
 		str += swprintf(str,20,L".byte ");
+		
+		for (size_t i = 0; i < data.size(); i++)
+		{
+			str += swprintf(str,20,L"0x%02X,",data[i]);
+		}
 		break;
 	case EncodingMode::U16:
 		str += swprintf(str,20,L".halfword ");
+
+		for (size_t i = 0; i < data.size(); i += 2)
+		{
+			str += swprintf(str,20,L"0x%04X,",data.getWord(i));
+		}
 		break;
 	case EncodingMode::U32:
 		str += swprintf(str,20,L".word ");
-		break;
-	}
 
-	size_t unitSize = getUnitSize();
-	for (size_t i = 0; i < data.size(); i++)
-	{
-		str += swprintf(str,20,L"0x%0*X,",unitSize*2,data[i]);
+		for (size_t i = 0; i < data.size(); i += 4)
+		{
+			str += swprintf(str,20,L"0x%08X,",data.getDoubleWord(i));
+		}
+		break;
 	}
 
 	*(str-1) = 0;

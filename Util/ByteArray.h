@@ -26,7 +26,7 @@ public:
 	void reserveBytes(size_t count, byte value = 0);
 	void alignSize(size_t alignment);
 
-	int getWord(size_t pos, bool bigEndian = false)
+	int getWord(size_t pos, bool bigEndian = false) const
 	{
 		if (pos+1 >= this->size()) return -1;
 		unsigned char* d = (unsigned char*) this->data();
@@ -39,7 +39,7 @@ public:
 		}
 	}
 
-	int getDoubleWord(size_t pos, bool bigEndian = false)
+	int getDoubleWord(size_t pos, bool bigEndian = false) const
 	{
 		if (pos+3 >= this->size()) return -1;
 		unsigned char* d = (unsigned char*) this->data();
