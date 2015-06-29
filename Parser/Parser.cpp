@@ -368,6 +368,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 	// registering replacements for parameter values
 	TokenStreamTokenizer macroTokenizer;
 
+	std::set<std::wstring> identifierParameters;
 	for (size_t i = 0; i < macro.parameters.size(); i++)
 	{
 		if (i != 0)
@@ -396,6 +397,10 @@ CAssemblerCommand* Parser::parseMacroCall()
 
 		TokenizerPosition endPos = getTokenizer()->getPosition();
 		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
+
+		// remember any single identifier parameters for the label replacement
+		if (tokens.size() == 1 && tokens[0].type == TokenType::Identifier)
+			identifierParameters.insert(tokens[0].getStringValue());
 
 		// give them as a replacement to new tokenizer
 		macroTokenizer.registerReplacement(macro.parameters[i],tokens);
@@ -441,6 +446,12 @@ CAssemblerCommand* Parser::parseMacroCall()
 	// register labels and replacements
 	for (const std::wstring& label: macro.labels)
 	{
+		// check if the label is using the name of a parameter
+		// in that case, don't register a unique replacement
+		if (identifierParameters.find(label) != identifierParameters.end())
+			continue;
+
+		// otherwise make sure the name is unique
 		std::wstring fullName;
 		if (Global.symbolTable.isLocalSymbol(label))
 			fullName = formatString(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
