@@ -21,6 +21,7 @@ inline bool isPartOfList(const std::wstring& value, std::initializer_list<wchar_
 Parser::Parser()
 {
 	initializingMacro = false;
+	overrideFileInfo = false;
 	clearError();
 }
 
@@ -103,19 +104,13 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, std::initiali
 	return sequence;
 }
 
-CAssemblerCommand* Parser::parseFile(TextFile& file)
+CAssemblerCommand* Parser::parseFile(TextFile& file, bool virtualFile)
 {
 	FileTokenizer tokenizer;
 	if (tokenizer.init(&file) == false)
 		return nullptr;
 
-	int oldNum = Global.FileInfo.FileNum;
-	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.size();
-	Global.FileInfo.FileList.push_back(file.getFileName());
-	Global.FileInfo.LineNumber = 0;
-
-	CAssemblerCommand* result = parse(&tokenizer);
-	Global.FileInfo.FileNum = oldNum;
+	CAssemblerCommand* result = parse(&tokenizer,virtualFile,file.getFileName());
 	return result;
 }
 
@@ -123,12 +118,16 @@ CAssemblerCommand* Parser::parseString(const std::wstring& text)
 {
 	TextFile file;
 	file.openMemory(text);
-	return parseFile(file);
+	return parseFile(file,true);
 }
 
 CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
 {
 	std::wstring fullText = text;
+
+	overrideFileInfo = true;
+	overrideFileNum = Global.FileInfo.FileNum;
+	overrideLineNum = Global.FileInfo.LineNumber;
 
 	for (auto& arg: variables)
 	{
@@ -140,7 +139,10 @@ CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initiali
 #endif
 	}
 
-	return parseString(fullText);
+	CAssemblerCommand* result = parseString(fullText);
+	overrideFileInfo = false;
+
+	return result;
 }
 
 CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
@@ -196,9 +198,21 @@ bool Parser::matchToken(TokenType type, bool optional)
 	return nextToken().type == type;
 }
 
-CAssemblerCommand* Parser::parse(Tokenizer* tokenizer)
+CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name)
 {
-	entries.push_back(tokenizer);
+	FileEntry entry;
+	entry.tokenizer = tokenizer;
+	entry.virtualFile = virtualFile;
+
+	if (virtualFile == false && name.empty() == false)
+	{
+		entry.fileNum = (int) Global.FileInfo.FileList.size();
+		Global.FileInfo.FileList.push_back(name);
+	} else {
+		entry.fileNum = -1;
+	}
+
+	entries.push_back(entry);
 
 	CAssemblerCommand* sequence = parseCommandSequence();
 	entries.pop_back();
@@ -208,6 +222,8 @@ CAssemblerCommand* Parser::parse(Tokenizer* tokenizer)
 
 bool Parser::checkEquLabel()
 {
+	updateFileInfo();
+
 	const Token& start = peekToken();
 	if (start.type == TokenType::Identifier)
 	{
@@ -257,8 +273,8 @@ bool Parser::checkEquLabel()
 			std::vector<Token> tokens = tok.getTokens(start,end);
 			size_t index = Tokenizer::addEquValue(tokens);
 
-			for (Tokenizer* tokenizer: entries)
-				tokenizer->resetLookaheadCheckMarks();
+			for (FileEntry& entry: entries)
+				entry.tokenizer->resetLookaheadCheckMarks();
 
 			// register equation
 			Global.symbolTable.addEquation(name,Global.FileInfo.FileNum,Global.Section,index);
@@ -434,7 +450,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 		
 		// parse the short lived next command
 		macroTokenizer.init(macro.content);
-		CAssemblerCommand* command =  parse(&macroTokenizer);
+		CAssemblerCommand* command =  parse(&macroTokenizer,true);
 		delete command;
 
 		macro.labels = macroLabels;
@@ -466,11 +482,13 @@ CAssemblerCommand* Parser::parseMacroCall()
 	macroTokenizer.init(macro.content);
 	macro.counter++;
 
-	return parse(&macroTokenizer);
+	return parse(&macroTokenizer,true);
 }
 
 CAssemblerCommand* Parser::parseLabel()
 {
+	updateFileInfo();
+
 	const Token& start = peekToken(0);
 
 	if (peekToken(0).type == TokenType::Identifier &&
@@ -505,6 +523,27 @@ CAssemblerCommand* Parser::handleError()
 	return new InvalidCommand();
 }
 
+
+void Parser::updateFileInfo()
+{
+	if (overrideFileInfo)
+	{
+		Global.FileInfo.FileNum = overrideFileNum;
+		Global.FileInfo.LineNumber = overrideLineNum;
+		return;
+	}
+
+	for (size_t i = entries.size()-1; i >= 0; i--)
+	{
+		if (entries[i].virtualFile == false && entries[i].fileNum != -1)
+		{
+			Global.FileInfo.FileNum = entries[i].fileNum;
+			Global.FileInfo.LineNumber = entries[i].tokenizer->peekToken().line;
+			return;
+		}
+	}
+}
+
 CAssemblerCommand* Parser::parseCommand()
 {
 	CAssemblerCommand* command;
@@ -516,6 +555,8 @@ CAssemblerCommand* Parser::parseCommand()
 			return handleError();
 	}
 	
+	updateFileInfo();
+
 	if (atEnd())
 		return new DummyCommand();
 	

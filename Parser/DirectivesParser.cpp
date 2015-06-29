@@ -219,7 +219,10 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 	}
 
 	CAssemblerCommand* ifBlock = parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
-	
+
+	// update the file info so that else commands get the right line number
+	parser.updateFileInfo();
+
 	CAssemblerCommand* elseBlock = nullptr;
 	const Token &next = parser.nextToken();
 	const std::wstring stringValue = next.getStringValue();
@@ -362,13 +365,14 @@ CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
 	if (parser.parseExpressionList(parameters,1,2) == false)
 		return nullptr;
 	
-	CAssemblerCommand* content = parser.parseCommandSequence(L'.', {L".endarea"});
-	parser.eatToken();
-
-	CDirectiveArea* area = new CDirectiveArea(content,parameters[0]);
+	CDirectiveArea* area = new CDirectiveArea(parameters[0]);
 	if (parameters.size() == 2)
 		area->setFillExpression(parameters[1]);
 
+	CAssemblerCommand* content = parser.parseCommandSequence(L'.', {L".endarea"});
+	parser.eatToken();
+
+	area->setContent(content);
 	return area;
 }
 
@@ -492,6 +496,7 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 	if (parameters[0].evaluateIdentifier(name) == false)
 		return nullptr;
 
+	CDirectiveFunction* func = new CDirectiveFunction(name);
 	CAssemblerCommand* seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
 
 	const std::wstring stringValue = parser.peekToken().getStringValue();
@@ -501,7 +506,8 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 		parser.eatToken();
 	}
 
-	return new CDirectiveFunction(name,seq);
+	func->setContent(seq);
+	return func;
 }
 
 CAssemblerCommand* parseDirectiveMessage(Parser& parser, int flags)

@@ -85,10 +85,12 @@ bool CDirectiveConditional::Validate()
 
 	if (result)
 	{
+		ifBlock->applyFileInfo();
 		if (ifBlock->Validate())
 			returnValue = true;
 	} else if (elseBlock != NULL)
 	{
+		elseBlock->applyFileInfo();
 		if (elseBlock->Validate())
 			returnValue = true;
 	}
@@ -99,7 +101,12 @@ bool CDirectiveConditional::Validate()
 void CDirectiveConditional::Encode() const
 {
 	if (previousResult)
+	{
+		ifBlock->applyFileInfo();
 		ifBlock->Encode();
-	else if (elseBlock != NULL)
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
 		elseBlock->Encode();
+	}
 }

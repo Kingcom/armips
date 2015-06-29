@@ -5,13 +5,14 @@
 class CDirectiveArea: public CAssemblerCommand
 {
 public:
-	CDirectiveArea(CAssemblerCommand* content, Expression& size);
+	CDirectiveArea(Expression& size);
 	~CDirectiveArea();
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 	void setFillExpression(Expression& exp);
+	void setContent(CAssemblerCommand* content) { this->content = content; }
 private:
 	u64 position;
 	Expression sizeExpression;

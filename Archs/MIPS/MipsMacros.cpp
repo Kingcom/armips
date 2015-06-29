@@ -22,8 +22,11 @@ MipsMacroCommand::~MipsMacroCommand()
 bool MipsMacroCommand::Validate()
 {
 	u64 memoryPos = g_fileManager->getVirtualAddress();
+	content->applyFileInfo();
 	bool result = content->Validate();
 	u64 newMemoryPos = g_fileManager->getVirtualAddress();
+
+	applyFileInfo();
 
 	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && (newMemoryPos-memoryPos) > 4
 		&& (macroFlags & MIPSM_DONTWARNDELAYSLOT) == 0)

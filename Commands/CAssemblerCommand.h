@@ -14,7 +14,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) const { };
 	virtual bool IsConditional() { return false; };
 	virtual bool IsPool() { return false; };
-	void SetFileInfo();
+	void applyFileInfo();
 	int getSection() { return section; }
 	void updateSection(int num) { section = num; }
 protected:

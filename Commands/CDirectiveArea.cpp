@@ -4,14 +4,14 @@
 #include "Core/FileManager.h"
 #include <algorithm>
 
-CDirectiveArea::CDirectiveArea(CAssemblerCommand* content, Expression& size)
+CDirectiveArea::CDirectiveArea(Expression& size)
 {
 	this->areaSize = 0;
 	this->contentSize = 0;
 	this->fillValue = 0;
 
 	this->sizeExpression = size;
-	this->content = content;
+	this->content = nullptr;
 }
 
 CDirectiveArea::~CDirectiveArea()
@@ -46,13 +46,16 @@ bool CDirectiveArea::Validate()
 		}
 	}
 
+	content->applyFileInfo();
 	bool result = content->Validate();
 	contentSize = g_fileManager->getVirtualAddress()-position;
 
+	// restore info of this command
+	applyFileInfo();
+
 	if (areaSize < contentSize)
 	{
-		Logger::queueError(Logger::Error,L"Area at %s(%d) overflown",
-			Global.FileInfo.FileList[FileNum],FileLine);
+		Logger::queueError(Logger::Error,L"Area overflowed");
 	}
 
 	if (fillExpression.isLoaded())
@@ -66,6 +69,7 @@ bool CDirectiveArea::Validate()
 
 void CDirectiveArea::Encode() const
 {
+	content->applyFileInfo();
 	content->Encode();
 
 	if (fillExpression.isLoaded())

@@ -97,10 +97,10 @@ void CAssemblerLabel::writeSymData(SymbolData& symData) const
 
 
 
-CDirectiveFunction::CDirectiveFunction(const std::wstring& name, CAssemblerCommand* content)
+CDirectiveFunction::CDirectiveFunction(const std::wstring& name)
 {
 	this->label = new CAssemblerLabel(name);
-	this->content = content;
+	this->content = nullptr;
 	this->start = this->end = 0;
 }
 
@@ -114,7 +114,10 @@ bool CDirectiveFunction::Validate()
 {
 	start = g_fileManager->getVirtualAddress();
 
+	label->applyFileInfo();
 	bool result = label->Validate();
+
+	content->applyFileInfo();
 	if (content->Validate())
 		result = true;
 
@@ -124,7 +127,10 @@ bool CDirectiveFunction::Validate()
 
 void CDirectiveFunction::Encode() const
 {
+	label->applyFileInfo();
 	label->Encode();
+
+	content->applyFileInfo();
 	content->Encode();
 }
 

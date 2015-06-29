@@ -9,7 +9,7 @@ CAssemblerCommand::CAssemblerCommand()
 	section = Global.Section;
 }
 
-void CAssemblerCommand::SetFileInfo()
+void CAssemblerCommand::applyFileInfo()
 {
 	Global.FileInfo.FileNum = FileNum;
 	Global.FileInfo.LineNumber = FileLine;

@@ -21,6 +21,7 @@ bool CommandSequence::Validate()
 	
 	for (CAssemblerCommand* cmd: commands)
 	{
+		cmd->applyFileInfo();
 		if (cmd->Validate())
 			result = true;
 	}
@@ -32,6 +33,7 @@ void CommandSequence::Encode() const
 {
 	for (CAssemblerCommand* cmd: commands)
 	{
+		cmd->applyFileInfo();
 		cmd->Encode();
 	}
 }

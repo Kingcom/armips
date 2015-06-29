@@ -250,7 +250,10 @@ bool ElfRelocator::exportSymbols()
 CAssemblerCommand* ElfRelocator::generateCtor(const std::wstring& ctorName)
 {
 	CAssemblerCommand* content = relocator->generateCtorStub(ctors);
-	return new CDirectiveFunction(ctorName,content);
+
+	CDirectiveFunction* func = new CDirectiveFunction(ctorName);
+	func->setContent(content);
+	return func;
 }
 
 bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
