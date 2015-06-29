@@ -284,7 +284,7 @@ bool CMipsInstruction::Validate()
 	}
 
 	// check load delay
-	if (Mips.hasLoadDelay() && Mips.GetLoadDelay() && IgnoreLoadDelay == false && !(opcodeData.opcode.flags & MO_IGNORERTD))
+	if (Mips.hasLoadDelay() && Mips.GetLoadDelay() && IgnoreLoadDelay == false)
 	{
 		bool fix = false;
 
@@ -296,7 +296,8 @@ bool CMipsInstruction::Validate()
 		{
 			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registerData.grs.name);
 			fix = true;
-		} else if (registerData.grt.num != -1 && registerData.grt.num == Mips.GetLoadDelayRegister())
+		} else if (registerData.grt.num != -1 && registerData.grt.num == Mips.GetLoadDelayRegister()
+			&& !(opcodeData.opcode.flags & MO_IGNORERTD))
 		{
 			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registerData.grt.name);
 			fix = true;
