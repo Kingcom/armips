@@ -46,6 +46,18 @@ int CArmInstruction::getShiftedImmediate(unsigned int num, int& ShiftAmount)
 	return -1;
 }
 
+void CArmInstruction::setPoolAddress(u64 address)
+{
+	int pos = (int) (address-((RamPos+8) & 0xFFFFFFFD));
+	if (abs(pos) > 4095)
+	{
+		Logger::queueError(Logger::Error,L"Literal pool out of range");
+		return;
+	}
+
+	Vars.Immediate = pos;
+}
+
 bool CArmInstruction::Validate()
 {
 	RamPos = g_fileManager->getVirtualAddress();
@@ -191,7 +203,7 @@ bool CArmInstruction::Validate()
 			Vars.Immediate = temp;
 		} else if (Opcode.flags & ARM_POOL)
 		{
-			int pos, temp;
+			int temp;
 
 			if ((temp = getShiftedImmediate(Vars.Immediate,Vars.Shift.ShiftAmount)) != -1)
 			{
@@ -209,18 +221,8 @@ bool CArmInstruction::Validate()
 				Vars.Opcode.NewType = ARM_TYPE5;
 				Vars.Opcode.UseNewType = true;
 				Vars.Immediate = temp;
-			} else if ((pos = Arm.AddToCurrentPool(Vars.Immediate)) == -1)
-			{
-				Logger::queueError(Logger::Error,L"Unable to find literal pool");
-				return false;
 			} else {
-				pos = pos-((RamPos+8) & 0xFFFFFFFD);
-				if (abs(pos) > 4095)
-				{
-					Logger::queueError(Logger::Error,L"Literal pool out of range");
-					return false;
-				}
-				Vars.Immediate = pos;
+				Arm.addPoolValue(this,Vars.Immediate);
 			}
 		} else if (Opcode.flags & ARM_BRANCH)
 		{

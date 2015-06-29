@@ -48,7 +48,6 @@ bool encodeAssembly(CAssemblerCommand* content)
 		}
 
 		g_fileManager->reset();
-		Arch->Revalidate();
 
 #ifdef _DEBUG
 		if (!Logger::isSilent())
@@ -59,6 +58,8 @@ bool encodeAssembly(CAssemblerCommand* content)
 			g_fileManager->openFile(Global.memoryFile,true);
 
 		Revalidate = content->Validate();
+
+		Arch->Revalidate();
 		validationPasses++;
 	} while (Revalidate == true);
 

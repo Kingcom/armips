@@ -23,6 +23,18 @@ CThumbInstruction::CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpco
 	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
 }
 
+void CThumbInstruction::setPoolAddress(u64 address)
+{
+	int pos = (int) address-((RamPos+4) & 0xFFFFFFFD);
+	if (pos < 0 || pos > 1020)
+	{
+		Logger::queueError(Logger::Error,L"Literal pool out of range");
+		return;
+	}
+
+	Vars.Immediate = pos >> 2;
+}
+
 bool CThumbInstruction::Validate()
 {
 	RamPos = g_fileManager->getVirtualAddress();
@@ -99,19 +111,7 @@ bool CThumbInstruction::Validate()
 			Vars.Immediate >>= 1;
 		} else if (Opcode.flags & THUMB_POOL)
 		{
-			int pos;
-			if ((pos = Arm.AddToCurrentPool(Vars.Immediate)) == -1)
-			{
-				Logger::queueError(Logger::Error,L"Unable to find literal pool");
-				return false;
-			}
-			pos = pos-((RamPos+4) & 0xFFFFFFFD);
-			if (pos < 0 || pos > 1020)
-			{
-				Logger::queueError(Logger::Error,L"Literal pool out of range");
-				return false;
-			}
-			Vars.Immediate = pos >> 2;
+			Arm.addPoolValue(this,Vars.Immediate);
 		} else if (Opcode.flags & THUMB_PCR)
 		{
 			if (Vars.Immediate & 3)

@@ -8,7 +8,6 @@ CArmArchitecture Arm;
 
 CArmArchitecture::CArmArchitecture()
 {
-	Pools = NULL;
 	clear();
 }
 
@@ -36,28 +35,25 @@ CAssemblerCommand* CArmArchitecture::parseOpcode(Parser& parser)
 
 void CArmArchitecture::clear()
 {
-	if (Pools != NULL)
-		delete[] Pools;
-
+	currentPoolContent.clear();
 	thumb = false;
 	arm9 = false;
-	PoolCount = 0;
-	Pools = NULL;
 }
 
 void CArmArchitecture::Pass2()
 {
-	Pools = new ArmPool[PoolCount];
-	CurrentPool = 0;
+	currentPoolContent.clear();
 }
 
 void CArmArchitecture::Revalidate()
 {
-	for (size_t i = 0; i < PoolCount; i++)
+	for (ArmPoolEntry& entry: currentPoolContent)
 	{
-		Pools[i].Clear();
+		entry.command->applyFileInfo();
+		Logger::queueError(Logger::Error,L"Unable to find literal pool");
 	}
-	CurrentPool = 0;
+
+	currentPoolContent.clear();
 }
 
 void CArmArchitecture::NextSection()
@@ -70,11 +66,11 @@ IElfRelocator* CArmArchitecture::getElfRelocator()
 	return new ArmElfRelocator(arm9);
 }
 
-int CArmArchitecture::AddToCurrentPool(int value)
+void CArmArchitecture::addPoolValue(ArmOpcodeCommand* command, u32 value)
 {
-	if (CurrentPool == PoolCount)
-	{
-		return -1;
-	}
-	return (int) Pools[CurrentPool].AddEntry(value);
-};
+	ArmPoolEntry entry;
+	entry.command = command;
+	entry.value = value;
+
+	currentPoolContent.push_back(entry);
+}

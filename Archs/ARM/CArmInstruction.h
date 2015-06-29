@@ -58,7 +58,7 @@ struct ArmOpcodeVariables {
 	char RlistStr[64];
 };
 
-class CArmInstruction: public CAssemblerCommand
+class CArmInstruction: public ArmOpcodeCommand
 {
 public:
 	CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariables& vars);
@@ -69,6 +69,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
+	virtual void setPoolAddress(u64 address);
 private:
 	void FormatOpcode(char* Dest, const char* Source) const;
 	void FormatInstruction(const char* encoding, char* dest) const;

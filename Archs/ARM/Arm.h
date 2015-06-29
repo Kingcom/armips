@@ -48,16 +48,21 @@ public:
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };
 	bool isArm9() { return arm9; };
-	size_t NewPool() { return PoolCount++; };
-	ArmPool& GetPool(size_t num) { return Pools[num]; };
-	int AddToCurrentPool(int value);
-	void NextPool() { CurrentPool++; };
+
+	std::vector<ArmPoolEntry> getPoolContent() { return currentPoolContent; }
+	void clearPoolContent() { currentPoolContent.clear(); }
+	void addPoolValue(ArmOpcodeCommand* command, u32 value);
 private:
 	bool thumb;
 	bool arm9;
-	ArmPool* Pools;
-	size_t PoolCount;
-	size_t CurrentPool;
+
+	std::vector<ArmPoolEntry> currentPoolContent;
+};
+
+class ArmOpcodeCommand: public CAssemblerCommand
+{
+public:
+	virtual void setPoolAddress(u64 address) = 0;
 };
 
 extern CArmArchitecture Arm;

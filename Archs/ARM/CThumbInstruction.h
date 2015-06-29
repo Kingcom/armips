@@ -18,7 +18,7 @@ struct ThumbOpcodeVariables {
 	char RlistStr[32];
 } ;
 
-class CThumbInstruction: public CAssemblerCommand
+class CThumbInstruction: public ArmOpcodeCommand
 {
 public:
 	CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars);
@@ -30,6 +30,7 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	size_t GetSize() { return OpcodeSize; };
+	virtual void setPoolAddress(u64 address);
 private:
 	void FormatInstruction(const char* encoding, char* dest) const;
 	void WriteInstruction(unsigned short encoding) const;
