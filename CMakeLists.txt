@@ -24,8 +24,6 @@ add_executable(armips
 	Util/FileClasses.h
 	Util/ByteArray.cpp
 	Util/ByteArray.h
-	Util/StringFormat.cpp
-	Util/StringFormat.h
 	
 	Core/ELF/ElfTypes.h
 	Core/ELF/ElfRelocator.cpp
@@ -46,8 +44,6 @@ add_executable(armips
 	Core/Common.h
 	Core/Misc.cpp
 	Core/Misc.h
-	Core/MathParser.cpp
-	Core/MathParser.h
 	Core/Directives.cpp
 	Core/Directives.h
 	Core/Assembler.cpp

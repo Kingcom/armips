@@ -28,7 +28,7 @@ public:
 	virtual bool IsConditional() { return true; };
 private:
 	void Execute();
-	Expression Expression;
+	Expression expression;
 	std::wstring labelName;
 	u64 Value;
 	u64 RamPos;

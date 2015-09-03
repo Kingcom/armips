@@ -30,7 +30,7 @@ int wmain(int argc, wchar_t* argv[])
 
 	if (arguments.size() < 2)
 	{
-		Logger::printLine(L"Usage: armips.exe file.asm [-temp temp.txt] [-sym symfile.sym]");
+		Logger::printLine(L"Usage: %s file.asm [-temp temp.txt] [-sym symfile.sym]", argv[0]);
 		return 1;
 	}
 
