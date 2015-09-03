@@ -19,7 +19,7 @@ bool CDirectiveConditional::Load(ArgumentList& Args, ConditionType command)
 	{
 	case ConditionType::IF:
 	case ConditionType::ELSEIF:
-		if (Expression.load(Args[0].text) == false)
+		if (expression.load(Args[0].text) == false)
 			return false;
 		break;
 	case ConditionType::IFDEF:
@@ -98,7 +98,7 @@ bool CDirectiveConditional::Validate()
 	{
 	case ConditionType::IF:
 	case ConditionType::ELSEIF:
-		if (Expression.evaluateInteger(num) == false)
+		if (expression.evaluateInteger(num) == false)
 		{
 			Logger::printError(Logger::Error,L"Invalid expression");
 			return false;
