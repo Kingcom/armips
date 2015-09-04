@@ -179,13 +179,12 @@ bool ElfRelocator::init(const std::wstring& inputName)
 		// init exportable symbols
 		for (int i = 0; i < elf->getSymbolCount(); i++)
 		{
-			ElfRelocatorSymbol symEntry;
-
 			Elf32_Sym* symbol = elf->getSymbol(i);
-			symEntry.type = symbol->st_info & 0xF;
 
-			if (symEntry.type == STT_OBJECT || symEntry.type == STT_FUNC)
+			if (ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL && symbol->st_shndx != 0)
 			{
+				ElfRelocatorSymbol symEntry;
+				symEntry.type = ELF32_ST_TYPE(symbol->st_info);
 				symEntry.name = toWLowercase(elf->getStrTableString(symbol->st_name));
 				symEntry.relativeAddress = symbol->st_value;
 				symEntry.section = symbol->st_shndx;
