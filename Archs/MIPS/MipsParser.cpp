@@ -1208,6 +1208,9 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 		case 's':	// register
 			CHECK(parseRegister(parser,registers.grs));
 			break;
+		case 'S':	// register
+			CHECK(parseFpuRegister(parser,registers.frs));
+			break;
 		case 'i':	// primary immediate
 			CHECK(parseImmediate(parser,immediate.primary.expression));
 			break;

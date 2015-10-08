@@ -7,6 +7,8 @@
 #define MIPSM_HW					0x00000003
 #define MIPSM_HWU					0x00000004
 #define MIPSM_W						0x00000005
+#define MIPSM_COP1					0x00000006
+#define MIPSM_COP2					0x00000007
 #define MIPSM_ACCESSMASK			0x00000007
 
 #define MIPSM_NE					0x00000001
