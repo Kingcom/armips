@@ -25,7 +25,8 @@ public:
 	~CDirectiveConditional();
 	virtual bool Validate();
 	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 	void setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock);
 private:
 	bool evaluate();

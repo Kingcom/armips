@@ -110,3 +110,29 @@ void CDirectiveConditional::Encode() const
 		elseBlock->Encode();
 	}
 }
+
+void CDirectiveConditional::writeTempData(TempData& tempData) const
+{
+	if (previousResult)
+	{
+		ifBlock->applyFileInfo();
+		ifBlock->writeTempData(tempData);
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
+		elseBlock->writeTempData(tempData);
+	}
+}
+
+void CDirectiveConditional::writeSymData(SymbolData& symData) const
+{
+	if (previousResult)
+	{
+		ifBlock->applyFileInfo();
+		ifBlock->writeSymData(symData);
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
+		elseBlock->writeSymData(symData);
+	}
+}
