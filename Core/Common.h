@@ -34,6 +34,7 @@ typedef struct {
 	int validationPasses;
 	bool memoryMode;
 	AssemblerFile* memoryFile;
+	bool multiThreading;
 } tGlobal;
 
 enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NOTICE };

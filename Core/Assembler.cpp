@@ -81,13 +81,20 @@ bool encodeAssembly(CAssemblerCommand* content)
 	// writeTempData, writeSymData and encode all access the same
 	// memory but never change, so they can run in parallel
 	assemblyContent = content;
-	std::thread tempThread(writeTempData);
-	std::thread symThread(writeSymData);
+	if (Global.multiThreading)
+	{
+		std::thread tempThread(writeTempData);
+		std::thread symThread(writeSymData);
 
-	content->Encode();
+		content->Encode();
 
-	tempThread.join();
-	symThread.join();
+		tempThread.join();
+		symThread.join();
+	} else {
+		writeTempData();
+		writeSymData();
+		content->Encode();
+	}
 
 	if (g_fileManager->hasOpenFile())
 	{
@@ -113,6 +120,7 @@ bool runArmips(ArmipsArguments& arguments)
 	Global.DebugMessages = 0;
 	Global.relativeInclude = false;
 	Global.validationPasses = 0;
+	Global.multiThreading = false;
 	Arch = &InvalidArchitecture;
 
 	Tokenizer::clearEquValues();
