@@ -133,7 +133,6 @@ CDirectivePosition::CDirectivePosition(Type type, u64 position)
 	: type(type)
 {
 	this->position = position;
-	exec();
 	updateSection(++Global.Section);
 }
 
