@@ -69,6 +69,7 @@ void CDirectiveFile::initClose()
 
 bool CDirectiveFile::Validate()
 {
+	virtualAddress = g_fileManager->getVirtualAddress();
 	Arch->NextSection();
 
 	switch (type)
@@ -121,7 +122,7 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 		break;
 	}
 
-	tempData.writeLine(g_fileManager->getVirtualAddress(),str);
+	tempData.writeLine(virtualAddress,str);
 }
 
 
@@ -151,7 +152,9 @@ void CDirectivePosition::exec() const
 
 bool CDirectivePosition::Validate()
 {
+	virtualAddress = g_fileManager->getVirtualAddress();
 	Arch->NextSection();
+
 	exec();
 	return false;
 }
@@ -167,10 +170,10 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".orga 0x%08X",(u32)position));
+		tempData.writeLine(virtualAddress,formatString(L".orga 0x%08X",(u32)position));
 		break;
 	case Virtual:
-		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".org 0x%08X",(u32)position));
+		tempData.writeLine(virtualAddress,formatString(L".org 0x%08X",(u32)position));
 		break;
 	}
 }
@@ -194,6 +197,7 @@ CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
 
 bool CDirectiveIncbin::Validate()
 {
+	virtualAddress = g_fileManager->getVirtualAddress();
 	u64 oldStart = start;
 	u64 oldSize = size;
 
@@ -252,12 +256,12 @@ void CDirectiveIncbin::Encode() const
 
 void CDirectiveIncbin::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".incbin \"%s\"",fileName));
+	tempData.writeLine(virtualAddress,formatString(L".incbin \"%s\"",fileName));
 }
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData) const
 {
-	symData.addData(g_fileManager->getVirtualAddress(),size,SymbolData::Data8);
+	symData.addData(virtualAddress,size,SymbolData::Data8);
 }
 
 
@@ -287,6 +291,8 @@ CDirectiveAlignFill::CDirectiveAlignFill(Expression& value, Expression& fillValu
 
 bool CDirectiveAlignFill::Validate()
 {
+	virtualAddress = g_fileManager->getVirtualAddress();
+
 	if (valueExpression.isLoaded())
 	{
 		if (valueExpression.evaluateInteger(value) == false)
@@ -352,10 +358,10 @@ void CDirectiveAlignFill::writeTempData(TempData& tempData) const
 	switch (mode)
 	{
 	case Align:
-		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".align 0x%08X",value));
+		tempData.writeLine(virtualAddress,formatString(L".align 0x%08X",value));
 		break;
 	case Fill:
-		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".fill 0x%08X,0x%02X",value,fillByte));
+		tempData.writeLine(virtualAddress,formatString(L".fill 0x%08X,0x%02X",value,fillByte));
 		break;
 	}
 }
@@ -367,7 +373,7 @@ void CDirectiveAlignFill::writeSymData(SymbolData& symData) const
 	case Align:	// ?
 		break;
 	case Fill:
-		symData.addData(g_fileManager->getVirtualAddress(),value,SymbolData::Data8);
+		symData.addData(virtualAddress,value,SymbolData::Data8);
 		break;
 	}
 }
@@ -396,6 +402,7 @@ void CDirectiveHeaderSize::updateFile() const
 
 bool CDirectiveHeaderSize::Validate()
 {
+	virtualAddress = g_fileManager->getVirtualAddress();
 	updateFile();
 	return false;
 }
@@ -407,7 +414,7 @@ void CDirectiveHeaderSize::Encode() const
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".headersize 0x%08X",headerSize));
+	tempData.writeLine(virtualAddress,formatString(L".headersize 0x%08X",headerSize));
 }
 
 

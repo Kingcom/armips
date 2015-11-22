@@ -22,6 +22,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) const { };
 private:
 	Type type;
+	u64 virtualAddress;
 	GenericAssemblerFile* file;
 };
 
@@ -38,6 +39,7 @@ private:
 	void exec() const;
 	Type type;
 	u64 position;
+	u64 virtualAddress;
 };
 
 class CDirectiveIncbin: public CAssemblerCommand
@@ -59,6 +61,7 @@ private:
 	Expression sizeExpression;
 	u64 start;
 	u64 size;
+	u64 virtualAddress;
 };
 
 class CDirectiveAlignFill: public CAssemblerCommand
@@ -81,6 +84,7 @@ private:
 	u64 value;
 	u64 finalSize;
 	u8 fillByte;
+	u64 virtualAddress;
 };
 
 class CDirectiveHeaderSize: public CAssemblerCommand
@@ -94,6 +98,7 @@ public:
 private:
 	void updateFile() const;
 	u64 headerSize;
+	u64 virtualAddress;
 };
 
 class DirectiveObjImport: public CAssemblerCommand
