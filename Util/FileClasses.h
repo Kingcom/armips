@@ -48,6 +48,8 @@ public:
 	void close();
 
 	bool hasGuessedEncoding() { return guessedEncoding; };
+	bool isFromMemory() { return fromMemory; }
+	int getNumLines() { return lineCount; }
 
 	void setFileName(const std::wstring& name) { fileName = name; };
 	const std::wstring& getFileName() { return fileName; };
@@ -91,6 +93,7 @@ private:
 	bool fromMemory;
 	std::wstring content;
 	size_t contentPos;
+	int lineCount;
 
 	std::string buf;
 	size_t bufPos;

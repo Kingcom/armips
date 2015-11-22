@@ -701,6 +701,7 @@ TextFile::TextFile()
 	errorRetrieved = false;
 	fromMemory = false;
 	bufPos = 0;
+	lineCount = 0;
 }
 
 TextFile::~TextFile()
@@ -716,6 +717,7 @@ void TextFile::openMemory(const std::wstring& content)
 	size_ = (long) content.size();
 	encoding = UTF16LE;
 	mode = Read;
+	lineCount = 0;
 }
 
 bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
@@ -950,6 +952,7 @@ std::wstring TextFile::readLine()
 		}
 	}
 
+	lineCount++;
 	return result;
 }
 

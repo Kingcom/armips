@@ -111,6 +111,10 @@ CAssemblerCommand* Parser::parseFile(TextFile& file, bool virtualFile)
 		return nullptr;
 
 	CAssemblerCommand* result = parse(&tokenizer,virtualFile,file.getFileName());
+
+	if (file.isFromMemory() == false)
+		Global.FileInfo.TotalLineCount += file.getNumLines();
+
 	return result;
 }
 
