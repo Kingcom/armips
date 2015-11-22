@@ -32,7 +32,6 @@ private:
 	bool parseCop2BranchCondition(Parser& parser, int& result);
 	bool parseWb(Parser& parser);
 
-	bool decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest);
 	bool decodeCop2BranchCondition(const std::wstring& text, size_t& pos, int& result);
 	bool decodeVfpuType(const std::wstring& name, size_t& pos, int& dest);
 	bool decodeOpcode(const std::wstring& name, const tMipsOpcode& opcode);
@@ -46,4 +45,18 @@ private:
 	MipsImmediateData immediate;
 	MipsOpcodeData opcodeData;
 	bool hasFixedSecondaryImmediate;
+};
+
+class MipsOpcodeFormatter
+{
+public:
+	const std::wstring& formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData,
+		const MipsImmediateData& immData);
+private:
+	void handleOpcodeName(const MipsOpcodeData& opData);	
+	void handleOpcodeParameters(const MipsOpcodeData& opData, const MipsRegisterData& regData,
+		const MipsImmediateData& immData);
+	void handleImmediate(MipsImmediateType type, unsigned int originalValue, unsigned int opcodeFlags);
+
+	std::wstring buffer;
 };

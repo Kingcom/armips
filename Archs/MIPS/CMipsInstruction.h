@@ -95,8 +95,6 @@ public:
 private:
 	void encodeNormal() const;
 	void encodeVfpu() const;
-	int formatOpcodeName(char* dest) const;
-	void formatParameters(char* dest) const;
 	int floatToHalfFloat(int i);
 
 	bool IgnoreLoadDelay;

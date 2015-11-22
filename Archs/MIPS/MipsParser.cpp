@@ -174,7 +174,7 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 		if (number.type == TokenType::Integer && number.intValue <= 31)
 		{
 			dest.name = formatString(L"$%d",number.intValue);
-			dest.num = number.intValue;
+			dest.num = (int) number.intValue;
 
 			parser.eatTokens(2);
 			return true;
@@ -843,7 +843,7 @@ bool MipsParser::parseWb(Parser& parser)
 	return token.getStringValue() == L"wb";
 }
 
-bool MipsParser::decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest)
+static bool decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest)
 {
 	if (*encoding == 'h')	// half float
 	{
@@ -1259,4 +1259,140 @@ CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
 	// no matching macro found, restore state
 	parser.getTokenizer()->setPosition(startPos);
 	return nullptr;
+}
+
+void MipsOpcodeFormatter::handleOpcodeName(const MipsOpcodeData& opData)
+{
+	const char* encoding = opData.opcode.name;
+
+	while (*encoding != 0)
+	{
+		switch (*encoding++)
+		{
+		case 'S':
+			buffer += "sptq"[opData.vfpuSize];
+			break;
+		case 'B':
+			// TODO
+			break;
+		default:
+			buffer += *(encoding-1);
+			break;
+		}
+	}
+}
+
+void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int originalValue, unsigned int opcodeFlags)
+{
+	switch (type)
+	{
+	case MipsImmediateType::ImmediateHalfFloat:
+		buffer += formatString(L"%f",*((float*)&originalValue));
+		break;
+	case MipsImmediateType::Immediate16:
+		if (!(opcodeFlags & MO_IPCR) && originalValue & 0x8000)
+			buffer += formatString(L"-0x%X", 0x10000-(originalValue & 0xFFFF));
+		else
+			buffer += formatString(L"0x%X", originalValue);
+		break;
+	default:
+		buffer += formatString(L"0x%X", originalValue);
+		break;
+	}
+}
+
+void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, const MipsRegisterData& regData,
+	const MipsImmediateData& immData)
+{
+	const u8* encoding = (const u8*) opData.opcode.encoding;
+
+	MipsImmediateType type;
+	while (*encoding != 0)
+	{
+		switch (*encoding++)
+		{
+		case 'r':	// forced register
+			buffer += formatString(L"r%d",*encoding);
+			encoding += 1;
+			break;
+		case 's':	// register
+			buffer += regData.grs.name;
+			break;
+		case 'd':	// register
+			buffer += regData.grd.name;
+			break;
+		case 't':	// register
+			buffer += regData.grt.name;
+			break;
+		case 'S':	// fpu register
+			buffer += regData.frs.name;
+			break;
+		case 'D':	// fpu register
+			buffer += regData.frd.name;
+			break;
+		case 'T':	// fpu register
+			buffer += regData.frt.name;
+			break;
+		case 'v':	// psp vfpu reg
+		case 'm':	// vfpu matrix register
+			switch (*encoding++)
+			{
+			case 'd':
+				buffer += regData.vrd.name;
+				break;
+			case 's':
+				buffer += regData.vrs.name;
+				break;
+			case 't':
+				buffer += regData.vrt.name;
+				break;
+			}
+			break;
+		case 'V':	// ps2 vector reg
+			switch (*encoding++)
+			{
+			case 'd':
+				buffer += regData.ps2vrd.name;
+				break;
+			case 's':
+				buffer += regData.ps2vrs.name;
+				break;
+			case 't':
+				buffer += regData.ps2vrt.name;
+				break;
+			}
+			break;
+		case 'i':	// primary immediate
+			decodeImmediateSize(encoding,type);
+			handleImmediate(immData.primary.type,immData.primary.originalValue,opData.opcode.flags);
+			break;
+		case 'j':	// secondary immediate
+			handleImmediate(immData.secondary.type,immData.secondary.originalValue, opData.opcode.flags);
+			encoding++;
+			break;
+		case 'C':	// vfpu condition
+		case 'W':	// vfpu argument
+			// TODO
+			break;
+		case 'w':	// 'wb' characters
+			buffer += L"wb";
+			break;
+		default:
+			buffer += *(encoding-1);
+			break;
+		}
+	}
+}
+
+const std::wstring& MipsOpcodeFormatter::formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData,
+	const MipsImmediateData& immData)
+{
+	buffer = L"   ";
+	handleOpcodeName(opData);
+
+	while (buffer.size() < 11)
+		buffer += ' ';
+
+	handleOpcodeParameters(opData,regData,immData);
+	return buffer;
 }

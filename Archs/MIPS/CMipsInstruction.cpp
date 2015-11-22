@@ -4,6 +4,7 @@
 #include "Mips.h"
 #include "MipsOpcodes.h"
 #include "Core/FileManager.h"
+#include "MipsParser.h"
 
 CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers)
 {
@@ -18,119 +19,6 @@ CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& im
 CMipsInstruction::~CMipsInstruction()
 {
 
-}
-
-int CMipsInstruction::formatOpcodeName(char* dest) const
-{
-/*	const char* encoding = Opcode.name;
-	char* start = dest;
-
-	while (*encoding != 0)
-	{
-		switch (*encoding)
-		{
-		case 'S':
-			*dest++ = "sptq"[vfpuSize];
-			encoding++;
-			break;
-		default:
-			*dest++ = *encoding++;
-			break;
-		}
-	}
-	*dest = 0;
-	return (int) (dest-start);*/
-	return 0;
-}
-
-void CMipsInstruction::formatParameters(char* dest) const
-{
-/*	const char* encoding = Opcode.encoding;
-
-	while (*encoding != 0)
-	{
-		switch (*encoding)
-		{
-		case 'r':	// forced register
-			dest += sprintf(dest,"r%d",*(encoding+1));
-			encoding+=2;
-			break;
-		case 's':
-			dest += sprintf(dest,"%s",registers.grs.name);
-			encoding++;
-			break;
-		case 'S':
-			dest += sprintf(dest,"%s",registers.frs.name);
-			encoding++;
-			break;
-		case 'd':
-			dest += sprintf(dest,"%s",registers.grd.name);
-			encoding++;
-			break;
-		case 'D':
-			dest += sprintf(dest,"%s",registers.frd.name);
-			encoding++;
-			break;
-		case 't':
-			dest += sprintf(dest,"%s",registers.grt.name);
-			encoding++;
-			break;
-		case 'T':
-			dest += sprintf(dest,"%s",registers.frt.name);
-			encoding++;
-			break;
-		case 'v':
-			switch (*(encoding+1))
-			{
-			case 'd':
-				dest += sprintf(dest,"%s",registers.vrd.name);
-				break;
-			case 's':
-				dest += sprintf(dest,"%s",registers.vrs.name);
-				break;
-			case 't':
-				dest += sprintf(dest,"%s",registers.vrt.name);
-				break;
-			}
-			encoding += 2;
-			break;
-		case 'V':
-			switch (*(encoding+1))
-			{
-			case 'd':
-				dest += sprintf(dest,"%s",registers.ps2vrd.name);
-				break;
-			case 's':
-				dest += sprintf(dest,"%s",registers.ps2vrs.name);
-				break;
-			case 't':
-				dest += sprintf(dest,"%s",registers.ps2vrt.name);
-				break;
-			}
-			encoding += 2;
-			break;
-		case 'i':	// 16 bit immediate
-			dest += sprintf(dest,"0x%X",immediate.originalValue & 0xFFFF);
-			encoding++;
-			break;
-		case 'I':	// 32 bit immediate
-			dest += sprintf(dest,"0x%X",immediate.originalValue);
-			encoding++;
-			break;
-		case 'a':	// 5 bit immediate
-			dest += sprintf(dest,"0x%X",immediate.originalValue & 0x1F);
-			encoding++;
-			break;
-		case 'b':	// 26 bit immediate
-			dest += sprintf(dest,"0x%X",immediate.originalValue & 0x3FFFFFF);
-			encoding++;
-			break;
-		default:
-			*dest++ = *encoding++;
-			break;
-		}
-	}
-	*dest = 0;*/
 }
 
 int getImmediateBits(MipsImmediateType type)
@@ -430,14 +318,6 @@ void CMipsInstruction::Encode() const
 
 void CMipsInstruction::writeTempData(TempData& tempData) const
 {
-/*	char str[256];
-
-
-	int pos = sprintf(str,"   ");
-	pos += formatOpcodeName(&str[pos]);
-	while (pos < 11) str[pos++] = ' ';
-	str[pos] = 0;
-	formatParameters(&str[pos]);
-
-	tempData.writeLine(RamPos,convertUtf8ToWString(str));*/
+	MipsOpcodeFormatter formatter;
+	tempData.writeLine(RamPos,formatter.formatOpcode(opcodeData,registerData,immediateData));
 }
