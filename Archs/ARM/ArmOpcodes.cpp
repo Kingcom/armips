@@ -98,6 +98,7 @@ const tArmOpcode ArmOpcodes[] = {
 
 	{ "addCS",	"d1,=/#I",				0x028F0000,	ARM_TYPE5,	ARM_SHIFT|ARM_IMMEDIATE|ARM_D|ARM_PCR },
 	{ "subCS",	"d1,=/#I",				0x028F0000,	ARM_TYPE5,	ARM_SHIFT|ARM_IMMEDIATE|ARM_D|ARM_PCR },
+	{ "adrCS",	"d1,/#I",				0x028F0000,	ARM_TYPE5,	ARM_SHIFT|ARM_IMMEDIATE|ARM_D|ARM_PCR },
 
 
 	{ "lslCS",	"d0,m0,z\x00",			0x01A00000,	ARM_TYPE5,	ARM_D|ARM_M|ARM_REGISTER },
