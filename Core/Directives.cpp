@@ -280,6 +280,14 @@ bool DirectivePsx(ArgumentList& List, int flags)
 	return true;
 }
 
+bool DirectiveN64(ArgumentList& List, int flags)
+{
+	Arch = &Mips;
+	Mips.SetLoadDelay(false,0);
+	Mips.SetVersion(MARCH_N64);
+	return true;
+}
+
 bool DirectivePs2(ArgumentList& List, int flags)
 {
 	Arch = &Mips;
@@ -757,6 +765,7 @@ const tDirective Directives[] = {
 	{ L".psp",				0,	0,	&DirectivePsp,				0 },
 	{ L".gba",				0,	0,	&DirectiveGba,				0 },
 	{ L".nds",				0,	0,	&DirectiveNds,				0 },
+	{ L".n64",				0,	0,	&DirectiveN64,				0 },
 	{ L".gb",				0,	0,	&DirectiveGb,				DIRECTIVE_DISABLED },
 	{ L".nocash",			0,	1,	&DirectiveNocash,			0 },
 	{ L".definelabel",		2,	2,	&DirectiveDefineLabel,		0 },
