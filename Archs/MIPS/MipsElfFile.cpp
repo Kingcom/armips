@@ -14,7 +14,6 @@ MipsElfFile::MipsElfFile()
 bool MipsElfFile::open(bool onlyCheck)
 {
 	opened = !onlyCheck;
-	Global.symData.startModule(this);
 	return true;
 }
 
@@ -22,7 +21,15 @@ void MipsElfFile::close()
 {
 	if (isOpen())
 		save();
+}
 
+void MipsElfFile::beginSymData()
+{
+	Global.symData.startModule(this);
+}
+
+void MipsElfFile::endSymData()
+{
 	Global.symData.endModule(this);
 }
 
@@ -297,4 +304,9 @@ void DirectiveLoadMipsElf::writeTempData(TempData& tempData) const
 		tempData.writeLine(g_fileManager->getVirtualAddress(),formatString(L".loadelf \"%s\",\"%s\"",
 			inputName,outputName));
 	}
+}
+
+void DirectiveLoadMipsElf::writeSymData(SymbolData& symData) const
+{
+	file->beginSymData();
 }

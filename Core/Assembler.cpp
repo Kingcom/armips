@@ -120,7 +120,7 @@ bool runArmips(ArmipsArguments& arguments)
 	Global.DebugMessages = 0;
 	Global.relativeInclude = false;
 	Global.validationPasses = 0;
-	Global.multiThreading = false;
+	Global.multiThreading = true;
 	Arch = &InvalidArchitecture;
 
 	Tokenizer::clearEquValues();

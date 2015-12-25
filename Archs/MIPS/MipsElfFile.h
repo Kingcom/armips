@@ -17,6 +17,8 @@ public:
 	virtual bool seekVirtual(u64 virtualAddress);
 	virtual bool seekPhysical(u64 physicalAddress);
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
+	virtual void beginSymData();
+	virtual void endSymData();
 
 	bool load(const std::wstring& fileName, const std::wstring& outputFileName);
 	void save();
@@ -42,7 +44,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	MipsElfFile* file;
 	std::wstring inputName;

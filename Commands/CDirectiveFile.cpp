@@ -63,6 +63,7 @@ void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring&
 void CDirectiveFile::initClose()
 {
 	type = Type::Close;
+	closeFile = g_fileManager->getOpenFile();
 	g_fileManager->closeFile();
 	updateSection(++Global.Section);
 }
@@ -125,6 +126,20 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 	tempData.writeLine(virtualAddress,str);
 }
 
+void CDirectiveFile::writeSymData(SymbolData& symData) const
+{
+	switch (type)
+	{
+	case Type::Open:
+	case Type::Create:
+	case Type::Copy:
+		file->beginSymData();
+		break;
+	case Type::Close:
+		closeFile->endSymData();
+		break;
+	}
+}
 
 //
 // CDirectivePosition

@@ -19,11 +19,12 @@ public:
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	Type type;
 	u64 virtualAddress;
 	GenericAssemblerFile* file;
+	AssemblerFile* closeFile;
 };
 
 class CDirectivePosition: public CAssemblerCommand
