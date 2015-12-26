@@ -17,27 +17,27 @@ bool Logger::silent = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
-    std::wstring position;
+	std::wstring position;
 
-    if (Global.memoryMode == false)
-    {
-        std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-        position = formatString(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
-    }
+	if (Global.memoryMode == false)
+	{
+		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
+		position = formatString(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
+	}
 
-    switch (type)
-    {
-    case Warning:
-        return formatString(L"%swarning: %s",position,text);
-    case Error:
-        return formatString(L"%serror: %s",position,text);
-    case FatalError:
-        return formatString(L"%sfatal error: %s",position,text);
-    case Notice:
-        return formatString(L"%snotice: %s",position,text);
-    }
+	switch (type)
+	{
+	case Warning:
+		return formatString(L"%swarning: %s",position,text);
+	case Error:
+		return formatString(L"%serror: %s",position,text);
+	case FatalError:
+		return formatString(L"%sfatal error: %s",position,text);
+	case Notice:
+		return formatString(L"%snotice: %s",position,text);
+	}
 
-    return L"";
+	return L"";
 }
 
 void Logger::setFlags(ErrorType type)
@@ -167,7 +167,7 @@ void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
 	if (file.isOpen())
 	{
 		wchar_t hexbuf[10] = {0};
-		swprintf(hexbuf, 10, L"%08X ", memoryAddress);
+		swprintf(hexbuf, 10, L"%08X ", (u32) memoryAddress);
 		std::wstring str = hexbuf + text;
 		while (str.size() < 70)
 			str += ' ';

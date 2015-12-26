@@ -25,7 +25,7 @@ void CDirectiveFile::initOpen(const std::wstring& fileName, u64 memory)
 		return;
 	}
 
-	file = new GenericAssemblerFile(fileName,memory,false);
+	file = new GenericAssemblerFile(fileName,(u32) memory,false);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
@@ -36,7 +36,7 @@ void CDirectiveFile::initCreate(const std::wstring& fileName, u64 memory)
 	type = Type::Create;
 	std::wstring fullName = getFullPathName(fileName);
 
-	file = new GenericAssemblerFile(fullName,memory,true);
+	file = new GenericAssemblerFile(fullName,(u32) memory,true);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
@@ -54,7 +54,7 @@ void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring&
 		return;
 	}
 	
-	file = new GenericAssemblerFile(fullOutputName,fullInputName,memory);
+	file = new GenericAssemblerFile(fullOutputName,fullInputName,(u32) memory);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
