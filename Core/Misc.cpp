@@ -17,21 +17,27 @@ bool Logger::silent = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
-	const std::wstring& fileName = Global.memoryMode ? L"<memory>" : Global.FileInfo.FileList[Global.FileInfo.FileNum];
+    std::wstring position;
 
-	switch (type)
-	{
-	case Warning:
-		return formatString(L"%s(%d) warning: %s",fileName,Global.FileInfo.LineNumber,text);
-	case Error:
-		return formatString(L"%s(%d) error: %s",fileName,Global.FileInfo.LineNumber,text);
-	case FatalError:
-		return formatString(L"%s(%d) fatal error: %s",fileName,Global.FileInfo.LineNumber,text);
-	case Notice:
-		return formatString(L"%s(%d) notice: %s",fileName,Global.FileInfo.LineNumber,text);
-	}
+    if (Global.memoryMode == false)
+    {
+        std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
+        position = formatString(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
+    }
 
-	return L"";
+    switch (type)
+    {
+    case Warning:
+        return formatString(L"%swarning: %s",position,text);
+    case Error:
+        return formatString(L"%serror: %s",position,text);
+    case FatalError:
+        return formatString(L"%sfatal error: %s",position,text);
+    case Notice:
+        return formatString(L"%snotice: %s",position,text);
+    }
+
+    return L"";
 }
 
 void Logger::setFlags(ErrorType type)
