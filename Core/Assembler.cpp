@@ -5,6 +5,7 @@
 #include "Core/FileManager.h"
 #include "Parser/Parser.h"
 #include "Archs/ARM/Arm.h"
+#include "Archs/MIPS/Mips.h"
 #include <thread>
 
 void AddFileName(const std::wstring& FileName)
@@ -33,7 +34,10 @@ void writeSymData()
 bool encodeAssembly(CAssemblerCommand* content)
 {
 	bool Revalidate;
-	Arch->Pass2();
+	
+	Arm.Pass2();
+	Mips.Pass2();
+
 	int validationPasses = 0;
 	do	// loop until everything is constant
 	{
@@ -59,7 +63,9 @@ bool encodeAssembly(CAssemblerCommand* content)
 
 		Revalidate = content->Validate();
 
-		Arch->Revalidate();
+		Arm.Revalidate();
+		Mips.Revalidate();
+
 		validationPasses++;
 	} while (Revalidate == true);
 

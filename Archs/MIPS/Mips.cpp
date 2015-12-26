@@ -144,6 +144,13 @@ void CMipsArchitecture::NextSection()
 	DelaySlot = false;
 }
 
+void CMipsArchitecture::Revalidate()
+{
+	LoadDelay = false;
+	LoadDelayRegister = 0;
+	DelaySlot = false;
+}
+
 int CMipsArchitecture::GetWordSize()
 {
 	switch (Version)

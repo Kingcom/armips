@@ -29,7 +29,7 @@ public:
 	virtual CAssemblerCommand* parseOpcode(Parser& parser);
 	virtual void NextSection();
 	virtual void Pass2() { return; };
-	virtual void Revalidate() { return; };
+	virtual void Revalidate();
 	virtual int GetWordSize();
 	virtual IElfRelocator* getElfRelocator();
 	virtual Endianness getEndianness() { return Endianness::Little; };
