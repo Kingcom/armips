@@ -1,5 +1,4 @@
 #pragma once
-#include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
 
@@ -20,17 +19,24 @@ enum class ConditionType
 class CDirectiveConditional: public CAssemblerCommand
 {
 public:
-	CDirectiveConditional();
-	bool Load(ArgumentList& Args, ConditionType command);
+	CDirectiveConditional(ConditionType type);
+	CDirectiveConditional(ConditionType type, const std::wstring& name);
+	CDirectiveConditional(ConditionType type, const Expression& exp);
+	~CDirectiveConditional();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData) { };
-	virtual bool IsConditional() { return true; };
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
+	void setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock);
 private:
-	void Execute();
+	bool evaluate();
+
 	Expression expression;
-	std::wstring labelName;
-	u64 Value;
-	u64 RamPos;
+	Label* label;
+	u32 armState;
+	bool previousResult;
+
 	ConditionType type;
+	CAssemblerCommand* ifBlock;
+	CAssemblerCommand* elseBlock;
 };

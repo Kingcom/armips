@@ -1,5 +1,5 @@
 .gba
-.create output.bin,0
+.create "output.bin",0
 
 EQUTEST equ "test"
 

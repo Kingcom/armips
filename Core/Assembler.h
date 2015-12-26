@@ -1,5 +1,4 @@
 #pragma once
-#include "../Util/CommonClasses.h"
 #include "../Util/FileClasses.h"
 #include "../Util/Util.h"
 #include "FileManager.h"
@@ -12,6 +11,12 @@ struct LabelDefinition
 	int value;
 };
 
+struct EquationDefinition
+{
+	std::wstring name;
+	std::wstring value;
+};
+
 struct ArmipsArguments
 {
 	// common
@@ -20,7 +25,7 @@ struct ArmipsArguments
 	bool errorOnWarning;
 	bool silent;
 	StringList* errorsResult;
-	StringList equList;
+	std::vector<EquationDefinition> equList;
 	std::vector<LabelDefinition> labels;
 
 	// file mode
@@ -42,6 +47,3 @@ struct ArmipsArguments
 };
 
 bool runArmips(ArmipsArguments& arguments);
-void parseMacroDefinition(TextFile& Input, std::wstring& Args);
-void LoadAssemblyFile(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
-bool EncodeAssembly();

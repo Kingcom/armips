@@ -80,7 +80,7 @@ size_t ByteArray::append(const ByteArray& other)
 	return oldSize;
 }
 
-size_t ByteArray::append(byte* data, size_t size)
+size_t ByteArray::append(void* data, size_t size)
 {
 	size_t oldSize = this->size();
 	grow(this->size()+size);

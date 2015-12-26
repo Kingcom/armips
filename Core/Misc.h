@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Util/Util.h"
+#include "Util/FileClasses.h"
 
 class Logger
 {
@@ -70,47 +71,15 @@ private:
 	static bool silent;
 };
 
-class ConditionData
+class TempData
 {
 public:
-	void clear() { conditions.clear(); };
-	void addIf(bool conditionMet);
-	void addElse();
-	void addElseIf(bool conditionMet);
-	void addEndIf();
-	bool conditionTrue();
-	size_t activeConditions() { return conditions.size(); };
+	void setFileName(const std::wstring& name) { file.setFileName(name); };
+	void clear() { file.setFileName(L""); }
+	void start();
+	void end();
+	void writeLine(u64 memoryAddress, const std::wstring& text);
+	bool isOpen() { return file.isOpen(); }
 private:
-	struct Entry
-	{
-		bool currentConditionMet;
-		bool matchingCaseExecuted;
-		bool isInElseCase;
-	};
-
-	std::vector<Entry> conditions;
-};
-
-class AreaData
-{
-public:
-	void clear() { entries.clear(); };
-	void startArea(u64 start, size_t size, int fileNum, int lineNumber, int fillValue);
-	void endArea();
-	bool checkAreas();
-	int getCurrentFillValue() { return entries.back().fillValue; };
-	u64 getCurrentMaxAddress() { return entries.back().maxAddress; };
-	size_t getEntryCount() { return entries.size(); };
-private:
-	struct Entry
-	{
-		u64 start;
-		u64 maxAddress;
-		int fileNum;
-		int lineNumber;
-		bool overflow;
-		int fillValue;
-	};
-
-	std::vector<Entry> entries;
+	TextFile file;
 };

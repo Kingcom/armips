@@ -4,98 +4,108 @@
 #include "Core/FileManager.h"
 #include <algorithm>
 
-CDirectiveArea::CDirectiveArea()
+CDirectiveArea::CDirectiveArea(Expression& size)
 {
-	Start = true;
-	fillValue = -1;
-	Size = 0;
+	this->areaSize = 0;
+	this->contentSize = 0;
+	this->fillValue = 0;
+
+	this->sizeExpression = size;
+	this->content = nullptr;
 }
 
-bool CDirectiveArea::LoadStart(ArgumentList &Args)
+CDirectiveArea::~CDirectiveArea()
 {
-	if (SizeExpression.load(Args[0].text) == false)
-		return false;
-	Start = true;
-
-	if (Args.size() == 2)
-	{
-		if (FillExpression.load(Args[1].text) == false)
-			return false;
-	}
-
-	return true;
+	delete content;
 }
 
-bool CDirectiveArea::LoadEnd()
+void CDirectiveArea::setFillExpression(Expression& exp)
 {
-	Start = false;
-	return true;
+	fillExpression = exp;
 }
 
 bool CDirectiveArea::Validate()
 {
-	size_t NewSize;
+	size_t oldAreaSize = areaSize;
+	size_t oldContentSize = contentSize;
 
-	RamPos = g_fileManager->getVirtualAddress();
+	position = g_fileManager->getVirtualAddress();
 
-	if (Start == true)
+	if (sizeExpression.evaluateInteger(areaSize) == false)
 	{
-		if (SizeExpression.evaluateInteger(NewSize) == false)
-			return false;
-
-		if (FillExpression.isLoaded())
-		{
-			if (FillExpression.evaluateInteger(fillValue) == false)
-				return false;
-		}
-
-		Global.areaData.startArea(RamPos,NewSize,FileNum,FileLine,fillValue);
-
-		if (Size != NewSize)
-		{
-			Size = NewSize;
-			return true;
-		} else {
-			return false;
-		}
-	} else {
-		if (Global.areaData.getEntryCount() != 0)
-		{
-			fillValue = Global.areaData.getCurrentFillValue();
-			Size = (size_t) (Global.areaData.getCurrentMaxAddress()-g_fileManager->getVirtualAddress());
-
-			if (fillValue != -1)
-				g_fileManager->seekVirtual(Global.areaData.getCurrentMaxAddress());
-		}
-
-		Global.areaData.endArea();
+		Logger::queueError(Logger::Error,L"Invalid size expression");
 		return false;
 	}
+
+	if (fillExpression.isLoaded())
+	{
+		if (fillExpression.evaluateInteger(fillValue) == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid fill expression");
+			return false;
+		}
+	}
+
+	content->applyFileInfo();
+	bool result = content->Validate();
+	contentSize = g_fileManager->getVirtualAddress()-position;
+
+	// restore info of this command
+	applyFileInfo();
+
+	if (areaSize < contentSize)
+	{
+		Logger::queueError(Logger::Error,L"Area overflowed");
+	}
+
+	if (fillExpression.isLoaded())
+		g_fileManager->advanceMemory(areaSize-contentSize);
+
+	if (areaSize != oldAreaSize || contentSize != oldContentSize)
+		result = true;
+
+	return result;
 }
 
-void CDirectiveArea::Encode()
+void CDirectiveArea::Encode() const
 {
-	if (Start == false && fillValue != -1)
+	content->applyFileInfo();
+	content->Encode();
+
+	if (fillExpression.isLoaded())
 	{
 		unsigned char buffer[64];
 		memset(buffer,fillValue,64);
-
-		while (Size > 0)
+		
+		size_t writeSize = areaSize-contentSize;
+		while (writeSize > 0)
 		{
-			size_t part = std::min<size_t>(64,Size);
+			size_t part = std::min<size_t>(64,writeSize);
 			g_fileManager->write(buffer,part);
-			Size -= part;
+			writeSize -= part;
 		}
 	}
-	return;
 }
 
-void CDirectiveArea::writeTempData(TempData& tempData)
+void CDirectiveArea::writeTempData(TempData& tempData) const
 {
-	if (Start == true)
+	tempData.writeLine(position,formatString(L".area 0x%08X",areaSize));
+	content->writeTempData(tempData);
+
+	if (fillExpression.isLoaded())
 	{
-		tempData.writeLine(RamPos,formatString(L".area 0x%08X",Size));
+		std::wstring fillString = formatString(L".fill 0x%08X,0x%02X",areaSize-contentSize,fillValue);
+		tempData.writeLine(position+contentSize,fillString);
+		tempData.writeLine(position+areaSize,L".endarea");
 	} else {
-		tempData.writeLine(RamPos,L".endarea");
+		tempData.writeLine(position+contentSize,L".endarea");
 	}
+}
+
+void CDirectiveArea::writeSymData(SymbolData& symData) const
+{
+	content->writeSymData(symData);
+
+	if (fillExpression.isLoaded())
+		symData.addData(position+contentSize,areaSize-contentSize,SymbolData::Data8);
 }

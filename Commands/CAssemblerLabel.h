@@ -1,32 +1,36 @@
 #pragma once
 #include "Commands/CAssemblerCommand.h"
+#include "Core/Expression.h"
 
 class Label;
 
 class CAssemblerLabel: public CAssemblerCommand
 {
 public:
-	CAssemblerLabel(const std::wstring& name, u64 RamPos, int Section, bool constant);
+	CAssemblerLabel(const std::wstring& name);
+	CAssemblerLabel(const std::wstring& name, Expression& value);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 private:
-	std::wstring labelname;
-	u64 labelvalue;
+	Expression labelValue;
 	Label* label;
-	bool constant;
+	bool defined;
 };
 
 class CDirectiveFunction: public CAssemblerCommand
 {
 public:
-	CDirectiveFunction(const std::wstring& name, int Section);
+	CDirectiveFunction(const std::wstring& name);
 	virtual ~CDirectiveFunction();
 	virtual bool Validate();
-	virtual void Encode() { };
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
+	void setContent(CAssemblerCommand* content) { this->content = content; }
 private:
 	CAssemblerLabel* label;
+	CAssemblerCommand* content;
+	u64 start, end;
 };

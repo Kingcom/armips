@@ -7,169 +7,32 @@
 
 CThumbInstruction::CThumbInstruction()
 {
-	NoCheckError = false;
-	Loaded = false;
 	OpcodeSize = 0;
 }
 
-bool CThumbInstruction::Load(char *Name, char *Params)
+bool CThumbInstruction::Load(char* Name, char* Params)
 {
-	bool paramfail = false;
-	NoCheckError = false;
-
-	for (int z = 0; ThumbOpcodes[z].name != NULL; z++)
-	{
-		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && !Arm.isArm9())
-			continue;
-
-		if (strcmp(Name,ThumbOpcodes[z].name) == 0)
-		{
-			if (LoadEncoding(ThumbOpcodes[z],Params) == true)
-			{
-				Loaded = true;
-				return true;
-			}
-			paramfail = true;
-		}
-	}
-
-	if (NoCheckError == false)
-	{
-		if (paramfail == true)
-		{
-			Logger::printError(Logger::Error,L"THUMB parameter failure \"%S\"",Params);
-		} else {
-			Logger::printError(Logger::Error,L"Invalid THUMB opcode \"%S\"",Name);
-		}
-	}
 	return false;
 }
 
-typedef struct {
-	char Character;
-	char MaxNum;
-	std::ptrdiff_t StructOffset;
-} tThumbRegisterLookup;
-
-#include <stddef.h>
-
-const tThumbRegisterLookup RegisterLookup[] = {
-	{ 'd',	7,	offsetof(tThumbOpcodeVariables,rd) },
-	{ 's',	7,	offsetof(tThumbOpcodeVariables,rs) },
-	{ 'n',	7,	offsetof(tThumbOpcodeVariables,rn) },
-	{ 'o',	7,	offsetof(tThumbOpcodeVariables,ro) },
-	{ 'D',	15,	offsetof(tThumbOpcodeVariables,rd) },
-	{ 'S',	15,	offsetof(tThumbOpcodeVariables,rs) },
-	{ 0,	0,				-1 }
-};
-
-bool CThumbInstruction::LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line)
+CThumbInstruction::CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars)
 {
-	int p,RetLen;
-	bool Immediate = false;
+	this->Opcode = sourceOpcode;
+	this->Vars = vars;
+	
+	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
+}
 
-	const char* SourceEncoding = SourceOpcode.mask;
-	char* OriginalLine = Line;
-
-	while (*Line == ' ' || *Line == '\t') Line++;
-	tArmRegisterInfo* Info;
-
-	if (!(*SourceEncoding == 0 && *Line == 0))
+void CThumbInstruction::setPoolAddress(u64 address)
+{
+	int pos = (int) address-((RamPos+4) & 0xFFFFFFFD);
+	if (pos < 0 || pos > 1020)
 	{
-		while (*SourceEncoding != 0)
-		{
-			while (*Line == ' ' || *Line == '\t') Line++;
-//			if (*Line == 0) return false;
-
-			switch (*SourceEncoding)
-			{
-			case 'd': case 's': case 'n': case 'o':
-			case 'D': case 'S':	// registers
-				for (int i = 0; ; i++)
-				{
-					if (RegisterLookup[i].Character == *SourceEncoding)
-					{
-						Info = (tArmRegisterInfo*)((uintptr_t) (&Vars) + RegisterLookup[i].StructOffset);
-						if (ArmGetRegister(Line,RetLen,*Info) == false) return false;
-						if (Info->Number > RegisterLookup[i].MaxNum) return false;
-						Line += RetLen;
-						SourceEncoding++;
-						break;
-					}
-				}
-				break;
-/*			case 'd':	// low reg
-				if (ArmGetRegister(Line,RetLen,Vars.rd) == false) return false;
-				if (Vars.rd.Number > 7) return false;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 's':	// low reg
-				if (ArmGetRegister(Line,RetLen,Vars.rs) == false) return false;
-				if (Vars.rs.Number > 7) return false;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'n':	// low reg
-				if (ArmGetRegister(Line,RetLen,Vars.rn) == false) return false;
-				if (Vars.rn.Number > 7) return false;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'o':	// low reg
-				if (ArmGetRegister(Line,RetLen,Vars.ro) == false) return false;
-				if (Vars.ro.Number > 7) return false;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'D':	// high reg
-				if (ArmGetRegister(Line,RetLen,Vars.rd) == false) return false;
-				Line += RetLen;
-				SourceEncoding++;
-				break;
-			case 'S':	// high reg
-				if (ArmGetRegister(Line,RetLen,Vars.rs) == false) return false;
-				Line += RetLen;
-				SourceEncoding++;
-				break;*/
-			case 'I':	// immediate
-			case 'i':
-				if (ArmParseImmediate(Line,Vars.ImmediateExpression,RetLen) == false) return false;
-				Vars.ImmediateBitLen = *(SourceEncoding+1);
-				Line += RetLen;
-				SourceEncoding += 2;
-				break;
-			case 'r':	// forced register
-				if (ArmGetRegister(Line,RetLen) != *(SourceEncoding+1)) return false;
-				Line += RetLen;
-				SourceEncoding += 2;
-				break;
-			case 'R':	// rlist
-				memcpy(&p,&SourceEncoding[1],2);
-				if (ArmGetRlist(Line,RetLen,p,Vars.rlist) == false) return false;
-				memcpy(Vars.RlistStr,Line,RetLen);
-				Vars.RlistStr[RetLen] = 0;
-				Line += RetLen;
-				SourceEncoding += 3;
-				break;
-			case '/':	// optional characters
-				if (*Line == *(SourceEncoding+1)) Line++;
-				SourceEncoding += 2;
-				break;
-			default:	// everything else
-				if (*SourceEncoding++ != *Line++) return false;
-				break;
-			}
-		}
+		Logger::queueError(Logger::Error,L"Literal pool out of range");
+		return;
 	}
 
-	while (*Line == ' ' || *Line == '\t') Line++;
-	if (*Line != 0)	return false;	// there's something else, bad
-
-	// opcode is ok - now set all flags
-	Opcode = SourceOpcode;
-	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
-	return true;
+	Vars.Immediate = pos >> 2;
 }
 
 bool CThumbInstruction::Validate()
@@ -248,19 +111,7 @@ bool CThumbInstruction::Validate()
 			Vars.Immediate >>= 1;
 		} else if (Opcode.flags & THUMB_POOL)
 		{
-			int pos;
-			if ((pos = Arm.AddToCurrentPool(Vars.Immediate)) == -1)
-			{
-				Logger::queueError(Logger::Error,L"Unable to find literal pool");
-				return false;
-			}
-			pos = pos-((RamPos+4) & 0xFFFFFFFD);
-			if (pos < 0 || pos > 1020)
-			{
-				Logger::queueError(Logger::Error,L"Literal pool out of range");
-				return false;
-			}
-			Vars.Immediate = pos >> 2;
+			Arm.addPoolValue(this,Vars.Immediate);
 		} else if (Opcode.flags & THUMB_PCR)
 		{
 			if (Vars.Immediate & 3)
@@ -296,14 +147,15 @@ bool CThumbInstruction::Validate()
 	return false;
 }
 
-void CThumbInstruction::WriteInstruction(unsigned short encoding)
+void CThumbInstruction::WriteInstruction(unsigned short encoding) const
 {
 	g_fileManager->write(&encoding,2);
 }
 
-void CThumbInstruction::Encode()
+void CThumbInstruction::Encode() const
 {
 	unsigned int encoding = Opcode.encoding;;
+	int immediate;
 
 	if (Opcode.type == THUMB_TYPE19)	// THUMB.19: long branch with link
 	{
@@ -321,8 +173,8 @@ void CThumbInstruction::Encode()
 		{
 		case THUMB_TYPE1:	// THUMB.1: move shifted register
 			encoding |= (Vars.Immediate << 6);
-			encoding |= (Vars.rs.Number << 3);
-			encoding |= (Vars.rd.Number << 0);
+			encoding |= (Vars.rs.num << 3);
+			encoding |= (Vars.rd.num << 0);
 			break;
 		case THUMB_TYPE2:	// THUMB.2: add/subtract
 			if (Opcode.flags & THUMB_IMMEDIATE)
@@ -330,71 +182,72 @@ void CThumbInstruction::Encode()
 				encoding |= (Vars.Immediate << 6);
 			} else if (Opcode.flags & THUMB_REGISTER)
 			{
-				encoding |= (Vars.rn.Number << 6);
+				encoding |= (Vars.rn.num << 6);
 			}
-			encoding |= (Vars.rs.Number << 3);
-			encoding |= (Vars.rd.Number << 0);
+			encoding |= (Vars.rs.num << 3);
+			encoding |= (Vars.rd.num << 0);
 			break;
 		case THUMB_TYPE3:	// THUMB.3: move/compare/add/subtract immediate
-			encoding |= (Vars.rd.Number << 8);
+			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE4:	// THUMB.4: ALU operations
-			encoding |= (Vars.rs.Number << 3);
-			encoding |= (Vars.rd.Number << 0);
+			encoding |= (Vars.rs.num << 3);
+			encoding |= (Vars.rd.num << 0);
 			break;
 		case THUMB_TYPE5:	// THUMB.5: Hi register operations/branch exchange
 			if (Opcode.flags & THUMB_D)
 			{
-				if (Vars.rd.Number > 0x7) encoding |= (1 << 7);
-				encoding |= (Vars.rd.Number & 0x7);
+				if (Vars.rd.num > 0x7) encoding |= (1 << 7);
+				encoding |= (Vars.rd.num & 0x7);
 			}
 			if (Opcode.flags & THUMB_S)
 			{
-				if (Vars.rs.Number > 0x7) encoding |= (1 << 6);
-				encoding |= ((Vars.rs.Number & 0x7) << 3);
+				if (Vars.rs.num > 0x7) encoding |= (1 << 6);
+				encoding |= ((Vars.rs.num & 0x7) << 3);
 			}
 			break;
 		case THUMB_TYPE6:	// THUMB.6: load PC-relative
-			encoding |= (Vars.rd.Number << 8);
+			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE7:	// THUMB.7: load/store with register offset
 		case THUMB_TYPE8:	// THUMB.8: load/store sign-extended byte/halfword
-			encoding |= (Vars.ro.Number << 6);
-			encoding |= (Vars.rs.Number << 3);
-			encoding |= (Vars.rd.Number << 0);
+			encoding |= (Vars.ro.num << 6);
+			encoding |= (Vars.rs.num << 3);
+			encoding |= (Vars.rd.num << 0);
 			break;
 		case THUMB_TYPE9:	// THUMB.9: load/store with immediate offset
 		case THUMB_TYPE10:	// THUMB.10: load/store halfword
 			if (Opcode.flags & THUMB_IMMEDIATE) encoding |= (Vars.Immediate << 6);
-			encoding |= (Vars.rs.Number << 3);
-			encoding |= (Vars.rd.Number << 0);
+			encoding |= (Vars.rs.num << 3);
+			encoding |= (Vars.rd.num << 0);
 			break;
 		case THUMB_TYPE11:	// THUMB.11: load/store SP-relative
-			encoding |= (Vars.rd.Number << 8);
+			encoding |= (Vars.rd.num << 8);
 			if (Opcode.flags & THUMB_IMMEDIATE) encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE12:	// THUMB.12: get relative address
-			encoding |= (Vars.rd.Number << 8);
+			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE13:	// THUMB.13: add offset to stack pointer
+			immediate = Vars.Immediate;
 			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE) 
-				Vars.Immediate = (unsigned char)~Vars.Immediate;
-			if (Vars.Immediate & 0x80)	// sub
+				immediate = (unsigned char)~immediate;
+			if (immediate & 0x80)	// sub
 			{
 				encoding |= 1 << 7;
-				Vars.Immediate = 0x100-Vars.Immediate;
+				immediate = 0x100-immediate;
 			}
-			encoding |= (Vars.Immediate << 0);
+			encoding |= (immediate << 0);
 			break;
 		case THUMB_TYPE14:	// THUMB.14: push/pop registers
 			if (Vars.rlist & 0xC000) encoding |= (1 << 8); // r14 oder r15
 			encoding |= (Vars.rlist & 0xFF);
 			break;
 		case THUMB_TYPE15:	// THUMB.15: multiple load/store
-			encoding |= (Vars.rd.Number << 8);
+			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.rlist & 0xFF);
 			break;
 		case THUMB_TYPE16:	// THUMB.16: conditional branch
@@ -407,9 +260,9 @@ void CThumbInstruction::Encode()
 	}
 }
 
-void CThumbInstruction::FormatInstruction(const char* encoding,tThumbOpcodeVariables& Vars, char* dest)
+void CThumbInstruction::FormatInstruction(const char* encoding, char* dest) const
 {
-	while (*encoding != 0)
+/*	while (*encoding != 0)
 	{
 		switch (*encoding)
 		{
@@ -455,17 +308,17 @@ void CThumbInstruction::FormatInstruction(const char* encoding,tThumbOpcodeVaria
 			break;
 		}
 	}
-	*dest = 0;
+	*dest = 0;*/
 }
 
-void CThumbInstruction::writeTempData(TempData& tempData)
+void CThumbInstruction::writeTempData(TempData& tempData) const
 {
 	char str[256];
 
 	int pos = sprintf(str,"   %s",Opcode.name);
 	while (pos < 11) str[pos++] = ' ';
 	str[pos] = 0;
-	FormatInstruction(Opcode.mask,Vars,&str[pos]);
+	FormatInstruction(Opcode.mask,&str[pos]);
 
 	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }

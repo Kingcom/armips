@@ -17,6 +17,8 @@ public:
 	virtual bool seekPhysical(u64 physicalAddress) = 0;
 	virtual bool getModuleInfo(SymDataModuleInfo& info) { return false; };
 	virtual bool hasFixedVirtualAddress() { return false; };
+	virtual void beginSymData() { };
+	virtual void endSymData() { };
 };
 
 class GenericAssemblerFile: public AssemblerFile

@@ -692,12 +692,16 @@ size_t BinaryFile::write(void* source, size_t length)
 	return fwrite(source,1,length,handle);
 }
 
+const size_t TEXTFILE_BUF_MAX_SIZE = 4096;
+
 TextFile::TextFile()
 {
 	handle = NULL;
 	recursion = false;
 	errorRetrieved = false;
 	fromMemory = false;
+	bufPos = 0;
+	lineCount = 0;
 }
 
 TextFile::~TextFile()
@@ -713,6 +717,7 @@ void TextFile::openMemory(const std::wstring& content)
 	size_ = (long) content.size();
 	encoding = UTF16LE;
 	mode = Read;
+	lineCount = 0;
 }
 
 bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
@@ -745,6 +750,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		if (handle == NULL)
 			return false;
 
+		buf.resize(TEXTFILE_BUF_MAX_SIZE);
 		if (encoding != ASCII)
 		{
 			encoding = UTF8;
@@ -812,9 +818,11 @@ void TextFile::close()
 {
 	if (isOpen() && !fromMemory)
 	{
+		bufDrainWrite();
 		fclose(handle);
 		handle = NULL;
 	}
+	bufPos = 0;
 }
 
 long TextFile::tell()
@@ -830,16 +838,26 @@ void TextFile::seek(long pos)
 		fseek(handle,pos,SEEK_SET);
 }
 
+void TextFile::bufFillRead()
+{
+	assert(mode == Read);
+
+	buf.resize(TEXTFILE_BUF_MAX_SIZE);
+	size_t read = fread(&buf[0], 1, TEXTFILE_BUF_MAX_SIZE, handle);
+	buf.resize(read);
+
+	bufPos = 0;
+}
+
 wchar_t TextFile::readCharacter()
 {
-	unsigned char buf[4];
 	wchar_t value;
 
 	switch (encoding)
 	{
 	case UTF8:
 		{
-			value = fgetc(handle);
+			value = bufGetChar();
 			contentPos++;
 			
 			int extraBytes = 0;
@@ -858,7 +876,7 @@ wchar_t TextFile::readCharacter()
 
 			for (int i = 0; i < extraBytes; i++)
 			{
-				int b = fgetc(handle);
+				int b = bufGetChar();
 				contentPos++;
 
 				if ((b & 0xC0) != 0x80)
@@ -875,34 +893,32 @@ wchar_t TextFile::readCharacter()
 		{
 			value = content[contentPos++];
 		} else {
-			fread(buf,1,2,handle);
-			value = buf[0] | (buf[1] << 8);
+			value = bufGet16LE();
 			contentPos += 2;
 		}
 		break;
 	case UTF16BE:
-		fread(buf,1,2,handle);
-		value = buf[1] | (buf[0] << 8);
+		value = bufGet16BE();
 		contentPos += 2;
 		break;
 	case SJIS:
 		{
-			unsigned short sjis = fgetc(handle);
+			unsigned short sjis = bufGetChar();
 			contentPos++;
 			if (sjis >= 0x80)
 			{
-				sjis = (sjis << 8) | fgetc(handle);
+				sjis = (sjis << 8) | bufGetChar();
 				contentPos++;
 			}
 			value = sjisToUnicode(sjis);
-			if (value == -1)
+			if (value == (wchar_t)-1)
 			{
 				errorText = formatString(L"One or more invalid Shift-JIS characters in this file");
 			}
 		}
 		break;
 	case ASCII:
-		value = fgetc(handle);
+		value = bufGetChar();
 		contentPos++;
 		break;
 	}
@@ -928,11 +944,15 @@ std::wstring TextFile::readLine()
 	std::wstring result;
 	wchar_t value;
 
-	while (!atEnd() && (value = readCharacter()) != L'\n')
+	if (isOpen())
 	{
-		result += value;
+		while (tell() < size() && (value = readCharacter()) != L'\n')
+		{
+			result += value;
+		}
 	}
 
+	lineCount++;
 	return result;
 }
 
@@ -947,9 +967,44 @@ StringList TextFile::readAll()
 	return result;
 }
 
+void TextFile::bufPut(const void *p, const size_t len)
+{
+	assert(mode == Write);
+
+	if (len > TEXTFILE_BUF_MAX_SIZE)
+	{
+		// Lots of data.  Let's write directly.
+		bufDrainWrite();
+		fwrite(p, 1, len, handle);
+	}
+	else
+	{
+		if (bufPos + len > TEXTFILE_BUF_MAX_SIZE)
+			bufDrainWrite();
+
+		memcpy(&buf[bufPos], p, len);
+		bufPos += len;
+	}
+}
+
+void TextFile::bufPut(const char c)
+{
+	assert(mode == Write);
+
+	if (bufPos >= TEXTFILE_BUF_MAX_SIZE)
+		bufDrainWrite();
+
+	buf[bufPos++] = c;
+}
+
+void TextFile::bufDrainWrite()
+{
+	fwrite(&buf[0], 1, bufPos, handle);
+	bufPos = 0;
+}
+
 void TextFile::writeCharacter(wchar_t character)
 {
-	unsigned char buffer[4];
 	if (mode != Write) return;
 
 	// only support utf8 for now
@@ -959,26 +1014,22 @@ void TextFile::writeCharacter(wchar_t character)
 #ifdef WIN32
 		if (character == L'\n')
 		{
-			buffer[length++] = '\r';
+			bufPut('\r');
 		}
 #endif
-		buffer[length++] = character & 0x7F;
+		bufPut(character & 0x7F);
 	} else if (encoding != ASCII)
 	{
 		if (character < 0x800)
 		{
-			buffer[0] = 0xC0 | ((character >> 6) & 0x1F);
-			buffer[1] = 0x80 | (character & 0x3F);
-			length = 2;
+			bufPut(0xC0 | ((character >> 6) & 0x1F));
+			bufPut(0x80 | (character & 0x3F));
 		} else {
-			buffer[0] = 0xE0 | ((character >> 12) & 0xF);
-			buffer[1] = 0x80 | ((character >> 6) & 0x3F);
-			buffer[2] = 0x80 | (character & 0x3F);
-			length = 3;
+			bufPut(0xE0 | ((character >> 12) & 0xF));
+			bufPut(0x80 | ((character >> 6) & 0x3F));
+			bufPut(0x80 | (character & 0x3F));
 		}
 	}
-
-	fwrite(buffer,1,length,handle);
 }
 
 void TextFile::write(const wchar_t* line)

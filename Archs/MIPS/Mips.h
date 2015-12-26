@@ -25,11 +25,11 @@ class CMipsArchitecture: public CArchitecture
 {
 public:
 	CMipsArchitecture();
-	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
-	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
+	virtual CAssemblerCommand* parseDirective(Parser& parser);
+	virtual CAssemblerCommand* parseOpcode(Parser& parser);
 	virtual void NextSection();
 	virtual void Pass2() { return; };
-	virtual void Revalidate() { return; };
+	virtual void Revalidate();
 	virtual int GetWordSize();
 	virtual IElfRelocator* getElfRelocator();
 	virtual Endianness getEndianness() { return Version == MARCH_N64 ? Endianness::Big : Endianness::Little; };
@@ -90,4 +90,5 @@ public:
 	virtual bool relocateOpcode(int type, RelocationData& data);
 	virtual void setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType);
 	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
+	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 };

@@ -53,14 +53,14 @@ public:
 	static bool isGlobalSymbol(const std::wstring& symbol, size_t pos = 0) { return !isLocalSymbol(symbol) && !isStaticSymbol(symbol); };
 
 	Label* getLabel(const std::wstring& symbol, unsigned int file, unsigned int section);
-	bool addEquation(const std::wstring& name, unsigned int file, unsigned int section, std::wstring& replacement);
-	std::wstring insertEquations(const std::wstring& line, unsigned int file, unsigned int section);
+	bool addEquation(const std::wstring& name, unsigned int file, unsigned int section, size_t referenceIndex);
+	bool findEquation(const std::wstring& name, unsigned int file, unsigned int section, size_t& dest);
 	void addLabels(const std::vector<LabelDefinition>& labels);
 	int findSection(u64 address);
 
 	std::wstring getUniqueLabelName();
 	size_t getLabelCount() { return labels.size(); };
-	size_t getEquationCount() { return equations.size(); };
+	size_t getEquationCount() { return equationsCount; };
 private:
 	void setFileSectionValues(const std::wstring& symbol, unsigned int& file, unsigned int& section);
 
@@ -71,16 +71,8 @@ private:
 		size_t index;
 	};
 
-	struct Equation
-	{
-		std::wstring key;
-		std::wstring value;
-		unsigned int file;
-		unsigned int section;
-	};
-
 	std::map<SymbolKey,SymbolInfo> symbols;
 	std::vector<Label*> labels;
-	std::vector<Equation> equations;
-	int uniqueCount;
+	size_t equationsCount;
+	size_t uniqueCount;
 };

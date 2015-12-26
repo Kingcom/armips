@@ -71,9 +71,8 @@ void SymbolData::writeNocashSym()
 			entries.push_back(entry);
 		}
 
-		for (size_t i = 0; i < module.data.size(); i++)
+		for (const SymDataData& data: module.data)
 		{
-			SymDataData& data = module.data[i];
 			NocashSymEntry entry;
 			entry.address = data.address;
 
@@ -136,7 +135,6 @@ void SymbolData::addLabel(u64 memoryAddress, const std::wstring& name)
 			return;
 	}
 
-	addAddress(memoryAddress);
 	modules[currentModule].symbols.push_back(sym);
 }
 
@@ -145,19 +143,11 @@ void SymbolData::addData(u64 address, size_t size, DataType type)
 	if (!enabled)
 		return;
 
-	for (SymDataData& symbol: modules[currentModule].data)
-	{
-		if (symbol.address == address && symbol.size == size && symbol.type == type)
-			return;
-	}
-
-	addAddress(address);
-
 	SymDataData data;
 	data.address = address;
 	data.size = size;
 	data.type = type;
-	modules[currentModule].data.push_back(data);
+	modules[currentModule].data.insert(data);
 }
 
 size_t SymbolData::addFileName(const std::wstring& fileName)
@@ -170,24 +160,6 @@ size_t SymbolData::addFileName(const std::wstring& fileName)
 
 	files.push_back(fileName);
 	return files.size()-1;
-}
-
-size_t SymbolData::addAddress(u64 address)
-{
-	SymDataModule& module = modules[currentModule];
-
-	for (size_t i = 0; i < module.addressInfo.size(); i++)
-	{
-		if (module.addressInfo[i].address == address)
-			return i;
-	}
-
-	SymDataAddressInfo info;
-	info.address = address;
-	info.fileIndex = addFileName(Global.FileInfo.FileList[Global.FileInfo.FileNum]);
-	info.lineNumber = Global.FileInfo.LineNumber;
-	module.addressInfo.push_back(info);
-	return module.addressInfo.size()-1;
 }
 
 void SymbolData::startModule(AssemblerFile* file)
@@ -235,7 +207,6 @@ void SymbolData::startFunction(u64 address)
 	}
 
 	currentFunction = modules[currentModule].functions.size();
-	addAddress(address);
 
 	SymDataFunction func;
 	func.address = address;

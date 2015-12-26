@@ -1,14 +1,17 @@
 #pragma once
 
 class IElfRelocator;
+class CAssemblerCommand;
+class Tokenizer;
+class Parser;
 
 enum class Endianness { Big, Little };
 
 class CArchitecture
 {
 public:
-	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args) = 0;
-	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args) = 0;
+	virtual CAssemblerCommand* parseDirective(Parser& parserr) { return nullptr; };
+	virtual CAssemblerCommand* parseOpcode(Parser& parser) { return nullptr; };
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;
@@ -20,8 +23,6 @@ public:
 class CInvalidArchitecture: public CArchitecture
 {
 public:
-	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
-	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();

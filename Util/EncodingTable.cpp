@@ -5,6 +5,79 @@
 
 #define MAXHEXLENGTH 32
 
+Trie::Trie()
+{
+	Node root { 0, false };
+	nodes.push_back(root);
+}
+
+void Trie::insert(const wchar_t* text, size_t value)
+{
+	size_t node = 0;	// root node
+
+	// traverse existing nodes
+	while (*text != 0)
+	{
+		LookupEntry lookupEntry { node, *text };
+		auto it = lookup.find(lookupEntry);
+		if (it == lookup.end())
+			break;
+
+		node = it->second;
+		text++;
+	}
+
+	// add new nodes as necessary
+	while (*text != 0)
+	{
+		Node newNode { nodes.size(), false };
+		nodes.push_back(newNode);
+
+		LookupEntry lookupEntry { node, *text };
+		lookup[lookupEntry] = newNode.index;
+		node = newNode.index;
+		text++;
+	}
+
+	// set value
+	nodes[node].hasValue = true;
+	nodes[node].value = value;
+}
+
+void Trie::insert(wchar_t character, size_t value)
+{
+	wchar_t str[2];
+	str[0] = character;
+	str[1] = 0;
+	insert(str,value);
+}
+
+bool Trie::findLongestPrefix(const wchar_t* text, size_t& result)
+{
+	size_t node = 0;		// root node
+	size_t valueNode = 0;	// remember last node that had a value
+
+	while (*text != 0)
+	{
+		if (nodes[node].hasValue)
+			valueNode = node;
+
+		LookupEntry lookupEntry { node, *text++ };
+		auto it = lookup.find(lookupEntry);
+		
+		if (it == lookup.end())
+			break;
+
+		node = it->second;
+	}
+	
+	if (nodes[node].hasValue)
+		valueNode = node;
+
+	result = nodes[valueNode].value;
+	return nodes[valueNode].hasValue;
+}
+
 EncodingTable::EncodingTable()
 {
 
@@ -18,7 +91,6 @@ EncodingTable::~EncodingTable()
 void EncodingTable::clear()
 {
 	hexData.clear();
-	valueData.clear();
 	entries.clear();
 }
 
@@ -58,7 +130,6 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 		return false;
 
 	hexData.clear();
-	valueData.clear();
 	entries.clear();
 	setTerminationEntry((unsigned char*)"\0",1);
 
@@ -111,11 +182,17 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 
 void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, const std::wstring& value)
 {
+	if (value.size() == 0)
+		return;
+	
+	// insert into trie
+	size_t index = entries.size();
+	lookup.insert(value.c_str(),index);
+
+	// add entry
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
 	entry.hexLen = hexLength;
-	entry.valuePos = valueData.size();
-	valueData.append(value);
 	entry.valueLen = value.size();
 
 	entries.push_back(entry);
@@ -123,62 +200,39 @@ void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, const std::ws
 
 void EncodingTable::addEntry(unsigned char* hex, size_t hexLength, wchar_t value)
 {
+	if (value == '\0')
+		return;
+	
+	// insert into trie
+	size_t index = entries.size();
+	lookup.insert(value,index);
+	
+	// add entry
 	TableEntry entry;
 	entry.hexPos = hexData.append(hex,hexLength);
 	entry.hexLen = hexLength;
-	entry.valuePos = valueData.size();
-	valueData += value;
 	entry.valueLen = 1;
-
+	
 	entries.push_back(entry);
+
 }
 
 void EncodingTable::setTerminationEntry(unsigned char* hex, size_t hexLength)
 {
 	terminationEntry.hexPos = hexData.append(hex,hexLength);
 	terminationEntry.hexLen = hexLength;
-	terminationEntry.valueLen = terminationEntry.valuePos = 0;
-}
-
-int EncodingTable::searchStringMatch(const std::wstring& str, size_t pos)
-{
-	size_t longestLength = 0;
-	int longestNum = -1;
-
-	for (size_t i = 0; i < entries.size(); i++)
-	{
-		TableEntry& entry = entries[i];
-		if (entry.valueLen < longestLength) continue;
-
-		bool match = true;
-		for (size_t k = 0; k < entry.valueLen; k++)
-		{
-			if (pos+k >= str.size() || valueData[entry.valuePos+k] != str[pos+k])
-			{
-				match = false;
-				break;
-			}
-		}
-
-		if (match)
-		{
-			longestLength = entry.valueLen;
-			longestNum = (int) i;
-		}
-	}
-
-	return longestNum;
+	terminationEntry.valueLen = 0;
 }
 
 ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermination)
 {
 	ByteArray result;
-	size_t pos = 0;
 
+	size_t pos = 0;
 	while (pos < str.size())
 	{
-		int index = searchStringMatch(str,pos);
-		if (index == -1)
+		size_t index;
+		if (lookup.findLongestPrefix(str.c_str()+pos,index) == false)
 		{
 			// error
 			return ByteArray();

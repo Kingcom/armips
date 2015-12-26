@@ -1,5 +1,5 @@
 .gba
-.create output.bin,0
+.create "output.bin",0
 .if 1==1
 ldr r1,=0x123
 .pool

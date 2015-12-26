@@ -6,114 +6,133 @@
 
 extern CArmArchitecture Arm;
 
-CDirectiveConditional::CDirectiveConditional()
+CDirectiveConditional::CDirectiveConditional(ConditionType type)
 {
-	Value = 0;
+	this->type = type;
+
+	ifBlock = nullptr;
+	elseBlock = nullptr;
+	previousResult = false;
+
+	if (type == ConditionType::IFARM || type == ConditionType::IFTHUMB)
+	{
+		armState = (Arch == &Arm);
+		armState |= (Arm.GetThumbMode() << 1);
+	}
 }
 
-bool CDirectiveConditional::Load(ArgumentList& Args, ConditionType command)
+CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstring& name)
+	: CDirectiveConditional(type)
 {
-	type = command;
+	label = Global.symbolTable.getLabel(name,Global.FileInfo.FileNum,Global.Section);
+	if (label == NULL)
+		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name);
+}
 
-	switch (type)
+CDirectiveConditional::CDirectiveConditional(ConditionType type, const Expression& exp)
+	: CDirectiveConditional(type)
+{
+	this->expression = exp;
+}
+
+CDirectiveConditional::~CDirectiveConditional()
+{
+	delete ifBlock;
+	delete elseBlock;
+}
+
+void CDirectiveConditional::setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock)
+{
+	this->ifBlock = ifBlock;
+	this->elseBlock = elseBlock;
+}
+
+bool CDirectiveConditional::evaluate()
+{
+	u64 value;
+	if (expression.isLoaded())
 	{
-	case ConditionType::IF:
-	case ConditionType::ELSEIF:
-		if (expression.load(Args[0].text) == false)
-			return false;
-		break;
-	case ConditionType::IFDEF:
-	case ConditionType::IFNDEF:
-	case ConditionType::ELSEIFDEF:
-	case ConditionType::ELSEIFNDEF:
-		if (Global.symbolTable.isValidSymbolName(Args[0].text) == false)
+		if (expression.evaluateInteger(value) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid label name \"%s\"",Args[0].text);
+			Logger::queueError(Logger::Error,L"Invalid conditional expression");
 			return false;
 		}
-		labelName = Args[0].text;
-		break;
-	case ConditionType::IFARM:
-	case ConditionType::IFTHUMB:
-		Value = (Arch == &Arm);
-		Value |= (Arm.GetThumbMode() << 1);
-		break;
 	}
-	return true;
-}
-
-void CDirectiveConditional::Execute()
-{
-	bool b;
 
 	switch (type)
 	{
 	case ConditionType::IFARM:
-		b = Value == 1;
-		Global.conditionData.addIf(b);
-		break;
+		return armState == 1;
 	case ConditionType::IFTHUMB:
-		b = Value == 3;
-		Global.conditionData.addIf(b);
-		break;
+		return armState == 3;
 	case ConditionType::IF:
-		b = Value != 0;
-		Global.conditionData.addIf(b);
-		break;
-	case ConditionType::ELSE:
-		Global.conditionData.addElse();
-		break;
-	case ConditionType::ELSEIF:
-		b = Value != 0;
-		Global.conditionData.addElseIf(b);
-		break;
-	case ConditionType::ENDIF:
-		Global.conditionData.addEndIf();
-		break;
+		return value != 0;
 	case ConditionType::IFDEF:
-		b = checkLabelDefined(labelName,getSection());
-		Global.conditionData.addIf(b);
-		break;
+		return label->isDefined();
 	case ConditionType::IFNDEF:
-		b = !checkLabelDefined(labelName,getSection());
-		Global.conditionData.addIf(b);
-		break;
-	case ConditionType::ELSEIFDEF:	
-		b = checkLabelDefined(labelName,getSection());
-		Global.conditionData.addElseIf(b);
-		break;
-	case ConditionType::ELSEIFNDEF:
-		b = !checkLabelDefined(labelName,getSection());
-		Global.conditionData.addElseIf(b);
-		break;
+		return !label->isDefined();
 	}
+			
+	Logger::queueError(Logger::Error,L"Invalid conditional type");
+	return false;
 }
 
 bool CDirectiveConditional::Validate()
 {
-	bool Result = false;
-	u64 num;
+	bool result = evaluate();
+	bool returnValue = result != previousResult;
+	previousResult = result;
 
-	switch (type)
+	if (result)
 	{
-	case ConditionType::IF:
-	case ConditionType::ELSEIF:
-		if (expression.evaluateInteger(num) == false)
-		{
-			Logger::printError(Logger::Error,L"Invalid expression");
-			return false;
-		}
-
-		if (Value != num) Result = true;
-		Value = num;
-		break;
+		ifBlock->applyFileInfo();
+		if (ifBlock->Validate())
+			returnValue = true;
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
+		if (elseBlock->Validate())
+			returnValue = true;
 	}
 
-	Execute();
-	return Result;
+	return returnValue;
 }
 
-void CDirectiveConditional::Encode()
+void CDirectiveConditional::Encode() const
 {
-	Execute();
+	if (previousResult)
+	{
+		ifBlock->applyFileInfo();
+		ifBlock->Encode();
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
+		elseBlock->Encode();
+	}
+}
+
+void CDirectiveConditional::writeTempData(TempData& tempData) const
+{
+	if (previousResult)
+	{
+		ifBlock->applyFileInfo();
+		ifBlock->writeTempData(tempData);
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
+		elseBlock->writeTempData(tempData);
+	}
+}
+
+void CDirectiveConditional::writeSymData(SymbolData& symData) const
+{
+	if (previousResult)
+	{
+		ifBlock->applyFileInfo();
+		ifBlock->writeSymData(symData);
+	} else if (elseBlock != NULL)
+	{
+		elseBlock->applyFileInfo();
+		elseBlock->writeSymData(symData);
+	}
 }

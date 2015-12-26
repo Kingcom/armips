@@ -52,25 +52,7 @@ bool checkValidLabelName(const std::wstring& labelName)
 	return Global.symbolTable.isValidSymbolName(labelName);
 }
 
-bool addAssemblerLabel(const std::wstring& labelName)
-{
-	if (checkValidLabelName(labelName) == false)
-	{
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",labelName);
-		return false;
-	}
-
-	CAssemblerLabel* Label = new CAssemblerLabel(labelName,g_fileManager->getVirtualAddress(),Global.Section,false);
-	AddAssemblerCommand(Label);
-	return true;
-}
-
-void AddAssemblerCommand(CAssemblerCommand* Command)
-{
-	Global.Commands.push_back(Command);
-}
-
-bool isPowerOfTwo(int n)
+bool isPowerOfTwo(u64 n)
 {
 	if (n == 0) return false;
 	return !(n & (n - 1));

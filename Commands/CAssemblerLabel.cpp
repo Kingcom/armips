@@ -5,67 +5,87 @@
 #include "Core/FileManager.h"
 #include "Archs/ARM/Arm.h"
 
-CAssemblerLabel::CAssemblerLabel(const std::wstring& name, u64 RamPos, int Section, bool constant)
+CAssemblerLabel::CAssemblerLabel(const std::wstring& name)
 {
-	this->labelname = name;
-	this->labelvalue = RamPos;
-	this->constant = constant;
+	this->defined = false;
 	this->label = NULL;
 	
-	if (Global.symbolTable.isLocalSymbol(this->labelname) == false)	
+	if (Global.symbolTable.isLocalSymbol(name) == false)	
 		updateSection(++Global.Section);
+
+	label = Global.symbolTable.getLabel(name, FileNum, getSection());
+	if (label == NULL)
+	{
+		Logger::printError(Logger::Error, L"Invalid label name \"%s\"", name);
+		return;
+	}
+
+	// does this need to be in validate?
+	if (label->getUpdateInfo())
+	{
+		if (Arch == &Arm && Arm.GetThumbMode())
+			label->setInfo(1);
+		else
+			label->setInfo(0);
+	}
+}
+
+CAssemblerLabel::CAssemblerLabel(const std::wstring& name, Expression& value)
+	: CAssemblerLabel(name)
+{
+	labelValue = value;
 }
 
 bool CAssemblerLabel::Validate()
 {
-	if (label == NULL)
+	bool result = false;
+	if (defined == false)
 	{
-		label = Global.symbolTable.getLabel(this->labelname, FileNum, getSection());
-		if (label == NULL)
-		{
-			Logger::printError(Logger::Error, L"Invalid label name \"%s\"", this->labelname);
-			return false;
-		}
-
 		if (label->isDefined())
 		{
-			Logger::printError(Logger::Error, L"Label \"%s\" already defined", this->labelname);
-			label = NULL;
+			Logger::queueError(Logger::Error, L"Label \"%s\" already defined", label->getName());
 			return false;
 		}
-
-		if (label->getUpdateInfo())
-		{
-			if (Arch == &Arm && Arm.GetThumbMode())
-				label->setInfo(1);
-			else
-				label->setInfo(0);
-		}
 		
-		label->setValue(labelvalue);
 		label->setDefined(true);
-		return true;
+		defined = true;
+		result = true;
+	}
+	
+	u64 value;
+	if (labelValue.isLoaded())
+	{
+		// label value is given by expression
+		if (labelValue.evaluateInteger(value) == false)
+		{
+			Logger::printError(Logger::Error, L"Invalid expression");
+			return result;
+		}
+	} else {
+		// label value is given by current address
+		value = g_fileManager->getVirtualAddress();
 	}
 
-	if (constant == false && label->getValue() != g_fileManager->getVirtualAddress())
+	if (label->getValue() != value)
 	{
-		label->setValue(g_fileManager->getVirtualAddress());
-		return true;
+		label->setValue(value);
+		result = true;
 	}
-	return false;
+
+	return result;
 }
 
-void CAssemblerLabel::Encode()
+void CAssemblerLabel::Encode() const
 {
 
 }
 
-void CAssemblerLabel::writeTempData(TempData& tempData)
+void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
 	tempData.writeLine(label->getValue(),formatString(L"%s:",label->getName()));
 }
 
-void CAssemblerLabel::writeSymData(SymbolData& symData)
+void CAssemblerLabel::writeSymData(SymbolData& symData) const
 {
 	// TODO: find a less ugly way to check for undefined memory positions
 	if (label->getValue() == (u64)-1)
@@ -77,39 +97,53 @@ void CAssemblerLabel::writeSymData(SymbolData& symData)
 
 
 
-CDirectiveFunction::CDirectiveFunction(const std::wstring& name, int Section)
+CDirectiveFunction::CDirectiveFunction(const std::wstring& name)
 {
-	if (!name.empty())
-		label = new CAssemblerLabel(name,g_fileManager->getVirtualAddress(),Section,false);
-	else
-		label = NULL;
+	this->label = new CAssemblerLabel(name);
+	this->content = nullptr;
+	this->start = this->end = 0;
 }
 
 CDirectiveFunction::~CDirectiveFunction()
 {
 	delete label;
+	delete content;
 }
 
 bool CDirectiveFunction::Validate()
 {
-	if (label == NULL)
-		return false;
-	return label->Validate();
+	start = g_fileManager->getVirtualAddress();
+
+	label->applyFileInfo();
+	bool result = label->Validate();
+
+	content->applyFileInfo();
+	if (content->Validate())
+		result = true;
+
+	end = g_fileManager->getVirtualAddress();
+	return result;
 }
 
-void CDirectiveFunction::writeTempData(TempData& tempData)
+void CDirectiveFunction::Encode() const
 {
-	if (label != NULL)
-		label->writeTempData(tempData);
+	label->applyFileInfo();
+	label->Encode();
+
+	content->applyFileInfo();
+	content->Encode();
 }
 
-void CDirectiveFunction::writeSymData(SymbolData& symData)
+void CDirectiveFunction::writeTempData(TempData& tempData) const
 {
-	if (label != NULL)
-	{
-		Global.symData.startFunction(g_fileManager->getVirtualAddress());
-		label->writeSymData(symData);
-	} else {
-		Global.symData.endFunction(g_fileManager->getVirtualAddress());
-	}
+	label->writeTempData(tempData);
+	content->writeTempData(tempData);
+}
+
+void CDirectiveFunction::writeSymData(SymbolData& symData) const
+{
+	symData.startFunction(start);
+	label->writeSymData(symData);
+	content->writeSymData(symData);
+	symData.endFunction(end);
 }

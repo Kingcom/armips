@@ -1,19 +1,8 @@
 #include "stdafx.h"
 #include "Architecture.h"
 #include "Core/Common.h"
-#include "Core/Directives.h"
 
 CInvalidArchitecture InvalidArchitecture;
-
-void CInvalidArchitecture::AssembleOpcode(const std::wstring& name, const std::wstring& args)
-{
-	Logger::printError(Logger::FatalError,L"No architecture specified");
-}
-
-bool CInvalidArchitecture::AssembleDirective(const std::wstring& name, const std::wstring& args)
-{
-	return directiveAssembleGlobal(name,args);
-}
 
 void CInvalidArchitecture::NextSection()
 {

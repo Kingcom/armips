@@ -53,8 +53,8 @@ public:
 	bool init(const std::wstring& inputName);
 	bool relocate(int& memoryAddress);
 	bool hasDataChanged() { return dataChanged; };
-	ByteArray& getData() { return outputData; };
-	void writeSymbols(SymbolData& symData);
+	const ByteArray& getData() const { return outputData; };
+	void writeSymbols(SymbolData& symData) const;
 private:
 	size_t loadString(ByteArray& data, size_t pos, std::wstring& dest);
 	bool parseObject(ByteArray data, PsxRelocatorFile& dest);
@@ -69,12 +69,12 @@ private:
 class DirectivePsxObjImport: public CAssemblerCommand
 {
 public:
-	DirectivePsxObjImport(ArgumentList& args);
+	DirectivePsxObjImport(const std::wstring& fileName);
 	~DirectivePsxObjImport() { };
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData) { };
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	PsxRelocator rel;
 };

@@ -4,33 +4,34 @@
 #include "MipsOpcodes.h"
 #include "Core/Expression.h"
 
-enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
-	Immediate20_0, ImmediateHalfFloat, Immediate7 };
-enum class MipsSecondaryImmediateType { None, Ext, Ins, Cop2BranchType };
+enum class MipsRegisterType { Normal, Float, Ps2Cop2, VfpuVector, VfpuMatrix };
 
-struct MipsImmediate
+enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
+	Immediate20_0, ImmediateHalfFloat, Immediate7, Ext, Ins, Cop2BranchType };
+
+struct MipsRegisterValue
 {
-	Expression expression;
-	int value;
-	int originalValue;
+	MipsRegisterType type;
+	std::wstring name;
+	int num;
 };
 
-struct MipsOpcodeRegisters {
-	MipsRegisterInfo grs;			// general source reg
-	MipsRegisterInfo grt;			// general target reg
-	MipsRegisterInfo grd;			// general dest reg
+struct MipsRegisterData {
+	MipsRegisterValue grs;			// general source reg
+	MipsRegisterValue grt;			// general target reg
+	MipsRegisterValue grd;			// general dest reg
 	
-	MipsRegisterInfo frs;			// float source reg
-	MipsRegisterInfo frt;			// float target reg
-	MipsRegisterInfo frd;			// float dest reg
+	MipsRegisterValue frs;			// float source reg
+	MipsRegisterValue frt;			// float target reg
+	MipsRegisterValue frd;			// float dest reg
 	
-	MipsRegisterInfo ps2vrs;		// ps2 vector source reg
-	MipsRegisterInfo ps2vrt;		// ps2 vector target reg
-	MipsRegisterInfo ps2vrd;		// ps2 vector dest reg
+	MipsRegisterValue ps2vrs;		// ps2 vector source reg
+	MipsRegisterValue ps2vrt;		// ps2 vector target reg
+	MipsRegisterValue ps2vrd;		// ps2 vector dest reg
 
-	MipsVFPURegister vrs;			// vfpu source reg
-	MipsVFPURegister vrt;			// vfpu target reg
-	MipsVFPURegister vrd;			// vfpu dest reg
+	MipsRegisterValue vrs;			// vfpu source reg
+	MipsRegisterValue vrt;			// vfpu target reg
+	MipsRegisterValue vrd;			// vfpu dest reg
 
 	void reset()
 	{
@@ -41,40 +42,67 @@ struct MipsOpcodeRegisters {
 	}
 };
 
+struct MipsImmediateData
+{
+	struct
+	{
+		MipsImmediateType type;
+		Expression expression;
+		int value;
+		int originalValue;
+	} primary;
+
+	struct
+	{
+		MipsImmediateType type;
+		Expression expression;
+		int value;
+		int originalValue;
+	} secondary;
+
+	void reset()
+	{
+		primary.type = MipsImmediateType::None;
+		if (primary.expression.isLoaded())
+			primary.expression = Expression();
+		
+		secondary.type = MipsImmediateType::None;
+		if (secondary.expression.isLoaded())
+			secondary.expression = Expression();
+	}
+};
+
+struct MipsOpcodeData
+{
+	tMipsOpcode opcode;
+	int vfpuSize;
+	int vectorCondition;
+
+	void reset()
+	{
+		vfpuSize = vectorCondition = -1;
+	}
+};
 
 class CMipsInstruction: public CAssemblerCommand
 {
 public:
-	CMipsInstruction();
+	CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers);
 	~CMipsInstruction();
-	bool Load(const char* Name, const char* Params);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
 private:
-	void encodeNormal();
-	void encodeVfpu();
-	bool parseOpcode(const tMipsOpcode& SourceOpcode, const char* Line);
-	bool LoadEncoding(const tMipsOpcode& SourceOpcode, const char* Line);
-	void setOmittedRegisters();
-	int formatOpcodeName(char* dest);
-	void formatParameters(char* dest);
+	void encodeNormal() const;
+	void encodeVfpu() const;
+	int floatToHalfFloat(int i);
 
-	tMipsOpcode Opcode;
 	bool IgnoreLoadDelay;
-	bool NoCheckError;
-	bool Loaded;
 	u64 RamPos;
-	CMipsInstruction* subInstruction;
+	bool addNop;
 
 	// opcode variables
-	MipsOpcodeRegisters registers;
-	MipsImmediateType immediateType;
-	MipsImmediate immediate;
-	int vfpuSize;
-	int vectorCondition;
-	
-	bool hasFixedSecondaryImmediate;
-	MipsSecondaryImmediateType secondaryImmediateType;
-	MipsImmediate secondaryImmediate;
+	MipsOpcodeData opcodeData;
+	MipsImmediateData immediateData;
+	MipsRegisterData registerData;
 };

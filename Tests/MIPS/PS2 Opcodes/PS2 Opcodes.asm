@@ -1,5 +1,5 @@
 .ps2
-.create output.bin,0
+.create "output.bin",0
 				; assembled from pcsx2's disr5900asm.cpp file
 
 	; opcodes

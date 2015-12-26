@@ -6,29 +6,20 @@ class ArmStateCommand: public CAssemblerCommand
 public:
 	ArmStateCommand(bool state);
 	virtual bool Validate();
-	virtual void Encode() { };
-	virtual void writeTempData(TempData& tempData) { };
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const { };
+	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	u64 RamPos;
 	bool armstate;
 };
 
+class ArmOpcodeCommand;
 
-class ArmPool
+struct ArmPoolEntry
 {
-public:
-	ArmPool();
-	void Clear();
-	u64 AddEntry(u32 value);
-	size_t GetCount() { return EntryCount; };
-	u32 GetEntry(size_t num) { return Entries[num]; };
-	void SetRamPos(u64 num) { RamPos = num; };  
-	u64 GetRamPos() { return RamPos; };
-private:
-	u32 Entries[512];
-	size_t EntryCount;
-	u64 RamPos;
+	ArmOpcodeCommand* command;
+	u32 value;
 };
 
 class ArmPoolCommand: public CAssemblerCommand
@@ -36,12 +27,11 @@ class ArmPoolCommand: public CAssemblerCommand
 public:
 	ArmPoolCommand();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
-	virtual void writeSymData(SymbolData& symData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
 	virtual bool IsPool() { return true; };
 private:
-	u64 RamPos;
-	size_t PoolId;
-	size_t Size;
+	u64 position;
+	std::vector<u32> values;
 };

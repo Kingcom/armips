@@ -1,8 +1,8 @@
 #pragma once
 #include "Archs/Architecture.h"
-#include "Util/CommonClasses.h"
 #include "Pool.h"
 #include "Core/Expression.h"
+#include "Parser/Tokenizer.h"
 
 #define ARM_SHIFT_LSL		0x00
 #define ARM_SHIFT_LSR		0x01
@@ -21,6 +21,12 @@ typedef struct {
 	int Number;
 } tArmRegisterInfo;
 
+struct ArmRegisterValue
+{
+	std::wstring name;
+	int num;
+};
+
 extern const tArmRegister ArmRegister[];
 
 class CArmArchitecture: public CArchitecture
@@ -29,8 +35,9 @@ public:
 	CArmArchitecture();
 	~CArmArchitecture();
 	void clear();
-	virtual void AssembleOpcode(const std::wstring& name, const std::wstring& args);
-	virtual bool AssembleDirective(const std::wstring& name, const std::wstring& args);
+
+	virtual CAssemblerCommand* parseDirective(Parser& parser);
+	virtual CAssemblerCommand* parseOpcode(Parser& parser);
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
@@ -41,24 +48,21 @@ public:
 	bool GetThumbMode() { return thumb; };
 	void SetArm9(bool b) { arm9 = b; };
 	bool isArm9() { return arm9; };
-	size_t NewPool() { return PoolCount++; };
-	ArmPool& GetPool(size_t num) { return Pools[num]; };
-	int AddToCurrentPool(int value);
-	void NextPool() { CurrentPool++; };
+
+	std::vector<ArmPoolEntry> getPoolContent() { return currentPoolContent; }
+	void clearPoolContent() { currentPoolContent.clear(); }
+	void addPoolValue(ArmOpcodeCommand* command, u32 value);
 private:
 	bool thumb;
 	bool arm9;
-	ArmPool* Pools;
-	size_t PoolCount;
-	size_t CurrentPool;
+
+	std::vector<ArmPoolEntry> currentPoolContent;
+};
+
+class ArmOpcodeCommand: public CAssemblerCommand
+{
+public:
+	virtual void setPoolAddress(u64 address) = 0;
 };
 
 extern CArmArchitecture Arm;
-
-bool ArmGetRegister(char* source, int& RetLen, tArmRegisterInfo& Result);
-int ArmGetRegister(char* source, int& RetLen);
-bool ArmParseImmediate(char* Source, Expression& Dest, int& RetLen);
-bool ArmGetRlist(char* source, int& RetLen, int ValidRegisters, int& Result);
-int ArmGetShiftedImmediate(unsigned int num, int& ShiftAmount);
-bool ArmGetCopNumber(char* source, int& RetLen, tArmRegisterInfo& Result);
-bool ArmGetCopRegister(char* source, int& RetLen, tArmRegisterInfo& Result);

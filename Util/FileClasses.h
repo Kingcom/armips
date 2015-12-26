@@ -48,6 +48,8 @@ public:
 	void close();
 
 	bool hasGuessedEncoding() { return guessedEncoding; };
+	bool isFromMemory() { return fromMemory; }
+	int getNumLines() { return lineCount; }
 
 	void setFileName(const std::wstring& name) { fileName = name; };
 	const std::wstring& getFileName() { return fileName; };
@@ -91,6 +93,39 @@ private:
 	bool fromMemory;
 	std::wstring content;
 	size_t contentPos;
+	int lineCount;
+
+	std::string buf;
+	size_t bufPos;
+
+	inline unsigned char bufGetChar()
+	{
+		if (buf.size() <= bufPos)
+		{
+			bufFillRead();
+			if (buf.size() == 0)
+				return 0;
+		}
+		return buf[bufPos++];
+	}
+	inline unsigned short bufGet16LE()
+	{
+		char c1 = bufGetChar();
+		char c2 = bufGetChar();
+		return c1 | (c2 << 8);
+	}
+	inline unsigned short bufGet16BE()
+	{
+		char c1 = bufGetChar();
+		char c2 = bufGetChar();
+		return c2 | (c1 << 8);
+	}
+
+	void bufPut(const void *p, const size_t len);
+	void bufPut(const char c);
+
+	void bufFillRead();
+	void bufDrainWrite();
 };
 
 wchar_t sjisToUnicode(unsigned short);

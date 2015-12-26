@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Expression.h"
 #include "Common.h"
-#include "ExpressionParser.h"
 
 enum class ExpressionValueCombination
 {
@@ -13,6 +12,7 @@ enum class ExpressionValueCombination
 	FS = (int(ExpressionValueType::Float)   << 2) | (int(ExpressionValueType::String)  << 0),
 	SI = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::Integer) << 0),
 	SF = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::Float)   << 0),
+	SS = (int(ExpressionValueType::String)  << 2) | (int(ExpressionValueType::String)  << 0),
 };
 
 ExpressionValueCombination getValueCombination(ExpressionValueType a, ExpressionValueType b)
@@ -56,6 +56,10 @@ ExpressionValue ExpressionValue::operator+(const ExpressionValue& other) const
 	case ExpressionValueCombination::SF:
 		result.type = ExpressionValueType::String;
 		result.strValue = strValue + std::to_wstring(other.floatValue);
+		break;
+	case ExpressionValueCombination::SS:
+		result.type = ExpressionValueType::String;
+		result.strValue = strValue + other.strValue;
 		break;
 	}
 
@@ -120,18 +124,42 @@ ExpressionValue ExpressionValue::operator/(const ExpressionValue& other) const
 	switch (getValueCombination(type,other.type))
 	{
 	case ExpressionValueCombination::II:
+		if (other.intValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue / other.intValue;
 		break;
 	case ExpressionValueCombination::FI:
+		if (other.intValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.intValue;
 		break;
 	case ExpressionValueCombination::IF:
+		if (other.floatValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = intValue / other.floatValue;
 		break;
 	case ExpressionValueCombination::FF:
+		if (other.floatValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.floatValue;
 		break;
@@ -146,6 +174,12 @@ ExpressionValue ExpressionValue::operator%(const ExpressionValue& other) const
 	switch (getValueCombination(type,other.type))
 	{
 	case ExpressionValueCombination::II:
+		if (other.intValue == 0)
+		{
+			result.type = ExpressionValueType::String;
+			result.strValue = L"undef";
+			return result;
+		}
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue % other.intValue;
 		break;
@@ -264,6 +298,16 @@ bool ExpressionValue::operator==(const ExpressionValue& other) const
 		return intValue == other.floatValue;
 	case ExpressionValueCombination::FF:
 		return floatValue == other.floatValue;
+	case ExpressionValueCombination::IS:
+		return std::to_wstring(intValue) == other.strValue;
+	case ExpressionValueCombination::FS:
+		return std::to_wstring(floatValue) == other.strValue;
+	case ExpressionValueCombination::SI:
+		return strValue == std::to_wstring(other.intValue);
+	case ExpressionValueCombination::SF:
+		return strValue == std::to_wstring(other.floatValue);
+	case ExpressionValueCombination::SS:
+		return strValue == other.strValue;
 	}
 
 	return false;
@@ -364,41 +408,53 @@ ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
 	return result;
 }
 
+ExpressionInternal::ExpressionInternal()
+{
+	for (size_t i = 0; i < ARRAY_SIZE(children); i++)
+	{
+		children[i] = nullptr;
+	}
+}
 
 ExpressionInternal::ExpressionInternal(u64 value)
+	: ExpressionInternal()
 {
 	type = OperatorType::Integer;
 	intValue = value;
 }
 
 ExpressionInternal::ExpressionInternal(double value)
+	: ExpressionInternal()
 {
 	type = OperatorType::Float;
 	floatValue = value;
 }
 
 ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
+	: ExpressionInternal()
 {
 	this->type = type;
+	strValue = value;
 
 	switch (type)
 	{
 	case OperatorType::Identifier:
-		label = Global.symbolTable.getLabel(value,Global.FileInfo.FileNum,Global.Section);
+		fileNum = Global.FileInfo.FileNum;
+		section = Global.Section;
 		break;
 	case OperatorType::String:
-		strValue = value;
 		break;
 	}
 }
 
 ExpressionInternal::ExpressionInternal(OperatorType op, ExpressionInternal* a,
 	ExpressionInternal* b, ExpressionInternal* c)
+	: ExpressionInternal()
 {
 	type = op;
-	children[0] = std::shared_ptr<ExpressionInternal>(a);
-	children[1] = std::shared_ptr<ExpressionInternal>(b);
-	children[2] = std::shared_ptr<ExpressionInternal>(c);
+	children[0] = a;
+	children[1] = b;
+	children[2] = c;
 }
 
 
@@ -418,10 +474,30 @@ bool ExpressionInternal::hasIdentifierChild()
 	return false;
 }
 
+void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if (children[i] != NULL)
+		{
+			children[i]->replaceMemoryPos(identifierName);
+		}
+	}
+
+	if (type == OperatorType::MemoryPos)
+	{
+		type = OperatorType::Identifier;
+		strValue = identifierName;
+		fileNum = Global.FileInfo.FileNum;
+		section = Global.Section;
+	}
+}
+
 ExpressionValue ExpressionInternal::evaluate()
 {
 	ExpressionValue val;
 
+	Label* label;
 	switch (type)
 	{
 	case OperatorType::Integer:
@@ -433,6 +509,13 @@ ExpressionValue ExpressionInternal::evaluate()
 		val.floatValue = floatValue;
 		return val;
 	case OperatorType::Identifier:
+		label = Global.symbolTable.getLabel(strValue,fileNum,section);
+		if (label == nullptr)
+		{
+			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",strValue);
+			return val;
+		}
+
 		if (!label->isDefined())
 		{
 			Logger::queueError(Logger::Error,L"Undefined label \"%s\"",label->getName());
@@ -449,6 +532,10 @@ ExpressionValue ExpressionInternal::evaluate()
 	case OperatorType::MemoryPos:
 		val.type = ExpressionValueType::Integer;
 		val.intValue = g_fileManager->getVirtualAddress();
+		return val;
+	case OperatorType::ToString:
+		val.type = ExpressionValueType::String;
+		val.strValue = children[0]->toString();
 		return val;
 	case OperatorType::Add:
 		return children[0]->evaluate() + children[1]->evaluate();
@@ -518,25 +605,83 @@ ExpressionValue ExpressionInternal::evaluate()
 	}
 }
 
+static std::wstring escapeString(const std::wstring& text)
+{
+	std::wstring result = text;
+	replaceAll(result,LR"(\)",LR"(\\)");
+	replaceAll(result,LR"(")",LR"(\")");
+
+	return formatString(LR"("%s")",text);
+}
+
+std::wstring ExpressionInternal::toString()
+{
+	switch (type)
+	{
+	case OperatorType::Integer:
+		return formatString(L"%d",intValue);
+	case OperatorType::Float:
+		return formatString(L"%g",floatValue);
+	case OperatorType::Identifier:
+		return strValue;
+	case OperatorType::String:
+		return escapeString(strValue);
+	case OperatorType::MemoryPos:
+		return L".";
+	case OperatorType::Add:
+		return formatString(L"(%s + %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Sub:
+		return formatString(L"(%s - %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Mult:
+		return formatString(L"(%s * %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Div:
+		return formatString(L"(%s / %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Mod:
+		return formatString(L"(%s %% %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Neg:
+		return formatString(L"(-%s)",children[0]->toString());
+	case OperatorType::LogNot:
+		return formatString(L"(!%s)",children[0]->toString());
+	case OperatorType::BitNot:
+		return formatString(L"(~%s)",children[0]->toString());
+	case OperatorType::LeftShift:
+		return formatString(L"(%s << %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::RightShift:
+		return formatString(L"(%s >> %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Less:
+		return formatString(L"(%s < %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Greater:
+		return formatString(L"(%s > %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::LessEqual:
+		return formatString(L"(%s <= %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::GreaterEqual:
+		return formatString(L"(%s >= %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Equal:
+		return formatString(L"(%s == %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::NotEqual:
+		return formatString(L"(%s != %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::BitAnd:
+		return formatString(L"(%s & %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::BitOr:
+		return formatString(L"(%s | %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::LogAnd:
+		return formatString(L"(%s && %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::LogOr:
+		return formatString(L"(%s || %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::Xor:
+		return formatString(L"(%s ^ %s)",children[0]->toString(),children[1]->toString());
+	case OperatorType::TertiaryIf:
+		return formatString(L"(%s ? %s : %s)",children[0]->toString(),children[1]->toString(),children[2]->toString());
+	case OperatorType::ToString:
+		return formatString(L"(%c%s)",L'\U000000B0',children[0]->toString());
+	default:
+		return L"";
+	}
+}
 
 Expression::Expression()
 {
 	expression = NULL;
-}
-
-bool Expression::load(const std::wstring& text, bool allowLabels)
-{
-	ExpressionParser parser;
-	expression = std::shared_ptr<ExpressionInternal>(parser.parse(text));
-
-	if (expression == NULL)
-		return false;
-
-	if (!allowLabels && expression->hasIdentifierChild())
-		return false;
-
-	originalText = text;
-	return true;
 }
 
 ExpressionValue Expression::evaluate()
@@ -550,3 +695,16 @@ ExpressionValue Expression::evaluate()
 	return expression->evaluate();
 }
 
+void Expression::replaceMemoryPos(const std::wstring& identifierName)
+{
+	if (expression != NULL)
+		expression->replaceMemoryPos(identifierName);
+}
+
+Expression createConstExpression(u64 value)
+{
+	Expression exp;
+	ExpressionInternal* num = new ExpressionInternal(value);
+	exp.setExpression(num);
+	return exp;
+}

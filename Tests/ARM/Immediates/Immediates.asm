@@ -1,5 +1,5 @@
 .nds
-.create output.bin,0
+.create "output.bin",0
 
 
 	ldr	r1,=12345678h	; test pool loads

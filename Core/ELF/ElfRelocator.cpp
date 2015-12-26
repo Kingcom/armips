@@ -4,6 +4,7 @@
 #include "Core/Misc.h"
 #include "Util/CRC.h"
 #include "Util/Util.h"
+#include "Commands/CAssemblerLabel.h"
 
 struct ArFileHeader
 {
@@ -178,13 +179,12 @@ bool ElfRelocator::init(const std::wstring& inputName)
 		// init exportable symbols
 		for (int i = 0; i < elf->getSymbolCount(); i++)
 		{
-			ElfRelocatorSymbol symEntry;
-
 			Elf32_Sym* symbol = elf->getSymbol(i);
-			symEntry.type = symbol->st_info & 0xF;
 
-			if (symEntry.type == STT_OBJECT || symEntry.type == STT_FUNC)
+			if (ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL && symbol->st_shndx != 0)
 			{
+				ElfRelocatorSymbol symEntry;
+				symEntry.type = ELF32_ST_TYPE(symbol->st_info);
 				symEntry.name = toWLowercase(elf->getStrTableString(symbol->st_name));
 				symEntry.relativeAddress = symbol->st_value;
 				symEntry.section = symbol->st_shndx;
@@ -246,11 +246,13 @@ bool ElfRelocator::exportSymbols()
 	return !error;
 }
 
-void ElfRelocator::writeCtor(const std::wstring& ctorName)
+CAssemblerCommand* ElfRelocator::generateCtor(const std::wstring& ctorName)
 {
-	Arch->AssembleDirective(L".func",ctorName);
-	relocator->writeCtorStub(ctors);
-	Arch->AssembleDirective(L".endfunc",L"");
+	CAssemblerCommand* content = relocator->generateCtorStub(ctors);
+
+	CDirectiveFunction* func = new CDirectiveFunction(ctorName);
+	func->setContent(content);
+	return func;
 }
 
 bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
@@ -422,11 +424,11 @@ bool ElfRelocator::relocate(u64& memoryAddress)
 	return !error;
 }
 
-void ElfRelocator::writeSymbols(SymbolData& symData)
+void ElfRelocator::writeSymbols(SymbolData& symData) const
 {
-	for (ElfRelocatorFile& file: files)
+	for (const ElfRelocatorFile& file: files)
 	{
-		for (ElfRelocatorSymbol& sym: file.symbols)
+		for (const ElfRelocatorSymbol& sym: file.symbols)
 		{
 			symData.addLabel(sym.relocatedAddress,sym.name);
 

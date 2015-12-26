@@ -1,41 +1,41 @@
 #pragma once
-#include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
 #include "ThumbOpcodes.h"
 #include "Arm.h"
 #include "Core/Expression.h"
+#include "ThumbOpcodes.h"
 
-typedef struct {
-	tArmRegisterInfo rd;
-	tArmRegisterInfo rs;
-	tArmRegisterInfo rn;
-	tArmRegisterInfo ro;
+struct ThumbOpcodeVariables {
+	ArmRegisterValue rd;
+	ArmRegisterValue rs;
+	ArmRegisterValue rn;
+	ArmRegisterValue ro;
 	Expression ImmediateExpression;
 	int Immediate;
 	int ImmediateBitLen;
 	int OriginalImmediate;
 	int rlist;
 	char RlistStr[32];
-} tThumbOpcodeVariables;
+} ;
 
-class CThumbInstruction: public CAssemblerCommand
+class CThumbInstruction: public ArmOpcodeCommand
 {
 public:
+	CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars);
+
 	CThumbInstruction();
 //	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
 	size_t GetSize() { return OpcodeSize; };
+	virtual void setPoolAddress(u64 address);
 private:
-	bool LoadEncoding(const tThumbOpcode& SourceOpcode, char* Line);
-	void FormatInstruction(const char* encoding,tThumbOpcodeVariables& Vars, char* dest);
-	void WriteInstruction(unsigned short encoding);
-	tThumbOpcodeVariables Vars;
+	void FormatInstruction(const char* encoding, char* dest) const;
+	void WriteInstruction(unsigned short encoding) const;
+	ThumbOpcodeVariables Vars;
 	tThumbOpcode Opcode;
-	bool NoCheckError;
-	bool Loaded;
 	size_t OpcodeSize;
 	u64 RamPos;
 };

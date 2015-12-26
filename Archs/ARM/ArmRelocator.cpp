@@ -3,6 +3,7 @@
 #include "Util/Util.h"
 #include "Arm.h"
 #include "Core/Common.h"
+#include <algorithm>
 
 inline int signExtend(int value, int bitsLength)
 {
@@ -150,81 +151,72 @@ void ArmElfRelocator::setSymbolAddress(RelocationData& data, u64 symbolAddress, 
 	data.targetSymbolType = symbolType;
 }
 
+const wchar_t* ctorTemplate =
+	L"push	r4-r7,r14\n"
+	L"ldr	r4,=%ctorTable%\n"
+	L"ldr	r5,=%ctorTable%+%ctorTableSize%\n"
+	L"%outerLoopLabel%:\n"
+	L"ldr	r6,[r4]\n"
+	L"ldr	r7,[r4,4]\n"
+	L"add	r4,8\n"
+	L"%innerLoopLabel%:\n"
+	L"ldr	r0,[r6]\n"
+	L"add	r6,4\n"
+	L".if %simpleMode%\n"
+	L"	blx	r0\n"
+	L".else\n"
+	L"	bl	%stubName%\n"
+	L".endif\n"
+	L"cmp	r6,r7\n"
+	L"blt	%innerLooplabel%\n"
+	L"cmp	r4,r5\n"
+	L"blt	%outerLoopLabel%\n"
+	L".if %simpleMode%\n"
+	L"	pop	r4-r7,r15\n"
+	L".else\n"
+	L"	pop	r4-r7\n"
+	L"	pop	r0\n"
+	L"	%stubName%:\n"
+	L"	bx	r0\n"
+	L".endif\n"
+	L".pool\n"
+	L"%ctorTable%:\n"
+	L".word %ctorContent%"
+;
+
+CAssemblerCommand* ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
+{
+	std::wstring ctorText;
+
+	Parser parser;
+	if (ctors.size() != 0)
+	{
+		bool simpleMode = arm9 == false && Arm.GetThumbMode();
+
+		// create constructor table
+		std::wstring table;
+		for (size_t i = 0; i < ctors.size(); i++)
+		{
+			if (i != 0)
+				table += ',';
+			table += formatString(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+		}
+
+		return parser.parseTemplate(ctorTemplate,{
+			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
+			{ L"%ctorTableSize%",	formatString(L"%d",ctors.size()*8) },
+			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
+			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
+			{ L"%stubName%",		Global.symbolTable.getUniqueLabelName() },
+			{ L"%simpleMode%",		simpleMode ? L"1" : L"0" },
+			{ L"%ctorContent%",		table },
+		});
+	} else {
+		return parser.parseTemplate(L"bx r14");
+	}
+}
+
 void ArmElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 {
-	if (ctors.size() == 0)
-	{
-		Arm.AssembleOpcode(L"bx",L"r14");
-		return;
-	}
-
-	// arm7 can't blx to a register. a stub needs to be added
-	bool thumbStub = false;
-	std::wstring thumbStubName;
-
-	if (arm9 == false && Arm.GetThumbMode())
-	{
-		thumbStub = true;
-		thumbStubName = Global.symbolTable.getUniqueLabelName();
-	}
-
-	// initialization
-	Arm.AssembleOpcode(L"push",L"r4-r7,r14");
-
-	std::wstring tableLabel = Global.symbolTable.getUniqueLabelName();
-	Arm.AssembleOpcode(L"ldr",formatString(L"r4,=%s",tableLabel));
-	Arm.AssembleOpcode(L"ldr",formatString(L"r5,=%s+0x%08X",tableLabel,ctors.size()*8));
-	
-	// actual function
-	std::wstring loopStartLabel = Global.symbolTable.getUniqueLabelName();
-	addAssemblerLabel(loopStartLabel);
-	Arm.AssembleOpcode(L"ldr",L"r6,[r4]");
-	Arm.AssembleOpcode(L"ldr",L"r7,[r4,4]");
-	Arm.AssembleOpcode(L"add",L"r4,8");
-
-	std::wstring innerLoopLabel = Global.symbolTable.getUniqueLabelName();
-	addAssemblerLabel(innerLoopLabel);
-	
-	Arm.AssembleOpcode(L"ldr",L"r0,[r6]");
-	Arm.AssembleOpcode(L"add",L"r6,4");
-
-	if (thumbStub)
-		Arm.AssembleOpcode(L"bl",thumbStubName);
-	else
-		Arm.AssembleOpcode(L"blx",L"r0");
-
-	// finish inner loop
-	Arm.AssembleOpcode(L"cmp",L"r6,r7");
-	Arm.AssembleOpcode(L"blt",innerLoopLabel);
-
-	// finish outer loop
-	Arm.AssembleOpcode(L"cmp",L"r4,r5");
-	Arm.AssembleOpcode(L"blt",loopStartLabel);
-
-	// finish function
-	if (thumbStub)
-	{
-		Arm.AssembleOpcode(L"pop",L"r4-r7");
-		Arm.AssembleOpcode(L"pop",L"r0");
-
-		addAssemblerLabel(thumbStubName);
-		Arm.AssembleOpcode(L"bx",L"r0");
-	} else {
-		Arm.AssembleOpcode(L"pop",L"r4-r7,r15");
-	}
-
-	// add data
-	Arm.AssembleDirective(L".pool",L"");
-	Arm.AssembleDirective(L".align",L"4");
-	addAssemblerLabel(tableLabel);
-
-	std::wstring data;
-	for (size_t i = 0; i < ctors.size(); i++)
-	{
-		data += ctors[i].symbolName;
-		data += formatString(L",%s+0x%08X,",ctors[i].symbolName,ctors[i].size);
-	}
-
-	data.pop_back();	// remove trailing comma
-	Arm.AssembleDirective(L".word",data);
+	Logger::printError(Logger::FatalError,L"Unsupported operation");
 }

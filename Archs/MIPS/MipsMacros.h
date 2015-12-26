@@ -4,13 +4,19 @@
 
 #define MIPSM_B						0x00000001
 #define MIPSM_BU					0x00000002
-#define MIPSM_HW					0x00000004
-#define MIPSM_HWU					0x00000008
-#define MIPSM_W						0x00000010
-#define MIPSM_NE					0x00000020
-#define MIPSM_LT					0x00000040
-#define MIPSM_GE					0x00000080
-#define MIPSM_EQ					0x00000100
+#define MIPSM_HW					0x00000003
+#define MIPSM_HWU					0x00000004
+#define MIPSM_W						0x00000005
+#define MIPSM_COP1					0x00000006
+#define MIPSM_COP2					0x00000007
+#define MIPSM_ACCESSMASK			0x00000007
+
+#define MIPSM_NE					0x00000001
+#define MIPSM_LT					0x00000002
+#define MIPSM_GE					0x00000003
+#define MIPSM_EQ					0x00000004
+#define MIPSM_CONDITIONMASK			0x00000007
+
 #define MIPSM_IMM					0x00000200
 #define MIPSM_LEFT					0x00000400
 #define MIPSM_RIGHT					0x00000800
@@ -18,44 +24,32 @@
 #define MIPSM_DONTWARNDELAYSLOT		0x00002000
 #define MIPSM_UPPER					0x00004000
 #define MIPSM_LOWER					0x00008000
+#define MIPSM_LOAD					0x00010000
+#define MIPSM_STORE					0x00020000
 
-typedef struct {
-	Expression i1;
-	Expression i2;
-	MipsRegisterInfo rs;			// source reg
-	MipsRegisterInfo rt;			// target reg
-	MipsRegisterInfo rd;			// dest reg
-	bool NoCheckError;
-} tMipsMacroVars;
+class Parser;
 
-typedef struct {
-	Expression i1;
-	Expression i2;
-	MipsRegisterInfo rs;			// source reg
-	MipsRegisterInfo rt;			// target reg
-	MipsRegisterInfo rd;			// dest reg
-} tMipsMacroData;
+typedef CAssemblerCommand* (*MipsMacroFunc)(Parser&,MipsRegisterData&,MipsImmediateData&,int);
 
-typedef struct {
-	int i1;
-	int i2;
-	MipsRegisterInfo rs;			// source reg
-	MipsRegisterInfo rt;			// target reg
-	MipsRegisterInfo rd;			// dest reg
-} tMipsMacroValues;
-
-typedef int (*mipsmacrofunc)(tMipsMacroValues&,int,CMipsInstruction*);
-
-typedef struct {
-	const char* name;
-	const char* args;
-	int MaxOpcodes;
-	mipsmacrofunc Function;
+struct MipsMacroDefinition {
+	const wchar_t* name;
+	const wchar_t* args;
+	MipsMacroFunc function;
 	int flags;
-} tMipsMacro;
+};
 
-extern const tMipsMacro MipsMacros[];
+extern const MipsMacroDefinition mipsMacros[];
 
-
-bool MipsCheckMacro(char* Opcode, char* Arguments);
-
+class MipsMacroCommand: public CAssemblerCommand
+{
+public:
+	MipsMacroCommand(CAssemblerCommand* content, int macroFlags);
+	~MipsMacroCommand();
+	virtual bool Validate();
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+private:
+	CAssemblerCommand* content;
+	int macroFlags;
+	bool IgnoreLoadDelay;
+};

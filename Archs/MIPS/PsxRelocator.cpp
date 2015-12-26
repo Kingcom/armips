@@ -503,11 +503,11 @@ bool PsxRelocator::relocate(int& memoryAddress)
 }
 
 
-void PsxRelocator::writeSymbols(SymbolData& symData)
+void PsxRelocator::writeSymbols(SymbolData& symData) const
 {
-	for (PsxRelocatorFile& file: files)
+	for (const PsxRelocatorFile& file: files)
 	{
-		for (PsxSymbol& sym: file.symbols)
+		for (const PsxSymbol& sym: file.symbols)
 		{
 			if (sym.type != PsxSymbolType::External)
 				symData.addLabel(sym.label->getValue(),sym.name.c_str());
@@ -519,9 +519,9 @@ void PsxRelocator::writeSymbols(SymbolData& symData)
 // DirectivePsxObjImport
 //
 
-DirectivePsxObjImport::DirectivePsxObjImport(ArgumentList& args)
+DirectivePsxObjImport::DirectivePsxObjImport(const std::wstring& fileName)
 {
-	if (rel.init(args[0].text))
+	if (rel.init(fileName))
 	{
 	}
 }
@@ -534,13 +534,13 @@ bool DirectivePsxObjImport::Validate()
 	return rel.hasDataChanged();
 }
 
-void DirectivePsxObjImport::Encode()
+void DirectivePsxObjImport::Encode() const
 {
-	ByteArray& data = rel.getData();
+	const ByteArray& data = rel.getData();
 	g_fileManager->write(data.data(),data.size());
 }
 
-void DirectivePsxObjImport::writeSymData(SymbolData& symData)
+void DirectivePsxObjImport::writeSymData(SymbolData& symData) const
 {
 	rel.writeSymbols(symData);
 }

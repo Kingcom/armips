@@ -1,22 +1,24 @@
 #pragma once
-#include "Util/CommonClasses.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
 
 class CDirectiveArea: public CAssemblerCommand
 {
 public:
-	CDirectiveArea();
-	bool LoadStart(ArgumentList& Args);
-	bool LoadEnd();
+	CDirectiveArea(Expression& size);
+	~CDirectiveArea();
 	virtual bool Validate();
-	virtual void Encode();
-	virtual void writeTempData(TempData& tempData);
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
+	void setFillExpression(Expression& exp);
+	void setContent(CAssemblerCommand* content) { this->content = content; }
 private:
-	bool Start;
-	Expression SizeExpression;
-	size_t Size;
-	u64 RamPos;
-	int fillValue;
-	Expression FillExpression;
+	u64 position;
+	Expression sizeExpression;
+	size_t areaSize;
+	size_t contentSize;
+	Expression fillExpression;
+	u8 fillValue;
+	CAssemblerCommand* content;
 };

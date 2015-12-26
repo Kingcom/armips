@@ -8,6 +8,9 @@ struct ElfRelocatorCtor
 	size_t size;
 };
 
+class CAssemblerCommand;
+class Parser;
+
 class IElfRelocator
 {
 public:
@@ -15,6 +18,7 @@ public:
 	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
 	virtual void setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType) = 0;
 	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors) = 0;
+	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }
 };
 
 class Label;
@@ -51,11 +55,11 @@ class ElfRelocator
 public:
 	bool init(const std::wstring& inputName);
 	bool exportSymbols();
-	void writeSymbols(SymbolData& symData);
-	void writeCtor(const std::wstring& ctorName);
+	void writeSymbols(SymbolData& symData) const;
+	CAssemblerCommand* generateCtor(const std::wstring& ctorName);
 	bool relocate(u64& memoryAddress);
 	bool hasDataChanged() { return dataChanged; };
-	ByteArray& getData() { return outputData; };
+	const ByteArray& getData() const { return outputData; };
 private:
 	bool relocateFile(ElfRelocatorFile& file, u64& relocationAddress);
 

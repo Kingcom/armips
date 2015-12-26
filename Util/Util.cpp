@@ -49,6 +49,26 @@ std::wstring convertUtf8ToWString(const char* source)
 	return result;
 }
 
+std::string convertWCharToUtf8(wchar_t character)
+{
+	std::string result;
+	
+	if (character < 0x80)
+	{
+		result += character & 0x7F;
+	} else if (character < 0x800)
+	{
+		result += 0xC0 | ((character >> 6) & 0x1F);
+		result += (0x80 | (character & 0x3F));
+	} else {
+		result += 0xE0 | ((character >> 12) & 0xF);
+		result += 0x80 | ((character >> 6) & 0x3F);
+		result += 0x80 | (character & 0x3F);
+	}
+
+	return result;
+}
+
 std::string convertWStringToUtf8(const std::wstring& source)
 {
 	std::string result;
@@ -127,7 +147,7 @@ StringList getStringListFromArray(wchar_t** source, int count)
 }
 
 
-int fileSize(const std::wstring& fileName)
+size_t fileSize(const std::wstring& fileName)
 {
 #ifdef _WIN32
 	struct _stat fileStat; 
@@ -266,4 +286,31 @@ std::wstring getFileNameFromPath(const std::wstring& path)
 	if (n == path.npos)
 		return path;
 	return path.substr(n);
+}
+
+size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue)
+{
+	size_t pos = 0;
+	size_t len = wcslen(oldValue);
+
+	size_t count = 0;
+	while ((pos = str.find(oldValue, pos)) != std::string::npos)
+	{
+		str.replace(pos,len,newValue);
+		pos += newValue.length();
+		count++;
+	}
+
+	return count;
+}
+
+bool startsWith(const std::wstring& str, wchar_t* value, size_t stringPos)
+{
+	while (*value != 0 && stringPos < str.size())
+	{
+		if (str[stringPos++] != *value++)
+			return false;
+	}
+
+	return *value == 0;
 }

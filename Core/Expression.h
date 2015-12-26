@@ -31,6 +31,7 @@ enum class OperatorType
 	LogAnd,
 	LogOr,
 	TertiaryIf,
+	ToString
 };
 
 enum class ExpressionValueType { Invalid, Integer, Float, String};
@@ -99,32 +100,39 @@ class Label;
 class ExpressionInternal
 {
 public:
+	ExpressionInternal();
 	ExpressionInternal(u64 value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
 	ExpressionInternal(OperatorType op, ExpressionInternal* a = NULL,
 		ExpressionInternal* b = NULL, ExpressionInternal* c = NULL);
 	ExpressionValue evaluate();
+	std::wstring toString();
 	bool hasIdentifierChild();
+	bool isIdentifier() { return type == OperatorType::Identifier; }
+	std::wstring getStringValue() { return strValue; }
+	void replaceMemoryPos(const std::wstring& identifierName);
 private:
 	OperatorType type;
-	std::shared_ptr<ExpressionInternal> children[3];
+	ExpressionInternal* children[3];
 	union
 	{
 		u64 intValue;
 		double floatValue;
 	};
 	std::wstring strValue;
-	Label* label;
+
+	unsigned int fileNum, section;
 };
 
 class Expression
 {
 public:
 	Expression();
-	bool load(const std::wstring& text, bool allowLabels = true);
 	ExpressionValue evaluate();
-	bool isLoaded() { return expression != NULL; }
+	bool isLoaded() const { return expression != NULL; }
+	void setExpression(ExpressionInternal* exp) { expression = std::shared_ptr<ExpressionInternal>(exp); }
+	void replaceMemoryPos(const std::wstring& identifierName);
 
 	template<typename T>
 	bool evaluateInteger(T& dest)
@@ -164,22 +172,20 @@ public:
 		dest = value.strValue;
 		return true;
 	}
+	
+	bool evaluateIdentifier(std::wstring& dest)
+	{
+		if (expression == NULL || expression->isIdentifier() == false)
+			return false;
+
+		dest = expression->getStringValue();
+		return true;
+	}
+
+	std::wstring toString() { return expression != NULL ? expression->toString() : L""; };
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;
 };
 
-template<typename T>
-bool convertConstExpression(const std::wstring& text, T& dest)
-{
-	Expression exp;
-	if (exp.load(text,false) == false)
-		return false;
-
-	ExpressionValue value = exp.evaluate();
-	if (value.isInt() == false)
-		return false;
-
-	dest = (T) value.intValue;
-	return true;
-}
+Expression createConstExpression(u64 value);
