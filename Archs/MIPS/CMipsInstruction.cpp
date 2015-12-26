@@ -269,6 +269,11 @@ void CMipsInstruction::encodeNormal() const
 		encoding |= registerData.vrt.num >> 5;
 		encoding |= (registerData.vrt.num & 0x1F) << 16;
 	}
+
+	if (Arch->getEndianness() == Endianness::Big)
+	{
+		encoding = swapEndianness32((u32)encoding);
+	}
 	
 	g_fileManager->write(&encoding,4);
 }
@@ -297,6 +302,11 @@ void CMipsInstruction::encodeVfpu() const
 	case MipsImmediateType::Immediate7:
 		encoding |= immediateData.primary.value << 0;
 		break;
+	}
+
+	if (Arch->getEndianness() == Endianness::Big)
+	{
+		encoding = swapEndianness32((u32)encoding);
 	}
 
 	g_fileManager->write(&encoding,4);
