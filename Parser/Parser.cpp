@@ -548,7 +548,7 @@ void Parser::updateFileInfo()
 		if (entries[index].virtualFile == false && entries[index].fileNum != -1)
 		{
 			Global.FileInfo.FileNum = entries[index].fileNum;
-			Global.FileInfo.LineNumber = entries[index].tokenizer->peekToken().line;
+			Global.FileInfo.LineNumber = (int)entries[index].tokenizer->peekToken().line;
 			return;
 		}
 	}

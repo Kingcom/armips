@@ -66,6 +66,9 @@ bool encodeAssembly(CAssemblerCommand* content)
 		Arm.Revalidate();
 		Mips.Revalidate();
 
+		if (Global.memoryMode)
+			g_fileManager->closeFile();
+
 		validationPasses++;
 	} while (Revalidate == true);
 
