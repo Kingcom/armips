@@ -139,6 +139,8 @@ bool runArmips(ArmipsArguments& arguments)
 	Arm.clear();
 
 	// process arguments
+	Parser parser;
+
 	Logger::setSilent(arguments.silent);
 	Logger::setErrorOnWarning(arguments.errorOnWarning);
 
@@ -150,8 +152,7 @@ bool runArmips(ArmipsArguments& arguments)
 
 	for (size_t i = 0; i < arguments.equList.size(); i++)
 	{
-		std::wstring equline = arguments.equList.at(i);
-		//CheckEquLabel(equline);
+		parser.addEquation(arguments.equList[i].name, arguments.equList[i].value);
 	}
 
 	Global.symbolTable.addLabels(arguments.labels);
@@ -175,7 +176,6 @@ bool runArmips(ArmipsArguments& arguments)
 		break;
 	}
 
-	Parser parser;
 	CAssemblerCommand* content = parser.parseFile(input);
 
 	bool result = !Logger::hasError();

@@ -29,6 +29,8 @@ public:
 	Parser();
 	bool atEnd() { return entries.back().tokenizer->atEnd(); }
 
+	void addEquation(const std::wstring& name, const std::wstring& value);
+
 	Expression parseExpression();
 	bool parseExpressionList(std::vector<Expression>& list, int min = -1, int max = -1);
 	bool parseIdentifier(std::wstring& dest);

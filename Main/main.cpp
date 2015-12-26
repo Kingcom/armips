@@ -69,9 +69,10 @@ int wmain(int argc, wchar_t* argv[])
 			argpos += 1;
 		} else if (arguments[argpos] == L"-equ")
 		{
-			std::wstring name = arguments[argpos + 1];
-			std::wstring replacement = arguments[argpos + 2];
-			parameters.equList.push_back(name + L" equ " + replacement);
+			EquationDefinition def;
+			def.name = arguments[argpos + 1];
+			def.value = arguments[argpos + 2];
+			parameters.equList.push_back(def);
 			argpos += 3;
 		} else if (arguments[argpos] == L"-time")
 		{

@@ -11,6 +11,12 @@ struct LabelDefinition
 	int value;
 };
 
+struct EquationDefinition
+{
+	std::wstring name;
+	std::wstring value;
+};
+
 struct ArmipsArguments
 {
 	// common
@@ -19,7 +25,7 @@ struct ArmipsArguments
 	bool errorOnWarning;
 	bool silent;
 	StringList* errorsResult;
-	StringList equList;
+	std::vector<EquationDefinition> equList;
 	std::vector<LabelDefinition> labels;
 
 	// file mode

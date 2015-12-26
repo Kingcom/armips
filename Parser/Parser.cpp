@@ -224,6 +224,31 @@ CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool virtualFile, const s
 	return sequence;
 }
 
+void Parser::addEquation(const std::wstring& name, const std::wstring& value)
+{
+	// parse value string
+	TextFile f;
+	f.openMemory(value);
+
+	FileTokenizer tok;
+	tok.init(&f);
+
+	TokenizerPosition start = tok.getPosition();
+	while (tok.atEnd() == false)
+		tok.nextToken();
+
+	// extract tokens
+	TokenizerPosition end = tok.getPosition();
+	std::vector<Token> tokens = tok.getTokens(start, end);
+	size_t index = Tokenizer::addEquValue(tokens);
+
+	for (FileEntry& entry : entries)
+		entry.tokenizer->resetLookaheadCheckMarks();
+
+	// register equation
+	Global.symbolTable.addEquation(name, Global.FileInfo.FileNum, Global.Section, index);
+}
+
 bool Parser::checkEquLabel()
 {
 	updateFileInfo();
@@ -261,28 +286,7 @@ bool Parser::checkEquLabel()
 				return true;
 			}
 
-			// parse value string
-			TextFile f;
-			f.openMemory(value);
-
-			FileTokenizer tok;
-			tok.init(&f);
-
-			TokenizerPosition start = tok.getPosition();
-			while (tok.atEnd() == false)
-				tok.nextToken();
-
-			// extract tokens
-			TokenizerPosition end = tok.getPosition();
-			std::vector<Token> tokens = tok.getTokens(start,end);
-			size_t index = Tokenizer::addEquValue(tokens);
-
-			for (FileEntry& entry: entries)
-				entry.tokenizer->resetLookaheadCheckMarks();
-
-			// register equation
-			Global.symbolTable.addEquation(name,Global.FileInfo.FileNum,Global.Section,index);
-
+			addEquation(name,value);
 			return true;
 		}
 	}
