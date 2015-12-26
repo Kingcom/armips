@@ -541,12 +541,14 @@ void Parser::updateFileInfo()
 		return;
 	}
 
-	for (size_t i = entries.size()-1; i >= 0; i--)
+	for (size_t i = entries.size(); i > 0; i--)
 	{
-		if (entries[i].virtualFile == false && entries[i].fileNum != -1)
+		size_t index = i-1;
+
+		if (entries[index].virtualFile == false && entries[index].fileNum != -1)
 		{
-			Global.FileInfo.FileNum = entries[i].fileNum;
-			Global.FileInfo.LineNumber = entries[i].tokenizer->peekToken().line;
+			Global.FileInfo.FileNum = entries[index].fileNum;
+			Global.FileInfo.LineNumber = entries[index].tokenizer->peekToken().line;
 			return;
 		}
 	}
