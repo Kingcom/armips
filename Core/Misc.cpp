@@ -17,7 +17,7 @@ bool Logger::silent = false;
 
 std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
 {
-	std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
+	const std::wstring& fileName = Global.memoryMode ? L"<memory>" : Global.FileInfo.FileList[Global.FileInfo.FileNum];
 
 	switch (type)
 	{
