@@ -43,19 +43,19 @@ ExpressionValue ExpressionValue::operator+(const ExpressionValue& other) const
 		break;
 	case ExpressionValueCombination::IS:
 		result.type = ExpressionValueType::String;
-		result.strValue = std::to_wstring(intValue) + other.strValue;
+		result.strValue = to_wstring(intValue) + other.strValue;
 		break;
 	case ExpressionValueCombination::FS:
 		result.type = ExpressionValueType::String;
-		result.strValue = std::to_wstring(floatValue) + other.strValue;
+		result.strValue = to_wstring(floatValue) + other.strValue;
 		break;
 	case ExpressionValueCombination::SI:
 		result.type = ExpressionValueType::String;
-		result.strValue = strValue + std::to_wstring(other.intValue);
+		result.strValue = strValue + to_wstring(other.intValue);
 		break;
 	case ExpressionValueCombination::SF:
 		result.type = ExpressionValueType::String;
-		result.strValue = strValue + std::to_wstring(other.floatValue);
+		result.strValue = strValue + to_wstring(other.floatValue);
 		break;
 	case ExpressionValueCombination::SS:
 		result.type = ExpressionValueType::String;
@@ -299,13 +299,13 @@ bool ExpressionValue::operator==(const ExpressionValue& other) const
 	case ExpressionValueCombination::FF:
 		return floatValue == other.floatValue;
 	case ExpressionValueCombination::IS:
-		return std::to_wstring(intValue) == other.strValue;
+		return to_wstring(intValue) == other.strValue;
 	case ExpressionValueCombination::FS:
-		return std::to_wstring(floatValue) == other.strValue;
+		return to_wstring(floatValue) == other.strValue;
 	case ExpressionValueCombination::SI:
-		return strValue == std::to_wstring(other.intValue);
+		return strValue == to_wstring(other.intValue);
 	case ExpressionValueCombination::SF:
-		return strValue == std::to_wstring(other.floatValue);
+		return strValue == to_wstring(other.floatValue);
 	case ExpressionValueCombination::SS:
 		return strValue == other.strValue;
 	}

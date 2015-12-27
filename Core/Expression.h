@@ -1,6 +1,16 @@
 #pragma once
 #include <memory>
 
+inline std::wstring to_wstring(u64 value)
+{
+	return formatString(L"%d", value);
+}
+
+inline std::wstring to_wstring(double value)
+{
+	return formatString(L"%f", value);
+}
+
 enum class OperatorType
 {
 	Invalid,
@@ -156,13 +166,13 @@ public:
 		ExpressionValue value = expression->evaluate();
 		if (convert && value.isInt())
 		{
-			dest = std::to_wstring(value.intValue);
+			dest = to_wstring(value.intValue);
 			return true;
 		}
 
 		if (convert && value.isFloat())
 		{
-			dest = std::to_wstring(value.floatValue);
+			dest = to_wstring(value.floatValue);
 			return true;
 		}
 
