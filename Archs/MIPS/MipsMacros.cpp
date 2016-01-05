@@ -80,6 +80,8 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 			.elseif (%imm% & 0xFFFF) == 0
 				.if %upper%
 					lui	%rs%,%imm% >> 16
+				.elseif %lower%
+					nop
 				.endif
 			.else
 				.if %upper%

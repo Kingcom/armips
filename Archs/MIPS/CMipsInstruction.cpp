@@ -149,7 +149,10 @@ bool CMipsInstruction::Validate()
 		if (immediateData.secondary.expression.isLoaded())
 		{
 			if (immediateData.secondary.expression.evaluateInteger(immediateData.secondary.value) == false)
+			{
+				Logger::queueError(Logger::Error, L"Invalid immediate expression");
 				return false;
+			}
 
 			immediateData.secondary.originalValue = immediateData.secondary.value;
 		}
