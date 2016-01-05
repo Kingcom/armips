@@ -600,7 +600,7 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 			vars.ImmediateBitLen = *encoding++;
 			break;
 		case 'X': // cop number
-			CHECK(parseCopNumber(parser,vars.CopData.cm));
+			CHECK(parseCopNumber(parser,vars.CopData.pn));
 			break;
 		case 'Y':	// cop opcode number
 			CHECK(parseImmediate(parser,vars.CopData.CpopExpression));
