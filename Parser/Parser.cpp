@@ -417,7 +417,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 		TokenizerPosition startPos = getTokenizer()->getPosition();
 		Expression exp = parseExpression();
 		if (exp.isLoaded() == false)
-			return false;
+			return nullptr;
 
 		TokenizerPosition endPos = getTokenizer()->getPosition();
 		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);

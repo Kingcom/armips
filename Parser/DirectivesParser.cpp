@@ -37,7 +37,7 @@ CAssemblerCommand* parseDirectiveOpen(Parser& parser, int flags)
 	if (list.size() == 3)
 	{
 		if (list[1].evaluateString(outputName,false) == false)
-			return false;
+			return nullptr;
 		
 		CDirectiveFile* file = new CDirectiveFile();
 		file->initCopy(inputName,outputName,memoryAddress);
@@ -488,7 +488,7 @@ CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 	if (Global.symbolTable.isValidSymbolName(stringValue) == false)
 	{
 		parser.printError(tok,L"Invalid label name \"%s\"",stringValue);
-		return false;
+		return nullptr;
 	}
 
 	return new CAssemblerLabel(stringValue,value);

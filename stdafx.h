@@ -4,6 +4,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #undef __STRICT_ANSI__
 
+#ifdef __clang__
+typedef struct { double x, y; } __float128;
+#endif
+
 #include <cstdio>
 #include <vector>
 #include <cstdlib>
