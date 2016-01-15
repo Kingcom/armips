@@ -761,5 +761,5 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 	else
 		parser.printError(token,L"Invalid THUMB opcode");
 	
-	return false;
+	return nullptr;
 }
