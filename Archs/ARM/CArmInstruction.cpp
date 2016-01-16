@@ -25,7 +25,6 @@ CArmInstruction::CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariab
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
-	endianness = Arch->getEndianness();
 	arch = Arm.getVersion();
 }
 
@@ -440,14 +439,6 @@ void CArmInstruction::writeTempData(TempData& tempData) const
 	tempData.writeLine(RamPos,convertUtf8ToWString(str));
 }
 
-void CArmInstruction::WriteInstruction(unsigned int encoding) const
-{
-	if (endianness == Endianness::Big)
-		encoding = swapEndianness32((u32)encoding);
-
-	g_fileManager->write(&encoding,4);
-}
-
 void CArmInstruction::Encode() const
 {
 	unsigned int encoding = Vars.Opcode.UseNewEncoding == true ? Vars.Opcode.NewEncoding : Opcode.encoding;
@@ -621,5 +612,5 @@ void CArmInstruction::Encode() const
 		printf("doh");
 	}
 
-	WriteInstruction(encoding);
+	g_fileManager->writeU32((u32)encoding);
 }

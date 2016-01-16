@@ -194,6 +194,7 @@ FileManager::~FileManager()
 void FileManager::reset()
 {
 	activeFile = NULL;
+	setEndianness(Endianness::Little);
 }
 
 bool FileManager::checkActiveFile()
@@ -248,6 +249,27 @@ bool FileManager::write(void* data, size_t length)
 	}
 
 	return activeFile->write(data,length);
+}
+
+bool FileManager::writeU8(u8 data)
+{
+	return write(&data,1);
+}
+
+bool FileManager::writeU16(u16 data)
+{
+	if (endianness == Endianness::Big)
+		data = swapEndianness16(data);
+
+	return write(&data,2);
+}
+
+bool FileManager::writeU32(u32 data)
+{
+	if (endianness == Endianness::Big)
+		data = swapEndianness32(data);
+
+	return write(&data,4);
 }
 
 u64 FileManager::getVirtualAddress()

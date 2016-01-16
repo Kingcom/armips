@@ -35,5 +35,4 @@ public:
 private:
 	u64 position;
 	std::vector<u32> values;
-	Endianness endianness;
 };

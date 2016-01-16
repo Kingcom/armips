@@ -3,6 +3,8 @@
 #include "../Util/FileClasses.h"
 #include "SymbolData.h"
 
+enum class Endianness { Big, Little };
+
 class AssemblerFile
 {
 public:
@@ -65,14 +67,19 @@ public:
 	bool hasOpenFile() { return activeFile != NULL; };
 	void closeFile();
 	bool write(void* data, size_t length);
+	bool writeU8(u8 data);
+	bool writeU16(u16 data);
+	bool writeU32(u32 data);
 	u64 getVirtualAddress();
 	u64 getPhysicalAddress();
 	bool seekVirtual(u64 virtualAddress);
 	bool seekPhysical(u64 physicalAddress);
 	bool advanceMemory(size_t bytes);
 	AssemblerFile* getOpenFile() { return activeFile; };
+	void setEndianness(Endianness endianness) { this->endianness = endianness; };
 private:
 	bool checkActiveFile();
 	std::vector<AssemblerFile*> files;
 	AssemblerFile* activeFile;
+	Endianness endianness;
 };

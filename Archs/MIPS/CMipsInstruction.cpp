@@ -14,7 +14,6 @@ CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& im
 
 	addNop = false;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
-	endianness = Arch->getEndianness();
 }
 
 CMipsInstruction::~CMipsInstruction()
@@ -274,10 +273,7 @@ void CMipsInstruction::encodeNormal() const
 		encoding |= (registerData.vrt.num & 0x1F) << 16;
 	}
 
-	if (endianness == Endianness::Big)
-		encoding = swapEndianness32((u32)encoding);
-	
-	g_fileManager->write(&encoding,4);
+	g_fileManager->writeU32((u32)encoding);
 }
 
 void CMipsInstruction::encodeVfpu() const
@@ -306,21 +302,13 @@ void CMipsInstruction::encodeVfpu() const
 		break;
 	}
 
-	if (Arch->getEndianness() == Endianness::Big)
-	{
-		encoding = swapEndianness32((u32)encoding);
-	}
-
-	g_fileManager->write(&encoding,4);
+	g_fileManager->writeU32((u32)encoding);
 }
 
 void CMipsInstruction::Encode() const
 {
 	if (addNop)
-	{
-		u32 zero = 0;
-		g_fileManager->write(&zero,4);
-	}
+		g_fileManager->writeU32(0);
 
 	if (opcodeData.opcode.flags & MO_VFPU)
 		encodeVfpu();

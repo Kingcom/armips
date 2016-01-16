@@ -324,7 +324,7 @@ CAssemblerCommand* parseDirectivePsx(Parser& parser, int flags)
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
 	Mips.SetVersion(MARCH_PSX);
-	return new CommentCommand(L".psx",L"");
+	return new ArchitectureCommand(L".psx",L"");
 }
 
 CAssemblerCommand* parseDirectivePs2(Parser& parser, int flags)
@@ -332,7 +332,7 @@ CAssemblerCommand* parseDirectivePs2(Parser& parser, int flags)
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
 	Mips.SetVersion(MARCH_PS2);
-	return new CommentCommand(L".ps2",L"");
+	return new ArchitectureCommand(L".ps2",L"");
 }
 
 CAssemblerCommand* parseDirectivePsp(Parser& parser, int flags)
@@ -340,7 +340,7 @@ CAssemblerCommand* parseDirectivePsp(Parser& parser, int flags)
 	Arch = &Mips;
 	Mips.SetLoadDelay(false,0);
 	Mips.SetVersion(MARCH_PSP);
-	return new CommentCommand(L".psp",L"");
+	return new ArchitectureCommand(L".psp",L"");
 }
 
 CAssemblerCommand* parseDirectiveN64(Parser& parser, int flags)
@@ -348,7 +348,7 @@ CAssemblerCommand* parseDirectiveN64(Parser& parser, int flags)
 	Arch = &Mips;
 	Mips.SetLoadDelay(false, 0);
 	Mips.SetVersion(MARCH_N64);
-	return new CommentCommand(L".n64", L"");
+	return new ArchitectureCommand(L".n64", L"");
 }
 
 CAssemblerCommand* parseDirectiveArmArch(Parser& parser, int flags)
@@ -360,23 +360,23 @@ CAssemblerCommand* parseDirectiveArmArch(Parser& parser, int flags)
 	case DIRECTIVE_ARM_GBA:
 		Arm.SetThumbMode(true);
 		Arm.setVersion(AARCH_GBA);
-		return new CommentCommand(L".gba\n.thumb", L".thumb");
+		return new ArchitectureCommand(L".gba\n.thumb", L".thumb");
 	case DIRECTIVE_ARM_NDS:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_NDS);
-		return new CommentCommand(L".nds\n.arm", L".arm");
+		return new ArchitectureCommand(L".nds\n.arm", L".arm");
 	case DIRECTIVE_ARM_3DS:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_3DS);
-		return new CommentCommand(L".3ds\n.arm", L".arm");
+		return new ArchitectureCommand(L".3ds\n.arm", L".arm");
 	case DIRECTIVE_ARM_BIG:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_BIG);
-		return new CommentCommand(L".arm-big\n.arm", L".arm");
+		return new ArchitectureCommand(L".arm.big\n.arm", L".arm");
 	case DIRECTIVE_ARM_LITTLE:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_LITTLE);
-		return new CommentCommand(L".arm-little\n.arm", L".arm");
+		return new ArchitectureCommand(L".arm.little\n.arm", L".arm");
 	}
 
 	return nullptr;

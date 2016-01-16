@@ -71,12 +71,10 @@ public:
 private:
 	void FormatOpcode(char* Dest, const char* Source) const;
 	void FormatInstruction(const char* encoding, char* dest) const;
-	void WriteInstruction(unsigned int encoding) const;
 	int getShiftedImmediate(unsigned int num, int& ShiftAmount);
 
 	ArmOpcodeVariables Vars;
 	tArmOpcode Opcode;
 	u64 RamPos;
-	Endianness endianness;
 	ArmArchType arch;
 };

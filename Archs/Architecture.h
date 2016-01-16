@@ -1,11 +1,10 @@
 #pragma once
+#include "../Commands/CAssemblerCommand.h"
+#include "../Core/FileManager.h"
 
 class IElfRelocator;
-class CAssemblerCommand;
 class Tokenizer;
 class Parser;
-
-enum class Endianness { Big, Little };
 
 class CArchitecture
 {
@@ -18,6 +17,21 @@ public:
 	virtual int GetWordSize() = 0;
 	virtual IElfRelocator* getElfRelocator() = 0;
 	virtual Endianness getEndianness() = 0;
+};
+
+class ArchitectureCommand: public CAssemblerCommand
+{
+public:
+	ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText);
+	virtual bool Validate();
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const;
+private:
+	u64 position;
+	Endianness endianness;
+	std::wstring tempText;
+	std::wstring symText;
 };
 
 class CInvalidArchitecture: public CArchitecture

@@ -36,5 +36,4 @@ private:
 	tThumbOpcode Opcode;
 	size_t OpcodeSize;
 	u64 RamPos;
-	Endianness endianness;
 };
