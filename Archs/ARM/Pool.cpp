@@ -32,7 +32,7 @@ void ArmStateCommand::writeSymData(SymbolData& symData) const
 
 ArmPoolCommand::ArmPoolCommand()
 {
-
+	endianness = Arch->getEndianness();
 }
 
 bool ArmPoolCommand::Validate()
@@ -78,6 +78,10 @@ void ArmPoolCommand::Encode() const
 	for (size_t i = 0; i < values.size(); i++)
 	{
 		u32 value = values[i];
+
+		if (endianness == Endianness::Big)
+			value = swapEndianness32(value);
+
 		g_fileManager->write(&value,4);
 	}
 }
