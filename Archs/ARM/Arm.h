@@ -10,6 +10,8 @@
 #define ARM_SHIFT_ROR		0x03
 #define ARM_SHIFT_RRX		0x04
 
+enum ArmArchType { AARCH_GBA = 0, AARCH_NDS, AARCH_3DS, AARCH_LITTLE, AARCH_BIG, AARCH_INVALID };
+
 typedef struct {
 	const char* name;
 	short num;
@@ -43,18 +45,18 @@ public:
 	virtual void Revalidate();
 	virtual int GetWordSize() { return 4; };
 	virtual IElfRelocator* getElfRelocator();
-	virtual Endianness getEndianness() { return Endianness::Little; };
+	virtual Endianness getEndianness() { return version == AARCH_BIG ? Endianness::Big : Endianness::Little; };
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };
-	void SetArm9(bool b) { arm9 = b; };
-	bool isArm9() { return arm9; };
+	void setVersion(ArmArchType type) { version = type; }
+	ArmArchType getVersion() { return version; }
 
 	std::vector<ArmPoolEntry> getPoolContent() { return currentPoolContent; }
 	void clearPoolContent() { currentPoolContent.clear(); }
 	void addPoolValue(ArmOpcodeCommand* command, u32 value);
 private:
 	bool thumb;
-	bool arm9;
+	ArmArchType version;
 
 	std::vector<ArmPoolEntry> currentPoolContent;
 };

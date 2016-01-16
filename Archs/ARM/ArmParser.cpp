@@ -639,7 +639,7 @@ CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; ArmOpcodes[z].name != NULL; z++)
 	{
-		if ((ArmOpcodes[z].flags & ARM_ARM9) && !Arm.isArm9())
+		if ((ArmOpcodes[z].flags & ARM_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
 		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars) == true)
@@ -735,7 +735,7 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; ThumbOpcodes[z].name != NULL; z++)
 	{
-		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && !Arm.isArm9())
+		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
 		// todo: save as wchar

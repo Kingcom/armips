@@ -255,7 +255,8 @@ bool CArmInstruction::Validate()
 			}
 		} else if (Opcode.flags & ARM_SWI)	// it's an interrupt, may need to shift it
 		{
-			if (Vars.Immediate < 0xFF)
+			bool needsShift = arch == AARCH_GBA || arch == AARCH_NDS;
+			if (needsShift && Vars.Immediate < 0xFF)
 			{
 				Vars.Immediate <<= 16;
 				Vars.OriginalImmediate = Vars.Immediate;

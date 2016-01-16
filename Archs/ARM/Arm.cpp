@@ -37,7 +37,6 @@ void CArmArchitecture::clear()
 {
 	currentPoolContent.clear();
 	thumb = false;
-	arm9 = false;
 }
 
 void CArmArchitecture::Pass2()
@@ -63,7 +62,7 @@ void CArmArchitecture::NextSection()
 
 IElfRelocator* CArmArchitecture::getElfRelocator()
 {
-	return new ArmElfRelocator(arm9);
+	return new ArmElfRelocator(version != AARCH_GBA);
 }
 
 void CArmArchitecture::addPoolValue(ArmOpcodeCommand* command, u32 value)

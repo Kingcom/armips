@@ -351,20 +351,35 @@ CAssemblerCommand* parseDirectiveN64(Parser& parser, int flags)
 	return new CommentCommand(L".n64", L"");
 }
 
-CAssemblerCommand* parseDirectiveGba(Parser& parser, int flags)
+CAssemblerCommand* parseDirectiveArmArch(Parser& parser, int flags)
 {
 	Arch = &Arm;
-	Arm.SetThumbMode(true);
-	Arm.SetArm9(false);
-	return new CommentCommand(L".gba\n.thumb",L".thumb");
-}
 
-CAssemblerCommand* parseDirectiveNds(Parser& parser, int flags)
-{
-	Arch = &Arm;
-	Arm.SetThumbMode(false);
-	Arm.SetArm9(true);
-	return new CommentCommand(L".nds\n.arm",L".arm");
+	switch (flags)
+	{
+	case DIRECTIVE_ARM_GBA:
+		Arm.SetThumbMode(true);
+		Arm.setVersion(AARCH_GBA);
+		return new CommentCommand(L".gba\n.thumb", L".thumb");
+	case DIRECTIVE_ARM_NDS:
+		Arm.SetThumbMode(false);
+		Arm.setVersion(AARCH_NDS);
+		return new CommentCommand(L".nds\n.arm", L".arm");
+	case DIRECTIVE_ARM_3DS:
+		Arm.SetThumbMode(false);
+		Arm.setVersion(AARCH_3DS);
+		return new CommentCommand(L".3ds\n.arm", L".arm");
+	case DIRECTIVE_ARM_BIG:
+		Arm.SetThumbMode(false);
+		Arm.setVersion(AARCH_BIG);
+		return new CommentCommand(L".arm-big\n.arm", L".arm");
+	case DIRECTIVE_ARM_LITTLE:
+		Arm.SetThumbMode(false);
+		Arm.setVersion(AARCH_LITTLE);
+		return new CommentCommand(L".arm-little\n.arm", L".arm");
+	}
+
+	return nullptr;
 }
 
 CAssemblerCommand* parseDirectiveArea(Parser& parser, int flags)
@@ -633,9 +648,13 @@ const DirectiveMap directives = {
 	{ L".ps2",				{ &parseDirectivePs2,				0 } },
 	{ L".psp",				{ &parseDirectivePsp,				0 } },
 	{ L".n64",				{ &parseDirectiveN64,				0 } },
-	{ L".gba",				{ &parseDirectiveGba,				0 } },
-	{ L".nds",				{ &parseDirectiveNds,				0 } },
 
+	{ L".gba",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_GBA } },
+	{ L".nds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_NDS } },
+	{ L".3ds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_3DS } },
+	{ L".arm.big",			{ &parseDirectiveArmArch,			DIRECTIVE_ARM_BIG } },
+	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
+	
 	{ L".area",				{ &parseDirectiveArea,				0 } },
 
 	{ L".importobj",		{ &parseDirectiveObjImport,			0 } },

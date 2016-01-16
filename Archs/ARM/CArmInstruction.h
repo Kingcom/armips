@@ -78,4 +78,5 @@ private:
 	tArmOpcode Opcode;
 	u64 RamPos;
 	Endianness endianness;
+	ArmArchType arch;
 };
