@@ -62,8 +62,6 @@ class CArmInstruction: public ArmOpcodeCommand
 {
 public:
 	CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariables& vars);
-
-	CArmInstruction();
 //	~CArmInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
@@ -79,4 +77,5 @@ private:
 	ArmOpcodeVariables Vars;
 	tArmOpcode Opcode;
 	u64 RamPos;
+	Endianness endianness;
 };

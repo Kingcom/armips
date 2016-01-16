@@ -14,6 +14,7 @@ CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& im
 
 	addNop = false;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
+	endianness = Arch->getEndianness();
 }
 
 CMipsInstruction::~CMipsInstruction()
@@ -273,10 +274,8 @@ void CMipsInstruction::encodeNormal() const
 		encoding |= (registerData.vrt.num & 0x1F) << 16;
 	}
 
-	if (Arch->getEndianness() == Endianness::Big)
-	{
+	if (endianness == Endianness::Big)
 		encoding = swapEndianness32((u32)encoding);
-	}
 	
 	g_fileManager->write(&encoding,4);
 }

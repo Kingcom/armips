@@ -105,4 +105,5 @@ private:
 	MipsOpcodeData opcodeData;
 	MipsImmediateData immediateData;
 	MipsRegisterData registerData;
+	Endianness endianness;
 };

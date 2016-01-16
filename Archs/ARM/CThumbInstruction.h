@@ -22,8 +22,6 @@ class CThumbInstruction: public ArmOpcodeCommand
 {
 public:
 	CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars);
-
-	CThumbInstruction();
 //	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
@@ -38,4 +36,5 @@ private:
 	tThumbOpcode Opcode;
 	size_t OpcodeSize;
 	u64 RamPos;
+	Endianness endianness;
 };

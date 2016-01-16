@@ -37,6 +37,7 @@ CDirectiveData::CDirectiveData()
 {
 	mode = EncodingMode::Invalid;
 	writeTermination = false;
+	endianness = Arch->getEndianness();
 }
 
 CDirectiveData::~CDirectiveData()
@@ -201,7 +202,7 @@ void CDirectiveData::encodeNormal()
 		{
 			// swap endianess if the output is big endian
 			u64 num = value.intValue;
-			if (Arch->getEndianness() == Endianness::Big)
+			if (endianness == Endianness::Big)
 			{
 				switch (unitSize)
 				{

@@ -16,10 +16,6 @@ const char ArmPsrModes[16][5] = {
 	"_flg",	"_fc",	"_fx",	"_fxc",	"_fs",	"_fsc",	"_fsx",	""
 };
 
-CArmInstruction::CArmInstruction()
-{
-}
-
 bool CArmInstruction::Load(char *Name, char *Params)
 {
 	return false;
@@ -29,6 +25,8 @@ CArmInstruction::CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariab
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
+	endianness = Arch->getEndianness();
+	arch = Arm.getVersion();
 }
 
 int CArmInstruction::getShiftedImmediate(unsigned int num, int& ShiftAmount)
@@ -443,6 +441,9 @@ void CArmInstruction::writeTempData(TempData& tempData) const
 
 void CArmInstruction::WriteInstruction(unsigned int encoding) const
 {
+	if (endianness == Endianness::Big)
+		encoding = swapEndianness32((u32)encoding);
+
 	g_fileManager->write(&encoding,4);
 }
 

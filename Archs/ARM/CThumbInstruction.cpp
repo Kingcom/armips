@@ -5,11 +5,6 @@
 #include "ThumbOpcodes.h"
 #include "Core/FileManager.h"
 
-CThumbInstruction::CThumbInstruction()
-{
-	OpcodeSize = 0;
-}
-
 bool CThumbInstruction::Load(char* Name, char* Params)
 {
 	return false;
@@ -21,6 +16,7 @@ CThumbInstruction::CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpco
 	this->Vars = vars;
 	
 	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
+	endianness = Arch->getEndianness();
 }
 
 void CThumbInstruction::setPoolAddress(u64 address)
@@ -149,6 +145,9 @@ bool CThumbInstruction::Validate()
 
 void CThumbInstruction::WriteInstruction(unsigned short encoding) const
 {
+	if (endianness == Endianness::Big)
+		encoding = swapEndianness16((u16)encoding);
+
 	g_fileManager->write(&encoding,2);
 }
 
