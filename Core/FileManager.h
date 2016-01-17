@@ -82,4 +82,5 @@ private:
 	std::vector<AssemblerFile*> files;
 	AssemblerFile* activeFile;
 	Endianness endianness;
+	Endianness ownEndianness;
 };

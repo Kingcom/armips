@@ -194,6 +194,24 @@ bool GenericAssemblerFile::seekPhysical(u64 physicalAddress)
 
 FileManager::FileManager()
 {
+	// detect own endianness
+	volatile union
+	{
+		u32 i;
+		u8 c[4];
+	} u;
+	u.c[3] = 0xAA;
+	u.c[2] = 0xBB;
+	u.c[1] = 0xCC;
+	u.c[0] = 0xDD;
+
+	if (u.i == 0xDDCCBBAA)
+		ownEndianness = Endianness::Big;
+	else if (u.i == 0xAABBCCDD)
+		ownEndianness = Endianness::Little;
+	else
+		Logger::printError(Logger::Error,L"Running on unknown endianness");
+
 	reset();
 }
 
@@ -269,7 +287,7 @@ bool FileManager::writeU8(u8 data)
 
 bool FileManager::writeU16(u16 data)
 {
-	if (endianness == Endianness::Big)
+	if (endianness != ownEndianness)
 		data = swapEndianness16(data);
 
 	return write(&data,2);
@@ -277,7 +295,7 @@ bool FileManager::writeU16(u16 data)
 
 bool FileManager::writeU32(u32 data)
 {
-	if (endianness == Endianness::Big)
+	if (endianness != ownEndianness)
 		data = swapEndianness32(data);
 
 	return write(&data,4);
