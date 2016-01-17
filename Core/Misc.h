@@ -29,7 +29,9 @@ public:
 	}
 
 	static void printError(ErrorType type, const std::wstring& text);
+	static void printError(ErrorType type, const wchar_t* text);
 	static void queueError(ErrorType type, const std::wstring& text);
+	static void queueError(ErrorType type, const wchar_t* text);
 
 	template <typename... Args>
 	static void printError(ErrorType type, const wchar_t* text, const Args&... args)
@@ -54,7 +56,7 @@ public:
 	static void setSilent(bool b) { silent = b; };
 	static bool isSilent() { return silent; }
 private:
-	static std::wstring formatError(ErrorType type, const std::wstring& text);
+	static std::wstring formatError(ErrorType type, const wchar_t* text);
 	static void setFlags(ErrorType type);
 
 	struct QueueEntry

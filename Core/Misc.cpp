@@ -15,7 +15,7 @@ bool Logger::fatalError = false;
 bool Logger::errorOnWarning = false;
 bool Logger::silent = false;
 
-std::wstring Logger::formatError(ErrorType type, const std::wstring& text)
+std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 {
 	std::wstring position;
 
@@ -99,6 +99,17 @@ void Logger::print(const std::wstring& text)
 
 void Logger::printError(ErrorType type, const std::wstring& text)
 {
+	std::wstring errorText = formatError(type,text.c_str());
+	errors.push_back(errorText);
+
+	if (!silent)
+		printLine(errorText);
+
+	setFlags(type);
+}
+
+void Logger::printError(ErrorType type, const wchar_t* text)
+{
 	std::wstring errorText = formatError(type,text);
 	errors.push_back(errorText);
 
@@ -109,6 +120,14 @@ void Logger::printError(ErrorType type, const std::wstring& text)
 }
 
 void Logger::queueError(ErrorType type, const std::wstring& text)
+{
+	QueueEntry entry;
+	entry.type = type;
+	entry.text = formatError(type,text.c_str());
+	queue.push_back(entry);
+}
+
+void Logger::queueError(ErrorType type, const wchar_t* text)
 {
 	QueueEntry entry;
 	entry.type = type;
