@@ -3,6 +3,17 @@
 #include "Misc.h"
 #include "Common.h"
 
+inline u32 swapEndianness32(u32 value)
+{
+	return ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24);
+}
+
+inline u16 swapEndianness16(u16 value)
+{
+	return ((value & 0xFF) << 8) | ((value & 0xFF00) >> 8);
+}
+
+
 GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, u32 headerSize, bool overwrite)
 {
 	this->fileName = fileName;

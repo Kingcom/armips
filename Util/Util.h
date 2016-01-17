@@ -25,16 +25,6 @@ std::wstring getFileNameFromPath(const std::wstring& path);
 size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue);
 bool startsWith(const std::wstring& str, wchar_t* value, size_t stringPos = 0);
 
-inline unsigned int swapEndianness32(unsigned int value)
-{
-	return ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24);
-}
-
-inline unsigned short swapEndianness16(unsigned short value)
-{
-	return ((value & 0xFF) << 8) | ((value & 0xFF00) >> 8);
-}
-
 enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
 FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
 std::wstring getCurrentDirectory();

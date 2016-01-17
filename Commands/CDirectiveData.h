@@ -35,11 +35,13 @@ private:
 	void encodeSjis();
 	void encodeNormal();
 	size_t getUnitSize() const;
+	size_t getDataSize() const;
 	
 	u64 position;
 	EncodingMode mode;
 	bool writeTermination;
 	std::vector<Expression> entries;
-	ByteArray data;
+	ByteArray customData;
+	std::vector<u32> normalData;
 	Endianness endianness;
 };

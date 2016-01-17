@@ -68,6 +68,7 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 	
 	this->entries = entries;
 	this->writeTermination = false;
+	normalData.reserve(entries.size());
 }
 
 void CDirectiveData::setSjis(std::vector<Expression>& entries, bool terminate)
@@ -102,9 +103,26 @@ size_t CDirectiveData::getUnitSize() const
 	return 0;
 }
 
+size_t CDirectiveData::getDataSize() const
+{
+	switch (mode)
+	{
+	case EncodingMode::Sjis:
+	case EncodingMode::Custom:
+		return customData.size();
+	case EncodingMode::U8:
+	case EncodingMode::Ascii:
+	case EncodingMode::U16:
+	case EncodingMode::U32:
+		return normalData.size()*getUnitSize();
+	}
+
+	return 0;
+}
+
 void CDirectiveData::encodeCustom(EncodingTable& table)
 {
-	data.clear();
+	customData.clear();
 	for (size_t i = 0; i < entries.size(); i++)
 	{
 		ExpressionValue value = entries[i].evaluate();
@@ -116,7 +134,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 		
 		if (value.isInt())
 		{
-			data.appendByte((u8)value.intValue);
+			customData.appendByte((u8)value.intValue);
 		} else if (value.isString())
 		{
 			ByteArray encoded = table.encodeString(value.strValue,false);
@@ -124,7 +142,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 			{
 				Logger::queueError(Logger::Error,L"Failed to encode \"%s\"",value.strValue);
 			}
-			data.append(encoded);
+			customData.append(encoded);
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
 		}
@@ -133,7 +151,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 	if (writeTermination)
 	{
 		ByteArray encoded = table.encodeTermination();
-		data.append(encoded);
+		customData.append(encoded);
 	}
 }
 
@@ -172,9 +190,7 @@ void CDirectiveData::encodeSjis()
 
 void CDirectiveData::encodeNormal()
 {
-	size_t unitSize = getUnitSize();
-
-	data.clear();
+	normalData.clear();
 	for (size_t i = 0; i < entries.size(); i++)
 	{
 		ExpressionValue value = entries[i].evaluate();
@@ -190,7 +206,7 @@ void CDirectiveData::encodeNormal()
 			for (size_t l = 0; l < value.strValue.size(); l++)
 			{
 				u64 num = value.strValue[l];
-				data.append(&num,unitSize);
+				normalData.push_back((u32)num);
 
 				if (num >= 0x80 && hadNonAscii == false)
 				{
@@ -200,22 +216,8 @@ void CDirectiveData::encodeNormal()
 			}
 		} else if (value.isInt())
 		{
-			// swap endianess if the output is big endian
 			u64 num = value.intValue;
-			if (endianness == Endianness::Big)
-			{
-				switch (unitSize)
-				{
-				case 2:
-					num = swapEndianness16((u16)num);
-					break;
-				case 4:
-					num = swapEndianness32((u32)num);
-					break;
-				}
-			}
-
-			data.append(&num,unitSize);
+			normalData.push_back((u32)num);
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
 		}
@@ -226,7 +228,7 @@ bool CDirectiveData::Validate()
 {
 	position = g_fileManager->getVirtualAddress();
 
-	size_t oldSize = data.size();
+	size_t oldSize = getDataSize();
 	switch (mode)
 	{
 	case EncodingMode::U8:
@@ -246,48 +248,80 @@ bool CDirectiveData::Validate()
 		break;
 	}
 
-	g_fileManager->advanceMemory(data.size());
-	return oldSize != data.size();
+	g_fileManager->advanceMemory(getDataSize());
+	return oldSize != getDataSize();
 }
 
 void CDirectiveData::Encode() const
 {
-	g_fileManager->write(data.data(),data.size());
+	switch (mode)
+	{
+	case EncodingMode::Sjis:
+	case EncodingMode::Custom:
+		g_fileManager->write(customData.data(),customData.size());
+		break;
+	case EncodingMode::U8:
+	case EncodingMode::Ascii:
+		for (auto value: normalData)
+		{
+			g_fileManager->writeU8((u8)value);
+		}
+		break;
+	case EncodingMode::U16:
+		for (auto value: normalData)
+		{
+			g_fileManager->writeU16((u16)value);
+		}
+		break;
+	case EncodingMode::U32:
+		for (auto value: normalData)
+		{
+			g_fileManager->writeU32((u32)value);
+		}
+		break;
+	}
 }
 
 void CDirectiveData::writeTempData(TempData& tempData) const
 {
-	size_t size = (getUnitSize()*2+3)*data.size()+20;
+	size_t size = (getUnitSize()*2+3)*getDataSize()+20;
 	wchar_t* str = new wchar_t[size];
 	wchar_t* start = str;
 
 	switch (mode)
 	{
-	case EncodingMode::U8:
-	case EncodingMode::Ascii:
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
 		str += swprintf(str,20,L".byte ");
-		
-		for (size_t i = 0; i < data.size(); i++)
+
+		for (size_t i = 0; i < customData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",data[i]);
+			str += swprintf(str,20,L"0x%02X,",(u8)customData[i]);
+		}
+		break;
+	case EncodingMode::U8:
+	case EncodingMode::Ascii:
+		str += swprintf(str,20,L".byte ");
+		
+		for (size_t i = 0; i < normalData.size(); i++)
+		{
+			str += swprintf(str,20,L"0x%02X,",(u8)normalData[i]);
 		}
 		break;
 	case EncodingMode::U16:
 		str += swprintf(str,20,L".halfword ");
 
-		for (size_t i = 0; i < data.size(); i += 2)
+		for (size_t i = 0; i < normalData.size(); i += 2)
 		{
-			str += swprintf(str,20,L"0x%04X,",data.getWord(i));
+			str += swprintf(str,20,L"0x%04X,",(u16)normalData[i]);
 		}
 		break;
 	case EncodingMode::U32:
 		str += swprintf(str,20,L".word ");
 
-		for (size_t i = 0; i < data.size(); i += 4)
+		for (size_t i = 0; i < normalData.size(); i += 4)
 		{
-			str += swprintf(str,20,L"0x%08X,",data.getDoubleWord(i));
+			str += swprintf(str,20,L"0x%08X,",(u32)normalData[i]);
 		}
 		break;
 	}
@@ -302,18 +336,18 @@ void CDirectiveData::writeSymData(SymbolData& symData) const
 	switch (mode)
 	{
 	case EncodingMode::Ascii:
-		symData.addData(position,data.size(),SymbolData::DataAscii);
+		symData.addData(position,getDataSize(),SymbolData::DataAscii);
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		symData.addData(position,data.size(),SymbolData::Data8);
+		symData.addData(position,getDataSize(),SymbolData::Data8);
 		break;
 	case EncodingMode::U16:
-		symData.addData(position,data.size(),SymbolData::Data16);
+		symData.addData(position,getDataSize(),SymbolData::Data16);
 		break;
 	case EncodingMode::U32:
-		symData.addData(position,data.size(),SymbolData::Data32);
+		symData.addData(position,getDataSize(),SymbolData::Data32);
 		break;
 	}
 }
