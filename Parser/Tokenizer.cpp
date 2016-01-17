@@ -419,15 +419,15 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
 
 	if (base == 10)
 	{
-		if (currentLine[end-1] == 'h')
+		if (towlower(currentLine[end-1]) == 'h')
 		{
 			base = 16;
 			end--;
-		} else if (currentLine[end-1] == 'b')
+		} else if (towlower(currentLine[end-1]) == 'b')
 		{
 			base = 2;
 			end--;
-		} else if (currentLine[end-1] == 'o')
+		} else if (towlower(currentLine[end-1]) == 'o')
 		{
 			base = 8;
 			end--;
