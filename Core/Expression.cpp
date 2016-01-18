@@ -410,10 +410,13 @@ ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
 
 ExpressionInternal::ExpressionInternal()
 {
-	for (size_t i = 0; i < ARRAY_SIZE(children); i++)
-	{
-		children[i] = nullptr;
-	}
+	children = nullptr;
+	childrenCount = 0;
+}
+
+ExpressionInternal::~ExpressionInternal()
+{
+	deallocate();
 }
 
 ExpressionInternal::ExpressionInternal(u64 value)
@@ -452,31 +455,48 @@ ExpressionInternal::ExpressionInternal(OperatorType op, ExpressionInternal* a,
 	: ExpressionInternal()
 {
 	type = op;
+	allocate(3);
+
 	children[0] = a;
 	children[1] = b;
 	children[2] = c;
 }
 
-
-bool ExpressionInternal::hasIdentifierChild()
+ExpressionInternal::ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters)
+	: ExpressionInternal()
 {
-	for (int i = 0; i < 3; i++)
+	type = OperatorType::FunctionCall;
+	allocate(parameters.size());
+
+	strValue = name;
+	for (size_t i = 0; i < parameters.size(); i++)
 	{
-		if (children[i] != NULL)
-		{
-			if (children[i]->type == OperatorType::Identifier
-				|| children[i]->type == OperatorType::MemoryPos
-				|| children[i]->hasIdentifierChild())
-				return true;
-		}
+		children[i] = parameters[i];
+	}
+}
+
+void ExpressionInternal::allocate(size_t count)
+{
+	deallocate();
+
+	children = new ExpressionInternal*[count];
+	childrenCount = count;
+}
+
+void ExpressionInternal::deallocate()
+{
+	for (size_t i = 0; i < childrenCount; i++)
+	{
+		delete children[i];
 	}
 
-	return false;
+	delete[] children;
+	childrenCount = 0;
 }
 
 void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < childrenCount; i++)
 	{
 		if (children[i] != NULL)
 		{
@@ -614,6 +634,20 @@ static std::wstring escapeString(const std::wstring& text)
 	return formatString(LR"("%s")",text);
 }
 
+std::wstring ExpressionInternal::formatFunctionCall()
+{
+	std::wstring text = strValue + L"(";
+
+	for (size_t i = 0; i < childrenCount; i++)
+	{
+		if (i != 0)
+			text += L",";
+		text += children[i]->toString();
+	}
+
+	return text + L")";
+}
+
 std::wstring ExpressionInternal::toString()
 {
 	switch (type)
@@ -674,6 +708,8 @@ std::wstring ExpressionInternal::toString()
 		return formatString(L"(%s ? %s : %s)",children[0]->toString(),children[1]->toString(),children[2]->toString());
 	case OperatorType::ToString:
 		return formatString(L"(%c%s)",L'\U000000B0',children[0]->toString());
+	case OperatorType::FunctionCall:
+		return formatFunctionCall();
 	default:
 		return L"";
 	}

@@ -41,7 +41,8 @@ enum class OperatorType
 	LogAnd,
 	LogOr,
 	TertiaryIf,
-	ToString
+	ToString,
+	FunctionCall
 };
 
 enum class ExpressionValueType { Invalid, Integer, Float, String};
@@ -111,20 +112,27 @@ class ExpressionInternal
 {
 public:
 	ExpressionInternal();
+	~ExpressionInternal();
 	ExpressionInternal(u64 value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
 	ExpressionInternal(OperatorType op, ExpressionInternal* a = NULL,
 		ExpressionInternal* b = NULL, ExpressionInternal* c = NULL);
+	ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters);
 	ExpressionValue evaluate();
 	std::wstring toString();
-	bool hasIdentifierChild();
 	bool isIdentifier() { return type == OperatorType::Identifier; }
 	std::wstring getStringValue() { return strValue; }
 	void replaceMemoryPos(const std::wstring& identifierName);
 private:
+	void allocate(size_t count);
+	void deallocate();
+	std::wstring formatFunctionCall();
+
 	OperatorType type;
-	ExpressionInternal* children[3];
+	ExpressionInternal** children;
+	size_t childrenCount;
+
 	union
 	{
 		u64 intValue;

@@ -43,14 +43,43 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 	return NULL;
 }
 
+static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
+{
+	if (tokenizer.peekToken(0).type == TokenType::Identifier &&
+		tokenizer.peekToken(1).type == TokenType::LParen)
+	{
+		const std::wstring functionName = tokenizer.nextToken().getStringValue();
+		tokenizer.eatToken();
+
+		std::vector<ExpressionInternal*> parameters;
+		while (tokenizer.peekToken().type != TokenType::RParen)
+		{
+			if (parameters.size() != 0 && tokenizer.nextToken().type != TokenType::Comma)
+				return nullptr;
+
+			ExpressionInternal* exp = expression(tokenizer);
+			if (exp == nullptr)
+				return nullptr;
+
+			parameters.push_back(exp);
+		}
+
+		tokenizer.eatToken();
+
+		return new ExpressionInternal(functionName,parameters);
+	}
+
+	return primaryExpression(tokenizer);
+}
+
 static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = primaryExpression(tokenizer);
+	ExpressionInternal* exp = postfixExpression(tokenizer);
 	if (exp != NULL)
 		return exp;
 
 	const TokenType opType = tokenizer.nextToken().type;
-	exp = primaryExpression(tokenizer);
+	exp = postfixExpression(tokenizer);
 	if (exp == NULL)
 		return NULL;
 
