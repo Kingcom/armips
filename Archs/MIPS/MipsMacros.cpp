@@ -109,21 +109,20 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 
 CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
-	const wchar_t* templateLoad = LR"(
-		.if %upper%
-			lui	%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
-		.endif
-		.if %lower%
-			%op%	%rs%,%imm% & 0xFFFF(%temp%)
-		.endif
-	)";
-	
-	const wchar_t* templateStore = LR"(
-		.if %upper%
-			lui	r1,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
-		.endif
-		.if %lower%
-			%op%	%rs%,%imm% & 0xFFFF(r1)
+	const wchar_t* templateLoadStore = LR"(
+		.if %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
+			.if %lower%
+				%op%	%rs%,%imm% & 0xFFFF(r0)
+			.elseif %upper%
+				nop
+			.endif
+		.else
+			.if %upper%
+				lui	%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+			.endif
+			.if %lower%
+				%op%	%rs%,%imm% & 0xFFFF(%temp%)
+			.endif
 		.endif
 	)";
 
@@ -146,18 +145,14 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 	default: return nullptr;
 	}
 
-	const wchar_t* selectedTemplate;
-	if (flags & MIPSM_LOAD)
-		selectedTemplate = templateLoad;
-	else
-		selectedTemplate = templateStore;
+	std::wstring macroText = preprocessMacro(templateLoadStore,immediates);
 
-	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
+	bool store = (flags & MIPSM_STORE) != 0;
 	return createMacro(parser,macroText,flags, {
 			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
 			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
 			{ L"%rs%",		isCop ? registers.frs.name : registers.grs.name },
-			{ L"%temp%",	isCop ? L"r1" : registers.grs.name },
+			{ L"%temp%",	isCop || store ? L"r1" : registers.grs.name },
 			{ L"%imm%",		immediates.secondary.expression.toString() },
 			{ L"%op%",		op },
 	});
@@ -168,7 +163,8 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 	const wchar_t* selectedTemplate;
 
 	std::wstring op;
-	if ((flags & MIPSM_HW) || (flags & MIPSM_HWU))
+	int type = flags & MIPSM_ACCESSMASK;
+	if (type == MIPSM_HW || type == MIPSM_HWU)
 	{
 		const wchar_t* templateHalfword = LR"(
 			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
@@ -181,9 +177,9 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 			.endif
 		)";
 		
-		op = (flags & MIPSM_HWU) ? L"lbu" : L"lb";
+		op = type == MIPSM_HWU ? L"lbu" : L"lb";
 		selectedTemplate = templateHalfword;
-	} else if (flags & MIPSM_W)
+	} else if (type == MIPSM_W)
 	{
 		const wchar_t* templateWord = LR"(
 			.if (%off% < 0x8000) && ((%off%+3) >= 0x8000)
@@ -193,6 +189,12 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 				lwr	%rd%,%off%(%rs%)
 			.endif
 		)";
+
+		if (registers.grs.num == registers.grd.num)
+		{
+			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
+			return new DummyCommand();
+		}
 
 		selectedTemplate = templateWord;
 	} else {
@@ -212,7 +214,8 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 {
 	const wchar_t* selectedTemplate;
 
-	if ((flags & MIPSM_HW))
+	int type = flags & MIPSM_ACCESSMASK;
+	if (type == MIPSM_HW)
 	{
 		const wchar_t* templateHalfword = LR"(
 			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
@@ -225,7 +228,7 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 		)";
 
 		selectedTemplate = templateHalfword;
-	} else if ( (flags & MIPSM_W))
+	} else if (type == MIPSM_W)
 	{
 		const wchar_t* templateWord = LR"(
 			.if (%off% < 0x8000) && ((%off%+3) >= 0x8000)
@@ -235,6 +238,12 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 				swr	%rd%,%off%(%rs%)
 			.endif
 		)";
+
+		if (registers.grs.num == registers.grd.num)
+		{
+			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
+			return new DummyCommand();
+		}
 
 		selectedTemplate = templateWord;
 	} else {
