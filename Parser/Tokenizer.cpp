@@ -403,7 +403,7 @@ bool FileTokenizer::parseOperator()
 bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
 {
 	// find base of number
-	int base = 10;
+	u32 base = 10;
 	if (currentLine[start] == '0')
 	{
 		if (tolower(currentLine[start+1]) == 'x')
@@ -442,11 +442,8 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
 
 		u32 value = c >= 'a' ? c-'a'+10 : c-'0';
 
-		if ((base == 16 && value > 15) || (base == 10 && value > 9)
-			|| (base == 8 && value > 7) || (base == 2 && value > 1))
-		{
+		if (value >= base)
 			return false;
-		}
 
 		result = (result*base) + value;
 	}

@@ -34,6 +34,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 {
 	bool valid = true;
 	list.clear();
+	list.reserve(max >= 0 ? max : 32);
 
 	const Token& start = peekToken();
 
