@@ -1080,7 +1080,9 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			break;
 		case 'i':	// primary immediate
 			CHECK(parseImmediate(parser,immediate.primary.expression));
+			allowFunctionCallExpression(*encoding != '(');
 			CHECK(decodeImmediateSize(encoding,immediate.primary.type));
+			allowFunctionCallExpression(true);
 			break;
 		case 'j':	// secondary immediate
 			switch (*encoding++)
@@ -1212,10 +1214,14 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 			CHECK(parseFpuRegister(parser,registers.frs));
 			break;
 		case 'i':	// primary immediate
+			allowFunctionCallExpression(*encoding != '(');
 			CHECK(parseImmediate(parser,immediate.primary.expression));
+			allowFunctionCallExpression(true);
 			break;
 		case 'I':	// secondary immediate
+			allowFunctionCallExpression(*encoding != '(');
 			CHECK(parseImmediate(parser,immediate.secondary.expression));
+			allowFunctionCallExpression(true);
 			break;
 		default:
 			CHECK(matchSymbol(parser,*(encoding-1)));

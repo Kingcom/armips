@@ -3,6 +3,13 @@
 
 static ExpressionInternal* expression(Tokenizer& tokenizer);
 
+static bool allowFunctionCall = true;
+
+void allowFunctionCallExpression(bool allow)
+{
+	allowFunctionCall = allow;
+}
+
 static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 {
 	const Token &tok = tokenizer.peekToken();
@@ -45,7 +52,8 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 
 static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
 {
-	if (tokenizer.peekToken(0).type == TokenType::Identifier &&
+	if (allowFunctionCall &&
+		tokenizer.peekToken(0).type == TokenType::Identifier &&
 		tokenizer.peekToken(1).type == TokenType::LParen)
 	{
 		const std::wstring functionName = tokenizer.nextToken().getStringValue();

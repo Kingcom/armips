@@ -3,3 +3,4 @@
 #include "Core/Expression.h"
 
 Expression parseExpression(Tokenizer& tokenizer);
+void allowFunctionCallExpression(bool allow);
