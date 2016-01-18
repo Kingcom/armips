@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Expression.h"
 #include "Common.h"
+#include "ExpressionFunctions.h"
 
 enum class ExpressionValueCombination
 {
@@ -513,6 +514,50 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 	}
 }
 
+ExpressionValue ExpressionInternal::executeFunctionCall()
+{
+	ExpressionValue invalid;
+
+	// find function, check parameter counts
+	auto it = expressionFunctions.find(strValue);
+	if (it == expressionFunctions.end())
+	{
+		Logger::queueError(Logger::Error,L"Unknown function \"%s\"",strValue);
+		return invalid;
+	}
+
+	if (it->second.minParams > childrenCount)
+	{
+		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",strValue,it->second.minParams);
+		return invalid;
+	}
+
+	if (it->second.maxParams < childrenCount)
+	{
+		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",strValue,it->second.maxParams);
+		return invalid;
+	}
+
+	// evaluate parameters
+	std::vector<ExpressionValue> params;
+	params.reserve(childrenCount);
+
+	for (size_t i = 0; i < childrenCount; i++)
+	{
+		ExpressionValue result = children[i]->evaluate();
+		if (result.isValid() == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
+			return result;
+		}
+
+		params.push_back(result);
+	}
+
+	// execute
+	return it->second.function(params);
+}
+
 ExpressionValue ExpressionInternal::evaluate()
 {
 	ExpressionValue val;
@@ -620,6 +665,8 @@ ExpressionValue ExpressionInternal::evaluate()
 			return children[2]->evaluate();
 		else
 			return children[1]->evaluate();
+	case OperatorType::FunctionCall:
+		return executeFunctionCall();
 	default:
 		return val;
 	}

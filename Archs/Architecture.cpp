@@ -14,6 +14,7 @@ ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std
 bool ArchitectureCommand::Validate()
 {
 	position = g_fileManager->getVirtualAddress();
+	g_fileManager->setEndianness(endianness);
 	return false;
 }
 

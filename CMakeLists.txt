@@ -34,6 +34,8 @@ add_executable(armips
 	Core/Common.h
 	Core/Expression.cpp
 	Core/Expression.h
+	Core/ExpressionFunctions.cpp
+	Core/ExpressionFunctions.h
 	Core/FileManager.cpp
 	Core/FileManager.h
 	Core/Misc.cpp

@@ -77,6 +77,7 @@ public:
 	bool advanceMemory(size_t bytes);
 	AssemblerFile* getOpenFile() { return activeFile; };
 	void setEndianness(Endianness endianness) { this->endianness = endianness; };
+	Endianness getEndianness() { return endianness; }
 private:
 	bool checkActiveFile();
 	std::vector<AssemblerFile*> files;

@@ -128,6 +128,7 @@ private:
 	void allocate(size_t count);
 	void deallocate();
 	std::wstring formatFunctionCall();
+	ExpressionValue executeFunctionCall();
 
 	OperatorType type;
 	ExpressionInternal** children;
