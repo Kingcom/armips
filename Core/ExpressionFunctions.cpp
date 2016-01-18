@@ -3,7 +3,7 @@
 #include "Misc.h"
 #include "Common.h"
 
-ExpressionValue expressionFunctionEndianness(const std::vector<ExpressionValue>& parameters)
+ExpressionValue expFuncEndianness(const std::vector<ExpressionValue>& parameters)
 {
 	Endianness endianness = g_fileManager->getEndianness();
 
@@ -23,6 +23,42 @@ ExpressionValue expressionFunctionEndianness(const std::vector<ExpressionValue>&
 	return result;
 }
 
+ExpressionValue expFuncFileExists(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	if (parameters[0].isString() == false)
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	std::wstring fileName = getFullPathName(parameters[0].strValue);
+
+	result.type = ExpressionValueType::Integer;
+	result.intValue = fileExists(fileName) ? 1 : 0;
+	return result;
+}
+
+ExpressionValue expFuncFileSize(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	if (parameters[0].isString() == false)
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	std::wstring fileName = getFullPathName(parameters[0].strValue);
+
+	result.type = ExpressionValueType::Integer;
+	result.intValue = fileSize(fileName);
+	return result;
+}
+
 const ExpressionFunctionMap expressionFunctions = {
-	{ L"endianness",	{ &expressionFunctionEndianness,	0,	0 } },
+	{ L"endianness",	{ &expFuncEndianness,	0,	0 } },
+	{ L"fileexists",	{ &expFuncFileExists,	1,	1 } },
+	{ L"filesize",		{ &expFuncFileSize,		1,	1 } },
 };
