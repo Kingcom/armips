@@ -142,6 +142,39 @@ ExpressionValue expFuncSubstr(const std::vector<ExpressionValue>& parameters)
 	return result;
 }
 
+template<typename T>
+ExpressionValue expFuncRead(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+	T buffer;
+
+	if (parameters[0].isString() == false || (parameters.size() >= 2 && parameters[1].isInt() == false))
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	std::wstring fileName = getFullPathName(parameters[0].strValue);
+	u64 pos = parameters.size() >= 2 ? parameters[1].intValue : 0;
+
+	BinaryFile file;
+	if (file.open(fileName,BinaryFile::Read) == false)
+	{
+		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
+		return result;
+	}
+
+	file.setPos((long)pos);
+
+	if (file.read(&buffer,sizeof(T)) == sizeof(T))
+	{
+		result.type = ExpressionValueType::Integer;
+		result.intValue = (u64) buffer;
+	}
+
+	return result;
+}
+
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,		0,	0 } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0 } },
@@ -151,4 +184,9 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"tohex",			{ &expFuncToHex,		1,	2 } },
 	{ L"strlen",		{ &expFuncStrlen,		1,	1 } },
 	{ L"substr",		{ &expFuncSubstr,		3,	3 } },
+
+	{ L"readbyte",		{ &expFuncRead<u8>,		1,	2 } },
+	{ L"readu8",		{ &expFuncRead<u8>,		1,	2 } },
+	{ L"readu16",		{ &expFuncRead<u16>,	1,	2 } },
+	{ L"readu32",		{ &expFuncRead<u32>,	1,	2 } },
 };
