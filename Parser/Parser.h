@@ -29,7 +29,7 @@ public:
 	Parser();
 	bool atEnd() { return entries.back().tokenizer->atEnd(); }
 
-	void addEquation(const std::wstring& name, const std::wstring& value);
+	void addEquation(const Token& start, const std::wstring& name, const std::wstring& value);
 
 	Expression parseExpression();
 	bool parseExpressionList(std::vector<Expression>& list, int min = -1, int max = -1);
@@ -65,7 +65,6 @@ protected:
 
 	CAssemblerCommand* parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name = L"");
 	CAssemblerCommand* parseLabel();
-	bool parseMacro();
 	bool checkEquLabel();
 	bool checkMacroDefinition();
 	CAssemblerCommand* parseMacroCall();

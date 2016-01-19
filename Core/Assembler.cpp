@@ -159,12 +159,16 @@ bool runArmips(ArmipsArguments& arguments)
 	if (!arguments.tempFileName.empty())
 		Global.tempData.setFileName(arguments.tempFileName);
 
+	Token token;
 	for (size_t i = 0; i < arguments.equList.size(); i++)
 	{
-		parser.addEquation(arguments.equList[i].name, arguments.equList[i].value);
+		parser.addEquation(token,arguments.equList[i].name, arguments.equList[i].value);
 	}
 
 	Global.symbolTable.addLabels(arguments.labels);
+
+	if (Logger::hasError())
+		return false;
 
 	// run assembler
 	TextFile input;

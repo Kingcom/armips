@@ -19,7 +19,7 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 {
 	std::wstring position;
 
-	if (Global.memoryMode == false)
+	if (Global.memoryMode == false && Global.FileInfo.FileList.size() > 0)
 	{
 		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
 		position = formatString(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);

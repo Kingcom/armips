@@ -225,7 +225,7 @@ CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool virtualFile, const s
 	return sequence;
 }
 
-void Parser::addEquation(const std::wstring& name, const std::wstring& value)
+void Parser::addEquation(const Token& startToken, const std::wstring& name, const std::wstring& value)
 {
 	// parse value string
 	TextFile f;
@@ -236,7 +236,14 @@ void Parser::addEquation(const std::wstring& name, const std::wstring& value)
 
 	TokenizerPosition start = tok.getPosition();
 	while (tok.atEnd() == false)
-		tok.nextToken();
+	{
+		const Token& token = tok.nextToken();
+		if (token.type == TokenType::Identifier && token.getStringValue() == name)
+		{
+			printError(startToken,L"Recursive enum definition for \"%s\" not allowed",name);
+			return;
+		}
+	}
 
 	// extract tokens
 	TokenizerPosition end = tok.getPosition();
@@ -287,7 +294,7 @@ bool Parser::checkEquLabel()
 				return true;
 			}
 
-			addEquation(name,value);
+			addEquation(start,name,value);
 			return true;
 		}
 	}
