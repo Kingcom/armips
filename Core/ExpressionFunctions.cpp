@@ -107,6 +107,41 @@ ExpressionValue expFuncToHex(const std::vector<ExpressionValue>& parameters)
 	return result;
 }
 
+ExpressionValue expFuncStrlen(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	if (parameters[0].isString() == false)
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+
+	result.type = ExpressionValueType::Integer;
+	result.intValue = parameters[0].strValue.size();
+	return result;
+}
+
+ExpressionValue expFuncSubstr(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	if (parameters[0].isString() == false || parameters[1].isInt() == false
+		|| parameters[2].isInt() == false)
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	size_t start = (size_t) parameters[1].intValue;
+	size_t count = (size_t) parameters[2].intValue;
+
+	result.type = ExpressionValueType::String;
+	result.strValue = parameters[0].strValue.substr(start,count);
+	return result;
+}
+
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,		0,	0 } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0 } },
@@ -114,4 +149,6 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"filesize",		{ &expFuncFileSize,		1,	1 } },
 	{ L"tostring",		{ &expFuncToString,		1,	1 } },
 	{ L"tohex",			{ &expFuncToHex,		1,	2 } },
+	{ L"strlen",		{ &expFuncStrlen,		1,	1 } },
+	{ L"substr",		{ &expFuncSubstr,		3,	3 } },
 };
