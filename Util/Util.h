@@ -15,7 +15,7 @@ std::wstring intToString(unsigned int value, int digits);
 
 StringList getStringListFromArray(wchar_t** source, int count);
 
-size_t fileSize(const std::wstring& fileName);
+u64 fileSize(const std::wstring& fileName);
 bool fileExists(const std::wstring& strFilename);
 bool copyFile(const std::wstring& existingFile, const std::wstring& newFile);
 bool deleteFile(const std::wstring& fileName);;

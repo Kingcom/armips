@@ -146,34 +146,37 @@ StringList getStringListFromArray(wchar_t** source, int count)
 	return result;
 }
 
-
-size_t fileSize(const std::wstring& fileName)
+u64 fileSize(const std::wstring& fileName)
 {
 #ifdef _WIN32
-	struct _stat fileStat; 
-	int err = _wstat(fileName.c_str(), &fileStat ); 
+	WIN32_FILE_ATTRIBUTE_DATA attr;
+	if (!GetFileAttributesEx(fileName.c_str(),GetFileExInfoStandard,&attr)
+		|| (attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		return 0;
+	return ((u64) attr.nFileSizeHigh << 32) | (u64) attr.nFileSizeLow;
 #else	
 	std::string utf8 = convertWStringToUtf8(fileName);
-	struct stat fileStat;
-	int err = stat(utf8.c_str(),&fileStat);
-#endif
-
-	if (0 != err) return 0; 
+	struct stat64 fileStat;
+	int err = stat64(utf8.c_str(),&fileStat);
+	if (0 != err)
+		return 0; 
 	return fileStat.st_size; 
+#endif
 }
 
 bool fileExists(const std::wstring& strFilename)
 {
 #ifdef _WIN32
-	struct _stat stFileInfo;
-	int intStat = _wstat(strFilename.c_str(),&stFileInfo);
+	int OldMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+	bool success = GetFileAttributes(strFilename.c_str()) != INVALID_FILE_ATTRIBUTES;
+	SetErrorMode(OldMode);
+	return success;
 #else
 	std::string utf8 = convertWStringToUtf8(strFilename);
 	struct stat stFileInfo;
 	int intStat = stat(utf8.c_str(),&stFileInfo);
-#endif
-
 	return intStat == 0;
+#endif
 }
 
 bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)

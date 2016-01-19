@@ -56,7 +56,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) const;
 private:
 	std::wstring fileName;
-	size_t fileSize;
+	u64 fileSize;
 
 	Expression startExpression;
 	Expression sizeExpression;
