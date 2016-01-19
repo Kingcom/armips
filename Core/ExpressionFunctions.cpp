@@ -3,6 +3,14 @@
 #include "Misc.h"
 #include "Common.h"
 
+ExpressionValue expFuncVersion(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+	result.type = ExpressionValueType::Integer;
+	result.intValue = ARMIPS_VERSION_MAJOR*100 + ARMIPS_VERSION_MINOR*10 + ARMIPS_VERSION_REVISION;
+	return result;
+}
+
 ExpressionValue expFuncEndianness(const std::vector<ExpressionValue>& parameters)
 {
 	Endianness endianness = g_fileManager->getEndianness();
@@ -100,6 +108,7 @@ ExpressionValue expFuncToHex(const std::vector<ExpressionValue>& parameters)
 }
 
 const ExpressionFunctionMap expressionFunctions = {
+	{ L"version",		{ &expFuncVersion,		0,	0 } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0 } },
 	{ L"fileexists",	{ &expFuncFileExists,	1,	1 } },
 	{ L"filesize",		{ &expFuncFileSize,		1,	1 } },
