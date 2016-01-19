@@ -76,6 +76,13 @@ int wmain(int argc, wchar_t* argv[])
 			def.value = arguments[argpos + 2];
 			parameters.equList.push_back(def);
 			argpos += 3;
+		} else if (arguments[argpos] == L"-strequ")
+		{
+			EquationDefinition def;
+			def.name = arguments[argpos + 1];
+			def.value = formatString(L"\"%s\"",arguments[argpos + 2]);
+			parameters.equList.push_back(def);
+			argpos += 3;
 		} else if (arguments[argpos] == L"-time")
 		{
 			printTime = true;
