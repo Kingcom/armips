@@ -629,9 +629,10 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 
 CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 {
-	const Token &token = parser.nextToken();
-	if (token.type != TokenType::Identifier)
+	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
+
+	const Token &token = parser.nextToken();
 
 	ArmOpcodeVariables vars;
 	bool paramFail = false;
@@ -725,9 +726,10 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 
 CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 {
-	const Token &token = parser.nextToken();
-	if (token.type != TokenType::Identifier)
+	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
+
+	const Token &token = parser.nextToken();
 
 	ThumbOpcodeVariables vars;
 	bool paramFail = false;

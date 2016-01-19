@@ -1150,9 +1150,10 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 
 CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 {
-	const Token &token = parser.nextToken();
-	if (token.type != TokenType::Identifier)
+	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
+
+	const Token &token = parser.nextToken();
 
 	bool paramFail = false;
 	const MipsArchDefinition& arch = mipsArchs[Mips.GetVersion()];
