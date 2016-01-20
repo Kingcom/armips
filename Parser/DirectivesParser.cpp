@@ -194,11 +194,18 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 
 	CDirectiveConditional* cond;
 
+	ConditionalResult condResult = ConditionalResult::Unknown;
 	switch (flags)
 	{
 	case DIRECTIVE_COND_IF:
 		exp = parser.parseExpression();
 		cond = new CDirectiveConditional(ConditionType::IF,exp);
+		if (exp.isConstExpression())
+		{
+			ExpressionValue result = exp.evaluate();
+			if (result.isInt())
+				condResult = result.intValue != 0 ? ConditionalResult::True : ConditionalResult::False;
+		}
 		break;
 	case DIRECTIVE_COND_IFDEF:
 		if (parser.parseIdentifier(name) == false)
@@ -218,7 +225,9 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		break;
 	}
 
+	parser.pushConditionalResult(condResult);
 	CAssemblerCommand* ifBlock = parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	parser.popConditionalResult();
 
 	// update the file info so that else commands get the right line number
 	parser.updateFileInfo();
@@ -229,7 +238,20 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 
 	if (stringValue == L".else")
 	{
+		switch (condResult)
+		{
+		case ConditionalResult::True:
+			condResult = ConditionalResult::False;
+			break;
+		case ConditionalResult::False:
+			condResult = ConditionalResult::True;
+			break;
+		}
+
+		parser.pushConditionalResult(condResult);
 		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
+		parser.popConditionalResult();
+
 		parser.eatToken();	// eat .endif
 	} else if (stringValue == L".elseif")
 	{

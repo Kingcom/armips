@@ -23,6 +23,8 @@ struct ParserMacro
 	size_t counter;
 };
 
+enum class ConditionalResult { Unknown, True, False };
+
 class Parser
 {
 public:
@@ -48,6 +50,9 @@ public:
 	void eatToken() { getTokenizer()->eatToken(); };
 	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
 	
+	void pushConditionalResult(ConditionalResult cond);
+	void popConditionalResult() { conditionStack.pop_back(); };
+
 	template <typename... Args>
 	void printError(const Token& token, const wchar_t* text, const Args&... args)
 	{
@@ -85,6 +90,14 @@ protected:
 	bool overrideFileInfo;
 	int overrideFileNum;
 	int overrideLineNum;
+
+	struct ConditionInfo
+	{
+		bool inTrueBlock;
+		bool inUnknownBlock;
+	};
+
+	std::vector<ConditionInfo> conditionStack;
 };
 
 struct TokenSequenceValue

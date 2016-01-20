@@ -22,7 +22,16 @@ Parser::Parser()
 {
 	initializingMacro = false;
 	overrideFileInfo = false;
+	conditionStack.push_back({true,false});
 	clearError();
+}
+
+void Parser::pushConditionalResult(ConditionalResult cond)
+{
+	ConditionInfo info = conditionStack.back();
+	info.inTrueBlock = info.inTrueBlock && cond != ConditionalResult::False;
+	info.inUnknownBlock = info.inUnknownBlock || cond == ConditionalResult::Unknown;
+	conditionStack.push_back(info);
 }
 
 Expression Parser::parseExpression()
