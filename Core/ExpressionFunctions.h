@@ -14,3 +14,5 @@ struct ExpressionFunctionEntry {
 typedef std::map<std::wstring, const ExpressionFunctionEntry> ExpressionFunctionMap;
 
 extern const ExpressionFunctionMap expressionFunctions;
+
+ExpressionValue expFuncDefined(ExpressionInternal* exp);

@@ -515,9 +515,35 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 	}
 }
 
+bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
+{
+	if (minParams > childrenCount)
+	{
+		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",strValue,minParams);
+		return false;
+	}
+
+	if (maxParams < childrenCount)
+	{
+		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",strValue,maxParams);
+		return false;
+	}
+
+	return true;
+}
+
 ExpressionValue ExpressionInternal::executeFunctionCall()
 {
 	ExpressionValue invalid;
+
+	// handle defined(x) seperately, it's kind of a special case
+	if (strValue == L"defined")
+	{
+		if (checkParameterCount(1,1) == false)
+			return invalid;
+
+		return expFuncDefined(children[0]);
+	}
 
 	// find function, check parameter counts
 	auto it = expressionFunctions.find(strValue);
@@ -527,17 +553,8 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 		return invalid;
 	}
 
-	if (it->second.minParams > childrenCount)
-	{
-		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",strValue,it->second.minParams);
+	if (checkParameterCount(it->second.minParams,it->second.maxParams) == false)
 		return invalid;
-	}
-
-	if (it->second.maxParams < childrenCount)
-	{
-		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",strValue,it->second.maxParams);
-		return invalid;
-	}
 
 	// evaluate parameters
 	std::vector<ExpressionValue> params;
@@ -563,7 +580,7 @@ bool isExpressionFunctionSafe(const std::wstring& name)
 {
 	auto it = expressionFunctions.find(name);
 	if (it == expressionFunctions.end())
-		return true;
+		return name != L"defined";
 
 	return it->second.safe;
 }

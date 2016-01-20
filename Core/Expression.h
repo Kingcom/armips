@@ -125,11 +125,14 @@ public:
 	std::wstring getStringValue() { return strValue; }
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool simplify();
+	unsigned int getFileNum() { return fileNum; }
+	unsigned int getSection() { return section; }
 private:
 	void allocate(size_t count);
 	void deallocate();
 	std::wstring formatFunctionCall();
 	ExpressionValue executeFunctionCall();
+	bool checkParameterCount(size_t min, size_t max);
 
 	OperatorType type;
 	ExpressionInternal** children;

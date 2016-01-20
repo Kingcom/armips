@@ -175,6 +175,28 @@ ExpressionValue expFuncRead(const std::vector<ExpressionValue>& parameters)
 	return result;
 }
 
+ExpressionValue expFuncDefined(ExpressionInternal* exp)
+{
+	ExpressionValue result;
+
+	if (exp == nullptr || exp->isIdentifier() == false)
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	const std::wstring& name = exp->getStringValue();
+	Label* label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
+
+	if (label != nullptr)
+	{
+		result.type = ExpressionValueType::Integer;
+		result.intValue = label->isDefined();
+	}
+
+	return result;
+}
+
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,		0,	0,	true } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0,	false } },
