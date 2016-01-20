@@ -124,6 +124,7 @@ public:
 	bool isIdentifier() { return type == OperatorType::Identifier; }
 	std::wstring getStringValue() { return strValue; }
 	void replaceMemoryPos(const std::wstring& identifierName);
+	bool simplify();
 private:
 	void allocate(size_t count);
 	void deallocate();
@@ -150,8 +151,9 @@ public:
 	Expression();
 	ExpressionValue evaluate();
 	bool isLoaded() const { return expression != NULL; }
-	void setExpression(ExpressionInternal* exp) { expression = std::shared_ptr<ExpressionInternal>(exp); }
+	void setExpression(ExpressionInternal* exp);
 	void replaceMemoryPos(const std::wstring& identifierName);
+	bool isConstExpression() { return constExpression; }
 
 	template<typename T>
 	bool evaluateInteger(T& dest)
@@ -205,6 +207,7 @@ public:
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;
+	bool constExpression;
 };
 
 Expression createConstExpression(u64 value);

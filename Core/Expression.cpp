@@ -492,6 +492,7 @@ void ExpressionInternal::deallocate()
 	}
 
 	delete[] children;
+	children = nullptr;
 	childrenCount = 0;
 }
 
@@ -556,6 +557,56 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 
 	// execute
 	return it->second.function(params);
+}
+
+bool ExpressionInternal::simplify()
+{
+	// check if this expression can actually be simplified
+	// without causing side effects
+	switch (type)
+	{
+	case OperatorType::Identifier:
+	case OperatorType::MemoryPos:
+	case OperatorType::ToString:
+		return false;
+	}
+
+	// check if the same applies to all children
+	bool canSimplify = true;
+	for (size_t i = 0; i < childrenCount; i++)
+	{
+		if (children[i] != nullptr && children[i]->simplify() == false)
+			canSimplify = false;
+	}
+
+	// if so, this expression can be evaluated into a constant
+	if (canSimplify)
+	{
+		ExpressionValue value = evaluate();
+
+		switch (value.type)
+		{
+		case ExpressionValueType::Integer:
+			type = OperatorType::Integer;
+			intValue = value.intValue;
+			break;
+		case ExpressionValueType::Float:
+			type = OperatorType::Float;
+			floatValue = value.floatValue;
+			break;
+		case ExpressionValueType::String:
+			type = OperatorType::String;
+			strValue = value.strValue;
+			break;
+		default:
+			type = OperatorType::Invalid;
+			break;
+		}
+
+		deallocate();
+	}
+
+	return canSimplify;
 }
 
 ExpressionValue ExpressionInternal::evaluate()
@@ -765,6 +816,16 @@ std::wstring ExpressionInternal::toString()
 Expression::Expression()
 {
 	expression = NULL;
+	constExpression = true;
+}
+
+void Expression::setExpression(ExpressionInternal* exp)
+{
+	expression = std::shared_ptr<ExpressionInternal>(exp);
+	if (exp != nullptr)
+		constExpression = expression->simplify();
+	else
+		constExpression = true;
 }
 
 ExpressionValue Expression::evaluate()
