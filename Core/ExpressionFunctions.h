@@ -8,6 +8,7 @@ struct ExpressionFunctionEntry {
 	ExpressionFunction function;
 	size_t minParams;
 	size_t maxParams;
+	bool safe;		// result doesn't depend on the current state
 };
 
 typedef std::map<std::wstring, const ExpressionFunctionEntry> ExpressionFunctionMap;

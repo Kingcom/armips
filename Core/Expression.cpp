@@ -559,6 +559,15 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	return it->second.function(params);
 }
 
+bool isExpressionFunctionSafe(const std::wstring& name)
+{
+	auto it = expressionFunctions.find(name);
+	if (it == expressionFunctions.end())
+		return true;
+
+	return it->second.safe;
+}
+
 bool ExpressionInternal::simplify()
 {
 	// check if this expression can actually be simplified
@@ -569,6 +578,10 @@ bool ExpressionInternal::simplify()
 	case OperatorType::MemoryPos:
 	case OperatorType::ToString:
 		return false;
+	case OperatorType::FunctionCall:
+		if (isExpressionFunctionSafe(strValue) == false)
+			return false;
+		break;
 	}
 
 	// check if the same applies to all children

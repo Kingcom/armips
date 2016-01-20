@@ -176,17 +176,17 @@ ExpressionValue expFuncRead(const std::vector<ExpressionValue>& parameters)
 }
 
 const ExpressionFunctionMap expressionFunctions = {
-	{ L"version",		{ &expFuncVersion,		0,	0 } },
-	{ L"endianness",	{ &expFuncEndianness,	0,	0 } },
-	{ L"fileexists",	{ &expFuncFileExists,	1,	1 } },
-	{ L"filesize",		{ &expFuncFileSize,		1,	1 } },
-	{ L"tostring",		{ &expFuncToString,		1,	1 } },
-	{ L"tohex",			{ &expFuncToHex,		1,	2 } },
-	{ L"strlen",		{ &expFuncStrlen,		1,	1 } },
-	{ L"substr",		{ &expFuncSubstr,		3,	3 } },
+	{ L"version",		{ &expFuncVersion,		0,	0,	true } },
+	{ L"endianness",	{ &expFuncEndianness,	0,	0,	false } },
+	{ L"fileexists",	{ &expFuncFileExists,	1,	1,	true } },
+	{ L"filesize",		{ &expFuncFileSize,		1,	1,	true } },
+	{ L"tostring",		{ &expFuncToString,		1,	1,	true } },
+	{ L"tohex",			{ &expFuncToHex,		1,	2,	true } },
+	{ L"strlen",		{ &expFuncStrlen,		1,	1,	true } },
+	{ L"substr",		{ &expFuncSubstr,		3,	3,	true } },
 
-	{ L"readbyte",		{ &expFuncRead<u8>,		1,	2 } },
-	{ L"readu8",		{ &expFuncRead<u8>,		1,	2 } },
-	{ L"readu16",		{ &expFuncRead<u16>,	1,	2 } },
-	{ L"readu32",		{ &expFuncRead<u32>,	1,	2 } },
+	{ L"readbyte",		{ &expFuncRead<u8>,		1,	2,	true } },
+	{ L"readu8",		{ &expFuncRead<u8>,		1,	2,	true } },
+	{ L"readu16",		{ &expFuncRead<u16>,	1,	2,	true } },
+	{ L"readu32",		{ &expFuncRead<u32>,	1,	2,	true } },
 };
