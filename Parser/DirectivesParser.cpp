@@ -597,6 +597,10 @@ CAssemblerCommand* parseDirectiveInclude(Parser& parser, int flags)
 		encoding = getEncodingFromString(encodingName);
 	}
 
+	// don't include the file if it's inside a false block
+	if (parser.isInsideTrueBlock() == false)
+		return new DummyCommand();
+
 	if (fileExists(fileName) == false)
 	{
 		parser.printError(start,L"Included file \"%s\" does not exist",fileName);
