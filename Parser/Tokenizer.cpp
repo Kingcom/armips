@@ -55,7 +55,12 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 			{
 				TokenList::iterator insertIt = it;
 				insertIt++;
-				
+			
+				// check if this is another equ with the same name.
+				// if so, keep equ redefinitions for later error handling
+				if (insertIt != tokens.end() && insertIt->type == TokenType::Equ)
+					break;
+
 				// replace old token with the new tokens
 				// replace the first token manually so that any iterators
 				// are still guaranteed to be valid
