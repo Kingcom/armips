@@ -142,6 +142,47 @@ ExpressionValue expFuncSubstr(const std::vector<ExpressionValue>& parameters)
 	return result;
 }
 
+ExpressionValue expFuncFind(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	if (parameters[0].isString() == false || parameters[1].isString() == false
+		|| (parameters.size() >= 3 && parameters[2].isInt() == false))
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	size_t start = parameters.size() >= 3 ? (size_t) parameters[2].intValue : 0;
+	size_t pos = parameters[0].strValue.find(parameters[1].strValue,start);
+
+	result.type = ExpressionValueType::Integer;
+	result.intValue = pos == std::wstring::npos ? (u64) -1 : pos;
+
+	return result;
+}
+
+ExpressionValue expFuncRFind(const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	if (parameters[0].isString() == false || parameters[1].isString() == false
+		|| (parameters.size() >= 3 && parameters[2].isInt() == false))
+	{
+		Logger::queueError(Logger::Error,L"Invalid parameter");
+		return result;
+	}
+
+	size_t start = parameters.size() >= 3 ? (size_t) parameters[2].intValue : std::wstring::npos;
+	size_t pos = parameters[0].strValue.rfind(parameters[1].strValue,start);
+
+	result.type = ExpressionValueType::Integer;
+	result.intValue = pos == std::wstring::npos ? (u64) -1 : pos;
+
+	return result;
+}
+
+
 template<typename T>
 ExpressionValue expFuncRead(const std::vector<ExpressionValue>& parameters)
 {
@@ -206,6 +247,8 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"tohex",			{ &expFuncToHex,		1,	2,	true } },
 	{ L"strlen",		{ &expFuncStrlen,		1,	1,	true } },
 	{ L"substr",		{ &expFuncSubstr,		3,	3,	true } },
+	{ L"find",			{ &expFuncFind,			2,	3,	true } },
+	{ L"rfind",			{ &expFuncRFind,		2,	3,	true } },
 
 	{ L"readbyte",		{ &expFuncRead<u8>,		1,	2,	true } },
 	{ L"readu8",		{ &expFuncRead<u8>,		1,	2,	true } },
