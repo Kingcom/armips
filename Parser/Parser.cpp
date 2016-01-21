@@ -262,7 +262,13 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 		const Token& token = tok.nextToken();
 		if (token.type == TokenType::Identifier && token.getStringValue() == name)
 		{
-			printError(startToken,L"Recursive enum definition for \"%s\" not allowed",name);
+			printError(startToken,L"Recursive equ definition for \"%s\" not allowed",name);
+			return;
+		}
+
+		if (token.type == TokenType::Equ)
+		{
+			printError(startToken,L"equ value must not contain another equ instance");
 			return;
 		}
 	}
@@ -297,6 +303,18 @@ bool Parser::checkEquLabel()
 			std::wstring value = peekToken(pos+1).getStringValue();
 			eatTokens(pos+2);
 		
+			// skip the equ if it's inside a false conditional block
+			if (isInsideTrueBlock() == false)
+				return true;
+
+			// equs can't be inside blocks whose condition can only be
+			// evaluated during validation
+			if (isInsideUnknownBlock())
+			{
+				printError(start,L"equ not allowed inside of block with non-trivial condition");
+				return true;
+			}
+
 			// equs are not allowed in macros
 			if (initializingMacro)
 			{

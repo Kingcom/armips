@@ -52,6 +52,8 @@ public:
 	
 	void pushConditionalResult(ConditionalResult cond);
 	void popConditionalResult() { conditionStack.pop_back(); };
+	bool isInsideTrueBlock() { return conditionStack.back().inTrueBlock; }
+	bool isInsideUnknownBlock() { return conditionStack.back().inUnknownBlock; }
 
 	template <typename... Args>
 	void printError(const Token& token, const wchar_t* text, const Args&... args)
