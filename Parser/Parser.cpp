@@ -107,6 +107,19 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, std::initiali
 		if (next.stringValueStartsWith(indicator) && isPartOfList(next.getStringValue(), terminators))
 			break;
 
+		bool foundSomething = false;
+		while (checkEquLabel() || checkMacroDefinition())
+		{
+			// do nothing, just parse all the equs and macros there are
+			if (hasError())
+				return handleError();
+
+			foundSomething = true;
+		}
+
+		if (foundSomething)
+			continue;
+
 		CAssemblerCommand* cmd = parseCommand();
 		sequence->addCommand(cmd);
 	}
@@ -575,13 +588,6 @@ CAssemblerCommand* Parser::parseCommand()
 {
 	CAssemblerCommand* command;
 
-	while (checkEquLabel() || checkMacroDefinition())
-	{
-		// do nothing, just parse all the equs and macros there are
-		if (hasError())
-			return handleError();
-	}
-	
 	updateFileInfo();
 
 	if (atEnd())
