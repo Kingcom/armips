@@ -58,6 +58,7 @@ public:
 	template <typename... Args>
 	void printError(const Token& token, const wchar_t* text, const Args&... args)
 	{
+		errorLine = token.line;
 		Global.FileInfo.LineNumber = (int) token.line;
 		std::wstring errorText = formatString(text,args...);
 		Logger::printError(Logger::Error,errorText);
@@ -88,6 +89,7 @@ protected:
 	std::set<std::wstring> macroLabels;
 	bool initializingMacro;
 	bool error;
+	size_t errorLine;
 
 	bool overrideFileInfo;
 	int overrideFileNum;

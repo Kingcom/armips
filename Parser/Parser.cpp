@@ -112,7 +112,7 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, std::initiali
 		{
 			// do nothing, just parse all the equs and macros there are
 			if (hasError())
-				return handleError();
+				sequence->addCommand(handleError());
 
 			foundSomething = true;
 		}
@@ -571,8 +571,7 @@ CAssemblerCommand* Parser::parseLabel()
 CAssemblerCommand* Parser::handleError()
 {
 	// skip the rest of the line
-	const Token& token = nextToken();
-	while (peekToken().line == token.line)
+	while (peekToken().line == errorLine)
 		eatToken();
 
 	clearError();
