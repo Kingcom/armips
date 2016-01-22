@@ -194,11 +194,18 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 
 	CDirectiveConditional* cond;
 
+	const Token& start = parser.peekToken();
 	ConditionalResult condResult = ConditionalResult::Unknown;
 	switch (flags)
 	{
 	case DIRECTIVE_COND_IF:
 		exp = parser.parseExpression();
+		if (exp.isLoaded() == false)
+		{
+			parser.printError(start,L"Invalid condition");
+			return new DummyCommand();
+		}
+
 		cond = new CDirectiveConditional(ConditionType::IF,exp);
 		if (exp.isConstExpression())
 		{
