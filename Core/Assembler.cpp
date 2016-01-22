@@ -190,6 +190,7 @@ bool runArmips(ArmipsArguments& arguments)
 	}
 
 	CAssemblerCommand* content = parser.parseFile(input);
+	Logger::printQueue();
 
 	bool result = !Logger::hasError();
 	if (result == true && content != nullptr)
