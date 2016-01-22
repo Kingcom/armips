@@ -2,6 +2,7 @@
 #include "ExpressionFunctions.h"
 #include "Misc.h"
 #include "Common.h"
+#include <regex>
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, u64& dest,
 	const std::wstring& funcName, bool optional)
@@ -136,6 +137,75 @@ ExpressionValue expFuncSubstr(const std::wstring& funcName, const std::vector<Ex
 	return ExpressionValue(source->substr((size_t)start,(size_t)count));
 }
 
+ExpressionValue expFuncRegExMatch(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	const std::wstring* source;
+	const std::wstring* regexString;
+
+	GET_PARAM(parameters,0,source);
+	GET_PARAM(parameters,1,regexString);
+
+	try
+	{
+		std::wregex regex(*regexString);
+		bool found = std::regex_match(*source,regex);
+		return ExpressionValue(found ? UINT64_C(1) : UINT64_C(0));
+	} catch (std::regex_error&)
+	{
+		Logger::queueError(Logger::Error,L"Invalid regular expression");
+		return ExpressionValue();
+	}
+}
+
+ExpressionValue expFuncRegExSearch(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	const std::wstring* source;
+	const std::wstring* regexString;
+
+	GET_PARAM(parameters,0,source);
+	GET_PARAM(parameters,1,regexString);
+
+	try
+	{
+		std::wregex regex(*regexString);
+		bool found = std::regex_search(*source,regex);
+		return ExpressionValue(found ? UINT64_C(1) : UINT64_C(0));
+	} catch (std::regex_error&)
+	{
+		Logger::queueError(Logger::Error,L"Invalid regular expression");
+		return ExpressionValue();
+	}
+}
+
+ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	const std::wstring* source;
+	const std::wstring* regexString;
+	u64 matchIndex;
+
+	GET_PARAM(parameters,0,source);
+	GET_PARAM(parameters,1,regexString);
+	GET_OPTIONAL_PARAM(parameters,2,matchIndex,0);
+
+	try
+	{
+		std::wregex regex(*regexString);
+		std::wsmatch result;
+		bool found = std::regex_search(*source,result,regex);
+		if (found == false || matchIndex >= result.size())
+		{
+			Logger::queueError(Logger::Error,L"Capture group index %d does not exist",matchIndex);
+			return ExpressionValue();
+		}
+	
+		return ExpressionValue(result[(size_t)matchIndex].str());
+	} catch (std::regex_error&)
+	{
+		Logger::queueError(Logger::Error,L"Invalid regular expression");
+		return ExpressionValue();
+	}
+}
+
 ExpressionValue expFuncFind(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	u64 start;
@@ -218,6 +288,9 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"tohex",			{ &expFuncToHex,		1,	2,	true } },
 	{ L"strlen",		{ &expFuncStrlen,		1,	1,	true } },
 	{ L"substr",		{ &expFuncSubstr,		3,	3,	true } },
+	{ L"regex_match",	{ &expFuncRegExMatch,	2,	2,	true } },
+	{ L"regex_search",	{ &expFuncRegExSearch,	2,	2,	true } },
+	{ L"regex_extract",	{ &expFuncRegExExtract,	2,	3,	true } },
 	{ L"find",			{ &expFuncFind,			2,	3,	true } },
 	{ L"rfind",			{ &expFuncRFind,		2,	3,	true } },
 

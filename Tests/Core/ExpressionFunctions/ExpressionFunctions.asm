@@ -57,6 +57,11 @@ test3	find,str,part,0
 test3	find,str,part,1
 test2	rfind,str,part
 
+test2	regex_match,str,"[a-z]+"
+test2	regex_match,str,"[0-9]+"
+test2	regex_search,str,"sts"
+test2	regex_extract,"test123test","[0-9]+"
+
 label:
 test1	defined,label
 test1	defined,label1

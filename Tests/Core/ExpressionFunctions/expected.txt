@@ -12,5 +12,9 @@ ExpressionFunctions.asm(56) notice: substr("teststest",0,4): test
 ExpressionFunctions.asm(57) notice: find("teststest","test",0): 0
 ExpressionFunctions.asm(58) notice: find("teststest","test",1): 5
 ExpressionFunctions.asm(60) notice: rfind("teststest","test"): 5
-ExpressionFunctions.asm(62) notice: defined(label): 1
-ExpressionFunctions.asm(64) notice: defined(label1): 0
+ExpressionFunctions.asm(61) notice: regex_match("teststest","[a-z]+"): 1
+ExpressionFunctions.asm(62) notice: regex_match("teststest","[0-9]+"): 0
+ExpressionFunctions.asm(63) notice: regex_search("teststest","sts"): 1
+ExpressionFunctions.asm(65) notice: regex_extract("test123test","[0-9]+"): 123
+ExpressionFunctions.asm(67) notice: defined(label): 1
+ExpressionFunctions.asm(69) notice: defined(label1): 0
