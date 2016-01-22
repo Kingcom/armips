@@ -2,7 +2,7 @@
 #include "Expression.h"
 #include <map>
 
-typedef ExpressionValue (*ExpressionFunction)(const std::vector<ExpressionValue>&);
+typedef ExpressionValue (*ExpressionFunction)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
 
 struct ExpressionFunctionEntry {
 	ExpressionFunction function;

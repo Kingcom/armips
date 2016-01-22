@@ -573,7 +573,7 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	}
 
 	// execute
-	return it->second.function(params);
+	return it->second.function(strValue,params);
 }
 
 bool isExpressionFunctionSafe(const std::wstring& name)

@@ -56,6 +56,24 @@ struct ExpressionValue
 		type = ExpressionValueType::Invalid;
 	}
 
+	ExpressionValue(u64 value)
+	{
+		type = ExpressionValueType::Integer;
+		intValue = value;
+	}
+
+	ExpressionValue(double value)
+	{
+		type = ExpressionValueType::Float;
+		floatValue = value;
+	}
+
+	ExpressionValue(const std::wstring& value)
+	{
+		type = ExpressionValueType::String;
+		strValue = value;
+	}
+
 	bool isFloat() const
 	{
 		return type == ExpressionValueType::Float;
