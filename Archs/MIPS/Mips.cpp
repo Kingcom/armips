@@ -105,11 +105,6 @@ CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCt
 	}
 }
 
-void MipsElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
-{
-	Logger::printError(Logger::FatalError,L"Unsupported operation");
-}
-
 CMipsArchitecture::CMipsArchitecture()
 {
 	FixLoadDelay = false;
@@ -149,21 +144,6 @@ void CMipsArchitecture::Revalidate()
 	LoadDelay = false;
 	LoadDelayRegister = 0;
 	DelaySlot = false;
-}
-
-int CMipsArchitecture::GetWordSize()
-{
-	switch (Version)
-	{
-	case MARCH_PSX:
-	case MARCH_N64:
-	case MARCH_PSP:
-		return 4;
-	case MARCH_PS2:
-		return 8;
-	default:
-		return 0;
-	}
 }
 
 IElfRelocator* CMipsArchitecture::getElfRelocator()

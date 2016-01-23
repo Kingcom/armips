@@ -17,7 +17,6 @@ public:
 	virtual ~IElfRelocator() { };
 	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
 	virtual void setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType) = 0;
-	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors) = 0;
 	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }
 };
 

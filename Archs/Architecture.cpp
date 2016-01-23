@@ -60,12 +60,6 @@ void CInvalidArchitecture::Revalidate()
 	Logger::printError(Logger::FatalError,L"No architecture specified");
 }
 
-int CInvalidArchitecture::GetWordSize()
-{
-	Logger::printError(Logger::FatalError,L"No architecture specified");
-	return 0;
-}
-
 IElfRelocator* CInvalidArchitecture::getElfRelocator()
 {
 	Logger::printError(Logger::FatalError,L"No architecture specified");

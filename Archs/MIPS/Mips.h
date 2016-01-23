@@ -30,7 +30,6 @@ public:
 	virtual void NextSection();
 	virtual void Pass2() { return; };
 	virtual void Revalidate();
-	virtual int GetWordSize();
 	virtual IElfRelocator* getElfRelocator();
 	virtual Endianness getEndianness() { return Version == MARCH_N64 ? Endianness::Big : Endianness::Little; };
 	void SetLoadDelay(bool Delay, int Register);
@@ -89,6 +88,5 @@ class MipsElfRelocator: public IElfRelocator
 public:
 	virtual bool relocateOpcode(int type, RelocationData& data);
 	virtual void setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType);
-	virtual void writeCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 };

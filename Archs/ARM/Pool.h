@@ -31,7 +31,6 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
-	virtual bool IsPool() { return true; };
 private:
 	u64 position;
 	std::vector<u32> values;

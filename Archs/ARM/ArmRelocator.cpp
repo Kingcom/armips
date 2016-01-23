@@ -215,8 +215,3 @@ CAssemblerCommand* ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCto
 		return parser.parseTemplate(L"bx r14");
 	}
 }
-
-void ArmElfRelocator::writeCtorStub(std::vector<ElfRelocatorCtor>& ctors)
-{
-	Logger::printError(Logger::FatalError,L"Unsupported operation");
-}

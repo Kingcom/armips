@@ -43,7 +43,6 @@ public:
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
-	virtual int GetWordSize() { return 4; };
 	virtual IElfRelocator* getElfRelocator();
 	virtual Endianness getEndianness() { return version == AARCH_BIG ? Endianness::Big : Endianness::Little; };
 	void SetThumbMode(bool b) { thumb = b; };

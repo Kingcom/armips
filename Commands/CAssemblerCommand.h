@@ -12,8 +12,6 @@ public:
 	virtual void Encode() const = 0;
 	virtual void writeTempData(TempData& tempData) const = 0;
 	virtual void writeSymData(SymbolData& symData) const { };
-	virtual bool IsConditional() { return false; };
-	virtual bool IsPool() { return false; };
 	void applyFileInfo();
 	int getSection() { return section; }
 	void updateSection(int num) { section = num; }
