@@ -13,12 +13,6 @@ CDirectiveConditional::CDirectiveConditional(ConditionType type)
 	ifBlock = nullptr;
 	elseBlock = nullptr;
 	previousResult = false;
-
-	if (type == ConditionType::IFARM || type == ConditionType::IFTHUMB)
-	{
-		armState = (Arch == &Arm);
-		armState |= (Arm.GetThumbMode() << 1);
-	}
 }
 
 CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstring& name)
@@ -61,10 +55,6 @@ bool CDirectiveConditional::evaluate()
 
 	switch (type)
 	{
-	case ConditionType::IFARM:
-		return armState == 1;
-	case ConditionType::IFTHUMB:
-		return armState == 3;
 	case ConditionType::IF:
 		return value != 0;
 	case ConditionType::IFDEF:

@@ -3,6 +3,7 @@
 #include "Misc.h"
 #include "Common.h"
 #include <regex>
+#include "../Archs/ARM/Arm.h"
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, u64& dest,
 	const std::wstring& funcName, bool optional)
@@ -279,6 +280,18 @@ ExpressionValue expFuncDefined(ExpressionInternal* exp)
 	return ExpressionValue(label->isDefined() ? UINT64_C(1) : UINT64_C(0)); 
 }
 
+ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	bool isArm = Arch == &Arm && Arm.GetThumbMode() == false;
+	return ExpressionValue(isArm ? UINT64_C(1) : UINT64_C(0)); 
+}
+
+ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	bool isThumb = Arch == &Arm && Arm.GetThumbMode() == true;
+	return ExpressionValue(isThumb ? UINT64_C(1) : UINT64_C(0)); 
+}
+
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,		0,	0,	true } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0,	false } },
@@ -298,4 +311,8 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"readu8",		{ &expFuncRead<u8>,		1,	2,	true } },
 	{ L"readu16",		{ &expFuncRead<u16>,	1,	2,	true } },
 	{ L"readu32",		{ &expFuncRead<u32>,	1,	2,	true } },
+
+	{ L"isarm",			{ &expFuncIsArm,		0,	0,	true } },
+	{ L"isthumb",		{ &expFuncIsThumb,		0,	0,	true } },
+
 };

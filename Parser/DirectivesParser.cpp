@@ -223,12 +223,6 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		if (parser.parseIdentifier(name) == false)
 			return nullptr;
 		break;
-	case DIRECTIVE_COND_IFARM:
-		type = ConditionType::IFARM;
-		break;
-	case DIRECTIVE_COND_IFTHUMB:
-		type = ConditionType::IFTHUMB;
-		break;
 	}
 
 	parser.pushConditionalResult(condResult);
@@ -669,8 +663,6 @@ const DirectiveMap directives = {
 	{ L".if",				{ &parseDirectiveConditional,		DIRECTIVE_COND_IF } },
 	{ L".ifdef",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFDEF } },
 	{ L".ifndef",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFNDEF } },
-	{ L".ifarm",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFARM } },
-	{ L".ifthumb",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFTHUMB } },
 
 	{ L".loadtable",		{ &parseDirectiveTable,				0 } },
 	{ L".table",			{ &parseDirectiveTable,				0 } },

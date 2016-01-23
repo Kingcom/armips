@@ -33,8 +33,6 @@ typedef std::unordered_multimap<std::wstring, const DirectiveEntry> DirectiveMap
 #define DIRECTIVE_COND_IF			0x00000001
 #define DIRECTIVE_COND_IFDEF		0x00000002
 #define DIRECTIVE_COND_IFNDEF		0x00000003
-#define DIRECTIVE_COND_IFARM		0x00000004
-#define DIRECTIVE_COND_IFTHUMB		0x00000005
 
 // data directive flags
 #define DIRECTIVE_DATA_8			0x00000001

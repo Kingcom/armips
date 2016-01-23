@@ -35,7 +35,7 @@ label:
 .ifndef label
 	.byte 40h
 .else
-	.ifarm
+	.if isArm()
 		.byte 41h
 	.else
 		.byte 42h
@@ -49,7 +49,7 @@ label:
 			; expected: 50h
 .if 5 < 6
 	.ifdef label
-		.ifthumb
+		.if isThumb()
 			.byte 50h
 		.else
 			.byte 51h

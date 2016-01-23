@@ -10,10 +10,6 @@ enum class ConditionType
 	ENDIF,
 	IFDEF,
 	IFNDEF,
-	ELSEIFDEF,
-	ELSEIFNDEF,
-	IFARM,
-	IFTHUMB
 };
 
 class CDirectiveConditional: public CAssemblerCommand
@@ -33,7 +29,6 @@ private:
 
 	Expression expression;
 	Label* label;
-	u32 armState;
 	bool previousResult;
 
 	ConditionType type;
