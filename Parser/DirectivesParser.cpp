@@ -189,16 +189,16 @@ CAssemblerCommand* parseDirectiveObjImport(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 {
+	ConditionType type;
 	std::wstring name;
 	Expression exp;
-
-	CDirectiveConditional* cond;
 
 	const Token& start = parser.peekToken();
 	ConditionalResult condResult = ConditionalResult::Unknown;
 	switch (flags)
 	{
 	case DIRECTIVE_COND_IF:
+		type = ConditionType::IF;
 		exp = parser.parseExpression();
 		if (exp.isLoaded() == false)
 		{
@@ -206,7 +206,6 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 			return new DummyCommand();
 		}
 
-		cond = new CDirectiveConditional(ConditionType::IF,exp);
 		if (exp.isConstExpression())
 		{
 			ExpressionValue result = exp.evaluate();
@@ -215,20 +214,20 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		}
 		break;
 	case DIRECTIVE_COND_IFDEF:
+		type = ConditionType::IFDEF;
 		if (parser.parseIdentifier(name) == false)
 			return nullptr;		
-		cond = new CDirectiveConditional(ConditionType::IFDEF,name);
 		break;
 	case DIRECTIVE_COND_IFNDEF:
+		type = ConditionType::IFNDEF;
 		if (parser.parseIdentifier(name) == false)
 			return nullptr;
-		cond = new CDirectiveConditional(ConditionType::IFNDEF,name);
 		break;
 	case DIRECTIVE_COND_IFARM:
-		cond = new CDirectiveConditional(ConditionType::IFARM);
+		type = ConditionType::IFARM;
 		break;
 	case DIRECTIVE_COND_IFTHUMB:
-		cond = new CDirectiveConditional(ConditionType::IFTHUMB);
+		type = ConditionType::IFTHUMB;
 		break;
 	}
 
@@ -245,17 +244,18 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 
 	if (stringValue == L".else")
 	{
+		ConditionalResult elseResult = condResult;
 		switch (condResult)
 		{
 		case ConditionalResult::True:
-			condResult = ConditionalResult::False;
+			elseResult = ConditionalResult::False;
 			break;
 		case ConditionalResult::False:
-			condResult = ConditionalResult::True;
+			elseResult = ConditionalResult::True;
 			break;
 		}
 
-		parser.pushConditionalResult(condResult);
+		parser.pushConditionalResult(elseResult);
 		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
 		parser.popConditionalResult();
 
@@ -273,6 +273,30 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 	{
 		return nullptr;
 	}
+
+	// for true or false blocks, there's no need to create a conditional command
+	if (condResult == ConditionalResult::True)
+	{
+		delete elseBlock;
+		return ifBlock;
+	} 
+	
+	if (condResult == ConditionalResult::False)
+	{
+		delete ifBlock;
+		if (elseBlock != nullptr)
+			return elseBlock;
+		else
+			return new DummyCommand();
+	}
+
+	CDirectiveConditional* cond;
+	if (exp.isLoaded())
+		cond = new CDirectiveConditional(type,exp);
+	else if (name.size() != 0)
+		cond = new CDirectiveConditional(type,name);
+	else
+		cond = new CDirectiveConditional(type);
 
 	cond->setContent(ifBlock,elseBlock);
 	return cond;

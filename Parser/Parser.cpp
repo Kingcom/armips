@@ -121,6 +121,14 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, std::initiali
 			continue;
 
 		CAssemblerCommand* cmd = parseCommand();
+
+		// omit commands inside blocks that are trivially false
+		if (isInsideTrueBlock() == false)
+		{
+			delete cmd;
+			continue;
+		}
+
 		sequence->addCommand(cmd);
 	}
 
