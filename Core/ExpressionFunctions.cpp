@@ -263,6 +263,51 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 	return ExpressionValue((u64) buffer);
 }
 
+ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	const std::wstring* fileName;
+	u64 start;
+	u64 length;
+
+	GET_PARAM(parameters,0,fileName);
+	GET_OPTIONAL_PARAM(parameters,1,start,0);
+	GET_OPTIONAL_PARAM(parameters,2,length,0);
+
+	std::wstring fullName = getFullPathName(*fileName);
+
+	u64 totalSize = fileSize(fullName);
+	if (length == 0 || start+length > totalSize)
+		length = totalSize-start;
+
+	BinaryFile file;
+	if (file.open(fullName,BinaryFile::Read) == false)
+	{
+		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
+		return ExpressionValue();
+	}
+
+	file.setPos((long)start);
+
+	u8* buffer = new u8[length];
+	file.read(buffer,(size_t)length);
+
+	std::wstring result;
+	for (size_t i = 0; i < (size_t) length; i++)
+	{
+		if (buffer[i] < 0x20 || buffer[i] > 0x7F)
+		{
+			Logger::printError(Logger::Warning,L"%s: Non-ASCII character",funcName);
+			return ExpressionValue();
+		}
+
+		result += (wchar_t) buffer[i];
+	}
+
+	delete[] buffer;
+
+	return ExpressionValue(result);
+}
+
 ExpressionValue expFuncDefined(ExpressionInternal* exp)
 {
 	if (exp == nullptr || exp->isIdentifier() == false)
@@ -311,6 +356,7 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"readu8",		{ &expFuncRead<u8>,		1,	2,	true } },
 	{ L"readu16",		{ &expFuncRead<u16>,	1,	2,	true } },
 	{ L"readu32",		{ &expFuncRead<u32>,	1,	2,	true } },
+	{ L"readascii",		{ &expFuncReadAscii,	1,	3,	true } },
 
 	{ L"isarm",			{ &expFuncIsArm,		0,	0,	true } },
 	{ L"isthumb",		{ &expFuncIsThumb,		0,	0,	true } },

@@ -66,4 +66,6 @@ label:
 test1	defined,label
 test1	defined,label1
 
+test3	readascii,fileA,4,4
+
 .close
