@@ -13,11 +13,11 @@ StringList TestRunner::listSubfolders(const std::wstring& dir)
 	StringList result;
 	
 #ifdef _WIN32
-	WIN32_FIND_DATA findFileData;
+	WIN32_FIND_DATAW findFileData;
 	HANDLE hFind;
 
 	std::wstring m = dir + L"*";
-	hFind = FindFirstFile(m.c_str(),&findFileData);
+	hFind = FindFirstFileW(m.c_str(),&findFileData);
 	
 	if (hFind != INVALID_HANDLE_VALUE) 
 	{
@@ -30,7 +30,7 @@ StringList TestRunner::listSubfolders(const std::wstring& dir)
 					result.push_back(dirName);
 			}
 			
-		} while (FindNextFile(hFind,&findFileData));
+		} while (FindNextFileW(hFind,&findFileData));
 	}
 #else
 	std::string utf8 = convertWStringToUtf8(dir);
