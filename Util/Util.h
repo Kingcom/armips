@@ -23,7 +23,7 @@ bool deleteFile(const std::wstring& fileName);;
 std::wstring toWLowercase(const std::string& str);
 std::wstring getFileNameFromPath(const std::wstring& path);
 size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue);
-bool startsWith(const std::wstring& str, wchar_t* value, size_t stringPos = 0);
+bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos = 0);
 
 enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
 FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
