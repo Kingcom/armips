@@ -98,6 +98,18 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 		.endif
 	)";
 
+	// floats need to be treated as integers, convert them
+	if (immediates.secondary.expression.isConstExpression())
+	{
+		ExpressionValue value = immediates.secondary.expression.evaluate();
+		if (value.isFloat())
+		{
+			union { float f; u32 i; } u;
+			u.f = (float) value.floatValue;
+			immediates.secondary.expression = createConstExpression(u.i);
+		}
+	}
+
 	std::wstring macroText = preprocessMacro(templateLi,immediates);
 	return createMacro(parser,macroText,flags, {
 			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
