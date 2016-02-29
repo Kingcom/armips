@@ -25,7 +25,7 @@ void CDirectiveFile::initOpen(const std::wstring& fileName, u64 memory)
 		return;
 	}
 
-	file = new GenericAssemblerFile(fileName,(u32) memory,false);
+	file = new GenericAssemblerFile(fullName,(u32) memory,false);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
