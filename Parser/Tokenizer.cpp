@@ -14,6 +14,7 @@ Tokenizer::Tokenizer()
 {
 	position.it = tokens.begin();
 	invalidToken.type = TokenType::Invalid;
+	invalidToken.setOriginalText(L"Unexpected end of token stream");
 }
 
 bool Tokenizer::processElement(TokenList::iterator& it)
