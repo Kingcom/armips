@@ -40,6 +40,10 @@ void ArchitectureCommand::writeTempData(TempData& tempData) const
 
 void ArchitectureCommand::writeSymData(SymbolData& symData) const
 {
+	// TODO: find a less ugly way to check for undefined memory positions
+	if (position == (u64)-1)
+		return;
+	
 	if (symText.size() != 0)
 		symData.addLabel(position,symText);
 }
