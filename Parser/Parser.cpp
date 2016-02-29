@@ -7,9 +7,9 @@
 #include "Core/Common.h"
 #include "Util/Util.h"
 
-inline bool isPartOfList(const std::wstring& value, std::initializer_list<wchar_t*>& terminators)
+inline bool isPartOfList(const std::wstring& value, const std::initializer_list<const wchar_t*>& terminators)
 {
-	for (wchar_t* term: terminators)
+	for (const wchar_t* term: terminators)
 	{
 		if (value == term)
 			return true;
@@ -97,7 +97,7 @@ bool Parser::parseIdentifier(std::wstring& dest)
 	return true;
 }
 
-CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, std::initializer_list<wchar_t*> terminators)
+CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::initializer_list<const wchar_t*> terminators)
 {
 	CommandSequence* sequence = new CommandSequence();
 

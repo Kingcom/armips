@@ -126,7 +126,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 		.endif
 	)";
 
-	wchar_t* op;
+	const wchar_t* op;
 	bool isCop = false;
 	switch (flags & (MIPSM_ACCESSMASK|MIPSM_LOAD|MIPSM_STORE))
 	{

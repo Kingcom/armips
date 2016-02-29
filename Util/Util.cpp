@@ -307,7 +307,7 @@ size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring&
 	return count;
 }
 
-bool startsWith(const std::wstring& str, wchar_t* value, size_t stringPos)
+bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos)
 {
 	while (*value != 0 && stringPos < str.size())
 	{
