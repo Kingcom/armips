@@ -222,6 +222,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "dsrav",	"d,t,s",	MIPS_SPECIAL(0x17),				MA_MIPS3,	MO_64BIT },
 	{ "dsrav",	"d,s",		MIPS_SPECIAL(0x17),				MA_MIPS3,	MO_64BIT|MO_RDT },
 	{ "clo",	"d,s",		MIPS_SPECIAL(0x17),				MA_PSP,		0 },
+	{ "mult",	"d,s,t",	MIPS_SPECIAL(0x18),				MA_PS2,		0 },
+	{ "multu",	"d,s,t",	MIPS_SPECIAL(0x19),				MA_PS2,		0 },
 	{ "mult",	"s,t",		MIPS_SPECIAL(0x18),				MA_MIPS1,	0 },
 	{ "mult",	"r\x0,s,t",	MIPS_SPECIAL(0x18),				MA_MIPS1,	0 },
 	{ "multu",	"s,t",		MIPS_SPECIAL(0x19),				MA_MIPS1,	0 },
