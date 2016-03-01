@@ -41,9 +41,14 @@ int wmain(int argc, wchar_t* argv[])
 	}
 
 	parameters.inputFileName = arguments[1];
+
+	// turn it into an absolute path
+	if (isAbsolutePath(parameters.inputFileName) == false)
+		parameters.inputFileName = formatString(L"%s/%s",getCurrentDirectory(),arguments[1]);
+
 	if (fileExists(parameters.inputFileName) == false)
 	{
-		Logger::printLine(L"File %S not found\n",parameters.inputFileName);
+		Logger::printLine(L"File %S not found\n",arguments[1]);
 		return 1;
 	}
 
@@ -87,6 +92,10 @@ int wmain(int argc, wchar_t* argv[])
 		{
 			printTime = true;
 			argpos += 1;
+		} else if (arguments[argpos] == L"-root")
+		{
+			changeDirectory(arguments[argpos + 1]);
+			argpos += 2;
 		} else {
 			Logger::printLine(L"Invalid parameter %S\n",arguments[argpos]);
 			return 1;

@@ -29,6 +29,6 @@ enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
 FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
 std::wstring getCurrentDirectory();
 void changeDirectory(const std::wstring& dir);
-
+bool isAbsolutePath(const std::wstring& path);
 
 #define ARRAY_SIZE(x) (sizeof((x)) / sizeof((x)[0]))

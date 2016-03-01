@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #ifdef _WIN32
 #include <Windows.h>
+#include <Shlwapi.h>
 #else
 #include <unistd.h>
 #endif
@@ -316,4 +317,13 @@ bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos)
 	}
 
 	return *value == 0;
+}
+
+bool isAbsolutePath(const std::wstring& path)
+{
+#ifdef _WIN32
+	return PathIsRelativeW(path.c_str()) == FALSE;
+#else
+	return path.size() >= 1 && path[0] == '/';
+#endif
 }

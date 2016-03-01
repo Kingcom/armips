@@ -29,7 +29,7 @@ std::wstring getFullPathName(const std::wstring& path)
 {
 	if (Global.relativeInclude == true)
 	{
-		if (path.size() >= 3 && path[1] == ':' && (path[2] == '/' || path[2] == '\\'))
+		if (isAbsolutePath(path))
 		{
 			return path;
 		} else {
