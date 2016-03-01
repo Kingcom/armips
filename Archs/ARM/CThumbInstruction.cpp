@@ -47,9 +47,26 @@ bool CThumbInstruction::Validate()
 	bool memoryAdvanced = false;
 	if (Opcode.flags & THUMB_IMMEDIATE)
 	{
-		if (Vars.ImmediateExpression.evaluateInteger(Vars.Immediate) == false)
+		ExpressionValue value = Vars.ImmediateExpression.evaluate();
+
+		union { float f; u32 i; } u;
+		switch (value.type)
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+		case ExpressionValueType::Integer:
+			Vars.Immediate = (int) value.intValue;
+			break;
+		case ExpressionValueType::Float:
+			if (!(Opcode.flags & THUMB_POOL))
+			{
+				Logger::queueError(Logger::Error,L"Invalid expression type");
+				return false;
+			}
+
+			u.f = (float) value.floatValue;
+			Vars.Immediate = (int) u.i;
+			break;
+		default:
+			Logger::queueError(Logger::Error,L"Invalid expression type");
 			return false;
 		}
 

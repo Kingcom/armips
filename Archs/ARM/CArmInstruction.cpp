@@ -71,7 +71,10 @@ bool CArmInstruction::Validate()
 	if (Vars.Shift.UseShift == true && Vars.Shift.ShiftByRegister == false)
 	{
 		if (Vars.Shift.ShiftExpression.evaluateInteger(Vars.Shift.ShiftAmount) == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
+		}
 
 		int mode = Vars.Shift.Type;
 		int num = Vars.Shift.ShiftAmount;
@@ -110,7 +113,10 @@ bool CArmInstruction::Validate()
 	if (Opcode.flags & ARM_COPOP)
 	{
 		if (Vars.CopData.CpopExpression.evaluateInteger(Vars.CopData.Cpop) == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
+		}
 
 		if (Vars.CopData.Cpop > 15)
 		{
@@ -122,7 +128,10 @@ bool CArmInstruction::Validate()
 	if (Opcode.flags & ARM_COPINF)
 	{
 		if (Vars.CopData.CpinfExpression.evaluateInteger(Vars.CopData.Cpinf) == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
+		}
 
 		if (Vars.CopData.Cpinf > 7)
 		{
@@ -153,8 +162,28 @@ bool CArmInstruction::Validate()
 	bool memoryAdvanced = false;
 	if (Opcode.flags & ARM_IMMEDIATE)
 	{
-		if (Vars.ImmediateExpression.evaluateInteger(Vars.Immediate) == false)
+		ExpressionValue value = Vars.ImmediateExpression.evaluate();
+
+		union { float f; u32 i; } u;
+		switch (value.type)
+		{
+		case ExpressionValueType::Integer:
+			Vars.Immediate = (int) value.intValue;
+			break;
+		case ExpressionValueType::Float:
+			if (!(Opcode.flags & ARM_SHIFT) && !(Opcode.flags & ARM_POOL))
+			{
+				Logger::queueError(Logger::Error,L"Invalid expression type");
+				return false;
+			}
+
+			u.f = (float) value.floatValue;
+			Vars.Immediate = (int) u.i;
+			break;
+		default:
+			Logger::queueError(Logger::Error,L"Invalid expression type");
 			return false;
+		}
 
 		Vars.OriginalImmediate = Vars.Immediate;
 		Vars.negative = false;
