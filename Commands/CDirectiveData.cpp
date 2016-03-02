@@ -354,7 +354,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 	case EncodingMode::U16:
 		str += swprintf(str,20,L".halfword ");
 
-		for (size_t i = 0; i < normalData.size(); i += 2)
+		for (size_t i = 0; i < normalData.size(); i++)
 		{
 			str += swprintf(str,20,L"0x%04X,",(u16)normalData[i]);
 		}
@@ -363,7 +363,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 	case EncodingMode::Float:
 		str += swprintf(str,20,L".word ");
 
-		for (size_t i = 0; i < normalData.size(); i += 4)
+		for (size_t i = 0; i < normalData.size(); i++)
 		{
 			str += swprintf(str,20,L"0x%08X,",(u32)normalData[i]);
 		}
