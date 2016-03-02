@@ -71,6 +71,13 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 	normalData.reserve(entries.size());
 }
 
+void CDirectiveData::setFloat(std::vector<Expression>& entries)
+{
+	this->mode = EncodingMode::Float;
+	this->entries = entries;
+	this->writeTermination = false;
+}
+
 void CDirectiveData::setSjis(std::vector<Expression>& entries, bool terminate)
 {
 	this->mode = EncodingMode::Sjis;
@@ -97,6 +104,7 @@ size_t CDirectiveData::getUnitSize() const
 	case EncodingMode::U16:
 		return 2;
 	case EncodingMode::U32:
+	case EncodingMode::Float:
 		return 4;
 	}
 
@@ -114,6 +122,7 @@ size_t CDirectiveData::getDataSize() const
 	case EncodingMode::Ascii:
 	case EncodingMode::U16:
 	case EncodingMode::U32:
+	case EncodingMode::Float:
 		return normalData.size()*getUnitSize();
 	}
 
@@ -188,6 +197,32 @@ void CDirectiveData::encodeSjis()
 	encodeCustom(sjisTable);
 }
 
+void CDirectiveData::encodeFloat()
+{
+	normalData.clear();
+	for (size_t i = 0; i < entries.size(); i++)
+	{
+		ExpressionValue value = entries[i].evaluate();
+		if (!value.isValid())
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
+			continue;
+		}
+
+		if (value.isInt())
+		{
+			u32 num = getFloatBits((float)value.intValue);
+			normalData.push_back(num);
+		} else if (value.isFloat())
+		{
+			u32 num = getFloatBits((float)value.floatValue);
+			normalData.push_back(num);
+		} else {
+			Logger::queueError(Logger::Error,L"Invalid expression type");
+		}
+	}
+}
+
 void CDirectiveData::encodeNormal()
 {
 	normalData.clear();
@@ -218,6 +253,10 @@ void CDirectiveData::encodeNormal()
 		{
 			u64 num = value.intValue;
 			normalData.push_back((u32)num);
+		} else if (value.isFloat() && mode == EncodingMode::U32)
+		{
+			u32 num = getFloatBits((float)value.floatValue);
+			normalData.push_back(num);
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
 		}
@@ -236,6 +275,9 @@ bool CDirectiveData::Validate()
 	case EncodingMode::U32:
 	case EncodingMode::Ascii:
 		encodeNormal();
+		break;
+	case EncodingMode::Float:
+		encodeFloat();
 		break;
 	case EncodingMode::Sjis:
 		encodeSjis();
@@ -274,6 +316,7 @@ void CDirectiveData::Encode() const
 		}
 		break;
 	case EncodingMode::U32:
+	case EncodingMode::Float:
 		for (auto value: normalData)
 		{
 			g_fileManager->writeU32((u32)value);
@@ -317,6 +360,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 		}
 		break;
 	case EncodingMode::U32:
+	case EncodingMode::Float:
 		str += swprintf(str,20,L".word ");
 
 		for (size_t i = 0; i < normalData.size(); i += 4)
@@ -347,6 +391,7 @@ void CDirectiveData::writeSymData(SymbolData& symData) const
 		symData.addData(position,getDataSize(),SymbolData::Data16);
 		break;
 	case EncodingMode::U32:
+	case EncodingMode::Float:
 		symData.addData(position,getDataSize(),SymbolData::Data32);
 		break;
 	}

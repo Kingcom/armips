@@ -104,9 +104,8 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 		ExpressionValue value = immediates.secondary.expression.evaluate();
 		if (value.isFloat())
 		{
-			union { float f; u32 i; } u;
-			u.f = (float) value.floatValue;
-			immediates.secondary.expression = createConstExpression(u.i);
+			u32 newValue = getFloatBits((float)value.floatValue);
+			immediates.secondary.expression = createConstExpression(newValue);
 		}
 	}
 

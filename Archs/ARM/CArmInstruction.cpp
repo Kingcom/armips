@@ -164,7 +164,6 @@ bool CArmInstruction::Validate()
 	{
 		ExpressionValue value = Vars.ImmediateExpression.evaluate();
 
-		union { float f; u32 i; } u;
 		switch (value.type)
 		{
 		case ExpressionValueType::Integer:
@@ -177,8 +176,7 @@ bool CArmInstruction::Validate()
 				return false;
 			}
 
-			u.f = (float) value.floatValue;
-			Vars.Immediate = (int) u.i;
+			Vars.Immediate = (int) getFloatBits((float)value.floatValue);
 			break;
 		default:
 			Logger::queueError(Logger::Error,L"Invalid expression type");

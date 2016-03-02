@@ -361,6 +361,9 @@ CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 	case DIRECTIVE_DATA_CUSTOM:
 		data->setCustom(list,terminate);
 		break;
+	case DIRECTIVE_DATA_FLOAT:
+		data->setFloat(list);
+		break;
 	}
 	
 	return data;
@@ -692,6 +695,7 @@ const DirectiveMap directives = {
 	{ L".strn",				{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM } },
 	{ L".sjis",				{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS|DIRECTIVE_DATA_TERMINATION } },
 	{ L".sjisn",			{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS } },
+	{ L".float",			{ &parseDirectiveData,				DIRECTIVE_DATA_FLOAT } },
 
 	{ L".psx",				{ &parseDirectivePsx,				0 } },
 	{ L".ps2",				{ &parseDirectivePs2,				0 } },

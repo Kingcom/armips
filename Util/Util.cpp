@@ -136,6 +136,13 @@ std::wstring intToString(unsigned int value, int digits)
 	return result;
 }
 
+u32 getFloatBits(float value)
+{
+	union { float f; u32 i; } u;
+	u.f = value;
+	return u.i;
+}
+
 StringList getStringListFromArray(wchar_t** source, int count)
 {
 	StringList result;

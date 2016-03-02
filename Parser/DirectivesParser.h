@@ -41,6 +41,7 @@ typedef std::unordered_multimap<std::wstring, const DirectiveEntry> DirectiveMap
 #define DIRECTIVE_DATA_ASCII		0x00000004
 #define DIRECTIVE_DATA_SJIS			0x00000005
 #define DIRECTIVE_DATA_CUSTOM		0x00000006
+#define DIRECTIVE_DATA_FLOAT		0x00000007
 #define DIRECTIVE_DATA_TERMINATION	0x00000100
 
 // message directive flags

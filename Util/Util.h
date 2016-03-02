@@ -12,6 +12,7 @@ std::string convertWCharToUtf8(wchar_t character);
 
 std::wstring intToHexString(unsigned int value, int digits, bool prefix = false);
 std::wstring intToString(unsigned int value, int digits);
+u32 getFloatBits(float value);
 
 StringList getStringListFromArray(wchar_t** source, int count);
 
