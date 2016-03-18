@@ -15,22 +15,6 @@ void AddFileName(const std::wstring& FileName)
 	Global.FileInfo.LineNumber = 0;
 }
 
-CAssemblerCommand* assemblyContent;
-
-void writeTempData()
-{
-	Global.tempData.start();
-	if (Global.tempData.isOpen())
-		assemblyContent->writeTempData(Global.tempData);
-	Global.tempData.end();
-}
-
-void writeSymData()
-{
-	assemblyContent->writeSymData(Global.symData);
-	Global.symData.write();
-}
-
 bool encodeAssembly(CAssemblerCommand* content)
 {
 	bool Revalidate;
@@ -87,9 +71,22 @@ bool encodeAssembly(CAssemblerCommand* content)
 	if (Global.memoryMode)
 		g_fileManager->openFile(Global.memoryFile,false);
 
+	auto writeTempData = [=]()
+	{
+		Global.tempData.start();
+		if (Global.tempData.isOpen())
+			content->writeTempData(Global.tempData);
+		Global.tempData.end();
+	};
+
+	auto writeSymData = [=]()
+	{
+		content->writeSymData(Global.symData);
+		Global.symData.write();
+	};
+
 	// writeTempData, writeSymData and encode all access the same
 	// memory but never change, so they can run in parallel
-	assemblyContent = content;
 	if (Global.multiThreading)
 	{
 		std::thread tempThread(writeTempData);
