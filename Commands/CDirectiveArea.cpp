@@ -69,7 +69,6 @@ bool CDirectiveArea::Validate()
 
 void CDirectiveArea::Encode() const
 {
-	content->applyFileInfo();
 	content->Encode();
 
 	if (fillExpression.isLoaded())
@@ -90,6 +89,7 @@ void CDirectiveArea::Encode() const
 void CDirectiveArea::writeTempData(TempData& tempData) const
 {
 	tempData.writeLine(position,formatString(L".area 0x%08X",areaSize));
+	content->applyFileInfo();
 	content->writeTempData(tempData);
 
 	if (fillExpression.isLoaded())

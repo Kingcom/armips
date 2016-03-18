@@ -47,6 +47,7 @@ void MipsMacroCommand::Encode() const
 
 void MipsMacroCommand::writeTempData(TempData& tempData) const
 {
+	content->applyFileInfo();
 	content->writeTempData(tempData);
 }
 

@@ -127,16 +127,14 @@ bool CDirectiveFunction::Validate()
 
 void CDirectiveFunction::Encode() const
 {
-	label->applyFileInfo();
 	label->Encode();
-
-	content->applyFileInfo();
 	content->Encode();
 }
 
 void CDirectiveFunction::writeTempData(TempData& tempData) const
 {
 	label->writeTempData(tempData);
+	content->applyFileInfo();
 	content->writeTempData(tempData);
 }
 

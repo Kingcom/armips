@@ -92,11 +92,9 @@ void CDirectiveConditional::Encode() const
 {
 	if (previousResult)
 	{
-		ifBlock->applyFileInfo();
 		ifBlock->Encode();
 	} else if (elseBlock != NULL)
 	{
-		elseBlock->applyFileInfo();
 		elseBlock->Encode();
 	}
 }
@@ -118,11 +116,9 @@ void CDirectiveConditional::writeSymData(SymbolData& symData) const
 {
 	if (previousResult)
 	{
-		ifBlock->applyFileInfo();
 		ifBlock->writeSymData(symData);
 	} else if (elseBlock != NULL)
 	{
-		elseBlock->applyFileInfo();
 		elseBlock->writeSymData(symData);
 	}
 }

@@ -33,7 +33,6 @@ void CommandSequence::Encode() const
 {
 	for (CAssemblerCommand* cmd: commands)
 	{
-		cmd->applyFileInfo();
 		cmd->Encode();
 	}
 }
@@ -42,6 +41,7 @@ void CommandSequence::writeTempData(TempData& tempData) const
 {
 	for (CAssemblerCommand* cmd: commands)
 	{
+		cmd->applyFileInfo();
 		cmd->writeTempData(tempData);
 	}
 }
