@@ -68,6 +68,9 @@ void SymbolData::writeNocashSym()
 			else
 				entry.text = sym.name;
 
+			if (nocashSymVersion == 1)
+				std::transform(entry.text.begin(), entry.text.end(), entry.text.begin(), ::towlower);
+
 			entries.push_back(entry);
 		}
 

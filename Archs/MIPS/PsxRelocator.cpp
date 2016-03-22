@@ -71,7 +71,7 @@ size_t PsxRelocator::loadString(ByteArray& data, size_t pos, std::wstring& dest)
 
 	for (int i = 0; i < len; i++)
 	{
-		dest += tolower(data[pos++]);
+		dest += data[pos++];
 	}
 
 	return len+1;
@@ -345,7 +345,10 @@ bool PsxRelocator::init(const std::wstring& inputName)
 		bool error = false;
 		for (PsxSymbol& sym: file.symbols)
 		{
-			sym.label = Global.symbolTable.getLabel(sym.name,-1,-1);
+			std::wstring lowered = sym.name;
+			std::transform(lowered.begin(), lowered.end(), lowered.begin(), ::towlower);
+
+			sym.label = Global.symbolTable.getLabel(lowered,-1,-1);
 			if (sym.label == NULL)
 			{
 				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
@@ -359,6 +362,8 @@ bool PsxRelocator::init(const std::wstring& inputName)
 				error = true;
 				continue;
 			}
+
+			sym.label->setOriginalName(sym.name);
 		}
 
 		files.push_back(file);

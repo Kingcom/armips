@@ -185,7 +185,7 @@ bool ElfRelocator::init(const std::wstring& inputName)
 			{
 				ElfRelocatorSymbol symEntry;
 				symEntry.type = ELF32_ST_TYPE(symbol->st_info);
-				symEntry.name = toWLowercase(elf->getStrTableString(symbol->st_name));
+				symEntry.name = convertUtf8ToWString(elf->getStrTableString(symbol->st_name));
 				symEntry.relativeAddress = symbol->st_value;
 				symEntry.section = symbol->st_shndx;
 				symEntry.size = symbol->st_size;
@@ -214,7 +214,10 @@ bool ElfRelocator::exportSymbols()
 			if (sym.label != NULL)
 				continue;
 
-			sym.label = Global.symbolTable.getLabel(sym.name,-1,-1);
+			std::wstring lowered = sym.name;
+			std::transform(lowered.begin(), lowered.end(), lowered.begin(), ::towlower);
+
+			sym.label = Global.symbolTable.getLabel(lowered,-1,-1);
 			if (sym.label == NULL)
 			{
 				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
@@ -240,6 +243,7 @@ bool ElfRelocator::exportSymbols()
 
 			sym.label->setValue(0);
 			sym.label->setDefined(true);
+			sym.label->setOriginalName(sym.name);
 		}
 	}
 
@@ -250,7 +254,7 @@ CAssemblerCommand* ElfRelocator::generateCtor(const std::wstring& ctorName)
 {
 	CAssemblerCommand* content = relocator->generateCtorStub(ctors);
 
-	CDirectiveFunction* func = new CDirectiveFunction(ctorName);
+	CDirectiveFunction* func = new CDirectiveFunction(ctorName,ctorName);
 	func->setContent(content);
 	return func;
 }

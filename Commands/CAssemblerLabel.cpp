@@ -5,7 +5,7 @@
 #include "Core/FileManager.h"
 #include "Archs/ARM/Arm.h"
 
-CAssemblerLabel::CAssemblerLabel(const std::wstring& name)
+CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName)
 {
 	this->defined = false;
 	this->label = NULL;
@@ -20,6 +20,8 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name)
 		return;
 	}
 
+	label->setOriginalName(originalName);
+
 	// does this need to be in validate?
 	if (label->getUpdateInfo())
 	{
@@ -30,8 +32,8 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name)
 	}
 }
 
-CAssemblerLabel::CAssemblerLabel(const std::wstring& name, Expression& value)
-	: CAssemblerLabel(name)
+CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName, Expression& value)
+	: CAssemblerLabel(name,originalName)
 {
 	labelValue = value;
 }
@@ -91,15 +93,15 @@ void CAssemblerLabel::writeSymData(SymbolData& symData) const
 	if (label->getValue() == (u64)-1)
 		return;
 
-	symData.addLabel(label->getValue(),label->getName());
+	symData.addLabel(label->getValue(),label->getOriginalName());
 }
 
 
 
 
-CDirectiveFunction::CDirectiveFunction(const std::wstring& name)
+CDirectiveFunction::CDirectiveFunction(const std::wstring& name, const std::wstring& originalName)
 {
-	this->label = new CAssemblerLabel(name);
+	this->label = new CAssemblerLabel(name,originalName);
 	this->content = nullptr;
 	this->start = this->end = 0;
 }

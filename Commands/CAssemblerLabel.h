@@ -7,8 +7,8 @@ class Label;
 class CAssemblerLabel: public CAssemblerCommand
 {
 public:
-	CAssemblerLabel(const std::wstring& name);
-	CAssemblerLabel(const std::wstring& name, Expression& value);
+	CAssemblerLabel(const std::wstring& name, const std::wstring& originalName);
+	CAssemblerLabel(const std::wstring& name, const std::wstring& originalName, Expression& value);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
@@ -22,7 +22,7 @@ private:
 class CDirectiveFunction: public CAssemblerCommand
 {
 public:
-	CDirectiveFunction(const std::wstring& name);
+	CDirectiveFunction(const std::wstring& name, const std::wstring& originalName);
 	virtual ~CDirectiveFunction();
 	virtual bool Validate();
 	virtual void Encode() const;

@@ -17,6 +17,8 @@ class Label
 public:
 	Label(std::wstring name): name(name), defined(false),info(0),data(false),updateInfo(true) { };
 	const std::wstring getName() { return name; };
+	void setOriginalName(const std::wstring& name) { originalName = name; }
+	const std::wstring getOriginalName() { return originalName.empty() ? name : originalName; }
 	u64 getValue() { return value; };
 	void setValue(u64 val) { value = val; };
 	bool isDefined() { return defined; };
@@ -30,7 +32,7 @@ public:
 	void setSection(int num) { section = num; }
 	int getSection() { return section; }
 private:
-	std::wstring name;
+	std::wstring name, originalName;
 	u64 value;
 	bool defined;
 	bool data;

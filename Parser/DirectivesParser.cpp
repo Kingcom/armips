@@ -556,20 +556,19 @@ CAssemblerCommand* parseDirectiveDefineLabel(Parser& parser, int flags)
 		return nullptr;
 	}
 
-	return new CAssemblerLabel(stringValue,value);
+	return new CAssemblerLabel(stringValue,tok.getOriginalText(),value);
 }
 
 CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 {
-	std::vector<Expression> parameters;
-	if (parser.parseExpressionList(parameters,1,1) == false)
-		return nullptr;
-	
-	std::wstring name;
-	if (parameters[0].evaluateIdentifier(name) == false)
+	const Token& tok = parser.nextToken();
+	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
-	CDirectiveFunction* func = new CDirectiveFunction(name);
+	if (parser.peekToken().type == TokenType::Comma)
+		return nullptr;
+
+	CDirectiveFunction* func = new CDirectiveFunction(tok.getStringValue(),tok.getOriginalText());
 	CAssemblerCommand* seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
 
 	const std::wstring stringValue = parser.peekToken().getStringValue();

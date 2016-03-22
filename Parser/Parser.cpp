@@ -558,7 +558,7 @@ CAssemblerCommand* Parser::parseLabel()
 	if (peekToken(0).type == TokenType::Identifier &&
 		peekToken(1).type == TokenType::Colon)
 	{
-		const std::wstring name = peekToken(0).getStringValue();
+		const std::wstring name = start.getStringValue();
 		eatTokens(2);
 		
 		if (initializingMacro)
@@ -570,7 +570,7 @@ CAssemblerCommand* Parser::parseLabel()
 			return nullptr;
 		}
 
-		return new CAssemblerLabel(name);
+		return new CAssemblerLabel(name,start.getOriginalText());
 	}
 
 	return nullptr;
