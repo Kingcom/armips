@@ -57,7 +57,7 @@ std::wstring preprocessMacro(const wchar_t* text, MipsImmediateData& immediates)
 	// Any expressions used in the macro may be evaluated at a different memory
 	// position, so the '.' operator needs to be replaced by a label at the start
 	// of the macro
-	std::wstring labelName = L"@@" + Global.symbolTable.getUniqueLabelName();
+	std::wstring labelName = Global.symbolTable.getUniqueLabelName(true);
 	immediates.primary.expression.replaceMemoryPos(labelName);
 	immediates.secondary.expression.replaceMemoryPos(labelName);
 

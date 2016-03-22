@@ -84,13 +84,14 @@ void CAssemblerLabel::Encode() const
 
 void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(label->getValue(),formatString(L"%s:",label->getName()));
+	if (Global.symbolTable.isGeneratedLabel(label->getName()) == false)
+		tempData.writeLine(label->getValue(),formatString(L"%s:",label->getName()));
 }
 
 void CAssemblerLabel::writeSymData(SymbolData& symData) const
 {
 	// TODO: find a less ugly way to check for undefined memory positions
-	if (label->getValue() == (u64)-1)
+	if (label->getValue() == (u64)-1 || Global.symbolTable.isGeneratedLabel(label->getName()))
 		return;
 
 	symData.addLabel(label->getValue(),label->getOriginalName());

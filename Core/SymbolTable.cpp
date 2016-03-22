@@ -169,9 +169,14 @@ bool SymbolTable::findEquation(const std::wstring& name, unsigned int file, unsi
 }
 
 // TODO: better
-std::wstring SymbolTable::getUniqueLabelName()
+std::wstring SymbolTable::getUniqueLabelName(bool local)
 {
-	return formatString(L"__armips_label_%08x__",uniqueCount++);
+	std::wstring name = formatString(L"__armips_label_%08x__",uniqueCount++);
+	if (local)
+		name = L"@@" + name;
+
+	generatedLabels.insert(name);
+	return name;
 }
 
 void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)

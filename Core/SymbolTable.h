@@ -60,9 +60,10 @@ public:
 	void addLabels(const std::vector<LabelDefinition>& labels);
 	int findSection(u64 address);
 
-	std::wstring getUniqueLabelName();
+	std::wstring getUniqueLabelName(bool local = false);
 	size_t getLabelCount() { return labels.size(); };
 	size_t getEquationCount() { return equationsCount; };
+	bool isGeneratedLabel(const std::wstring& name) { return generatedLabels.find(name) != generatedLabels.end(); }
 private:
 	void setFileSectionValues(const std::wstring& symbol, unsigned int& file, unsigned int& section);
 
@@ -77,4 +78,5 @@ private:
 	std::vector<Label*> labels;
 	size_t equationsCount;
 	size_t uniqueCount;
+	std::set<std::wstring> generatedLabels;
 };
