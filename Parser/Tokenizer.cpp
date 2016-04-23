@@ -145,6 +145,7 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, const std::w
 	Token tok;
 	tok.type = TokenType::Identifier;
 	tok.setStringValue(newValue);
+	tok.setOriginalText(newValue);
 
 	Replacement replacement;
 	replacement.identifier = identifier;
