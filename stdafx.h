@@ -8,6 +8,20 @@
 typedef struct { double x, y; } __float128;
 #endif
 
+#if defined(__clang__)
+#if __has_feature(cxx_exceptions)
+#define ARMIPS_EXCEPTIONS 1
+#else
+#define ARMIPS_EXCEPTIONS 0
+#endif
+#elif defined(_MSC_VER) && defined(_CPPUNWIND)
+#define ARMIPS_EXCEPTIONS 1
+#elif defined(__EXCEPTIONS) || defined(__cpp_exceptions)
+#define ARMIPS_EXCEPTIONS 1
+#else
+#define ARMIPS_EXCEPTIONS 0
+#endif
+
 #include <cstdio>
 #include <vector>
 #include <cstdlib>

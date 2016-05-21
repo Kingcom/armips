@@ -32,4 +32,6 @@ std::wstring getCurrentDirectory();
 void changeDirectory(const std::wstring& dir);
 bool isAbsolutePath(const std::wstring& path);
 
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof((x)) / sizeof((x)[0]))
+#endif
