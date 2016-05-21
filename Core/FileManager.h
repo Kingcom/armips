@@ -8,6 +8,7 @@ enum class Endianness { Big, Little };
 class AssemblerFile
 {
 public:
+	virtual ~AssemblerFile() { };
 	
 	virtual bool open(bool onlyCheck) = 0;
 	virtual void close() = 0;
