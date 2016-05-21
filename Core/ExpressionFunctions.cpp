@@ -146,16 +146,20 @@ ExpressionValue expFuncRegExMatch(const std::wstring& funcName, const std::vecto
 	GET_PARAM(parameters,0,source);
 	GET_PARAM(parameters,1,regexString);
 
+#if ARMIPS_EXCEPTIONS
 	try
 	{
+#endif
 		std::wregex regex(*regexString);
 		bool found = std::regex_match(*source,regex);
 		return ExpressionValue(found ? UINT64_C(1) : UINT64_C(0));
+#if ARMIPS_EXCEPTIONS
 	} catch (std::regex_error&)
 	{
 		Logger::queueError(Logger::Error,L"Invalid regular expression");
 		return ExpressionValue();
 	}
+#endif
 }
 
 ExpressionValue expFuncRegExSearch(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -166,16 +170,20 @@ ExpressionValue expFuncRegExSearch(const std::wstring& funcName, const std::vect
 	GET_PARAM(parameters,0,source);
 	GET_PARAM(parameters,1,regexString);
 
+#if ARMIPS_EXCEPTIONS
 	try
 	{
+#endif
 		std::wregex regex(*regexString);
 		bool found = std::regex_search(*source,regex);
 		return ExpressionValue(found ? UINT64_C(1) : UINT64_C(0));
+#if ARMIPS_EXCEPTIONS
 	} catch (std::regex_error&)
 	{
 		Logger::queueError(Logger::Error,L"Invalid regular expression");
 		return ExpressionValue();
 	}
+#endif
 }
 
 ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -188,8 +196,10 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 	GET_PARAM(parameters,1,regexString);
 	GET_OPTIONAL_PARAM(parameters,2,matchIndex,0);
 
+#if ARMIPS_EXCEPTIONS
 	try
 	{
+#endif
 		std::wregex regex(*regexString);
 		std::wsmatch result;
 		bool found = std::regex_search(*source,result,regex);
@@ -200,11 +210,13 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 		}
 	
 		return ExpressionValue(result[(size_t)matchIndex].str());
+#if ARMIPS_EXCEPTIONS
 	} catch (std::regex_error&)
 	{
 		Logger::queueError(Logger::Error,L"Invalid regular expression");
 		return ExpressionValue();
 	}
+#endif
 }
 
 ExpressionValue expFuncFind(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
