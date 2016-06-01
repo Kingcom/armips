@@ -68,6 +68,19 @@ ExpressionValue expFuncEndianness(const std::wstring& funcName, const std::vecto
 	return ExpressionValue();
 }
 
+ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	AssemblerFile* file = g_fileManager->getOpenFile();
+	if (file == nullptr)
+	{
+		Logger::queueError(Logger::Error,L"outputName: no file opened");
+		return ExpressionValue();
+	}
+
+	std::wstring value = file->getFileName();
+	return ExpressionValue(value);
+}
+
 ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
@@ -352,6 +365,7 @@ ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<E
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,		0,	0,	true } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0,	false } },
+	{ L"outputname",	{ &expFuncOutputName,	0,	0,	false } },
 	{ L"fileexists",	{ &expFuncFileExists,	1,	1,	true } },
 	{ L"filesize",		{ &expFuncFileSize,		1,	1,	true } },
 	{ L"tostring",		{ &expFuncToString,		1,	1,	true } },

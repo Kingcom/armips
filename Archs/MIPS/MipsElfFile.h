@@ -19,6 +19,7 @@ public:
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
 	virtual void beginSymData();
 	virtual void endSymData();
+	virtual const std::wstring& getFileName() { return fileName; };
 
 	bool load(const std::wstring& fileName, const std::wstring& outputFileName);
 	void save();

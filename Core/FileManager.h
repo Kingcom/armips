@@ -22,6 +22,7 @@ public:
 	virtual bool hasFixedVirtualAddress() { return false; };
 	virtual void beginSymData() { };
 	virtual void endSymData() { };
+	virtual const std::wstring& getFileName() = 0;
 };
 
 class GenericAssemblerFile: public AssemblerFile
@@ -40,7 +41,7 @@ public:
 	virtual bool seekPhysical(u64 physicalAddress);
 	virtual bool hasFixedVirtualAddress() { return true; };
 
-	const std::wstring& getFileName() { return fileName; };
+	virtual const std::wstring& getFileName() { return fileName; };
 	const std::wstring& getOriginalFileName() { return originalName; };
 	size_t getOriginalHeaderSize() { return originalHeaderSize; };
 	void setHeaderSize(size_t size) { headerSize = size; };
