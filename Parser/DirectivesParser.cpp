@@ -401,6 +401,14 @@ CAssemblerCommand* parseDirectiveN64(Parser& parser, int flags)
 	return new ArchitectureCommand(L".n64", L"");
 }
 
+CAssemblerCommand* parseDirectiveRsp(Parser& parser, int flags)
+{
+	Arch = &Mips;
+	Mips.SetLoadDelay(false, 0);
+	Mips.SetVersion(MARCH_RSP);
+	return new ArchitectureCommand(L".rsp", L"");
+}
+
 CAssemblerCommand* parseDirectiveArmArch(Parser& parser, int flags)
 {
 	Arch = &Arm;
@@ -700,6 +708,7 @@ const DirectiveMap directives = {
 	{ L".ps2",				{ &parseDirectivePs2,				0 } },
 	{ L".psp",				{ &parseDirectivePsp,				0 } },
 	{ L".n64",				{ &parseDirectiveN64,				0 } },
+	{ L".rsp",				{ &parseDirectiveRsp,				0 } },
 
 	{ L".gba",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_GBA } },
 	{ L".nds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_NDS } },

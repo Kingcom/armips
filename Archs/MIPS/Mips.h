@@ -3,7 +3,7 @@
 #include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
 
-enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_INVALID };
+enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_RSP, MARCH_INVALID };
 
 enum {
 	R_MIPS_NONE,
@@ -31,7 +31,10 @@ public:
 	virtual void Pass2() { return; };
 	virtual void Revalidate();
 	virtual IElfRelocator* getElfRelocator();
-	virtual Endianness getEndianness() { return Version == MARCH_N64 ? Endianness::Big : Endianness::Little; };
+	virtual Endianness getEndianness()
+	{
+		return Version == MARCH_N64 || Version == MARCH_RSP ? Endianness::Big : Endianness::Little;
+	};
 	void SetLoadDelay(bool Delay, int Register);
 	bool GetLoadDelay() { return LoadDelay; };
 	int GetLoadDelayRegister() { return LoadDelayRegister; };

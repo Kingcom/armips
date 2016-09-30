@@ -7,11 +7,13 @@
 #define MA_MIPS4			0x0000008
 #define MA_PS2				0x0000010
 #define MA_PSP				0x0000020
+#define MA_RSP				0x0000040
 
 #define MA_EXPSX			0x0000100
 #define MA_EXN64			0x0000200
 #define MA_EXPS2			0x0000400
 #define MA_EXPSP			0x0000800
+#define MA_EXRSP			0x0001000
 
 #define MO_IPCA			0x00000001	// pc >> 2
 #define MO_IPCR			0x00000002	// PC, -> difference >> 2
@@ -34,6 +36,7 @@
 #define MO_TRANSPOSE_VS	0x00040000	// matrix vs has to be transposed
 #define MO_VFPU_PAIR	0x00080000	// pair vfpu reg
 #define MO_VFPU_TRIPLE	0x00100000	// triple vfpu reg
+#define MO_RSP_VEALT	0x00200000	// rsp alternative vector element placement
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
@@ -59,7 +62,13 @@
 #define MIPS_VFPUSIZE(VALUE)			( (((VALUE) & 1) << 7) | (((VALUE) & 2) << 14) )
 #define MIPS_VFPUFUNC(VALUE)			BITFIELD(23, 3, (VALUE))
 #define MIPS_COP2(VALUE)				(MIPS_OP(18) | MIPS_RS(VALUE))
+#define MIPS_COP2_RSP(VALUE)			(MIPS_OP(18) | (1 << 25) | MIPS_FUNC(VALUE))
 #define MIPS_COP2BC(VALUE)				(MIPS_COP2(8) | MIPS_RT(VALUE))
+#define MIPS_LWC2_RSP(VALUE)			(MIPS_OP(50) | MIPS_RD(VALUE))
+#define MIPS_SWC2_RSP(VALUE)			(MIPS_OP(58) | MIPS_RD(VALUE))
+#define MIPS_COP2_RSP_VE(VALUE)			BITFIELD(21, 4, (VALUE))
+#define MIPS_COP2_RSP_VDE(VALUE)			BITFIELD(11, 4, (VALUE))
+#define MIPS_COP2_RSP_VEALT(VALUE)		BITFIELD(7, 4, (VALUE))
 #define MIPS_VFPU0(VALUE)				(MIPS_OP(24) | MIPS_VFPUFUNC(VALUE))
 #define MIPS_VFPU1(VALUE)				(MIPS_OP(25) | MIPS_VFPUFUNC(VALUE))
 #define MIPS_VFPU3(VALUE)				(MIPS_OP(27) | MIPS_VFPUFUNC(VALUE))

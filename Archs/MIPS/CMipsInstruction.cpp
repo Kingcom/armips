@@ -230,10 +230,21 @@ void CMipsInstruction::encodeNormal() const
 	if (registerData.frt.num != -1) encoding |= MIPS_FT(registerData.frt.num);	// float target reg
 	if (registerData.frs.num != -1) encoding |= MIPS_FS(registerData.frs.num);	// float source reg
 	if (registerData.frd.num != -1) encoding |= MIPS_FD(registerData.frd.num);	// float dest reg
-	
+
 	if (registerData.ps2vrt.num != -1) encoding |= (registerData.ps2vrt.num << 16);	// ps2 vector target reg
 	if (registerData.ps2vrs.num != -1) encoding |= (registerData.ps2vrs.num << 21);	// ps2 vector source reg
 	if (registerData.ps2vrd.num != -1) encoding |= (registerData.ps2vrd.num << 6);	// ps2 vector dest reg
+
+	if (registerData.rspvrt.num != -1) encoding |= MIPS_FT(registerData.rspvrt.num);	// rsp vector target reg
+	if (registerData.rspvrs.num != -1) encoding |= MIPS_FS(registerData.rspvrs.num);	// rsp vector source reg
+	if (registerData.rspvrd.num != -1) encoding |= MIPS_FD(registerData.rspvrd.num);	// rsp vector dest reg
+
+	if (registerData.rspve.num != -1) // rsp vector element reg
+	{
+		if(opcodeData.opcode.flags & MO_RSP_VEALT) encoding |= MIPS_COP2_RSP_VEALT(registerData.rspve.num);
+		else encoding |= MIPS_COP2_RSP_VE(registerData.rspve.num);
+	}
+	if (registerData.rspvde.num != -1) encoding |= MIPS_COP2_RSP_VDE(registerData.rspve.num);	// rsp vector dest element reg
 
 	if (!(opcodeData.opcode.flags & MO_VFPU_MIXED) && registerData.vrt.num != -1)			// vfpu rt
 		encoding |= registerData.vrt.num << 16;
@@ -247,6 +258,7 @@ void CMipsInstruction::encodeNormal() const
 	case MipsImmediateType::Immediate16:
 	case MipsImmediateType::Immediate26:
 	case MipsImmediateType::Immediate20_0:
+	case MipsImmediateType::Immediate7:
 	case MipsImmediateType::ImmediateHalfFloat:
 		encoding |= immediateData.primary.value;
 		break;

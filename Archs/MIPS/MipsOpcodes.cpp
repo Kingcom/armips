@@ -48,14 +48,14 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
 // 000 | *1    | *2    | J     | JAL   | BEQ   | BNE   | BLEZ  | BGTZ  | 00..07
 // 001 | ADDI  | ADDIU | SLTI  | SLTIU | ANDI  | ORI   | XORI  | LUI   | 08..0F
-// 010 | *3    | *4    | ---   | ---   | BEQL  | BNEL  | BLEZL | BGTZL | 10..17
+// 010 | *3    | *4    | *5    | ---   | BEQL  | BNEL  | BLEZL | BGTZL | 10..17
 // 011 | DADDI | DADDIU| LDL   | LDR   | ---   | ---   | LQ    | SQ   | 18..1F
 // 100 | LB    | LH    | LWL   | LW    | LBU   | LHU   | LWR   | LWU   | 20..27
 // 101 | SB    | SH    | SWL   | SW    | SDL   | SDR   | SWR   | CACHE | 28..2F
 // 110 | LL    | LWC1  | LV.S  | ---   | LLD   | ULV.Q | LV.Q  | LD    | 30..37
 // 111 | SC    | SWC1  | SV.S  | ---   | SCD   | USV.Q | SV.Q  | SD    | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-//		*1 = SPECIAL	*2 = REGIMM		*3 = COP0		*4 = COP1
+//		*1 = SPECIAL	*2 = REGIMM		*3 = COP0		*4 = COP1		*5 = COP2
 	{ "j",		"i26",				MIPS_OP(0x02), 			MA_MIPS1,	MO_IPCA|MO_DELAY|MO_NODELAYSLOT },
 	{ "jal",	"i26",				MIPS_OP(0x03),			MA_MIPS1,	MO_IPCA|MO_DELAY|MO_NODELAYSLOT },
 	{ "beq",	"s,t,i16",			MIPS_OP(0x04),			MA_MIPS1,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
@@ -126,7 +126,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "sdr",	"t,(s)",			MIPS_OP(0x2D),			MA_MIPS3,	MO_64BIT|MO_IGNORERTD },
 	{ "swr",	"t,i16(s)",			MIPS_OP(0x2E),			MA_MIPS1,	0 },
 	{ "swr",	"t,(s)",			MIPS_OP(0x2E),			MA_MIPS1,	0 },
-	{ "cache",	"t,i16(s)",			MIPS_OP(0x2F),			MA_PS2,		0 },
+	{ "cache",	"t,i16(s)",			MIPS_OP(0x2F),			MA_MIPS2,	0 },
 	{ "ll",		"t,i16(s)",			MIPS_OP(0x30),			MA_MIPS2,	MO_DELAYRT|MO_IGNORERTD },
 	{ "ll",		"t,(s)",			MIPS_OP(0x30),			MA_MIPS2,	MO_DELAYRT|MO_IGNORERTD },
 	{ "lwc1",	"T,i16(s)",			MIPS_OP(0x31),			MA_MIPS1,	0 },
@@ -325,6 +325,21 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "mtsah",	"s,i16",	MIPS_REGIMM(0x19),				MA_PS2,	0 },
 
 //     31-------26------21---------------------------------------------0
+//     |=    COP0|  rs  |                                              |
+//     -----6-------5---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |  MFC0 | DMFC0 |  ---  |  ---  |  MTC0 | DMTC0 |  ---  |  ---  | 00..07
+//  01 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 08..0F
+//  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
+//  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "mfc0",	"t,d",		MIPS_COP0(0x00),				MA_MIPS2,	0 },
+	{ "dmfc0",	"t,d",		MIPS_COP0(0x01),				MA_MIPS3,	0 },
+	{ "mtc0",	"t,d",		MIPS_COP0(0x04),				MA_MIPS2,	0 },
+	{ "dmtc0",	"t,d",		MIPS_COP0(0x05),				MA_MIPS3,	0 },
+	{ "eret",	"",			MIPS_COP0(0x10)|0x18,			MA_MIPS2,	0 },
+
+//     31-------26------21---------------------------------------------0
 //     |=    COP1|  rs  |                                              |
 //     -----6-------5---------------------------------------------------
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
@@ -333,9 +348,12 @@ const tMipsOpcode MipsOpcodes[] = {
 //  10 |  S*   |  ---  |  ---  |  ---  |  W*   |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
 	{ "mfc1",	"t,S",		MIPS_COP1(0x00),				MA_MIPS2,	0 },
+	{ "dmfc1",	"t,S",		MIPS_COP1(0x01),				MA_MIPS3,	0 },
 	{ "cfc1",	"t,S",		MIPS_COP1(0x02),				MA_MIPS2,	0 },
 	{ "mtc1",	"t,S",		MIPS_COP1(0x04),				MA_MIPS2,	0 },
+	{ "dmtc1",	"t,S",		MIPS_COP1(0x05),				MA_MIPS3,	0 },
 	{ "ctc1",	"t,S",		MIPS_COP1(0x06),				MA_MIPS2,	0 },
 
 //     31---------21-------16------------------------------------------0
@@ -428,21 +446,27 @@ const tMipsOpcode MipsOpcodes[] = {
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 	{ "cvt.s.w",	"D,S",		MIPS_COP1W(0x20),			MA_MIPS2,	0 },
-	
+
 //     31-------26------21---------------------------------------------0
 //     |=    COP2|  rs  |                                              |
 //     -----6-------5---------------------------------------------------
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
-//  00 |  ---  |  ---  |  ---  |  MFV  |  ---  |  ---  |  ---  |  MTV  |
+//  00 |  MFC2 |  ---  |  CFC2 |  MFV  |  MTC2 |  ---  |  CTC2 |  MTV  |
 //  01 |  BC*  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
+	{ "mfc2",	"t,Rs[Re]",		MIPS_COP2(0x00),				MA_RSP, MO_RSP_VEALT },
+	{ "cfc2",	"t,d",			MIPS_COP2(0x02),				MA_RSP },
+	{ "mtc2",	"t,Rs[Re]",		MIPS_COP2(0x04),				MA_RSP, MO_RSP_VEALT },
+	{ "ctc2",	"t,d",			MIPS_COP2(0x06),				MA_RSP },
 	// VVVVVV VVVVV ttttt -------- C DDDDDDD
-	{ "mfv",	"t,vd",			MIPS_COP2(3),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
-	{ "mfvc",	"t,vc",			MIPS_COP2(3) | 0x80,		MA_PSP,	MO_VFPU },
-	{ "mtv",	"t,vd",			MIPS_COP2(7),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
-	{ "mtvc",	"t,vc",			MIPS_COP2(7) | 0x80,		MA_PSP,	MO_VFPU },
+	{ "mfv",	"t,vd",			MIPS_COP2(0x03),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
+	{ "mfvc",	"t,vc",			MIPS_COP2(0x03) | 0x80,			MA_PSP,	MO_VFPU },
+	{ "mtv",	"t,vd",			MIPS_COP2(0x07),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
+	{ "mtvc",	"t,vc",			MIPS_COP2(0x07) | 0x80,			MA_PSP,	MO_VFPU },
+
 
 //     COP2BC: ? indicates any, * indicates all
 //     31---------21-------16------------------------------------------0
@@ -699,6 +723,125 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vmzero.S",	"md",		MIPS_VFPU6_2(6),					MA_PSP, MO_VFPU },
 	{ "vmone.S",	"md",		MIPS_VFPU6_2(7),					MA_PSP, MO_VFPU },
 
+//     31---------25------------------------------------------5--------0
+//     |=    RSP|                                            | function|
+//     ------6----------------------------------------------------6-----
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+// 000 | VMULF | VMULU | VRNDP | VMULQ | VMUDL | VMUDM | VMUDN | VMUDH | 00..07
+// 001 | VMACF | VMACU | VRNDN | VMACQ | VMADL | VMADH | VMADN | VMADH | 08..0F
+// 010 | VADD  | VSUB  | VSUT  | VABS  | VADDC | VSUBC | VADDB | VSUBB | 10..17
+// 011 | VACCB | VSUCB | VSAD  | VSAC  | VSUM  | VSAR  | VACC  | VSUC  | 18..1F
+// 100 | VLT   | VEQ   | VNE   | VGE   | VCL   | VCH   | VCR   | VMRG  | 20..27
+// 101 | VAND  | VNAND | VOR   | VNOR  | VXOR  | VNXOR |  ---  |  ---  | 28..2F
+// 110 | VRCP  | VRCPL | VRCPH | VMOV  | VRSQ  | VRSQL | VRSQH | VNOP  | 30..37
+// 111 | VEXTT | VEXTQ | VEXTN |  ---  | VINST | VINSQ | VINSN | VNULL | 38..3F
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "vmulf",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x00),			MA_RSP, 0 },
+	{ "vmulu",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x01),			MA_RSP, 0 },
+	{ "vrndp",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x02),			MA_RSP, 0 },
+	{ "vmulq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x03),			MA_RSP, 0 },
+	{ "vmudl",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x04),			MA_RSP, 0 },
+	{ "vmudm",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x05),			MA_RSP, 0 },
+	{ "vmudn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x06),			MA_RSP, 0 },
+	{ "vmudh",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x07),			MA_RSP, 0 },
+	{ "vmacf",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x08),			MA_RSP, 0 },
+	{ "vmacu",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x09),			MA_RSP, 0 },
+	{ "vrndn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x0a),			MA_RSP, 0 },
+	{ "vmacq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x0b),			MA_RSP, 0 },
+	{ "vmadl",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x0c),			MA_RSP, 0 },
+	{ "vmadm",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x0d),			MA_RSP, 0 },
+	{ "vmadn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x0e),			MA_RSP, 0 },
+	{ "vmadh",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x0f),			MA_RSP, 0 },
+	{ "vadd",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x10),			MA_RSP, 0 },
+	{ "vsub",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x11),			MA_RSP, 0 },
+	{ "vsut",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x12),			MA_RSP, 0 },
+	{ "vabs",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x13),			MA_RSP, 0 },
+	{ "vaddc",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x14),			MA_RSP, 0 },
+	{ "vsubc",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x15),			MA_RSP, 0 },
+	{ "vaddb",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x16),			MA_RSP, 0 },
+	{ "vsubb",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x17),			MA_RSP, 0 },
+	{ "vaccb",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x18),			MA_RSP, 0 },
+	{ "vsucb",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x19),			MA_RSP, 0 },
+	{ "vsad",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x1a),			MA_RSP, 0 },
+	{ "vsac",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x1b),			MA_RSP, 0 },
+	{ "vsum",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x1c),			MA_RSP, 0 },
+	{ "vsar",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x1d),			MA_RSP, 0 },
+	{ "vacc",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x1e),			MA_RSP, 0 },
+	{ "vsuc",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x1f),			MA_RSP, 0 },
+	{ "vlt",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x20),			MA_RSP, 0 },
+	{ "veq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x21),			MA_RSP, 0 },
+	{ "vne",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x22),			MA_RSP, 0 },
+	{ "vge",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x23),			MA_RSP, 0 },
+	{ "vcl",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x24),			MA_RSP, 0 },
+	{ "vch",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x25),			MA_RSP, 0 },
+	{ "vcr",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x26),			MA_RSP, 0 },
+	{ "vmrg",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x27),			MA_RSP, 0 },
+	{ "vand",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x28),			MA_RSP, 0 },
+	{ "vnand",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x29),			MA_RSP, 0 },
+	{ "vor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2a),			MA_RSP, 0 },
+	{ "vnor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2b),			MA_RSP, 0 },
+	{ "vxor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2c),			MA_RSP, 0 },
+	{ "vnxor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2d),			MA_RSP, 0 },
+	{ "vrcp",   "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x30),			MA_RSP, 0 },
+	{ "vrcpl",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x31),			MA_RSP, 0 },
+	{ "vrcph",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x32),			MA_RSP, 0 },
+	{ "vmov",   "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x33),			MA_RSP, 0 },
+	{ "vrsq",   "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x34),			MA_RSP, 0 },
+	{ "vrsql",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x35),			MA_RSP, 0 },
+	{ "vrsqh",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x36),			MA_RSP, 0 },
+	{ "vnop",   "",					MIPS_COP2_RSP(0x37),			MA_RSP, 0 },
+	{ "vextt",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x38),			MA_RSP, 0 },
+	{ "vextq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x39),			MA_RSP, 0 },
+	{ "vextn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3a),			MA_RSP, 0 },
+	{ "vmacq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3b),			MA_RSP, 0 },
+	{ "vinst",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3c),			MA_RSP, 0 },
+	{ "vnstq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3d),			MA_RSP, 0 },
+	{ "vinsn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3e),			MA_RSP, 0 },
+	{ "vnull",	"",					MIPS_COP2_RSP(0x3f),			MA_RSP, 0 },
+
+//     31-------26-------------16-----11-------------------------------0
+//     |=  LWC2|               |   rd  |                               |
+//     -----6-------5---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |  LBV  |  LSV  |  LLV  |  LDV  |  LQV  |  LRV  |  LPV  |  LUV  | 00..07
+//  01 |  LHV  |  LFV  |  LWV  |  LTV  |  ---  |  ---  |  ---  |  ---  | 08..0F
+//  10 |  ---  |  ---  |  ---  |  ---  | ---   |  ---  |  ---  |  ---  | 10..17
+//  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{"lbv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x00),			MA_RSP, MO_RSP_VEALT },
+	{"lsv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x01),			MA_RSP, MO_RSP_VEALT },
+	{"llv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x02),			MA_RSP, MO_RSP_VEALT },
+	{"ldv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x03),			MA_RSP, MO_RSP_VEALT },
+	{"lqv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x04),			MA_RSP, MO_RSP_VEALT },
+	{"lrv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x05),			MA_RSP, MO_RSP_VEALT },
+	{"lpv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x06),			MA_RSP, MO_RSP_VEALT },
+	{"luv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x07),			MA_RSP, MO_RSP_VEALT },
+	{"lhv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x08),			MA_RSP, MO_RSP_VEALT },
+	{"lfv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x09),			MA_RSP, MO_RSP_VEALT },
+	{"lwv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x0a),			MA_RSP, MO_RSP_VEALT },
+	{"ltv",		"Rt[Re],i7(s)",		MIPS_LWC2_RSP(0x0b),			MA_RSP, MO_RSP_VEALT },
+
+//     31-------26-------------16-----11-------------------------------0
+//     |=  SWC2|               |   rd  |                               |
+//     -----6-------5---------------------------------------------------
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+//  00 |  SBV  |  SSV  |  SLV  |  SDV  |  SQV  |  SRV  |  SPV  |  SUV  | 00..07
+//  01 |  SHV  |  SFV  |  SWV  |  STV  |  ---  |  ---  |  ---  |  ---  | 08..0F
+//  10 |  ---  |  ---  |  ---  |  ---  | ---   |  ---  |  ---  |  ---  | 10..17
+//  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{"sbv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x00),			MA_RSP, MO_RSP_VEALT },
+	{"ssv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x01),			MA_RSP, MO_RSP_VEALT },
+	{"slv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x02),			MA_RSP, MO_RSP_VEALT },
+	{"sdv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x03),			MA_RSP, MO_RSP_VEALT },
+	{"sqv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x04),			MA_RSP, MO_RSP_VEALT },
+	{"srv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x05),			MA_RSP, MO_RSP_VEALT },
+	{"spv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x06),			MA_RSP, MO_RSP_VEALT },
+	{"suv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x07),			MA_RSP, MO_RSP_VEALT },
+	{"shv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x08),			MA_RSP, MO_RSP_VEALT },
+	{"sfv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x09),			MA_RSP, MO_RSP_VEALT },
+	{"swv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x0a),			MA_RSP, MO_RSP_VEALT },
+	{"stv",		"Rt[Re],i7(s)",		MIPS_SWC2_RSP(0x0b),			MA_RSP, MO_RSP_VEALT },
 	// END
 	{ NULL,		NULL,		0,			0 }
 };
@@ -712,6 +855,8 @@ const MipsArchDefinition mipsArchs[] = {
 	{ "PS2",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PS2,	MA_EXPS2,	MO_64BIT|MO_FPU },
 	// MARCH_PSP
 	{ "PSP",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PSP,	MA_EXPSP,	MO_FPU },
+	// MARCH_RSP
+	{ "RSP",		MA_MIPS1|MA_RSP,					MA_EXRSP,	0 },
 	// MARCH_INVALID
 	{ "Invalid",	0,									0,			0 },
 };

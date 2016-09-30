@@ -21,6 +21,8 @@ private:
 	bool parseRegister(Parser& parser, MipsRegisterValue& dest);
 	bool parseFpuRegister(Parser& parser, MipsRegisterValue& dest);
 	bool parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest);
+	bool parseRspCop2Register(Parser& parser, MipsRegisterValue& dest);
+	bool parseRspCop2Element(Parser& parser, MipsRegisterValue& dest);
 	bool parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int size);
 	bool parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg);
 	bool parseImmediate(Parser& parser, Expression& dest);
