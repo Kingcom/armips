@@ -352,6 +352,9 @@ CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 	case DIRECTIVE_DATA_32:
 		data->setNormal(list,4,false);
 		break;
+	case DIRECTIVE_DATA_64:
+		data->setNormal(list,8,false);
+		break;
 	case DIRECTIVE_DATA_ASCII:
 		data->setNormal(list,1,true);
 		break;
@@ -363,6 +366,9 @@ CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 		break;
 	case DIRECTIVE_DATA_FLOAT:
 		data->setFloat(list);
+		break;
+	case DIRECTIVE_DATA_DOUBLE:
+		data->setDouble(list);
 		break;
 	}
 	
@@ -679,9 +685,11 @@ const DirectiveMap directives = {
 	{ L".byte",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
 	{ L".halfword",			{ &parseDirectiveData,				DIRECTIVE_DATA_16 } },
 	{ L".word",				{ &parseDirectiveData,				DIRECTIVE_DATA_32 } },
+	{ L".doubleword",		{ &parseDirectiveData,				DIRECTIVE_DATA_64 } },
 	{ L".db",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
 	{ L".dh",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
 	{ L".dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
+	{ L".dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
 	{ L".dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
 	{ L".dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
 	{ L".dcb",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
@@ -690,6 +698,7 @@ const DirectiveMap directives = {
 	{ L"db",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
 	{ L"dh",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
 	{ L"dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
+	{ L"dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
 	{ L"dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
 	{ L"dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
 	{ L"dcb",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
@@ -703,6 +712,7 @@ const DirectiveMap directives = {
 	{ L".sjis",				{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS|DIRECTIVE_DATA_TERMINATION } },
 	{ L".sjisn",			{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS } },
 	{ L".float",			{ &parseDirectiveData,				DIRECTIVE_DATA_FLOAT } },
+	{ L".double",			{ &parseDirectiveData,				DIRECTIVE_DATA_DOUBLE } },
 
 	{ L".psx",				{ &parseDirectivePsx,				0 } },
 	{ L".ps2",				{ &parseDirectivePs2,				0 } },

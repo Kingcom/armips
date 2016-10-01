@@ -143,6 +143,13 @@ u32 getFloatBits(float value)
 	return u.i;
 }
 
+u64 getDoubleBits(double value)
+{
+	union { double f; u64 i; } u;
+	u.f = value;
+	return u.i;
+}
+
 StringList getStringListFromArray(wchar_t** source, int count)
 {
 	StringList result;

@@ -3,6 +3,13 @@
 #include "Misc.h"
 #include "Common.h"
 
+inline u64 swapEndianness64(u64 value)
+{
+	return ((value & 0xFF) << 56) | ((value & 0xFF00) << 40) | ((value & 0xFF0000) << 24) | ((value & 0xFF000000) << 8) |
+	((value & 0xFF00000000) >> 8) | ((value & 0xFF0000000000) >> 24) |
+	((value & 0xFF000000000000) >> 40) | ((value & 0xFF00000000000000) >> 56);
+}
+
 inline u32 swapEndianness32(u32 value)
 {
 	return ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24);
@@ -299,6 +306,14 @@ bool FileManager::writeU32(u32 data)
 		data = swapEndianness32(data);
 
 	return write(&data,4);
+}
+
+bool FileManager::writeU64(u64 data)
+{
+	if (endianness != ownEndianness)
+		data = swapEndianness64(data);
+
+	return write(&data,8);
 }
 
 u64 FileManager::getVirtualAddress()
