@@ -333,11 +333,11 @@ const tMipsOpcode MipsOpcodes[] = {
 //  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "mfc0",	"t,d",		MIPS_COP0(0x00),				MA_MIPS2,	0 },
+	{ "mfc0",	"t,d",		MIPS_COP0(0x00),				MA_MIPS1,	0 },
 	{ "dmfc0",	"t,d",		MIPS_COP0(0x01),				MA_MIPS3,	0 },
-	{ "mtc0",	"t,d",		MIPS_COP0(0x04),				MA_MIPS2,	0 },
+	{ "mtc0",	"t,d",		MIPS_COP0(0x04),				MA_MIPS1,	0 },
 	{ "dmtc0",	"t,d",		MIPS_COP0(0x05),				MA_MIPS3,	0 },
-	{ "eret",	"",			MIPS_COP0(0x10)|0x18,			MA_MIPS2,	0 },
+	{ "eret",	"",			MIPS_COP0(0x10)|0x18,			MA_MIPS3,	0 },
 
 //     31-------26------21---------------------------------------------0
 //     |=    COP1|  rs  |                                              |
@@ -793,9 +793,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vextt",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x38),			MA_RSP, 0 },
 	{ "vextq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x39),			MA_RSP, 0 },
 	{ "vextn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3a),			MA_RSP, 0 },
-	{ "vmacq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3b),			MA_RSP, 0 },
 	{ "vinst",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3c),			MA_RSP, 0 },
-	{ "vnstq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3d),			MA_RSP, 0 },
+	{ "vinsq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3d),			MA_RSP, 0 },
 	{ "vinsn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3e),			MA_RSP, 0 },
 	{ "vnull",	"",					MIPS_COP2_RSP(0x3f),			MA_RSP, 0 },
 

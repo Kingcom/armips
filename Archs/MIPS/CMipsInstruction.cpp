@@ -244,7 +244,7 @@ void CMipsInstruction::encodeNormal() const
 		if(opcodeData.opcode.flags & MO_RSP_VEALT) encoding |= MIPS_COP2_RSP_VEALT(registerData.rspve.num);
 		else encoding |= MIPS_COP2_RSP_VE(registerData.rspve.num);
 	}
-	if (registerData.rspvde.num != -1) encoding |= MIPS_COP2_RSP_VDE(registerData.rspve.num);	// rsp vector dest element reg
+	if (registerData.rspvde.num != -1) encoding |= MIPS_COP2_RSP_VDE(registerData.rspvde.num);	// rsp vector dest element reg
 
 	if (!(opcodeData.opcode.flags & MO_VFPU_MIXED) && registerData.vrt.num != -1)			// vfpu rt
 		encoding |= registerData.vrt.num << 16;
