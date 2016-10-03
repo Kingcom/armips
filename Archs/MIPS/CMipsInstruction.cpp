@@ -99,7 +99,10 @@ bool CMipsInstruction::Validate()
 		if (immediateData.primary.expression.isLoaded())
 		{
 			if (immediateData.primary.expression.evaluateInteger(immediateData.primary.value) == false)
+			{
+				Logger::queueError(Logger::Error, L"Invalid immediate expression");
 				return false;
+			}
 
 			immediateData.primary.originalValue = immediateData.primary.value;
 		}
