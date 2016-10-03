@@ -224,14 +224,14 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "clo",	"d,s",		MIPS_SPECIAL(0x17),				MA_PSP,		0 },
 	{ "mult",	"d,s,t",	MIPS_SPECIAL(0x18),				MA_PS2,		0 },
 	{ "multu",	"d,s,t",	MIPS_SPECIAL(0x19),				MA_PS2,		0 },
-	{ "mult",	"s,t",		MIPS_SPECIAL(0x18),				MA_MIPS1,	0 },
-	{ "mult",	"r\x0,s,t",	MIPS_SPECIAL(0x18),				MA_MIPS1,	0 },
-	{ "multu",	"s,t",		MIPS_SPECIAL(0x19),				MA_MIPS1,	0 },
-	{ "multu",	"r\x0,s,t",	MIPS_SPECIAL(0x19),				MA_MIPS1,	0 },
-	{ "div",	"s,t",		MIPS_SPECIAL(0x1A),				MA_MIPS1,	0 },
-	{ "div",	"r\x0,s,t",	MIPS_SPECIAL(0x1A),				MA_MIPS1,	0 },
-	{ "divu",	"s,t",		MIPS_SPECIAL(0x1B),				MA_MIPS1,	0 },
-	{ "divu",	"r\x0,s,t",	MIPS_SPECIAL(0x1B),				MA_MIPS1,	0 },
+	{ "mult",	"s,t",		MIPS_SPECIAL(0x18),				MA_MIPS1,	MO_MULDIV },
+	{ "mult",	"r\x0,s,t",	MIPS_SPECIAL(0x18),				MA_MIPS1,	MO_MULDIV },
+	{ "multu",	"s,t",		MIPS_SPECIAL(0x19),				MA_MIPS1,	MO_MULDIV },
+	{ "multu",	"r\x0,s,t",	MIPS_SPECIAL(0x19),				MA_MIPS1,	MO_MULDIV },
+	{ "div",	"s,t",		MIPS_SPECIAL(0x1A),				MA_MIPS1,	MO_MULDIV },
+	{ "div",	"r\x0,s,t",	MIPS_SPECIAL(0x1A),				MA_MIPS1,	MO_MULDIV },
+	{ "divu",	"s,t",		MIPS_SPECIAL(0x1B),				MA_MIPS1,	MO_MULDIV },
+	{ "divu",	"r\x0,s,t",	MIPS_SPECIAL(0x1B),				MA_MIPS1,	MO_MULDIV },
 	{ "dmult",	"s,t",		MIPS_SPECIAL(0x1C),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
 	{ "dmult",	"r\x0,s,t",	MIPS_SPECIAL(0x1C),				MA_MIPS3|MA_EXPS2,	MO_64BIT },
 	{ "madd",	"s,t",		MIPS_SPECIAL(0x1C),				MA_PSP,		0 },
@@ -847,13 +847,13 @@ const tMipsOpcode MipsOpcodes[] = {
 
 const MipsArchDefinition mipsArchs[] = {
 	// MARCH_PSX
-	{ "PSX",		MA_MIPS1,							MA_EXPSX,	0 },
+	{ "PSX",		MA_MIPS1,							MA_EXPSX,	MO_MULDIV },
 	// MARCH_N64
-	{ "N64",		MA_MIPS1|MA_MIPS2|MA_MIPS3,			MA_EXN64,	MO_64BIT|MO_FPU },
+	{ "N64",		MA_MIPS1|MA_MIPS2|MA_MIPS3,			MA_EXN64,	MO_MULDIV|MO_64BIT|MO_FPU },
 	// MARCH_PS2
-	{ "PS2",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PS2,	MA_EXPS2,	MO_64BIT|MO_FPU },
+	{ "PS2",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PS2,	MA_EXPS2,	MO_MULDIV|MO_64BIT|MO_FPU },
 	// MARCH_PSP
-	{ "PSP",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PSP,	MA_EXPSP,	MO_FPU },
+	{ "PSP",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PSP,	MA_EXPSP,	MO_MULDIV|MO_FPU },
 	// MARCH_RSP
 	{ "RSP",		MA_MIPS1|MA_RSP,					MA_EXRSP,	0 },
 	// MARCH_INVALID

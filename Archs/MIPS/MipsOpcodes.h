@@ -37,7 +37,7 @@
 #define MO_VFPU_PAIR	0x00080000	// pair vfpu reg
 #define MO_VFPU_TRIPLE	0x00100000	// triple vfpu reg
 #define MO_RSP_VEALT	0x00200000	// rsp alternative vector element placement
-
+#define MO_MULDIV		0x00400000	// integer multiply/divide instructions
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
 #define MIPS_SA(VALUE)					BITFIELD(6,5,(VALUE))
