@@ -254,7 +254,7 @@ void ElfFile::determinePartOrder()
 
 int ElfFile::findSegmentlessSection(const std::string& name)
 {
-	for (int i = 0; i < (int)sections.size(); i++)
+	for (int i = 0; i < (int)segmentlessSections.size(); i++)
 	{
 		if (stringEqualInsensitive(name,segmentlessSections[i]->getName()))
 			return i;

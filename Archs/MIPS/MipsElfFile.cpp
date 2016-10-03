@@ -210,6 +210,9 @@ bool MipsElfFile::load(const std::wstring& fileName, const std::wstring& outputF
 		return false;
 	}
 
+	if (elf.getSegmentCount() != 0)
+		seekVirtual(elf.getSegment(0)->getVirtualAddress());
+
 	return true;
 }
 
