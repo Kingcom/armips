@@ -4,7 +4,7 @@
 #include "Util/EncodingTable.h"
 #include "../Archs/Architecture.h"
 
-enum class EncodingMode { Invalid, U8, U16, U32, Ascii, Float, Sjis, Custom };
+enum class EncodingMode { Invalid, U8, U16, U32, U64, Ascii, Float, Double, Sjis, Custom };
 
 class TableCommand: public CAssemblerCommand
 {
@@ -25,6 +25,7 @@ public:
 	~CDirectiveData();
 	void setNormal(std::vector<Expression>& entries, size_t unitSize, bool ascii);
 	void setFloat(std::vector<Expression>& entries);
+	void setDouble(std::vector<Expression>& entries);
 	void setSjis(std::vector<Expression>& entries, bool terminate);
 	void setCustom(std::vector<Expression>& entries, bool terminate);
 	virtual bool Validate();
@@ -35,6 +36,7 @@ private:
 	void encodeCustom(EncodingTable& table);
 	void encodeSjis();
 	void encodeFloat();
+	void encodeDouble();
 	void encodeNormal();
 	size_t getUnitSize() const;
 	size_t getDataSize() const;
@@ -44,6 +46,6 @@ private:
 	bool writeTermination;
 	std::vector<Expression> entries;
 	ByteArray customData;
-	std::vector<u32> normalData;
+	std::vector<u64> normalData;
 	Endianness endianness;
 };

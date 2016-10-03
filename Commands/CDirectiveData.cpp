@@ -61,6 +61,9 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 	case 4:
 		this->mode = EncodingMode::U32;
 		break;
+	case 8:
+		this->mode = EncodingMode::U64;
+		break;
 	default:
 		Logger::printError(Logger::Error,L"Invalid data unit size %d",unitSize);
 		return;
@@ -74,6 +77,13 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 void CDirectiveData::setFloat(std::vector<Expression>& entries)
 {
 	this->mode = EncodingMode::Float;
+	this->entries = entries;
+	this->writeTermination = false;
+}
+
+void CDirectiveData::setDouble(std::vector<Expression>& entries)
+{
+	this->mode = EncodingMode::Double;
 	this->entries = entries;
 	this->writeTermination = false;
 }
@@ -106,6 +116,9 @@ size_t CDirectiveData::getUnitSize() const
 	case EncodingMode::U32:
 	case EncodingMode::Float:
 		return 4;
+	case EncodingMode::U64:
+	case EncodingMode::Double:
+		return 8;
 	}
 
 	return 0;
@@ -122,7 +135,9 @@ size_t CDirectiveData::getDataSize() const
 	case EncodingMode::Ascii:
 	case EncodingMode::U16:
 	case EncodingMode::U32:
+	case EncodingMode::U64:
 	case EncodingMode::Float:
+	case EncodingMode::Double:
 		return normalData.size()*getUnitSize();
 	}
 
@@ -209,13 +224,21 @@ void CDirectiveData::encodeFloat()
 			continue;
 		}
 
-		if (value.isInt())
+		if (value.isInt() && mode == EncodingMode::Float)
 		{
 			u32 num = getFloatBits((float)value.intValue);
 			normalData.push_back(num);
-		} else if (value.isFloat())
+		} else if (value.isInt() && mode == EncodingMode::Double)
+		{
+			u64 num = getDoubleBits((double)value.intValue);
+			normalData.push_back(num);
+		} else if (value.isFloat() && mode == EncodingMode::Float)
 		{
 			u32 num = getFloatBits((float)value.floatValue);
+			normalData.push_back(num);
+		} else if (value.isFloat() && mode == EncodingMode::Double)
+		{
+			u64 num = getDoubleBits((double)value.floatValue);
 			normalData.push_back(num);
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
@@ -241,7 +264,7 @@ void CDirectiveData::encodeNormal()
 			for (size_t l = 0; l < value.strValue.size(); l++)
 			{
 				u64 num = value.strValue[l];
-				normalData.push_back((u32)num);
+				normalData.push_back((u64)num);
 
 				if (num >= 0x80 && hadNonAscii == false)
 				{
@@ -252,10 +275,13 @@ void CDirectiveData::encodeNormal()
 		} else if (value.isInt())
 		{
 			u64 num = value.intValue;
-			normalData.push_back((u32)num);
+			normalData.push_back((u64)num);
 		} else if (value.isFloat() && mode == EncodingMode::U32)
 		{
 			u32 num = getFloatBits((float)value.floatValue);
+			normalData.push_back(num);
+		} else if(value.isFloat() && mode == EncodingMode::U64) {
+			u64 num = getDoubleBits((double)value.floatValue);
 			normalData.push_back(num);
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
@@ -273,10 +299,12 @@ bool CDirectiveData::Validate()
 	case EncodingMode::U8:
 	case EncodingMode::U16:
 	case EncodingMode::U32:
+	case EncodingMode::U64:
 	case EncodingMode::Ascii:
 		encodeNormal();
 		break;
 	case EncodingMode::Float:
+	case EncodingMode::Double:
 		encodeFloat();
 		break;
 	case EncodingMode::Sjis:
@@ -320,6 +348,13 @@ void CDirectiveData::Encode() const
 		for (auto value: normalData)
 		{
 			g_fileManager->writeU32((u32)value);
+		}
+		break;
+	case EncodingMode::U64:
+	case EncodingMode::Double:
+		for (auto value: normalData)
+		{
+			g_fileManager->writeU64((u64)value);
 		}
 		break;
 	}
@@ -366,6 +401,15 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
 			str += swprintf(str,20,L"0x%08X,",(u32)normalData[i]);
+		}
+		break;
+	case EncodingMode::U64:
+	case EncodingMode::Double:
+		str += swprintf(str,20,L".doubleword ");
+
+		for (size_t i = 0; i < normalData.size(); i++)
+		{
+			str += swprintf(str,20,L"0x%16X,",(u64)normalData[i]);
 		}
 		break;
 	}

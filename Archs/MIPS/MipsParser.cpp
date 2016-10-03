@@ -58,6 +58,30 @@ const MipsRegisterDescriptor mipsPs2Cop2FpRegisters[] = {
 	{ L"vf30", 30 },	{ L"vf31", 31 },
 };
 
+const MipsRegisterDescriptor mipsRspCop2Registers[] = {
+	{ L"v0", 0 },		{ L"v1", 1 },		{ L"v2", 2 },		{ L"v3", 3 },
+	{ L"v4", 4 },		{ L"v5", 5 },		{ L"v6", 6 },		{ L"v7", 7 },
+	{ L"v8", 8 },		{ L"v9", 9 },		{ L"v00", 0 },		{ L"v01", 1 },
+	{ L"v02", 2 },		{ L"v03", 3 },		{ L"v04", 4 },		{ L"v05", 5 },
+	{ L"v06", 6 },		{ L"v07", 7 },		{ L"v08", 8 },		{ L"v09", 9 },
+	{ L"v10", 10 },		{ L"v11", 11 },		{ L"v12", 12 },		{ L"v13", 13 },
+	{ L"v14", 14 },		{ L"v15", 15 },		{ L"v16", 16 },		{ L"v17", 17 },
+	{ L"v18", 18 },		{ L"v19", 19 },		{ L"v20", 20 },		{ L"v21", 21 },
+	{ L"v22", 22 },		{ L"v23", 23 },		{ L"v24", 24 },		{ L"v25", 25 },
+	{ L"v26", 26 },		{ L"v27", 27 },		{ L"v28", 28 },		{ L"v29", 29 },
+	{ L"v30", 30 },		{ L"v31", 31 },
+};
+
+const MipsRegisterDescriptor mipsRspCop2Elements[] = {
+	{ L"e0", 0 },		{ L"e1", 1 },		{ L"e2", 2 },		{ L"e3", 3 },
+	{ L"e4", 4 },		{ L"e5", 5 },		{ L"e6", 6 },		{ L"e7", 7 },
+	{ L"e8", 8 },		{ L"e9", 9 },		{ L"e00", 0 },		{ L"e01", 1 },
+	{ L"e02", 2 },		{ L"e03", 3 },		{ L"e04", 4 },		{ L"e05", 5 },
+	{ L"e06", 6 },		{ L"e07", 7 },		{ L"e08", 8 },		{ L"e09", 9 },
+	{ L"e10", 10 },		{ L"e11", 11 },		{ L"e12", 12 },		{ L"e13", 13 },
+	{ L"e14", 14 },		{ L"e15", 15 },
+};
+
 CAssemblerCommand* parseDirectiveResetDelay(Parser& parser, int flags)
 {
 	Mips.SetIgnoreDelay(true);
@@ -196,6 +220,19 @@ bool MipsParser::parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest)
 	dest.type = MipsRegisterType::Ps2Cop2;
 	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
 }
+
+bool MipsParser::parseRspCop2Register(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::RspCop2Vector;
+	return parseRegisterTable(parser,dest,mipsRspCop2Registers,ARRAY_SIZE(mipsRspCop2Registers));
+}
+
+bool MipsParser::parseRspCop2Element(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::RspCop2VectorElement;
+	return parseRegisterTable(parser,dest,mipsRspCop2Elements,ARRAY_SIZE(mipsRspCop2Elements));
+}
+
 
 static bool decodeDigit(wchar_t digit, int& dest)
 {
@@ -359,6 +396,10 @@ bool MipsParser::matchSymbol(Parser& parser, wchar_t symbol)
 		return parser.matchToken(TokenType::RParen);
 	case ',':
 		return parser.matchToken(TokenType::Comma);
+	case '[':
+		return parser.matchToken(TokenType::LBrack);
+	case ']':
+		return parser.matchToken(TokenType::RBrack);
 	}
 
 	return false;
@@ -1078,6 +1119,28 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			CHECK(parseRegister(parser,tempRegister));
 			CHECK(tempRegister.num == *encoding++);
 			break;
+		case 'R':	// rsp vector register or element
+			switch (*encoding++)
+			{
+			case 't':	// register
+				CHECK(parseRspCop2Register(parser,registers.rspvrt));
+				break;
+			case 'd':	// register
+				CHECK(parseRspCop2Register(parser,registers.rspvrd));
+				break;
+			case 's':	// register
+				CHECK(parseRspCop2Register(parser,registers.rspvrs));
+				break;
+			case 'e':	// element
+				CHECK(parseRspCop2Element(parser,registers.rspve));
+				break;
+			case 'x':	// destination element
+				CHECK(parseRspCop2Element(parser,registers.rspvde));
+				break;
+			default:
+				return false;
+			}
+			break;
 		case 'i':	// primary immediate
 			CHECK(parseImmediate(parser,immediate.primary.expression));
 			allowFunctionCallExpression(*encoding != '(');
@@ -1169,6 +1232,8 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 		if ((MipsOpcodes[z].flags & MO_64BIT) && !(arch.flags & MO_64BIT))
 			continue;
 		if ((MipsOpcodes[z].flags & MO_FPU) && !(arch.flags & MO_FPU))
+			continue;
+		if ((MipsOpcodes[z].flags & MO_MULDIV) && !(arch.flags & MO_MULDIV))
 			continue;
 
 		if (decodeOpcode(stringValue,MipsOpcodes[z]) == true)

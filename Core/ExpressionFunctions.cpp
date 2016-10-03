@@ -382,6 +382,7 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"readu8",		{ &expFuncRead<u8>,		1,	2,	true } },
 	{ L"readu16",		{ &expFuncRead<u16>,	1,	2,	true } },
 	{ L"readu32",		{ &expFuncRead<u32>,	1,	2,	true } },
+	{ L"readu64",		{ &expFuncRead<u64>,	1,	2,	true } },
 	{ L"readascii",		{ &expFuncReadAscii,	1,	3,	true } },
 
 	{ L"isarm",			{ &expFuncIsArm,		0,	0,	true } },

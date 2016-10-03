@@ -72,6 +72,7 @@ public:
 	bool writeU8(u8 data);
 	bool writeU16(u16 data);
 	bool writeU32(u32 data);
+	bool writeU64(u64 data);
 	u64 getVirtualAddress();
 	u64 getPhysicalAddress();
 	bool seekVirtual(u64 virtualAddress);
