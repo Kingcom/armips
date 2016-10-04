@@ -142,18 +142,25 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 	bool isCop = false;
 	switch (flags & (MIPSM_ACCESSMASK|MIPSM_LOAD|MIPSM_STORE))
 	{
-	case MIPSM_LOAD|MIPSM_B:	op = L"lb"; break;
-	case MIPSM_LOAD|MIPSM_BU:	op = L"lbu"; break;
-	case MIPSM_LOAD|MIPSM_HW:	op = L"lh"; break;
-	case MIPSM_LOAD|MIPSM_HWU:	op = L"lhu"; break;
-	case MIPSM_LOAD|MIPSM_W:	op = L"lw"; break;
-	case MIPSM_LOAD|MIPSM_COP1:	op = L"lwc1"; isCop = true; break;
-	case MIPSM_LOAD|MIPSM_COP2:	op = L"lwc2"; isCop = true; break;
-	case MIPSM_STORE|MIPSM_B:	op = L"sb"; break;
-	case MIPSM_STORE|MIPSM_HW:	op = L"sh"; break;
-	case MIPSM_STORE|MIPSM_W:	op = L"sw"; break;
-	case MIPSM_STORE|MIPSM_COP1:op = L"swc1"; isCop = true; break;
-	case MIPSM_STORE|MIPSM_COP2:op = L"swc2"; isCop = true; break;
+	case MIPSM_LOAD|MIPSM_B:		op = L"lb"; break;
+	case MIPSM_LOAD|MIPSM_BU:		op = L"lbu"; break;
+	case MIPSM_LOAD|MIPSM_HW:		op = L"lh"; break;
+	case MIPSM_LOAD|MIPSM_HWU:		op = L"lhu"; break;
+	case MIPSM_LOAD|MIPSM_W:		op = L"lw"; break;
+	case MIPSM_LOAD|MIPSM_WU:		op = L"lwu"; break;
+	case MIPSM_LOAD|MIPSM_DW:		op = L"ld"; break;
+	case MIPSM_LOAD|MIPSM_COP1:		op = L"lwc1"; isCop = true; break;
+	case MIPSM_LOAD|MIPSM_COP2:		op = L"lwc2"; isCop = true; break;
+	case MIPSM_LOAD|MIPSM_DCOP1:	op = L"ldc1"; isCop = true; break;
+	case MIPSM_LOAD|MIPSM_DCOP2:	op = L"ldc2"; isCop = true; break;
+	case MIPSM_STORE|MIPSM_B:		op = L"sb"; break;
+	case MIPSM_STORE|MIPSM_HW:		op = L"sh"; break;
+	case MIPSM_STORE|MIPSM_W:		op = L"sw"; break;
+	case MIPSM_STORE|MIPSM_DW:		op = L"sd"; break;
+	case MIPSM_STORE|MIPSM_COP1:	op = L"swc1"; isCop = true; break;
+	case MIPSM_STORE|MIPSM_COP2:	op = L"swc2"; isCop = true; break;
+	case MIPSM_STORE|MIPSM_DCOP1:	op = L"sdc1"; isCop = true; break;
+	case MIPSM_STORE|MIPSM_DCOP2:	op = L"sdc2"; isCop = true; break;
 	default: return nullptr;
 	}
 
@@ -174,7 +181,7 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 {
 	const wchar_t* selectedTemplate;
 
-	std::wstring op;
+	std::wstring op, size;
 	int type = flags & MIPSM_ACCESSMASK;
 	if (type == MIPSM_HW || type == MIPSM_HWU)
 	{
@@ -188,17 +195,17 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 				or		%rd%,r1
 			.endif
 		)";
-		
+
 		op = type == MIPSM_HWU ? L"lbu" : L"lb";
 		selectedTemplate = templateHalfword;
-	} else if (type == MIPSM_W)
+	} else if (type == MIPSM_W || type == MIPSM_DW)
 	{
 		const wchar_t* templateWord = LR"(
-			.if (%off% < 0x8000) && ((%off%+3) >= 0x8000)
+			.if (%off% < 0x8000) && ((%off%+%size%-1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
-				lwl	%rd%,%off%+3(%rs%)
-				lwr	%rd%,%off%(%rs%)
+				%op%l	%rd%,%off%+%size%-1(%rs%)
+				%op%r	%rd%,%off%(%rs%)
 			.endif
 		)";
 
@@ -208,6 +215,8 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 			return new DummyCommand();
 		}
 
+		op = type == MIPSM_W ? L"lw" : L"ld";
+		size = type == MIPSM_W ? L"4" : L"8";
 		selectedTemplate = templateWord;
 	} else {
 		return nullptr;
@@ -219,6 +228,7 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 			{ L"%rd%",		registers.grd.name },
 			{ L"%off%",		immediates.primary.expression.toString() },
 			{ L"%op%",		op },
+			{ L"%size%",    size },
 	});
 }
 
@@ -226,6 +236,7 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 {
 	const wchar_t* selectedTemplate;
 
+	std::wstring op, size;
 	int type = flags & MIPSM_ACCESSMASK;
 	if (type == MIPSM_HW)
 	{
@@ -240,14 +251,14 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 		)";
 
 		selectedTemplate = templateHalfword;
-	} else if (type == MIPSM_W)
+	} else if (type == MIPSM_W || type == MIPSM_DW)
 	{
 		const wchar_t* templateWord = LR"(
-			.if (%off% < 0x8000) && ((%off%+3) >= 0x8000)
+			.if (%off% < 0x8000) && ((%off%+%size%-1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
-				swl	%rd%,%off%+3(%rs%)
-				swr	%rd%,%off%(%rs%)
+				%op%l	%rd%,%off%+%size%-1(%rs%)
+				%op%r	%rd%,%off%(%rs%)
 			.endif
 		)";
 
@@ -257,6 +268,8 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 			return new DummyCommand();
 		}
 
+		op = type == MIPSM_W ? L"sw" : L"sd";
+		size = type == MIPSM_W ? L"4" : L"8";
 		selectedTemplate = templateWord;
 	} else {
 		return nullptr;
@@ -267,6 +280,8 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rd%",		registers.grd.name },
 			{ L"%off%",		immediates.primary.expression.toString() },
+			{ L"%op%",		op },
+			{ L"%size%",	size },
 	});
 }
 
@@ -414,24 +429,36 @@ const MipsMacroDefinition mipsMacros[] = {
 	{ L"lh",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_HW|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"lhu",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_HWU|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"lw",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_W|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"lwu",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_WU|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"ld",    L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DW|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"lwc1",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_COP1|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"lwc2",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_COP2|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"ldc1",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DCOP1|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"ldc2",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DCOP2|MIPSM_UPPER|MIPSM_LOWER },
 	
 	{ L"lb.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_B|MIPSM_UPPER },
 	{ L"lbu.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_BU|MIPSM_UPPER },
 	{ L"lh.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_HW|MIPSM_UPPER },
 	{ L"lhu.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_HWU|MIPSM_UPPER },
 	{ L"lw.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_W|MIPSM_UPPER },
+	{ L"lwu.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_WU|MIPSM_UPPER },
+	{ L"ld.u",  L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DW|MIPSM_UPPER },
 	{ L"lwc1.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_COP1|MIPSM_UPPER },
 	{ L"lwc2.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_COP2|MIPSM_UPPER },
+	{ L"ldc1.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DCOP1|MIPSM_UPPER },
+	{ L"ldc2.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DCOP2|MIPSM_UPPER },
 	
 	{ L"lb.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_B|MIPSM_LOWER },
 	{ L"lbu.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_BU|MIPSM_LOWER },
 	{ L"lh.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_HW|MIPSM_LOWER },
 	{ L"lhu.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_HWU|MIPSM_LOWER },
 	{ L"lw.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_W|MIPSM_LOWER },
+	{ L"lwu.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_WU|MIPSM_LOWER },
+	{ L"ld.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DW|MIPSM_LOWER },
 	{ L"lwc1.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_COP1|MIPSM_LOWER },
 	{ L"lwc2.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_COP2|MIPSM_LOWER },
+	{ L"ldc1.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DCOP1|MIPSM_LOWER },
+	{ L"ldc2.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_DCOP2|MIPSM_LOWER },
 	
 	{ L"ulh",	L"d,i(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_HW|MIPSM_IMM },
 	{ L"ulh",	L"d,(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_HW },
@@ -439,29 +466,42 @@ const MipsMacroDefinition mipsMacros[] = {
 	{ L"ulhu",	L"d,(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_HWU },
 	{ L"ulw",	L"d,i(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_W|MIPSM_IMM },
 	{ L"ulw",	L"d,(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_W },
+	{ L"uld",	L"d,i(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_DW|MIPSM_IMM },
+	{ L"uld",	L"d,(s)",	&generateMipsMacroLoadUnaligned,	MIPSM_DW },
 
 	{ L"sb",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_B|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"sh",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_HW|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"sw",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_W|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"sd",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DW|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"swc1",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP1|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"swc2",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP2|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"sdc1",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DCOP1|MIPSM_UPPER|MIPSM_LOWER },
+	{ L"sdc2",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DCOP2|MIPSM_UPPER|MIPSM_LOWER },
 	
 	{ L"sb.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_B|MIPSM_UPPER },
 	{ L"sh.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_HW|MIPSM_UPPER },
 	{ L"sw.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_W|MIPSM_UPPER },
+	{ L"sd.u",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DW|MIPSM_UPPER },
 	{ L"swc1.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP1|MIPSM_UPPER },
 	{ L"swc2.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP2|MIPSM_UPPER },
+	{ L"sdc1.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DCOP1|MIPSM_UPPER },
+	{ L"sdc2.u",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DCOP2|MIPSM_UPPER },
 	
 	{ L"sb.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_B|MIPSM_LOWER },
 	{ L"sh.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_HW|MIPSM_LOWER },
 	{ L"sw.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_W|MIPSM_LOWER },
+	{ L"sd.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DW|MIPSM_LOWER },
 	{ L"swc1.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP1|MIPSM_LOWER },
 	{ L"swc2.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP2|MIPSM_LOWER },
+	{ L"sdc1.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DCOP1|MIPSM_LOWER },
+	{ L"sdc2.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DCOP2|MIPSM_LOWER },
 
 	{ L"ush",	L"d,i(s)",	&generateMipsMacroStoreUnaligned,	MIPSM_HW|MIPSM_IMM },
 	{ L"ush",	L"d,(s)",	&generateMipsMacroStoreUnaligned,	MIPSM_HW },
 	{ L"usw",	L"d,i(s)",	&generateMipsMacroStoreUnaligned,	MIPSM_W|MIPSM_IMM },
 	{ L"usw",	L"d,(s)",	&generateMipsMacroStoreUnaligned,	MIPSM_W },
+	{ L"usd",	L"d,i(s)",	&generateMipsMacroStoreUnaligned,	MIPSM_DW|MIPSM_IMM },
+	{ L"usd",	L"d,(s)",	&generateMipsMacroStoreUnaligned,	MIPSM_DW },
 
 	{ L"blt",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_DONTWARNDELAYSLOT },
 	{ L"blt",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
