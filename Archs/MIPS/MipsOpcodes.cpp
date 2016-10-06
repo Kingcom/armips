@@ -337,10 +337,12 @@ const tMipsOpcode MipsOpcodes[] = {
 //  10 |FUNCT* |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "mfc0",	"t,d",		MIPS_COP0(0x00),				MA_MIPS1,	0 },
-	{ "dmfc0",	"t,d",		MIPS_COP0(0x01),				MA_MIPS3,	MO_64BIT },
-	{ "mtc0",	"t,d",		MIPS_COP0(0x04),				MA_MIPS1,	0 },
-	{ "dmtc0",	"t,d",		MIPS_COP0(0x05),				MA_MIPS3,	MO_64BIT },
+	{ "mfc0",	"t,z",		MIPS_COP0(0x00),				MA_MIPS1|MA_EXRSP,	0 },
+	{ "mfc0",	"t,Rz",		MIPS_COP0(0x00),				MA_RSP,		0 },
+	{ "dmfc0",	"t,z",		MIPS_COP0(0x01),				MA_MIPS3,	MO_64BIT },
+	{ "mtc0",	"t,z",		MIPS_COP0(0x04),				MA_MIPS1|MA_EXRSP,	0 },
+	{ "mtc0",	"t,Rz",		MIPS_COP0(0x04),				MA_RSP,		0 },
+	{ "dmtc0",	"t,z",		MIPS_COP0(0x05),				MA_MIPS3,	MO_64BIT },
 
 //     31--------------------21-------------------------------5--------0
 //     |=            COP0FUNCT|                              | function|
@@ -804,14 +806,14 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vnor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2b),			MA_RSP, 0 },
 	{ "vxor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2c),			MA_RSP, 0 },
 	{ "vnxor",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x2d),			MA_RSP, 0 },
-	{ "vrcp",   "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x30),			MA_RSP, 0 },
-	{ "vrcpl",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x31),			MA_RSP, 0 },
-	{ "vrcph",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x32),			MA_RSP, 0 },
-	{ "vmov",   "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x33),			MA_RSP, 0 },
-	{ "vrsq",   "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x34),			MA_RSP, 0 },
-	{ "vrsql",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x35),			MA_RSP, 0 },
-	{ "vrsqh",  "Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x36),			MA_RSP, 0 },
-	{ "vnop",   "",					MIPS_COP2_RSP(0x37),			MA_RSP, 0 },
+	{ "vrcp",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x30),			MA_RSP, 0 },
+	{ "vrcpl",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x31),			MA_RSP, 0 },
+	{ "vrcph",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x32),			MA_RSP, 0 },
+	{ "vmov",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x33),			MA_RSP, 0 },
+	{ "vrsq",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x34),			MA_RSP, 0 },
+	{ "vrsql",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x35),			MA_RSP, 0 },
+	{ "vrsqh",	"Rd[Rx],Rt[Re]",	MIPS_COP2_RSP(0x36),			MA_RSP, 0 },
+	{ "vnop",	"",					MIPS_COP2_RSP(0x37),			MA_RSP, 0 },
 	{ "vextt",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x38),			MA_RSP, 0 },
 	{ "vextq",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x39),			MA_RSP, 0 },
 	{ "vextn",	"Rd,Rs,Rt[Re]",		MIPS_COP2_RSP(0x3a),			MA_RSP, 0 },
