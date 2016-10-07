@@ -44,6 +44,19 @@ const MipsRegisterDescriptor mipsFloatRegisters[] = {
 	{ L"f30", 30 },	{ L"f31", 31 },
 };
 
+const MipsRegisterDescriptor mipsCop0Registers[] = {
+	{ L"index", 0},			{ L"random", 1 }, 		{ L"entrylo", 2 },
+	{ L"entrylo0", 2 },		{ L"entrylo1", 3 },		{ L"context", 4 },
+	{ L"pagemask", 5 },		{ L"wired", 6 },		{ L"badvaddr", 8 },
+	{ L"count", 9 },		{ L"entryhi", 10 },		{ L"compare", 11 },
+	{ L"status", 12 },		{ L"sr", 12 },			{ L"cause", 13 },
+	{ L"epc", 14 },			{ L"prid", 15 },		{ L"config", 16 },
+	{ L"lladdr", 17 },		{ L"watchlo", 18 },		{ L"watchhi", 19 },
+	{ L"xcontext", 20 },	{ L"badpaddr", 23 },	{ L"ecc", 26 },
+	{ L"perr", 26},			{ L"cacheerr", 27 },	{ L"taglo", 28 },
+	{ L"taghi", 29 },		{ L"errorepc", 30 },
+};
+
 const MipsRegisterDescriptor mipsPs2Cop2FpRegisters[] = {
 	{ L"vf0", 0 },		{ L"vf1", 1 },		{ L"vf2", 2 },		{ L"vf3", 3 },
 	{ L"vf4", 4 },		{ L"vf5", 5 },		{ L"vf6", 6 },		{ L"vf7", 7 },
@@ -56,6 +69,15 @@ const MipsRegisterDescriptor mipsPs2Cop2FpRegisters[] = {
 	{ L"vf22", 22 },	{ L"vf23", 23 },	{ L"vf24", 24 },	{ L"vf25", 25 },
 	{ L"vf26", 26 },	{ L"vf27", 27 },	{ L"vf28", 28 },	{ L"vf29", 29 },
 	{ L"vf30", 30 },	{ L"vf31", 31 },
+};
+
+const MipsRegisterDescriptor mipsRspCop0Registers[] = {
+	{ L"sp_mem_addr", 0 },	{ L"sp_dram_addr", 1 }, { L"sp_rd_len", 2 },
+	{ L"sp_wr_len", 3 },	{ L"sp_status", 4 },	{ L"sp_dma_full", 5 },
+	{ L"sp_dma_busy", 6 },	{ L"sp_semaphore", 7 },	{ L"dpc_start", 8 },
+	{ L"dpc_end", 9 },		{ L"dpc_current", 10 },	{ L"dpc_status", 11 },
+	{ L"dpc_clock", 12 },	{ L"dpc_bufbusy", 13 },	{ L"dpc_pipebusy", 14 },
+	{ L"dpc_tmem", 15 },
 };
 
 const MipsRegisterDescriptor mipsRspCop2Registers[] = {
@@ -160,6 +182,25 @@ CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 	return parser.parseDirective(mipsDirectives);
 }
 
+bool MipsParser::parseRegisterNumber(Parser& parser, MipsRegisterValue& dest){
+
+	// check for $0 and $1
+	if (parser.peekToken().type == TokenType::Dollar)
+	{
+		const Token& number = parser.peekToken(1);
+		if (number.type == TokenType::Integer && number.intValue <= 31)
+		{
+			dest.name = formatString(L"$%d",number.intValue);
+			dest.num = (int) number.intValue;
+
+			parser.eatTokens(2);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count)
 {
 	int offset = 0;
@@ -191,20 +232,8 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Normal;
 
-	// check for $0 and $1
-	if (parser.peekToken().type == TokenType::Dollar)
-	{
-		const Token& number = parser.peekToken(1);
-		if (number.type == TokenType::Integer && number.intValue <= 31)
-		{
-			dest.name = formatString(L"$%d",number.intValue);
-			dest.num = (int) number.intValue;
-
-			parser.eatTokens(2);
-			return true;
-		}
-	}
-
+	if(parseRegisterNumber(parser,dest))
+		return true;
 
 	return parseRegisterTable(parser,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
 }
@@ -215,10 +244,30 @@ bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
 	return parseRegisterTable(parser,dest,mipsFloatRegisters,ARRAY_SIZE(mipsFloatRegisters));
 }
 
+bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::Cop0;
+
+	if(parseRegisterNumber(parser,dest))
+		return true;
+
+	return parseRegisterTable(parser,dest,mipsCop0Registers,ARRAY_SIZE(mipsCop0Registers));
+}
+
 bool MipsParser::parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Ps2Cop2;
 	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
+}
+
+bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::RspCop0;
+
+	if(parseRegisterNumber(parser,dest))
+		return true;
+
+	return parseRegisterTable(parser,dest,mipsRspCop0Registers,ARRAY_SIZE(mipsRspCop0Registers));
 }
 
 bool MipsParser::parseRspCop2Register(Parser& parser, MipsRegisterValue& dest)
@@ -1047,6 +1096,9 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 		case 'S':	// float register
 			CHECK(parseFpuRegister(parser,registers.frs));
 			break;
+		case 'z':	// cop0 register
+			CHECK(parseCop0Register(parser,registers.grd));
+			break;
 		case 'v':	// psp vfpu reg
 			if (*encoding == 'S')
 			{
@@ -1119,22 +1171,25 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			CHECK(parseRegister(parser,tempRegister));
 			CHECK(tempRegister.num == *encoding++);
 			break;
-		case 'R':	// rsp vector register or element
+		case 'R':	// rsp register
 			switch (*encoding++)
 			{
-			case 't':	// register
+			case 'z':	// cop0 register
+				CHECK(parseRspCop0Register(parser,registers.grd));
+				break;
+			case 't':	// vector register
 				CHECK(parseRspCop2Register(parser,registers.rspvrt));
 				break;
-			case 'd':	// register
+			case 'd':	// vector register
 				CHECK(parseRspCop2Register(parser,registers.rspvrd));
 				break;
-			case 's':	// register
+			case 's':	// vector register
 				CHECK(parseRspCop2Register(parser,registers.rspvrs));
 				break;
-			case 'e':	// element
+			case 'e':	// vector element
 				CHECK(parseRspCop2Element(parser,registers.rspve));
 				break;
-			case 'x':	// destination element
+			case 'x':	// vector destination element
 				CHECK(parseRspCop2Element(parser,registers.rspvde));
 				break;
 			default:
