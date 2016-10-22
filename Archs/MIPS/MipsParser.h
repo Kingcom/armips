@@ -17,7 +17,7 @@ public:
 	CMipsInstruction* parseOpcode(Parser& parser);
 	CAssemblerCommand* parseMacro(Parser& parser);
 private:
-	bool parseRegisterNumber(Parser& parser, MipsRegisterValue& dest);
+	bool parseRegisterNumber(Parser& parser, MipsRegisterValue& dest, int numValues);
 	bool parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);
 	bool parseRegister(Parser& parser, MipsRegisterValue& dest);
 	bool parseFpuRegister(Parser& parser, MipsRegisterValue& dest);
@@ -26,6 +26,7 @@ private:
 	bool parseRspCop0Register(Parser& parser, MipsRegisterValue& dest);
 	bool parseRspCop2Register(Parser& parser, MipsRegisterValue& dest);
 	bool parseRspCop2Element(Parser& parser, MipsRegisterValue& dest);
+	bool parseRspCop2ScalarElement(Parser& parser, MipsRegisterValue& dest);
 	bool parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int size);
 	bool parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg);
 	bool parseImmediate(Parser& parser, Expression& dest);
