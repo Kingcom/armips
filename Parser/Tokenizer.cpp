@@ -421,6 +421,10 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
 		{
 			base = 8;
 			start += 2;
+		} else if (tolower(currentLine[start+1]) == 'b')
+		{
+			base = 2;
+			start += 2;
 		}
 	}
 
