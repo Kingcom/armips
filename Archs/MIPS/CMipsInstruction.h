@@ -4,7 +4,7 @@
 #include "MipsOpcodes.h"
 #include "Core/Expression.h"
 
-enum class MipsRegisterType { Normal, Float, Cop0, Ps2Cop2, VfpuVector, VfpuMatrix, RspCop0, RspCop2Vector, RspCop2VectorElement };
+enum class MipsRegisterType { Normal, Float, Cop0, Ps2Cop2, VfpuVector, VfpuMatrix, RspCop0, RspVector, RspElement, RspScalarElement };
 
 enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
 	Immediate20_0, ImmediateHalfFloat, Immediate7, Ext, Ins, Cop2BranchType };
