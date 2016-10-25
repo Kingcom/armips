@@ -80,7 +80,7 @@ const MipsRegisterDescriptor mipsRspCop0Registers[] = {
 	{ L"dpc_tmem", 15 },
 };
 
-const MipsRegisterDescriptor mipsRspCop2Registers[] = {
+const MipsRegisterDescriptor mipsRspVectorRegisters[] = {
 	{ L"v0", 0 },		{ L"v1", 1 },		{ L"v2", 2 },		{ L"v3", 3 },
 	{ L"v4", 4 },		{ L"v5", 5 },		{ L"v6", 6 },		{ L"v7", 7 },
 	{ L"v8", 8 },		{ L"v9", 9 },		{ L"v00", 0 },		{ L"v01", 1 },
@@ -92,16 +92,6 @@ const MipsRegisterDescriptor mipsRspCop2Registers[] = {
 	{ L"v22", 22 },		{ L"v23", 23 },		{ L"v24", 24 },		{ L"v25", 25 },
 	{ L"v26", 26 },		{ L"v27", 27 },		{ L"v28", 28 },		{ L"v29", 29 },
 	{ L"v30", 30 },		{ L"v31", 31 },
-};
-
-const MipsRegisterDescriptor mipsRspCop2Elements[] = {
-	{ L"e0", 0 },		{ L"e1", 1 },		{ L"e2", 2 },		{ L"e3", 3 },
-	{ L"e4", 4 },		{ L"e5", 5 },		{ L"e6", 6 },		{ L"e7", 7 },
-	{ L"e8", 8 },		{ L"e9", 9 },		{ L"e00", 0 },		{ L"e01", 1 },
-	{ L"e02", 2 },		{ L"e03", 3 },		{ L"e04", 4 },		{ L"e05", 5 },
-	{ L"e06", 6 },		{ L"e07", 7 },		{ L"e08", 8 },		{ L"e09", 9 },
-	{ L"e10", 10 },		{ L"e11", 11 },		{ L"e12", 12 },		{ L"e13", 13 },
-	{ L"e14", 14 },		{ L"e15", 15 },
 };
 
 CAssemblerCommand* parseDirectiveResetDelay(Parser& parser, int flags)
@@ -182,15 +172,15 @@ CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
 	return parser.parseDirective(mipsDirectives);
 }
 
-bool MipsParser::parseRegisterNumber(Parser& parser, MipsRegisterValue& dest){
-
+bool MipsParser::parseRegisterNumber(Parser& parser, MipsRegisterValue& dest, int numValues)
+{
 	// check for $0 and $1
 	if (parser.peekToken().type == TokenType::Dollar)
 	{
 		const Token& number = parser.peekToken(1);
-		if (number.type == TokenType::Integer && number.intValue <= 31)
+		if (number.type == TokenType::Integer && number.intValue < numValues)
 		{
-			dest.name = formatString(L"$%d",number.intValue);
+			dest.name = formatString(L"$%d", number.intValue);
 			dest.num = (int) number.intValue;
 
 			parser.eatTokens(2);
@@ -232,7 +222,7 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Normal;
 
-	if(parseRegisterNumber(parser,dest))
+	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
 	return parseRegisterTable(parser,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
@@ -248,7 +238,7 @@ bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Cop0;
 
-	if(parseRegisterNumber(parser,dest))
+	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
 	return parseRegisterTable(parser,dest,mipsCop0Registers,ARRAY_SIZE(mipsCop0Registers));
@@ -264,24 +254,92 @@ bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::RspCop0;
 
-	if(parseRegisterNumber(parser,dest))
+	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
 	return parseRegisterTable(parser,dest,mipsRspCop0Registers,ARRAY_SIZE(mipsRspCop0Registers));
 }
 
-bool MipsParser::parseRspCop2Register(Parser& parser, MipsRegisterValue& dest)
+bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
 {
-	dest.type = MipsRegisterType::RspCop2Vector;
-	return parseRegisterTable(parser,dest,mipsRspCop2Registers,ARRAY_SIZE(mipsRspCop2Registers));
+	dest.type = MipsRegisterType::RspVector;
+	return parseRegisterTable(parser,dest,mipsRspVectorRegisters,ARRAY_SIZE(mipsRspVectorRegisters));
 }
 
-bool MipsParser::parseRspCop2Element(Parser& parser, MipsRegisterValue& dest)
+bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest)
 {
-	dest.type = MipsRegisterType::RspCop2VectorElement;
-	return parseRegisterTable(parser,dest,mipsRspCop2Elements,ARRAY_SIZE(mipsRspCop2Elements));
+	CHECK(parseRspVectorRegister(parser, dest));
+
+	edest.type = MipsRegisterType::RspElement;
+
+	if (parser.peekToken().type == TokenType::LBrack)
+	{
+		static const MipsRegisterDescriptor rspElementNames[] = {
+			{ L"0q", 2 },		{ L"1q", 3 },		{ L"0h", 4 },		{ L"1h", 5 },
+			{ L"2h", 6 },		{ L"3h", 7 },		{ L"0w", 8 },		{ L"0", 8 },
+			{ L"1w", 9 },		{ L"1", 9 },		{ L"2w", 10 },		{ L"2", 10 },
+			{ L"3w", 11 },		{ L"3", 11 },		{ L"4w", 12 },		{ L"4", 12 },
+			{ L"5w", 13 },		{ L"5", 13 },		{ L"6w", 14 },		{ L"6", 14 },
+			{ L"7w", 15 },		{ L"7", 15 },
+		};
+
+		parser.eatToken();
+
+		if (parseRegisterNumber(parser, edest, 16))
+			return parser.nextToken().type == TokenType::RBrack;
+
+		const Token& token = parser.nextToken();
+
+		if (token.type != TokenType::Integer && token.type != TokenType::NumberString)
+			return false;
+
+		//ignore the numerical values, just use the original text as an identifier
+		std::wstring stringValue = token.getOriginalText();
+		if (std::any_of(stringValue.begin(), stringValue.end(), iswupper))
+		{
+			std::transform(stringValue.begin(), stringValue.end(), stringValue.begin(), towlower);
+		}
+
+		for (size_t i = 0; i < ARRAY_SIZE(rspElementNames); i++)
+		{
+			if (stringValue == rspElementNames[i].name)
+			{
+				edest.num = rspElementNames[i].num;
+				edest.name = rspElementNames[i].name;
+
+				return parser.nextToken().type == TokenType::RBrack;
+			}
+		}
+
+		return false;
+	} else
+	{
+		edest.num = 0;
+		edest.name = L"";
+
+		return true;
+	}
 }
 
+bool MipsParser::parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest)
+{
+	CHECK(parseRspVectorRegister(parser, dest));
+
+	edest.type = MipsRegisterType::RspScalarElement;
+
+	if (parser.nextToken().type != TokenType::LBrack)
+		return false;
+
+	const Token &token = parser.nextToken();
+
+	if (token.type != TokenType::Integer || token.intValue >= 8)
+		return false;
+
+	edest.name = formatString(L"%d", token.intValue);
+	edest.num = (int) token.intValue;
+
+	return parser.nextToken().type == TokenType::RBrack;
+}
 
 static bool decodeDigit(wchar_t digit, int& dest)
 {
@@ -445,10 +503,6 @@ bool MipsParser::matchSymbol(Parser& parser, wchar_t symbol)
 		return parser.matchToken(TokenType::RParen);
 	case ',':
 		return parser.matchToken(TokenType::Comma);
-	case '[':
-		return parser.matchToken(TokenType::LBrack);
-	case ']':
-		return parser.matchToken(TokenType::RBrack);
 	}
 
 	return false;
@@ -1038,15 +1092,18 @@ void MipsParser::setOmittedRegisters(const tMipsOpcode& opcode)
 	// copy over omitted registers
 	if (opcode.flags & MO_RSD)
 		registers.grd = registers.grs;
-	
+
 	if (opcode.flags & MO_RST)
 		registers.grt = registers.grs;
-	
+
 	if (opcode.flags & MO_RDT)
 		registers.grt = registers.grd;
-	
+
 	if (opcode.flags & MO_FRSD)
 		registers.frd = registers.frs;
+
+	if (opcode.flags & MO_RSPVRSD)
+		registers.rspvrd = registers.rspvrs;
 }
 
 bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
@@ -1175,22 +1232,25 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			switch (*encoding++)
 			{
 			case 'z':	// cop0 register
-				CHECK(parseRspCop0Register(parser,registers.grd));
+				CHECK(parseRspVectorRegister(parser,registers.grd));
 				break;
-			case 't':	// vector register
-				CHECK(parseRspCop2Register(parser,registers.rspvrt));
+			case 't':	// vector register with element
+				CHECK(parseRspElemVectorRegister(parser,registers.rspvrt,registers.rspve));
 				break;
 			case 'd':	// vector register
-				CHECK(parseRspCop2Register(parser,registers.rspvrd));
+				CHECK(parseRspVectorRegister(parser,registers.rspvrd));
 				break;
 			case 's':	// vector register
-				CHECK(parseRspCop2Register(parser,registers.rspvrs));
+				CHECK(parseRspVectorRegister(parser,registers.rspvrs));
 				break;
-			case 'e':	// vector element
-				CHECK(parseRspCop2Element(parser,registers.rspve));
+			case 'S':	// vector register with element
+				CHECK(parseRspElemVectorRegister(parser,registers.rspvrs,registers.rspve));
 				break;
-			case 'x':	// vector destination element
-				CHECK(parseRspCop2Element(parser,registers.rspvde));
+			case 'l':	// vector scalar register
+				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve));
+				break;
+			case 'm':	// vector scalar destination register
+				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrd,registers.rspvde));
 				break;
 			default:
 				return false;
