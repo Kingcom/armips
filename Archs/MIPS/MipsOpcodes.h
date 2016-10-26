@@ -1,19 +1,19 @@
 #pragma once
 #include "Mips.h"
 
-#define MA_MIPS1			0x0000001
-#define MA_MIPS2			0x0000002
-#define MA_MIPS3			0x0000004
-#define MA_MIPS4			0x0000008
-#define MA_PS2				0x0000010
-#define MA_PSP				0x0000020
-#define MA_RSP				0x0000040
+#define MA_MIPS1		0x0000001
+#define MA_MIPS2		0x0000002
+#define MA_MIPS3		0x0000004
+#define MA_MIPS4		0x0000008
+#define MA_PS2			0x0000010
+#define MA_PSP			0x0000020
+#define MA_RSP			0x0000040
 
-#define MA_EXPSX			0x0000100
-#define MA_EXN64			0x0000200
-#define MA_EXPS2			0x0000400
-#define MA_EXPSP			0x0000800
-#define MA_EXRSP			0x0001000
+#define MA_EXPSX		0x0000100
+#define MA_EXN64		0x0000200
+#define MA_EXPS2		0x0000400
+#define MA_EXPSP		0x0000800
+#define MA_EXRSP		0x0001000
 
 #define MO_IPCA			0x00000001	// pc >> 2
 #define MO_IPCR			0x00000002	// PC, -> difference >> 2
@@ -37,7 +37,8 @@
 #define MO_VFPU_PAIR	0x00080000	// pair vfpu reg
 #define MO_VFPU_TRIPLE	0x00100000	// triple vfpu reg
 #define MO_RSP_VEALT	0x00200000	// rsp alternative vector element placement
-#define MO_RSPVRSD		0x0040000	// rsp vector rs + rd
+#define MO_RSPVRSD		0x00400000	// rsp vector rs + rd
+#define MO_DFPU			0x00800000	// double-precision fpu opcodes
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
@@ -59,7 +60,9 @@
 #define MIPS_COP1(VALUE)				(MIPS_OP(17) | MIPS_RS(VALUE))
 #define MIPS_COP1BC(VALUE)				(MIPS_COP1(8) | MIPS_RT(VALUE))
 #define MIPS_COP1S(VALUE)				(MIPS_COP1(16) | MIPS_FUNC(VALUE))
+#define MIPS_COP1D(VALUE)				(MIPS_COP1(17) | MIPS_FUNC(VALUE))
 #define MIPS_COP1W(VALUE)				(MIPS_COP1(20) | MIPS_FUNC(VALUE))
+#define MIPS_COP1L(VALUE)				(MIPS_COP1(21) | MIPS_FUNC(VALUE))
 
 #define MIPS_VFPUSIZE(VALUE)			( (((VALUE) & 1) << 7) | (((VALUE) & 2) << 14) )
 #define MIPS_VFPUFUNC(VALUE)			BITFIELD(23, 3, (VALUE))
