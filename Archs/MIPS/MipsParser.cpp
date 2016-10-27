@@ -1232,7 +1232,7 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			switch (*encoding++)
 			{
 			case 'z':	// cop0 register
-				CHECK(parseRspVectorRegister(parser,registers.grd));
+				CHECK(parseRspCop0Register(parser,registers.grd));
 				break;
 			case 't':	// vector register with element
 				CHECK(parseRspElemVectorRegister(parser,registers.rspvrt,registers.rspve));
