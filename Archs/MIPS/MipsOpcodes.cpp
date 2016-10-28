@@ -135,8 +135,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "lv.s",	"vt,(s)",			MIPS_OP(0x32),			MA_PSP,		MO_VFPU_SINGLE|MO_VFPU_MIXED },
 	{ "lld",	"t,i16(s)",			MIPS_OP(0x34),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "lld",	"t,(s)",			MIPS_OP(0x34),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
-	{ "ldc1",	"T,i16(s)",			MIPS_OP(0x35),			MA_MIPS2|MA_EXPS2|MA_EXPSP,	0 },
-	{ "ldc1",	"T,(s)",			MIPS_OP(0x35),			MA_MIPS2|MA_EXPS2|MA_EXPSP,	0 },
+	{ "ldc1",	"T,i16(s)",			MIPS_OP(0x35),			MA_MIPS2,	MO_DFPU },
+	{ "ldc1",	"T,(s)",			MIPS_OP(0x35),			MA_MIPS2,	MO_DFPU },
 	{ "ulv.q",	"vt,i16(s)",		MIPS_OP(0x35),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_IMMALIGNED },
 	{ "ulv.q",	"vt,(s)",			MIPS_OP(0x35),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED },
 	{ "lvl.q",	"vt,i16(s)",		MIPS_OP(0x35),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
@@ -156,8 +156,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "sv.s",	"vt,(s)",			MIPS_OP(0x3A),			MA_PSP,		MO_VFPU_SINGLE|MO_VFPU_MIXED },
 	{ "scd",	"t,i16(s)",			MIPS_OP(0x3C),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
 	{ "scd",	"t,(s)",			MIPS_OP(0x3C),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
-	{ "sdc1",	"T,i16(s)",			MIPS_OP(0x3D),			MA_MIPS2|MA_EXPS2|MA_EXPSP,	0 },
-	{ "sdc1",	"T,(s)",			MIPS_OP(0x3D),			MA_MIPS2|MA_EXPS2|MA_EXPSP,	0 },
+	{ "sdc1",	"T,i16(s)",			MIPS_OP(0x3D),			MA_MIPS2,	MO_DFPU },
+	{ "sdc1",	"T,(s)",			MIPS_OP(0x3D),			MA_MIPS2,	MO_DFPU },
 	{ "usv.q",	"vt,i16(s)",		MIPS_OP(0x3D),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_IMMALIGNED },
 	{ "usv.q",	"vt,(s)",			MIPS_OP(0x3D),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED },
 	{ "svl.q",	"vt,i16(s)",		MIPS_OP(0x3D),			MA_PSP,		MO_VFPU_QUAD|MO_VFPU_MIXED|MO_VFPU_6BIT|MO_IMMALIGNED },
@@ -373,12 +373,12 @@ const tMipsOpcode MipsOpcodes[] = {
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 
-	{ "mfc1",	"t,S",		MIPS_COP1(0x00),				MA_MIPS2,	0 },
-	{ "dmfc1",	"t,S",		MIPS_COP1(0x01),				MA_MIPS3,	MO_64BIT },
-	{ "cfc1",	"t,S",		MIPS_COP1(0x02),				MA_MIPS2,	0 },
-	{ "mtc1",	"t,S",		MIPS_COP1(0x04),				MA_MIPS2,	0 },
-	{ "dmtc1",	"t,S",		MIPS_COP1(0x05),				MA_MIPS3,	MO_64BIT },
-	{ "ctc1",	"t,S",		MIPS_COP1(0x06),				MA_MIPS2,	0 },
+	{ "mfc1",	"t,S",		MIPS_COP1(0x00),				MA_MIPS1,	MO_FPU },
+	{ "dmfc1",	"t,S",		MIPS_COP1(0x01),				MA_MIPS3,	MO_DFPU|MO_64BIT },
+	{ "cfc1",	"t,S",		MIPS_COP1(0x02),				MA_MIPS1,	MO_FPU },
+	{ "mtc1",	"t,S",		MIPS_COP1(0x04),				MA_MIPS1,	MO_FPU },
+	{ "dmtc1",	"t,S",		MIPS_COP1(0x05),				MA_MIPS3,	MO_DFPU|MO_64BIT },
+	{ "ctc1",	"t,S",		MIPS_COP1(0x06),				MA_MIPS1,	MO_FPU },
 
 //     31---------26----------20-------16------------------------------0
 //     |=    COP1BC|          |   rt    |                              |
@@ -389,73 +389,131 @@ const tMipsOpcode MipsOpcodes[] = {
 //  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "bc1f",	"i26",		MIPS_COP1BC(0x00),				MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
-	{ "bc1t",	"i26",		MIPS_COP1BC(0x01),				MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
-	{ "bc1fl",	"i26",		MIPS_COP1BC(0x02),				MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
-	{ "bc1tl",	"i26",		MIPS_COP1BC(0x03),				MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1f",	"i26",		MIPS_COP1BC(0x00),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1t",	"i26",		MIPS_COP1BC(0x01),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1fl",	"i26",		MIPS_COP1BC(0x02),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1tl",	"i26",		MIPS_COP1BC(0x03),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
 
 //     31--------------------21-------------------------------5--------0
 //     |=                COP1S|                              | function|
 //     -----11----------------------------------------------------6-----
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
 // 000 |  add  |  sub  |  mul  |  div  | sqrt  |  abs  |  mov  |  neg  | 00..07
-// 001 |  ---  |  ---  |  ---  |  ---  |round.w|trunc.w|ceil.w |floor.w| 08..0F
+// 001 |round.l|trunc.l|ceil.l |floor.l|round.w|trunc.w|ceil.w |floor.w| 08..0F
 // 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | rsqrt |  ---  | 10..17
-// 011 |  adda |  suba | mula  |  ---  | madd  |  msub | madda | msuba | 18..1F
-// 100 |  ---  |  ---  |  ---  |  ---  | cvt.w |  ---  |  ---  |  ---  | 20..27
+// 011 | adda  | suba  | mula  |  ---  | madd  | msub  | madda | msuba | 18..1F
+// 100 |  ---  | cvt.d |  ---  |  ---  | cvt.w | cvt.l |  ---  |  ---  | 20..27
 // 101 |  max  |  min  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 28..2F
 // 110 |  c.f  | c.un  | c.eq  | c.ueq |c.(o)lt| c.ult |c.(o)le| c.ule | 30..37
 // 110 |  c.sf | c.ngle| c.seq | c.ngl | c.lt  | c.nge | c.le  | c.ngt | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "add.s",		"D,S,T",	MIPS_COP1S(0x00),			MA_MIPS2,	0 },
-	{ "add.s",		"S,T",		MIPS_COP1S(0x00),			MA_MIPS2,	MO_FRSD },
-	{ "sub.s",		"D,S,T",	MIPS_COP1S(0x01),			MA_MIPS2,	0 },
-	{ "sub.s",		"S,T",		MIPS_COP1S(0x01),			MA_MIPS2,	MO_FRSD },
-	{ "mul.s",		"D,S,T",	MIPS_COP1S(0x02),			MA_MIPS2,	0 },
-	{ "mul.s",		"S,T",		MIPS_COP1S(0x02),			MA_MIPS2,	MO_FRSD },
-	{ "div.s",		"D,S,T",	MIPS_COP1S(0x03),			MA_MIPS2,	0 },
-	{ "div.s",		"S,T",		MIPS_COP1S(0x03),			MA_MIPS2,	MO_FRSD },
-	{ "sqrt.s",		"D,S",		MIPS_COP1S(0x04),			MA_MIPS2,	0 },
-	{ "abs.s",		"D,S",		MIPS_COP1S(0x05),			MA_MIPS2,	0 },
-	{ "mov.s",		"D,S",		MIPS_COP1S(0x06),			MA_MIPS2,	0 },
-	{ "neg.s",		"D,S",		MIPS_COP1S(0x07),			MA_MIPS2,	0 },
-	{ "round.w.s",	"D,S",		MIPS_COP1S(0x0C),			MA_PSP,	0 },
-	{ "trunc.w.s",	"D,S",		MIPS_COP1S(0x0D),			MA_PSP,	0 },
-	{ "ceil.w.s",	"D,S",		MIPS_COP1S(0x0E),			MA_PSP,	0 },
-	{ "floor.w.s",	"D,S",		MIPS_COP1S(0x0F),			MA_PSP,	0 },
-	{ "rsqrt.w.s",	"D,S",		MIPS_COP1S(0x16),			MA_PS2,	0 },
-	{ "adda.s",		"S,T",		MIPS_COP1S(0x18),			MA_PS2,	0 },
-	{ "suba.s",		"S,T",		MIPS_COP1S(0x19),			MA_PS2,	0 },
-	{ "mula.s",		"S,T",		MIPS_COP1S(0x1A),			MA_PS2,	0 },
-	{ "madd.s",		"D,S,T",	MIPS_COP1S(0x1C),			MA_PS2,	0 },
-	{ "madd.s",		"S,T",		MIPS_COP1S(0x1C),			MA_PS2,	MO_FRSD },
-	{ "msub.s",		"D,S,T",	MIPS_COP1S(0x1D),			MA_PS2,	0 },
-	{ "msub.s",		"S,T",		MIPS_COP1S(0x1D),			MA_PS2,	MO_FRSD },
-	{ "madda.s",	"S,T",		MIPS_COP1S(0x1E),			MA_PS2,	0 },
-	{ "msuba.s",	"S,T",		MIPS_COP1S(0x1F),			MA_PS2,	0 },
-	{ "cvt.w.s",	"D,S",		MIPS_COP1S(0x24),			MA_MIPS2,	0 },
-	{ "max.s",		"D,S,T",	MIPS_COP1S(0x28),			MA_PS2,	0 },
-	{ "min.s",		"D,S,T",	MIPS_COP1S(0x29),			MA_PS2,	0 },
-	{ "c.f.s",		"S,T",		MIPS_COP1S(0x30),			MA_MIPS2,	0 },
-	{ "c.un.s",		"S,T",		MIPS_COP1S(0x31),			MA_PSP,	0 },
-	{ "c.eq.s",		"S,T",		MIPS_COP1S(0x32),			MA_MIPS2,	0 },
-	{ "c.ueq.s",	"S,T",		MIPS_COP1S(0x33),			MA_PSP,	0 },
-	{ "c.olt.s",	"S,T",		MIPS_COP1S(0x34),			MA_PSP,	0 },
-	{ "c.lt.s",		"S,T",		MIPS_COP1S(0x34),			MA_PS2,	0 },
-	{ "c.ult.s",	"S,T",		MIPS_COP1S(0x35),			MA_PSP,	0 },
-	{ "c.ole.s",	"S,T",		MIPS_COP1S(0x36),			MA_PSP,	0 },
-	{ "c.le.s",		"S,T",		MIPS_COP1S(0x36),			MA_PS2,	0 },
-	{ "c.ule.s",	"S,T",		MIPS_COP1S(0x37),			MA_PSP,	0 },
-	{ "c.sf.s",		"S,T",		MIPS_COP1S(0x38),			MA_PSP,	0 },
-	{ "c.ngle.s",	"S,T",		MIPS_COP1S(0x39),			MA_PSP,	0 },
-	{ "c.seq.s",	"S,T",		MIPS_COP1S(0x3A),			MA_PSP,	0 },
-	{ "c.ngl.s",	"S,T",		MIPS_COP1S(0x3B),			MA_PSP,	0 },
-	{ "c.lt.s",		"S,T",		MIPS_COP1S(0x3C),			MA_PSP,	0 },
-	{ "c.nge.s",	"S,T",		MIPS_COP1S(0x3D),			MA_PSP,	0 },
-	{ "c.le.s",		"S,T",		MIPS_COP1S(0x3E),			MA_PSP,	0 },
-	{ "c.ngt.s",	"S,T",		MIPS_COP1S(0x3F),			MA_PSP,	0 },
+	{ "add.s",		"D,S,T",	MIPS_COP1S(0x00),			MA_MIPS1,	MO_FPU },
+	{ "add.s",		"S,T",		MIPS_COP1S(0x00),			MA_MIPS1,	MO_FPU|MO_FRSD },
+	{ "sub.s",		"D,S,T",	MIPS_COP1S(0x01),			MA_MIPS1,	MO_FPU },
+	{ "sub.s",		"S,T",		MIPS_COP1S(0x01),			MA_MIPS1,	MO_FPU|MO_FRSD },
+	{ "mul.s",		"D,S,T",	MIPS_COP1S(0x02),			MA_MIPS1,	MO_FPU },
+	{ "mul.s",		"S,T",		MIPS_COP1S(0x02),			MA_MIPS1,	MO_FPU|MO_FRSD },
+	{ "div.s",		"D,S,T",	MIPS_COP1S(0x03),			MA_MIPS1,	MO_FPU },
+	{ "div.s",		"S,T",		MIPS_COP1S(0x03),			MA_MIPS1,	MO_FPU|MO_FRSD },
+	{ "sqrt.s",		"D,S",		MIPS_COP1S(0x04),			MA_MIPS2,	MO_FPU },
+	{ "abs.s",		"D,S",		MIPS_COP1S(0x05),			MA_MIPS1,	MO_FPU },
+	{ "mov.s",		"D,S",		MIPS_COP1S(0x06),			MA_MIPS1,	MO_FPU },
+	{ "neg.s",		"D,S",		MIPS_COP1S(0x07),			MA_MIPS1,	MO_FPU },
+	{ "round.l.s",	"D,S",		MIPS_COP1S(0x08),			MA_MIPS3,	MO_DFPU },
+	{ "trunc.l.s",	"D,S",		MIPS_COP1S(0x09),			MA_MIPS3,	MO_DFPU },
+	{ "ceil.l.s",	"D,S",		MIPS_COP1S(0x0A),			MA_MIPS3,	MO_DFPU },
+	{ "floor.l.s",	"D,S",		MIPS_COP1S(0x0B),			MA_MIPS3,	MO_DFPU },
+	{ "round.w.s",	"D,S",		MIPS_COP1S(0x0C),			MA_MIPS2|MA_EXPS2,	MO_FPU },
+	{ "trunc.w.s",	"D,S",		MIPS_COP1S(0x0D),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "ceil.w.s",	"D,S",		MIPS_COP1S(0x0E),			MA_MIPS2|MA_EXPS2,	MO_FPU },
+	{ "floor.w.s",	"D,S",		MIPS_COP1S(0x0F),			MA_MIPS2|MA_EXPS2,	MO_FPU },
+	{ "rsqrt.w.s",	"D,S",		MIPS_COP1S(0x16),			MA_PS2,		0 },
+	{ "adda.s",		"S,T",		MIPS_COP1S(0x18),			MA_PS2,		0 },
+	{ "suba.s",		"S,T",		MIPS_COP1S(0x19),			MA_PS2,		0 },
+	{ "mula.s",		"S,T",		MIPS_COP1S(0x1A),			MA_PS2,		0 },
+	{ "madd.s",		"D,S,T",	MIPS_COP1S(0x1C),			MA_PS2,		0 },
+	{ "madd.s",		"S,T",		MIPS_COP1S(0x1C),			MA_PS2,		MO_FRSD },
+	{ "msub.s",		"D,S,T",	MIPS_COP1S(0x1D),			MA_PS2,		0 },
+	{ "msub.s",		"S,T",		MIPS_COP1S(0x1D),			MA_PS2,		MO_FRSD },
+	{ "madda.s",	"S,T",		MIPS_COP1S(0x1E),			MA_PS2,		0 },
+	{ "msuba.s",	"S,T",		MIPS_COP1S(0x1F),			MA_PS2,		0 },
+	{ "cvt.d.s",	"D,S",		MIPS_COP1S(0x21),			MA_MIPS1,	MO_DFPU },
+	{ "cvt.w.s",	"D,S",		MIPS_COP1S(0x24),			MA_MIPS1,	MO_FPU },
+	{ "cvt.l.s",	"D,S",		MIPS_COP1S(0x25),			MA_MIPS3,	MO_DFPU },
+	{ "max.s",		"D,S,T",	MIPS_COP1S(0x28),			MA_PS2,		0 },
+	{ "min.s",		"D,S,T",	MIPS_COP1S(0x29),			MA_PS2,		0 },
+	{ "c.f.s",		"S,T",		MIPS_COP1S(0x30),			MA_MIPS1,	MO_FPU },
+	{ "c.un.s",		"S,T",		MIPS_COP1S(0x31),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.eq.s",		"S,T",		MIPS_COP1S(0x32),			MA_MIPS1,	MO_FPU },
+	{ "c.ueq.s",	"S,T",		MIPS_COP1S(0x33),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.olt.s",	"S,T",		MIPS_COP1S(0x34),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.lt.s",		"S,T",		MIPS_COP1S(0x34),			MA_PS2,		0 },
+	{ "c.ult.s",	"S,T",		MIPS_COP1S(0x35),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.ole.s",	"S,T",		MIPS_COP1S(0x36),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.le.s",		"S,T",		MIPS_COP1S(0x36),			MA_PS2,		0 },
+	{ "c.ule.s",	"S,T",		MIPS_COP1S(0x37),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.sf.s",		"S,T",		MIPS_COP1S(0x38),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.ngle.s",	"S,T",		MIPS_COP1S(0x39),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.seq.s",	"S,T",		MIPS_COP1S(0x3A),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.ngl.s",	"S,T",		MIPS_COP1S(0x3B),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.lt.s",		"S,T",		MIPS_COP1S(0x3C),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.nge.s",	"S,T",		MIPS_COP1S(0x3D),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.le.s",		"S,T",		MIPS_COP1S(0x3E),			MA_MIPS1|MA_EXPS2,	MO_FPU },
+	{ "c.ngt.s",	"S,T",		MIPS_COP1S(0x3F),			MA_MIPS1|MA_EXPS2,	MO_FPU },
 
-//     COP1W: encoded by function field
+//     31--------------------21-------------------------------5--------0
+//     |=                COP1D|                              | function|
+//     -----11----------------------------------------------------6-----
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+// 000 |  add  |  sub  |  mul  |  div  | sqrt  |  abs  |  mov  |  neg  | 00..07
+// 001 |round.l|trunc.l|ceil.l |floor.l|round.w|trunc.w|ceil.w |floor.w| 08..0F
+// 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
+// 011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  --- | 18..1F
+// 100 | cvt.s |  ---  |  ---  |  ---  | cvt.w | cvt.l |  ---  |  ---  | 20..27
+// 101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 28..2F
+// 110 |  c.f  | c.un  | c.eq  | c.ueq |c.(o)lt| c.ult |c.(o)le| c.ule | 30..37
+// 110 |  c.sf | c.ngle| c.seq | c.ngl | c.lt  | c.nge | c.le  | c.ngt | 38..3F
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "add.d",		"D,S,T",	MIPS_COP1D(0x00),			MA_MIPS1,	MO_DFPU },
+	{ "add.d",		"S,T",		MIPS_COP1D(0x00),			MA_MIPS1,	MO_DFPU|MO_FRSD },
+	{ "sub.d",		"D,S,T",	MIPS_COP1D(0x01),			MA_MIPS1,	MO_DFPU },
+	{ "sub.d",		"S,T",		MIPS_COP1D(0x01),			MA_MIPS1,	MO_DFPU|MO_FRSD },
+	{ "mul.d",		"D,S,T",	MIPS_COP1D(0x02),			MA_MIPS1,	MO_DFPU },
+	{ "mul.d",		"S,T",		MIPS_COP1D(0x02),			MA_MIPS1,	MO_DFPU|MO_FRSD },
+	{ "div.d",		"D,S,T",	MIPS_COP1D(0x03),			MA_MIPS1,	MO_DFPU },
+	{ "div.d",		"S,T",		MIPS_COP1D(0x03),			MA_MIPS1,	MO_DFPU|MO_FRSD },
+	{ "sqrt.d",		"D,S",		MIPS_COP1D(0x04),			MA_MIPS2,	MO_DFPU },
+	{ "abs.d",		"D,S",		MIPS_COP1D(0x05),			MA_MIPS1,	MO_DFPU },
+	{ "mov.d",		"D,S",		MIPS_COP1D(0x06),			MA_MIPS1,	MO_DFPU },
+	{ "neg.d",		"D,S",		MIPS_COP1D(0x07),			MA_MIPS1,	MO_DFPU },
+	{ "round.l.d",	"D,S",		MIPS_COP1D(0x08),			MA_MIPS3,	MO_DFPU },
+	{ "trunc.l.d",	"D,S",		MIPS_COP1D(0x09),			MA_MIPS3,	MO_DFPU },
+	{ "ceil.l.d",	"D,S",		MIPS_COP1D(0x0A),			MA_MIPS3,	MO_DFPU },
+	{ "floor.l.d",	"D,S",		MIPS_COP1D(0x0B),			MA_MIPS3,	MO_DFPU },
+	{ "round.w.d",	"D,S",		MIPS_COP1D(0x0C),			MA_MIPS2,	MO_DFPU },
+	{ "trunc.w.d",	"D,S",		MIPS_COP1D(0x0D),			MA_MIPS1,	MO_DFPU },
+	{ "ceil.w.d",	"D,S",		MIPS_COP1D(0x0E),			MA_MIPS2,	MO_DFPU },
+	{ "floor.w.d",	"D,S",		MIPS_COP1D(0x0F),			MA_MIPS2,	MO_DFPU },
+	{ "cvt.s.d",	"D,S",		MIPS_COP1D(0x20),			MA_MIPS1,	MO_DFPU },
+	{ "cvt.w.d",	"D,S",		MIPS_COP1D(0x24),			MA_MIPS1,	MO_DFPU },
+	{ "cvt.l.d",	"D,S",		MIPS_COP1D(0x25),			MA_MIPS3,	MO_DFPU },
+	{ "c.f.d",		"S,T",		MIPS_COP1D(0x30),			MA_MIPS1,	MO_DFPU },
+	{ "c.un.d",		"S,T",		MIPS_COP1D(0x31),			MA_MIPS1,	MO_DFPU },
+	{ "c.eq.d",		"S,T",		MIPS_COP1D(0x32),			MA_MIPS1,	MO_DFPU },
+	{ "c.ueq.d",	"S,T",		MIPS_COP1D(0x33),			MA_MIPS1,	MO_DFPU },
+	{ "c.olt.d",	"S,T",		MIPS_COP1D(0x34),			MA_MIPS1,	MO_DFPU },
+	{ "c.ult.d",	"S,T",		MIPS_COP1D(0x35),			MA_MIPS1,	MO_DFPU },
+	{ "c.ole.d",	"S,T",		MIPS_COP1D(0x36),			MA_MIPS1,	MO_DFPU },
+	{ "c.ule.d",	"S,T",		MIPS_COP1D(0x37),			MA_MIPS1,	MO_DFPU },
+	{ "c.sf.d",		"S,T",		MIPS_COP1D(0x38),			MA_MIPS1,	MO_DFPU },
+	{ "c.ngle.d",	"S,T",		MIPS_COP1D(0x39),			MA_MIPS1,	MO_DFPU },
+	{ "c.seq.d",	"S,T",		MIPS_COP1D(0x3A),			MA_MIPS1,	MO_DFPU },
+	{ "c.ngl.d",	"S,T",		MIPS_COP1D(0x3B),			MA_MIPS1,	MO_DFPU },
+	{ "c.lt.d",		"S,T",		MIPS_COP1D(0x3C),			MA_MIPS1,	MO_DFPU },
+	{ "c.nge.d",	"S,T",		MIPS_COP1D(0x3D),			MA_MIPS1,	MO_DFPU },
+	{ "c.le.d",		"S,T",		MIPS_COP1D(0x3E),			MA_MIPS1,	MO_DFPU },
+	{ "c.ngt.d",	"S,T",		MIPS_COP1D(0x3F),			MA_MIPS1,	MO_DFPU },
+
 //     31--------------------21-------------------------------5--------0
 //     |=                COP1W|                              | function|
 //     -----11----------------------------------------------------6-----
@@ -464,12 +522,29 @@ const tMipsOpcode MipsOpcodes[] = {
 // 001 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 08..0F
 // 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 // 011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
-// 100 |cvt.s.w|  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 20..27
+// 100 | cvt.s | cvt.d |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 20..27
 // 101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 28..2F
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 30..37
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "cvt.s.w",	"D,S",		MIPS_COP1W(0x20),			MA_MIPS2,	0 },
+	{ "cvt.s.w",	"D,S",		MIPS_COP1W(0x20),			MA_MIPS1,	MO_FPU },
+	{ "cvt.d.w",	"D,S",		MIPS_COP1W(0x21),			MA_MIPS1,	MO_DFPU },
+
+//     31--------------------21-------------------------------5--------0
+//     |=                COP1L|                              | function|
+//     -----11----------------------------------------------------6-----
+//     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+// 000 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 00..07
+// 001 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 08..0F
+// 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
+// 011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
+// 100 | cvt.s | cvt.d |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 20..27
+// 101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 28..2F
+// 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 30..37
+// 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 38..3F
+//  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+	{ "cvt.s.l",	"D,S",		MIPS_COP1L(0x20),			MA_MIPS3,	MO_DFPU },
+	{ "cvt.d.l",	"D,S",		MIPS_COP1L(0x21),			MA_MIPS3,	MO_DFPU },
 
 //     31---------26---------21----------------------------------------0
 //     |=      COP2|    rs    |                                        |
@@ -949,7 +1024,7 @@ const MipsArchDefinition mipsArchs[] = {
 	// MARCH_PSX
 	{ "PSX",		MA_MIPS1,							MA_EXPSX,	0 },
 	// MARCH_N64
-	{ "N64",		MA_MIPS1|MA_MIPS2|MA_MIPS3,			MA_EXN64,	MO_64BIT|MO_FPU },
+	{ "N64",		MA_MIPS1|MA_MIPS2|MA_MIPS3,			MA_EXN64,	MO_64BIT|MO_FPU|MO_DFPU },
 	// MARCH_PS2
 	{ "PS2",		MA_MIPS1|MA_MIPS2|MA_MIPS3|MA_PS2,	MA_EXPS2,	MO_64BIT|MO_FPU },
 	// MARCH_PSP

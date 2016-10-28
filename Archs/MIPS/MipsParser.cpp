@@ -1348,6 +1348,8 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 			continue;
 		if ((MipsOpcodes[z].flags & MO_FPU) && !(arch.flags & MO_FPU))
 			continue;
+		if ((MipsOpcodes[z].flags & MO_DFPU) && !(arch.flags & MO_DFPU))
+			continue;
 
 		if (decodeOpcode(stringValue,MipsOpcodes[z]) == true)
 		{
