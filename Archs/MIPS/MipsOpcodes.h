@@ -39,6 +39,7 @@
 #define MO_RSP_VEALT	0x00200000	// rsp alternative vector element placement
 #define MO_RSPVRSD		0x00400000	// rsp vector rs + rd
 #define MO_DFPU			0x00800000	// double-precision fpu opcodes
+#define MO_NEGIMM		0x01000000 	// negated immediate (for subi)
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
