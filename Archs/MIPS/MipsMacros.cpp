@@ -70,6 +70,32 @@ CAssemblerCommand* createMacro(Parser& parser, const std::wstring& text, int fla
 	return new MipsMacroCommand(content,flags);
 }
 
+CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+{
+	const wchar_t* templateAbs = LR"(
+		%sraop% 	r1,%rs%,31
+		xor 		%rd%,%rs%,r1
+		%subop% 	%rd%,%rd%,r1
+	)";
+
+	std::wstring sraop, subop;
+
+	switch (flags & MIPSM_ACCESSMASK)
+	{
+	case MIPSM_W:	sraop = L"sra"; subop = L"subu"; break;
+	case MIPSM_DW:	sraop = L"dsra32"; subop = L"dsub"; break;
+	default: return nullptr;
+	}
+
+	std::wstring macroText = preprocessMacro(templateAbs,immediates);
+	return createMacro(parser,macroText,flags, {
+			{ L"%rd%",		registers.grd.name },
+			{ L"%rs%",		registers.grs.name },
+			{ L"%sraop%",	sraop },
+			{ L"%subop%",	subop },
+	});
+}
+
 CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLi = LR"(
@@ -417,6 +443,9 @@ CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& reg
 	I = i2 = 32 bit immediate
 	s,t,d = registers */
 const MipsMacroDefinition mipsMacros[] = {
+	{ L"abs",	L"d,s",		&generateMipsMacroAbs,				MIPSM_W },
+	{ L"dabs",	L"d,s",		&generateMipsMacroAbs,				MIPSM_DW },
+
 	{ L"li",	L"s,I",		&generateMipsMacroLi,				MIPSM_IMM|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"li.u",	L"s,I",		&generateMipsMacroLi,				MIPSM_IMM|MIPSM_UPPER },
 	{ L"li.l",	L"s,I",		&generateMipsMacroLi,				MIPSM_IMM|MIPSM_LOWER },
