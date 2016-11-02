@@ -82,7 +82,7 @@ CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& regist
 
 	switch (flags & MIPSM_ACCESSMASK)
 	{
-	case MIPSM_W:	sraop = L"sra"; subop = L"subu"; break;
+	case MIPSM_W:	sraop = L"sra"; subop = L"sub"; break;
 	case MIPSM_DW:	sraop = L"dsra32"; subop = L"dsub"; break;
 	default: return nullptr;
 	}
