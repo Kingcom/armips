@@ -315,11 +315,15 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 {
 	const wchar_t* selectedTemplate;
 
-	bool bne = (flags & MIPSM_NE) != 0;
-	bool beq = (flags & MIPSM_EQ) != 0;
-	bool beqz = (flags & MIPSM_GE) != 0;
-	bool bnez = (flags & MIPSM_LT) != 0;
+	int type = flags & MIPSM_CONDITIONMASK;
+
+	bool bne = type == MIPSM_NE;
+	bool beq = type == MIPSM_EQ;
+	bool beqz = type == MIPSM_GE || type == MIPSM_GEU;
+	bool bnez = type == MIPSM_LT || type == MIPSM_LTU;
+	bool unsigned_ = type == MIPSM_GEU || type == MIPSM_LTU;
 	bool immediate = (flags & MIPSM_IMM) != 0;
+	bool likely = (flags & MIPSM_LIKELY) != 0;
 
 	std::wstring op;
 	if (bne || beq)
@@ -330,37 +334,47 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 		)";
 
 		selectedTemplate = templateNeEq;
-		op = bne ? L"bne" : L"beq";
+		if(likely)
+			op = bne ? L"bnel" : L"beql";
+		else
+			op = bne ? L"bne" : L"beq";
 	} else if (immediate && (beqz || bnez))
 	{
 		const wchar_t* templateImmediate = LR"(
 			.if %imm% > 0xFFFF
-				li	r1,%imm%
-				slt	r1,%rs%,r1
+				li		r1,%imm%
+				slt%u%	r1,%rs%,r1
 			.else
-				slti	r1,%rs%,%imm%
+				slti%u%	r1,%rs%,%imm%
 			.endif
 			%op%	r1,%dest%
 		)";
 
 		selectedTemplate = templateImmediate;
-		op = bnez ? L"bnez" : L"beqz";
+		if(likely)
+			op = bnez ? L"bnezl" : L"beqzl";
+		else
+			op = bnez ? L"bnez" : L"beqz";
 	} else if (beqz || bnez)
 	{
 		const wchar_t* templateRegister = LR"(
-			slt		r1,%rs%,%rt%
+			slt%u%	r1,%rs%,%rt%
 			%op%	r1,%dest%
 		)";
 
 		selectedTemplate = templateRegister;
-		op = bnez ? L"bnez" : L"beqz";
+		if(likely)
+			op = bnez ? L"bnezl" : L"beqzl";
+		else
+			op = bnez ? L"bnez" : L"beqz";
 	} else {
 		return nullptr;
 	}
 	
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
 	return createMacro(parser,macroText,flags, {
-			{ L"%op%",		op},
+			{ L"%op%",		op },
+			{ L"%u%",		unsigned_ ? L"u" : L""},
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rt%",		registers.grt.name },
 			{ L"%imm%",		immediates.primary.expression.toString() },
@@ -534,10 +548,24 @@ const MipsMacroDefinition mipsMacros[] = {
 
 	{ L"blt",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_DONTWARNDELAYSLOT },
 	{ L"blt",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bltu",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bltu",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bge",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bge",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bgeu",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bgeu",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bne",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_NE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
 	{ L"beq",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_EQ|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bltl",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bltl",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bltul",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bltul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgel",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgel",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgeul",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgeul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bnel",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_NE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"beql",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_EQ|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 
 	{ L"rol",	L"d,s,t",	&generateMipsMacroRotate,			MIPSM_LEFT },
 	{ L"rol",	L"d,s,i",	&generateMipsMacroRotate,			MIPSM_LEFT|MIPSM_IMM },
