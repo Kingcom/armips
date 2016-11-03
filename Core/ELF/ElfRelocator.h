@@ -61,6 +61,7 @@ public:
 	const ByteArray& getData() const { return outputData; };
 private:
 	bool relocateFile(ElfRelocatorFile& file, u64& relocationAddress);
+	void loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, bool bigEndian);
 
 	ByteArray outputData;
 	IElfRelocator* relocator;

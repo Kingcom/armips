@@ -152,9 +152,9 @@ IElfRelocator* CMipsArchitecture::getElfRelocator()
 	{
 	case MARCH_PS2:
 	case MARCH_PSP:
+	case MARCH_N64:
 		return new MipsElfRelocator();
 	case MARCH_PSX:
-	case MARCH_N64:
 	case MARCH_RSP:
 	default:
 		return NULL;

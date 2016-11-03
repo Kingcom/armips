@@ -18,6 +18,7 @@ public:
 	void save(const std::wstring&fileName);
 
 	Elf32_Half getType() { return fileHeader.e_type; };
+	bool isBigEndian() { return (fileHeader.e_ident[0x5] == 0x02); }
 	size_t getSegmentCount() { return segments.size(); };
 	ElfSegment* getSegment(size_t index) { return segments[index]; };
 
@@ -27,9 +28,12 @@ public:
 	ByteArray& getFileData() { return fileData; }
 
 	int getSymbolCount();
-	Elf32_Sym* getSymbol(size_t index);
+	bool getSymbol(Elf32_Sym& symbol, size_t index);
 	const char* getStrTableString(size_t pos);
 private:
+	void loadElfHeader();
+	void loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos);
+	void loadSectionHeader(Elf32_Shdr& header, ByteArray& data, int pos);
 	void loadSectionNames();
 	void determinePartOrder();
 
