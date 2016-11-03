@@ -31,9 +31,18 @@ void ElfSection::setOwner(ElfSegment* segment)
 	owner = segment;
 }
 
-void ElfSection::writeHeader(byte* dest)
+void ElfSection::writeHeader(ByteArray& data, int pos, bool bigEndian)
 {
-	memcpy(dest,&header,sizeof(Elf32_Shdr));
+	data.replaceDoubleWord(pos + 0x00, header.sh_name, bigEndian);
+	data.replaceDoubleWord(pos + 0x04, header.sh_type, bigEndian);
+	data.replaceDoubleWord(pos + 0x08, header.sh_flags, bigEndian);
+	data.replaceDoubleWord(pos + 0x0C, header.sh_addr, bigEndian);
+	data.replaceDoubleWord(pos + 0x10, header.sh_offset, bigEndian);
+	data.replaceDoubleWord(pos + 0x14, header.sh_size, bigEndian);
+	data.replaceDoubleWord(pos + 0x18, header.sh_link, bigEndian);
+	data.replaceDoubleWord(pos + 0x1C, header.sh_info, bigEndian);
+	data.replaceDoubleWord(pos + 0x20, header.sh_addralign, bigEndian);
+	data.replaceDoubleWord(pos + 0x24, header.sh_entsize, bigEndian);
 }
 
 // only called for segmentless sections
@@ -133,9 +142,16 @@ void ElfSegment::writeData(ByteArray& output)
 	output.append(data);
 }
 
-void ElfSegment::writeHeader(byte* dest)
+void ElfSegment::writeHeader(ByteArray& data, int pos, bool bigEndian)
 {
-	memcpy(dest,&header,sizeof(Elf32_Phdr));
+	data.replaceDoubleWord(pos + 0x00, header.p_type, bigEndian);
+	data.replaceDoubleWord(pos + 0x04, header.p_offset, bigEndian);
+	data.replaceDoubleWord(pos + 0x08, header.p_vaddr, bigEndian);
+	data.replaceDoubleWord(pos + 0x0C, header.p_paddr, bigEndian);
+	data.replaceDoubleWord(pos + 0x10, header.p_filesz, bigEndian);
+	data.replaceDoubleWord(pos + 0x14, header.p_memsz, bigEndian);
+	data.replaceDoubleWord(pos + 0x18, header.p_flags, bigEndian);
+	data.replaceDoubleWord(pos + 0x1C, header.p_align, bigEndian);
 }
 
 void ElfSegment::splitSections()
@@ -266,7 +282,7 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 void ElfFile::loadElfHeader()
 {
 	memcpy(fileHeader.e_ident, &fileData[0], sizeof(fileHeader.e_ident));
-	bool bigEndian = (fileHeader.e_ident[5] == 0x02);
+	bool bigEndian = isBigEndian();
 	fileHeader.e_type = fileData.getWord(0x10, bigEndian);
 	fileHeader.e_machine = fileData.getWord(0x12, bigEndian);
 	fileHeader.e_version = fileData.getDoubleWord(0x14, bigEndian);
@@ -282,9 +298,27 @@ void ElfFile::loadElfHeader()
 	fileHeader.e_shstrndx = fileData.getWord(0x32, bigEndian);
 }
 
+void ElfFile::writeHeader(ByteArray& data, int pos, bool bigEndian)
+{
+	memcpy(&fileData[0], fileHeader.e_ident, sizeof(fileHeader.e_ident));
+	data.replaceWord(pos + 0x10, fileHeader.e_type, bigEndian);
+	data.replaceWord(pos + 0x12, fileHeader.e_machine, bigEndian);
+	data.replaceDoubleWord(pos + 0x14, fileHeader.e_version, bigEndian);
+	data.replaceDoubleWord(pos + 0x18, fileHeader.e_entry, bigEndian);
+	data.replaceDoubleWord(pos + 0x1C, fileHeader.e_phoff, bigEndian);
+	data.replaceDoubleWord(pos + 0x20, fileHeader.e_shoff, bigEndian);
+	data.replaceDoubleWord(pos + 0x24, fileHeader.e_flags, bigEndian);
+	data.replaceWord(pos + 0x28, fileHeader.e_ehsize, bigEndian);
+	data.replaceWord(pos + 0x2A, fileHeader.e_phentsize, bigEndian);
+	data.replaceWord(pos + 0x2C, fileHeader.e_phnum, bigEndian);
+	data.replaceWord(pos + 0x2E, fileHeader.e_shentsize, bigEndian);
+	data.replaceWord(pos + 0x30, fileHeader.e_shnum, bigEndian);
+	data.replaceWord(pos + 0x32, fileHeader.e_shstrndx, bigEndian);
+}
+
 void ElfFile::loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos)
 {
-	bool bigEndian = (fileHeader.e_ident[5] == 0x02);
+	bool bigEndian = isBigEndian();
 	header.p_type   = data.getDoubleWord(pos + 0x00, bigEndian);
 	header.p_offset = data.getDoubleWord(pos + 0x04, bigEndian);
 	header.p_vaddr  = data.getDoubleWord(pos + 0x08, bigEndian);
@@ -297,7 +331,7 @@ void ElfFile::loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos)
 
 void ElfFile::loadSectionHeader(Elf32_Shdr& header, ByteArray& data, int pos)
 {
-	bool bigEndian = (fileHeader.e_ident[5] == 0x02);
+	bool bigEndian = isBigEndian();
 	header.sh_name      = data.getDoubleWord(pos + 0x00, bigEndian);
 	header.sh_type      = data.getDoubleWord(pos + 0x04, bigEndian);
 	header.sh_flags     = data.getDoubleWord(pos + 0x08, bigEndian);
@@ -438,17 +472,18 @@ void ElfFile::save(const std::wstring&fileName)
 	}
 
 	// copy data to the tables
-	memcpy(fileData.data(0),&fileHeader,sizeof(Elf32_Ehdr));
+	bool bigEndian = isBigEndian();
+	writeHeader(fileData, 0, bigEndian);
 	for (int i = 0; i < (int)segments.size(); i++)
 	{
 		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
-		segments[i]->writeHeader(fileData.data(pos));
+		segments[i]->writeHeader(fileData, pos, bigEndian);
 	}
 	
 	for (int i = 0; i < (int)sections.size(); i++)
 	{
-		byte* pointer = fileData.data(fileHeader.e_shoff+i*fileHeader.e_shentsize);
-		sections[i]->writeHeader(pointer);
+		int pos = fileHeader.e_shoff+i*fileHeader.e_shentsize;
+		sections[i]->writeHeader(fileData, pos, bigEndian);
 	}
 
 	fileData.toFile(fileName);
@@ -469,7 +504,7 @@ bool ElfFile::getSymbol(Elf32_Sym& symbol, size_t index)
 
 	ByteArray &data = symTab->getData();
 	int pos = index*sizeof(Elf32_Sym);
-	bool bigEndian = (fileHeader.e_ident[5] == 0x02);
+	bool bigEndian = isBigEndian();
 	symbol.st_name  = data.getDoubleWord(pos + 0x00, bigEndian);
 	symbol.st_value = data.getDoubleWord(pos + 0x04, bigEndian);
 	symbol.st_size  = data.getDoubleWord(pos + 0x08, bigEndian);
