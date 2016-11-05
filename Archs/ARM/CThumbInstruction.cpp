@@ -169,14 +169,21 @@ void CThumbInstruction::Encode() const
 
 	if (Opcode.type == THUMB_TYPE19)	// THUMB.19: long branch with link
 	{
-		encoding |= ((Vars.Immediate >> 11) & 0x7FF);
-		WriteInstruction(encoding);
-
-		if (Opcode.flags & THUMB_EXCHANGE)
+		if (Opcode.flags & THUMB_LONG)
 		{
-			WriteInstruction(0xE800 | (Vars.Immediate & 0x7FF));
+			encoding |= ((Vars.Immediate >> 11) & 0x7FF);
+			WriteInstruction(encoding);
+
+			if (Opcode.flags & THUMB_EXCHANGE)
+			{
+				WriteInstruction(0xE800 | (Vars.Immediate & 0x7FF));
+			} else {
+				WriteInstruction(0xF800 | (Vars.Immediate & 0x7FF));
+			}
 		} else {
-			WriteInstruction(0xF800 | (Vars.Immediate & 0x7FF));
+			if (Opcode.flags & THUMB_IMMEDIATE)
+				encoding |= Vars.Immediate & 0x7FF;
+			WriteInstruction(encoding);
 		}
 	} else {
 		switch (Opcode.type)

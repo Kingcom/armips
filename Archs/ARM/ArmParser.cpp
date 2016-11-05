@@ -205,6 +205,8 @@ bool ArmParser::matchSymbol(Parser& parser, wchar_t symbol, bool optional)
 		return parser.matchToken(TokenType::Hash,optional);
 	case '=':
 		return parser.matchToken(TokenType::Assign,optional);
+	case '+':
+		return parser.matchToken(TokenType::Plus,optional);
 	}
 
 	return false;
