@@ -116,7 +116,10 @@ bool CMipsInstruction::Validate()
 			}
 		}
 
-		if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2)
+		if (opcodeData.opcode.flags & MO_NEGIMM)
+		{
+			immediateData.primary.value = -immediateData.primary.value;
+		} else if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2)
 		{
 			immediateData.primary.value = (immediateData.primary.value >> 2) & 0x3FFFFFF;
 		} else if (opcodeData.opcode.flags & MO_IPCR)	// relative 16 bit value

@@ -17,8 +17,10 @@
 
 #define MIPSM_NE					0x00000001
 #define MIPSM_LT					0x00000002
-#define MIPSM_GE					0x00000003
-#define MIPSM_EQ					0x00000004
+#define MIPSM_LTU					0x00000003
+#define MIPSM_GE					0x00000004
+#define MIPSM_GEU					0x00000005
+#define MIPSM_EQ					0x00000006
 #define MIPSM_CONDITIONMASK			0x00000007
 
 #define MIPSM_IMM					0x00000200
@@ -30,6 +32,7 @@
 #define MIPSM_LOWER					0x00008000
 #define MIPSM_LOAD					0x00010000
 #define MIPSM_STORE					0x00020000
+#define MIPSM_LIKELY				0x00040000
 
 class Parser;
 
