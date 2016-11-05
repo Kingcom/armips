@@ -140,6 +140,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	StringList errors;
 
 	args.inputFileName = testName + L".asm";
+	args.tempFileName = testName + L".temp.txt";
 	args.errorsResult = &errors;
 	args.silent = true;
 
