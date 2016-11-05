@@ -18,6 +18,7 @@ public:
 	void save(const std::wstring&fileName);
 
 	Elf32_Half getType() { return fileHeader.e_type; };
+	bool isBigEndian() { return (fileHeader.e_ident[EI_DATA] == ELFDATA2MSB); }
 	size_t getSegmentCount() { return segments.size(); };
 	ElfSegment* getSegment(size_t index) { return segments[index]; };
 
@@ -27,9 +28,13 @@ public:
 	ByteArray& getFileData() { return fileData; }
 
 	int getSymbolCount();
-	Elf32_Sym* getSymbol(size_t index);
+	bool getSymbol(Elf32_Sym& symbol, size_t index);
 	const char* getStrTableString(size_t pos);
 private:
+	void loadElfHeader();
+	void writeHeader(ByteArray& data, int pos, bool bigEndian);
+	void loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos);
+	void loadSectionHeader(Elf32_Shdr& header, ByteArray& data, int pos);
 	void loadSectionNames();
 	void determinePartOrder();
 
@@ -54,7 +59,7 @@ public:
 	void setData(ByteArray& data) { this->data = data; };
 	void setOwner(ElfSegment* segment);
 	bool hasOwner() { return owner != NULL; };
-	void writeHeader(byte* dest);
+	void writeHeader(ByteArray& data, int pos, bool bigEndian);
 	void writeData(ByteArray& output);
 	void setOffsetBase(int base);
 	ByteArray& getData() { return data; };
@@ -85,7 +90,7 @@ public:
 	Elf32_Word getType() { return header.p_type; };
 	Elf32_Addr getVirtualAddress() { return header.p_vaddr; };
 	size_t getSectionCount() { return sections.size(); };
-	void writeHeader(byte* dest);
+	void writeHeader(ByteArray& data, int pos, bool bigEndian);
 	void writeData(ByteArray& output);
 	void splitSections();
 

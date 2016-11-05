@@ -50,8 +50,23 @@ public:
 		} else {
 			return d[pos+3] | (d[pos+2] << 8) | (d[pos+1] << 16) | (d[pos+0] << 24);
 		}
-	};
+	}
 	
+	void replaceWord(size_t pos, unsigned int w, bool bigEndian = false)
+	{
+		if (pos+1 >= this->size()) return;
+		unsigned char* d = (unsigned char*) this->data();
+
+		if (bigEndian == false)
+		{
+			d[pos+0] = w & 0xFF;
+			d[pos+1] = (w >> 8) & 0xFF;
+		} else {
+			d[pos+0] = (w >> 8) & 0xFF;
+			d[pos+1] = w & 0xFF;
+		}
+	}
+
 	void replaceDoubleWord(size_t pos, unsigned int w, bool bigEndian = false)
 	{
 		if (pos+3 >= this->size()) return;

@@ -179,16 +179,17 @@ bool ElfRelocator::init(const std::wstring& inputName)
 		// init exportable symbols
 		for (int i = 0; i < elf->getSymbolCount(); i++)
 		{
-			Elf32_Sym* symbol = elf->getSymbol(i);
+			Elf32_Sym symbol;
+			bool found = elf->getSymbol(symbol, i);
 
-			if (ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL && symbol->st_shndx != 0)
+			if (ELF32_ST_BIND(symbol.st_info) == STB_GLOBAL && symbol.st_shndx != 0)
 			{
 				ElfRelocatorSymbol symEntry;
-				symEntry.type = ELF32_ST_TYPE(symbol->st_info);
-				symEntry.name = convertUtf8ToWString(elf->getStrTableString(symbol->st_name));
-				symEntry.relativeAddress = symbol->st_value;
-				symEntry.section = symbol->st_shndx;
-				symEntry.size = symbol->st_size;
+				symEntry.type = ELF32_ST_TYPE(symbol.st_info);
+				symEntry.name = convertUtf8ToWString(elf->getStrTableString(symbol.st_name));
+				symEntry.relativeAddress = symbol.st_value;
+				symEntry.section = symbol.st_shndx;
+				symEntry.size = symbol.st_size;
 				symEntry.label = NULL;
 
 				file.symbols.push_back(symEntry);
@@ -259,6 +260,12 @@ CAssemblerCommand* ElfRelocator::generateCtor(const std::wstring& ctorName)
 	return func;
 }
 
+void ElfRelocator::loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, bool bigEndian)
+{
+	rel.r_offset = data.getDoubleWord(offset + 0x00, bigEndian);
+	rel.r_info   = data.getDoubleWord(offset + 0x04, bigEndian);
+}
+
 bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 {
 	ElfFile* elf = file.elf;
@@ -304,14 +311,13 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 		ElfSection* relSection = entry.relSection;
 		if (relSection != NULL)
 		{
-			Elf32_Rel* rel = (Elf32_Rel*) &relSection->getData()[0];
-			int relCount = relSection->getSize()/sizeof(Elf32_Rel);
-
-			for (int i = 0; i < relCount; i++)
+			for (unsigned int relOffset = 0; relOffset < relSection->getSize(); relOffset += sizeof(Elf32_Rel))
 			{
-				int pos = rel[i].r_offset;
+				Elf32_Rel rel;
+				loadRelocation(rel, relSection->getData(), relOffset, elf->isBigEndian());
+				int pos = rel.r_offset;
 
-				int symNum = rel[i].getSymbolNum();
+				int symNum = rel.getSymbolNum();
 				if (symNum <= 0)
 				{
 					Logger::queueError(Logger::Warning,L"Invalid symbol num %06X",symNum);
@@ -319,18 +325,19 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 					continue;
 				}
 
-				auto sym = elf->getSymbol(symNum);
-				int symSection = sym->st_shndx;
+				Elf32_Sym sym;
+				auto found = elf->getSymbol(sym, symNum);
+				int symSection = sym.st_shndx;
 				
 				RelocationData relData;
-				relData.opcode = sectionData.getDoubleWord(pos);
+				relData.opcode = sectionData.getDoubleWord(pos, elf->isBigEndian());
 				relData.opcodeOffset = pos+relocationOffsets[index];
-				relocator->setSymbolAddress(relData,sym->st_value,sym->st_info & 0xF);
+				relocator->setSymbolAddress(relData,sym.st_value,sym.st_info & 0xF);
 
 				// externs?
-				if (relData.targetSymbolType == STT_NOTYPE && sym->st_shndx == 0)
+				if (relData.targetSymbolType == STT_NOTYPE && sym.st_shndx == 0)
 				{
-					std::wstring symName = toWLowercase(elf->getStrTableString(sym->st_name));
+					std::wstring symName = toWLowercase(elf->getStrTableString(sym.st_name));
 
 					Label* label = Global.symbolTable.getLabel(symName,-1,-1);
 					if (label == NULL)
@@ -353,14 +360,14 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 					relData.relocationBase = relocationOffsets[symSection]+relData.symbolAddress;
 				}
 
-				if (relocator->relocateOpcode(rel[i].getType(),relData) == false)
+				if (relocator->relocateOpcode(rel.getType(),relData) == false)
 				{
 					Logger::queueError(Logger::Error,relData.errorMessage);
 					error = true;
 					continue;
 				}
 
-				sectionData.replaceDoubleWord(pos,relData.opcode);
+				sectionData.replaceDoubleWord(pos,relData.opcode, elf->isBigEndian());
 			}
 		}
 
