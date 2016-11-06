@@ -127,7 +127,6 @@ bool CThumbInstruction::Validate()
 			if (Vars.Immediate & 3)
 			{
 				Logger::queueError(Logger::Error,L"PC relative address must be word aligned");
-				g_fileManager->advanceMemory(OpcodeSize);
 				return false;
 			}
 
