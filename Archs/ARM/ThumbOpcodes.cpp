@@ -68,7 +68,7 @@ const tThumbOpcode ThumbOpcodes[] = {
 	{ "blx",	"S",				0x4780,	THUMB_TYPE5,	2,	THUMB_S|THUMB_ARM9 },
 
 	{ "ldr",	"d,[r\xF]",			0x4800,	THUMB_TYPE6,	2,	0 },
-	{ "ldr",	"d,[r\xF,/#i\x08]",	0x4800,	THUMB_TYPE6,	2,	THUMB_IMMEDIATE },
+	{ "ldr",	"d,[r\xF,/#i\x08]",	0x4800,	THUMB_TYPE6,	2,	THUMB_IMMEDIATE|THUMB_WORD },
 	{ "ldr",	"d,[/#I\x20]",		0x4800,	THUMB_TYPE6,	2,	THUMB_IMMEDIATE|THUMB_PCR },
 	{ "ldr",	"d,=/#I\x20",		0x4800,	THUMB_TYPE6,	2,	THUMB_IMMEDIATE|THUMB_POOL },
 
