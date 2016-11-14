@@ -131,6 +131,84 @@ ExpressionValue expFuncToHex(const std::wstring& funcName, const std::vector<Exp
 	return ExpressionValue(formatString(L"%0*X",digits,value));
 }
 
+ExpressionValue expFuncInt(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	switch (parameters[0].type)
+	{
+	case ExpressionValueType::Integer:
+		result.intValue = parameters[0].intValue;
+		break;
+	case ExpressionValueType::Float:
+		result.intValue = (u64) parameters[0].floatValue;
+		break;
+	default:
+		return result;
+	}
+
+	result.type = ExpressionValueType::Integer;
+	return result;
+}
+
+ExpressionValue expFuncFloat(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	switch (parameters[0].type)
+	{
+	case ExpressionValueType::Integer:
+		result.floatValue = (double) parameters[0].intValue;
+		break;
+	case ExpressionValueType::Float:
+		result.floatValue = parameters[0].floatValue;
+		break;
+	default:
+		return result;
+	}
+
+	result.type = ExpressionValueType::Float;
+	return result;
+}
+
+ExpressionValue expFuncFrac(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+	double intPart;
+
+	switch (parameters[0].type)
+	{
+	case ExpressionValueType::Float:
+		result.floatValue = modf(parameters[0].floatValue,&intPart);
+		break;
+	default:
+		return result;
+	}
+
+	result.type = ExpressionValueType::Float;
+	return result;
+}
+
+ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	switch (parameters[0].type)
+	{
+	case ExpressionValueType::Float:
+		result.type = ExpressionValueType::Float;
+		result.floatValue = fabs(parameters[0].floatValue);
+		break;
+	case ExpressionValueType::Integer:
+		result.type = ExpressionValueType::Integer;
+		result.intValue = (int64_t) parameters[0].intValue >= 0 ?
+			parameters[0].intValue : -parameters[0].intValue;
+		break;
+	}
+
+	return result;
+}
+
 ExpressionValue expFuncStrlen(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* source;
@@ -370,6 +448,12 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"filesize",		{ &expFuncFileSize,		1,	1,	true } },
 	{ L"tostring",		{ &expFuncToString,		1,	1,	true } },
 	{ L"tohex",			{ &expFuncToHex,		1,	2,	true } },
+
+	{ L"int",			{ &expFuncInt,			1,	1,	true } },
+	{ L"float",			{ &expFuncFloat,		1,	1,	true } },
+	{ L"frac",			{ &expFuncFrac,			1,	1,	true } },
+	{ L"abs",			{ &expFuncAbs,			1,	1,	true } },
+
 	{ L"strlen",		{ &expFuncStrlen,		1,	1,	true } },
 	{ L"substr",		{ &expFuncSubstr,		3,	3,	true } },
 	{ L"regex_match",	{ &expFuncRegExMatch,	2,	2,	true } },
