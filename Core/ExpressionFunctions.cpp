@@ -81,6 +81,26 @@ ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vecto
 	return ExpressionValue(value);
 }
 
+ExpressionValue expFuncOrg(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	if(!g_fileManager->hasOpenFile())
+	{
+		Logger::queueError(Logger::Error,L"org: no file opened");
+		return ExpressionValue();
+	}
+	return ExpressionValue((u64) g_fileManager->getVirtualAddress());
+}
+
+ExpressionValue expFuncOrga(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	if(!g_fileManager->hasOpenFile())
+	{
+		Logger::queueError(Logger::Error,L"orga: no file opened");
+		return ExpressionValue();
+	}
+	return ExpressionValue((u64) g_fileManager->getPhysicalAddress());
+}
+
 ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
@@ -444,6 +464,8 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,		0,	0,	true } },
 	{ L"endianness",	{ &expFuncEndianness,	0,	0,	false } },
 	{ L"outputname",	{ &expFuncOutputName,	0,	0,	false } },
+	{ L"org",			{ &expFuncOrg,			0,	0,	false } },
+	{ L"orga",			{ &expFuncOrga,			0,	0,	false } },
 	{ L"fileexists",	{ &expFuncFileExists,	1,	1,	true } },
 	{ L"filesize",		{ &expFuncFileSize,		1,	1,	true } },
 	{ L"tostring",		{ &expFuncToString,		1,	1,	true } },
