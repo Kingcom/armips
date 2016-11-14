@@ -68,6 +68,13 @@ u64 MipsElfFile::getPhysicalAddress()
 	return -1;
 }
 
+size_t MipsElfFile::getHeaderSize()
+{
+	// this method is not used
+	Logger::queueError(Logger::Error,L"Unimplemented method");
+	return -1;
+}
+
 bool MipsElfFile::seekVirtual(u64 virtualAddress)
 {
 	// search in segments

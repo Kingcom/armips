@@ -101,6 +101,16 @@ ExpressionValue expFuncOrga(const std::wstring& funcName, const std::vector<Expr
 	return ExpressionValue((u64) g_fileManager->getPhysicalAddress());
 }
 
+ExpressionValue expFuncHeaderSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	if(!g_fileManager->hasOpenFile())
+	{
+		Logger::queueError(Logger::Error,L"headersize: no file opened");
+		return ExpressionValue();
+	}
+	return ExpressionValue((u64) g_fileManager->getHeaderSize());
+}
+
 ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
@@ -466,6 +476,7 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"outputname",	{ &expFuncOutputName,	0,	0,	false } },
 	{ L"org",			{ &expFuncOrg,			0,	0,	false } },
 	{ L"orga",			{ &expFuncOrga,			0,	0,	false } },
+	{ L"headersize",	{ &expFuncHeaderSize,	0,	0,	false } },
 	{ L"fileexists",	{ &expFuncFileExists,	1,	1,	true } },
 	{ L"filesize",		{ &expFuncFileSize,		1,	1,	true } },
 	{ L"tostring",		{ &expFuncToString,		1,	1,	true } },
