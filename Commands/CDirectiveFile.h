@@ -31,7 +31,7 @@ class CDirectivePosition: public CAssemblerCommand
 {
 public:
 	enum Type { Physical, Virtual };
-	CDirectivePosition(Type type, u64 position);
+	CDirectivePosition(Expression value, Type type);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
@@ -39,6 +39,7 @@ public:
 private:
 	void exec() const;
 	Type type;
+	Expression expression;
 	u64 position;
 	u64 virtualAddress;
 };
@@ -91,13 +92,14 @@ private:
 class CDirectiveHeaderSize: public CAssemblerCommand
 {
 public:
-	CDirectiveHeaderSize(u64 size);
+	CDirectiveHeaderSize(Expression expression);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const { };
 private:
-	void updateFile() const;
+	void exec() const;
+	Expression expression;
 	u64 headerSize;
 	u64 virtualAddress;
 };

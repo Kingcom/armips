@@ -98,28 +98,24 @@ CAssemblerCommand* parseDirectiveIncbin(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 {
-	const Token& start = parser.peekToken();
-
 	std::vector<Expression> list;
 	if (parser.parseExpressionList(list,1,1) == false)
 		return nullptr;
 
-	u64 position;
-	if (list[0].evaluateInteger(position) == false)
-	{
-		parser.printError(start,L"Invalid ram address");
-		return nullptr;
-	}
-
+	CDirectivePosition::Type type;
 	switch (flags & DIRECTIVE_USERMASK)
 	{
 	case DIRECTIVE_POS_PHYSICAL:
-		return new CDirectivePosition(CDirectivePosition::Physical,position);
+		type = CDirectivePosition::Physical;
+		break;
 	case DIRECTIVE_POS_VIRTUAL:
-		return new CDirectivePosition(CDirectivePosition::Virtual,position);
+		type = CDirectivePosition::Virtual;
+		break;
+	default:
+		return nullptr;
 	}
 
-	return nullptr;
+	return new CDirectivePosition(list[0],type);
 }
 
 CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
@@ -149,20 +145,11 @@ CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveHeaderSize(Parser& parser, int flags)
 {
-	const Token& start = parser.peekToken();
-
 	std::vector<Expression> list;
 	if (parser.parseExpressionList(list,1,1) == false)
 		return nullptr;
 
-	u64 size;
-	if (list[0].evaluateInteger(size) == false)
-	{
-		parser.printError(start,L"Invalid header size");
-		return nullptr;
-	}
-
-	return new CDirectiveHeaderSize(size);
+	return new CDirectiveHeaderSize(list[0]);
 }
 
 CAssemblerCommand* parseDirectiveObjImport(Parser& parser, int flags)
