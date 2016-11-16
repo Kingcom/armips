@@ -21,7 +21,7 @@ inline u16 swapEndianness16(u16 value)
 }
 
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, u32 headerSize, bool overwrite)
+GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t headerSize, bool overwrite)
 {
 	this->fileName = fileName;
 	this->headerSize = headerSize;
@@ -30,7 +30,7 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, u32 hea
 	mode = overwrite == true ? Create : Open;
 }
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, u32 headerSize)
+GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int64_t headerSize)
 {
 	this->fileName = fileName;
 	this->originalName = originalFileName;
@@ -164,16 +164,16 @@ bool GenericAssemblerFile::write(void* data, size_t length)
 	return len == length;
 }
 
-bool GenericAssemblerFile::seekVirtual(u64 virtualAddress)
+bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 {
-	if (virtualAddress < headerSize)
+	if (virtualAddress - headerSize < 0 || virtualAddress < 0)
 	{
 		Logger::queueError(Logger::Error,L"Seeking to invalid address");
 		return false;
 	}
 
 	this->virtualAddress = virtualAddress;
-	u64 physicalAddress = virtualAddress-headerSize;
+	int64_t physicalAddress = virtualAddress-headerSize;
 
 	if (isOpen())
 		handle.setPos((long)physicalAddress);
@@ -181,9 +181,9 @@ bool GenericAssemblerFile::seekVirtual(u64 virtualAddress)
 	return true;
 }
 
-bool GenericAssemblerFile::seekPhysical(u64 physicalAddress)
+bool GenericAssemblerFile::seekPhysical(int64_t physicalAddress)
 {
-	if ((signed)physicalAddress < 0)
+	if (physicalAddress < 0 || physicalAddress + headerSize < 0)
 	{
 		Logger::queueError(Logger::Error,L"Seeking to invalid address");
 		return false;
@@ -316,28 +316,28 @@ bool FileManager::writeU64(u64 data)
 	return write(&data,8);
 }
 
-u64 FileManager::getVirtualAddress()
+int64_t FileManager::getVirtualAddress()
 {
 	if (activeFile == NULL)
 		return -1;
 	return activeFile->getVirtualAddress();
 }
 
-u64 FileManager::getPhysicalAddress()
+int64_t FileManager::getPhysicalAddress()
 {
 	if (activeFile == NULL)
 		return -1;
 	return activeFile->getPhysicalAddress();
 }
 
-u64 FileManager::getHeaderSize()
+int64_t FileManager::getHeaderSize()
 {
 	if (activeFile == NULL)
 		return -1;
 	return activeFile->getHeaderSize();
 }
 
-bool FileManager::seekVirtual(u64 virtualAddress)
+bool FileManager::seekVirtual(int64_t virtualAddress)
 {
 	if (checkActiveFile() == false)
 		return false;
@@ -353,7 +353,7 @@ bool FileManager::seekVirtual(u64 virtualAddress)
 	return result;
 }
 
-bool FileManager::seekPhysical(u64 virtualAddress)
+bool FileManager::seekPhysical(int64_t virtualAddress)
 {
 	if (checkActiveFile() == false)
 		return false;
@@ -365,6 +365,6 @@ bool FileManager::advanceMemory(size_t bytes)
 	if (checkActiveFile() == false)
 		return false;
 
-	u64 pos = activeFile->getVirtualAddress();
+	int64_t pos = activeFile->getVirtualAddress();
 	return activeFile->seekVirtual(pos+bytes);
 }

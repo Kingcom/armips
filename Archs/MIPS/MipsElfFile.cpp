@@ -33,7 +33,7 @@ void MipsElfFile::endSymData()
 	Global.symData.endModule(this);
 }
 
-u64 MipsElfFile::getVirtualAddress()
+int64_t MipsElfFile::getVirtualAddress()
 {
 	if (segment != -1)
 	{
@@ -48,7 +48,7 @@ u64 MipsElfFile::getVirtualAddress()
 	return -1;
 }
 
-u64 MipsElfFile::getPhysicalAddress()
+int64_t MipsElfFile::getPhysicalAddress()
 {
 	if (segment != -1)
 	{
@@ -68,14 +68,14 @@ u64 MipsElfFile::getPhysicalAddress()
 	return -1;
 }
 
-size_t MipsElfFile::getHeaderSize()
+int64_t MipsElfFile::getHeaderSize()
 {
 	// this method is not used
 	Logger::queueError(Logger::Error,L"Unimplemented method");
 	return -1;
 }
 
-bool MipsElfFile::seekVirtual(u64 virtualAddress)
+bool MipsElfFile::seekVirtual(int64_t virtualAddress)
 {
 	// search in segments
 	for (size_t i = 0; i < elf.getSegmentCount(); i++)
@@ -112,7 +112,7 @@ bool MipsElfFile::seekVirtual(u64 virtualAddress)
 	return false;
 }
 
-bool MipsElfFile::seekPhysical(u64 physicalAddress)
+bool MipsElfFile::seekPhysical(int64_t physicalAddress)
 {
 	// search in segments
 	for (size_t i = 0; i < elf.getSegmentCount(); i++)
