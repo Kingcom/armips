@@ -330,6 +330,13 @@ u64 FileManager::getPhysicalAddress()
 	return activeFile->getPhysicalAddress();
 }
 
+u64 FileManager::getHeaderSize()
+{
+	if (activeFile == NULL)
+		return -1;
+	return activeFile->getHeaderSize();
+}
+
 bool FileManager::seekVirtual(u64 virtualAddress)
 {
 	if (checkActiveFile() == false)

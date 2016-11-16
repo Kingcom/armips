@@ -145,10 +145,9 @@ void CDirectiveFile::writeSymData(SymbolData& symData) const
 // CDirectivePosition
 //
 
-CDirectivePosition::CDirectivePosition(Type type, u64 position)
-	: type(type)
+CDirectivePosition::CDirectivePosition(Expression expression, Type type)
+	: expression(expression), type(type)
 {
-	this->position = position;
 	updateSection(++Global.Section);
 }
 
@@ -168,8 +167,14 @@ void CDirectivePosition::exec() const
 bool CDirectivePosition::Validate()
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
-	Arch->NextSection();
 
+	if (expression.evaluateInteger(position) == false)
+	{
+		Logger::queueError(Logger::FatalError,L"Invalid position");
+		return false;
+	}
+
+	Arch->NextSection();
 	exec();
 	return false;
 }
@@ -312,7 +317,7 @@ bool CDirectiveAlignFill::Validate()
 	{
 		if (valueExpression.evaluateInteger(value) == false)
 		{
-			Logger::printError(Logger::FatalError,L"Invalid %s",mode == Fill ? L"size" : L"alignment");
+			Logger::queueError(Logger::FatalError,L"Invalid %s",mode == Fill ? L"size" : L"alignment");
 			return false;
 		}
 	}
@@ -324,7 +329,7 @@ bool CDirectiveAlignFill::Validate()
 	case Align:
 		if (isPowerOfTwo(value) == false)
 		{
-			Logger::printError(Logger::Error,L"Invalid alignment %d",value);
+			Logger::queueError(Logger::Error,L"Invalid alignment %d",value);
 			return false;
 		}
 
@@ -397,13 +402,10 @@ void CDirectiveAlignFill::writeSymData(SymbolData& symData) const
 // CDirectiveHeaderSize
 //
 
-CDirectiveHeaderSize::CDirectiveHeaderSize(u64 size)
-{
-	headerSize = size;
-	updateFile();
-}
+CDirectiveHeaderSize::CDirectiveHeaderSize(Expression expression)
+	: expression(expression) {}
 
-void CDirectiveHeaderSize::updateFile() const
+void CDirectiveHeaderSize::exec() const
 {
 	AssemblerFile* openFile = g_fileManager->getOpenFile();
 	if (!openFile->hasFixedVirtualAddress())
@@ -418,13 +420,20 @@ void CDirectiveHeaderSize::updateFile() const
 bool CDirectiveHeaderSize::Validate()
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
-	updateFile();
+
+	if (expression.evaluateInteger(headerSize) == false)
+	{
+		Logger::queueError(Logger::FatalError,L"Invalid header size");
+		return false;
+	}
+
+	exec();
 	return false;
 }
 
 void CDirectiveHeaderSize::Encode() const
 {
-	updateFile();
+	exec();
 }
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const

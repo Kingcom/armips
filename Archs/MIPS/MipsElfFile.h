@@ -14,6 +14,7 @@ public:
 	virtual bool write(void* data, size_t length);
 	virtual u64 getVirtualAddress();
 	virtual u64 getPhysicalAddress();
+	virtual u64 getHeaderSize();
 	virtual bool seekVirtual(u64 virtualAddress);
 	virtual bool seekPhysical(u64 physicalAddress);
 	virtual bool getModuleInfo(SymDataModuleInfo& info);

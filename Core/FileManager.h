@@ -16,6 +16,7 @@ public:
 	virtual bool write(void* data, size_t length) = 0;
 	virtual u64 getVirtualAddress() = 0;
 	virtual u64 getPhysicalAddress() = 0;
+	virtual size_t getHeaderSize() = 0;
 	virtual bool seekVirtual(u64 virtualAddress) = 0;
 	virtual bool seekPhysical(u64 physicalAddress) = 0;
 	virtual bool getModuleInfo(SymDataModuleInfo& info) { return false; };
@@ -37,6 +38,7 @@ public:
 	virtual bool write(void* data, size_t length);
 	virtual u64 getVirtualAddress() { return virtualAddress; };
 	virtual u64 getPhysicalAddress() { return virtualAddress-headerSize; };
+	virtual size_t getHeaderSize() { return headerSize; };
 	virtual bool seekVirtual(u64 virtualAddress);
 	virtual bool seekPhysical(u64 physicalAddress);
 	virtual bool hasFixedVirtualAddress() { return true; };
@@ -75,6 +77,7 @@ public:
 	bool writeU64(u64 data);
 	u64 getVirtualAddress();
 	u64 getPhysicalAddress();
+	size_t getHeaderSize();
 	bool seekVirtual(u64 virtualAddress);
 	bool seekPhysical(u64 physicalAddress);
 	bool advanceMemory(size_t bytes);
