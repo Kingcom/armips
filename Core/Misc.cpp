@@ -4,8 +4,8 @@
 #include "Core/FileManager.h"
 #include <iostream>
 
-#ifdef _MSC_VER
-#include <Windows.h>
+#ifdef _WIN32
+#include <windows.h>
 #endif
 
 std::vector<Logger::QueueEntry> Logger::queue;
