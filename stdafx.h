@@ -47,7 +47,3 @@ typedef uint64_t u64;
 
 #include "ext/tinyformat/tinyformat.h"
 #define formatString tfm::format
-
-#ifdef _WIN32
-#pragma comment(lib,"Shlwapi.lib")
-#endif
