@@ -1,7 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 project(armips) 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11")
+if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11")
+endif()
+
+if(MSVC)
+	add_definitions(-DUNICODE -D_UNICODE)
+elseif(MINGW)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
 
 include_directories(.)
 
@@ -108,3 +117,7 @@ add_executable(armips
 	
 	ext/tinyformat/tinyformat.h
 )
+
+if(WIN32)
+	target_link_libraries(armips shlwapi)
+endif(WIN32)

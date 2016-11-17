@@ -1011,7 +1011,7 @@ void TextFile::writeCharacter(wchar_t character)
 	int length = 0;
 	if (character < 0x80)
 	{
-#ifdef WIN32
+#ifdef _WIN32
 		if (character == L'\n')
 		{
 			bufPut('\r');

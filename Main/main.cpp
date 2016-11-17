@@ -29,8 +29,8 @@ int wmain(int argc, wchar_t* argv[])
 		return !runTests(argv[1]);
 #endif
 
-	Logger::printLine(L"%s Assembler v%d.%d.%d (" __DATE__ " " __TIME__ ") by Kingcom",
-		ARMIPSNAME,ARMIPS_VERSION_MAJOR,ARMIPS_VERSION_MINOR,ARMIPS_VERSION_REVISION);
+	Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
+		ARMIPSNAME,ARMIPS_VERSION_MAJOR,ARMIPS_VERSION_MINOR,ARMIPS_VERSION_REVISION,__DATE__,__TIME__);
 
 	StringList arguments = getStringListFromArray(argv,argc);
 
