@@ -14,11 +14,11 @@ public:
 	virtual void close() = 0;
 	virtual bool isOpen() = 0;
 	virtual bool write(void* data, size_t length) = 0;
-	virtual u64 getVirtualAddress() = 0;
-	virtual u64 getPhysicalAddress() = 0;
-	virtual size_t getHeaderSize() = 0;
-	virtual bool seekVirtual(u64 virtualAddress) = 0;
-	virtual bool seekPhysical(u64 physicalAddress) = 0;
+	virtual int64_t getVirtualAddress() = 0;
+	virtual int64_t getPhysicalAddress() = 0;
+	virtual int64_t getHeaderSize() = 0;
+	virtual bool seekVirtual(int64_t virtualAddress) = 0;
+	virtual bool seekPhysical(int64_t physicalAddress) = 0;
 	virtual bool getModuleInfo(SymDataModuleInfo& info) { return false; };
 	virtual bool hasFixedVirtualAddress() { return false; };
 	virtual void beginSymData() { };
@@ -29,31 +29,32 @@ public:
 class GenericAssemblerFile: public AssemblerFile
 {
 public:
-	GenericAssemblerFile(const std::wstring& fileName, u32 headerSize, bool overwrite);
-	GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, u32 headerSize);
+	GenericAssemblerFile(const std::wstring& fileName, int64_t headerSize, bool overwrite);
+	GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int64_t headerSize);
 
 	virtual bool open(bool onlyCheck);
 	virtual void close() { if (handle.isOpen()) handle.close(); };
 	virtual bool isOpen() { return handle.isOpen(); };
 	virtual bool write(void* data, size_t length);
-	virtual u64 getVirtualAddress() { return virtualAddress; };
-	virtual u64 getPhysicalAddress() { return virtualAddress-headerSize; };
-	virtual size_t getHeaderSize() { return headerSize; };
-	virtual bool seekVirtual(u64 virtualAddress);
-	virtual bool seekPhysical(u64 physicalAddress);
+	virtual int64_t getVirtualAddress() { return virtualAddress; };
+	virtual int64_t getPhysicalAddress() { return virtualAddress-headerSize; };
+	virtual int64_t getHeaderSize() { return headerSize; };
+	virtual bool seekVirtual(int64_t virtualAddress);
+	virtual bool seekPhysical(int64_t physicalAddress);
 	virtual bool hasFixedVirtualAddress() { return true; };
 
 	virtual const std::wstring& getFileName() { return fileName; };
 	const std::wstring& getOriginalFileName() { return originalName; };
-	size_t getOriginalHeaderSize() { return originalHeaderSize; };
-	void setHeaderSize(size_t size) { headerSize = size; };
+	int64_t getOriginalHeaderSize() { return originalHeaderSize; };
+	void setHeaderSize(int64_t size) { headerSize = size; };
+
 private:
 	enum Mode { Open, Create, Copy };
 
 	Mode mode;
-	size_t originalHeaderSize;
-	size_t headerSize;
-	u64 virtualAddress;
+	int64_t originalHeaderSize;
+	int64_t headerSize;
+	int64_t virtualAddress;
 	BinaryFile handle;
 	std::wstring fileName;
 	std::wstring originalName;
@@ -75,11 +76,11 @@ public:
 	bool writeU16(u16 data);
 	bool writeU32(u32 data);
 	bool writeU64(u64 data);
-	u64 getVirtualAddress();
-	u64 getPhysicalAddress();
-	size_t getHeaderSize();
-	bool seekVirtual(u64 virtualAddress);
-	bool seekPhysical(u64 physicalAddress);
+	int64_t getVirtualAddress();
+	int64_t getPhysicalAddress();
+	int64_t getHeaderSize();
+	bool seekVirtual(int64_t virtualAddress);
+	bool seekPhysical(int64_t physicalAddress);
 	bool advanceMemory(size_t bytes);
 	AssemblerFile* getOpenFile() { return activeFile; };
 	void setEndianness(Endianness endianness) { this->endianness = endianness; };

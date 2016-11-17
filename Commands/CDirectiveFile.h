@@ -11,9 +11,9 @@ public:
 	enum class Type { Invalid, Open, Create, Copy, Close };
 
 	CDirectiveFile();
-	void initOpen(const std::wstring& fileName, u64 memory);
-	void initCreate(const std::wstring& fileName, u64 memory);
-	void initCopy(const std::wstring& inputName, const std::wstring& outputName, u64 memory);
+	void initOpen(const std::wstring& fileName, int64_t memory);
+	void initCreate(const std::wstring& fileName, int64_t memory);
+	void initCopy(const std::wstring& inputName, const std::wstring& outputName, int64_t memory);
 	void initClose();
 
 	virtual bool Validate();
@@ -22,7 +22,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) const;
 private:
 	Type type;
-	u64 virtualAddress;
+	int64_t virtualAddress;
 	GenericAssemblerFile* file;
 	AssemblerFile* closeFile;
 };
@@ -40,8 +40,8 @@ private:
 	void exec() const;
 	Type type;
 	Expression expression;
-	u64 position;
-	u64 virtualAddress;
+	int64_t position;
+	int64_t virtualAddress;
 };
 
 class CDirectiveIncbin: public CAssemblerCommand
@@ -57,13 +57,13 @@ public:
 	virtual void writeSymData(SymbolData& symData) const;
 private:
 	std::wstring fileName;
-	u64 fileSize;
+	int64_t fileSize;
 
 	Expression startExpression;
 	Expression sizeExpression;
-	u64 start;
-	u64 size;
-	u64 virtualAddress;
+	int64_t start;
+	int64_t size;
+	int64_t virtualAddress;
 };
 
 class CDirectiveAlignFill: public CAssemblerCommand
@@ -86,7 +86,7 @@ private:
 	u64 value;
 	u64 finalSize;
 	u8 fillByte;
-	u64 virtualAddress;
+	int64_t virtualAddress;
 };
 
 class CDirectiveHeaderSize: public CAssemblerCommand
@@ -100,8 +100,8 @@ public:
 private:
 	void exec() const;
 	Expression expression;
-	u64 headerSize;
-	u64 virtualAddress;
+	int64_t headerSize;
+	int64_t virtualAddress;
 };
 
 class DirectiveObjImport: public CAssemblerCommand

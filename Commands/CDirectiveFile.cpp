@@ -14,7 +14,7 @@ CDirectiveFile::CDirectiveFile()
 	file = nullptr;
 }
 
-void CDirectiveFile::initOpen(const std::wstring& fileName, u64 memory)
+void CDirectiveFile::initOpen(const std::wstring& fileName, int64_t memory)
 {
 	type = Type::Open;
 	std::wstring fullName = getFullPathName(fileName);
@@ -25,24 +25,24 @@ void CDirectiveFile::initOpen(const std::wstring& fileName, u64 memory)
 		return;
 	}
 
-	file = new GenericAssemblerFile(fullName,(u32) memory,false);
+	file = new GenericAssemblerFile(fullName,memory,false);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
 }
 
-void CDirectiveFile::initCreate(const std::wstring& fileName, u64 memory)
+void CDirectiveFile::initCreate(const std::wstring& fileName, int64_t memory)
 {
 	type = Type::Create;
 	std::wstring fullName = getFullPathName(fileName);
 
-	file = new GenericAssemblerFile(fullName,(u32) memory,true);
+	file = new GenericAssemblerFile(fullName,memory,true);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
 }
 
-void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring& outputName, u64 memory)
+void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring& outputName, int64_t memory)
 {
 	type = Type::Copy;
 	std::wstring fullInputName = getFullPathName(inputName);
@@ -54,7 +54,7 @@ void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring&
 		return;
 	}
 	
-	file = new GenericAssemblerFile(fullOutputName,fullInputName,(u32) memory);
+	file = new GenericAssemblerFile(fullOutputName,fullInputName,memory);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
@@ -109,13 +109,13 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Type::Open:
-		str = formatString(L".open \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());;
+		str = formatString(L".open \"%s\",0x%016X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Create:
-		str = formatString(L".create \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
+		str = formatString(L".create \"%s\",0x%016X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = formatString(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName(),
+		str = formatString(L".open \"%s\",\"%s\",0x%016X",file->getOriginalFileName(),
 			file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
@@ -190,10 +190,10 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(virtualAddress,formatString(L".orga 0x%08X",(u32)position));
+		tempData.writeLine(virtualAddress,formatString(L".orga 0x%016X",position));
 		break;
 	case Virtual:
-		tempData.writeLine(virtualAddress,formatString(L".org 0x%08X",(u32)position));
+		tempData.writeLine(virtualAddress,formatString(L".org 0x%016X",position));
 		break;
 	}
 }
@@ -414,7 +414,9 @@ void CDirectiveHeaderSize::exec() const
 		return;
 	}
 	GenericAssemblerFile* file = static_cast<GenericAssemblerFile*>(openFile);
+	int64_t physicalAddress = file->getPhysicalAddress();
 	file->setHeaderSize(headerSize);
+	file->seekPhysical(physicalAddress);
 }
 
 bool CDirectiveHeaderSize::Validate()
@@ -438,7 +440,7 @@ void CDirectiveHeaderSize::Encode() const
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,formatString(L".headersize 0x%08X",headerSize));
+	tempData.writeLine(virtualAddress,formatString(L".headersize 0x%016X",headerSize));
 }
 
 
@@ -470,7 +472,7 @@ bool DirectiveObjImport::Validate()
 	if (ctor != nullptr && ctor->Validate())
 		result = true;
 
-	u64 memory = g_fileManager->getVirtualAddress();
+	u64 memory = (u64) g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory((size_t)memory);
 

@@ -12,11 +12,11 @@ public:
 	virtual void close();
 	virtual bool isOpen() { return opened; };
 	virtual bool write(void* data, size_t length);
-	virtual u64 getVirtualAddress();
-	virtual u64 getPhysicalAddress();
-	virtual u64 getHeaderSize();
-	virtual bool seekVirtual(u64 virtualAddress);
-	virtual bool seekPhysical(u64 physicalAddress);
+	virtual int64_t getVirtualAddress();
+	virtual int64_t getPhysicalAddress();
+	virtual int64_t getHeaderSize();
+	virtual bool seekVirtual(int64_t virtualAddress);
+	virtual bool seekPhysical(int64_t physicalAddress);
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
 	virtual void beginSymData();
 	virtual void endSymData();

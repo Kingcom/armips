@@ -25,7 +25,7 @@ CAssemblerCommand* parseDirectiveOpen(Parser& parser, int flags)
 	if (parser.parseExpressionList(list,2,3) == false)
 		return nullptr;
 
-	u64 memoryAddress;
+	int64_t memoryAddress;
 	std::wstring inputName, outputName;
 
 	if (list[0].evaluateString(inputName,false) == false)
@@ -55,7 +55,7 @@ CAssemblerCommand* parseDirectiveCreate(Parser& parser, int flags)
 	if (parser.parseExpressionList(list,2,2) == false)
 		return nullptr;
 
-	u64 memoryAddress;
+	int64_t memoryAddress;
 	std::wstring inputName, outputName;
 
 	if (list[0].evaluateString(inputName,false) == false)
