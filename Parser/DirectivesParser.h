@@ -51,6 +51,13 @@ typedef std::unordered_multimap<std::wstring, const DirectiveEntry> DirectiveMap
 #define DIRECTIVE_MSG_ERROR			0x00000002
 #define DIRECTIVE_MSG_NOTICE		0x00000003
 
+// MIPS directive flags
+#define DIRECTIVE_MIPS_PSX			0x00000001
+#define DIRECTIVE_MIPS_PS2			0x00000002
+#define DIRECTIVE_MIPS_PSP			0x00000003
+#define DIRECTIVE_MIPS_N64			0x00000004
+#define DIRECTIVE_MIPS_RSP			0x00000005
+
 // ARM directive flags
 #define DIRECTIVE_ARM_GBA			0x00000001
 #define DIRECTIVE_ARM_NDS			0x00000002

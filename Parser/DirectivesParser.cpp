@@ -98,8 +98,8 @@ CAssemblerCommand* parseDirectiveIncbin(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 {
-	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,1) == false)
+	Expression exp = parser.parseExpression();
+	if (exp.isLoaded() == false)
 		return nullptr;
 
 	CDirectivePosition::Type type;
@@ -115,7 +115,7 @@ CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 		return nullptr;
 	}
 
-	return new CDirectivePosition(list[0],type);
+	return new CDirectivePosition(exp,type);
 }
 
 CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
@@ -145,11 +145,11 @@ CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveHeaderSize(Parser& parser, int flags)
 {
-	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,1) == false)
+	Expression exp = parser.parseExpression();
+	if (exp.isLoaded() == false)
 		return nullptr;
 
-	return new CDirectiveHeaderSize(list[0]);
+	return new CDirectiveHeaderSize(exp);
 }
 
 CAssemblerCommand* parseDirectiveObjImport(Parser& parser, int flags)
@@ -210,6 +210,12 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		if (parser.parseIdentifier(name) == false)
 			return nullptr;
 		break;
+	}
+
+	if(parser.nextToken().type != TokenType::Separator)
+	{
+		parser.printError(start,L"Directive not terminated");
+		return nullptr;
 	}
 
 	parser.pushConditionalResult(condResult);
@@ -362,44 +368,31 @@ CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 	return data;
 }
 
-CAssemblerCommand* parseDirectivePsx(Parser& parser, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false,0);
-	Mips.SetVersion(MARCH_PSX);
-	return new ArchitectureCommand(L".psx",L"");
-}
-
-CAssemblerCommand* parseDirectivePs2(Parser& parser, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false,0);
-	Mips.SetVersion(MARCH_PS2);
-	return new ArchitectureCommand(L".ps2",L"");
-}
-
-CAssemblerCommand* parseDirectivePsp(Parser& parser, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false,0);
-	Mips.SetVersion(MARCH_PSP);
-	return new ArchitectureCommand(L".psp",L"");
-}
-
-CAssemblerCommand* parseDirectiveN64(Parser& parser, int flags)
+CAssemblerCommand* parseDirectiveMipsArch(Parser& parser, int flags)
 {
 	Arch = &Mips;
 	Mips.SetLoadDelay(false, 0);
-	Mips.SetVersion(MARCH_N64);
-	return new ArchitectureCommand(L".n64", L"");
-}
 
-CAssemblerCommand* parseDirectiveRsp(Parser& parser, int flags)
-{
-	Arch = &Mips;
-	Mips.SetLoadDelay(false, 0);
-	Mips.SetVersion(MARCH_RSP);
-	return new ArchitectureCommand(L".rsp", L"");
+	switch (flags)
+	{
+	case DIRECTIVE_MIPS_PSX:
+		Mips.SetVersion(MARCH_PSX);
+		return new ArchitectureCommand(L".psx", L"");
+	case DIRECTIVE_MIPS_PS2:
+		Mips.SetVersion(MARCH_PS2);
+		return new ArchitectureCommand(L".ps2", L"");
+	case DIRECTIVE_MIPS_PSP:
+		Mips.SetVersion(MARCH_PSP);
+		return new ArchitectureCommand(L".psp", L"");
+	case DIRECTIVE_MIPS_N64:
+		Mips.SetVersion(MARCH_N64);
+		return new ArchitectureCommand(L".n64", L"");
+	case DIRECTIVE_MIPS_RSP:
+		Mips.SetVersion(MARCH_RSP);
+		return new ArchitectureCommand(L".rsp", L"");
+	}
+
+	return nullptr;
 }
 
 CAssemblerCommand* parseDirectiveArmArch(Parser& parser, int flags)
@@ -586,7 +579,7 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 CAssemblerCommand* parseDirectiveMessage(Parser& parser, int flags)
 {
 	Expression exp = parser.parseExpression();
-	
+
 	switch (flags)
 	{
 	case DIRECTIVE_MSG_WARNING:
@@ -701,11 +694,11 @@ const DirectiveMap directives = {
 	{ L".float",			{ &parseDirectiveData,				DIRECTIVE_DATA_FLOAT } },
 	{ L".double",			{ &parseDirectiveData,				DIRECTIVE_DATA_DOUBLE } },
 
-	{ L".psx",				{ &parseDirectivePsx,				0 } },
-	{ L".ps2",				{ &parseDirectivePs2,				0 } },
-	{ L".psp",				{ &parseDirectivePsp,				0 } },
-	{ L".n64",				{ &parseDirectiveN64,				0 } },
-	{ L".rsp",				{ &parseDirectiveRsp,				0 } },
+	{ L".psx",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PSX } },
+	{ L".ps2",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PS2 } },
+	{ L".psp",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PSP } },
+	{ L".n64",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_N64 } },
+	{ L".rsp",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_RSP } },
 
 	{ L".gba",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_GBA } },
 	{ L".nds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_NDS } },

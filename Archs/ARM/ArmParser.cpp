@@ -624,9 +624,9 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 		}
 	}
 
-	// the next token has to be an identifier, else the parameters aren't
+	// the next token has to be a separator, else the parameters aren't
 	// completely parsed
-	return parser.atEnd() || parser.peekToken().type == TokenType::Identifier;
+	return parser.nextToken().type == TokenType::Separator;
 }
 
 CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
@@ -721,9 +721,9 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 		}
 	}
 	
-	// the next token has to be an identifier, else the parameters aren't
+	// the next token has to be a separator, else the parameters aren't
 	// completely parsed
-	return parser.atEnd() || parser.peekToken().type == TokenType::Identifier;
+	return parser.nextToken().type == TokenType::Separator;
 }
 
 CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
