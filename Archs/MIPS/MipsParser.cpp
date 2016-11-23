@@ -321,7 +321,7 @@ bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& d
 	}
 }
 
-bool MipsParser::parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest)
+bool MipsParser::parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest, bool byteOriented)
 {
 	CHECK(parseRspVectorRegister(parser, dest));
 
@@ -332,7 +332,7 @@ bool MipsParser::parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterVa
 
 	const Token &token = parser.nextToken();
 
-	if (token.type != TokenType::Integer || token.intValue >= 8)
+	if (token.type != TokenType::Integer || token.intValue >= (byteOriented ? 16 : 8))
 		return false;
 
 	edest.name = formatString(L"%d", token.intValue);
@@ -1246,11 +1246,14 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 'S':	// vector register with element
 				CHECK(parseRspElemVectorRegister(parser,registers.rspvrs,registers.rspve));
 				break;
-			case 'l':	// vector scalar register
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve));
+			case 'b':	// vector register with byte-based scalar element
+				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve,true));
 				break;
-			case 'm':	// vector scalar destination register
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrd,registers.rspvde));
+			case 'l':	// vector register with scalar element
+				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve,false));
+				break;
+			case 'm':	// vector register with scalar element
+				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrd,registers.rspvde,false));
 				break;
 			default:
 				return false;
