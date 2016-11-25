@@ -104,6 +104,13 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 	while (atEnd() == false)
 	{
 		const Token &next = peekToken();
+
+		if(next.type == TokenType::Separator)
+		{
+			eatToken();
+			continue;
+		}
+
 		if (next.stringValueStartsWith(indicator) && isPartOfList(next.getStringValue(), terminators))
 			break;
 
@@ -212,8 +219,12 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
 			if (hasError() == false)
 				printError(tok,L"Directive parameter failure");
 			return nullptr;
+		} else if (!(directive.flags & DIRECTIVE_MANUALSEPARATOR) && nextToken().type != TokenType::Separator)
+		{
+			printError(tok,L"Directive not terminated");
+			return nullptr;
 		}
-		
+
 		return result;
 	}
 
@@ -265,7 +276,7 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 	tok.init(&f);
 
 	TokenizerPosition start = tok.getPosition();
-	while (tok.atEnd() == false)
+	while (tok.atEnd() == false && tok.peekToken().type != TokenType::Separator)
 	{
 		const Token& token = tok.nextToken();
 		if (token.type == TokenType::Identifier && token.getStringValue() == name)
@@ -310,7 +321,7 @@ bool Parser::checkEquLabel()
 			std::wstring name = peekToken(0).getStringValue();
 			std::wstring value = peekToken(pos+1).getStringValue();
 			eatTokens(pos+2);
-		
+
 			// skip the equ if it's inside a false conditional block
 			if (isInsideTrueBlock() == false)
 				return true;
@@ -406,6 +417,12 @@ bool Parser::checkMacroDefinition()
 		macro.parameters.push_back(name);
 	}
 
+	if(nextToken().type != TokenType::Separator)
+	{
+		printError(first,L"Macro directive not terminated");
+		return false;
+	}
+
 	// load macro content
 
 	TokenizerPosition start = getTokenizer()->getPosition();
@@ -419,7 +436,7 @@ bool Parser::checkMacroDefinition()
 			break;
 		}
 	}
-	
+
 	// no .endmacro, not valid
 	if (valid == false)
 		return true;
@@ -427,6 +444,12 @@ bool Parser::checkMacroDefinition()
 	// get content
 	TokenizerPosition end = getTokenizer()->getPosition().previous();
 	macro.content = getTokenizer()->getTokens(start,end);
+
+	if(nextToken().type != TokenType::Separator)
+	{
+		printError(first,L"Endmacro directive not terminated");
+		return false;
+	}
 
 	return true;
 }
@@ -500,6 +523,12 @@ CAssemblerCommand* Parser::parseMacroCall()
 		return nullptr;
 	}
 
+	if(nextToken().type != TokenType::Separator)
+	{
+		printError(start,L"Macro call not terminated");
+		return nullptr;
+	}
+
 	// a macro is fully parsed once when it's loaded
 	// to gather all labels. it's not necessary to
 	// instantiate other macros at that time
@@ -542,11 +571,12 @@ CAssemblerCommand* Parser::parseMacroCall()
 
 		macroTokenizer.registerReplacement(label,fullName);
 	}
-	
+
 	macroTokenizer.init(macro.content);
 	macro.counter++;
 
 	return parse(&macroTokenizer,true);
+
 }
 
 CAssemblerCommand* Parser::parseLabel()
@@ -578,9 +608,8 @@ CAssemblerCommand* Parser::parseLabel()
 
 CAssemblerCommand* Parser::handleError()
 {
-	// skip the rest of the line
-	while (peekToken().line == errorLine)
-		eatToken();
+	// skip the rest of the statement
+	while (!atEnd() && nextToken().type != TokenType::Separator);
 
 	clearError();
 	return new InvalidCommand();
@@ -617,7 +646,7 @@ CAssemblerCommand* Parser::parseCommand()
 
 	if (atEnd())
 		return new DummyCommand();
-	
+
 	if ((command = parseLabel()) != nullptr)
 		return command;
 	if (hasError())

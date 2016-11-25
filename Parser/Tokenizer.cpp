@@ -199,9 +199,18 @@ inline bool isComment(const std::wstring& text, size_t pos)
 	return false;
 }
 
+inline bool isContinuation(const std::wstring& text, size_t pos)
+{
+	if (pos >= text.size())
+		return false;
+
+	return text[pos] == '\\';
+}
+
+
 void FileTokenizer::skipWhitespace()
 {
-	while (linePos == currentLine.size() || isWhitespace(currentLine,linePos) || isComment(currentLine,linePos))
+	while (isWhitespace(currentLine,linePos) || isComment(currentLine,linePos))
 	{
 		// skip whitespace
 		while (isWhitespace(currentLine,linePos))
@@ -213,15 +222,8 @@ void FileTokenizer::skipWhitespace()
 		if (isComment(currentLine,linePos))
 			linePos = currentLine.size();
 
-		if (linePos >= currentLine.size())
-		{
-			if (input->atEnd())
-				return;
-
-			currentLine = input->readLine();
-			linePos = 0;
-			lineNumber++;
-		}
+		if(linePos >= currentLine.size())
+			break;
 	}
 }
 
@@ -233,9 +235,6 @@ void FileTokenizer::createToken(TokenType type, size_t length)
 	token.setOriginalText(currentLine,linePos,length);
 
 	linePos += length;
-
-	// advance to start of next token
-	skipWhitespace();
 }
 
 void FileTokenizer::createToken(TokenType type, size_t length, u64 value)
@@ -247,9 +246,6 @@ void FileTokenizer::createToken(TokenType type, size_t length, u64 value)
 	token.intValue = value;
 
 	linePos += length;
-	
-	// advance to start of next token
-	skipWhitespace();
 }
 
 void FileTokenizer::createToken(TokenType type, size_t length, double value)
@@ -261,9 +257,6 @@ void FileTokenizer::createToken(TokenType type, size_t length, double value)
 	token.floatValue = value;
 
 	linePos += length;
-	
-	// advance to start of next token
-	skipWhitespace();
 }
 
 void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value)
@@ -280,9 +273,6 @@ void FileTokenizer::createToken(TokenType type, size_t length, const std::wstrin
 	token.setStringValue(value,valuePos,valueLength);
 
 	linePos += length;
-	
-	// advance to start of next token
-	skipWhitespace();
 }
 
 void FileTokenizer::createTokenCurrentString(TokenType type, size_t length)
@@ -293,9 +283,6 @@ void FileTokenizer::createTokenCurrentString(TokenType type, size_t length)
 	token.setStringAndOriginalValue(currentLine,linePos,length);
 
 	linePos += length;
-
-	// advance to start of next token
-	skipWhitespace();
 }
 
 bool FileTokenizer::parseOperator()
@@ -376,7 +363,10 @@ bool FileTokenizer::parseOperator()
 		createToken(TokenType::Question,1);
 		return true;
 	case ':':
-		createToken(TokenType::Colon,1);
+		if (second == ':')
+			createToken(TokenType::Separator,2);
+		else
+			createToken(TokenType::Colon,1);
 		return true;
 	case ',':
 		createToken(TokenType::Comma,1);
@@ -413,15 +403,15 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
 	u32 base = 10;
 	if (currentLine[start] == '0')
 	{
-		if (tolower(currentLine[start+1]) == 'x')
+		if (towlower(currentLine[start+1]) == 'x')
 		{
 			base = 16;
 			start += 2;
-		} else if (tolower(currentLine[start+1]) == 'o')
+		} else if (towlower(currentLine[start+1]) == 'o')
 		{
 			base = 8;
 			start += 2;
-		} else if (tolower(currentLine[start+1]) == 'b' && towlower(currentLine[end-1]) != 'h')
+		} else if (towlower(currentLine[start+1]) == 'b' && towlower(currentLine[end-1]) != 'h')
 		{
 			base = 2;
 			start += 2;
@@ -503,8 +493,9 @@ Token FileTokenizer::loadToken()
 	if (parseOperator())
 		return std::move(token);
 
-	// character constants
 	wchar_t first = currentLine[pos];
+
+	// character constants
 	if (first == '\'' && pos+2 < currentLine.size() && currentLine[pos+2] == '\'')
 	{
 		createToken(TokenType::Integer,3,(u64)currentLine[pos+1]);
@@ -648,21 +639,52 @@ bool FileTokenizer::init(TextFile* input)
 {
 	clearTokens();
 
-	currentLine.clear();
-	lineNumber = 0;
+	lineNumber = 1;
 	linePos = 0;
 	equActive = false;
+	currentLine = input->readLine();
 
 	this->input = input;
 	if (input != NULL && input->isOpen())
 	{
-		skipWhitespace();
-
 		while (!isInputAtEnd())
 		{
-			addToken(std::move(loadToken()));
+			bool addSeparator = true;
+
+			skipWhitespace();
+			if(isContinuation(currentLine, linePos))
+			{
+				linePos++;
+				skipWhitespace();
+				if(linePos < currentLine.size()){
+					createToken(TokenType::Invalid,0,
+						L"Unexpected character after line continuation character");
+					addToken(token);
+				}
+
+				addSeparator = false;
+			} else if(linePos < currentLine.size())
+			{
+				addToken(std::move(loadToken()));
+			}
+
+			if (linePos >= currentLine.size())
+			{
+				if(addSeparator) //TODO: enable separator after it works with parser
+				{
+					createToken(TokenType::Separator,0);
+					addToken(token);
+				}
+
+				if (input->atEnd())
+					break;
+
+				currentLine = input->readLine();
+				linePos = 0;
+				lineNumber++;
+			}
 		}
-		
+
 		resetPosition();
 		return true;
 	}

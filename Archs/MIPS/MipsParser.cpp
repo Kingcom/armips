@@ -1323,7 +1323,12 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 
 	opcodeData.opcode = opcode;
 	setOmittedRegisters(opcode);
-	return true;
+
+	// the next token has to be a separator, else the parameters aren't
+	// completely parsed
+
+	return parser.nextToken().type == TokenType::Separator;
+
 }
 
 CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
@@ -1414,7 +1419,9 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 	if (parser.peekToken().type == TokenType::LParen)
 		return false;
 
-	return true;
+	// the next token has to be a separator, else the parameters aren't
+	// completely parsed
+	return parser.nextToken().type == TokenType::Separator;
 }
 
 CAssemblerCommand* MipsParser::parseMacro(Parser& parser)

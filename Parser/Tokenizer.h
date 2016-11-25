@@ -43,7 +43,8 @@ enum class TokenType
 	RBrace,
 	Dollar,
 	NumberString,
-	Degree
+	Degree,
+	Separator
 };
 
 struct Token
