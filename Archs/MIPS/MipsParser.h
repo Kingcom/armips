@@ -26,7 +26,7 @@ private:
 	bool parseRspCop0Register(Parser& parser, MipsRegisterValue& dest);
 	bool parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest);
 	bool parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest);
-	bool parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest);
+	bool parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest, bool byteOriented);
 	bool parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int size);
 	bool parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg);
 	bool parseImmediate(Parser& parser, Expression& dest);
