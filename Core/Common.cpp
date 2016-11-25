@@ -14,12 +14,14 @@ CArchitecture* Arch;
 
 std::wstring getFolderNameFromPath(const std::wstring& src)
 {
-	size_t s = src.rfind('\\');
+#ifdef _WIN32
+	size_t s = src.find_last_of(L"\\/");
+#else
+	size_t s = src.rfind(L"/");
+#endif
 	if (s == std::wstring::npos)
 	{
-		s = src.rfind('/');
-		if (s == std::wstring::npos)
-			return L".";
+		return L".";
 	}
 
 	return src.substr(0,s);
