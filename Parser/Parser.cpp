@@ -219,7 +219,8 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
 			if (hasError() == false)
 				printError(tok,L"Directive parameter failure");
 			return nullptr;
-		} else if(nextToken().type != TokenType::Separator) {
+		} else if (!(directive.flags & DIRECTIVE_MANUALSEPARATOR) && nextToken().type != TokenType::Separator)
+		{
 			printError(tok,L"Directive not terminated");
 			return nullptr;
 		}

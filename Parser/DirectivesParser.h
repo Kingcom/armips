@@ -22,6 +22,7 @@ typedef std::unordered_multimap<std::wstring, const DirectiveEntry> DirectiveMap
 #define DIRECTIVE_MIPSRESETDELAY	0x00040000
 #define DIRECTIVE_DISABLED			0x00080000
 #define DIRECTIVE_NOTINMEMORY		0x00100000
+#define DIRECTIVE_MANUALSEPARATOR	0x00200000
 
 // file directive flags
 #define DIRECTIVE_POS_PHYSICAL		0x00000001

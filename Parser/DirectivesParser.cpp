@@ -559,8 +559,11 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
-	if (parser.peekToken().type == TokenType::Comma)
+	if (parser.nextToken().type != TokenType::Separator)
+	{
+		parser.printError(tok,L"Directive not terminated");
 		return nullptr;
+	}
 
 	CDirectiveFunction* func = new CDirectiveFunction(tok.getStringValue(),tok.getOriginalText());
 	CAssemblerCommand* seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
@@ -570,6 +573,11 @@ CAssemblerCommand* parseDirectiveFunction(Parser& parser, int flags)
 		stringValue == L".endfunction")
 	{
 		parser.eatToken();
+		if(parser.nextToken().type != TokenType::Separator)
+		{
+			parser.printError(tok,L"Directive not terminated");
+			return nullptr;
+		}
 	}
 
 	func->setContent(seq);
@@ -717,8 +725,8 @@ const DirectiveMap directives = {
 	{ L".sym",				{ &parseDirectiveSym,				0 } },
 	
 	{ L".definelabel",		{ &parseDirectiveDefineLabel,		0 } },
-	{ L".function",			{ &parseDirectiveFunction,			0 } },
-	{ L".func",				{ &parseDirectiveFunction,			0 } },
+	{ L".function",			{ &parseDirectiveFunction,			DIRECTIVE_MANUALSEPARATOR } },
+	{ L".func",				{ &parseDirectiveFunction,			DIRECTIVE_MANUALSEPARATOR } },
 	
 	{ L".warning",			{ &parseDirectiveMessage,			DIRECTIVE_MSG_WARNING } },
 	{ L".error",			{ &parseDirectiveMessage,			DIRECTIVE_MSG_ERROR } },
