@@ -266,11 +266,9 @@ bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
 	return parseRegisterTable(parser,dest,mipsRspVectorRegisters,ARRAY_SIZE(mipsRspVectorRegisters));
 }
 
-bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest)
+bool MipsParser::parseRspBroadcastElement(Parser& parser, MipsRegisterValue& dest)
 {
-	CHECK(parseRspVectorRegister(parser, dest));
-
-	edest.type = MipsRegisterType::RspElement;
+	dest.type = MipsRegisterType::RspBroadcastElement;
 
 	if (parser.peekToken().type == TokenType::LBrack)
 	{
@@ -285,7 +283,7 @@ bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& d
 
 		parser.eatToken();
 
-		if (parseRegisterNumber(parser, edest, 16))
+		if (parseRegisterNumber(parser, dest, 16))
 			return parser.nextToken().type == TokenType::RBrack;
 
 		const Token& token = parser.nextToken();
@@ -304,41 +302,64 @@ bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& d
 		{
 			if (stringValue == rspElementNames[i].name)
 			{
-				edest.num = rspElementNames[i].num;
-				edest.name = rspElementNames[i].name;
+				dest.num = rspElementNames[i].num;
+				dest.name = rspElementNames[i].name;
 
 				return parser.nextToken().type == TokenType::RBrack;
 			}
 		}
 
 		return false;
-	} else
-	{
-		edest.num = 0;
-		edest.name = L"";
-
-		return true;
 	}
+
+	dest.num = 0;
+	dest.name = L"";
+
+	return true;
+
 }
 
-bool MipsParser::parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest, bool byteOriented)
+bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
 {
-	CHECK(parseRspVectorRegister(parser, dest));
-
-	edest.type = MipsRegisterType::RspScalarElement;
+	dest.type = MipsRegisterType::RspScalarElement;
 
 	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
 
 	const Token &token = parser.nextToken();
 
-	if (token.type != TokenType::Integer || token.intValue >= (byteOriented ? 16 : 8))
+	if (token.type != TokenType::Integer || token.intValue >= 8)
 		return false;
 
-	edest.name = formatString(L"%d", token.intValue);
-	edest.num = (int) token.intValue;
+	dest.name = formatString(L"%d", token.intValue);
+	dest.num = token.intValue;
 
 	return parser.nextToken().type == TokenType::RBrack;
+}
+
+bool MipsParser::parseRspOffsetElement(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::RspOffsetElement;
+
+	if (parser.peekToken().type == TokenType::LBrack)
+	{
+		parser.eatToken();
+
+		const Token &token = parser.nextToken();
+
+		if (token.type != TokenType::Integer || token.intValue >= 16)
+			return false;
+
+		dest.name = formatString(L"%d", token.intValue);
+		dest.num = token.intValue;
+
+		return parser.nextToken().type == TokenType::RBrack;
+	}
+
+	dest.num = 0;
+	dest.name = L"";
+
+	return true;
 }
 
 static bool decodeDigit(wchar_t digit, int& dest)
@@ -1187,7 +1208,7 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 				return false;
 			}
 			break;
-		case 'm':	// vfpu amtrix register
+		case 'm':	// vfpu matrix register
 			switch (*encoding++)
 			{
 			case 's':
@@ -1234,8 +1255,8 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 'z':	// cop0 register
 				CHECK(parseRspCop0Register(parser,registers.grd));
 				break;
-			case 't':	// vector register with element
-				CHECK(parseRspElemVectorRegister(parser,registers.rspvrt,registers.rspve));
+			case 't':	// vector register
+				CHECK(parseRspVectorRegister(parser,registers.rspvrt));
 				break;
 			case 'd':	// vector register
 				CHECK(parseRspVectorRegister(parser,registers.rspvrd));
@@ -1243,17 +1264,17 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 's':	// vector register
 				CHECK(parseRspVectorRegister(parser,registers.rspvrs));
 				break;
-			case 'S':	// vector register with element
-				CHECK(parseRspElemVectorRegister(parser,registers.rspvrs,registers.rspve));
+			case 'e':	// vector broadcast element
+				CHECK(parseRspBroadcastElement(parser,registers.rspve));
 				break;
-			case 'b':	// vector register with byte-based scalar element
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve,true));
+			case 'l':	// vector scalar element
+				CHECK(parseRspScalarElement(parser,registers.rspve));
 				break;
-			case 'l':	// vector register with scalar element
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve,false));
+			case 'm':	// vector scalar destination element
+				CHECK(parseRspScalarElement(parser,registers.rspvde));
 				break;
-			case 'm':	// vector register with scalar element
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrd,registers.rspvde,false));
+			case 'o':	// vector byte offset element
+				CHECK(parseRspOffsetElement(parser,registers.rspvealt));
 				break;
 			default:
 				return false;

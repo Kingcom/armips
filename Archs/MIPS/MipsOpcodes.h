@@ -36,14 +36,13 @@
 #define MO_TRANSPOSE_VS	0x00040000	// matrix vs has to be transposed
 #define MO_VFPU_PAIR	0x00080000	// pair vfpu reg
 #define MO_VFPU_TRIPLE	0x00100000	// triple vfpu reg
-#define MO_RSP_VEALT	0x00200000	// rsp alternative vector element placement
+#define MO_DFPU			0x00200000	// double-precision fpu opcodes
 #define MO_RSPVRSD		0x00400000	// rsp vector rs + rd
-#define MO_DFPU			0x00800000	// double-precision fpu opcodes
-#define MO_NEGIMM		0x01000000 	// negated immediate (for subi)
-#define MO_RSP_HWOFFSET	0x02000000	// RSP halfword load/store offset
-#define MO_RSP_WOFFSET	0x04000000	// RSP word load/store offset
-#define MO_RSP_DWOFFSET	0x08000000	// RSP doubleword load/store offset
-#define MO_RSP_QWOFFSET	0x10000000	// RSP quadword load/store offset
+#define MO_NEGIMM		0x00800000 	// negated immediate (for subi)
+#define MO_RSP_HWOFFSET	0x01000000	// RSP halfword load/store offset
+#define MO_RSP_WOFFSET	0x02000000	// RSP word load/store offset
+#define MO_RSP_DWOFFSET	0x04000000	// RSP doubleword load/store offset
+#define MO_RSP_QWOFFSET	0x08000000	// RSP quadword load/store offset
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
@@ -72,13 +71,13 @@
 #define MIPS_VFPUSIZE(VALUE)			( (((VALUE) & 1) << 7) | (((VALUE) & 2) << 14) )
 #define MIPS_VFPUFUNC(VALUE)			BITFIELD(23, 3, (VALUE))
 #define MIPS_COP2(VALUE)				(MIPS_OP(18) | MIPS_RS(VALUE))
-#define MIPS_COP2_RSP(VALUE)			(MIPS_OP(18) | (1 << 25) | MIPS_FUNC(VALUE))
 #define MIPS_COP2BC(VALUE)				(MIPS_COP2(8) | MIPS_RT(VALUE))
-#define MIPS_LWC2_RSP(VALUE)			(MIPS_OP(50) | MIPS_RD(VALUE))
-#define MIPS_SWC2_RSP(VALUE)			(MIPS_OP(58) | MIPS_RD(VALUE))
-#define MIPS_COP2_RSP_VE(VALUE)			BITFIELD(21, 4, (VALUE))
-#define MIPS_COP2_RSP_VDE(VALUE)		BITFIELD(11, 4, (VALUE))
-#define MIPS_COP2_RSP_VEALT(VALUE)		BITFIELD(7, 4, (VALUE))
+#define MIPS_RSP_COP2(VALUE)			(MIPS_OP(18) | (1 << 25) | MIPS_FUNC(VALUE))
+#define MIPS_RSP_LWC2(VALUE)			(MIPS_OP(50) | MIPS_RD(VALUE))
+#define MIPS_RSP_SWC2(VALUE)			(MIPS_OP(58) | MIPS_RD(VALUE))
+#define MIPS_RSP_VE(VALUE)				BITFIELD(21, 4, (VALUE))
+#define MIPS_RSP_VDE(VALUE)				BITFIELD(11, 4, (VALUE))
+#define MIPS_RSP_VEALT(VALUE)			BITFIELD(7, 4, (VALUE))
 #define MIPS_VFPU0(VALUE)				(MIPS_OP(24) | MIPS_VFPUFUNC(VALUE))
 #define MIPS_VFPU1(VALUE)				(MIPS_OP(25) | MIPS_VFPUFUNC(VALUE))
 #define MIPS_VFPU3(VALUE)				(MIPS_OP(27) | MIPS_VFPUFUNC(VALUE))

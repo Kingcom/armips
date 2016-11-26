@@ -1,46 +1,6 @@
 #include "stdafx.h"
 #include "MipsOpcodes.h"
 
-/* Placeholders for encoding
-   Opcodes
-	S	vfpu size
-	B	cop2 branch condition
-
-   Parameters
-	s	source register
-	d	destination register
-	t	target register
-	S	float source reg
-	D	float dest reg
-	T	float traget reg
-	i	primary immediate
-		5 5bit
-		16 16bit
-		20 20bit
-		26 26bit
-		h 16bit halffloat
-	u	Shifted 16 bit immediate (upper)
-	n	negative 16 bit immediate (for subi/u aliases)
-	j	5 bit secondary immediate
-	 e	ext
-	 i	ins
-	 b	cop2 branch condition
-	vs	PSP vfpu source reg
-	vd	PSP vfpu dest reg
-	vt	PSP vfpu target reg
-	vc	PSP vfpu control reg
-	Vs	PS2 vector source reg
-	Vd	PS2 vector dest reg
-	Vt	PS2 vector target reg
-	C	PSP vector condition
-	W	weird vfpu parameters
-		s vpfxs/t parameter
-		d vpfxd parameter
-		c vcst constant
-		r vrot constant
-	w	'wb' characters
-*/
-
 const tMipsOpcode MipsOpcodes[] = {
 //     31---------26---------------------------------------------------0
 //     |  opcode   |                                                   |
@@ -491,7 +451,7 @@ const tMipsOpcode MipsOpcodes[] = {
 // 000 |  add  |  sub  |  mul  |  div  | sqrt  |  abs  |  mov  |  neg  | 00..07
 // 001 |round.l|trunc.l|ceil.l |floor.l|round.w|trunc.w|ceil.w |floor.w| 08..0F
 // 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
-// 011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  --- | 18..1F
+// 011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 // 100 | cvt.s |  ---  |  ---  |  ---  | cvt.w | cvt.l |  ---  |  ---  | 20..27
 // 101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 28..2F
 // 110 |  c.f  | c.un  | c.eq  | c.ueq | c.olt | c.ult | c.ole | c.ule | 30..37
@@ -579,15 +539,15 @@ const tMipsOpcode MipsOpcodes[] = {
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 
-	{ "mfc2",	"t,RS",			MIPS_COP2(0x00),				MA_RSP, MO_RSP_VEALT },
-	{ "cfc2",	"t,d",			MIPS_COP2(0x02),				MA_RSP },
-	{ "mtc2",	"t,RS",			MIPS_COP2(0x04),				MA_RSP, MO_RSP_VEALT },
-	{ "ctc2",	"t,d",			MIPS_COP2(0x06),				MA_RSP },
+	{ "mfc2",	"t,RsRo",		MIPS_COP2(0x00),			MA_RSP, 0 },
+	{ "cfc2",	"t,d",			MIPS_COP2(0x02),			MA_RSP, 0 },
+	{ "mtc2",	"t,RsRo",		MIPS_COP2(0x04),			MA_RSP, 0 },
+	{ "ctc2",	"t,d",			MIPS_COP2(0x06),			MA_RSP, 0 },
 	// VVVVVV VVVVV ttttt -------- C DDDDDDD
-	{ "mfv",	"t,vd",			MIPS_COP2(0x03),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
-	{ "mfvc",	"t,vc",			MIPS_COP2(0x03) | 0x80,			MA_PSP,	MO_VFPU },
-	{ "mtv",	"t,vd",			MIPS_COP2(0x07),				MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
-	{ "mtvc",	"t,vc",			MIPS_COP2(0x07) | 0x80,			MA_PSP,	MO_VFPU },
+	{ "mfv",	"t,vd",			MIPS_COP2(0x03),			MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
+	{ "mfvc",	"t,vc",			MIPS_COP2(0x03) | 0x80,		MA_PSP,	MO_VFPU },
+	{ "mtv",	"t,vd",			MIPS_COP2(0x07),			MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
+	{ "mtvc",	"t,vc",			MIPS_COP2(0x07) | 0x80,		MA_PSP,	MO_VFPU },
 
 
 //     COP2BC: ? indicates any, * indicates all
@@ -626,12 +586,12 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--|
 //     |  VMUL |  VDOT |  VSCL |  ---  |  VHDP |  VDET |  VCRS |  ---  |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "vmul.S",		"vd,vs,vt",	MIPS_VFPU1(0),			MA_PSP,	MO_VFPU },
-	{ "vdot.S",		"vd,vs,vt",	MIPS_VFPU1(1),			MA_PSP,	MO_VFPU },
-	{ "vscl.S",		"vd,vs,vt",	MIPS_VFPU1(2),			MA_PSP,	MO_VFPU },
-	{ "vhdp.S",		"vd,vs,vt",	MIPS_VFPU1(4),			MA_PSP,	MO_VFPU },
-	{ "vdet.S",		"vd,vs,vt",	MIPS_VFPU1(5),			MA_PSP,	MO_VFPU },
-	{ "vcrs.S",		"vd,vs,vt",	MIPS_VFPU1(6),			MA_PSP,	MO_VFPU },
+	{ "vmul.S",		"vd,vs,vt",	MIPS_VFPU1(0),				MA_PSP,	MO_VFPU },
+	{ "vdot.S",		"vd,vs,vt",	MIPS_VFPU1(1),				MA_PSP,	MO_VFPU },
+	{ "vscl.S",		"vd,vs,vt",	MIPS_VFPU1(2),				MA_PSP,	MO_VFPU },
+	{ "vhdp.S",		"vd,vs,vt",	MIPS_VFPU1(4),				MA_PSP,	MO_VFPU },
+	{ "vdet.S",		"vd,vs,vt",	MIPS_VFPU1(5),				MA_PSP,	MO_VFPU },
+	{ "vcrs.S",		"vd,vs,vt",	MIPS_VFPU1(6),				MA_PSP,	MO_VFPU },
 
 //     31-------26-----23----------------------------------------------0
 //     |=   VFPU3|  f  |                                               |
@@ -640,12 +600,12 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |  VCMP |  ---  |  VMIN |  VMAX |  ---  | VSCMP |  VSGE |  VSLT |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
 	// VVVVVV VVV TTTTTTT z SSSSSSS z --- CCCC
-	{ "vcmp.S",		"C,vs,vt",	MIPS_VFPU3(0),			MA_PSP,	MO_VFPU },
-	{ "vmin.S",		"vd,vs,vt",	MIPS_VFPU3(2),			MA_PSP,	MO_VFPU },
-	{ "vmax.S",		"vd,vs,vt",	MIPS_VFPU3(3),			MA_PSP,	MO_VFPU },
-	{ "vscmp.S",	"vd,vs,vt",	MIPS_VFPU3(5),			MA_PSP,	MO_VFPU },
-	{ "vsge.S",		"vd,vs,vt",	MIPS_VFPU3(6),			MA_PSP,	MO_VFPU },
-	{ "vslt.S",		"vd,vs,vt",	MIPS_VFPU3(7),			MA_PSP,	MO_VFPU },
+	{ "vcmp.S",		"C,vs,vt",	MIPS_VFPU3(0),				MA_PSP,	MO_VFPU },
+	{ "vmin.S",		"vd,vs,vt",	MIPS_VFPU3(2),				MA_PSP,	MO_VFPU },
+	{ "vmax.S",		"vd,vs,vt",	MIPS_VFPU3(3),				MA_PSP,	MO_VFPU },
+	{ "vscmp.S",	"vd,vs,vt",	MIPS_VFPU3(5),				MA_PSP,	MO_VFPU },
+	{ "vsge.S",		"vd,vs,vt",	MIPS_VFPU3(6),				MA_PSP,	MO_VFPU },
+	{ "vslt.S",		"vd,vs,vt",	MIPS_VFPU3(7),				MA_PSP,	MO_VFPU },
 
 //     31-------26--------------------------------------------5--------0
 //     |=SPECIAL3|                                           | function|
@@ -698,15 +658,15 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
 	// VVVVVV VVVVV iiiii z ------- z DDDDDDD
 	// Technically these also have names (as the second arg.)
-	{ "vcst.S",		"vd,Wc",	MIPS_VFPU4(0x03),				MA_PSP, MO_VFPU },
-	{ "vf2in.S",	"vd,vs,i5",	MIPS_VFPU4(0x10),				MA_PSP, MO_VFPU },
-	{ "vf2iz.S",	"vd,vs,i5",	MIPS_VFPU4(0x11),				MA_PSP, MO_VFPU },
-	{ "vf2iu.S",	"vd,vs,i5",	MIPS_VFPU4(0x12),				MA_PSP, MO_VFPU },
-	{ "vf2id.S",	"vd,vs,i5",	MIPS_VFPU4(0x13),				MA_PSP, MO_VFPU },
-	{ "vi2f.S",		"vd,vs,i5",	MIPS_VFPU4(0x14),				MA_PSP, MO_VFPU },
-	{ "vcmovt.S",	"vd,vs,i5",	MIPS_VFPU4(0x15) | 0x00000000,  MA_PSP, MO_VFPU },
-	{ "vcmovf.S",	"vd,vs,i5",	MIPS_VFPU4(0x15) | 0x00080000,  MA_PSP, MO_VFPU },
-	{ "vwbn.S",		"vd,vs,i5",	MIPS_VFPU4(0x18),				MA_PSP, MO_VFPU },
+	{ "vcst.S",		"vd,Wc",	MIPS_VFPU4(0x03),			MA_PSP, MO_VFPU },
+	{ "vf2in.S",	"vd,vs,i5",	MIPS_VFPU4(0x10),			MA_PSP, MO_VFPU },
+	{ "vf2iz.S",	"vd,vs,i5",	MIPS_VFPU4(0x11),			MA_PSP, MO_VFPU },
+	{ "vf2iu.S",	"vd,vs,i5",	MIPS_VFPU4(0x12),			MA_PSP, MO_VFPU },
+	{ "vf2id.S",	"vd,vs,i5",	MIPS_VFPU4(0x13),			MA_PSP, MO_VFPU },
+	{ "vi2f.S",		"vd,vs,i5",	MIPS_VFPU4(0x14),			MA_PSP, MO_VFPU },
+	{ "vcmovt.S",	"vd,vs,i5",	MIPS_VFPU4(0x15) | 0,  		MA_PSP, MO_VFPU },
+	{ "vcmovf.S",	"vd,vs,i5",	MIPS_VFPU4(0x15) | (1<<19),	MA_PSP, MO_VFPU },
+	{ "vwbn.S",		"vd,vs,i5",	MIPS_VFPU4(0x18),			MA_PSP, MO_VFPU },
 
 //     31-------------21-------16--------------------------------------0
 //     |= VF4-1.1      |   rt  |                                       |
@@ -829,7 +789,7 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |VF6-1.2|  ---  |     VROT      |  ---  |  ---  |  ---  |  ---  |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
 	// VVVVVVVVVVV iiiii z SSSSSSS z DDDDDDD
-	{ "vrot.S",		"vd,vSs,Wr",	MIPS_VFPU6_1VROT(),				MA_PSP, MO_VFPU },
+	{ "vrot.S",		"vd,vSs,Wr",	MIPS_VFPU6_1VROT(),		MA_PSP, MO_VFPU },
 
 //     31--------20----16----------------------------------------------0
 //     |= VF6-1.2 |  f |                                               |
@@ -839,11 +799,11 @@ const tMipsOpcode MipsOpcodes[] = {
 //   1 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
 	// VVVVVVVVVVVVVVVV z SSSSSSS z DDDDDDD
-	{ "vmmov.S",	"md,ms",	MIPS_VFPU6_2(0),					MA_PSP, MO_VFPU },
+	{ "vmmov.S",	"md,ms",	MIPS_VFPU6_2(0),			MA_PSP, MO_VFPU },
 	// VVVVVVVVVVVVVVVV z ------- z DDDDDDD
-	{ "vmidt.S",	"md",		MIPS_VFPU6_2(3),					MA_PSP, MO_VFPU },
-	{ "vmzero.S",	"md",		MIPS_VFPU6_2(6),					MA_PSP, MO_VFPU },
-	{ "vmone.S",	"md",		MIPS_VFPU6_2(7),					MA_PSP, MO_VFPU },
+	{ "vmidt.S",	"md",		MIPS_VFPU6_2(3),			MA_PSP, MO_VFPU },
+	{ "vmzero.S",	"md",		MIPS_VFPU6_2(6),			MA_PSP, MO_VFPU },
+	{ "vmone.S",	"md",		MIPS_VFPU6_2(7),			MA_PSP, MO_VFPU },
 
 //     31---------26------------------------------------------5--------0
 //     |=       RSP|                                         | function|
@@ -858,119 +818,119 @@ const tMipsOpcode MipsOpcodes[] = {
 // 110 | VRCP  | VRCPL | VRCPH | VMOV  | VRSQ  | VRSQL | VRSQH | VNOP  | 30..37
 // 111 | VEXTT | VEXTQ | VEXTN |  ---  | VINST | VINSQ | VINSN | VNULL | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "vmulf",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x00),			MA_RSP, 0 },
-	{ "vmulf",	"Rs,Rt",			MIPS_COP2_RSP(0x00),			MA_RSP, MO_RSPVRSD },
-	{ "vmulu",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x01),			MA_RSP, 0 },
-	{ "vmulu",	"Rs,Rt",			MIPS_COP2_RSP(0x01),			MA_RSP, MO_RSPVRSD },
-	{ "vrndp",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x02),			MA_RSP, 0 },
-	{ "vrndp",	"Rs,Rt",			MIPS_COP2_RSP(0x02),			MA_RSP, MO_RSPVRSD },
-	{ "vmulq",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x03),			MA_RSP, 0 },
-	{ "vmulq",	"Rs,Rt",			MIPS_COP2_RSP(0x03),			MA_RSP, MO_RSPVRSD },
-	{ "vmudl",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x04),			MA_RSP, 0 },
-	{ "vmudl",	"Rs,Rt",			MIPS_COP2_RSP(0x04),			MA_RSP, MO_RSPVRSD },
-	{ "vmudm",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x05),			MA_RSP, 0 },
-	{ "vmudm",	"Rs,Rt",			MIPS_COP2_RSP(0x05),			MA_RSP, MO_RSPVRSD },
-	{ "vmudn",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x06),			MA_RSP, 0 },
-	{ "vmudn",	"Rs,Rt",			MIPS_COP2_RSP(0x06),			MA_RSP, MO_RSPVRSD },
-	{ "vmudh",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x07),			MA_RSP, 0 },
-	{ "vmudh",	"Rs,Rt",			MIPS_COP2_RSP(0x07),			MA_RSP, MO_RSPVRSD },
-	{ "vmacf",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x08),			MA_RSP, 0 },
-	{ "vmacf",	"Rs,Rt",			MIPS_COP2_RSP(0x08),			MA_RSP, MO_RSPVRSD },
-	{ "vmacu",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x09),			MA_RSP, 0 },
-	{ "vmacu",	"Rs,Rt",			MIPS_COP2_RSP(0x09),			MA_RSP, MO_RSPVRSD },
-	{ "vrndn",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x0a),			MA_RSP, 0 },
-	{ "vrndn",	"Rs,Rt",			MIPS_COP2_RSP(0x0a),			MA_RSP, MO_RSPVRSD },
-	{ "vmacq",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x0b),			MA_RSP, 0 },
-	{ "vmacq",	"Rs,Rt",			MIPS_COP2_RSP(0x0b),			MA_RSP, MO_RSPVRSD },
-	{ "vmadl",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x0c),			MA_RSP, 0 },
-	{ "vmadl",	"Rs,Rt",			MIPS_COP2_RSP(0x0c),			MA_RSP, MO_RSPVRSD },
-	{ "vmadm",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x0d),			MA_RSP, 0 },
-	{ "vmadm",	"Rs,Rt",			MIPS_COP2_RSP(0x0d),			MA_RSP, MO_RSPVRSD },
-	{ "vmadn",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x0e),			MA_RSP, 0 },
-	{ "vmadn",	"Rs,Rt",			MIPS_COP2_RSP(0x0e),			MA_RSP, MO_RSPVRSD },
-	{ "vmadh",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x0f),			MA_RSP, 0 },
-	{ "vmadh",	"Rs,Rt",			MIPS_COP2_RSP(0x0f),			MA_RSP, MO_RSPVRSD },
-	{ "vadd",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x10),			MA_RSP, 0 },
-	{ "vadd",	"Rs,Rt",			MIPS_COP2_RSP(0x10),			MA_RSP, MO_RSPVRSD },
-	{ "vsub",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x11),			MA_RSP, 0 },
-	{ "vsub",	"Rs,Rt",			MIPS_COP2_RSP(0x11),			MA_RSP, MO_RSPVRSD },
-	{ "vsut",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x12),			MA_RSP, 0 },
-	{ "vsut",	"Rs,Rt",			MIPS_COP2_RSP(0x12),			MA_RSP, MO_RSPVRSD },
-	{ "vabs",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x13),			MA_RSP, 0 },
-	{ "vabs",	"Rs,Rt",			MIPS_COP2_RSP(0x13),			MA_RSP, MO_RSPVRSD },
-	{ "vaddc",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x14),			MA_RSP, 0 },
-	{ "vaddc",	"Rs,Rt",			MIPS_COP2_RSP(0x14),			MA_RSP, MO_RSPVRSD },
-	{ "vsubc",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x15),			MA_RSP, 0 },
-	{ "vsubc",	"Rs,Rt",			MIPS_COP2_RSP(0x15),			MA_RSP, MO_RSPVRSD },
-	{ "vaddb",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x16),			MA_RSP, 0 },
-	{ "vaddb",	"Rs,Rt",			MIPS_COP2_RSP(0x16),			MA_RSP, MO_RSPVRSD },
-	{ "vsubb",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x17),			MA_RSP, 0 },
-	{ "vsubb",	"Rs,Rt",			MIPS_COP2_RSP(0x17),			MA_RSP, MO_RSPVRSD },
-	{ "vaccb",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x18),			MA_RSP, 0 },
-	{ "vaccb",	"Rs,Rt",			MIPS_COP2_RSP(0x18),			MA_RSP, MO_RSPVRSD },
-	{ "vsucb",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x19),			MA_RSP, 0 },
-	{ "vsucb",	"Rs,Rt",			MIPS_COP2_RSP(0x19),			MA_RSP, MO_RSPVRSD },
-	{ "vsad",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x1a),			MA_RSP, 0 },
-	{ "vsad",	"Rs,Rt",			MIPS_COP2_RSP(0x1a),			MA_RSP, MO_RSPVRSD },
-	{ "vsac",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x1b),			MA_RSP, 0 },
-	{ "vsac",	"Rs,Rt",			MIPS_COP2_RSP(0x1b),			MA_RSP, MO_RSPVRSD },
-	{ "vsum",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x1c),			MA_RSP, 0 },
-	{ "vsum",	"Rs,Rt",			MIPS_COP2_RSP(0x1c),			MA_RSP, MO_RSPVRSD },
-	{ "vsar",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x1d),			MA_RSP, 0 },
-	{ "vsar",	"Rs,Rt",			MIPS_COP2_RSP(0x1d),			MA_RSP, MO_RSPVRSD },
-	{ "vacc",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x1e),			MA_RSP, 0 },
-	{ "vacc",	"Rs,Rt",			MIPS_COP2_RSP(0x1e),			MA_RSP, MO_RSPVRSD },
-	{ "vsuc",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x1f),			MA_RSP, 0 },
-	{ "vsuc",	"Rs,Rt",			MIPS_COP2_RSP(0x1f),			MA_RSP, MO_RSPVRSD },
-	{ "vlt",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x20),			MA_RSP, 0 },
-	{ "vlt",	"Rs,Rt",			MIPS_COP2_RSP(0x20),			MA_RSP, MO_RSPVRSD },
-	{ "veq",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x21),			MA_RSP, 0 },
-	{ "veq",	"Rs,Rt",			MIPS_COP2_RSP(0x21),			MA_RSP, MO_RSPVRSD },
-	{ "vne",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x22),			MA_RSP, 0 },
-	{ "vne",	"Rs,Rt",			MIPS_COP2_RSP(0x22),			MA_RSP, MO_RSPVRSD },
-	{ "vge",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x23),			MA_RSP, 0 },
-	{ "vge",	"Rs,Rt",			MIPS_COP2_RSP(0x23),			MA_RSP, MO_RSPVRSD },
-	{ "vcl",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x24),			MA_RSP, 0 },
-	{ "vcl",	"Rs,Rt",			MIPS_COP2_RSP(0x24),			MA_RSP, MO_RSPVRSD },
-	{ "vch",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x25),			MA_RSP, 0 },
-	{ "vch",	"Rs,Rt",			MIPS_COP2_RSP(0x25),			MA_RSP, MO_RSPVRSD },
-	{ "vcr",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x26),			MA_RSP, 0 },
-	{ "vcr",	"Rs,Rt",			MIPS_COP2_RSP(0x26),			MA_RSP, MO_RSPVRSD },
-	{ "vmrg",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x27),			MA_RSP, 0 },
-	{ "vmrg",	"Rs,Rt",			MIPS_COP2_RSP(0x27),			MA_RSP, MO_RSPVRSD },
-	{ "vand",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x28),			MA_RSP, 0 },
-	{ "vand",	"Rs,Rt",			MIPS_COP2_RSP(0x28),			MA_RSP, MO_RSPVRSD },
-	{ "vnand",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x29),			MA_RSP, 0 },
-	{ "vnand",	"Rs,Rt",			MIPS_COP2_RSP(0x29),			MA_RSP, MO_RSPVRSD },
-	{ "vor",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x2a),			MA_RSP, 0 },
-	{ "vor",	"Rs,Rt",			MIPS_COP2_RSP(0x2a),			MA_RSP, MO_RSPVRSD },
-	{ "vnor",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x2b),			MA_RSP, 0 },
-	{ "vnor",	"Rs,Rt",			MIPS_COP2_RSP(0x2b),			MA_RSP, MO_RSPVRSD },
-	{ "vxor",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x2c),			MA_RSP, 0 },
-	{ "vxor",	"Rs,Rt",			MIPS_COP2_RSP(0x2c),			MA_RSP, MO_RSPVRSD },
-	{ "vnxor",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x2d),			MA_RSP, 0 },
-	{ "vnxor",	"Rs,Rt",			MIPS_COP2_RSP(0x2d),			MA_RSP, MO_RSPVRSD },
-	{ "vrcp",	"Rm,Rl",			MIPS_COP2_RSP(0x30),			MA_RSP, 0 },
-	{ "vrcpl",	"Rm,Rl",			MIPS_COP2_RSP(0x31),			MA_RSP, 0 },
-	{ "vrcph",	"Rm,Rl",			MIPS_COP2_RSP(0x32),			MA_RSP, 0 },
-	{ "vmov",	"Rm,Rl",			MIPS_COP2_RSP(0x33),			MA_RSP, 0 },
-	{ "vrsq",	"Rm,Rl",			MIPS_COP2_RSP(0x34),			MA_RSP, 0 },
-	{ "vrsql",	"Rm,Rl",			MIPS_COP2_RSP(0x35),			MA_RSP, 0 },
-	{ "vrsqh",	"Rm,Rl",			MIPS_COP2_RSP(0x36),			MA_RSP, 0 },
-	{ "vnop",	"",					MIPS_COP2_RSP(0x37),			MA_RSP, 0 },
-	{ "vextt",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x38),			MA_RSP, 0 },
-	{ "vextt",	"Rs,Rt",			MIPS_COP2_RSP(0x38),			MA_RSP, MO_RSPVRSD },
-	{ "vextq",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x39),			MA_RSP, 0 },
-	{ "vextq",	"Rs,Rt",			MIPS_COP2_RSP(0x39),			MA_RSP, MO_RSPVRSD },
-	{ "vextn",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x3a),			MA_RSP, 0 },
-	{ "vextn",	"Rs,Rt",			MIPS_COP2_RSP(0x3a),			MA_RSP, MO_RSPVRSD },
-	{ "vinst",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x3c),			MA_RSP, 0 },
-	{ "vinst",	"Rs,Rt",			MIPS_COP2_RSP(0x3c),			MA_RSP, MO_RSPVRSD },
-	{ "vinsq",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x3d),			MA_RSP, 0 },
-	{ "vinsq",	"Rs,Rt",			MIPS_COP2_RSP(0x3d),			MA_RSP, MO_RSPVRSD },
-	{ "vinsn",	"Rd,Rs,Rt",			MIPS_COP2_RSP(0x3e),			MA_RSP, 0 },
-	{ "vinsn",	"Rs,Rt",			MIPS_COP2_RSP(0x3e),			MA_RSP, MO_RSPVRSD },
-	{ "vnull",	"",					MIPS_COP2_RSP(0x3f),			MA_RSP, 0 },
+	{ "vmulf",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x00),		MA_RSP, 0 },
+	{ "vmulf",	"Rs,RtRe",		MIPS_RSP_COP2(0x00),		MA_RSP, MO_RSPVRSD },
+	{ "vmulu",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x01),		MA_RSP, 0 },
+	{ "vmulu",	"Rs,RtRe",		MIPS_RSP_COP2(0x01),		MA_RSP, MO_RSPVRSD },
+	{ "vrndp",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x02),		MA_RSP, 0 },
+	{ "vrndp",	"Rs,RtRe",		MIPS_RSP_COP2(0x02),		MA_RSP, MO_RSPVRSD },
+	{ "vmulq",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x03),		MA_RSP, 0 },
+	{ "vmulq",	"Rs,RtRe",		MIPS_RSP_COP2(0x03),		MA_RSP, MO_RSPVRSD },
+	{ "vmudl",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x04),		MA_RSP, 0 },
+	{ "vmudl",	"Rs,RtRe",		MIPS_RSP_COP2(0x04),		MA_RSP, MO_RSPVRSD },
+	{ "vmudm",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x05),		MA_RSP, 0 },
+	{ "vmudm",	"Rs,RtRe",		MIPS_RSP_COP2(0x05),		MA_RSP, MO_RSPVRSD },
+	{ "vmudn",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x06),		MA_RSP, 0 },
+	{ "vmudn",	"Rs,RtRe",		MIPS_RSP_COP2(0x06),		MA_RSP, MO_RSPVRSD },
+	{ "vmudh",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x07),		MA_RSP, 0 },
+	{ "vmudh",	"Rs,RtRe",		MIPS_RSP_COP2(0x07),		MA_RSP, MO_RSPVRSD },
+	{ "vmacf",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x08),		MA_RSP, 0 },
+	{ "vmacf",	"Rs,RtRe",		MIPS_RSP_COP2(0x08),		MA_RSP, MO_RSPVRSD },
+	{ "vmacu",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x09),		MA_RSP, 0 },
+	{ "vmacu",	"Rs,RtRe",		MIPS_RSP_COP2(0x09),		MA_RSP, MO_RSPVRSD },
+	{ "vrndn",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x0a),		MA_RSP, 0 },
+	{ "vrndn",	"Rs,RtRe",		MIPS_RSP_COP2(0x0a),		MA_RSP, MO_RSPVRSD },
+	{ "vmacq",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x0b),		MA_RSP, 0 },
+	{ "vmacq",	"Rs,RtRe",		MIPS_RSP_COP2(0x0b),		MA_RSP, MO_RSPVRSD },
+	{ "vmadl",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x0c),		MA_RSP, 0 },
+	{ "vmadl",	"Rs,RtRe",		MIPS_RSP_COP2(0x0c),		MA_RSP, MO_RSPVRSD },
+	{ "vmadm",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x0d),		MA_RSP, 0 },
+	{ "vmadm",	"Rs,RtRe",		MIPS_RSP_COP2(0x0d),		MA_RSP, MO_RSPVRSD },
+	{ "vmadn",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x0e),		MA_RSP, 0 },
+	{ "vmadn",	"Rs,RtRe",		MIPS_RSP_COP2(0x0e),		MA_RSP, MO_RSPVRSD },
+	{ "vmadh",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x0f),		MA_RSP, 0 },
+	{ "vmadh",	"Rs,RtRe",		MIPS_RSP_COP2(0x0f),		MA_RSP, MO_RSPVRSD },
+	{ "vadd",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x10),		MA_RSP, 0 },
+	{ "vadd",	"Rs,RtRe",		MIPS_RSP_COP2(0x10),		MA_RSP, MO_RSPVRSD },
+	{ "vsub",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x11),		MA_RSP, 0 },
+	{ "vsub",	"Rs,RtRe",		MIPS_RSP_COP2(0x11),		MA_RSP, MO_RSPVRSD },
+	{ "vsut",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x12),		MA_RSP, 0 },
+	{ "vsut",	"Rs,RtRe",		MIPS_RSP_COP2(0x12),		MA_RSP, MO_RSPVRSD },
+	{ "vabs",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x13),		MA_RSP, 0 },
+	{ "vabs",	"Rs,RtRe",		MIPS_RSP_COP2(0x13),		MA_RSP, MO_RSPVRSD },
+	{ "vaddc",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x14),		MA_RSP, 0 },
+	{ "vaddc",	"Rs,RtRe",		MIPS_RSP_COP2(0x14),		MA_RSP, MO_RSPVRSD },
+	{ "vsubc",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x15),		MA_RSP, 0 },
+	{ "vsubc",	"Rs,RtRe",		MIPS_RSP_COP2(0x15),		MA_RSP, MO_RSPVRSD },
+	{ "vaddb",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x16),		MA_RSP, 0 },
+	{ "vaddb",	"Rs,RtRe",		MIPS_RSP_COP2(0x16),		MA_RSP, MO_RSPVRSD },
+	{ "vsubb",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x17),		MA_RSP, 0 },
+	{ "vsubb",	"Rs,RtRe",		MIPS_RSP_COP2(0x17),		MA_RSP, MO_RSPVRSD },
+	{ "vaccb",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x18),		MA_RSP, 0 },
+	{ "vaccb",	"Rs,RtRe",		MIPS_RSP_COP2(0x18),		MA_RSP, MO_RSPVRSD },
+	{ "vsucb",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x19),		MA_RSP, 0 },
+	{ "vsucb",	"Rs,RtRe",		MIPS_RSP_COP2(0x19),		MA_RSP, MO_RSPVRSD },
+	{ "vsad",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x1a),		MA_RSP, 0 },
+	{ "vsad",	"Rs,RtRe",		MIPS_RSP_COP2(0x1a),		MA_RSP, MO_RSPVRSD },
+	{ "vsac",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x1b),		MA_RSP, 0 },
+	{ "vsac",	"Rs,RtRe",		MIPS_RSP_COP2(0x1b),		MA_RSP, MO_RSPVRSD },
+	{ "vsum",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x1c),		MA_RSP, 0 },
+	{ "vsum",	"Rs,RtRe",		MIPS_RSP_COP2(0x1c),		MA_RSP, MO_RSPVRSD },
+	{ "vsar",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x1d),		MA_RSP, 0 },
+	{ "vsar",	"Rs,RtRe",		MIPS_RSP_COP2(0x1d),		MA_RSP, MO_RSPVRSD },
+	{ "vacc",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x1e),		MA_RSP, 0 },
+	{ "vacc",	"Rs,RtRe",		MIPS_RSP_COP2(0x1e),		MA_RSP, MO_RSPVRSD },
+	{ "vsuc",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x1f),		MA_RSP, 0 },
+	{ "vsuc",	"Rs,RtRe",		MIPS_RSP_COP2(0x1f),		MA_RSP, MO_RSPVRSD },
+	{ "vlt",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x20),		MA_RSP, 0 },
+	{ "vlt",	"Rs,RtRe",		MIPS_RSP_COP2(0x20),		MA_RSP, MO_RSPVRSD },
+	{ "veq",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x21),		MA_RSP, 0 },
+	{ "veq",	"Rs,RtRe",		MIPS_RSP_COP2(0x21),		MA_RSP, MO_RSPVRSD },
+	{ "vne",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x22),		MA_RSP, 0 },
+	{ "vne",	"Rs,RtRe",		MIPS_RSP_COP2(0x22),		MA_RSP, MO_RSPVRSD },
+	{ "vge",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x23),		MA_RSP, 0 },
+	{ "vge",	"Rs,RtRe",		MIPS_RSP_COP2(0x23),		MA_RSP, MO_RSPVRSD },
+	{ "vcl",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x24),		MA_RSP, 0 },
+	{ "vcl",	"Rs,RtRe",		MIPS_RSP_COP2(0x24),		MA_RSP, MO_RSPVRSD },
+	{ "vch",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x25),		MA_RSP, 0 },
+	{ "vch",	"Rs,RtRe",		MIPS_RSP_COP2(0x25),		MA_RSP, MO_RSPVRSD },
+	{ "vcr",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x26),		MA_RSP, 0 },
+	{ "vcr",	"Rs,RtRe",		MIPS_RSP_COP2(0x26),		MA_RSP, MO_RSPVRSD },
+	{ "vmrg",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x27),		MA_RSP, 0 },
+	{ "vmrg",	"Rs,RtRe",		MIPS_RSP_COP2(0x27),		MA_RSP, MO_RSPVRSD },
+	{ "vand",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x28),		MA_RSP, 0 },
+	{ "vand",	"Rs,RtRe",		MIPS_RSP_COP2(0x28),		MA_RSP, MO_RSPVRSD },
+	{ "vnand",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x29),		MA_RSP, 0 },
+	{ "vnand",	"Rs,RtRe",		MIPS_RSP_COP2(0x29),		MA_RSP, MO_RSPVRSD },
+	{ "vor",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x2a),		MA_RSP, 0 },
+	{ "vor",	"Rs,RtRe",		MIPS_RSP_COP2(0x2a),		MA_RSP, MO_RSPVRSD },
+	{ "vnor",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x2b),		MA_RSP, 0 },
+	{ "vnor",	"Rs,RtRe",		MIPS_RSP_COP2(0x2b),		MA_RSP, MO_RSPVRSD },
+	{ "vxor",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x2c),		MA_RSP, 0 },
+	{ "vxor",	"Rs,RtRe",		MIPS_RSP_COP2(0x2c),		MA_RSP, MO_RSPVRSD },
+	{ "vnxor",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x2d),		MA_RSP, 0 },
+	{ "vnxor",	"Rs,RtRe",		MIPS_RSP_COP2(0x2d),		MA_RSP, MO_RSPVRSD },
+	{ "vrcp",	"RdRm,RtRl",	MIPS_RSP_COP2(0x30),		MA_RSP, 0 },
+	{ "vrcpl",	"RdRm,RtRl",	MIPS_RSP_COP2(0x31),		MA_RSP, 0 },
+	{ "vrcph",	"RdRm,RtRl",	MIPS_RSP_COP2(0x32),		MA_RSP, 0 },
+	{ "vmov",	"RdRm,RtRl",	MIPS_RSP_COP2(0x33),		MA_RSP, 0 },
+	{ "vrsq",	"RdRm,RtRl",	MIPS_RSP_COP2(0x34),		MA_RSP, 0 },
+	{ "vrsql",	"RdRm,RtRl",	MIPS_RSP_COP2(0x35),		MA_RSP, 0 },
+	{ "vrsqh",	"RdRm,RtRl",	MIPS_RSP_COP2(0x36),		MA_RSP, 0 },
+	{ "vnop",	"",				MIPS_RSP_COP2(0x37),		MA_RSP, 0 },
+	{ "vextt",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x38),		MA_RSP, 0 },
+	{ "vextt",	"Rs,RtRe",		MIPS_RSP_COP2(0x38),		MA_RSP, MO_RSPVRSD },
+	{ "vextq",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x39),		MA_RSP, 0 },
+	{ "vextq",	"Rs,RtRe",		MIPS_RSP_COP2(0x39),		MA_RSP, MO_RSPVRSD },
+	{ "vextn",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x3a),		MA_RSP, 0 },
+	{ "vextn",	"Rs,RtRe",		MIPS_RSP_COP2(0x3a),		MA_RSP, MO_RSPVRSD },
+	{ "vinst",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x3c),		MA_RSP, 0 },
+	{ "vinst",	"Rs,RtRe",		MIPS_RSP_COP2(0x3c),		MA_RSP, MO_RSPVRSD },
+	{ "vinsq",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x3d),		MA_RSP, 0 },
+	{ "vinsq",	"Rs,RtRe",		MIPS_RSP_COP2(0x3d),		MA_RSP, MO_RSPVRSD },
+	{ "vinsn",	"Rd,Rs,RtRe",	MIPS_RSP_COP2(0x3e),		MA_RSP, 0 },
+	{ "vinsn",	"Rs,RtRe",		MIPS_RSP_COP2(0x3e),		MA_RSP, MO_RSPVRSD },
+	{ "vnull",	"",				MIPS_RSP_COP2(0x3f),		MA_RSP, 0 },
 
 //     31---------26--------------------15-------11--------------------0
 //     |=      LWC2|                    |   rd    |                    |
@@ -978,33 +938,33 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
 //  00 |  LBV  |  LSV  |  LLV  |  LDV  |  LQV  |  LRV  |  LPV  |  LUV  | 00..07
 //  01 |  LHV  |  LFV  |  LWV  |  LTV  |  ---  |  ---  |  ---  |  ---  | 08..0F
-//  10 |  ---  |  ---  |  ---  |  ---  | ---   |  ---  |  ---  |  ---  | 10..17
+//  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{"lbv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x00),			MA_RSP, MO_RSP_VEALT },
-	{"lbv",		"Rb,(s)",			MIPS_LWC2_RSP(0x00),			MA_RSP, MO_RSP_VEALT },
-	{"lsv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x01),			MA_RSP, MO_RSP_VEALT|MO_RSP_HWOFFSET },
-	{"lsv",		"Rb,(s)",			MIPS_LWC2_RSP(0x01),			MA_RSP, MO_RSP_VEALT|MO_RSP_HWOFFSET },
-	{"llv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x02),			MA_RSP, MO_RSP_VEALT|MO_RSP_WOFFSET  },
-	{"llv",		"Rb,(s)",			MIPS_LWC2_RSP(0x02),			MA_RSP, MO_RSP_VEALT|MO_RSP_WOFFSET  },
-	{"ldv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x03),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"ldv",		"Rb,(s)",			MIPS_LWC2_RSP(0x03),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"lqv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x04),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lqv",		"Rb,(s)",			MIPS_LWC2_RSP(0x04),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lrv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x05),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lrv",		"Rb,(s)",			MIPS_LWC2_RSP(0x05),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lpv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x06),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"lpv",		"Rb,(s)",			MIPS_LWC2_RSP(0x06),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"luv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x07),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"luv",		"Rb,(s)",			MIPS_LWC2_RSP(0x07),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"lhv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x08),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lhv",		"Rb,(s)",			MIPS_LWC2_RSP(0x08),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lfv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x09),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lfv",		"Rb,(s)",			MIPS_LWC2_RSP(0x09),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lwv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x0a),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"lwv",		"Rb,(s)",			MIPS_LWC2_RSP(0x0a),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"ltv",		"Rb,i7(s)",			MIPS_LWC2_RSP(0x0b),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"ltv",		"Rb,(s)",			MIPS_LWC2_RSP(0x0b),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
+	{"lbv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x00),		MA_RSP, 0 },
+	{"lbv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x00),		MA_RSP, 0 },
+	{"lsv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x01),		MA_RSP, MO_RSP_HWOFFSET },
+	{"lsv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x01),		MA_RSP, MO_RSP_HWOFFSET },
+	{"llv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x02),		MA_RSP, MO_RSP_WOFFSET  },
+	{"llv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x02),		MA_RSP, MO_RSP_WOFFSET  },
+	{"ldv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x03),		MA_RSP, MO_RSP_DWOFFSET },
+	{"ldv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x03),		MA_RSP, MO_RSP_DWOFFSET },
+	{"lqv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x04),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lqv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x04),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lrv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x05),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lrv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x05),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lpv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x06),		MA_RSP, MO_RSP_DWOFFSET },
+	{"lpv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x06),		MA_RSP, MO_RSP_DWOFFSET },
+	{"luv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x07),		MA_RSP, MO_RSP_DWOFFSET },
+	{"luv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x07),		MA_RSP, MO_RSP_DWOFFSET },
+	{"lhv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x08),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lhv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x08),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lfv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x09),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lfv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x09),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lwv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x0a),		MA_RSP, MO_RSP_QWOFFSET },
+	{"lwv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x0a),		MA_RSP, MO_RSP_QWOFFSET },
+	{"ltv",		"RtRo,i7(s)",	MIPS_RSP_LWC2(0x0b),		MA_RSP, MO_RSP_QWOFFSET },
+	{"ltv",		"RtRo,(s)",		MIPS_RSP_LWC2(0x0b),		MA_RSP, MO_RSP_QWOFFSET },
 
 //     31---------26--------------------15-------11--------------------0
 //     |=      SWC2|                    |   rd    |                    |
@@ -1012,35 +972,35 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
 //  00 |  SBV  |  SSV  |  SLV  |  SDV  |  SQV  |  SRV  |  SPV  |  SUV  | 00..07
 //  01 |  SHV  |  SFV  |  SWV  |  STV  |  ---  |  ---  |  ---  |  ---  | 08..0F
-//  10 |  ---  |  ---  |  ---  |  ---  | ---   |  ---  |  ---  |  ---  | 10..17
+//  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{"sbv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x00),			MA_RSP, MO_RSP_VEALT },
-	{"sbv",		"Rb,(s)",			MIPS_SWC2_RSP(0x00),			MA_RSP, MO_RSP_VEALT },
-	{"ssv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x01),			MA_RSP, MO_RSP_VEALT|MO_RSP_HWOFFSET },
-	{"ssv",		"Rb,(s)",			MIPS_SWC2_RSP(0x01),			MA_RSP, MO_RSP_VEALT|MO_RSP_HWOFFSET },
-	{"slv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x02),			MA_RSP, MO_RSP_VEALT|MO_RSP_WOFFSET },
-	{"slv",		"Rb,(s)",			MIPS_SWC2_RSP(0x02),			MA_RSP, MO_RSP_VEALT|MO_RSP_WOFFSET },
-	{"sdv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x03),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"sdv",		"Rb,(s)",			MIPS_SWC2_RSP(0x03),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"sqv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x04),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"sqv",		"Rb,(s)",			MIPS_SWC2_RSP(0x04),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"srv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x05),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"srv",		"Rb,(s)",			MIPS_SWC2_RSP(0x05),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"spv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x06),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"spv",		"Rb,(s)",			MIPS_SWC2_RSP(0x06),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"suv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x07),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"suv",		"Rb,(s)",			MIPS_SWC2_RSP(0x07),			MA_RSP, MO_RSP_VEALT|MO_RSP_DWOFFSET },
-	{"shv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x08),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"shv",		"Rb,(s)",			MIPS_SWC2_RSP(0x08),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"sfv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x09),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"sfv",		"Rb,(s)",			MIPS_SWC2_RSP(0x09),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"swv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x0a),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"swv",		"Rb,(s)",			MIPS_SWC2_RSP(0x0a),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"stv",		"Rb,i7(s)",			MIPS_SWC2_RSP(0x0b),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
-	{"stv",		"Rb,(s)",			MIPS_SWC2_RSP(0x0b),			MA_RSP, MO_RSP_VEALT|MO_RSP_QWOFFSET },
+	{"sbv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x00),		MA_RSP, 0 },
+	{"sbv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x00),		MA_RSP, 0 },
+	{"ssv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x01),		MA_RSP, MO_RSP_HWOFFSET },
+	{"ssv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x01),		MA_RSP, MO_RSP_HWOFFSET },
+	{"slv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x02),		MA_RSP, MO_RSP_WOFFSET },
+	{"slv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x02),		MA_RSP, MO_RSP_WOFFSET },
+	{"sdv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x03),		MA_RSP, MO_RSP_DWOFFSET },
+	{"sdv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x03),		MA_RSP, MO_RSP_DWOFFSET },
+	{"sqv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x04),		MA_RSP, MO_RSP_QWOFFSET },
+	{"sqv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x04),		MA_RSP, MO_RSP_QWOFFSET },
+	{"srv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x05),		MA_RSP, MO_RSP_QWOFFSET },
+	{"srv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x05),		MA_RSP, MO_RSP_QWOFFSET },
+	{"spv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x06),		MA_RSP, MO_RSP_DWOFFSET },
+	{"spv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x06),		MA_RSP, MO_RSP_DWOFFSET },
+	{"suv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x07),		MA_RSP, MO_RSP_DWOFFSET },
+	{"suv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x07),		MA_RSP, MO_RSP_DWOFFSET },
+	{"shv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x08),		MA_RSP, MO_RSP_QWOFFSET },
+	{"shv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x08),		MA_RSP, MO_RSP_QWOFFSET },
+	{"sfv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x09),		MA_RSP, MO_RSP_QWOFFSET },
+	{"sfv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x09),		MA_RSP, MO_RSP_QWOFFSET },
+	{"swv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x0a),		MA_RSP, MO_RSP_QWOFFSET },
+	{"swv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x0a),		MA_RSP, MO_RSP_QWOFFSET },
+	{"stv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x0b),		MA_RSP, MO_RSP_QWOFFSET },
+	{"stv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x0b),		MA_RSP, MO_RSP_QWOFFSET },
 	// END
-	{ NULL,		NULL,		0,			0 }
+	{ NULL,		NULL,			0,							0 }
 };
 
 const MipsArchDefinition mipsArchs[] = {

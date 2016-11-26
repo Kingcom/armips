@@ -6,8 +6,8 @@
 mfc0 r8,SP_STATUS
 mtc0 r8,SP_STATUS
 
-mfc2 r1,v1[7w]
-mtc2 r1,v1[7w]
+mfc2 r1,v1[15]
+mtc2 r1,v1[15]
 cfc2 r1,$2
 ctc2 r1,$2
 

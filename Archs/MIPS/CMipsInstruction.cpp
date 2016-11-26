@@ -260,12 +260,9 @@ void CMipsInstruction::encodeNormal() const
 	if (registerData.rspvrs.num != -1) encoding |= MIPS_FS(registerData.rspvrs.num);	// rsp vector source reg
 	if (registerData.rspvrd.num != -1) encoding |= MIPS_FD(registerData.rspvrd.num);	// rsp vector dest reg
 
-	if (registerData.rspve.num != -1) // rsp vector element reg
-	{
-		if(opcodeData.opcode.flags & MO_RSP_VEALT) encoding |= MIPS_COP2_RSP_VEALT(registerData.rspve.num);
-		else encoding |= MIPS_COP2_RSP_VE(registerData.rspve.num);
-	}
-	if (registerData.rspvde.num != -1) encoding |= MIPS_COP2_RSP_VDE(registerData.rspvde.num);	// rsp vector dest element reg
+	if (registerData.rspve.num != -1) encoding |= MIPS_RSP_VE(registerData.rspve.num);			// rsp element
+	if (registerData.rspvde.num != -1) encoding |= MIPS_RSP_VDE(registerData.rspvde.num);		// rsp destination element
+	if (registerData.rspvealt.num != -1) encoding |= MIPS_RSP_VEALT(registerData.rspvealt.num);	// rsp element (alt. placement)
 
 	if (!(opcodeData.opcode.flags & MO_VFPU_MIXED) && registerData.vrt.num != -1)			// vfpu rt
 		encoding |= registerData.vrt.num << 16;
