@@ -119,10 +119,10 @@ bool CMipsInstruction::Validate()
 			}
 		}
 
-		if (opcodeData.opcode.flags & MO_NEGIMM)
+		if (opcodeData.opcode.flags & MO_NEGIMM) //negated immediate
 		{
 			immediateData.primary.value = -immediateData.primary.value;
-		} else if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2)
+		} else if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2
 		{
 			immediateData.primary.value = (immediateData.primary.value >> 2) & 0x3FFFFFF;
 		} else if (opcodeData.opcode.flags & MO_IPCR)	// relative 16 bit value
@@ -135,6 +135,21 @@ bool CMipsInstruction::Validate()
 				return false;
 			}
 			immediateData.primary.value = num >> 2;
+		} else if (opcodeData.opcode.flags & (MO_RSP_HWOFFSET | MO_RSP_WOFFSET | MO_RSP_DWOFFSET | MO_RSP_QWOFFSET))
+		{
+			int shift = 0;
+
+			if (opcodeData.opcode.flags & MO_RSP_HWOFFSET) shift = 1;
+			else if (opcodeData.opcode.flags & MO_RSP_WOFFSET) shift = 2;
+			else if (opcodeData.opcode.flags & MO_RSP_DWOFFSET) shift = 3;
+			else if (opcodeData.opcode.flags & MO_RSP_QWOFFSET) shift = 4;
+
+			if (immediateData.primary.value & (1 << shift) - 1){
+				Logger::queueError(Logger::Error,L"Offset must be %d-byte aligned",1<<shift);
+				return false;
+			}
+
+			immediateData.primary.value = immediateData.primary.value >> shift;
 		}
 		
 		int immediateBits = getImmediateBits(immediateData.primary.type);
@@ -143,7 +158,7 @@ bool CMipsInstruction::Validate()
 
 		if ((unsigned int)std::abs(immediateData.primary.value) > mask)
 		{
-			Logger::queueError(Logger::Error,L"Immediate value %0*X out of range",digits,immediateData.primary.value);
+			Logger::queueError(Logger::Error,L"Immediate value 0x%0*X out of range",digits,immediateData.primary.value);
 			return false;
 		}
 

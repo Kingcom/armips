@@ -40,6 +40,10 @@
 #define MO_RSPVRSD		0x00400000	// rsp vector rs + rd
 #define MO_DFPU			0x00800000	// double-precision fpu opcodes
 #define MO_NEGIMM		0x01000000 	// negated immediate (for subi)
+#define MO_RSP_HWOFFSET	0x02000000	// RSP halfword load/store offset
+#define MO_RSP_WOFFSET	0x04000000	// RSP word load/store offset
+#define MO_RSP_DWOFFSET	0x08000000	// RSP doubleword load/store offset
+#define MO_RSP_QWOFFSET	0x10000000	// RSP quadword load/store offset
 
 #define BITFIELD(START,LENGTH,VALUE)	(((VALUE) & ((1 << (LENGTH)) - 1)) << (START))
 #define MIPS_FUNC(VALUE)				BITFIELD(0,6,(VALUE))
