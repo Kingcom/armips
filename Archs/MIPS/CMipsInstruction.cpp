@@ -119,7 +119,7 @@ bool CMipsInstruction::Validate()
 			}
 		}
 
-		if (opcodeData.opcode.flags & MO_NEGIMM) //negated immediate
+		if (opcodeData.opcode.flags & MO_NEGIMM) 		// negated immediate
 		{
 			immediateData.primary.value = -immediateData.primary.value;
 		} else if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2
@@ -144,11 +144,11 @@ bool CMipsInstruction::Validate()
 			else if (opcodeData.opcode.flags & MO_RSP_DWOFFSET) shift = 3;
 			else if (opcodeData.opcode.flags & MO_RSP_QWOFFSET) shift = 4;
 
-			if (immediateData.primary.value & (1 << shift) - 1){
+			if (immediateData.primary.value & (1 << shift) - 1)
+			{
 				Logger::queueError(Logger::Error,L"Offset must be %d-byte aligned",1<<shift);
 				return false;
 			}
-
 			immediateData.primary.value = immediateData.primary.value >> shift;
 		}
 		
