@@ -8,6 +8,7 @@ enum class MipsRegisterType
 {
 	Normal,
 	Float,
+	FpuControl,
 	Cop0,
 	Ps2Cop2,
 	VfpuVector,

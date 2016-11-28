@@ -21,6 +21,7 @@ private:
 	bool parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);
 	bool parseRegister(Parser& parser, MipsRegisterValue& dest);
 	bool parseFpuRegister(Parser& parser, MipsRegisterValue& dest);
+	bool parseFpuControlRegister(Parser& parser, MipsRegisterValue& dest);
 	bool parseCop0Register(Parser& parser, MipsRegisterValue& dest);
 	bool parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest);
 	bool parseRspCop0Register(Parser& parser, MipsRegisterValue& dest);

@@ -358,10 +358,10 @@ const tMipsOpcode MipsOpcodes[] = {
 
 	{ "mfc1",	"t,S",		MIPS_COP1(0x00),				MA_MIPS1,	MO_FPU },
 	{ "dmfc1",	"t,S",		MIPS_COP1(0x01),				MA_MIPS3,	MO_DFPU|MO_64BIT },
-	{ "cfc1",	"t,S",		MIPS_COP1(0x02),				MA_MIPS1,	MO_FPU },
+	{ "cfc1",	"t,f",		MIPS_COP1(0x02),				MA_MIPS1,	MO_FPU },
 	{ "mtc1",	"t,S",		MIPS_COP1(0x04),				MA_MIPS1,	MO_FPU },
 	{ "dmtc1",	"t,S",		MIPS_COP1(0x05),				MA_MIPS3,	MO_DFPU|MO_64BIT },
-	{ "ctc1",	"t,S",		MIPS_COP1(0x06),				MA_MIPS1,	MO_FPU },
+	{ "ctc1",	"t,f",		MIPS_COP1(0x06),				MA_MIPS1,	MO_FPU },
 
 //     31---------26----------20-------16------------------------------0
 //     |=    COP1BC|          |   rt    |                              |
