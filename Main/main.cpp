@@ -4,7 +4,6 @@
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CDirectiveFile.h"
 #include "Tests.h"
-#include <chrono>
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__)
 #define ARMIPSNAME "ARMIPS64"
@@ -12,13 +11,9 @@
 #define ARMIPSNAME "ARMIPS"
 #endif
 
-typedef std::chrono::steady_clock Clock;
-
 int wmain(int argc, wchar_t* argv[])
 {
 	ArmipsArguments parameters;
-   
-	auto startTime = Clock::now();
 
 #ifdef ARMIPS_TESTS
 	std::wstring name;
@@ -29,13 +24,12 @@ int wmain(int argc, wchar_t* argv[])
 		return !runTests(argv[1]);
 #endif
 
-	Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
-		ARMIPSNAME,ARMIPS_VERSION_MAJOR,ARMIPS_VERSION_MINOR,ARMIPS_VERSION_REVISION,__DATE__,__TIME__);
-
 	StringList arguments = getStringListFromArray(argv,argc);
 
 	if (arguments.size() < 2)
 	{
+		Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
+			ARMIPSNAME,ARMIPS_VERSION_MAJOR,ARMIPS_VERSION_MINOR,ARMIPS_VERSION_REVISION,__DATE__,__TIME__);
 		Logger::printLine(L"Usage: %s file.asm [-temp temp.txt] [-sym symfile.sym]", argv[0]);
 		return 1;
 	}
@@ -88,10 +82,6 @@ int wmain(int argc, wchar_t* argv[])
 			def.value = formatString(L"\"%s\"",arguments[argpos + 2]);
 			parameters.equList.push_back(def);
 			argpos += 3;
-		} else if (arguments[argpos] == L"-time")
-		{
-			printTime = true;
-			argpos += 1;
 		} else if (arguments[argpos] == L"-root")
 		{
 			changeDirectory(arguments[argpos + 1]);
@@ -103,22 +93,13 @@ int wmain(int argc, wchar_t* argv[])
 	}
 
 	bool result = runArmips(parameters);
-	
-	auto endTime = Clock::now();
-	auto executionTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+
 	if (result == false)
 	{
-		if (printTime)
-			Logger::printLine(L"Aborting. Duration: %.3fs",executionTime.count()/1000.);
-		else
-			Logger::printLine(L"Aborting.");
+		Logger::printLine(L"Aborting.");
 		return 1;
 	}
-	
-	if (printTime)
-		Logger::printLine(L"Done. Duration: %.3fs",executionTime.count()/1000.);
-	else
-		Logger::printLine(L"Done.");
+
 	return 0;
 }
 
