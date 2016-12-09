@@ -82,6 +82,10 @@ int wmain(int argc, wchar_t* argv[])
 			def.value = formatString(L"\"%s\"",arguments[argpos + 2]);
 			parameters.equList.push_back(def);
 			argpos += 3;
+		} else if (arguments[argpos] == L"-time")
+		{
+			Logger::printError(Logger::Warning,L"-time flag is deprecated");
+			argpos += 1;
 		} else if (arguments[argpos] == L"-root")
 		{
 			changeDirectory(arguments[argpos + 1]);
