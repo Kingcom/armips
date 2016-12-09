@@ -4,10 +4,37 @@
 #include "MipsOpcodes.h"
 #include "Core/Expression.h"
 
-enum class MipsRegisterType { Normal, Float, Cop0, Ps2Cop2, VfpuVector, VfpuMatrix, RspCop0, RspVector, RspElement, RspScalarElement };
+enum class MipsRegisterType
+{
+	Normal,
+	Float,
+	FpuControl,
+	Cop0,
+	Ps2Cop2,
+	VfpuVector,
+	VfpuMatrix,
+	RspCop0,
+	RspVector,
+	RspBroadcastElement,
+	RspScalarElement,
+	RspOffsetElement
+};
 
-enum class MipsImmediateType { None, Immediate5, Immediate8, Immediate16, Immediate20, Immediate26,
-	Immediate20_0, ImmediateHalfFloat, Immediate7, Ext, Ins, Cop2BranchType };
+enum class MipsImmediateType
+{
+	None,
+	Immediate5,
+	Immediate8,
+	Immediate16,
+	Immediate20,
+	Immediate26,
+	Immediate20_0,
+	ImmediateHalfFloat,
+	Immediate7,
+	Ext,
+	Ins,
+	Cop2BranchType
+};
 
 struct MipsRegisterValue
 {
@@ -34,6 +61,7 @@ struct MipsRegisterData {
 	MipsRegisterValue rspvrd;		// rsp vector dest reg
 	MipsRegisterValue rspve;		// rsp vector element reg
 	MipsRegisterValue rspvde;		// rsp vector dest element reg
+	MipsRegisterValue rspvealt;		// rsp vector element reg (alt. placement)
 
 	MipsRegisterValue vrs;			// vfpu source reg
 	MipsRegisterValue vrt;			// vfpu target reg
@@ -45,7 +73,8 @@ struct MipsRegisterData {
 		frs.num = frt.num = frd.num = -1;
 		vrs.num = vrt.num = vrd.num = -1;
 		ps2vrs.num = ps2vrt.num = ps2vrd.num = -1;
-		rspvrs.num = rspvrt.num = rspvrd.num = rspve.num = rspvde.num = -1;
+		rspvrs.num = rspvrt.num = rspvrd.num = -1;
+		rspve.num = rspvde.num = rspvealt.num = -1;
 	}
 };
 

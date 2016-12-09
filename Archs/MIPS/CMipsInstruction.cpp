@@ -119,10 +119,10 @@ bool CMipsInstruction::Validate()
 			}
 		}
 
-		if (opcodeData.opcode.flags & MO_NEGIMM)
+		if (opcodeData.opcode.flags & MO_NEGIMM) 		// negated immediate
 		{
 			immediateData.primary.value = -immediateData.primary.value;
-		} else if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2)
+		} else if (opcodeData.opcode.flags & MO_IPCA)	// absolute value >> 2
 		{
 			immediateData.primary.value = (immediateData.primary.value >> 2) & 0x3FFFFFF;
 		} else if (opcodeData.opcode.flags & MO_IPCR)	// relative 16 bit value
@@ -135,6 +135,21 @@ bool CMipsInstruction::Validate()
 				return false;
 			}
 			immediateData.primary.value = num >> 2;
+		} else if (opcodeData.opcode.flags & (MO_RSP_HWOFFSET | MO_RSP_WOFFSET | MO_RSP_DWOFFSET | MO_RSP_QWOFFSET))
+		{
+			int shift = 0;
+
+			if (opcodeData.opcode.flags & MO_RSP_HWOFFSET) shift = 1;
+			else if (opcodeData.opcode.flags & MO_RSP_WOFFSET) shift = 2;
+			else if (opcodeData.opcode.flags & MO_RSP_DWOFFSET) shift = 3;
+			else if (opcodeData.opcode.flags & MO_RSP_QWOFFSET) shift = 4;
+
+			if (immediateData.primary.value & (1 << shift) - 1)
+			{
+				Logger::queueError(Logger::Error,L"Offset must be %d-byte aligned",1<<shift);
+				return false;
+			}
+			immediateData.primary.value = immediateData.primary.value >> shift;
 		}
 		
 		int immediateBits = getImmediateBits(immediateData.primary.type);
@@ -143,7 +158,7 @@ bool CMipsInstruction::Validate()
 
 		if ((unsigned int)std::abs(immediateData.primary.value) > mask)
 		{
-			Logger::queueError(Logger::Error,L"Immediate value %0*X out of range",digits,immediateData.primary.value);
+			Logger::queueError(Logger::Error,L"Immediate value 0x%0*X out of range",digits,immediateData.primary.value);
 			return false;
 		}
 
@@ -245,12 +260,9 @@ void CMipsInstruction::encodeNormal() const
 	if (registerData.rspvrs.num != -1) encoding |= MIPS_FS(registerData.rspvrs.num);	// rsp vector source reg
 	if (registerData.rspvrd.num != -1) encoding |= MIPS_FD(registerData.rspvrd.num);	// rsp vector dest reg
 
-	if (registerData.rspve.num != -1) // rsp vector element reg
-	{
-		if(opcodeData.opcode.flags & MO_RSP_VEALT) encoding |= MIPS_COP2_RSP_VEALT(registerData.rspve.num);
-		else encoding |= MIPS_COP2_RSP_VE(registerData.rspve.num);
-	}
-	if (registerData.rspvde.num != -1) encoding |= MIPS_COP2_RSP_VDE(registerData.rspvde.num);	// rsp vector dest element reg
+	if (registerData.rspve.num != -1) encoding |= MIPS_RSP_VE(registerData.rspve.num);			// rsp element
+	if (registerData.rspvde.num != -1) encoding |= MIPS_RSP_VDE(registerData.rspvde.num);		// rsp destination element
+	if (registerData.rspvealt.num != -1) encoding |= MIPS_RSP_VEALT(registerData.rspvealt.num);	// rsp element (alt. placement)
 
 	if (!(opcodeData.opcode.flags & MO_VFPU_MIXED) && registerData.vrt.num != -1)			// vfpu rt
 		encoding |= registerData.vrt.num << 16;

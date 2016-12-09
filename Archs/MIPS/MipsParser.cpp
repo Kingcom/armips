@@ -12,36 +12,41 @@
 #define CHECK(exp) if (!(exp)) return false;
 
 const MipsRegisterDescriptor mipsRegisters[] = {
-	{ L"r0", 0 },	{ L"zero", 0},	{ L"at", 1 },	{ L"r1", 1 },
-	{ L"v0", 2 },	{ L"r2", 2 },	{ L"v1", 3 },	{ L"r3", 3 },
-	{ L"a0", 4 },	{ L"r4", 4 },	{ L"a1", 5 },	{ L"r5", 5 },
-	{ L"a2", 6 },	{ L"r6", 6 },	{ L"a3", 7 },	{ L"r7", 7 },
-	{ L"t0", 8 },	{ L"r8", 8 },	{ L"t1", 9 },	{ L"r9", 9 },
-	{ L"t2", 10 },	{ L"r10", 10 },	{ L"t3", 11 },	{ L"r11", 11 },
-	{ L"t4", 12 },	{ L"r12", 12 },	{ L"t5", 13 },	{ L"r13", 13 },
-	{ L"t6", 14 },	{ L"r14", 14 },	{ L"t7", 15 },	{ L"r15", 15 },
-	{ L"s0", 16 },	{ L"r16", 16 },	{ L"s1", 17 },	{ L"r17", 17 },
-	{ L"s2", 18 },	{ L"r18", 18 },	{ L"s3", 19 },	{ L"r19", 19 },
-	{ L"s4", 20 },	{ L"r20", 20 },	{ L"s5", 21 },	{ L"r21", 21 },
-	{ L"s6", 22 },	{ L"r22", 22 },	{ L"s7", 23 },	{ L"r23", 23 },
-	{ L"t8", 24 },	{ L"r24", 24 },	{ L"t9", 25 },	{ L"r25", 25 },
-	{ L"k0", 26 },	{ L"r26", 26 },	{ L"k1", 27 },	{ L"r27", 27 },
-	{ L"gp", 28 },	{ L"r28", 28 },	{ L"sp", 29 },	{ L"r29", 29 },
-	{ L"fp", 30 },	{ L"r30", 30 },	{ L"ra", 31 },	{ L"r31", 31 },
+	{ L"r0", 0 },		{ L"zero", 0},		{ L"at", 1 },		{ L"r1", 1 },
+	{ L"v0", 2 },		{ L"r2", 2 },		{ L"v1", 3 },		{ L"r3", 3 },
+	{ L"a0", 4 },		{ L"r4", 4 },		{ L"a1", 5 },		{ L"r5", 5 },
+	{ L"a2", 6 },		{ L"r6", 6 },		{ L"a3", 7 },		{ L"r7", 7 },
+	{ L"t0", 8 },		{ L"r8", 8 },		{ L"t1", 9 },		{ L"r9", 9 },
+	{ L"t2", 10 },		{ L"r10", 10 },		{ L"t3", 11 },		{ L"r11", 11 },
+	{ L"t4", 12 },		{ L"r12", 12 },		{ L"t5", 13 },		{ L"r13", 13 },
+	{ L"t6", 14 },		{ L"r14", 14 },		{ L"t7", 15 },		{ L"r15", 15 },
+	{ L"s0", 16 },		{ L"r16", 16 },		{ L"s1", 17 },		{ L"r17", 17 },
+	{ L"s2", 18 },		{ L"r18", 18 },		{ L"s3", 19 },		{ L"r19", 19 },
+	{ L"s4", 20 },		{ L"r20", 20 },		{ L"s5", 21 },		{ L"r21", 21 },
+	{ L"s6", 22 },		{ L"r22", 22 },		{ L"s7", 23 },		{ L"r23", 23 },
+	{ L"t8", 24 },		{ L"r24", 24 },		{ L"t9", 25 },		{ L"r25", 25 },
+	{ L"k0", 26 },		{ L"r26", 26 },		{ L"k1", 27 },		{ L"r27", 27 },
+	{ L"gp", 28 },		{ L"r28", 28 },		{ L"sp", 29 },		{ L"r29", 29 },
+	{ L"fp", 30 },		{ L"r30", 30 },		{ L"ra", 31 },		{ L"r31", 31 },
+	{ L"s8", 30 },
 };
 
 const MipsRegisterDescriptor mipsFloatRegisters[] = {
-	{ L"f0", 0 },	{ L"f1", 1 },	{ L"f2", 2 },	{ L"f3", 3 },
-	{ L"f4", 4 },	{ L"f5", 5 },	{ L"f6", 6 },	{ L"f7", 7 },
-	{ L"f8", 8 },	{ L"f9", 9 },	{ L"f00", 0 },	{ L"f01", 1 },
-	{ L"f02", 2 },	{ L"f03", 3 },	{ L"f04", 4 },	{ L"f05", 5 },
-	{ L"f06", 6 },	{ L"f07", 7 },	{ L"f08", 8 },	{ L"f09", 9 },
-	{ L"f10", 10 },	{ L"f11", 11 },	{ L"f12", 12 },	{ L"f13", 13 },
-	{ L"f14", 14 },	{ L"f15", 15 },	{ L"f16", 16 },	{ L"f17", 17 },
-	{ L"f18", 18 },	{ L"f19", 19 },	{ L"f20", 20 },	{ L"f21", 21 },
-	{ L"f22", 22 },	{ L"f23", 23 },	{ L"f24", 24 },	{ L"f25", 25 },
-	{ L"f26", 26 },	{ L"f27", 27 },	{ L"f28", 28 },	{ L"f29", 29 },
-	{ L"f30", 30 },	{ L"f31", 31 },
+	{ L"f0", 0 },		{ L"f1", 1 },		{ L"f2", 2 },		{ L"f3", 3 },
+	{ L"f4", 4 },		{ L"f5", 5 },		{ L"f6", 6 },		{ L"f7", 7 },
+	{ L"f8", 8 },		{ L"f9", 9 },		{ L"f00", 0 },		{ L"f01", 1 },
+	{ L"f02", 2 },		{ L"f03", 3 },		{ L"f04", 4 },		{ L"f05", 5 },
+	{ L"f06", 6 },		{ L"f07", 7 },		{ L"f08", 8 },		{ L"f09", 9 },
+	{ L"f10", 10 },		{ L"f11", 11 },		{ L"f12", 12 },		{ L"f13", 13 },
+	{ L"f14", 14 },		{ L"f15", 15 },		{ L"f16", 16 },		{ L"f17", 17 },
+	{ L"f18", 18 },		{ L"f19", 19 },		{ L"f20", 20 },		{ L"f21", 21 },
+	{ L"f22", 22 },		{ L"f23", 23 },		{ L"f24", 24 },		{ L"f25", 25 },
+	{ L"f26", 26 },		{ L"f27", 27 },		{ L"f28", 28 },		{ L"f29", 29 },
+	{ L"f30", 30 },		{ L"f31", 31 },
+};
+
+const MipsRegisterDescriptor mipsFpuControlRegisters[] = {
+	{ L"fir", 0 },		{ L"fcr0", 0 },		{ L"fcsr", 31 },	{ L"fcr31", 31 },
 };
 
 const MipsRegisterDescriptor mipsCop0Registers[] = {
@@ -231,7 +236,21 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Float;
+
+	if (parseRegisterNumber(parser, dest, 32))
+		return true;
+
 	return parseRegisterTable(parser,dest,mipsFloatRegisters,ARRAY_SIZE(mipsFloatRegisters));
+}
+
+bool MipsParser::parseFpuControlRegister(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::FpuControl;
+
+	if (parseRegisterNumber(parser, dest, 32))
+		return true;
+
+	return parseRegisterTable(parser,dest,mipsFpuControlRegisters,ARRAY_SIZE(mipsFpuControlRegisters));
 }
 
 bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
@@ -266,11 +285,9 @@ bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
 	return parseRegisterTable(parser,dest,mipsRspVectorRegisters,ARRAY_SIZE(mipsRspVectorRegisters));
 }
 
-bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest)
+bool MipsParser::parseRspBroadcastElement(Parser& parser, MipsRegisterValue& dest)
 {
-	CHECK(parseRspVectorRegister(parser, dest));
-
-	edest.type = MipsRegisterType::RspElement;
+	dest.type = MipsRegisterType::RspBroadcastElement;
 
 	if (parser.peekToken().type == TokenType::LBrack)
 	{
@@ -285,7 +302,7 @@ bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& d
 
 		parser.eatToken();
 
-		if (parseRegisterNumber(parser, edest, 16))
+		if (parseRegisterNumber(parser, dest, 16))
 			return parser.nextToken().type == TokenType::RBrack;
 
 		const Token& token = parser.nextToken();
@@ -304,41 +321,64 @@ bool MipsParser::parseRspElemVectorRegister(Parser& parser, MipsRegisterValue& d
 		{
 			if (stringValue == rspElementNames[i].name)
 			{
-				edest.num = rspElementNames[i].num;
-				edest.name = rspElementNames[i].name;
+				dest.num = rspElementNames[i].num;
+				dest.name = rspElementNames[i].name;
 
 				return parser.nextToken().type == TokenType::RBrack;
 			}
 		}
 
 		return false;
-	} else
-	{
-		edest.num = 0;
-		edest.name = L"";
-
-		return true;
 	}
+
+	dest.num = 0;
+	dest.name = L"";
+
+	return true;
+
 }
 
-bool MipsParser::parseRspScalarElemVectorRegister(Parser& parser, MipsRegisterValue& dest, MipsRegisterValue& edest, bool byteOriented)
+bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
 {
-	CHECK(parseRspVectorRegister(parser, dest));
-
-	edest.type = MipsRegisterType::RspScalarElement;
+	dest.type = MipsRegisterType::RspScalarElement;
 
 	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
 
 	const Token &token = parser.nextToken();
 
-	if (token.type != TokenType::Integer || token.intValue >= (byteOriented ? 16 : 8))
+	if (token.type != TokenType::Integer || token.intValue >= 8)
 		return false;
 
-	edest.name = formatString(L"%d", token.intValue);
-	edest.num = (int) token.intValue;
+	dest.name = formatString(L"%d", token.intValue);
+	dest.num = token.intValue;
 
 	return parser.nextToken().type == TokenType::RBrack;
+}
+
+bool MipsParser::parseRspOffsetElement(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::RspOffsetElement;
+
+	if (parser.peekToken().type == TokenType::LBrack)
+	{
+		parser.eatToken();
+
+		const Token &token = parser.nextToken();
+
+		if (token.type != TokenType::Integer || token.intValue >= 16)
+			return false;
+
+		dest.name = formatString(L"%d", token.intValue);
+		dest.num = token.intValue;
+
+		return parser.nextToken().type == TokenType::RBrack;
+	}
+
+	dest.num = 0;
+	dest.name = L"";
+
+	return true;
 }
 
 static bool decodeDigit(wchar_t digit, int& dest)
@@ -1153,6 +1193,9 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 		case 'S':	// float register
 			CHECK(parseFpuRegister(parser,registers.frs));
 			break;
+		case 'f':	// fpu control register
+			CHECK(parseFpuControlRegister(parser,registers.frs));
+			break;
 		case 'z':	// cop0 register
 			CHECK(parseCop0Register(parser,registers.grd));
 			break;
@@ -1187,7 +1230,7 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 				return false;
 			}
 			break;
-		case 'm':	// vfpu amtrix register
+		case 'm':	// vfpu matrix register
 			switch (*encoding++)
 			{
 			case 's':
@@ -1234,8 +1277,8 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 'z':	// cop0 register
 				CHECK(parseRspCop0Register(parser,registers.grd));
 				break;
-			case 't':	// vector register with element
-				CHECK(parseRspElemVectorRegister(parser,registers.rspvrt,registers.rspve));
+			case 't':	// vector register
+				CHECK(parseRspVectorRegister(parser,registers.rspvrt));
 				break;
 			case 'd':	// vector register
 				CHECK(parseRspVectorRegister(parser,registers.rspvrd));
@@ -1243,17 +1286,17 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 's':	// vector register
 				CHECK(parseRspVectorRegister(parser,registers.rspvrs));
 				break;
-			case 'S':	// vector register with element
-				CHECK(parseRspElemVectorRegister(parser,registers.rspvrs,registers.rspve));
+			case 'e':	// vector broadcast element
+				CHECK(parseRspBroadcastElement(parser,registers.rspve));
 				break;
-			case 'b':	// vector register with byte-based scalar element
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve,true));
+			case 'l':	// vector scalar element
+				CHECK(parseRspScalarElement(parser,registers.rspve));
 				break;
-			case 'l':	// vector register with scalar element
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrt,registers.rspve,false));
+			case 'm':	// vector scalar destination element
+				CHECK(parseRspScalarElement(parser,registers.rspvde));
 				break;
-			case 'm':	// vector register with scalar element
-				CHECK(parseRspScalarElemVectorRegister(parser,registers.rspvrd,registers.rspvde,false));
+			case 'o':	// vector byte offset element
+				CHECK(parseRspOffsetElement(parser,registers.rspvealt));
 				break;
 			default:
 				return false;
