@@ -14,63 +14,7 @@ endif()
 
 include_directories(.)
 
-add_executable(armips
-	Main/main.cpp
-	Main/Tests.cpp
-	Main/Tests.h
-	stdafx.cpp
-	stdafx.h
-
-	Util/ByteArray.cpp
-	Util/ByteArray.h
-	Util/CRC.cpp
-	Util/CRC.h
-	Util/EncodingTable.cpp
-	Util/EncodingTable.h
-	Util/FileClasses.cpp
-	Util/FileClasses.h
-	Util/Util.cpp
-	Util/Util.h
-	
-	Core/ELF/ElfTypes.h
-	Core/ELF/ElfRelocator.cpp
-	Core/ELF/ElfRelocator.h
-	Core/ELF/ElfFile.cpp
-	Core/ELF/ElfFile.h
-	Core/Assembler.cpp
-	Core/Assembler.h
-	Core/Common.cpp
-	Core/Common.h
-	Core/Expression.cpp
-	Core/Expression.h
-	Core/ExpressionFunctions.cpp
-	Core/ExpressionFunctions.h
-	Core/FileManager.cpp
-	Core/FileManager.h
-	Core/Misc.cpp
-	Core/Misc.h
-	Core/SymbolData.cpp
-	Core/SymbolData.h
-	Core/SymbolTable.cpp
-	Core/SymbolTable.h
-	
-	Commands/CAssemblerCommand.cpp
-	Commands/CAssemblerCommand.h
-	Commands/CAssemblerLabel.cpp
-	Commands/CAssemblerLabel.h
-	Commands/CDirectiveArea.cpp
-	Commands/CDirectiveArea.h
-	Commands/CDirectiveConditional.cpp
-	Commands/CDirectiveConditional.h
-	Commands/CDirectiveData.cpp
-	Commands/CDirectiveData.h
-	Commands/CDirectiveFile.cpp
-	Commands/CDirectiveFile.h
-	Commands/CDirectiveMessage.cpp
-	Commands/CDirectiveMessage.h
-	Commands/CommandSequence.cpp
-	Commands/CommandSequence.h
-
+add_library(armips STATIC
 	Archs/Architecture.h
 	Archs/Architecture.cpp
 
@@ -106,6 +50,47 @@ add_executable(armips
 	Archs/MIPS/PsxRelocator.cpp
 	Archs/MIPS/PsxRelocator.h
 	
+	Commands/CAssemblerCommand.cpp
+	Commands/CAssemblerCommand.h
+	Commands/CAssemblerLabel.cpp
+	Commands/CAssemblerLabel.h
+	Commands/CDirectiveArea.cpp
+	Commands/CDirectiveArea.h
+	Commands/CDirectiveConditional.cpp
+	Commands/CDirectiveConditional.h
+	Commands/CDirectiveData.cpp
+	Commands/CDirectiveData.h
+	Commands/CDirectiveFile.cpp
+	Commands/CDirectiveFile.h
+	Commands/CDirectiveMessage.cpp
+	Commands/CDirectiveMessage.h
+	Commands/CommandSequence.cpp
+	Commands/CommandSequence.h
+
+	Core/ELF/ElfTypes.h
+	Core/ELF/ElfRelocator.cpp
+	Core/ELF/ElfRelocator.h
+	Core/ELF/ElfFile.cpp
+	Core/ELF/ElfFile.h
+	Core/Assembler.cpp
+	Core/Assembler.h
+	Core/Common.cpp
+	Core/Common.h
+	Core/Expression.cpp
+	Core/Expression.h
+	Core/ExpressionFunctions.cpp
+	Core/ExpressionFunctions.h
+	Core/FileManager.cpp
+	Core/FileManager.h
+	Core/Misc.cpp
+	Core/Misc.h
+	Core/SymbolData.cpp
+	Core/SymbolData.h
+	Core/SymbolTable.cpp
+	Core/SymbolTable.h
+
+	ext/tinyformat/tinyformat.h
+
 	Parser/DirectivesParser.cpp
 	Parser/DirectivesParser.h
 	Parser/ExpressionParser.cpp
@@ -115,9 +100,42 @@ add_executable(armips
 	Parser/Tokenizer.cpp
 	Parser/Tokenizer.h
 	
-	ext/tinyformat/tinyformat.h
+	Util/ByteArray.cpp
+	Util/ByteArray.h
+	Util/CRC.cpp
+	Util/CRC.h
+	Util/EncodingTable.cpp
+	Util/EncodingTable.h
+	Util/FileClasses.cpp
+	Util/FileClasses.h
+	Util/Util.cpp
+	Util/Util.h
 )
 
+add_executable(armips-bin
+	Main/main.cpp
+	Main/Tests.cpp
+	Main/Tests.h
+	stdafx.cpp
+	stdafx.h
+)
+# workaround library and executable having same name
+set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
+
+add_executable(armipstests
+	Main/main.cpp
+	Main/Tests.cpp
+	Main/Tests.h
+	stdafx.cpp
+	stdafx.h
+)
+
+target_compile_definitions(armipstests PUBLIC ARMIPS_TESTS)
+
+target_link_libraries(armips-bin armips)
+target_link_libraries(armipstests armips)
+
 if(WIN32)
-	target_link_libraries(armips shlwapi)
+	target_link_libraries(armips-bin shlwapi)
+	target_link_libraries(armipstests shlwapi)
 endif(WIN32)
