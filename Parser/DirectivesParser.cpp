@@ -120,10 +120,6 @@ CAssemblerCommand* parseDirectivePosition(Parser& parser, int flags)
 
 CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 {
-	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
-		return nullptr;
-
 	CDirectiveAlignFill::Mode mode;
 	switch (flags & DIRECTIVE_USERMASK)
 	{
@@ -136,6 +132,13 @@ CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 	default:
 		return nullptr;
 	}
+
+	if (mode == CDirectiveAlignFill::Align && parser.peekToken().type == TokenType::Separator)
+		return new CDirectiveAlignFill(UINT64_C(4),mode);
+
+	std::vector<Expression> list;
+	if (parser.parseExpressionList(list,1,2) == false)
+		return nullptr;
 
 	if (list.size() == 2)
 		return new CDirectiveAlignFill(list[0],list[1],mode);
