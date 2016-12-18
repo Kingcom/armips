@@ -374,10 +374,10 @@ const tMipsOpcode MipsOpcodes[] = {
 //  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 10..17
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 18..1F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "bc1f",	"i26",		MIPS_COP1BC(0x00),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
-	{ "bc1t",	"i26",		MIPS_COP1BC(0x01),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
-	{ "bc1fl",	"i26",		MIPS_COP1BC(0x02),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
-	{ "bc1tl",	"i26",		MIPS_COP1BC(0x03),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1f",	"i16",		MIPS_COP1BC(0x00),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1t",	"i16",		MIPS_COP1BC(0x01),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1fl",	"i16",		MIPS_COP1BC(0x02),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
+	{ "bc1tl",	"i16",		MIPS_COP1BC(0x03),				MA_MIPS1,	MO_FPU|MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
 
 //     31--------------------21-------------------------------5--------0
 //     |=                COP1S|                              | function|
