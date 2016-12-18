@@ -181,6 +181,26 @@ ExpressionValue expFuncInt(const std::wstring& funcName, const std::vector<Expre
 	return result;
 }
 
+ExpressionValue expFuncRound(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+
+	switch (parameters[0].type)
+	{
+	case ExpressionValueType::Integer:
+		result.intValue = parameters[0].intValue;
+		break;
+	case ExpressionValueType::Float:
+		result.intValue = llround(parameters[0].floatValue);
+		break;
+	default:
+		return result;
+	}
+
+	result.type = ExpressionValueType::Integer;
+	return result;
+}
+
 ExpressionValue expFuncFloat(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	ExpressionValue result;
@@ -218,6 +238,8 @@ ExpressionValue expFuncFrac(const std::wstring& funcName, const std::vector<Expr
 	result.type = ExpressionValueType::Float;
 	return result;
 }
+
+
 
 ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
@@ -486,6 +508,7 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"float",			{ &expFuncFloat,		1,	1,	true } },
 	{ L"frac",			{ &expFuncFrac,			1,	1,	true } },
 	{ L"abs",			{ &expFuncAbs,			1,	1,	true } },
+	{ L"round",			{ &expFuncRound,		1,	1,	true } },
 
 	{ L"strlen",		{ &expFuncStrlen,		1,	1,	true } },
 	{ L"substr",		{ &expFuncSubstr,		3,	3,	true } },
