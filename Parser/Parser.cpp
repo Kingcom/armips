@@ -474,7 +474,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 	std::set<std::wstring> identifierParameters;
 	for (size_t i = 0; i < macro.parameters.size(); i++)
 	{
-		if(peekToken().type == TokenType::Separator)
+		if (peekToken().type == TokenType::Separator)
 		{
 			printError(start,L"Too few macro arguments (%d vs %d)",i,macro.parameters.size());
 			return nullptr;
@@ -483,13 +483,19 @@ CAssemblerCommand* Parser::parseMacroCall()
 		if (i != 0)
 		{
 			if (nextToken().type != TokenType::Comma)
+			{
+				printError(start,L"Macro arguments not comma-separated");
 				return nullptr;
+			}
 		}
 
 		TokenizerPosition startPos = getTokenizer()->getPosition();
 		Expression exp = parseExpression();
 		if (exp.isLoaded() == false)
+		{
+			printError(start,L"Invalid macro argument expression");
 			return nullptr;
+		}
 
 		TokenizerPosition endPos = getTokenizer()->getPosition();
 		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
