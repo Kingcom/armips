@@ -250,7 +250,7 @@ void CThumbInstruction::Encode() const
 		case THUMB_TYPE13:	// THUMB.13: add offset to stack pointer
 			immediate = Vars.Immediate;
 			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE) 
-				immediate = (unsigned char)~immediate;
+				immediate = (unsigned char)(0-immediate);
 			if (immediate & 0x80)	// sub
 			{
 				encoding |= 1 << 7;
