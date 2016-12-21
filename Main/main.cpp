@@ -13,6 +13,8 @@
 
 int wmain(int argc, wchar_t* argv[])
 {
+	std::setlocale(LC_CTYPE,"");
+
 	ArmipsArguments parameters;
 
 #ifdef ARMIPS_TESTS
@@ -47,7 +49,6 @@ int wmain(int argc, wchar_t* argv[])
 	}
 
 	size_t argpos = 2;
-	bool printTime = false;
 	while (argpos < arguments.size())
 	{
 		if (arguments[argpos] == L"-temp")

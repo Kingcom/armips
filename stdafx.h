@@ -25,6 +25,7 @@
 #include <cctype>
 #include <cstring>
 #include <cmath>
+#include <clocale>
 
 #include <sstream>
 #include <iomanip>
