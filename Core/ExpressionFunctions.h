@@ -11,7 +11,14 @@ struct ExpressionFunctionEntry {
 	bool safe;		// result doesn't depend on the current state
 };
 
+struct ExpressionUserFunction {
+	std::wstring name;
+	std::vector<std::wstring> parameters;
+	std::wstring content;
+};
+
 typedef std::map<std::wstring, const ExpressionFunctionEntry> ExpressionFunctionMap;
+typedef std::map<std::wstring, ExpressionUserFunction> ExpressionUserFunctionMap;
 
 extern const ExpressionFunctionMap expressionFunctions;
 

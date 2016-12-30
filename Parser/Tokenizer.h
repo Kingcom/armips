@@ -232,7 +232,9 @@ public:
 	void skipLookahead();
 	std::vector<Token> getTokens(TokenizerPosition start, TokenizerPosition end) const;
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
-	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
+	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue, bool isString);
+	void registerReplacement(const std::wstring& identifier, u64 newValue);
+	void registerReplacement(const std::wstring& identifier, double newValue);
 	static size_t addEquValue(const std::vector<Token>& tokens);
 	static void clearEquValues() { equValues.clear(); }
 	void resetLookaheadCheckMarks();

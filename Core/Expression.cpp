@@ -2,6 +2,16 @@
 #include "Expression.h"
 #include "Common.h"
 #include "ExpressionFunctions.h"
+#include "../Parser/ExpressionParser.h"
+
+static std::wstring escapeString(const std::wstring& text)
+{
+	std::wstring result = text;
+	replaceAll(result,LR"(\)",LR"(\\)");
+	replaceAll(result,LR"(")",LR"(\")");
+
+	return formatString(LR"("%s")",text);
+}
 
 enum class ExpressionValueCombination
 {
@@ -409,6 +419,21 @@ ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
 	return result;
 }
 
+std::wstring ExpressionValue::toString() const
+{
+	switch (type)
+	{
+	case ExpressionValueType::Integer:
+		return formatString(L"%d",intValue);
+	case ExpressionValueType::Float:
+		return formatString(L"%g",floatValue);
+	case ExpressionValueType::String:
+		return escapeString(strValue);
+	default:
+		return L"invalid";
+	}
+}
+
 ExpressionInternal::ExpressionInternal()
 {
 	children = nullptr;
@@ -532,6 +557,58 @@ bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
 	return true;
 }
 
+ExpressionValue ExpressionInternal::executeUserFunctionCall(const ExpressionUserFunction& func)
+{
+	if (checkParameterCount(func.parameters.size(),func.parameters.size()) == false)
+		return ExpressionValue();
+
+	// evaluate and initialize parameters
+	FileTokenizer tok;
+	for (size_t i = 0; i < childrenCount; i++)
+	{
+		ExpressionValue result = children[i]->evaluate();
+		if (result.isValid() == false)
+		{
+			Logger::queueError(Logger::Error,L"Invalid expression");
+			return result;
+		}
+
+		const std::wstring& paramName = func.parameters[i];
+		switch (result.type)
+		{
+		case ExpressionValueType::Integer:
+			tok.registerReplacement(paramName,result.intValue);
+			break;
+		case ExpressionValueType::Float:
+			tok.registerReplacement(paramName,result.floatValue);
+			break;
+		case ExpressionValueType::String:
+			tok.registerReplacement(paramName,result.strValue,true);
+			break;
+		}
+	}
+
+	static size_t recursionLevel = 0;
+	if (recursionLevel == 32)
+	{
+		Logger::queueError(Logger::Error,L"Maximum user function recursion level reached");
+		return ExpressionValue();
+	}
+
+	// process function content
+	TextFile input;
+	input.openMemory(func.content);
+	tok.init(&input);
+
+	// parse and evaluate it
+	recursionLevel++;
+	Expression exp = parseExpression(tok);
+	ExpressionValue result = exp.evaluate();
+	recursionLevel--;
+
+	return result;
+}
+
 ExpressionValue ExpressionInternal::executeFunctionCall()
 {
 	ExpressionValue invalid;
@@ -549,6 +626,12 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	auto it = expressionFunctions.find(strValue);
 	if (it == expressionFunctions.end())
 	{
+		// check if it's a user defined function
+		auto userIt = Global.userFunctions.find(strValue);
+		if (userIt != Global.userFunctions.end())
+			return executeUserFunctionCall(userIt->second);
+
+		// otherwise error out
 		Logger::queueError(Logger::Error,L"Unknown function \"%s\"",strValue);
 		return invalid;
 	}
@@ -580,7 +663,13 @@ bool isExpressionFunctionSafe(const std::wstring& name)
 {
 	auto it = expressionFunctions.find(name);
 	if (it == expressionFunctions.end())
+	{
+		auto userIt = Global.userFunctions.find(name);
+		if (userIt != Global.userFunctions.end())
+			return false;
+
 		return name != L"defined";
+	}
 
 	return it->second.safe;
 }
@@ -751,15 +840,6 @@ ExpressionValue ExpressionInternal::evaluate()
 	default:
 		return val;
 	}
-}
-
-static std::wstring escapeString(const std::wstring& text)
-{
-	std::wstring result = text;
-	replaceAll(result,LR"(\)",LR"(\\)");
-	replaceAll(result,LR"(")",LR"(\")");
-
-	return formatString(LR"("%s")",text);
 }
 
 std::wstring ExpressionInternal::formatFunctionCall()

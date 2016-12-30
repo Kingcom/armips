@@ -140,12 +140,38 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, std::vector<
 	replacements.push_back(replacement);
 }
 
-void Tokenizer::registerReplacement(const std::wstring& identifier, const std::wstring& newValue)
+void Tokenizer::registerReplacement(const std::wstring& identifier, const std::wstring& newValue, bool isString)
 {
 	Token tok;
-	tok.type = TokenType::Identifier;
+	tok.type = isString ? TokenType::String : TokenType::Identifier;
 	tok.setStringValue(newValue);
 	tok.setOriginalText(newValue);
+
+	Replacement replacement;
+	replacement.identifier = identifier;
+	replacement.value.push_back(tok);
+
+	replacements.push_back(replacement);
+}
+
+void Tokenizer::registerReplacement(const std::wstring& identifier, u64 newValue)
+{
+	Token tok;
+	tok.type = TokenType::Integer;
+	tok.intValue = newValue;
+
+	Replacement replacement;
+	replacement.identifier = identifier;
+	replacement.value.push_back(tok);
+
+	replacements.push_back(replacement);
+}
+
+void Tokenizer::registerReplacement(const std::wstring& identifier, double newValue)
+{
+	Token tok;
+	tok.type = TokenType::Float;
+	tok.floatValue = newValue;
 
 	Replacement replacement;
 	replacement.identifier = identifier;

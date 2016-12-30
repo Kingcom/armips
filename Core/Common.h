@@ -5,6 +5,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Util/EncodingTable.h"
 #include "Util/FileClasses.h"
+#include "Core/ExpressionFunctions.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 #include "Archs/Architecture.h"
@@ -23,6 +24,7 @@ typedef struct {
 	SymbolData symData;
 	SymbolTable symbolTable;
 	EncodingTable Table;
+	ExpressionUserFunctionMap userFunctions;
 	int Section;
 	int Radix;
 	bool Revalidate;

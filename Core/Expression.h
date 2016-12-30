@@ -122,9 +122,12 @@ struct ExpressionValue
 	ExpressionValue operator&&(const ExpressionValue& other) const;
 	ExpressionValue operator||(const ExpressionValue& other) const;
 	ExpressionValue operator^(const ExpressionValue& other) const;
+
+	std::wstring toString() const;
 };
 
 class Label;
+struct ExpressionUserFunction;
 
 class ExpressionInternal
 {
@@ -149,6 +152,7 @@ private:
 	void allocate(size_t count);
 	void deallocate();
 	std::wstring formatFunctionCall();
+	ExpressionValue executeUserFunctionCall(const ExpressionUserFunction& func);
 	ExpressionValue executeFunctionCall();
 	bool checkParameterCount(size_t min, size_t max);
 

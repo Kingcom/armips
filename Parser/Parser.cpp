@@ -311,9 +311,39 @@ bool Parser::checkEquLabel()
 	const Token& start = peekToken();
 	if (start.type == TokenType::Identifier)
 	{
+		ExpressionUserFunction function;
+		bool isFunction = false;
+
 		int pos = 1;
 		if (peekToken(pos).type == TokenType::Colon)
 			pos++;
+		else if (peekToken(pos).type == TokenType::LParen)
+		{
+			TokenizerPosition oldPos = getTokenizer()->getPosition();
+			eatTokens(2);
+			pos++;
+
+			// could be a function call, parse it
+			while (peekToken().type == TokenType::Identifier)
+			{
+				function.parameters.push_back(nextToken().getStringValue());
+				pos++;
+
+				if (peekToken().type == TokenType::Colon)
+				{
+					eatToken();
+					pos++;
+				}
+			}
+
+			// something invalid
+			if (peekToken().type != TokenType::RParen)
+				return false;
+
+			getTokenizer()->setPosition(oldPos);
+			isFunction = true;
+			pos++;
+		}
 
 		if (peekToken(pos).type == TokenType::Equ &&
 			peekToken(pos+1).type == TokenType::EquValue)
@@ -350,6 +380,21 @@ bool Parser::checkEquLabel()
 			if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 			{
 				printError(start,L"Equation name %s already defined",name);
+				return true;
+			}
+
+			if (isFunction)
+			{
+				if (expressionFunctions.find(name) != expressionFunctions.end()
+					|| Global.userFunctions.find(name) != Global.userFunctions.end())
+				{
+					printError(start,L"Function name %s already defined",name);
+					return true;
+				}
+
+				function.name = name;
+				function.content = value;
+				Global.userFunctions[name] = function;
 				return true;
 			}
 
@@ -568,7 +613,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 		else
 			fullName = formatString(L"%s_%s_%08X",macro.name,label,macro.counter);
 
-		macroTokenizer.registerReplacement(label,fullName);
+		macroTokenizer.registerReplacement(label,fullName,false);
 	}
 
 	macroTokenizer.init(macro.content);
