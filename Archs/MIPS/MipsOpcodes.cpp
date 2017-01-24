@@ -245,6 +245,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "eor",	"s,t",		MIPS_SPECIAL(0x26), 			MA_MIPS1,	MO_RSD },
 	{ "nor",	"d,s,t",	MIPS_SPECIAL(0x27),				MA_MIPS1,	0 },
 	{ "nor",	"s,t",		MIPS_SPECIAL(0x27),				MA_MIPS1,	MO_RSD },
+	{ "not",	"d,s",		MIPS_SPECIAL(0x27),				MA_MIPS1,	0 },
 	{ "mfsa",	"d",		MIPS_SPECIAL(0x28),				MA_PS2,		0 },
 	{ "mtsa",	"s",		MIPS_SPECIAL(0x29),				MA_PS2,		0 },
 	{ "slt",	"d,s,t",	MIPS_SPECIAL(0x2A),				MA_MIPS1,	0 },
