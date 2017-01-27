@@ -1,7 +1,7 @@
-ARMIPS assembler v0.9  
-by Kingcom  
-https://github.com/Kingcom/armips
-http://buildbot.orphis.net/armips/
+# ARMIPS assembler v0.9
+* Author: Kingcom
+* Source: https://github.com/Kingcom/armips
+* Automated builds: http://buildbot.orphis.net/armips
 
 # 1. Introduction
 
@@ -16,32 +16,11 @@ armips code.asm [optional parameters]
 armips64 code.asm [optional parameters]
 ```
 
-Code.asm is the main file of your assembly code, which can open and include other files.  
+`code.asm` is the main file of your assembly code, which can open and include other files.
 The following optional command line parameters are supported:
 
-* `-temp fileName`
-        Specifies the output name for temporary assembly data.
-
-* `-sym fileName`
-        Specifies the output name for symbol data in the sym format.
-
-* `-sym2 fileName`
-        Specifies the output name for symbol data in the sym2 format.
-
-* `-erroronwarning`
-        Specifies that any warnings shall be treated like errors, preventing assembling. This has the same effect as the `.erroronwarning` directive.
-
-* `-equ name replacement`
-        Equivalent to using `name equ replacement` in the assembly code.
-
-* `-strequ name replacement`
-        Equivalent to using `name equ "replacement"` in the assembly code.
-
-* `-root folderName`
-        Specifies the folder to be used as the working directory during execution.
-
-The optional `-temp` parameter specifies a text file where all the temporary assembly data will be written to for reference purposes. It will look like this:
-
+#### `-temp <filename>`
+Specifies the output name for temporary assembly data. Example output:
 ```
 ; 1 file  included
 ; test.asm
@@ -52,77 +31,77 @@ The optional `-temp` parameter specifies a text file where all the temporary ass
 800362E0 .Close                          ; test.asm line 9
 ```
 
-## 1.2  Change log
+#### `-sym <filename>`
+Specifies the output name for symbol data in the sym format. Example output:
+```
+00000000 0
+80000000 .dbl:0010
+80000010 main
+8000002C subroutine
+80240000 newblock
+```
 
-* Version 0.9
-    * huge rewrite with many enhancements and fixes
-    * can now read from UTF8, UTF16, and Shift-JIS files and convert the input correctly
-    * PSP support, load ELFs with `.loadelf`
-    * able to import and relocate static C/C++ libraries
-    * new `-sym2` format for use with PPSSPP and PCSX2
-    * new directives: `.sym`, `.stringn`, `.sjis`, `.sjisn`, `.function`, `.endfunction`, `.importlib`, `.loadelf`, ...
-    * removed directives: `.ifarm`, `.ifthumb`, `.radix`
-* Version 0.7d
-    * added automatic optimizations for several ARM opcodes
-    * many bugfixes and internal changes
-    * added static labels
-    * new directives: `.warning`, `.error`, `.notice`, `.relativeinclude`, `.erroronwarning`, `.ifarm`, `.ifthumb`
-    * quotation marks can now be escaped in strings using `\"`.
-* Version 0.7c
-    * Macros can now contain unique local labels
-    * `.area` directive added
-    * countless bugfixes
-    * no$gba debug message support
-    * full no$gba sym support
-* Version 0.7b
-    * ARM/THUMB support
-    * fixed break/syscall MIPS opcodes 
-    * added check if a MIPS instruction is valid inside a delay slot
-    * fixed and extended base detection
-    * added "." dummy label to the math parser to get the current memory address
-    * added `dcb`/`dcw`/`dcd` directives
+#### `-sym2 <filename>`
+Specifies the output name for symbol data in the sym2 format. Example output:
+```
+00000000 0
+80000000 .dbl:0010
+80000010 Main
+8000002C Subroutine,0000001C
+80240000 NewBlock,00000014
+```
 
-* Version 0.5b
-    * Initial release
+#### `-erroronwarning`
+Specifies that any warnings shall be treated like errors, preventing assembling. This has the same effect as the `.erroronwarning` directive.
 
-## 1.3  Migration from older versions
+#### `-equ <name> <replacement`
+Equivalent to using `name equ replacement` in the assembly code.
 
-There are several changes after version 0.7d that may break compatibility with code written for older versions. These are as follows:
+#### `-strequ <name> <replacement>`
+Equivalent to using `name equ "replacement"` in the assembly code.
 
-* String literals now require quotation marks, e.g. for file names
-* `$XX` is no longer supported for hexadecimal literals
+#### `-root <directory>`
+Specifies the working directory to be used during execution.
 
-# 2. Building from source
+# 2. Installation
 
-You can find the latest code at the [GitHub repository](https://github.com/Kingcom/armips). Make sure to initialize and update submodules, too.
+## 2.1 Download binary
+Download the latest Windows 32-bit binary from the [Automated ARMIPS builds](http://buildbot.orphis.net/armips) site.
+
+## 2.2 Building from source
+
+The latest code is available at the [ARMIPS GitHub repository](https://github.com/Kingcom/armips). Make sure to also initialize and update submodules. This can be accomplished with one command:
+```bash
+$ git clone --recursive https://github.com/Kingcom/armips.git
+```
 
 Build instructions per platform:
-* Building on Windows: You will need Visual Studio 2015 (Community Edition is sufficient). Simply open armips.sln, select the configuration and platform, and build the solution. Alternatively, you can build using CMake with mingw, but the VS2015 project is the only Windows build officially supported.
-* Building on Unix: You will need CMake and a C++11 compliant compiler. Create a build directory and invoke CMake from there, then simply run make.
-```
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
+* Building on Windows: You will need Visual Studio 2015 (Community Edition is sufficient). Simply open armips.sln, select the desired configuration and platform, and build the solution. Alternatively, you can build using [CMake](https://cmake.org/) with [MSYS2/MinGW](https://msys2.github.io/), but the VS2015 project is the only Windows build officially supported.
+* Building on Unix: You will need CMake and a C++11 compliant compiler (recent versions of both gcc and clang have been tested). Create a build directory, invoke CMake from there, and then simply run `make`.
+```bash
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make
 ```
 
-# 3. General information
+# 3. Overview
 
 The assembler includes full support for the MIPS R3000, MIPS R4000, and Allegrex instruction sets, partial support for the EmotionEngine instruction set, as well as complete support for the ARM7 and ARM9 instruction sets, both THUMB and ARM mode. Among the other features of the assembler are:
 
-* a full fledged C-like math parser. It should behave exactly like in any C/C++ code, including all the weirdness. All immediate values can be specified by an expression, though some directives can't use variable addresses including labels
+* a full fledged C-like expression parser. It should behave exactly like in any C/C++ code, including all the weirdness. All immediate values can be specified by an expression, though some directives can't use variable addresses including labels
 * you can open several files in a row, but only one output file can be open at any time. You can specify its address in memory to allow overlay support. Any file can cross-reference any other included file
-* local, static, and global labels (see [3.3 Labels](#33-labels))
-* table support for user defined text encodings (see [3.7 Strings](#37-strings))
-* several MIPS macros to make writing code easier and faster (see [4.1 General directives](#41-general-directives))
-* user defined macros (see [5.3 User defined macros](#53-user-defined-macros))
-* built-in checks for possible load delay problems (see [3.6 Load delay detection](#36-load-delay-detection))
+* local, static, and global labels (see [4.3 Labels](#43-labels))
+* table support for user defined text encodings (see [4.7 Strings](#47-strings))
+* several MIPS macros to make writing code easier and faster (see [5.1 General directives](#51-general-directives))
+* user defined macros (see [6.3 User defined macros](#63-user-defined-macros))
+* built-in checks for possible load delay problems (see [4.6 Load delay detection](#46-load-delay-detection))
 * optional automatic fix for said problems by inserting a nop between the instructions
 * output of the assembled code to a text file, with memory addresses and origin (see [1.1 Usage](#11-usage))
-* a directive to ensure that data is not bigger than a user defined size (see [3.8 Areas](#38-areas))
+* a directive to ensure that data is not bigger than a user defined size (see [4.8 Areas](#48-areas))
 
-# 3. Features
+# 4. Features
 
-## 3.1 Files
+## 4.1 Files
 
 Unlike other assemblers, you don't specify the input/output file as a command line argument. You have to open the file in the source code, and also close it yourself. This was done in order to support overlays, which are very common in PSX and NDS games. Instead of only having one output file, you can have as many as you need - each with its own address in memory. The files can cross-reference each other without any problems, so you can call code from other files that are currently not opened as well.
 
@@ -135,21 +114,35 @@ Unlike other assemblers, you don't specify the input/output file as a command li
 .Close
 ```
 
-## 3.2 Comments
+## 4.2 Syntax
 
-Both `;` and `//` are supported for comments.
+### Comments
+Both `;` and `//` style single-line comments are supported.
 
-## 3.3 Labels
+### Statement separator
+Statements are separated by newlines or `::` can be used between statements on the same line. For example, to insert four `nop` instructions, this could be written on one line:
+```
+nop :: nop :: nop :: nop
+```
 
-There is support for both local, global and static labels. Local labels are only valid in the area between the previous and the next global label. Specific directives, like .org, will also terminate the area. A label is defined by writing a colon after its name. All labels can be used before they are defined.
+### Statement line spanning
+Single statements can continue on to the next line by inserting a `\` at the end of a line. Comments and whitespace can follow. For example:
+```
+addiu t3, t4, \
+ FunctionJumpTable - headersize() + 0x1000 * filesize("blob.bin")
+```
+
+## 4.3 Labels
+
+There is support for both local, global and static labels. Local labels are only valid in the area between the previous and the next global label. Specific directives, like `.org`, will also terminate the area. A label is defined by writing a colon after its name. All labels can be used before they are defined.
 
 ```
-GlobalLabel:      ; This is a global label
-@@LocalLabel:     ; This is a local label, it is only
-                    ; valid until the next global one
-OtherGlobalLabel: ; this will terminate the area where
-                    ; @@LocalLabel can be used
-  b   @@LocalLabel  ; as a result, this will cause an error
+GlobalLabel:       ; This is a global label
+@@LocalLabel:      ; This is a local label, it is only
+                   ; valid until the next global one
+OtherGlobalLabel:  ; this will terminate the area where
+                   ; @@LocalLabel can be used
+  b   @@LocalLabel ; as a result, this will cause an error
 ```
 
 Static labels behave like global labels, but are only valid in the very file they were defined. Any included files or files that include it cannot reference it. They can, however, contain another static label with the same name.
@@ -162,7 +155,7 @@ A label name can contain all characters from A-Z, numbers, and underscores. Howe
 
 Additionally, `.` can be used to reference the current memory address.
 
-## 3.4 equ
+## 4.4 equ
 
 The `equ` directive works as a text replacement and is defined as follows:
 
@@ -170,11 +163,11 @@ The `equ` directive works as a text replacement and is defined as follows:
 @@StringPointer equ 0x20(r29)
 ```
 
-There has to be a space before and after equ. The assembler will replace any occurrence of `@@StringPointer` with `0x20(r29)`. As it is a local equ, it will only do so in the current section, which is terminated by any global label or specific directives. This code:
+There has to be a space before and after `equ`. The assembler will replace any occurrence of `@@StringPointer` with `0x20(r29)`. As it is a local `equ`, it will only do so in the current section, which is terminated by any global label or specific directives. This code:
 
 ```
 @@StringPointer equ 0x20(r29)
- 
+
   lw  a0,@@StringPointer
   nop
   sw  a1,@@StringPointer
@@ -188,12 +181,12 @@ will assemble to this:
   sw  a1,0x20(r29)
 ```
 
-There can be both global and local `equ` directives, but unlike normal labels, they have to be defined before they are used.
+There can be both global and local `equ` directives, but unlike normal labels, they must be defined before they are used.
 
 
-## 3.5 Math parser
+## 4.5 Expression parser
 
-A standard math parser with operator precedence and bracket support has been implemented. It is intended to behave exactly like any C/C++ parser and supports all unary, binary and tertiary operators of the C language. Every numeral argument can be given as an expression, including label names. However, some directives do not support variable addresses, so labels cannot be used in expressions for them. The following bases are supported:
+A standard expression parser with operator precedence and bracket support has been implemented. It is intended to behave exactly like any C/C++ parser and supports all unary, binary and ternary operators of the C language. Every numeral argument can be given as an expression, including label names. However, some directives do not support variable addresses, so labels cannot be used in expressions for them. The following bases are supported:
 
 * `0xA` and `0Ah` for hexadecimal numbers
 * `0o12` and `12o` for octal numbers
@@ -209,7 +202,44 @@ A few examples:
   li   v0,Structure+(3*StructureSize)
 ```
 
-## 3.6 Load delay detection
+### Built-in functions
+
+Below is a table of functions built into the assembler that can be used with the expression parser for runtime computation.
+
+| Function | Description |
+|----------|-------------|
+| `version()` | armips version encoded as int |
+| `endianness()` | current endianness as string `"big"` or `"little"` |
+| `outputname()` | currently opened output filename |
+| `org()` | current memory address (like `.`) |
+| `orga()` | current absolute file address |
+| `headersize()` | current header size (displacement of memory address against absolute file address) |
+| `fileexists(file)` | `1` if `file` exists, `0` otherwise |
+| `filesize(file)` | size of `file` in bytes |
+| `tostring(val)` | string representation of int or float `val` |
+| `tohex(val, optional digits = 8)` | hex string representaion of int `val` |
+| `round(val)` | float `val` rounded to nearest int |
+| `int(val)` | cast float `val` to int, dropping fractional part |
+| `float(val)` | cast int `val` to float |
+| `frac(val)` | fractional part of float `val` |
+| `abs(val)` | absolute value of int or float `val` |
+| `strlen(str)` | number of characters in `str` |
+| `substr(str, start, count)` | substring of `str` from `start`, length `count` |
+| `regex_match(source, regex)` | `1` if `regex` matched entire `source`, `0` otherwise|
+| `regex_search(source, regex)` | `1` if `regex` matched subsequence of `source`, `0` otherwise|
+| `regex_extract(source, regex, optional index = 0)` | string of `regex` matched in `source` |
+| `find(source, substr, optional start = 0)` | lowest index of `substr` in `source` from `start`, else `-1` |
+| `rfind(source, substr, optional start = -1)` | highest index of `substr` in `source` from `start`, else `-1` |
+| `readbyte(file, optional pos = 0)` | read byte from `file` at position `pos` |
+| `readu8(file, optional pos = 0)` | read byte from `file` at position `pos` |
+| `readu16(file, optional pos = 0)` | read u16 from `file` at position `pos` |
+| `readu32(file, optional pos = 0)` | read u32 from `file` at position `pos` |
+| `readu64(file, optional pos = 0)` | read u64 from `file` at position `pos` |
+| `readascii(file, optional start = 0, optional len = 0)` | read ASCII string from `file` at `start` length `len` |
+| `isarm()` | `1` if in ARM mode, `0` otherwise |
+| `isthumb()` | `1` if in Thumb mode, `0` otherwise |
+
+## 4.6 Load delay detection
 
 This feature is still unfinished and experimental. It works in most cases, though. On certain MIPS platforms (most notably the PlayStation 1), any load is asynchronously delayed by one cycle and the CPU won't stall if you attempt to use it before. Attempts to use it will return the old value on an actual system (emulators usually do not emulate this, which makes spotting these mistakes even more difficult). Therefore, the assembler will attempt to detect when such a case happens. The following code would result in a warning:
 
@@ -226,7 +256,7 @@ This code doesn't take the load delay into account and will therefore only work 
   lbu  a1,(a0)
 ```
 
-The assembler can optionally automatically insert a `nop` when it detects such an issue. This can be enabled with the [`.fixloaddelay`](#load-delay) directive.  
+The assembler can optionally automatically insert a `nop` when it detects such an issue. This can be enabled with the [`.fixloaddelay`](#load-delay) directive.
 However, as there is no control flow analysis, there is a chance of false positives. For example, a branch delay slot may cause a warning for the opcode that follows it, even if there is no chance that they will be executed sequentially. The following example illustrates this:
 
 ```
@@ -250,9 +280,9 @@ You can fix the false warning by using the [`.resetdelay`](#load-delay) directiv
   lbu   a2,(a0)
 ```
 
-## 3.7 Strings
+## 4.7 Strings
 
-You can write ASCII text by simple using the `.db`/`.ascii` directive. However, you can also write text with custom encodings. In order to do that, you first have to load a table, and then use the .string directive to write the text. It behaves exactly like the `.db` instruction (so you can also specify immediate values as arguments), with the exception that it uses the table to encode the text, and appends a termination sequence after the last argument. This has to be specified inside the table, otherwise 0 is used.
+You can write ASCII text by simply using the `.db`/`.ascii` directive. However, you can also write text with custom encodings. In order to do that, you first have to load a table using [`.loadtable <tablefile>`](#load-a-table-specifying-a-custom-encoding), and then use the [`.string`](#write-text-with-custom-encoding) directive to write the text. It behaves exactly like the `.db` instruction (so you can also specify immediate values as arguments), with the exception that it uses the table to encode the text, and appends a termination sequence after the last argument. This has to be specified inside the table, otherwise 0 is used.
 
 ```
 .loadtable "custom.tbl"
@@ -261,14 +291,14 @@ You can write ASCII text by simple using the `.db`/`.ascii` directive. However, 
 
 The first and third argument are encoded according to the table, while the second one is written as-is.
 
-Quotation marks can be escaped by prefixing them with a backslash. Any backlash not followed by a quotation mark is kept as-is. If you want to use a backslash at the end of a string, prefix it by another backlash.  
+Quotation marks can be escaped by prefixing them with a backslash. Any backlash not followed by a quotation mark is kept as-is. If you want to use a backslash at the end of a string, prefix it by another backlash.
 For example, to write a quotation mark followed by a backlash:
 
 ```
 .ascii "\"\\"
 ```
 
-## 3.8 Areas
+## 4.8 Areas
 
 If you overwrite existing data, it is critical that you don't overwrite too much. The area directive will take care of checking if all the data is within a given space. In order to do that, you just have to specify the maximum size allowed.
 
@@ -287,14 +317,14 @@ This would cause an error on assembling, because the word directive takes up 20 
 .endarea
 ```
 
-Here, the area is 32 bytes, which is sufficient for the 20 bytes used by .word.  
+Here, the area is 32 bytes, which is sufficient for the 20 bytes used by .word.
 Optionally, a second parameter can be given. The remaining free size of the area will then be completely filled with bytes of that value.
 
-## 3.9 Symbol files
+## 4.9 Symbol files
 
 Functions.
 
-## 3.10 C/C++ importer
+## 4.10 C/C++ importer
 
 You can link object files or static libraries in ELF format. The code and data is relocated to the current output position and all of its symbols are exported. You can in turn use armips symbols inside of your compiled code by declaring them as `extern`. Note: As armips labels are case insensitive, the exported symbols are treated the same way. Be aware of name mangling when trying to reference C++ functions, and consider declaring them as `extern "C"`.
 
@@ -308,18 +338,18 @@ You can optionally supply names for constructor and destructor functions. Functi
 .importlib "code.a",globalConstructor,globalDestructor
 ```
 
-# 4. Assembler directives
+# 5. Assembler directives
 
 These commands tell the assembler to do various things like opening the output file or opening another source file.
 
-## 4.1 General directives
+## 5.1 General directives
 
 ### Setting the architecture
 
 These directives can be used to set the architecture that the following assembly code should be parsed and output for. The architecture can be changed at any time without affecting the preceding code.
 
 | Directive | System | Architecture | Comment |
-| --------- |:------:|:------------:|:--------|
+| --------- |:-------|:-------------|:--------|
 | `.psx` | PlayStation 1 | MIPS R3000 | - |
 | `.ps2` | PlayStation 2 | EmotionEngine | - |
 | `.psp` | PlayStation Portable | Allegrex | - |
@@ -334,21 +364,21 @@ These directives can be used to set the architecture that the following assembly
 ### Opening a generic file
 
 ```
-.open FileName,RamAddress  
-.open OldFileName,NewFileName,MemoryAddress
+.open FileName,Offset
+.open OldFileName,NewFileName,Offset
 ```
 
-Opens the specified file for output. If two file names are specified, then the assembler will copy the file specified by the file name to the second path. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. MemoryAddress specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the `.headersize` directive.
+Opens the specified file for output. If two file names are specified, then the assembler will copy the file specified by the file name to the second path. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. `Offset` specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
 Only the changes specified by the assembly code will be inserted, the rest of the file remains untouched.
 
 ### Creating a new file
 
 ```
-.create FileName,MemoryAddress
-.createfile FileName,MemoryAddress
+.create FileName,Offset
+.createfile FileName,Offset
 ```
 
-Creates the specified file for output. If the file already exists, it will be overwritten. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. MemoryAddress specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
+Creates the specified file for output. If the file already exists, it will be overwritten. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. `Offset` specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
 
 ### Closing a file
 
@@ -374,7 +404,7 @@ Sets the output pointer to the specified address. `.org` specifies a memory addr
 .headersize Offset
 ```
 
-Sets the header size to the given value which is difference between the first byte of the file and its position in memory. This is used to calculate all addresses up until the next .headersize or .open/.create directive. The current address will also be set to `Offset`.
+Sets the header size to the given value which is difference between the first byte of the file and its position in memory. This is used to calculate all addresses up until the next `.headersize` or `.open`/`.create` directive. The current memory address will be updated, but the absolute file offset will remain the same. The header size can be negative so long as the resulting memory address remains positive.
 
 ### Including another assembly file
 
@@ -382,7 +412,7 @@ Sets the header size to the given value which is difference between the first by
 .include FileName[,encoding]
 ```
 
-Opens the file called FileName to assemble its content. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. You can include other files up to a depth level of 64. This limit was added to prevent the assembler from getting stuck in an infinite loop due to two files including each other recursively. If the included file has an Unicode Byte Order Mark then the encoding will be automatically detected. If no Byte Order Mark is present it will default to UTF-8. This can be overwritten by manually specifying the file encoding as a second parameter.
+Opens the file called `FileName` to assemble its content. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. You can include other files up to a depth level of 64. This limit was added to prevent the assembler from getting stuck in an infinite loop due to two files including each other recursively. If the included file has an Unicode Byte Order Mark then the encoding will be automatically detected. If no Byte Order Mark is present it will default to UTF-8. This can be overwritten by manually specifying the file encoding as a second parameter.
 
 The following values  are supported:
 * SJIS, Shift-JIS
@@ -398,7 +428,7 @@ The following values  are supported:
 .align num
 ```
 
-Writes zeros into the output file until the output position is a multiple of `num`. `num` has to be a power of two. 
+Writes zeros into the output file until the output position is a multiple of `num`. `num` has to be a power of two.
 
 ### Filling space with a value
 
@@ -416,7 +446,7 @@ Inserts `length` amount of bytes of `value`. If `value` isn't specified, zeros a
 .import FileName[,start[,size]]
 ```
 
-Inserts the file specified by FileName into the currently opened output file. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. Optionally, start can specify the start position in the file from it should be imported, and size can specify the number of bytes to read.
+Inserts the file specified by `FileName` into the currently opened output file. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. Optionally, start can specify the start position in the file from it should be imported, and size can specify the number of bytes to read.
 
 ### Write bytes
 
@@ -427,7 +457,7 @@ Inserts the file specified by FileName into the currently opened output file. If
 dcb value[,...]
 ```
 
-Inserts the specified sequence of bytes. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 8 bits are inserted. If it evaluates to a string, every character is inserted as a byte. 
+Inserts the specified sequence of bytes. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 8 bits are inserted. If it evaluates to a string, every character is inserted as a byte.
 
 ### Write halfwords
 
@@ -437,7 +467,7 @@ Inserts the specified sequence of bytes. Each parameter can be any expression th
 dcw value[,...]
 ```
 
-Inserts the specified sequence of halfwords. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 16 bits are inserted. If it evaluates to a string, every character is inserted as a halfword. 
+Inserts the specified sequence of 16-bit halfwords. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 16 bits are inserted. If it evaluates to a string, every character is inserted as a halfword.
 
 
 ### Write words
@@ -448,7 +478,16 @@ Inserts the specified sequence of halfwords. Each parameter can be any expressio
 dcd value[,...]
 ```
 
-Inserts the specified sequence of halfwords. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to an integer, only the lowest 32 bits are inserted. If it evaluates to a string, every character is inserted as a word. Floats are inserted using an integer representation of the float's encoding
+Inserts the specified sequence of 32-bit words. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to an integer, only the lowest 32 bits are inserted. If it evaluates to a string, every character is inserted as a word. Floats are inserted using an integer representation of the single-precision float's encoding.
+
+### Write doublewords
+
+```
+.doubleword value[,...]
+.dd value[,...]
+```
+
+Inserts the specified sequence of 64-bit words. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to a string, every character is inserted as a doubleword. Floats are inserted using an integer representation of the double-precision float's encoding.
 
 ### Write floating point numbers
 
@@ -457,8 +496,7 @@ Inserts the specified sequence of halfwords. Each parameter can be any expressio
 .double value[,...]
 ```
 
-`.float` inserts the specified sequence of single precision floats and `.double` inserts double precision floats. Each parameter can be any expression that evaluates to an integer or a floating point number. If it evaluates to an integer, it will be converted to a floating point number of that value.
-
+`.float` inserts the specified sequence of single-precision floats and `.double` inserts double-precision floats. Each parameter can be any expression that evaluates to an integer or a floating point number. If it evaluates to an integer, it will be converted to a floating point number of that value.
 
 ### Load a table specifying a custom encoding
 
@@ -468,7 +506,7 @@ Inserts the specified sequence of halfwords. Each parameter can be any expressio
 ```
 
 Loads `TableName` for using it with the `.string` directive. The encoding can be specified in the same way as for `.include`.
- 
+
 The table file format is a line-separated list of key values specified by `hexbyte=string` and optional termination byte sequence by `/hexbytes`
 
 ```
@@ -511,7 +549,7 @@ Inserts the given string using the Shift-JIS encoding. `.sjis` inserts a null by
 .ifndef idenifier
 ```
 
-The content of a conditional block will only be used if the condition is met. In the case of `.if`, it is met of cond evaluates to non-zero integer. `.ifdef` is met if the given identifier is defined anywhere in the code, and `.ifndef` if it is not.
+The content of a conditional block will only be used if the condition is met. In the case of `.if`, it is met of `cond` evaluates to non-zero integer. `.ifdef` is met if the given identifier is defined anywhere in the code, and `.ifndef` if it is not.
 
 ### Else case of a conditional block
 
@@ -530,7 +568,7 @@ The else block is used if the condition of the condition of the if block was not
 .endif
 ```
 
-Ends the lastest open if or else block.
+Ends the last open if or else block.
 
 ### Define labels
 
@@ -558,7 +596,7 @@ Opens a new area with the maximum size of `SizeEquation`. If the data inside the
 
 Prints the message and sets warning/error flags. Useful with conditionals.
 
-## 4.2 MIPS directives
+## 5.2 MIPS directives
 
 ### Load delay
 
@@ -581,7 +619,7 @@ Automatically fixes any load delay problems by inserting a `nop` between the ins
 Opens the specified ELF file for output. If two file names are specified, then the assembler will copy the first file to the second path. If relative include is off, all paths are relative to the current working directory, so from where the assembler was called. Otherwise the path is relative to the including assembly file. All segments are accessible by their virtual addresses, and all unmapped sections can be accessed by their physical position (through `.orga`).
 Currently this is only supported for the PSP architecture, and only for non-relocateable files. The internal structure of the file may be changed during the process, but this should not affect its behavior.
 
-## 4.3  ARM Directives
+## 5.3 ARM Directives
 
 ### Changing instruction set
 
@@ -617,19 +655,23 @@ ldr  r0,=0xFFEEDDCC
 
 Inserts a no$gba debug message as described by GBATEK.
 
-# 5. Macros
+# 6. Macros
 
-## 5.1 Assembler-defined MIPS macros
+## 6.1 Assembler-defined MIPS macros
 
 There are various macros built into the assembler for ease of use. They are intended to make using some of the assembly simpler and faster.
 At the moment, these are all the MIPS macros included:
+
+### Immediate macros
 
 ```
 li   reg,Immediate
 la   reg,Immediate
 ```
 
-Loads Immediate into the specified register by using a combination of `lui`/`ori`, a simple `addiu` or a simple `ori`.
+Loads Immediate into the specified register by using a combination of `lui`/`ori`, a simple `addiu`, or a simple `ori`, depending on the value of the Immediate.
+
+### Memory macros
 
 ```
 lb   reg,Address
@@ -637,85 +679,104 @@ lbu  reg,Address
 lh   reg,Address
 lhu  reg,Address
 lw   reg,Address
+lwu  reg,Address
+ld   reg,Address
+lwc1 reg,Address
+lwc2 reg,Address
+ldc1 reg,Address
+ldc2 reg,Address
 ```
 
-Loads a byte/halfword/word from the given address into the specified register by using a combination of `lui` and `lb`/`lbu`/`lh`/`lhu`/`lw`.
+Loads a byte/halfword/word from the given address into the specified register by using a combination of `lui` and `lb`/`lbu`/`lh`/`lhu`/`lw`/`ld`/`lwc1`/`lwc2`/`ldc1`/`ldc2`.
 
 ```
 ulh  destreg,imm(sourcereg)
 ulh  destreg,(sourcereg)
 ulhu destreg,imm(sourcereg)
 ulhu destreg,(sourcereg)
-```
-
-Loads an unaligned halfword from the address in sourcereg. It uses a combination of several `lb`/`lbu` and `ori` instructions.
-
-```
 ulw  destreg,imm(sourcereg)
 ulw  destreg,(sourcereg)
+uld  destreg,imm(sourcereg)
+uld  destreg,(sourcereg)
 ```
 
-Loads an unaligned word from the address in sourcereg. It uses a combination of `lwl`/`lwr`.
+Loads an unaligned halfword/word/doubleword from the address in sourcereg by using a combination of several `lb`/`lbu` and `ori` or `lwl`/`lwr` or `ldl`/`ldr` instructions.
 
 ```
 sb   reg,Address
 sh   reg,Address
 sw   reg,Address
+sd   reg,Address
+swc1 reg,Address
+swc2 reg,Address
+sdc1 reg,Address
+sdc2 reg,Address
 ```
 
-Writes a byte/halfword/word to the given address by using a combination of `lui` and `sb`/`sh`/`sw`.
+Stores a byte/halfword/word/doubleword to the given address by using a combination of `lui` and `sb`/`sh`/`sw`/`sd`/`swc1`/`swc2`/`sdc1`/`sdc2`.
 
 ```
 ush  destreg,imm(sourcereg)
 ush  destreg,(sourcereg)
-```
-
-Loads an unaligned halfword to the address in sourcereg. It uses a combination of several `sb`/`sbu` and shift instructions.
-
-```
 usw  destreg,imm(sourcereg)
 usw  destreg,(sourcereg)
+usd  destreg,imm(sourcereg)
+usd  destreg,(sourcereg)
 ```
 
-Loads an unaligned word to the address in sourcereg. It uses a combination of `swl`/`swr`.
+Stores an unaligned halfword/word/doubleword to the address in sourcereg using a combination of several `sb`/`sbu` and shifts or `swl`/`swr`/`sdl`/`sdr` instructions.
+
+### Branch macros
 
 ```
 blt   reg1,reg2,Dest
+bltu  reg1,reg2,Dest
 bge   reg1,reg2,Dest
-```
-
-If reg1 is less/greater than reg2, branches to the given address. A combination of `sltu` and `beq`/`bne` is used.
-
-```
+bgeu  reg1,reg2,Dest
+bltl  reg1,reg2,Dest
+bltul reg1,reg2,Dest
+bgel  reg1,reg2,Dest
+bgeul reg1,reg2,Dest
 blt   reg,Imm,Dest
+bltu  reg,Imm,Dest
 bge   reg,Imm,Dest
-```
-
-If reg is less/greater than Imm, branches to the given address. A combination of `li`, `sltu` and `beq`/`bne` is used.
-
-```
+bgeu  reg,Imm,Dest
 bne   reg,Imm,Dest
 beq   reg,Imm,Dest
+bltl  reg,Imm,Dest
+bltul reg,Imm,Dest
+bgel  reg,Imm,Dest
+bgeul reg,Imm,Dest
+bnel  reg,Imm,Dest
+beql  reg,Imm,Dest
 ```
 
-If reg is not equal/is equal to Imm, branches to the given address. A combination of `li` and `beq`/`bne` is used.
+If reg/reg1 is less/greater than/equal/not equal to reg2/Imm, branches to the given address. A combination of `sltu` and `beq`/`bne` or `li`, `sltu` and `beq`/`bne` is used.
+
+### Rotate macros
 
 ```
 rol    reg1,reg2,reg3
 ror    reg1,reg2,reg3
-```
-
-Rotates reg2 left/right by the value of the lower 5 bits of reg3 and stores the result in reg1. A combination of `sll`, `srl` and `or` is used.
-
-```
 rol    reg1,reg2,Imm
 ror    reg1,reg2,Imm
 ```
 
-Rotates reg2 left/right by Imm and stores the result in reg1. A combination of `sll`, `srl` and `or` is used.
+Rotates reg2 left/right by the value of the lower 5 bits of reg3/Imm and stores the result in reg1. A combination of `sll`, `srl` and `or` is used.
+
+### Absolute value macros
+
+```
+abs   reg1,reg2
+dabs  reg1,reg2
+```
+
+Stores absolute value of word/doubleword in reg2 into reg1 using a combination of `sra`/`dsra32`, `xor`, and `sub`/`dsub`.
+
+### Upper/lower versions
 
 Additionally, there are upper and lower versions for many two opcode macros. They have the same names and parameters as the normal versions, but `.u` or `.l` is appended at the end of the name.
-For example, `li.u` will output the upper half of the `li` macro, and `li.l` will output the lower half. The following macros support this: `li`,`la`,`lb`,`lbu`,`lhu`,`lw`,`sb`,`sh`,`sw`
+For example, `li.u` will output the upper half of the `li` macro, and `li.l` will output the lower half. The following macros support this: `li`,`la`,`lb`,`lbu`,`lh`,`lhu`,`lw`,`lwu`,`ld`,`lwc1`,`lwc2`,`ldc1`,`ldc2`,`sb`,`sh`,`sw`,`sd`,`swc1`,`swc2`,`sdc1`,`sdc2`
 
 This can be used when the two halves of the macros need to be used in nonconsecutive positions, for example:
 
@@ -725,7 +786,7 @@ jal   function
 li.l  a0,address
 ```
 
-## 5.2 Assembler-defined ARM macros
+## 6.2 Assembler-defined ARM macros
 
 The assembler will automatically convert the arguments between the following opcodes if possible:
 
@@ -740,7 +801,7 @@ E.g., `mov r0,-1` will be assembled as `mvn r0,0`
 Additionally, `ldr rx,=immediate` can be used to load a 32-bit immediate. The assembler will try to convert it into a mov/mvn instruction if possible. Otherwise, it will be stored in the nearest pool (see the .pool directive). `add rx,=immediate` can be used as a PC-relative add and will be assembled as `add rx,r15,(immediate-.-8)`
 
 
-## 5.3 User defined macros
+## 6.3 User defined macros
 
 The assembler allows the creation of custom macros. This is an example macro, a recreation of the builtin MIPS macro `li`:
 
@@ -790,39 +851,47 @@ will therefore be changed to:
 
 Each call of the macro will increase the counter.
 
-# 6. Built-in functions
+# 7. Meta
 
-There are a number of functions built into armips that can be used with the math parser to compute things at runtime.
+## 7.1 Change log
 
-| Function | Description |
-|----------|-------------|
-| `version()` | armips version encoded as int |
-| `endianness()` | string "big" or "little" |
-| `outputname()` | output filename |
-| `org()` | current memory address |
-| `orga()` | current absolute file address |
-| `headersize()` | headersize (displacement of memory against absolute file address) |
-| `fileexists(file)` | 1: `file` exists, 0: doesn't exist |
-| `filesize(file)` | size of `file` in bytes |
-| `tostring(val)` | convert int or float `val` to string |
-| `tohex(val, optional digits = 8)` | convert int `val` to hex string |
-| `int(val)` | cast float `val` to int |
-| `float(val)` | cast int `val` to float |
-| `frac(val)` | fractional part of float `val` |
-| `abs(val)` | absolute value of int or float `val` |
-| `strlen(str)` | number of characters in `str` |
-| `substr(str, start, count)` | substring of `str` from `start`, length `count` |
-| `regex_match(str, regex)` | 1: `regex` matched entire `str`, 0: didn't match |
-| `regex_search(str, regex)` | 1: `regex` matched subsequence of "str", 0: didn't match |
-| `regex_extract(str, regex, optional index = 0)` | string of `regex` matched in `str` |
-| `find(str, val, optional start = 0)` | index of `val` in `str` from `start`, else -1 |
-| `rfind(str, val, optional start = -1)` | reverse find index of `val` in `str` from `start`, else -1 |
-| `readbyte(file, optional pos = 0)` | read byte from `file` at position `pos` |
-| `readu8(file, optional pos = 0)` | read byte from `file` at position `pos` |
-| `readu16(file, optional pos = 0)` | read u16 from `file` at position `pos` |
-| `readu32(file, optional pos = 0)` | read u32 from `file` at position `pos` |
-| `readu64(file, optional pos = 0)` | read u64 from `file` at position `pos` |
-| `readascii(file, optional start = 0, optional len = 0)` | read ASCII string from `file` at `start` length `len` |
-| `isarm()` | 1: if ARM, 0: otherwise |
-| `isthumb()` | 1: if Thumb, 0: otherwise |
+* Version 0.9
+    * huge rewrite with many enhancements and fixes
+    * can now read from UTF8, UTF16, and Shift-JIS files and convert the input correctly
+    * PSP support, load ELFs with `.loadelf`
+    * able to import and relocate static C/C++ libraries
+    * new `-sym2` format for use with PPSSPP and PCSX2
+    * new directives: `.sym`, `.stringn`, `.sjis`, `.sjisn`, `.function`, `.endfunction`, `.importlib`, `.loadelf`, ...
+    * removed directives: `.ifarm`, `.ifthumb`, `.radix`
+* Version 0.7d
+    * added automatic optimizations for several ARM opcodes
+    * many bugfixes and internal changes
+    * added static labels
+    * new directives: `.warning`, `.error`, `.notice`, `.relativeinclude`, `.erroronwarning`, `.ifarm`, `.ifthumb`
+    * quotation marks can now be escaped in strings using `\"`.
+* Version 0.7c
+    * Macros can now contain unique local labels
+    * `.area` directive added
+    * countless bugfixes
+    * no$gba debug message support
+    * full no$gba sym support
+* Version 0.7b
+    * ARM/THUMB support
+    * fixed break/syscall MIPS opcodes
+    * added check if a MIPS instruction is valid inside a delay slot
+    * fixed and extended base detection
+    * added "." dummy label to the math parser to get the current memory address
+    * added `dcb`/`dcw`/`dcd` directives
+* Version 0.5b
+    * Initial release
 
+## 7.2 Migration from older versions
+
+There are several changes after version 0.7d that may break compatibility with code written for older versions. These are as follows:
+
+* String literals now require quotation marks, e.g. for file names
+* `$XX` is no longer supported for hexadecimal literals
+
+## 7.3 License
+
+MIT Copyright (c) 2009-2017 Kingcom: [LICENSE.txt](LICENSE.txt)
