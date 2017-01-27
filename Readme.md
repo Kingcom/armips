@@ -858,11 +858,17 @@ Each call of the macro will increase the counter.
 * Version 0.9
     * huge rewrite with many enhancements and fixes
     * can now read from UTF8, UTF16, and Shift-JIS files and convert the input correctly
+    * several new MIPS pseudo-ops, new COP0 and FPU control register types
+    * Nintendo 64 CPU + RSP support
     * PSP support, load ELFs with `.loadelf`
     * able to import and relocate static C/C++ libraries
     * new `-sym2` format for use with PPSSPP and PCSX2
-    * new directives: `.sym`, `.stringn`, `.sjis`, `.sjisn`, `.function`, `.endfunction`, `.importlib`, `.loadelf`, ...
+    * new directives: `.sym`, `.stringn`, `.sjis`, `.sjisn`, `.function`, `.endfunction`, `.importlib`, `.loadelf`, `.float`, `.dd`, `.double`
     * removed directives: `.ifarm`, `.ifthumb`, `.radix`
+    * added support for floats in data directives
+    * added expression functions
+    * variable expressions supported in `.org`/`.orga`/`.headersize`
+    * new statement syntax with `::` as separator and `\` as line continuation.
 * Version 0.7d
     * added automatic optimizations for several ARM opcodes
     * many bugfixes and internal changes
