@@ -26,7 +26,7 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t
 	this->fileName = fileName;
 	this->headerSize = headerSize;
 	this->originalHeaderSize = headerSize;
-	this->virtualAddress = headerSize;
+	this->seekPhysical(0);
 	mode = overwrite == true ? Create : Open;
 }
 
@@ -35,8 +35,8 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const s
 	this->fileName = fileName;
 	this->originalName = originalFileName;
 	this->headerSize = headerSize;
-	this->virtualAddress = headerSize;
-	originalHeaderSize = headerSize;
+	this->originalHeaderSize = headerSize;
+	this->seekPhysical(0);
 	mode = Copy;
 }
 
