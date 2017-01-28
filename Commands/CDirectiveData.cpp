@@ -438,5 +438,9 @@ void CDirectiveData::writeSymData(SymbolData& symData) const
 	case EncodingMode::Float:
 		symData.addData(position,getDataSize(),SymbolData::Data32);
 		break;
+	case EncodingMode::U64:
+	case EncodingMode::Double:
+		symData.addData(position,getDataSize(),SymbolData::Data64);
+		break;
 	}
 }
