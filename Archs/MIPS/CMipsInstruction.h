@@ -31,6 +31,7 @@ enum class MipsImmediateType
 	Immediate20_0,
 	ImmediateHalfFloat,
 	Immediate7,
+	CacheOp,
 	Ext,
 	Ins,
 	Cop2BranchType

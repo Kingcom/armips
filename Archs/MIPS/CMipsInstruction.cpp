@@ -180,6 +180,13 @@ bool CMipsInstruction::Validate()
 
 		switch (immediateData.secondary.type)
 		{
+		case MipsImmediateType::CacheOp:
+			if ((unsigned int)immediateData.secondary.value > 0x1f)
+			{
+				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",immediateData.secondary.value);
+				return false;
+			}
+			break;
 		case MipsImmediateType::Ext:
 		case MipsImmediateType::Ins:
 			if (immediateData.secondary.value > 32 || immediateData.secondary.value == 0)
@@ -285,6 +292,9 @@ void CMipsInstruction::encodeNormal() const
 
 	switch (immediateData.secondary.type)
 	{
+	case MipsImmediateType::CacheOp:
+		encoding |= immediateData.secondary.value << 16;
+		break;
 	case MipsImmediateType::Ext:
 	case MipsImmediateType::Ins:
 		encoding |= immediateData.secondary.value << 11;

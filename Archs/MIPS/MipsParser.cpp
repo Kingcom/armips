@@ -1311,6 +1311,10 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 		case 'j':	// secondary immediate
 			switch (*encoding++)
 			{
+			case 'c':
+				CHECK(parseImmediate(parser,immediate.secondary.expression));
+				immediate.secondary.type = MipsImmediateType::CacheOp;
+				break;
 			case 'e':
 				CHECK(parseImmediate(parser,immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::Ext;
