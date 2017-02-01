@@ -29,8 +29,8 @@ int getImmediateBits(MipsImmediateType type)
 		return 5;
 	case MipsImmediateType::Immediate7:
 		return 7;
-	case MipsImmediateType::Immediate8:
-		return 8;
+	case MipsImmediateType::Immediate10:
+		return 10;
 	case MipsImmediateType::Immediate16:
 	case MipsImmediateType::ImmediateHalfFloat:
 		return 16;
@@ -270,6 +270,7 @@ void CMipsInstruction::encodeNormal() const
 	switch (immediateData.primary.type)
 	{
 	case MipsImmediateType::Immediate5:
+	case MipsImmediateType::Immediate10:
 	case MipsImmediateType::Immediate20:
 		encoding |= immediateData.primary.value << 6;
 		break;
@@ -279,9 +280,6 @@ void CMipsInstruction::encodeNormal() const
 	case MipsImmediateType::Immediate7:
 	case MipsImmediateType::ImmediateHalfFloat:
 		encoding |= immediateData.primary.value;
-		break;
-	case MipsImmediateType::Immediate8:
-		encoding |= immediateData.primary.value << 16;
 		break;
 	}
 

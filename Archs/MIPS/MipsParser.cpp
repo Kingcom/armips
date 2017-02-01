@@ -1049,8 +1049,8 @@ static bool decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest)
 		case 7:
 			dest = MipsImmediateType::Immediate7;
 			break;
-		case 8:
-			dest = MipsImmediateType::Immediate8;
+		case 10:
+			dest = MipsImmediateType::Immediate10;
 			break;
 		case 16:
 			dest = MipsImmediateType::Immediate16;

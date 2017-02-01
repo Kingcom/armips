@@ -24,7 +24,7 @@ enum class MipsImmediateType
 {
 	None,
 	Immediate5,
-	Immediate8,
+	Immediate10,
 	Immediate16,
 	Immediate20,
 	Immediate26,
