@@ -32,7 +32,7 @@ Specifies the output name for temporary assembly data. Example output:
 ```
 
 #### `-sym <filename>`
-Specifies the output name for symbol data in the sym format. Example output:
+Specifies the output name for symbol data in the sym format. This format is supported by the debuggers in NO$PSX and NO$GBA. Example output:
 ```
 00000000 0
 80000000 .dbl:0010
@@ -42,7 +42,7 @@ Specifies the output name for symbol data in the sym format. Example output:
 ```
 
 #### `-sym2 <filename>`
-Specifies the output name for symbol data in the sym2 format. Example output:
+Specifies the output name for symbol data in the sym2 format. This format is supported by the debuggers in PCSX2 and PPSSPP. Example output:
 ```
 00000000 0
 80000000 .dbl:0010
@@ -54,7 +54,7 @@ Specifies the output name for symbol data in the sym2 format. Example output:
 #### `-erroronwarning`
 Specifies that any warnings shall be treated like errors, preventing assembling. This has the same effect as the `.erroronwarning` directive.
 
-#### `-equ <name> <replacement`
+#### `-equ <name> <replacement>`
 Equivalent to using `name equ replacement` in the assembly code.
 
 #### `-strequ <name> <replacement>`
@@ -485,9 +485,10 @@ Inserts the specified sequence of 32-bit words. Each parameter can be any expres
 ```
 .doubleword value[,...]
 .dd value[,...]
+dcq value[,...]
 ```
 
-Inserts the specified sequence of 64-bit words. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to a string, every character is inserted as a doubleword. Floats are inserted using an integer representation of the double-precision float's encoding.
+Inserts the specified sequence of 64-bit doublewords. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to a string, every character is inserted as a doubleword. Floats are inserted using an integer representation of the double-precision float's encoding.
 
 ### Write floating point numbers
 

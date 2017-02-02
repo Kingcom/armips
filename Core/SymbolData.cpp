@@ -90,6 +90,9 @@ void SymbolData::writeNocashSym()
 			case Data32:
 				entry.text = formatString(L".dbl:%04X",data.size);
 				break;
+			case Data64:
+				entry.text = formatString(L".dbl:%04X",data.size);
+				break;
 			case DataAscii:
 				entry.text = formatString(L".asc:%04X",data.size);
 				break;

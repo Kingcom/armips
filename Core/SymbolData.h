@@ -72,7 +72,7 @@ struct SymDataModuleInfo
 class SymbolData
 {
 public:
-	enum DataType { Data8, Data16, Data32, DataAscii };
+	enum DataType { Data8, Data16, Data32, Data64, DataAscii };
 
 	SymbolData();
 	void clear();
