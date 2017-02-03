@@ -106,16 +106,17 @@ void CDirectiveFile::Encode() const
 void CDirectiveFile::writeTempData(TempData& tempData) const
 {
 	std::wstring str;
+
 	switch (type)
 	{
 	case Type::Open:
-		str = formatString(L".open \"%s\",0x%016X",file->getFileName(),file->getOriginalHeaderSize());
+		str = formatString(L".open \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Create:
-		str = formatString(L".create \"%s\",0x%016X",file->getFileName(),file->getOriginalHeaderSize());
+		str = formatString(L".create \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = formatString(L".open \"%s\",\"%s\",0x%016X",file->getOriginalFileName(),
+		str = formatString(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName(),
 			file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
@@ -190,10 +191,10 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(virtualAddress,formatString(L".orga 0x%016X",position));
+		tempData.writeLine(virtualAddress,formatString(L".orga 0x%08X",position));
 		break;
 	case Virtual:
-		tempData.writeLine(virtualAddress,formatString(L".org 0x%016X",position));
+		tempData.writeLine(virtualAddress,formatString(L".org 0x%08X",position));
 		break;
 	}
 }
@@ -440,7 +441,8 @@ void CDirectiveHeaderSize::Encode() const
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,formatString(L".headersize 0x%016X",headerSize));
+	tempData.writeLine(virtualAddress,formatString(L".headersize %s0x%08X",
+		headerSize < 0 ? L"-" : L"", headerSize < 0 ? -headerSize : headerSize));
 }
 
 
