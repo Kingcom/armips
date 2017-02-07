@@ -15,7 +15,7 @@ void printUsage(std::wstring executableName)
 {
 	Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
 		ARMIPSNAME, ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
-	Logger::printLine(L"Usage: %s <FILE> [optional parameters]", executableName);
+	Logger::printLine(L"Usage: %s [optional parameters] <FILE>", executableName);
 	Logger::printLine(L"");
 	Logger::printLine(L"Optional parameters:");
 	Logger::printLine(L" -temp <TEMP>         Output temporary assembly data to <TEMP> file");
@@ -47,11 +47,16 @@ int wmain(int argc, wchar_t* argv[])
 
 	StringList arguments = getStringListFromArray(argv,argc);
 	size_t argpos = 1;
+	bool readflags = true;
 	while (argpos < arguments.size())
 	{
-		if (arguments[argpos][0] == L'-')
+		if (readflags && arguments[argpos][0] == L'-')
 		{
-			if (arguments[argpos] == L"-temp" && argpos + 1 < arguments.size())
+			if (arguments[argpos] == L"--")
+			{
+				readflags = false;
+				argpos += 1;
+			} else if (arguments[argpos] == L"-temp" && argpos + 1 < arguments.size())
 			{
 				parameters.tempFileName = arguments[argpos + 1];
 				argpos += 2;
@@ -85,7 +90,7 @@ int wmain(int argc, wchar_t* argv[])
 				argpos += 3;
 			} else if (arguments[argpos] == L"-time")
 			{
-				Logger::printError(Logger::Warning,L"-time flag is deprecated");
+				Logger::printError(Logger::Warning, L"-time flag is deprecated");
 				argpos += 1;
 			} else if (arguments[argpos] == L"-root" && argpos + 1 < arguments.size())
 			{
@@ -103,6 +108,7 @@ int wmain(int argc, wchar_t* argv[])
 				parameters.inputFileName = arguments[argpos];
 				argpos++;
 			} else {
+				Logger::printError(Logger::Error, L"Multiple input assembly files specified\n");
 				printUsage(arguments[0]);
 				return 1;
 			}
@@ -112,7 +118,9 @@ int wmain(int argc, wchar_t* argv[])
 	// ensure input file was specified
 	if (parameters.inputFileName == L"")
 	{
-		Logger::printError(Logger::Error, L"Missing input assembly file\n");
+		if(arguments.size() > 1)
+			Logger::printError(Logger::Error, L"Missing input assembly file\n");
+
 		printUsage(arguments[0]);
 		return 1;
 	}
