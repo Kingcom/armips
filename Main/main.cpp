@@ -11,6 +11,25 @@
 #define ARMIPSNAME "ARMIPS"
 #endif
 
+void printUsage(std::wstring executableName)
+{
+	Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
+		ARMIPSNAME, ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
+	Logger::printLine(L"Usage: %s <FILE> [optional parameters]", executableName);
+	Logger::printLine(L"");
+	Logger::printLine(L"Optional parameters:");
+	Logger::printLine(L" -temp <TEMP>         Output temporary assembly data to <TEMP> file");
+	Logger::printLine(L" -sym  <SYM>          Output symbol data in the sym format to <SYM> file");
+	Logger::printLine(L" -sym2 <SYM2>         Output symbol data in the sym2 format to <SYM2> file");
+	Logger::printLine(L" -root <ROOT>         Use <ROOT> as working directory during execution");
+	Logger::printLine(L" -equ  <NAME> <VAL>   Equivalent to \'<NAME> equ <VAL>\' in code");
+	Logger::printLine(L" -strequ <NAME> <VAL> Equivalent to \'<NAME> equ \"<VAL>\"\' in code");
+	Logger::printLine(L" -erroronwarning      Treat all warnings like errors");
+	Logger::printLine(L"");
+	Logger::printLine(L"File arguments:");
+	Logger::printLine(L" <FILE>               Main assembly code file");
+}
+
 int wmain(int argc, wchar_t* argv[])
 {
 	std::setlocale(LC_CTYPE,"");
@@ -27,74 +46,85 @@ int wmain(int argc, wchar_t* argv[])
 #endif
 
 	StringList arguments = getStringListFromArray(argv,argc);
-
-	if (arguments.size() < 2)
+	size_t argpos = 1;
+	while (argpos < arguments.size())
 	{
-		Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
-			ARMIPSNAME,ARMIPS_VERSION_MAJOR,ARMIPS_VERSION_MINOR,ARMIPS_VERSION_REVISION,__DATE__,__TIME__);
-		Logger::printLine(L"Usage: %s file.asm [-temp temp.txt] [-sym symfile.sym]", argv[0]);
+		if (arguments[argpos][0] == L'-')
+		{
+			if (arguments[argpos] == L"-temp" && argpos + 1 < arguments.size())
+			{
+				parameters.tempFileName = arguments[argpos + 1];
+				argpos += 2;
+			} else if (arguments[argpos] == L"-sym" && argpos + 1 < arguments.size())
+			{
+				parameters.symFileName = arguments[argpos + 1];
+				parameters.symFileVersion = 1;
+				argpos += 2;
+			} else if (arguments[argpos] == L"-sym2" && argpos + 1 < arguments.size())
+			{
+				parameters.symFileName = arguments[argpos + 1];
+				parameters.symFileVersion = 2;
+				argpos += 2;
+			} else if (arguments[argpos] == L"-erroronwarning")
+			{
+				parameters.errorOnWarning = true;
+				argpos += 1;
+			} else if (arguments[argpos] == L"-equ" && argpos + 2 < arguments.size())
+			{
+				EquationDefinition def;
+				def.name = arguments[argpos + 1];
+				def.value = arguments[argpos + 2];
+				parameters.equList.push_back(def);
+				argpos += 3;
+			} else if (arguments[argpos] == L"-strequ" && argpos + 2 < arguments.size())
+			{
+				EquationDefinition def;
+				def.name = arguments[argpos + 1];
+				def.value = formatString(L"\"%s\"", arguments[argpos + 2]);
+				parameters.equList.push_back(def);
+				argpos += 3;
+			} else if (arguments[argpos] == L"-time")
+			{
+				Logger::printError(Logger::Warning,L"-time flag is deprecated");
+				argpos += 1;
+			} else if (arguments[argpos] == L"-root" && argpos + 1 < arguments.size())
+			{
+				changeDirectory(arguments[argpos + 1]);
+				argpos += 2;
+			} else {
+				Logger::printError(Logger::Error, L"Invalid command line argument '%s'\n", arguments[argpos]);
+				printUsage(arguments[0]);
+				return 1;
+			}
+		} else {
+			// only allow one input filename
+			if (parameters.inputFileName == L"")
+			{
+				parameters.inputFileName = arguments[argpos];
+				argpos++;
+			} else {
+				printUsage(arguments[0]);
+				return 1;
+			}
+		}
+	}
+
+	// ensure input file was specified
+	if (parameters.inputFileName == L"")
+	{
+		Logger::printError(Logger::Error, L"Missing input assembly file\n");
+		printUsage(arguments[0]);
 		return 1;
 	}
 
-	parameters.inputFileName = arguments[1];
-
-	// turn it into an absolute path
+	// turn input filename into an absolute path
 	if (isAbsolutePath(parameters.inputFileName) == false)
-		parameters.inputFileName = formatString(L"%s/%s",getCurrentDirectory(),arguments[1]);
+		parameters.inputFileName = formatString(L"%s/%s", getCurrentDirectory(), parameters.inputFileName);
 
 	if (fileExists(parameters.inputFileName) == false)
 	{
-		Logger::printLine(L"File %S not found\n",arguments[1]);
+		Logger::printError(Logger::Error, L"File '%s' not found\n", parameters.inputFileName);
 		return 1;
-	}
-
-	size_t argpos = 2;
-	while (argpos < arguments.size())
-	{
-		if (arguments[argpos] == L"-temp")
-		{
-			parameters.tempFileName = arguments[argpos+1];
-			argpos += 2;
-		} else if (arguments[argpos] == L"-sym")
-		{
-			parameters.symFileName = arguments[argpos+1];
-			parameters.symFileVersion = 1;
-			argpos += 2;
-		} else if (arguments[argpos] == L"-sym2")
-		{
-			parameters.symFileName = arguments[argpos+1];
-			parameters.symFileVersion = 2;
-			argpos += 2;
-		} else if (arguments[argpos] == L"-erroronwarning")
-		{
-			parameters.errorOnWarning = true;
-			argpos += 1;
-		} else if (arguments[argpos] == L"-equ")
-		{
-			EquationDefinition def;
-			def.name = arguments[argpos + 1];
-			def.value = arguments[argpos + 2];
-			parameters.equList.push_back(def);
-			argpos += 3;
-		} else if (arguments[argpos] == L"-strequ")
-		{
-			EquationDefinition def;
-			def.name = arguments[argpos + 1];
-			def.value = formatString(L"\"%s\"",arguments[argpos + 2]);
-			parameters.equList.push_back(def);
-			argpos += 3;
-		} else if (arguments[argpos] == L"-time")
-		{
-			Logger::printError(Logger::Warning,L"-time flag is deprecated");
-			argpos += 1;
-		} else if (arguments[argpos] == L"-root")
-		{
-			changeDirectory(arguments[argpos + 1]);
-			argpos += 2;
-		} else {
-			Logger::printLine(L"Invalid parameter %S\n",arguments[argpos]);
-			return 1;
-		}
 	}
 
 	bool result = runArmips(parameters);
