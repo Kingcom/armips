@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(armips) 
 
+option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
+
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wno-uninitialized")
 endif()
 
 if(MSVC)
@@ -10,6 +12,10 @@ if(MSVC)
 elseif(MINGW)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
+
+if(ARMIPS_REGEXP)
+	add_definitions(-DARMIPS_REGEXP=1)
 endif()
 
 include_directories(.)

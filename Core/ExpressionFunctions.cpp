@@ -2,7 +2,9 @@
 #include "ExpressionFunctions.h"
 #include "Misc.h"
 #include "Common.h"
+#if ARMIPS_REGEXP
 #include <regex>
+#endif
 #include "../Archs/ARM/Arm.h"
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, u64& dest,
@@ -281,6 +283,7 @@ ExpressionValue expFuncSubstr(const std::wstring& funcName, const std::vector<Ex
 	return ExpressionValue(source->substr((size_t)start,(size_t)count));
 }
 
+#if ARMIPS_REGEXP
 ExpressionValue expFuncRegExMatch(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* source;
@@ -361,6 +364,7 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 	}
 #endif
 }
+#endif
 
 ExpressionValue expFuncFind(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
@@ -512,9 +516,11 @@ const ExpressionFunctionMap expressionFunctions = {
 
 	{ L"strlen",		{ &expFuncStrlen,		1,	1,	true } },
 	{ L"substr",		{ &expFuncSubstr,		3,	3,	true } },
+#if ARMIPS_REGEXP
 	{ L"regex_match",	{ &expFuncRegExMatch,	2,	2,	true } },
 	{ L"regex_search",	{ &expFuncRegExSearch,	2,	2,	true } },
 	{ L"regex_extract",	{ &expFuncRegExExtract,	2,	3,	true } },
+#endif
 	{ L"find",			{ &expFuncFind,			2,	3,	true } },
 	{ L"rfind",			{ &expFuncRFind,		2,	3,	true } },
 
