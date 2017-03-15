@@ -336,7 +336,7 @@ bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos)
 bool isAbsolutePath(const std::wstring& path)
 {
 #ifdef _WIN32
-	return path.size() > 2 && path[1] == ':';
+	return path.size() > 2 && (path[1] == ':' || (path[0] == '\\' && path[1] == '\\'));
 #else
 	return path.size() >= 1 && path[0] == '/';
 #endif
