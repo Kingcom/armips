@@ -23,9 +23,10 @@ class CDirectiveData: public CAssemblerCommand
 public:
 	CDirectiveData();
 	~CDirectiveData();
-	void setNormal(std::vector<Expression>& entries, size_t unitSize, bool ascii);
+	void setNormal(std::vector<Expression>& entries, size_t unitSize);
 	void setFloat(std::vector<Expression>& entries);
 	void setDouble(std::vector<Expression>& entries);
+	void setAscii(std::vector<Expression>& entries, bool terminate);
 	void setSjis(std::vector<Expression>& entries, bool terminate);
 	void setCustom(std::vector<Expression>& entries, bool terminate);
 	virtual bool Validate();
