@@ -45,15 +45,12 @@ CDirectiveData::~CDirectiveData()
 
 }
 
-void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize, bool ascii)
+void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize)
 {
 	switch (unitSize)
 	{
 	case 1:
-		if (ascii)
-			this->mode = EncodingMode::Ascii;
-		else
-			this->mode = EncodingMode::U8;
+		this->mode = EncodingMode::U8;
 		break;
 	case 2:
 		this->mode = EncodingMode::U16;
@@ -86,6 +83,13 @@ void CDirectiveData::setDouble(std::vector<Expression>& entries)
 	this->mode = EncodingMode::Double;
 	this->entries = entries;
 	this->writeTermination = false;
+}
+
+void CDirectiveData::setAscii(std::vector<Expression>& entries, bool terminate)
+{
+	this->mode = EncodingMode::Ascii;
+	this->entries = entries;
+	this->writeTermination = terminate;
 }
 
 void CDirectiveData::setSjis(std::vector<Expression>& entries, bool terminate)
@@ -286,6 +290,11 @@ void CDirectiveData::encodeNormal()
 		} else {
 			Logger::queueError(Logger::Error,L"Invalid expression type");
 		}
+	}
+
+	if (writeTermination)
+	{
+		normalData.push_back((u64) 0);
 	}
 }
 

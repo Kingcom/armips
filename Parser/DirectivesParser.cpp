@@ -340,19 +340,19 @@ CAssemblerCommand* parseDirectiveData(Parser& parser, int flags)
 	switch (flags & DIRECTIVE_USERMASK)
 	{
 	case DIRECTIVE_DATA_8:
-		data->setNormal(list,1,false);
+		data->setNormal(list,1);
 		break;
 	case DIRECTIVE_DATA_16:
-		data->setNormal(list,2,false);
+		data->setNormal(list,2);
 		break;
 	case DIRECTIVE_DATA_32:
-		data->setNormal(list,4,false);
+		data->setNormal(list,4);
 		break;
 	case DIRECTIVE_DATA_64:
-		data->setNormal(list,8,false);
+		data->setNormal(list,8);
 		break;
 	case DIRECTIVE_DATA_ASCII:
-		data->setNormal(list,1,true);
+		data->setAscii(list,terminate);
 		break;
 	case DIRECTIVE_DATA_SJIS:
 		data->setSjis(list,terminate);
@@ -697,15 +697,16 @@ const DirectiveMap directives = {
 	{ L"dcw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16 } },
 	{ L"dcd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32 } },
 	{ L"dcq",				{ &parseDirectiveData,				DIRECTIVE_DATA_64 } },
+	{ L".float",			{ &parseDirectiveData,				DIRECTIVE_DATA_FLOAT } },
+	{ L".double",			{ &parseDirectiveData,				DIRECTIVE_DATA_DOUBLE } },
 	{ L".ascii",			{ &parseDirectiveData,				DIRECTIVE_DATA_ASCII } },
+	{ L".asciiz",			{ &parseDirectiveData,				DIRECTIVE_DATA_ASCII|DIRECTIVE_DATA_TERMINATION } },
 	{ L".string",			{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
 	{ L".str",				{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
 	{ L".stringn",			{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM } },
 	{ L".strn",				{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM } },
 	{ L".sjis",				{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS|DIRECTIVE_DATA_TERMINATION } },
 	{ L".sjisn",			{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS } },
-	{ L".float",			{ &parseDirectiveData,				DIRECTIVE_DATA_FLOAT } },
-	{ L".double",			{ &parseDirectiveData,				DIRECTIVE_DATA_DOUBLE } },
 
 	{ L".psx",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PSX } },
 	{ L".ps2",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PS2 } },

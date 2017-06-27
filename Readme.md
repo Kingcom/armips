@@ -415,10 +415,11 @@ Sets the header size to the given value which is difference between the first by
 Opens the file called `FileName` to assemble its content. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. You can include other files up to a depth level of 64. This limit was added to prevent the assembler from getting stuck in an infinite loop due to two files including each other recursively. If the included file has an Unicode Byte Order Mark then the encoding will be automatically detected. If no Byte Order Mark is present it will default to UTF-8. This can be overwritten by manually specifying the file encoding as a second parameter.
 
 The following values  are supported:
-* SJIS, Shift-JIS
-* UTF8, UTF-8
-* UTF16, UTF-16, UTF16-BE, UTF-16-BE
-* ASCII
+* `SJIS`/`Shift-JIS`
+* `UTF8`/`UTF-8`
+* `UTF16`/`UTF-16`
+* `UTF16-BE`/`UTF-16-BE`
+* `ASCII`
 
 ## Text and data directives
 
@@ -454,10 +455,11 @@ Inserts the file specified by `FileName` into the currently opened output file. 
 .byte value[,...]
 .db value[,...]
 .ascii value[,...]
+.asciiz value[,...]
 dcb value[,...]
 ```
 
-Inserts the specified sequence of bytes. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 8 bits are inserted. If it evaluates to a string, every character is inserted as a byte.
+Inserts the specified sequence of bytes. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 8 bits are inserted. If it evaluates to a string, every character is inserted as a byte. `.asciiz` inserts a null terminator after the string, while the others omit it.
 
 ### Write halfwords
 
@@ -577,7 +579,7 @@ Ends the last open if or else block.
 .definelabel Label,value
 ```
 
-Defines Label with a given value, creating a symbol for it. This can be used similar to `equ`, but symbols can be used before labels are defined and can be used in conjunction with the `.ifdef/.ifndef` conditionals. These can also be useful for declaring symbols for existing code and data when inserting new code.
+Defines `Label` with a given value, creating a symbol for it. This can be used similar to `equ`, but symbols can be used before labels are defined and can be used in conjunction with the `.ifdef/.ifndef` conditionals. These can also be useful for declaring symbols for existing code and data when inserting new code.
 
 ### Areas
 
@@ -887,7 +889,7 @@ Each call of the macro will increase the counter.
     * fixed break/syscall MIPS opcodes
     * added check if a MIPS instruction is valid inside a delay slot
     * fixed and extended base detection
-    * added "." dummy label to the math parser to get the current memory address
+    * added `.` dummy label to the math parser to get the current memory address
     * added `dcb`/`dcw`/`dcd` directives
 * Version 0.5b
     * Initial release
