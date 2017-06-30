@@ -207,23 +207,54 @@ inline bool isContinuation(const std::wstring& text, size_t pos)
 	return text[pos] == '\\';
 }
 
+inline bool isBlockComment(const std::wstring& text, size_t pos){
+	if (pos+1 < text.size() && text[pos+0] == '/' && text[pos+1] == '*')
+		return true;
+
+	return false;
+}
+
+inline bool isBlockCommentEnd(const std::wstring& text, size_t pos){
+	if (pos+1 < text.size() && text[pos+0] == '*' && text[pos+1] == '/')
+		return true;
+
+	return false;
+}
 
 void FileTokenizer::skipWhitespace()
 {
-	while (isWhitespace(currentLine,linePos) || isComment(currentLine,linePos))
+	while (true)
 	{
-		// skip whitespace
-		while (isWhitespace(currentLine,linePos))
+		if (isWhitespace(currentLine,linePos))
 		{
-			linePos++;
-		}
-
-		// skip comments
-		if (isComment(currentLine,linePos))
+			do { linePos++; } while (isWhitespace(currentLine,linePos));
+		} else if (isComment(currentLine,linePos))
+		{
 			linePos = currentLine.size();
-
-		if(linePos >= currentLine.size())
+		} else if (isBlockComment(currentLine,linePos))
+		{
+			linePos += 2;
+			while(!isBlockCommentEnd(currentLine,linePos))
+			{
+				linePos++;
+				if (linePos >= currentLine.size())
+				{
+					if (isInputAtEnd())
+					{
+						createToken(TokenType::Invalid,linePos,L"Unexpected end of file in block comment");
+						addToken(token);
+						return;
+					}
+					currentLine = input->readLine();
+					linePos = 0;
+					lineNumber++;
+				}
+			}
+			linePos += 2;
+		} else
+		{
 			break;
+		}
 	}
 }
 
@@ -652,11 +683,12 @@ bool FileTokenizer::init(TextFile* input)
 			bool addSeparator = true;
 
 			skipWhitespace();
-			if(isContinuation(currentLine, linePos))
+			if (isContinuation(currentLine, linePos))
 			{
 				linePos++;
 				skipWhitespace();
-				if(linePos < currentLine.size()){
+				if (linePos < currentLine.size())
+				{
 					createToken(TokenType::Invalid,0,
 						L"Unexpected character after line continuation character");
 					addToken(token);
@@ -670,7 +702,7 @@ bool FileTokenizer::init(TextFile* input)
 
 			if (linePos >= currentLine.size())
 			{
-				if(addSeparator) //TODO: enable separator after it works with parser
+				if (addSeparator)
 				{
 					createToken(TokenType::Separator,0);
 					addToken(token);
