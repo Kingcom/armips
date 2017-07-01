@@ -118,6 +118,7 @@ Unlike other assemblers, you don't specify the input/output file as a command li
 
 ### Comments
 Both `;` and `//` style single-line comments are supported.
+`/* */` style block comments are also accepted.
 
 ### Statement separator
 Statements are separated by newlines or `::` can be used between statements on the same line. For example, to insert four `nop` instructions, this could be written on one line:
