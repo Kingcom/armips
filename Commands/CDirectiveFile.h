@@ -79,13 +79,26 @@ public:
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 private:
-
 	Mode mode;
 	Expression valueExpression;
 	Expression fillExpression;
 	u64 value;
 	u64 finalSize;
 	u8 fillByte;
+	int64_t virtualAddress;
+};
+
+class CDirectiveSkip: public CAssemblerCommand
+{
+public:
+	CDirectiveSkip(Expression& value);
+	virtual bool Validate();
+	virtual void Encode() const;
+	virtual void writeTempData(TempData& tempData) const;
+	virtual void writeSymData(SymbolData& symData) const { };
+private:
+	Expression expression;
+	u64 value;
 	int64_t virtualAddress;
 };
 
