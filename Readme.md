@@ -345,7 +345,7 @@ These commands tell the assembler to do various things like opening the output f
 
 ## 5.1 General directives
 
-### Setting the architecture
+### Set the architecture
 
 These directives can be used to set the architecture that the following assembly code should be parsed and output for. The architecture can be changed at any time without affecting the preceding code.
 
@@ -362,7 +362,7 @@ These directives can be used to set the architecture that the following assembly
 | `.arm.big` | - | ARM | Output in big endian |
 | `.arm.little` | - | ARM | Output in little endian |
 
-### Opening a generic file
+### Open a generic file
 
 ```
 .open FileName,Offset
@@ -372,7 +372,7 @@ These directives can be used to set the architecture that the following assembly
 Opens the specified file for output. If two file names are specified, then the assembler will copy the file specified by the file name to the second path. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. `Offset` specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
 Only the changes specified by the assembly code will be inserted, the rest of the file remains untouched.
 
-### Creating a new file
+### Create a new file
 
 ```
 .create FileName,Offset
@@ -381,7 +381,7 @@ Only the changes specified by the assembly code will be inserted, the rest of th
 
 Creates the specified file for output. If the file already exists, it will be overwritten. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. `Offset` specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
 
-### Closing a file
+### Close a file
 
 ```
 .close
@@ -390,7 +390,7 @@ Creates the specified file for output. If the file already exists, it will be ov
 
 Closes the currently opened output file.
 
-### Setting the output position
+### Set the output position
 
 ```
 .org RamAddress
@@ -399,15 +399,15 @@ Closes the currently opened output file.
 
 Sets the output pointer to the specified address. `.org` specifies a memory address, which is automatically converted to the file address for the current output file. `.orga` directly specifies the absolute file address.
 
-### Changing the header size
+### Change the header size
 
 ```
 .headersize Offset
 ```
 
-Sets the header size to the given value which is difference between the first byte of the file and its position in memory. This is used to calculate all addresses up until the next `.headersize` or `.open`/`.create` directive. The current memory address will be updated, but the absolute file offset will remain the same. The header size can be negative so long as the resulting memory address remains positive.
+Sets the header size to the given value which is the difference between the file position of a byte and its address in memory. This is used to calculate all addresses up until the next `.headersize` or `.open`/`.create` directive. The current memory address will be updated, but the absolute file offset will remain the same. The header size can be negative so long as the resulting memory address remains positive.
 
-### Including another assembly file
+### Include another assembly file
 
 ```
 .include FileName[,encoding]
@@ -424,7 +424,7 @@ The following values  are supported:
 
 ## Text and data directives
 
-### Aligning the output position
+### Align the output position
 
 ```
 .align num
@@ -432,7 +432,7 @@ The following values  are supported:
 
 Writes zeros into the output file until the output position is a multiple of `num`. `num` has to be a power of two.
 
-### Filling space with a value
+### Fill space with a value
 
 ```
 .fill length[,value]
@@ -441,7 +441,15 @@ defs length[,value]
 
 Inserts `length` amount of bytes of `value`. If `value` isn't specified, zeros are inserted. Only the lowest 8 bits of `value` are inserted.
 
-### Including a binary file
+### Skip bytes
+
+```
+.skip length
+```
+
+Skips `length` amount of bytes without overwriting them.
+
+### Include a binary file
 
 ```
 .incbin FileName[,start[,size]]
@@ -545,7 +553,7 @@ Inserts the given string using the Shift-JIS encoding. `.sjis` inserts a null by
 
 ## Conditional directives
 
-### Beginning a conditional block
+### Begin a conditional block
 
 ```
 .if cond
@@ -566,7 +574,7 @@ The content of a conditional block will only be used if the condition is met. In
 
 The else block is used if the condition of the condition of the if block was not met. `.else` unconditionally inserts the content of the else block, while the others start a new if block and work as described before.
 
-### Ending a conditional block
+### End a conditional block
 
 ```
 .endif
@@ -625,7 +633,7 @@ Currently this is only supported for the PSP architecture, and only for non-relo
 
 ## 5.3 ARM Directives
 
-### Changing instruction set
+### Change instruction set
 
 ```
 .arm

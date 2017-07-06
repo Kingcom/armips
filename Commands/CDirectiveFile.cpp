@@ -400,6 +400,43 @@ void CDirectiveAlignFill::writeSymData(SymbolData& symData) const
 }
 
 //
+// CDirectiveSkip
+//
+
+CDirectiveSkip::CDirectiveSkip(Expression& expression)
+	: expression(expression) {}
+
+bool CDirectiveSkip::Validate()
+{
+	virtualAddress = g_fileManager->getVirtualAddress();
+
+	if (expression.isLoaded())
+	{
+		if (expression.evaluateInteger(value) == false)
+		{
+			Logger::queueError(Logger::FatalError,L"Invalid skip length");
+			return false;
+		}
+	}
+
+	Arch->NextSection();
+	g_fileManager->advanceMemory(value);
+
+	return false;
+}
+
+void CDirectiveSkip::Encode() const
+{
+	Arch->NextSection();
+	g_fileManager->advanceMemory(value);
+}
+
+void CDirectiveSkip::writeTempData(TempData& tempData) const
+{
+	tempData.writeLine(virtualAddress,formatString(L".skip 0x%08X",value));
+}
+
+//
 // CDirectiveHeaderSize
 //
 

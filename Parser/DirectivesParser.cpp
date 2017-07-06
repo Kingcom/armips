@@ -146,6 +146,15 @@ CAssemblerCommand* parseDirectiveAlignFill(Parser& parser, int flags)
 		return new CDirectiveAlignFill(list[0],mode);
 }
 
+CAssemblerCommand* parseDirectiveSkip(Parser& parser, int flags)
+{
+	std::vector<Expression> list;
+	if (parser.parseExpressionList(list,1,1) == false)
+		return nullptr;
+
+	return new CDirectiveSkip(list[0]);
+}
+
 CAssemblerCommand* parseDirectiveHeaderSize(Parser& parser, int flags)
 {
 	Expression exp = parser.parseExpression();
@@ -662,10 +671,11 @@ const DirectiveMap directives = {
 	{ L"org",				{ &parseDirectivePosition,			DIRECTIVE_POS_VIRTUAL } },
 	{ L".orga",				{ &parseDirectivePosition,			DIRECTIVE_POS_PHYSICAL } },
 	{ L"orga",				{ &parseDirectivePosition,			DIRECTIVE_POS_PHYSICAL } },
+	{ L".headersize",		{ &parseDirectiveHeaderSize,		0 } },
 	{ L".align",			{ &parseDirectiveAlignFill,			DIRECTIVE_FILE_ALIGN } },
 	{ L".fill",				{ &parseDirectiveAlignFill,			DIRECTIVE_FILE_FILL } },
 	{ L"defs",				{ &parseDirectiveAlignFill,			DIRECTIVE_FILE_FILL } },
-	{ L".headersize",		{ &parseDirectiveHeaderSize,		0 } },
+	{ L".skip",				{ &parseDirectiveSkip,				0 } },
 
 	{ L".if",				{ &parseDirectiveConditional,		DIRECTIVE_COND_IF } },
 	{ L".ifdef",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFDEF } },
