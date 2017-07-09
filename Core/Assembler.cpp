@@ -192,7 +192,8 @@ bool runArmips(ArmipsArguments& arguments)
 	bool result = !Logger::hasError();
 	if (result == true && content != nullptr)
 		result = encodeAssembly(content);
-	else if (g_fileManager->hasOpenFile())
+	
+	if (g_fileManager->hasOpenFile())
 	{
 		if (!Global.memoryMode)
 			Logger::printError(Logger::Warning,L"File not closed");

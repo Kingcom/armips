@@ -258,7 +258,6 @@ bool FileManager::openFile(AssemblerFile* file, bool onlyCheck)
 void FileManager::addFile(AssemblerFile* file)
 {
 	files.push_back(file);
-	activeFile = file;
 }
 
 void FileManager::closeFile()
