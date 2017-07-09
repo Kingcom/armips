@@ -633,7 +633,16 @@ void Parser::updateFileInfo()
 		if (entries[index].virtualFile == false && entries[index].fileNum != -1)
 		{
 			Global.FileInfo.FileNum = entries[index].fileNum;
-			Global.FileInfo.LineNumber = (int)entries[index].tokenizer->peekToken().line;
+
+			// if it's not the topmost file, then the command to instantiate the
+			// following files was already parsed -> take the previous command's line
+			if (index != entries.size() - 1)
+				Global.FileInfo.LineNumber = entries[index].previousCommandLine;
+			else
+			{
+				Global.FileInfo.LineNumber = (int)entries[index].tokenizer->peekToken().line;
+				entries[index].previousCommandLine = Global.FileInfo.LineNumber;
+			}
 			return;
 		}
 	}

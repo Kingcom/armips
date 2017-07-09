@@ -82,6 +82,7 @@ protected:
 		Tokenizer* tokenizer;
 		bool virtualFile;
 		int fileNum;
+		int previousCommandLine;
 	};
 
 	std::vector<FileEntry> entries;
