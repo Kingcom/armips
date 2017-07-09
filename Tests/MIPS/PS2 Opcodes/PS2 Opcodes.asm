@@ -126,7 +126,7 @@ label:
 
 	syscall	1
 	break	1
-	cache	a1,2(a3)
+	cache	5,2(a3)
 	bltz	a1,label
 	nop
 	bgez	a1,label
