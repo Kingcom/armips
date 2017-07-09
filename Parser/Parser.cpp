@@ -246,6 +246,12 @@ bool Parser::matchToken(TokenType type, bool optional)
 
 CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name)
 {
+	if (entries.size() >= 150)
+	{
+		Logger::queueError(Logger::Error, L"Max include/recursion depth reached");
+		return nullptr;
+	}
+
 	FileEntry entry;
 	entry.tokenizer = tokenizer;
 	entry.virtualFile = virtualFile;
