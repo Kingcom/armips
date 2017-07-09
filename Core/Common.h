@@ -29,8 +29,6 @@ typedef struct {
 	bool nocash;
 	bool relativeInclude;
 	int DebugMessages;
-	int IncludeNestingLevel;
-	int MacroNestingLevel;
 	int validationPasses;
 	bool memoryMode;
 	AssemblerFile* memoryFile;

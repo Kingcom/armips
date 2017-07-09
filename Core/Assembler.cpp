@@ -119,8 +119,6 @@ bool runArmips(ArmipsArguments& arguments)
 	Global.Revalidate = true;
 	Global.Section = 0;
 	Global.nocash = false;
-	Global.IncludeNestingLevel = 0;
-	Global.MacroNestingLevel = 0;
 	Global.FileInfo.FileCount = 0;
 	Global.FileInfo.TotalLineCount = 0;
 	Global.DebugMessages = 0;
