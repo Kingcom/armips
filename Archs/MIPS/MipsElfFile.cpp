@@ -23,14 +23,14 @@ void MipsElfFile::close()
 		save();
 }
 
-void MipsElfFile::beginSymData()
+void MipsElfFile::beginSymData(SymbolData& symData)
 {
-	Global.symData.startModule(this);
+	symData.startModule(this);
 }
 
-void MipsElfFile::endSymData()
+void MipsElfFile::endSymData(SymbolData& symData)
 {
-	Global.symData.endModule(this);
+	symData.endModule(this);
 }
 
 int64_t MipsElfFile::getVirtualAddress()
@@ -318,5 +318,5 @@ void DirectiveLoadMipsElf::writeTempData(TempData& tempData) const
 
 void DirectiveLoadMipsElf::writeSymData(SymbolData& symData) const
 {
-	file->beginSymData();
+	file->beginSymData(symData);
 }

@@ -15,7 +15,7 @@ void AddFileName(const std::wstring& FileName)
 	Global.FileInfo.LineNumber = 0;
 }
 
-bool encodeAssembly(CAssemblerCommand* content)
+bool encodeAssembly(CAssemblerCommand* content, SymbolData& symData, TempData& tempData)
 {
 	bool Revalidate;
 	
@@ -71,18 +71,18 @@ bool encodeAssembly(CAssemblerCommand* content)
 	if (Global.memoryMode)
 		g_fileManager->openFile(Global.memoryFile,false);
 
-	auto writeTempData = [=]()
+	auto writeTempData = [&]()
 	{
-		Global.tempData.start();
-		if (Global.tempData.isOpen())
-			content->writeTempData(Global.tempData);
-		Global.tempData.end();
+		tempData.start();
+		if (tempData.isOpen())
+			content->writeTempData(tempData);
+		tempData.end();
 	};
 
-	auto writeSymData = [=]()
+	auto writeSymData = [&]()
 	{
-		content->writeSymData(Global.symData);
-		Global.symData.write();
+		content->writeSymData(symData);
+		symData.write();
 	};
 
 	// writeTempData, writeSymData and encode all access the same
@@ -129,10 +129,8 @@ bool runArmips(ArmipsArguments& arguments)
 
 	Tokenizer::clearEquValues();
 	Logger::clear();
-	Global.symData.clear();
 	Global.Table.clear();
 	Global.symbolTable.clear();
-	Global.tempData.clear();
 
 	Global.FileInfo.FileList.clear();
 	Global.FileInfo.FileCount = 0;
@@ -144,15 +142,17 @@ bool runArmips(ArmipsArguments& arguments)
 
 	// process arguments
 	Parser parser;
-
+	SymbolData symData;
+	TempData tempData;
+	
 	Logger::setSilent(arguments.silent);
 	Logger::setErrorOnWarning(arguments.errorOnWarning);
 
 	if (!arguments.symFileName.empty())
-		Global.symData.setNocashSymFileName(arguments.symFileName,arguments.symFileVersion);
+		symData.setNocashSymFileName(arguments.symFileName,arguments.symFileVersion);
 
 	if (!arguments.tempFileName.empty())
-		Global.tempData.setFileName(arguments.tempFileName);
+		tempData.setFileName(arguments.tempFileName);
 
 	Token token;
 	for (size_t i = 0; i < arguments.equList.size(); i++)
@@ -189,7 +189,7 @@ bool runArmips(ArmipsArguments& arguments)
 
 	bool result = !Logger::hasError();
 	if (result == true && content != nullptr)
-		result = encodeAssembly(content);
+		result = encodeAssembly(content, symData, tempData);
 	
 	if (g_fileManager->hasOpenFile())
 	{

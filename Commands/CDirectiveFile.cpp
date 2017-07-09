@@ -121,11 +121,11 @@ void CDirectiveFile::writeSymData(SymbolData& symData) const
 	case Type::Open:
 	case Type::Create:
 	case Type::Copy:
-		file->beginSymData();
+		file->beginSymData(symData);
 		break;
 	case Type::Close:
 		if (closeFile)
-			closeFile->endSymData();
+			closeFile->endSymData(symData);
 		break;
 	}
 }

@@ -18,8 +18,8 @@ public:
 	virtual bool seekVirtual(int64_t virtualAddress);
 	virtual bool seekPhysical(int64_t physicalAddress);
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
-	virtual void beginSymData();
-	virtual void endSymData();
+	virtual void beginSymData(SymbolData& symData);
+	virtual void endSymData(SymbolData& symData);
 	virtual const std::wstring& getFileName() { return fileName; };
 
 	bool load(const std::wstring& fileName, const std::wstring& outputFileName);

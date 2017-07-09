@@ -19,8 +19,6 @@ typedef struct {
 
 typedef struct {
 	tFileInfo FileInfo;
-	TempData tempData;
-	SymbolData symData;
 	SymbolTable symbolTable;
 	EncodingTable Table;
 	int Section;

@@ -449,8 +449,8 @@ void ElfRelocator::writeSymbols(SymbolData& symData) const
 				symData.addData(sym.relocatedAddress,sym.size,SymbolData::Data8);
 				break;
 			case STT_FUNC:
-				Global.symData.startFunction(sym.relocatedAddress);
-				Global.symData.endFunction(sym.relocatedAddress+sym.size);
+				symData.startFunction(sym.relocatedAddress);
+				symData.endFunction(sym.relocatedAddress+sym.size);
 				break;
 			}
 		}

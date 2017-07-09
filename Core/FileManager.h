@@ -21,8 +21,8 @@ public:
 	virtual bool seekPhysical(int64_t physicalAddress) = 0;
 	virtual bool getModuleInfo(SymDataModuleInfo& info) { return false; };
 	virtual bool hasFixedVirtualAddress() { return false; };
-	virtual void beginSymData() { };
-	virtual void endSymData() { };
+	virtual void beginSymData(SymbolData& symData) { };
+	virtual void endSymData(SymbolData& symData) { };
 	virtual const std::wstring& getFileName() = 0;
 };
 
