@@ -528,6 +528,10 @@ CAssemblerCommand* Parser::parseMacroCall()
 		return nullptr;
 	}
 
+	// skip macro instantiation in known false blocks
+	if (!isInsideUnknownBlock() && !isInsideTrueBlock())
+		return new DummyCommand();
+
 	// a macro is fully parsed once when it's loaded
 	// to gather all labels. it's not necessary to
 	// instantiate other macros at that time
