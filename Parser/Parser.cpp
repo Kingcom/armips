@@ -395,23 +395,13 @@ bool Parser::checkMacroDefinition()
 	std::vector<Expression> parameters;
 	if (parseExpressionList(parameters,1,-1) == false)
 		return false;
-	
-	// load name
-	std::wstring macroName;
-	if (parameters[0].evaluateIdentifier(macroName) == false)
-		return false;
 
-	// duplicate check the macro
-	ParserMacro &macro = macros[macroName];
-	if (macro.name.length() != 0)
-	{
-		printError(first,L"Macro \"%s\" already defined",macro.name);
-		return false;
-	}
-
-	// and register it
-	macro.name = macroName;
+	ParserMacro macro;
 	macro.counter = 0;
+
+	// load name
+	if (parameters[0].evaluateIdentifier(macro.name) == false)
+		return false;
 
 	// load parameters
 	for (size_t i = 1; i < parameters.size(); i++)
@@ -443,6 +433,25 @@ bool Parser::checkMacroDefinition()
 		}
 	}
 
+	// Macros have to be defined at parse time, so they can't be defined in blocks
+	// with non-trivial conditions
+	if (isInsideUnknownBlock())
+	{
+		printError(first, L"Macro definition not allowed inside of block with non-trivial condition");
+		return false;
+	}
+
+	// if we are in a known false block, don't define the macro
+	if (!isInsideTrueBlock())
+		return true;
+	
+	// duplicate check
+	if (macros.find(macro.name) != macros.end())
+	{
+		printError(first, L"Macro \"%s\" already defined", macro.name);
+		return false;
+	}
+
 	// no .endmacro, not valid
 	if (valid == false)
 		return true;
@@ -457,6 +466,7 @@ bool Parser::checkMacroDefinition()
 		return false;
 	}
 
+	macros[macro.name] = macro;
 	return true;
 }
 
