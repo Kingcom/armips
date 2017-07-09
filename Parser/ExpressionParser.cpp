@@ -461,7 +461,7 @@ static ExpressionInternal* expression(Tokenizer& tokenizer)
 	return conditionalExpression(tokenizer);
 }
 
-Expression parseExpression(Tokenizer& tokenizer)
+Expression parseExpression(Tokenizer& tokenizer, bool inUnknownOrFalseBlock)
 {
 	TokenizerPosition pos = tokenizer.getPosition();
 
@@ -472,6 +472,6 @@ Expression parseExpression(Tokenizer& tokenizer)
 		tokenizer.setPosition(pos);
 
 	Expression result;
-	result.setExpression(exp);
+	result.setExpression(exp, inUnknownOrFalseBlock);
 	return result;
 }

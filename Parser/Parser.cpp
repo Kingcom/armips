@@ -36,7 +36,7 @@ void Parser::pushConditionalResult(ConditionalResult cond)
 
 Expression Parser::parseExpression()
 {
-	return ::parseExpression(*getTokenizer());
+	return ::parseExpression(*getTokenizer(), !isInsideTrueBlock() || isInsideUnknownBlock());
 }
 
 bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max)

@@ -142,7 +142,7 @@ public:
 	bool isIdentifier() { return type == OperatorType::Identifier; }
 	std::wstring getStringValue() { return strValue; }
 	void replaceMemoryPos(const std::wstring& identifierName);
-	bool simplify();
+	bool simplify(bool inUnknownOrFalseBlock);
 	unsigned int getFileNum() { return fileNum; }
 	unsigned int getSection() { return section; }
 private:
@@ -172,7 +172,7 @@ public:
 	Expression();
 	ExpressionValue evaluate();
 	bool isLoaded() const { return expression != NULL; }
-	void setExpression(ExpressionInternal* exp);
+	void setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock);
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool isConstExpression() { return constExpression; }
 

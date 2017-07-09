@@ -4,11 +4,22 @@
 
 typedef ExpressionValue (*ExpressionFunction)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
 
-struct ExpressionFunctionEntry {
+enum class ExpFuncSafety
+{
+	// Result may depend entirely on the internal state
+	Unsafe,
+	// Result is unsafe in conditional blocks, safe otherwise
+	ConditionalUnsafe,
+	// Result is completely independent of the internal state
+	Safe,
+};
+
+struct ExpressionFunctionEntry
+{
 	ExpressionFunction function;
 	size_t minParams;
 	size_t maxParams;
-	bool safe;		// result doesn't depend on the current state
+	ExpFuncSafety safety;
 };
 
 typedef std::map<std::wstring, const ExpressionFunctionEntry> ExpressionFunctionMap;

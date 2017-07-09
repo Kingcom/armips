@@ -576,16 +576,19 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	return it->second.function(strValue,params);
 }
 
-bool isExpressionFunctionSafe(const std::wstring& name)
+bool isExpressionFunctionSafe(const std::wstring& name, bool inUnknownOrFalseBlock)
 {
 	auto it = expressionFunctions.find(name);
 	if (it == expressionFunctions.end())
 		return name != L"defined";
 
-	return it->second.safe;
+	if (inUnknownOrFalseBlock && it->second.safety == ExpFuncSafety::ConditionalUnsafe)
+		return false;
+
+	return it->second.safety != ExpFuncSafety::Unsafe;
 }
 
-bool ExpressionInternal::simplify()
+bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 {
 	// check if this expression can actually be simplified
 	// without causing side effects
@@ -596,7 +599,7 @@ bool ExpressionInternal::simplify()
 	case OperatorType::ToString:
 		return false;
 	case OperatorType::FunctionCall:
-		if (isExpressionFunctionSafe(strValue) == false)
+		if (isExpressionFunctionSafe(strValue, inUnknownOrFalseBlock) == false)
 			return false;
 		break;
 	}
@@ -605,7 +608,7 @@ bool ExpressionInternal::simplify()
 	bool canSimplify = true;
 	for (size_t i = 0; i < childrenCount; i++)
 	{
-		if (children[i] != nullptr && children[i]->simplify() == false)
+		if (children[i] != nullptr && children[i]->simplify(inUnknownOrFalseBlock) == false)
 			canSimplify = false;
 	}
 
@@ -849,11 +852,11 @@ Expression::Expression()
 	constExpression = true;
 }
 
-void Expression::setExpression(ExpressionInternal* exp)
+void Expression::setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock)
 {
 	expression = std::shared_ptr<ExpressionInternal>(exp);
 	if (exp != nullptr)
-		constExpression = expression->simplify();
+		constExpression = expression->simplify(inUnknownOrFalseBlock);
 	else
 		constExpression = true;
 }
@@ -879,6 +882,6 @@ Expression createConstExpression(u64 value)
 {
 	Expression exp;
 	ExpressionInternal* num = new ExpressionInternal(value);
-	exp.setExpression(num);
+	exp.setExpression(num,false);
 	return exp;
 }
