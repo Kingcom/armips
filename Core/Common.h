@@ -22,18 +22,13 @@ typedef struct {
 	SymbolTable symbolTable;
 	EncodingTable Table;
 	int Section;
-	int Radix;
-	bool Revalidate;
 	bool nocash;
 	bool relativeInclude;
-	int DebugMessages;
 	int validationPasses;
 	bool memoryMode;
 	AssemblerFile* memoryFile;
 	bool multiThreading;
 } tGlobal;
-
-enum eErrorLevel {ERROR_WARNING, ERROR_ERROR, ERROR_FATALERROR, ERROR_NOTICE };
 
 extern tGlobal Global;
 extern CArchitecture* Arch;

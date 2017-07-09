@@ -115,13 +115,10 @@ bool encodeAssembly(CAssemblerCommand* content, SymbolData& symData, TempData& t
 bool runArmips(ArmipsArguments& arguments)
 {
 	// initialize and reset global data
-	Global.Radix = 10;
-	Global.Revalidate = true;
 	Global.Section = 0;
 	Global.nocash = false;
 	Global.FileInfo.FileCount = 0;
 	Global.FileInfo.TotalLineCount = 0;
-	Global.DebugMessages = 0;
 	Global.relativeInclude = false;
 	Global.validationPasses = 0;
 	Global.multiThreading = true;
