@@ -14,6 +14,7 @@ bool Logger::error = false;
 bool Logger::fatalError = false;
 bool Logger::errorOnWarning = false;
 bool Logger::silent = false;
+int Logger::suppressLevel = 0;
 
 std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 {
@@ -70,6 +71,9 @@ void Logger::clear()
 
 void Logger::printLine(const std::wstring& text)
 {
+	if (suppressLevel)
+		return;
+
 	std::wcout << text << std::endl;
 
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -80,6 +84,9 @@ void Logger::printLine(const std::wstring& text)
 
 void Logger::printLine(const std::string& text)
 {
+	if (suppressLevel)
+		return;
+
 	std::cout << text << std::endl;
 	
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -90,6 +97,9 @@ void Logger::printLine(const std::string& text)
 
 void Logger::print(const std::wstring& text)
 {
+	if (suppressLevel)
+		return;
+
 	std::wcout << text;
 	
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -99,6 +109,9 @@ void Logger::print(const std::wstring& text)
 
 void Logger::printError(ErrorType type, const std::wstring& text)
 {
+	if (suppressLevel)
+		return;
+
 	std::wstring errorText = formatError(type,text.c_str());
 	errors.push_back(errorText);
 
@@ -110,6 +123,9 @@ void Logger::printError(ErrorType type, const std::wstring& text)
 
 void Logger::printError(ErrorType type, const wchar_t* text)
 {
+	if (suppressLevel)
+		return;
+
 	std::wstring errorText = formatError(type,text);
 	errors.push_back(errorText);
 
@@ -121,6 +137,9 @@ void Logger::printError(ErrorType type, const wchar_t* text)
 
 void Logger::queueError(ErrorType type, const std::wstring& text)
 {
+	if (suppressLevel)
+		return;
+
 	QueueEntry entry;
 	entry.type = type;
 	entry.text = formatError(type,text.c_str());
@@ -129,6 +148,9 @@ void Logger::queueError(ErrorType type, const std::wstring& text)
 
 void Logger::queueError(ErrorType type, const wchar_t* text)
 {
+	if (suppressLevel)
+		return;
+
 	QueueEntry entry;
 	entry.type = type;
 	entry.text = formatError(type,text);

@@ -55,6 +55,8 @@ public:
 	static void setErrorOnWarning(bool b) { errorOnWarning = b; };
 	static void setSilent(bool b) { silent = b; };
 	static bool isSilent() { return silent; }
+	static void supressErrors() { ++suppressLevel; }
+	static void unsuppressErrors() { if (suppressLevel) --suppressLevel; }
 private:
 	static std::wstring formatError(ErrorType type, const wchar_t* text);
 	static void setFlags(ErrorType type);
@@ -71,6 +73,7 @@ private:
 	static bool fatalError;
 	static bool errorOnWarning;
 	static bool silent;
+	static int suppressLevel;
 };
 
 class TempData
