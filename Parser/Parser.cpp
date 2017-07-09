@@ -562,7 +562,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 		
 		// parse the short lived next command
 		macroTokenizer.init(macro.content);
-		Logger::supressErrors();
+		Logger::suppressErrors();
 		CAssemblerCommand* command =  parse(&macroTokenizer,true);
 		Logger::unsuppressErrors();
 		delete command;
