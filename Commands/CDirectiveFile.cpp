@@ -51,8 +51,6 @@ void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring&
 void CDirectiveFile::initClose()
 {
 	type = Type::Close;
-	closeFile = g_fileManager->getOpenFile();
-	g_fileManager->closeFile();
 	updateSection(++Global.Section);
 }
 
@@ -69,6 +67,7 @@ bool CDirectiveFile::Validate()
 		g_fileManager->openFile(file,true);
 		return false;
 	case Type::Close:
+		closeFile = g_fileManager->getOpenFile();
 		g_fileManager->closeFile();
 		return false;
 	}
@@ -125,7 +124,8 @@ void CDirectiveFile::writeSymData(SymbolData& symData) const
 		file->beginSymData();
 		break;
 	case Type::Close:
-		closeFile->endSymData();
+		if (closeFile)
+			closeFile->endSymData();
 		break;
 	}
 }
