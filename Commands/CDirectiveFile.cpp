@@ -19,12 +19,6 @@ void CDirectiveFile::initOpen(const std::wstring& fileName, int64_t memory)
 	type = Type::Open;
 	std::wstring fullName = getFullPathName(fileName);
 
-	if (fileExists(fullName) == false)
-	{
-		Logger::printError(Logger::Error,L"File %s not found",fullName);
-		return;
-	}
-
 	file = new GenericAssemblerFile(fullName,memory,false);
 	g_fileManager->addFile(file);
 
@@ -47,12 +41,6 @@ void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring&
 	type = Type::Copy;
 	std::wstring fullInputName = getFullPathName(inputName);
 	std::wstring fullOutputName = getFullPathName(outputName);
-
-	if (fileExists(fullInputName) == false)
-	{
-		Logger::printError(Logger::Error,L"File %s not found",fullInputName);
-		return;
-	}
 	
 	file = new GenericAssemblerFile(fullOutputName,fullInputName,memory);
 	g_fileManager->addFile(file);
