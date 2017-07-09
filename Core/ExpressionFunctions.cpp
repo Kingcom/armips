@@ -409,15 +409,18 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 	BinaryFile file;
 	if (file.open(fullName,BinaryFile::Read) == false)
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
+		Logger::queueError(Logger::Error,L"Could not open %s",*fileName);
 		return ExpressionValue();
 	}
 
 	file.setPos((long)pos);
 
 	T buffer;
-	if (file.read(&buffer,sizeof(T)) != sizeof(T))
+	if (file.read(&buffer, sizeof(T)) != sizeof(T))
+	{
+		Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", sizeof(T), pos, *fileName);
 		return ExpressionValue();
+	}
 
 	return ExpressionValue((u64) buffer);
 }
