@@ -241,22 +241,21 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 	const Token &next = parser.nextToken();
 	const std::wstring stringValue = next.getStringValue();
 
+	ConditionalResult elseResult = condResult;
+	switch (condResult)
+	{
+	case ConditionalResult::True:
+		elseResult = ConditionalResult::False;
+		break;
+	case ConditionalResult::False:
+		elseResult = ConditionalResult::True;
+		break;
+	}
+
+	parser.pushConditionalResult(elseResult);
 	if (stringValue == L".else")
 	{
-		ConditionalResult elseResult = condResult;
-		switch (condResult)
-		{
-		case ConditionalResult::True:
-			elseResult = ConditionalResult::False;
-			break;
-		case ConditionalResult::False:
-			elseResult = ConditionalResult::True;
-			break;
-		}
-
-		parser.pushConditionalResult(elseResult);
 		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
-		parser.popConditionalResult();
 
 		parser.eatToken();	// eat .endif
 	} else if (stringValue == L".elseif")
@@ -270,8 +269,11 @@ CAssemblerCommand* parseDirectiveConditional(Parser& parser, int flags)
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFNDEF);
 	} else if (stringValue != L".endif")
 	{
+		parser.popConditionalResult();
 		return nullptr;
 	}
+
+	parser.popConditionalResult();
 
 	// for true or false blocks, there's no need to create a conditional command
 	if (condResult == ConditionalResult::True)
