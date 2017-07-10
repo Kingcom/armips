@@ -32,12 +32,12 @@ int CArmInstruction::getShiftedImmediate(unsigned int num, int& ShiftAmount)
 {
 	for (int i = 0; i < 32; i+=2)
 	{
-		unsigned int andval = (0xFFFFFF00 >> i) | (0xFFFFFF00 << (32-i));
+		unsigned int andval = (0xFFFFFF00 >> i) | (0xFFFFFF00 << (-i & 31));
 
 		if ((num & andval) == 0)	// found it
 		{
 			ShiftAmount = i;
-			return (num << i) | (num >> (32 - i));
+			return (num << i) | (num >> (-i & 31));
 		}
 	}
 	return -1;
