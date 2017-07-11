@@ -216,7 +216,7 @@ bool TestRunner::runTests(const std::wstring& dir)
 
 	initConsole();
 
-	int successCount = 0;
+	unsigned int successCount = 0;
 	for (size_t i = 0; i < tests.size(); i++)
 	{
 		changeConsoleColor(ConsoleColors::White);

@@ -1114,7 +1114,7 @@ const EncodingValue encodingValues[] = {
 
 TextFile::Encoding getEncodingFromString(const std::wstring& str)
 {
-	for (int i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
+	for (size_t i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
 	{
 		if (str.compare(encodingValues[i].name) == 0)
 			return encodingValues[i].value;

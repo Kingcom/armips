@@ -56,7 +56,7 @@ void ElfSection::writeData(ByteArray& output)
 		header.sh_offset = (Elf32_Off) output.size();
 	}
 
-	if (header.sh_addralign != -1)
+	if (header.sh_addralign != (unsigned) -1)
 		output.alignSize(header.sh_addralign);
 	header.sh_offset = (Elf32_Off) output.size();
 	output.append(data);
@@ -161,7 +161,7 @@ void ElfSegment::splitSections()
 
 int ElfSegment::findSection(const std::string& name)
 {
-	for (int i = 0; i < (int)sections.size(); i++)
+	for (size_t i = 0; i < sections.size(); i++)
 	{
 		if (stringEqualInsensitive(name,sections[i]->getName()))
 			return i;
@@ -189,9 +189,9 @@ void ElfFile::loadSectionNames()
 
 	// check if the string table is actually a string table
 	// sometimes it gives the wrong section id
-	int strTablePos = sections[fileHeader.e_shstrndx]->getOffset();
-	int strTableSize = sections[fileHeader.e_shstrndx]->getSize();
-	for (int i = 0; i < strTableSize; i++)
+	size_t strTablePos = sections[fileHeader.e_shstrndx]->getOffset();
+	size_t strTableSize = sections[fileHeader.e_shstrndx]->getSize();
+	for (size_t i = 0; i < strTableSize; i++)
 	{
 		if (fileData[strTablePos+i] != 0 && fileData[strTablePos+i] < 0x20)
 			return;
@@ -199,7 +199,7 @@ void ElfFile::loadSectionNames()
 			return;
 	}
 
-	for (int i = 0; i < (int)sections.size(); i++)
+	for (size_t i = 0; i < sections.size(); i++)
 	{
 		ElfSection* section = sections[i];
 		if (section->getType() == SHT_NULL) continue;
@@ -220,7 +220,7 @@ void ElfFile::determinePartOrder()
 
 	// segments
 	size_t firstSegmentStart = fileData.size(), lastSegmentEnd = 0;
-	for (int i = 0; i < fileHeader.e_phnum; i++)
+	for (size_t i = 0; i < fileHeader.e_phnum; i++)
 	{
 		size_t pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
 		
@@ -228,13 +228,13 @@ void ElfFile::determinePartOrder()
 		loadProgramHeader(segmentHeader, fileData, pos);
 		size_t end = segmentHeader.p_offset + segmentHeader.p_filesz;
 
-		if ((int)segmentHeader.p_offset < firstSegmentStart) firstSegmentStart = segmentHeader.p_offset;
+		if (segmentHeader.p_offset < firstSegmentStart) firstSegmentStart = segmentHeader.p_offset;
 		if (lastSegmentEnd < end) lastSegmentEnd = end;
 	}
 
 	// segmentless sections
 	size_t firstSectionStart = fileData.size(), lastSectionEnd = 0;
-	for (int i = 0; i < (int)segmentlessSections.size(); i++)
+	for (size_t i = 0; i < segmentlessSections.size(); i++)
 	{
 		if (segmentlessSections[i]->getType() == SHT_NULL) continue;
 
@@ -262,7 +262,7 @@ void ElfFile::determinePartOrder()
 
 	std::sort(&temp[0],&temp[4]);
 
-	for (int i = 0; i < 4; i++)
+	for (size_t i = 0; i < 4; i++)
 	{
 		partsOrder[i] = temp[i].type;
 	}
@@ -270,7 +270,7 @@ void ElfFile::determinePartOrder()
 
 int ElfFile::findSegmentlessSection(const std::string& name)
 {
-	for (int i = 0; i < (int)segmentlessSections.size(); i++)
+	for (size_t i = 0; i < segmentlessSections.size(); i++)
 	{
 		if (stringEqualInsensitive(name,segmentlessSections[i]->getName()))
 			return i;
@@ -361,7 +361,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 	strTab = NULL;
 
 	// load segments
-	for (int i = 0; i < fileHeader.e_phnum; i++)
+	for (size_t i = 0; i < fileHeader.e_phnum; i++)
 	{
 		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
 		
@@ -445,7 +445,7 @@ void ElfFile::save(const std::wstring&fileName)
 	// reserve space for header and table data
 	fileData.reserveBytes(sizeof(Elf32_Ehdr));
 
-	for (int i = 0; i < 4; i++)
+	for (size_t i = 0; i < 4; i++)
 	{
 		switch (partsOrder[i])
 		{
@@ -460,13 +460,13 @@ void ElfFile::save(const std::wstring&fileName)
 			fileData.reserveBytes(sections.size()*fileHeader.e_shentsize);
 			break;
 		case ELFPART_SEGMENTS:
-			for (int i = 0; i < (int)segments.size(); i++)
+			for (size_t i = 0; i < segments.size(); i++)
 			{
 				segments[i]->writeData(fileData);
 			}
 			break;
 		case ELFPART_SEGMENTLESSSECTIONS:
-			for (int i = 0; i < (int)segmentlessSections.size(); i++)
+			for (size_t i = 0; i < segmentlessSections.size(); i++)
 			{
 				segmentlessSections[i]->writeData(fileData);
 			}
@@ -477,13 +477,13 @@ void ElfFile::save(const std::wstring&fileName)
 	// copy data to the tables
 	bool bigEndian = isBigEndian();
 	writeHeader(fileData, 0, bigEndian);
-	for (int i = 0; i < (int)segments.size(); i++)
+	for (size_t i = 0; i < segments.size(); i++)
 	{
 		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
 		segments[i]->writeHeader(fileData, pos, bigEndian);
 	}
 	
-	for (int i = 0; i < (int)sections.size(); i++)
+	for (size_t i = 0; i < sections.size(); i++)
 	{
 		int pos = fileHeader.e_shoff+i*fileHeader.e_shentsize;
 		sections[i]->writeHeader(fileData, pos, bigEndian);
