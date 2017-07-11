@@ -12,12 +12,12 @@ std::string convertWCharToUtf8(wchar_t character);
 
 std::wstring intToHexString(unsigned int value, int digits, bool prefix = false);
 std::wstring intToString(unsigned int value, int digits);
-u32 getFloatBits(float value);
-u64 getDoubleBits(double value);
+int32_t getFloatBits(float value);
+int64_t getDoubleBits(double value);
 
 StringList getStringListFromArray(wchar_t** source, int count);
 
-u64 fileSize(const std::wstring& fileName);
+int64_t fileSize(const std::wstring& fileName);
 bool fileExists(const std::wstring& strFilename);
 bool copyFile(const std::wstring& existingFile, const std::wstring& newFile);
 bool deleteFile(const std::wstring& fileName);;

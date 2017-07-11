@@ -113,7 +113,7 @@ struct TokenSequenceValue
 		textValue = text;
 	}
 	
-	TokenSequenceValue(u64 num)
+	TokenSequenceValue(int64_t num)
 	{
 		type = TokenType::Integer;
 		intValue = num;
@@ -130,7 +130,7 @@ struct TokenSequenceValue
 	union
 	{
 		const wchar_t* textValue;
-		u64 intValue;
+		int64_t intValue;
 		double floatValue;
 	};
 };

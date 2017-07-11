@@ -7,7 +7,7 @@
 #endif
 #include "../Archs/ARM/Arm.h"
 
-bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, u64& dest,
+bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, int64_t& dest,
 	const std::wstring& funcName, bool optional)
 {
 	if (optional && index >= parameters.size())
@@ -50,7 +50,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 
 ExpressionValue expFuncVersion(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	u64 value = ARMIPS_VERSION_MAJOR*100 + ARMIPS_VERSION_MINOR*10 + ARMIPS_VERSION_REVISION;
+	int64_t value = ARMIPS_VERSION_MAJOR*100 + ARMIPS_VERSION_MINOR*10 + ARMIPS_VERSION_REVISION;
 	return ExpressionValue(value);
 }
 
@@ -90,7 +90,7 @@ ExpressionValue expFuncOrg(const std::wstring& funcName, const std::vector<Expre
 		Logger::queueError(Logger::Error,L"org: no file opened");
 		return ExpressionValue();
 	}
-	return ExpressionValue((u64) g_fileManager->getVirtualAddress());
+	return ExpressionValue(g_fileManager->getVirtualAddress());
 }
 
 ExpressionValue expFuncOrga(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -100,7 +100,7 @@ ExpressionValue expFuncOrga(const std::wstring& funcName, const std::vector<Expr
 		Logger::queueError(Logger::Error,L"orga: no file opened");
 		return ExpressionValue();
 	}
-	return ExpressionValue((u64) g_fileManager->getPhysicalAddress());
+	return ExpressionValue(g_fileManager->getPhysicalAddress());
 }
 
 ExpressionValue expFuncHeaderSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -110,7 +110,7 @@ ExpressionValue expFuncHeaderSize(const std::wstring& funcName, const std::vecto
 		Logger::queueError(Logger::Error,L"headersize: no file opened");
 		return ExpressionValue();
 	}
-	return ExpressionValue((u64) g_fileManager->getHeaderSize());
+	return ExpressionValue(g_fileManager->getHeaderSize());
 }
 
 ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -119,7 +119,7 @@ ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vecto
 	GET_PARAM(parameters,0,fileName);
 
 	std::wstring fullName = getFullPathName(*fileName);
-	return ExpressionValue(fileExists(fullName) ? UINT64_C(1) : UINT64_C(0));
+	return ExpressionValue(fileExists(fullName) ? INT64_C(1) : INT64_C(0));
 }
 
 ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -128,7 +128,7 @@ ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<
 	GET_PARAM(parameters,0,fileName);
 
 	std::wstring fullName = getFullPathName(*fileName);
-	return ExpressionValue(fileSize(fullName));
+	return ExpressionValue((int64_t) fileSize(fullName));
 }
 
 ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -156,7 +156,7 @@ ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<
 
 ExpressionValue expFuncToHex(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	u64 value, digits;
+	int64_t value, digits;
 	GET_PARAM(parameters,0,value);
 	GET_OPTIONAL_PARAM(parameters,1,digits,8);
 
@@ -173,7 +173,7 @@ ExpressionValue expFuncInt(const std::wstring& funcName, const std::vector<Expre
 		result.intValue = parameters[0].intValue;
 		break;
 	case ExpressionValueType::Float:
-		result.intValue = (u64) parameters[0].floatValue;
+		result.intValue = (int64_t) parameters[0].floatValue;
 		break;
 	default:
 		return result;
@@ -255,7 +255,7 @@ ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<Expre
 		break;
 	case ExpressionValueType::Integer:
 		result.type = ExpressionValueType::Integer;
-		result.intValue = (int64_t) parameters[0].intValue >= 0 ?
+		result.intValue = parameters[0].intValue >= 0 ?
 			parameters[0].intValue : -parameters[0].intValue;
 		break;
 	}
@@ -268,12 +268,12 @@ ExpressionValue expFuncStrlen(const std::wstring& funcName, const std::vector<Ex
 	const std::wstring* source;
 	GET_PARAM(parameters,0,source);
 
-	return ExpressionValue((u64)source->size());
+	return ExpressionValue((int64_t)source->size());
 }
 
 ExpressionValue expFuncSubstr(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	u64 start, count;
+	int64_t start, count;
 	const std::wstring* source;
 
 	GET_PARAM(parameters,0,source);
@@ -298,7 +298,7 @@ ExpressionValue expFuncRegExMatch(const std::wstring& funcName, const std::vecto
 #endif
 		std::wregex regex(*regexString);
 		bool found = std::regex_match(*source,regex);
-		return ExpressionValue(found ? UINT64_C(1) : UINT64_C(0));
+		return ExpressionValue(found ? INT64_C(1) : INT64_C(0));
 #if ARMIPS_EXCEPTIONS
 	} catch (std::regex_error&)
 	{
@@ -322,7 +322,7 @@ ExpressionValue expFuncRegExSearch(const std::wstring& funcName, const std::vect
 #endif
 		std::wregex regex(*regexString);
 		bool found = std::regex_search(*source,regex);
-		return ExpressionValue(found ? UINT64_C(1) : UINT64_C(0));
+		return ExpressionValue(found ? INT64_C(1) : INT64_C(0));
 #if ARMIPS_EXCEPTIONS
 	} catch (std::regex_error&)
 	{
@@ -336,7 +336,7 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 {
 	const std::wstring* source;
 	const std::wstring* regexString;
-	u64 matchIndex;
+	int64_t matchIndex;
 
 	GET_PARAM(parameters,0,source);
 	GET_PARAM(parameters,1,regexString);
@@ -349,7 +349,7 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 		std::wregex regex(*regexString);
 		std::wsmatch result;
 		bool found = std::regex_search(*source,result,regex);
-		if (found == false || matchIndex >= result.size())
+		if (found == false || (size_t)matchIndex >= result.size())
 		{
 			Logger::queueError(Logger::Error,L"Capture group index %d does not exist",matchIndex);
 			return ExpressionValue();
@@ -368,7 +368,7 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 
 ExpressionValue expFuncFind(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	u64 start;
+	int64_t start;
 	const std::wstring* source;
 	const std::wstring* value;
 
@@ -377,12 +377,12 @@ ExpressionValue expFuncFind(const std::wstring& funcName, const std::vector<Expr
 	GET_OPTIONAL_PARAM(parameters,2,start,0);
 
 	size_t pos = source->find(*value,(size_t)start);
-	return ExpressionValue(pos == std::wstring::npos ? (u64) -1 : pos);
+	return ExpressionValue(pos == std::wstring::npos ? INT64_C(-1) : (int64_t) pos);
 }
 
 ExpressionValue expFuncRFind(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	u64 start;
+	int64_t start;
 	const std::wstring* source;
 	const std::wstring* value;
 
@@ -391,7 +391,7 @@ ExpressionValue expFuncRFind(const std::wstring& funcName, const std::vector<Exp
 	GET_OPTIONAL_PARAM(parameters,2,start,std::wstring::npos);
 
 	size_t pos = source->rfind(*value,(size_t)start);
-	return ExpressionValue(pos == std::wstring::npos ? (u64) -1 : pos);
+	return ExpressionValue(pos == std::wstring::npos ? INT64_C(-1) : (int64_t) pos);
 }
 
 
@@ -399,7 +399,7 @@ template<typename T>
 ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
-	u64 pos;
+	int64_t pos;
 
 	GET_PARAM(parameters,0,fileName);
 	GET_OPTIONAL_PARAM(parameters,1,pos,0);
@@ -413,7 +413,7 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 		return ExpressionValue();
 	}
 
-	file.setPos((long)pos);
+	file.setPos(pos);
 
 	T buffer;
 	if (file.read(&buffer, sizeof(T)) != sizeof(T))
@@ -422,14 +422,14 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 		return ExpressionValue();
 	}
 
-	return ExpressionValue((u64) buffer);
+	return ExpressionValue((int64_t) buffer);
 }
 
 ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
-	u64 start;
-	u64 length;
+	int64_t start;
+	int64_t length;
 
 	GET_PARAM(parameters,0,fileName);
 	GET_OPTIONAL_PARAM(parameters,1,start,0);
@@ -437,7 +437,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 
 	std::wstring fullName = getFullPathName(*fileName);
 
-	u64 totalSize = fileSize(fullName);
+	int64_t totalSize = fileSize(fullName);
 	if (length == 0 || start+length > totalSize)
 		length = totalSize-start;
 
@@ -450,7 +450,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 
 	file.setPos((long)start);
 
-	u8* buffer = new u8[length];
+	unsigned char* buffer = new unsigned char[length];
 	file.read(buffer,(size_t)length);
 
 	std::wstring result;
@@ -484,57 +484,56 @@ ExpressionValue expFuncDefined(ExpressionInternal* exp)
 	if (label == nullptr)
 		return ExpressionValue();
 
-	return ExpressionValue(label->isDefined() ? UINT64_C(1) : UINT64_C(0)); 
+	return ExpressionValue(label->isDefined() ? INT64_C(1) : INT64_C(0));
 }
 
 ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	bool isArm = Arch == &Arm && Arm.GetThumbMode() == false;
-	return ExpressionValue(isArm ? UINT64_C(1) : UINT64_C(0)); 
+	return ExpressionValue(isArm ? INT64_C(1) : INT64_C(0));
 }
 
 ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	bool isThumb = Arch == &Arm && Arm.GetThumbMode() == true;
-	return ExpressionValue(isThumb ? UINT64_C(1) : UINT64_C(0)); 
+	return ExpressionValue(isThumb ? INT64_C(1) : INT64_C(0));
 }
 
 const ExpressionFunctionMap expressionFunctions = {
-	{ L"version",		{ &expFuncVersion,		0,	0,	ExpFuncSafety::Safe } },
-	{ L"endianness",	{ &expFuncEndianness,	0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"outputname",	{ &expFuncOutputName,	0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"org",			{ &expFuncOrg,			0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"orga",			{ &expFuncOrga,			0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"headersize",	{ &expFuncHeaderSize,	0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"fileexists",	{ &expFuncFileExists,	1,	1,	ExpFuncSafety::Safe } },
-	{ L"filesize",		{ &expFuncFileSize,		1,	1,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"tostring",		{ &expFuncToString,		1,	1,	ExpFuncSafety::Safe } },
-	{ L"tohex",			{ &expFuncToHex,		1,	2,	ExpFuncSafety::Safe } },
+	{ L"version",		{ &expFuncVersion,			0,	0,	ExpFuncSafety::Safe } },
+	{ L"endianness",	{ &expFuncEndianness,		0,	0,	ExpFuncSafety::Unsafe } },
+	{ L"outputname",	{ &expFuncOutputName,		0,	0,	ExpFuncSafety::Unsafe } },
+	{ L"org",			{ &expFuncOrg,				0,	0,	ExpFuncSafety::Unsafe } },
+	{ L"orga",			{ &expFuncOrga,				0,	0,	ExpFuncSafety::Unsafe } },
+	{ L"headersize",	{ &expFuncHeaderSize,		0,	0,	ExpFuncSafety::Unsafe } },
+	{ L"fileexists",	{ &expFuncFileExists,		1,	1,	ExpFuncSafety::Safe } },
+	{ L"filesize",		{ &expFuncFileSize,			1,	1,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"tostring",		{ &expFuncToString,			1,	1,	ExpFuncSafety::Safe } },
+	{ L"tohex",			{ &expFuncToHex,			1,	2,	ExpFuncSafety::Safe } },
 
-	{ L"int",			{ &expFuncInt,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"float",			{ &expFuncFloat,		1,	1,	ExpFuncSafety::Safe } },
-	{ L"frac",			{ &expFuncFrac,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"abs",			{ &expFuncAbs,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"round",			{ &expFuncRound,		1,	1,	ExpFuncSafety::Safe } },
+	{ L"int",			{ &expFuncInt,				1,	1,	ExpFuncSafety::Safe } },
+	{ L"float",			{ &expFuncFloat,			1,	1,	ExpFuncSafety::Safe } },
+	{ L"frac",			{ &expFuncFrac,				1,	1,	ExpFuncSafety::Safe } },
+	{ L"abs",			{ &expFuncAbs,				1,	1,	ExpFuncSafety::Safe } },
+	{ L"round",			{ &expFuncRound,			1,	1,	ExpFuncSafety::Safe } },
 
-	{ L"strlen",		{ &expFuncStrlen,		1,	1,	ExpFuncSafety::Safe } },
-	{ L"substr",		{ &expFuncSubstr,		3,	3,	ExpFuncSafety::Safe } },
+	{ L"strlen",		{ &expFuncStrlen,			1,	1,	ExpFuncSafety::Safe } },
+	{ L"substr",		{ &expFuncSubstr,			3,	3,	ExpFuncSafety::Safe } },
 #if ARMIPS_REGEXP
-	{ L"regex_match",	{ &expFuncRegExMatch,	2,	2,	ExpFuncSafety::Safe } },
-	{ L"regex_search",	{ &expFuncRegExSearch,	2,	2,	ExpFuncSafety::Safe } },
-	{ L"regex_extract",	{ &expFuncRegExExtract,	2,	3,	ExpFuncSafety::Safe } },
+	{ L"regex_match",	{ &expFuncRegExMatch,		2,	2,	ExpFuncSafety::Safe } },
+	{ L"regex_search",	{ &expFuncRegExSearch,		2,	2,	ExpFuncSafety::Safe } },
+	{ L"regex_extract",	{ &expFuncRegExExtract,		2,	3,	ExpFuncSafety::Safe } },
 #endif
-	{ L"find",			{ &expFuncFind,			2,	3,	ExpFuncSafety::Safe } },
-	{ L"rfind",			{ &expFuncRFind,		2,	3,	ExpFuncSafety::Safe } },
+	{ L"find",			{ &expFuncFind,				2,	3,	ExpFuncSafety::Safe } },
+	{ L"rfind",			{ &expFuncRFind,			2,	3,	ExpFuncSafety::Safe } },
 
-	{ L"readbyte",		{ &expFuncRead<u8>,		1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu8",		{ &expFuncRead<u8>,		1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu16",		{ &expFuncRead<u16>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu32",		{ &expFuncRead<u32>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu64",		{ &expFuncRead<u64>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readascii",		{ &expFuncReadAscii,	1,	3,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readbyte",		{ &expFuncRead<uint8_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readu8",		{ &expFuncRead<uint8_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readu16",		{ &expFuncRead<uint16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readu32",		{ &expFuncRead<uint32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readu64",		{ &expFuncRead<uint64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readascii",		{ &expFuncReadAscii,		1,	3,	ExpFuncSafety::ConditionalUnsafe } },
 
-	{ L"isarm",			{ &expFuncIsArm,		0,	0,	ExpFuncSafety::Safe } },
-	{ L"isthumb",		{ &expFuncIsThumb,		0,	0,	ExpFuncSafety::Safe } },
-
+	{ L"isarm",			{ &expFuncIsArm,			0,	0,	ExpFuncSafety::Safe } },
+	{ L"isthumb",		{ &expFuncIsThumb,			0,	0,	ExpFuncSafety::Safe } },
 };

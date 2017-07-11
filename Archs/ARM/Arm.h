@@ -52,7 +52,7 @@ public:
 
 	std::vector<ArmPoolEntry> getPoolContent() { return currentPoolContent; }
 	void clearPoolContent() { currentPoolContent.clear(); }
-	void addPoolValue(ArmOpcodeCommand* command, u32 value);
+	void addPoolValue(ArmOpcodeCommand* command, int32_t value);
 private:
 	bool thumb;
 	ArmArchType version;
@@ -63,7 +63,7 @@ private:
 class ArmOpcodeCommand: public CAssemblerCommand
 {
 public:
-	virtual void setPoolAddress(u64 address) = 0;
+	virtual void setPoolAddress(int64_t address) = 0;
 };
 
 extern CArmArchitecture Arm;

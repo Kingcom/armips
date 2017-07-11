@@ -54,7 +54,7 @@ bool CAssemblerLabel::Validate()
 		result = true;
 	}
 	
-	u64 value;
+	int64_t value;
 	if (labelValue.isLoaded())
 	{
 		// label value is given by expression
@@ -91,7 +91,7 @@ void CAssemblerLabel::writeTempData(TempData& tempData) const
 void CAssemblerLabel::writeSymData(SymbolData& symData) const
 {
 	// TODO: find a less ugly way to check for undefined memory positions
-	if (label->getValue() == (u64)-1 || Global.symbolTable.isGeneratedLabel(label->getName()))
+	if (label->getValue() == -1 || Global.symbolTable.isGeneratedLabel(label->getName()))
 		return;
 
 	symData.addLabel(label->getValue(),label->getOriginalName());

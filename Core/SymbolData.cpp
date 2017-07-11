@@ -26,7 +26,7 @@ void SymbolData::clear()
 
 struct NocashSymEntry
 {
-	u64 address;
+	int64_t address;
 	std::wstring text;
 
 	bool operator<(const NocashSymEntry& other) const
@@ -126,7 +126,7 @@ void SymbolData::write()
 	writeNocashSym();
 }
 
-void SymbolData::addLabel(u64 memoryAddress, const std::wstring& name)
+void SymbolData::addLabel(int64_t memoryAddress, const std::wstring& name)
 {
 	if (!enabled)
 		return;
@@ -144,7 +144,7 @@ void SymbolData::addLabel(u64 memoryAddress, const std::wstring& name)
 	modules[currentModule].symbols.push_back(sym);
 }
 
-void SymbolData::addData(u64 address, size_t size, DataType type)
+void SymbolData::addData(int64_t address, size_t size, DataType type)
 {
 	if (!enabled)
 		return;
@@ -205,7 +205,7 @@ void SymbolData::endModule(AssemblerFile* file)
 	currentModule = 0;
 }
 
-void SymbolData::startFunction(u64 address)
+void SymbolData::startFunction(int64_t address)
 {
 	if (currentFunction != -1)
 	{
@@ -220,7 +220,7 @@ void SymbolData::startFunction(u64 address)
 	modules[currentModule].functions.push_back(func);
 }
 
-void SymbolData::endFunction(u64 address)
+void SymbolData::endFunction(int64_t address)
 {
 	if (currentFunction == -1)
 	{

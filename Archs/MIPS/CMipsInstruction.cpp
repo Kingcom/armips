@@ -311,7 +311,7 @@ void CMipsInstruction::encodeNormal() const
 		encoding |= (registerData.vrt.num & 0x1F) << 16;
 	}
 
-	g_fileManager->writeU32((u32)encoding);
+	g_fileManager->writeU32((uint32_t)encoding);
 }
 
 void CMipsInstruction::encodeVfpu() const
@@ -340,7 +340,7 @@ void CMipsInstruction::encodeVfpu() const
 		break;
 	}
 
-	g_fileManager->writeU32((u32)encoding);
+	g_fileManager->writeU32((uint32_t)encoding);
 }
 
 void CMipsInstruction::Encode() const

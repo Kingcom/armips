@@ -3,19 +3,19 @@
 #include "Misc.h"
 #include "Common.h"
 
-inline u64 swapEndianness64(u64 value)
+inline uint64_t swapEndianness64(uint64_t value)
 {
 	return ((value & 0xFF) << 56) | ((value & 0xFF00) << 40) | ((value & 0xFF0000) << 24) | ((value & 0xFF000000) << 8) |
 	((value & 0xFF00000000) >> 8) | ((value & 0xFF0000000000) >> 24) |
 	((value & 0xFF000000000000) >> 40) | ((value & 0xFF00000000000000) >> 56);
 }
 
-inline u32 swapEndianness32(u32 value)
+inline uint32_t swapEndianness32(uint32_t value)
 {
 	return ((value & 0xFF) << 24) | ((value & 0xFF00) << 8) | ((value & 0xFF0000) >> 8) | ((value & 0xFF000000) >> 24);
 }
 
-inline u16 swapEndianness16(u16 value)
+inline uint16_t swapEndianness16(uint16_t value)
 {
 	return ((value & 0xFF) << 8) | ((value & 0xFF00) >> 8);
 }
@@ -204,8 +204,8 @@ FileManager::FileManager()
 	// detect own endianness
 	volatile union
 	{
-		u32 i;
-		u8 c[4];
+		uint32_t i;
+		uint8_t c[4];
 	} u;
 	u.c[3] = 0xAA;
 	u.c[2] = 0xBB;
@@ -286,12 +286,12 @@ bool FileManager::write(void* data, size_t length)
 	return activeFile->write(data,length);
 }
 
-bool FileManager::writeU8(u8 data)
+bool FileManager::writeU8(uint8_t data)
 {
 	return write(&data,1);
 }
 
-bool FileManager::writeU16(u16 data)
+bool FileManager::writeU16(uint16_t data)
 {
 	if (endianness != ownEndianness)
 		data = swapEndianness16(data);
@@ -299,7 +299,7 @@ bool FileManager::writeU16(u16 data)
 	return write(&data,2);
 }
 
-bool FileManager::writeU32(u32 data)
+bool FileManager::writeU32(uint32_t data)
 {
 	if (endianness != ownEndianness)
 		data = swapEndianness32(data);
@@ -307,7 +307,7 @@ bool FileManager::writeU32(u32 data)
 	return write(&data,4);
 }
 
-bool FileManager::writeU64(u64 data)
+bool FileManager::writeU64(uint64_t data)
 {
 	if (endianness != ownEndianness)
 		data = swapEndianness64(data);

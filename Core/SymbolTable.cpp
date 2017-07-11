@@ -38,7 +38,7 @@ void SymbolTable::clear()
 	uniqueCount = 0;
 }
 
-void SymbolTable::setFileSectionValues(const std::wstring& symbol, unsigned int& file, unsigned int& section)
+void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, int& section)
 {
 	if (symbol[0] == '@')
 	{
@@ -56,7 +56,7 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, unsigned int&
 	}
 }
 
-Label* SymbolTable::getLabel(const std::wstring& symbol, unsigned int file, unsigned int section)
+Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 {
 	if (isValidSymbolName(symbol) == false)
 		return NULL;
@@ -88,7 +88,7 @@ Label* SymbolTable::getLabel(const std::wstring& symbol, unsigned int file, unsi
 	return labels[it->second.index];
 }
 
-bool SymbolTable::symbolExists(const std::wstring& symbol, unsigned int file, unsigned int section)
+bool SymbolTable::symbolExists(const std::wstring& symbol, int file, int section)
 {
 	if (isValidSymbolName(symbol) == false)
 		return false;
@@ -137,7 +137,7 @@ bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 	return false;
 }
 
-bool SymbolTable::addEquation(const std::wstring& name, unsigned int file, unsigned int section, size_t referenceIndex)
+bool SymbolTable::addEquation(const std::wstring& name, int file, int section, size_t referenceIndex)
 {
 	if (isValidSymbolName(name) == false)
 		return false;
@@ -155,7 +155,7 @@ bool SymbolTable::addEquation(const std::wstring& name, unsigned int file, unsig
 	return true;
 }
 
-bool SymbolTable::findEquation(const std::wstring& name, unsigned int file, unsigned int section, size_t& dest)
+bool SymbolTable::findEquation(const std::wstring& name, int file, int section, size_t& dest)
 {
 	setFileSectionValues(name,file,section);
 	
@@ -187,7 +187,7 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 		if (!isValidSymbolName(def.name))
 			continue;
 
-		Label* label = getLabel(def.name,(unsigned int)Global.FileInfo.FileNum,Global.Section);
+		Label* label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
 		if (label == NULL)
 			continue;
 
@@ -199,14 +199,14 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 	}
 }
 
-int SymbolTable::findSection(u64 address)
+int SymbolTable::findSection(int64_t address)
 {
-	int smallestBefore = -1;
-	int smallestDiff = 0x7FFFFFFF;
+	int64_t smallestBefore = -1;
+	int64_t smallestDiff = 0x7FFFFFFF;
 
 	for (auto& lab: labels)
 	{
-		int diff = (int)(address-lab->getValue());
+		int diff = address-lab->getValue();
 		if (diff >= 0 && diff < smallestDiff)
 		{
 			smallestDiff = diff;

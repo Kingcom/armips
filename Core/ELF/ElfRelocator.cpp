@@ -266,13 +266,13 @@ void ElfRelocator::loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, b
 	rel.r_info   = data.getDoubleWord(offset + 0x04, bigEndian);
 }
 
-bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
+bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddress)
 {
 	ElfFile* elf = file.elf;
-	u64 start = relocationAddress;
+	int64_t start = relocationAddress;
 
 	// calculate address for each section
-	std::map<u64,u64> relocationOffsets;
+	std::map<int64_t,int64_t> relocationOffsets;
 	for (ElfRelocatorSection& entry: file.sections)
 	{
 		ElfSection* section = entry.section;
@@ -378,7 +378,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 	// now update symbols
 	for (ElfRelocatorSymbol& sym: file.symbols)
 	{
-		u64 oldAddress = sym.relocatedAddress;
+		int64_t oldAddress = sym.relocatedAddress;
 
 		switch (sym.section)
 		{
@@ -387,7 +387,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 			break;
 		case SHN_COMMON:	// needs to be allocated. relativeAddress gives alignment constraint
 			{
-				u64 start = relocationAddress;
+				int64_t start = relocationAddress;
 
 				while (relocationAddress % sym.relativeAddress)
 					relocationAddress++;
@@ -412,14 +412,14 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, u64& relocationAddress)
 	return !error;
 }
 
-bool ElfRelocator::relocate(u64& memoryAddress)
+bool ElfRelocator::relocate(int64_t& memoryAddress)
 {
 	int oldCrc = getCrc32(outputData.data(),outputData.size());
 	outputData.clear();
 	dataChanged = false;
 
 	bool error = false;
-	u64 start = memoryAddress;
+	int64_t start = memoryAddress;
 
 	for (ElfRelocatorFile& file: files)
 	{

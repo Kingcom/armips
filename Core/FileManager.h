@@ -72,10 +72,10 @@ public:
 	bool hasOpenFile() { return activeFile != NULL; };
 	void closeFile();
 	bool write(void* data, size_t length);
-	bool writeU8(u8 data);
-	bool writeU16(u16 data);
-	bool writeU32(u32 data);
-	bool writeU64(u64 data);
+	bool writeU8(uint8_t data);
+	bool writeU16(uint16_t data);
+	bool writeU32(uint32_t data);
+	bool writeU64(uint64_t data);
 	int64_t getVirtualAddress();
 	int64_t getPhysicalAddress();
 	int64_t getHeaderSize();

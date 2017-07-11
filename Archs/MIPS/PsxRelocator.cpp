@@ -533,7 +533,7 @@ DirectivePsxObjImport::DirectivePsxObjImport(const std::wstring& fileName)
 
 bool DirectivePsxObjImport::Validate()
 {
-	int memory = (u32) g_fileManager->getVirtualAddress();
+	int memory = g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory(memory);
 	return rel.hasDataChanged();

@@ -136,16 +136,16 @@ std::wstring intToString(unsigned int value, int digits)
 	return result;
 }
 
-u32 getFloatBits(float value)
+int32_t getFloatBits(float value)
 {
-	union { float f; u32 i; } u;
+	union { float f; int32_t i; } u;
 	u.f = value;
 	return u.i;
 }
 
-u64 getDoubleBits(double value)
+int64_t getDoubleBits(double value)
 {
-	union { double f; u64 i; } u;
+	union { double f; int64_t i; } u;
 	u.f = value;
 	return u.i;
 }
@@ -161,14 +161,14 @@ StringList getStringListFromArray(wchar_t** source, int count)
 	return result;
 }
 
-u64 fileSize(const std::wstring& fileName)
+int64_t fileSize(const std::wstring& fileName)
 {
 #ifdef _WIN32
 	WIN32_FILE_ATTRIBUTE_DATA attr;
 	if (!GetFileAttributesEx(fileName.c_str(),GetFileExInfoStandard,&attr)
 		|| (attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		return 0;
-	return ((u64) attr.nFileSizeHigh << 32) | (u64) attr.nFileSizeLow;
+	return ((int64_t) attr.nFileSizeHigh << 32) | (int64_t) attr.nFileSizeLow;
 #else	
 	std::string utf8 = convertWStringToUtf8(fileName);
 	struct stat fileStat;

@@ -42,11 +42,11 @@ private:
 	size_t getUnitSize() const;
 	size_t getDataSize() const;
 	
-	u64 position;
+	int64_t position;
 	EncodingMode mode;
 	bool writeTermination;
 	std::vector<Expression> entries;
 	ByteArray customData;
-	std::vector<u64> normalData;
+	std::vector<int64_t> normalData;
 	Endianness endianness;
 };

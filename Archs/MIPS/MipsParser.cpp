@@ -563,12 +563,12 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 		// sqrt(2)
 		sequenceParser.addEntry(2,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"sqrt", UINT64_C(2)}
+			{L"sqrt", INT64_C(2)}
 		);
 		// sqrt(1/2)
 		sequenceParser.addEntry(3,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::Div, TokenType::Integer, TokenType::RParen},
-			{L"sqrt", UINT64_C(1), UINT64_C(2)}
+			{L"sqrt", INT64_C(1), INT64_C(2)}
 		);
 		// sqrt(0.5)
 		sequenceParser.addEntry(3,
@@ -578,32 +578,32 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 		// 2/sqrt(pi)
 		sequenceParser.addEntry(4,
 			{TokenType::Integer, TokenType::Div, TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
-			{UINT64_C(2), L"sqrt", L"pi"}
+			{INT64_C(2), L"sqrt", L"pi"}
 		);
 		// 2/pi
 		sequenceParser.addEntry(5,
 			{TokenType::Integer, TokenType::Div, TokenType::Identifier},
-			{UINT64_C(2), L"pi"}
+			{INT64_C(2), L"pi"}
 		);
 		// 1/pi
 		sequenceParser.addEntry(6,
 			{TokenType::Integer, TokenType::Div, TokenType::Identifier},
-			{UINT64_C(1), L"pi"}
+			{INT64_C(1), L"pi"}
 		);
 		// pi/4
 		sequenceParser.addEntry(7,
 			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", UINT64_C(4)}
+			{L"pi", INT64_C(4)}
 		);
 		// pi/2
 		sequenceParser.addEntry(8,
 			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", UINT64_C(2)}
+			{L"pi", INT64_C(2)}
 		);
 		// pi/6 - early because "pi" is a prefix of it
 		sequenceParser.addEntry(16,
 			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", UINT64_C(6)}
+			{L"pi", INT64_C(6)}
 		);
 		// pi
 		sequenceParser.addEntry(9,
@@ -628,32 +628,32 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 		// ln(2)
 		sequenceParser.addEntry(13,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"ln", UINT64_C(2)}
+			{L"ln", INT64_C(2)}
 		);
 		// ln(10)
 		sequenceParser.addEntry(14,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"ln", UINT64_C(10)}
+			{L"ln", INT64_C(10)}
 		);
 		// 2*pi
 		sequenceParser.addEntry(15,
 			{TokenType::Integer, TokenType::Mult, TokenType::Identifier},
-			{UINT64_C(2), L"pi"}
+			{INT64_C(2), L"pi"}
 		);
 		// log10(2)
 		sequenceParser.addEntry(17,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"log10", UINT64_C(2)}
+			{L"log10", INT64_C(2)}
 		);
 		// log2(10)
 		sequenceParser.addEntry(18,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"log2", UINT64_C(10)}
+			{L"log2", INT64_C(10)}
 		);
 		// sqrt(3)/2
 		sequenceParser.addEntry(19,
 			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen, TokenType::Div, TokenType::Integer},
-			{L"sqrt", UINT64_C(3), UINT64_C(2)}
+			{L"sqrt", INT64_C(3), INT64_C(2)}
 		);
 	}
 
@@ -779,7 +779,7 @@ bool MipsParser::parseVfpuCondition(Parser& parser, int& result)
 		return false;
 
 	const std::wstring stringValue = token.getStringValue();
-	for (int i = 0; i < ARRAY_SIZE(conditions); i++)
+	for (size_t i = 0; i < ARRAY_SIZE(conditions); i++)
 	{
 		if (stringValue == conditions[i])
 		{
@@ -799,21 +799,21 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 	if (sequenceParser.getEntryCount() == 0)
 	{
 		// 0
-		sequenceParser.addEntry(0, {TokenType::Integer}, {UINT64_C(0)} );
+		sequenceParser.addEntry(0, {TokenType::Integer}, {INT64_C(0)} );
 		// 1
-		sequenceParser.addEntry(1, {TokenType::Integer}, {UINT64_C(1)} );
+		sequenceParser.addEntry(1, {TokenType::Integer}, {INT64_C(1)} );
 		// 2
-		sequenceParser.addEntry(2, {TokenType::Integer}, {UINT64_C(2)} );
+		sequenceParser.addEntry(2, {TokenType::Integer}, {INT64_C(2)} );
 		// 1/2
-		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(2)} );
+		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(2)} );
 		// 3
-		sequenceParser.addEntry(4, {TokenType::Integer}, {UINT64_C(3)} );
+		sequenceParser.addEntry(4, {TokenType::Integer}, {INT64_C(3)} );
 		// 1/3
-		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(3)} );
+		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(3)} );
 		// 1/4
-		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(4)} );
+		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(4)} );
 		// 1/6
-		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {UINT64_C(1), UINT64_C(6)} );
+		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(6)} );
 	}
 
 	if (parser.nextToken().type != TokenType::LBrack)
@@ -891,35 +891,35 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 		// 0-1
 		sequenceParser.addEntry(1,
 			{TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{UINT64_C(0), UINT64_C(1)} );
+			{INT64_C(0), INT64_C(1)} );
 		// 0-1
 		sequenceParser.addEntry(-1,
 			{TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{UINT64_C(0), L"1m"} );
+			{INT64_C(0), L"1m"} );
 		// 0:1
 		sequenceParser.addEntry(1,
 			{TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{UINT64_C(0), UINT64_C(1)} );
+			{INT64_C(0), INT64_C(1)} );
 		// 0:1
 		sequenceParser.addEntry(-1,
 			{TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{UINT64_C(0), L"1m"} );
+			{INT64_C(0), L"1m"} );
 		// -1-1
 		sequenceParser.addEntry(3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{UINT64_C(1), UINT64_C(1)} );
+			{INT64_C(1), INT64_C(1)} );
 		// -1-1m
 		sequenceParser.addEntry(-3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{UINT64_C(1), L"1m"} );
+			{INT64_C(1), L"1m"} );
 		// -1:1
 		sequenceParser.addEntry(3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{UINT64_C(1), UINT64_C(1)} );
+			{INT64_C(1), INT64_C(1)} );
 		// -1:1m
 		sequenceParser.addEntry(-3,
 			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{UINT64_C(1), L"1m"} );
+			{INT64_C(1), L"1m"} );
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -1027,7 +1027,7 @@ bool MipsParser::parseWb(Parser& parser)
 	return token.getStringValue() == L"wb";
 }
 
-static bool decodeImmediateSize(const u8*& encoding, MipsImmediateType& dest)
+static bool decodeImmediateSize(const char*& encoding, MipsImmediateType& dest)
 {
 	if (*encoding == 'h')	// half float
 	{
@@ -1096,7 +1096,7 @@ bool MipsParser::decodeVfpuType(const std::wstring& name, size_t& pos, int& dest
 
 bool MipsParser::decodeOpcode(const std::wstring& name, const tMipsOpcode& opcode)
 {
-	const u8* encoding = (const u8*) opcode.name;
+	const char* encoding = opcode.name;
 	size_t pos = 0;
 
 	registers.reset();
@@ -1148,7 +1148,7 @@ void MipsParser::setOmittedRegisters(const tMipsOpcode& opcode)
 
 bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 {
-	const u8* encoding = (const u8*) opcode.encoding;
+	const char* encoding = opcode.encoding;
 
 	// initialize opcode variables
 	immediate.primary.type = MipsImmediateType::None;
@@ -1548,7 +1548,7 @@ void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int o
 void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, const MipsRegisterData& regData,
 	const MipsImmediateData& immData)
 {
-	const u8* encoding = (const u8*) opData.opcode.encoding;
+	const char* encoding = opData.opcode.encoding;
 
 	MipsImmediateType type;
 	while (*encoding != 0)

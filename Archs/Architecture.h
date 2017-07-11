@@ -27,7 +27,7 @@ public:
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 private:
-	u64 position;
+	int64_t position;
 	Endianness endianness;
 	std::wstring tempText;
 	std::wstring symText;

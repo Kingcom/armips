@@ -18,7 +18,7 @@ bool ArmStateCommand::Validate()
 void ArmStateCommand::writeSymData(SymbolData& symData) const
 {
 	// TODO: find a less ugly way to check for undefined memory positions
-	if (RamPos == (u64)-1)
+	if (RamPos == -1)
 		return;
 
 	if (armstate == true)
@@ -77,7 +77,7 @@ void ArmPoolCommand::Encode() const
 {
 	for (size_t i = 0; i < values.size(); i++)
 	{
-		u32 value = values[i];
+		int32_t value = values[i];
 		g_fileManager->writeU32(value);
 	}
 }
@@ -86,7 +86,7 @@ void ArmPoolCommand::writeTempData(TempData& tempData) const
 {
 	for (size_t i = 0; i < values.size(); i++)
 	{
-		u32 value = values[i];
+		int32_t value = values[i];
 		tempData.writeLine(position+i*4,formatString(L".word 0x%08X",value));
 	}
 }

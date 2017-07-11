@@ -268,7 +268,7 @@ void FileTokenizer::createToken(TokenType type, size_t length)
 	linePos += length;
 }
 
-void FileTokenizer::createToken(TokenType type, size_t length, u64 value)
+void FileTokenizer::createToken(TokenType type, size_t length, int64_t value)
 {
 	token.type = type;
 	token.line = lineNumber;
@@ -428,10 +428,10 @@ bool FileTokenizer::parseOperator()
 	return false;
 }
 
-bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
+bool FileTokenizer::convertInteger(size_t start, size_t end, int64_t& result)
 {
 	// find base of number
-	u32 base = 10;
+	int32_t base = 10;
 	if (currentLine[start] == '0')
 	{
 		if (towlower(currentLine[start+1]) == 'x')
@@ -472,7 +472,7 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, u64& result)
 	{
 		wchar_t c = towlower(currentLine[start++]);
 
-		u32 value = c >= 'a' ? c-'a'+10 : c-'0';
+		int32_t value = c >= 'a' ? c-'a'+10 : c-'0';
 
 		if (value >= base)
 			return false;
@@ -529,7 +529,7 @@ Token FileTokenizer::loadToken()
 	// character constants
 	if (first == '\'' && pos+2 < currentLine.size() && currentLine[pos+2] == '\'')
 	{
-		createToken(TokenType::Integer,3,(u64)currentLine[pos+1]);
+		createToken(TokenType::Integer,3,(int64_t)currentLine[pos+1]);
 		return std::move(token);
 	}
 
@@ -601,7 +601,7 @@ Token FileTokenizer::loadToken()
 
 		if (!isFloat)
 		{
-			u64 value;
+			int64_t value;
 			if (convertInteger(start,end,value) == false)
 			{
 				createTokenCurrentString(TokenType::NumberString,end-start);

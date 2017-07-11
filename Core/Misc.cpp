@@ -203,12 +203,12 @@ void TempData::end()
 		file.close();
 }
 
-void TempData::writeLine(u64 memoryAddress, const std::wstring& text)
+void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
 {
 	if (file.isOpen())
 	{
 		wchar_t hexbuf[10] = {0};
-		swprintf(hexbuf, 10, L"%08X ", (u32) memoryAddress);
+		swprintf(hexbuf, 10, L"%08X ", (int32_t) memoryAddress);
 		std::wstring str = hexbuf + text;
 		while (str.size() < 70)
 			str += ' ';

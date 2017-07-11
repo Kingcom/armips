@@ -39,7 +39,7 @@ int64_t MipsElfFile::getVirtualAddress()
 	{
 		ElfSegment* seg = elf.getSegment(segment);
 		ElfSection* sect = seg->getSection(section);
-		size_t addr = seg->getVirtualAddress() + sect->getOffset();
+		int64_t addr = seg->getVirtualAddress() + sect->getOffset();
 		return addr+sectionOffset;
 	}
 	
@@ -54,7 +54,7 @@ int64_t MipsElfFile::getPhysicalAddress()
 	{
 		ElfSegment* seg = elf.getSegment(segment);
 		ElfSection* sect = seg->getSection(section);
-		size_t addr = seg->getOffset() + sect->getOffset();
+		int64_t addr = seg->getOffset() + sect->getOffset();
 		return addr;
 	}
 	
@@ -81,8 +81,8 @@ bool MipsElfFile::seekVirtual(int64_t virtualAddress)
 	for (size_t i = 0; i < elf.getSegmentCount(); i++)
 	{
 		ElfSegment* seg = elf.getSegment(i);
-		size_t segStart = seg->getVirtualAddress();
-		size_t segEnd = segStart+seg->getPhysSize();
+		int64_t segStart = seg->getVirtualAddress();
+		int64_t segEnd = segStart+seg->getPhysSize();
 
 		if (segStart <= virtualAddress && virtualAddress < segEnd)
 		{
@@ -90,8 +90,8 @@ bool MipsElfFile::seekVirtual(int64_t virtualAddress)
 			for (size_t l = 0; l < seg->getSectionCount(); l++)
 			{
 				ElfSection* sect = seg->getSection(l);
-				size_t sectStart = segStart+sect->getOffset();
-				size_t sectEnd = sectStart+sect->getSize();
+				int64_t sectStart = segStart+sect->getOffset();
+				int64_t sectEnd = sectStart+sect->getSize();
 				
 				if (sectStart <= virtualAddress && virtualAddress < sectEnd)
 				{
@@ -118,8 +118,8 @@ bool MipsElfFile::seekPhysical(int64_t physicalAddress)
 	for (size_t i = 0; i < elf.getSegmentCount(); i++)
 	{
 		ElfSegment* seg = elf.getSegment(i);
-		size_t segStart = seg->getOffset();
-		size_t segEnd = segStart+seg->getPhysSize();
+		int64_t segStart = seg->getOffset();
+		int64_t segEnd = segStart+seg->getPhysSize();
 
 		if (segStart <= physicalAddress && physicalAddress < segEnd)
 		{
@@ -127,14 +127,14 @@ bool MipsElfFile::seekPhysical(int64_t physicalAddress)
 			for (size_t l = 0; l < seg->getSectionCount(); l++)
 			{
 				ElfSection* sect = seg->getSection(l);
-				size_t sectStart = segStart+sect->getOffset();
-				size_t sectEnd = sectStart+sect->getSize();
+				int64_t sectStart = segStart+sect->getOffset();
+				int64_t sectEnd = sectStart+sect->getSize();
 				
 				if (sectStart <= physicalAddress && physicalAddress < sectEnd)
 				{
 					segment = (int) i;
 					section = (int) l;
-					sectionOffset = (size_t) (physicalAddress-sectStart);
+					sectionOffset = physicalAddress-sectStart;
 					return true;
 				}
 			}
@@ -148,14 +148,14 @@ bool MipsElfFile::seekPhysical(int64_t physicalAddress)
 	for (size_t i = 0; i < elf.getSegmentlessSectionCount(); i++)
 	{
 		ElfSection* sect = elf.getSegmentlessSection(i);
-		size_t sectStart = sect->getOffset();
-		size_t sectEnd = sectStart+sect->getSize();
+		int64_t sectStart = sect->getOffset();
+		int64_t sectEnd = sectStart+sect->getSize();
 		
 		if (sectStart <= physicalAddress && physicalAddress < sectEnd)
 		{
 			segment = -1;
 			section = (int) i;
-			sectionOffset = (size_t) (physicalAddress-sectStart);
+			sectionOffset = physicalAddress-sectStart;
 			return true;
 		}
 	}
@@ -179,7 +179,7 @@ bool MipsElfFile::write(void* data, size_t length)
 		ElfSegment* seg = elf.getSegment(segment);
 		ElfSection* sect = seg->getSection(section);
 
-		size_t pos = sect->getOffset()+sectionOffset;
+		int64_t pos = sect->getOffset()+sectionOffset;
 		seg->writeToData(pos,data,length);
 		sectionOffset += length;
 		return true;

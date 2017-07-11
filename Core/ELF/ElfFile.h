@@ -107,11 +107,11 @@ private:
 
 struct RelocationData
 {
-	u64 opcodeOffset;
-	u64 relocationBase;
+	int64_t opcodeOffset;
+	int64_t relocationBase;
 	unsigned int opcode;
 
-	u64 symbolAddress;
+	int64_t symbolAddress;
 	int targetSymbolType;
 	int targetSymbolInfo;
 

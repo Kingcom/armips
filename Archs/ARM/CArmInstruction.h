@@ -67,7 +67,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	virtual void setPoolAddress(u64 address);
+	virtual void setPoolAddress(int64_t address);
 private:
 	void FormatOpcode(char* Dest, const char* Source) const;
 	void FormatInstruction(const char* encoding, char* dest) const;
@@ -75,6 +75,6 @@ private:
 
 	ArmOpcodeVariables Vars;
 	tArmOpcode Opcode;
-	u64 RamPos;
+	int64_t RamPos;
 	ArmArchType arch;
 };

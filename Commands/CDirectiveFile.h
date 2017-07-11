@@ -71,7 +71,7 @@ class CDirectiveAlignFill: public CAssemblerCommand
 public:
 	enum Mode { Align, Fill };
 
-	CDirectiveAlignFill(u64 value, Mode mode);
+	CDirectiveAlignFill(int64_t value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Expression& fillValue, Mode mode);
 	virtual bool Validate();
@@ -82,9 +82,9 @@ private:
 	Mode mode;
 	Expression valueExpression;
 	Expression fillExpression;
-	u64 value;
-	u64 finalSize;
-	u8 fillByte;
+	int64_t value;
+	int64_t finalSize;
+	int8_t fillByte;
 	int64_t virtualAddress;
 };
 
@@ -98,7 +98,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) const { };
 private:
 	Expression expression;
-	u64 value;
+	int64_t value;
 	int64_t virtualAddress;
 };
 

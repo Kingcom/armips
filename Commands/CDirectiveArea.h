@@ -14,11 +14,11 @@ public:
 	void setFillExpression(Expression& exp);
 	void setContent(CAssemblerCommand* content) { this->content = content; }
 private:
-	u64 position;
+	int64_t position;
 	Expression sizeExpression;
 	size_t areaSize;
 	size_t contentSize;
 	Expression fillExpression;
-	u8 fillValue;
+	int8_t fillValue;
 	CAssemblerCommand* content;
 };
