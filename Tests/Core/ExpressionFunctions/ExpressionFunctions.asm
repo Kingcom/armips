@@ -2,28 +2,28 @@
 .create "output.bin",0
 
 .macro test0,name
-	.notice °name + "(): " \
+	.notice °(name) + "(): " \
 		+ name()
 .endmacro
 
 .macro test1,name,a
-	.notice °name + "(" + °a + "): " \
+	.notice °(name) + "(" + °(a) + "): " \
 		+ name(a)
 .endmacro
 
 .macro test1h,name,a
-	.notice °name + "(" + °a + "): " \
-		+ toHex(name(a))
+	.notice °(name) + "(" + °(a) + "): " \
+		+ toHex(name(a),16)
 .endmacro
 
 .macro test2,name,a,b
-	.notice °name + "(" + °a + "," + °b + "): " \
+	.notice °(name) + "(" + °(a) + "," + °(b) + "): " \
 		+ name(a,b)
 .endmacro
 
 .macro test2h,name,a,b
-	.notice °name + "(" + °a + "," + °b + "): " \
-		+ toHex(name(a,b))
+	.notice °name + "(" + °(a) + "," + °(b) + "): " \
+		+ toHex(name(a,b),16)
 .endmacro
 
 .macro test3,name,a,b,c
@@ -46,6 +46,9 @@ test1	fileSize,fileA
 test2h	readU8,fileA,2
 test2h	readU16,fileA,2
 test1h	readU32,fileA
+test2h	readS8,fileA,2
+test2h	readS16,fileA,2
+test1h	readS32,fileA
 
 test1	int, 3.0
 test1	int, 3.7
@@ -56,12 +59,12 @@ test1	float, 3
 
 test1	frac, 3.0
 test1	frac, 3.7
-test1	frac, (-3.7)
+test1	frac, -3.7
 
 test1	abs, 3
-test1	abs, (-3)
+test1	abs, -3
 test1	abs, 3.7
-test1	abs, (-3.7)
+test1	abs, -3.7
 
 str equ "teststest"
 part equ "test"

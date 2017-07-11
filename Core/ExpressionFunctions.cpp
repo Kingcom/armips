@@ -532,6 +532,10 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"readu16",		{ &expFuncRead<uint16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"readu32",		{ &expFuncRead<uint32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"readu64",		{ &expFuncRead<uint64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"reads8",		{ &expFuncRead<int8_t>,		1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"reads16",		{ &expFuncRead<int16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"reads32",		{ &expFuncRead<int32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"reads64",		{ &expFuncRead<int64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"readascii",		{ &expFuncReadAscii,		1,	3,	ExpFuncSafety::ConditionalUnsafe } },
 
 	{ L"isarm",			{ &expFuncIsArm,			0,	0,	ExpFuncSafety::Safe } },
