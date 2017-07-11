@@ -130,8 +130,8 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 
 bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 {
-	if ((character >= 'a' && character <= 'z') || character >= 'A' && character <= 'Z') return true;
-	if (!first && character >= '0' && character <= '9') return true;
+	if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) return true;
+	if (!first && (character >= '0' && character <= '9')) return true;
 	if (character == '_' || character == '.') return true;
 	if (character == '@') return true;
 	return false;
@@ -181,7 +181,6 @@ std::wstring SymbolTable::getUniqueLabelName(bool local)
 
 void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 {
-	int lastSection = 0;
 	for (const LabelDefinition& def: labels)
 	{
 		if (!isValidSymbolName(def.name))

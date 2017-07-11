@@ -103,7 +103,6 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 				if (data[pos] != 8)
 					return false;
 
-				int nameLen = data[pos+1];
 				std::wstring& name = segments[segments.size()-1].name;
 				pos += 1 + loadString(data,pos+1,name);
 			}
@@ -342,7 +341,6 @@ bool PsxRelocator::init(const std::wstring& inputName)
 		}
 
 		// init symbols
-		bool error = false;
 		for (PsxSymbol& sym: file.symbols)
 		{
 			std::wstring lowered = sym.name;
@@ -352,14 +350,12 @@ bool PsxRelocator::init(const std::wstring& inputName)
 			if (sym.label == NULL)
 			{
 				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
-				error = true;
 				continue;
 			}
 
 			if (sym.label->isDefined() && sym.type != PsxSymbolType::External)
 			{
 				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name);
-				error = true;
 				continue;
 			}
 
@@ -533,7 +529,7 @@ DirectivePsxObjImport::DirectivePsxObjImport(const std::wstring& fileName)
 
 bool DirectivePsxObjImport::Validate()
 {
-	int memory = g_fileManager->getVirtualAddress();
+	int memory = (int) g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory(memory);
 	return rel.hasDataChanged();

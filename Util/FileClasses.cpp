@@ -1008,7 +1008,6 @@ void TextFile::writeCharacter(wchar_t character)
 	if (mode != Write) return;
 
 	// only support utf8 for now
-	int length = 0;
 	if (character < 0x80)
 	{
 #ifdef _WIN32

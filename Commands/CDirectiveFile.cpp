@@ -207,8 +207,6 @@ CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
 bool CDirectiveIncbin::Validate()
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
-	int64_t oldStart = start;
-	int64_t oldSize = size;
 
 	if (startExpression.isLoaded())
 	{

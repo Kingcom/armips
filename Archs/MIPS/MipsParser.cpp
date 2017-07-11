@@ -930,7 +930,7 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 				return false;
 		}
 
-		const Token& token = parser.nextToken();
+		parser.eatToken();
 		
 		int num = 0;
 		if (sequenceParser.parse(parser,num) == false)

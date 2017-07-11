@@ -80,7 +80,7 @@ bool ElfSegment::isSectionPartOf(ElfSection* section)
 	int sectionEnd = sectionStart+sectionSize;
 
 	int segmentStart = header.p_offset;
-	int segmentEnd = header.p_offset+header.p_filesz;
+	int segmentEnd = segmentStart+header.p_filesz;
 
 	// exclusive > in case the size is 0
 	if (sectionStart < (int)header.p_offset || sectionStart > segmentEnd) return false;
