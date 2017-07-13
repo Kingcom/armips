@@ -135,7 +135,7 @@ private:
 	int floatToHalfFloat(int i);
 
 	bool IgnoreLoadDelay;
-	u64 RamPos;
+	int64_t RamPos;
 	bool addNop;
 
 	// opcode variables

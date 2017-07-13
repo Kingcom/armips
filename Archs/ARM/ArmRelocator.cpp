@@ -139,7 +139,7 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 	return true;
 }
 
-void ArmElfRelocator::setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType)
+void ArmElfRelocator::setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType)
 {
 	if (symbolType == STT_FUNC)
 	{

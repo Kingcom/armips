@@ -32,5 +32,5 @@ public:
 private:
 	CAssemblerLabel* label;
 	CAssemblerCommand* content;
-	u64 start, end;
+	int64_t start, end;
 };

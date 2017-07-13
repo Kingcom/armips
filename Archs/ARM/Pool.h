@@ -11,7 +11,7 @@ public:
 	virtual void writeTempData(TempData& tempData) const { };
 	virtual void writeSymData(SymbolData& symData) const;
 private:
-	u64 RamPos;
+	int64_t RamPos;
 	bool armstate;
 };
 
@@ -20,7 +20,7 @@ class ArmOpcodeCommand;
 struct ArmPoolEntry
 {
 	ArmOpcodeCommand* command;
-	u32 value;
+	int32_t value;
 };
 
 class ArmPoolCommand: public CAssemblerCommand
@@ -32,6 +32,6 @@ public:
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 private:
-	u64 position;
-	std::vector<u32> values;
+	int64_t position;
+	std::vector<int32_t> values;
 };

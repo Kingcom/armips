@@ -41,7 +41,7 @@ bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 	return true;
 }
 
-void MipsElfRelocator::setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType)
+void MipsElfRelocator::setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType)
 {
 	data.symbolAddress = symbolAddress;
 	data.targetSymbolType = symbolType;

@@ -43,7 +43,7 @@ int CArmInstruction::getShiftedImmediate(unsigned int num, int& ShiftAmount)
 	return -1;
 }
 
-void CArmInstruction::setPoolAddress(u64 address)
+void CArmInstruction::setPoolAddress(int64_t address)
 {
 	int pos = (int) (address-((RamPos+8) & 0xFFFFFFFD));
 	if (abs(pos) > 4095)
@@ -639,5 +639,5 @@ void CArmInstruction::Encode() const
 		printf("doh");
 	}
 
-	g_fileManager->writeU32((u32)encoding);
+	g_fileManager->writeU32((uint32_t)encoding);
 }

@@ -222,7 +222,7 @@ ExpressionValue ExpressionValue::operator<<(const ExpressionValue& other) const
 	{
 	case ExpressionValueCombination::II:
 		result.type = ExpressionValueType::Integer;
-		result.intValue = intValue << other.intValue;
+		result.intValue = ((uint64_t) intValue) << other.intValue;
 		break;
 	}
 
@@ -236,7 +236,7 @@ ExpressionValue ExpressionValue::operator>>(const ExpressionValue& other) const
 	{
 	case ExpressionValueCombination::II:
 		result.type = ExpressionValueType::Integer;
-		result.intValue = intValue >> other.intValue;
+		result.intValue = ((uint64_t) intValue) >> other.intValue;
 		break;
 	}
 
@@ -420,7 +420,7 @@ ExpressionInternal::~ExpressionInternal()
 	deallocate();
 }
 
-ExpressionInternal::ExpressionInternal(u64 value)
+ExpressionInternal::ExpressionInternal(int64_t value)
 	: ExpressionInternal()
 {
 	type = OperatorType::Integer;
@@ -498,7 +498,7 @@ void ExpressionInternal::deallocate()
 
 void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 {
-	for (int i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < childrenCount; i++)
 	{
 		if (children[i] != NULL)
 		{
@@ -878,7 +878,7 @@ void Expression::replaceMemoryPos(const std::wstring& identifierName)
 		expression->replaceMemoryPos(identifierName);
 }
 
-Expression createConstExpression(u64 value)
+Expression createConstExpression(int64_t value)
 {
 	Expression exp;
 	ExpressionInternal* num = new ExpressionInternal(value);

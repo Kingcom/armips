@@ -18,7 +18,7 @@ CThumbInstruction::CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpco
 	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
 }
 
-void CThumbInstruction::setPoolAddress(u64 address)
+void CThumbInstruction::setPoolAddress(int64_t address)
 {
 	int pos = (int) address-((RamPos+4) & 0xFFFFFFFD);
 	if (pos < 0 || pos > 1020)

@@ -90,6 +90,6 @@ class MipsElfRelocator: public IElfRelocator
 {
 public:
 	virtual bool relocateOpcode(int type, RelocationData& data);
-	virtual void setSymbolAddress(RelocationData& data, u64 symbolAddress, int symbolType);
+	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType);
 	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 };

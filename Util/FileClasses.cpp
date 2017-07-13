@@ -1008,7 +1008,6 @@ void TextFile::writeCharacter(wchar_t character)
 	if (mode != Write) return;
 
 	// only support utf8 for now
-	int length = 0;
 	if (character < 0x80)
 	{
 #ifdef _WIN32
@@ -1114,7 +1113,7 @@ const EncodingValue encodingValues[] = {
 
 TextFile::Encoding getEncodingFromString(const std::wstring& str)
 {
-	for (int i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
+	for (size_t i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
 	{
 		if (str.compare(encodingValues[i].name) == 0)
 			return encodingValues[i].value;

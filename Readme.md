@@ -231,11 +231,15 @@ Below is a table of functions built into the assembler that can be used with the
 | `regex_extract(source, regex, optional index = 0)` | string of `regex` matched in `source` |
 | `find(source, substr, optional start = 0)` | lowest index of `substr` in `source` from `start`, else `-1` |
 | `rfind(source, substr, optional start = -1)` | highest index of `substr` in `source` from `start`, else `-1` |
-| `readbyte(file, optional pos = 0)` | read byte from `file` at position `pos` |
-| `readu8(file, optional pos = 0)` | read byte from `file` at position `pos` |
-| `readu16(file, optional pos = 0)` | read u16 from `file` at position `pos` |
-| `readu32(file, optional pos = 0)` | read u32 from `file` at position `pos` |
-| `readu64(file, optional pos = 0)` | read u64 from `file` at position `pos` |
+| `readbyte(file, optional pos = 0)` | read unsigned 8-bit value from `file` at position `pos` |
+| `readu8(file, optional pos = 0)` | read unsigned 8-bit value from `file` at position `pos` |
+| `readu16(file, optional pos = 0)` | read unsigned 16-bit value  from `file` at position `pos` |
+| `readu32(file, optional pos = 0)` | read unsigned 32-bit value  from `file` at position `pos` |
+| `readu64(file, optional pos = 0)` | read unsigned 64-bit value  from `file` at position `pos` |
+| `reads8(file, optional pos = 0)` | read signed 8-bit value from `file` at position `pos` |
+| `reads16(file, optional pos = 0)` | read signed 16-bit value from `file` at position `pos` |
+| `reads32(file, optional pos = 0)` | read signed 32-bit value from `file` at position `pos` |
+| `reads64(file, optional pos = 0)` | read signed 64-bit value from `file` at position `pos` |
 | `readascii(file, optional start = 0, optional len = 0)` | read ASCII string from `file` at `start` length `len` |
 | `isarm()` | `1` if in ARM mode, `0` otherwise |
 | `isthumb()` | `1` if in Thumb mode, `0` otherwise |

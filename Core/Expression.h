@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-inline std::wstring to_wstring(u64 value)
+inline std::wstring to_wstring(int64_t value)
 {
 	return formatString(L"%d", value);
 }
@@ -56,7 +56,7 @@ struct ExpressionValue
 		type = ExpressionValueType::Invalid;
 	}
 
-	ExpressionValue(u64 value)
+	ExpressionValue(int64_t value)
 	{
 		type = ExpressionValueType::Integer;
 		intValue = value;
@@ -96,7 +96,7 @@ struct ExpressionValue
 
 	struct
 	{
-		u64 intValue;
+		int64_t intValue;
 		double floatValue;
 	};
 
@@ -131,7 +131,7 @@ class ExpressionInternal
 public:
 	ExpressionInternal();
 	~ExpressionInternal();
-	ExpressionInternal(u64 value);
+	ExpressionInternal(int64_t value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
 	ExpressionInternal(OperatorType op, ExpressionInternal* a = NULL,
@@ -158,7 +158,7 @@ private:
 
 	union
 	{
-		u64 intValue;
+		int64_t intValue;
 		double floatValue;
 	};
 	std::wstring strValue;
@@ -231,4 +231,4 @@ private:
 	bool constExpression;
 };
 
-Expression createConstExpression(u64 value);
+Expression createConstExpression(int64_t value);

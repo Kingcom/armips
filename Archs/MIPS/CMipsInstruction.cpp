@@ -144,7 +144,7 @@ bool CMipsInstruction::Validate()
 			else if (opcodeData.opcode.flags & MO_RSP_DWOFFSET) shift = 3;
 			else if (opcodeData.opcode.flags & MO_RSP_QWOFFSET) shift = 4;
 
-			if (immediateData.primary.value & (1 << shift) - 1)
+			if (immediateData.primary.value & ((1 << shift) - 1))
 			{
 				Logger::queueError(Logger::Error,L"Offset must be %d-byte aligned",1<<shift);
 				return false;
@@ -311,7 +311,7 @@ void CMipsInstruction::encodeNormal() const
 		encoding |= (registerData.vrt.num & 0x1F) << 16;
 	}
 
-	g_fileManager->writeU32((u32)encoding);
+	g_fileManager->writeU32((uint32_t)encoding);
 }
 
 void CMipsInstruction::encodeVfpu() const
@@ -340,7 +340,7 @@ void CMipsInstruction::encodeVfpu() const
 		break;
 	}
 
-	g_fileManager->writeU32((u32)encoding);
+	g_fileManager->writeU32((uint32_t)encoding);
 }
 
 void CMipsInstruction::Encode() const

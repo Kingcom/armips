@@ -21,10 +21,10 @@ MipsMacroCommand::~MipsMacroCommand()
 
 bool MipsMacroCommand::Validate()
 {
-	u64 memoryPos = g_fileManager->getVirtualAddress();
+	int64_t memoryPos = g_fileManager->getVirtualAddress();
 	content->applyFileInfo();
 	bool result = content->Validate();
-	u64 newMemoryPos = g_fileManager->getVirtualAddress();
+	int64_t newMemoryPos = g_fileManager->getVirtualAddress();
 
 	applyFileInfo();
 
@@ -131,7 +131,7 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 		ExpressionValue value = immediates.secondary.expression.evaluate();
 		if (value.isFloat())
 		{
-			u32 newValue = getFloatBits((float)value.floatValue);
+			int32_t newValue = getFloatBits((float)value.floatValue);
 			immediates.secondary.expression = createConstExpression(newValue);
 		}
 	}

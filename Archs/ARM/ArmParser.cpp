@@ -234,13 +234,13 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	std::wstring stringValue = shiftMode.getStringValue();
 	
 	bool hasNumber = isNumber(stringValue.back());
-	u64 number;
+	int64_t number;
 
 	// handle modeXX syntax
 	if (hasNumber)
 	{
 		number = 0;
-		u64 multiplier = 1;
+		int64_t multiplier = 1;
 		while (isNumber(stringValue.back()))
 		{
 			number += multiplier*(stringValue.back() - '0');
@@ -390,7 +390,7 @@ bool ArmParser::decodeArmOpcode(const std::wstring& name, const tArmOpcode& opco
 	vars.Opcode.c = vars.Opcode.a = 0;
 	vars.Opcode.s = false;
 
-	const u8* encoding = (const u8*) opcode.name;
+	const char* encoding = opcode.name;
 	size_t pos = 0;
 
 	while (*encoding != 0)
@@ -536,7 +536,7 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 
 bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, ArmOpcodeVariables& vars)
 {
-	const u8* encoding = (const u8*) opcode.mask;
+	const char* encoding = opcode.mask;
 
 	ArmRegisterValue tempRegister;
 	
@@ -670,7 +670,7 @@ CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 
 bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode, ThumbOpcodeVariables& vars)
 {
-	const u8* encoding = (const u8*) opcode.mask;
+	const char* encoding = opcode.mask;
 
 	ArmRegisterValue tempRegister;
 	int value;

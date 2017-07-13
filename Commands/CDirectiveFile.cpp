@@ -207,8 +207,6 @@ CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
 bool CDirectiveIncbin::Validate()
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
-	u64 oldStart = start;
-	u64 oldSize = size;
 
 	if (startExpression.isLoaded())
 	{
@@ -254,7 +252,7 @@ void CDirectiveIncbin::Encode() const
 	if (size != 0)
 	{
 		ByteArray data = ByteArray::fromFile(fileName,(long)start,size);
-		if (data.size() != size)
+		if ((int) data.size() != size)
 		{
 			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName);
 			return;
@@ -278,7 +276,7 @@ void CDirectiveIncbin::writeSymData(SymbolData& symData) const
 // CDirectiveAlignFill
 //
 
-CDirectiveAlignFill::CDirectiveAlignFill(u64 value, Mode mode)
+CDirectiveAlignFill::CDirectiveAlignFill(int64_t value, Mode mode)
 {
 	this->mode = mode;
 	this->value = value;
@@ -311,8 +309,8 @@ bool CDirectiveAlignFill::Validate()
 		}
 	}
 
-	u64 oldSize = finalSize;
-	u64 mod;
+	int64_t oldSize = finalSize;
+	int64_t mod;
 	switch (mode)
 	{
 	case Align:
@@ -350,7 +348,7 @@ bool CDirectiveAlignFill::Validate()
 void CDirectiveAlignFill::Encode() const
 {
 	unsigned char buffer[128];
-	u64 n = finalSize;
+	int64_t n = finalSize;
 
 	memset(buffer,fillByte,n > 128 ? 128 : n);
 	while (n > 128)
@@ -499,7 +497,7 @@ bool DirectiveObjImport::Validate()
 	if (ctor != nullptr && ctor->Validate())
 		result = true;
 
-	u64 memory = (u64) g_fileManager->getVirtualAddress();
+	int64_t memory = g_fileManager->getVirtualAddress();
 	rel.relocate(memory);
 	g_fileManager->advanceMemory((size_t)memory);
 

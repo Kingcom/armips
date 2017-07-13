@@ -54,7 +54,7 @@ bool checkValidLabelName(const std::wstring& labelName)
 	return Global.symbolTable.isValidSymbolName(labelName);
 }
 
-bool isPowerOfTwo(u64 n)
+bool isPowerOfTwo(int64_t n)
 {
 	if (n == 0) return false;
 	return !(n & (n - 1));

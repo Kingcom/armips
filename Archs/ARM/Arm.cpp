@@ -65,7 +65,7 @@ IElfRelocator* CArmArchitecture::getElfRelocator()
 	return new ArmElfRelocator(version != AARCH_GBA);
 }
 
-void CArmArchitecture::addPoolValue(ArmOpcodeCommand* command, u32 value)
+void CArmArchitecture::addPoolValue(ArmOpcodeCommand* command, int32_t value)
 {
 	ArmPoolEntry entry;
 	entry.command = command;

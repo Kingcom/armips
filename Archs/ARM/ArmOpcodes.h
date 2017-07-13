@@ -59,7 +59,7 @@ typedef struct {
 	const char* mask;
 	unsigned int encoding;
 	unsigned int type:4;
-	u64 flags;
+	int64_t flags;
 } tArmOpcode;
 
 #define ARM_AMODE_IB 0

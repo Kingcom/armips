@@ -43,7 +43,7 @@ void CDirectiveConditional::setContent(CAssemblerCommand* ifBlock, CAssemblerCom
 
 bool CDirectiveConditional::evaluate()
 {
-	u64 value;
+	int64_t value;
 	if (expression.isLoaded())
 	{
 		if (expression.evaluateInteger(value) == false)

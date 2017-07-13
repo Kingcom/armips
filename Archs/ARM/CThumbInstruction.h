@@ -28,12 +28,12 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	size_t GetSize() { return OpcodeSize; };
-	virtual void setPoolAddress(u64 address);
+	virtual void setPoolAddress(int64_t address);
 private:
 	void FormatInstruction(const char* encoding, char* dest) const;
 	void WriteInstruction(unsigned short encoding) const;
 	ThumbOpcodeVariables Vars;
 	tThumbOpcode Opcode;
 	size_t OpcodeSize;
-	u64 RamPos;
+	int64_t RamPos;
 };

@@ -42,4 +42,4 @@ std::wstring getFullPathName(const std::wstring& path);
 bool checkLabelDefined(const std::wstring& labelName, int section);
 bool checkValidLabelName(const std::wstring& labelName);
 
-bool isPowerOfTwo(u64 n);
+bool isPowerOfTwo(int64_t n);

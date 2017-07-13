@@ -177,7 +177,7 @@ struct Token
 
 	union
 	{
-		u64 intValue;
+		int64_t intValue;
 		double floatValue;
 	};
 
@@ -267,13 +267,13 @@ protected:
 
 	void skipWhitespace();
 	void createToken(TokenType type, size_t length);
-	void createToken(TokenType type, size_t length, u64 value);
+	void createToken(TokenType type, size_t length, int64_t value);
 	void createToken(TokenType type, size_t length, double value);
 	void createToken(TokenType type, size_t length, const std::wstring& value);
 	void createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength);
 	void createTokenCurrentString(TokenType type, size_t length);
 
-	bool convertInteger(size_t start, size_t end, u64& result);
+	bool convertInteger(size_t start, size_t end, int64_t& result);
 	bool convertFloat(size_t start, size_t end, double& result);
 	bool parseOperator();
 

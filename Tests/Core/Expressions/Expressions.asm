@@ -102,6 +102,8 @@ check	2*3+3*2,12
 ; comparisons
 check	1 < 2, 1
 check	2 < 1, 0
+check	-1 < 1, 1
+check	1 < -1, 0
 check	1 < 1, 0
 check	2.0 < 2.1, 1
 check	2.1 < 2.0, 0
@@ -109,6 +111,8 @@ check	2.0 < 2.0, 0
 
 check	1 > 2, 0
 check	2 > 1, 1
+check	-1 > 1, 0
+check	1 > -1, 1
 check	1 > 1, 0
 check	2.0 > 2.1, 0
 check	2.1 > 2.0, 1
