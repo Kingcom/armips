@@ -99,7 +99,9 @@ CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& regist
 CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLi = LR"(
-		.if %imm% > 0xFFFF
+		.if (%imm% & ~0xFFFFFFFF) && ((%imm% < -0x80000000) || (%imm% >= 0x80000000))
+			.error "Immediate value too big"
+		.elseif %imm% & ~0xFFFF
 			.if (%imm% & 0xFFFF8000) == 0xFFFF8000
 				.if %lower%
 					addiu	%rs%,r0,%imm% & 0xFFFF
@@ -341,7 +343,7 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	} else if (immediate && (beqz || bnez))
 	{
 		const wchar_t* templateImmediate = LR"(
-			.if %imm% > 0xFFFF
+			.if (%imm% < -0x8000) || (%imm% >= 0x8000)
 				li		r1,%imm%
 				slt%u%	r1,%rs%,r1
 			.else
