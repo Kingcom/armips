@@ -229,6 +229,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "addu",	"d,s,t",	MIPS_SPECIAL(0x21),				MA_MIPS1,	0 },
 	{ "addu",	"s,t",		MIPS_SPECIAL(0x21),				MA_MIPS1,	MO_RSD },
 	{ "move",	"d,s",		MIPS_SPECIAL(0x21),				MA_MIPS1,	0 },
+	{ "clear",	"d",		MIPS_SPECIAL(0x21),				MA_MIPS1,	0 },
 	{ "sub",	"d,s,t",	MIPS_SPECIAL(0x22),				MA_MIPS1,	0 },
 	{ "sub",	"s,t",		MIPS_SPECIAL(0x22),				MA_MIPS1,	MO_RSD },
 	{ "neg",	"d,t",		MIPS_SPECIAL(0x22),				MA_MIPS1,	0 },
