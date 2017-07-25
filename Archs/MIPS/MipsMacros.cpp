@@ -398,11 +398,15 @@ CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& reg
 	if (psp && immediate)
 	{
 		const wchar_t* templatePspImmediate = LR"(
-			.if %left%
-				rotr	%rd%,%rs%,32-%amount%
+			.if %amount% != 0
+				.if %left%
+					rotr	%rd%,%rs%,-%amount%&31
+				.else
+					rotr	%rd%,%rs%,%amount%
+				.endif
 			.else
-				rotr	%rd%,%rs%,%amount%
-			.endif"
+				move	%rd%,%rs%
+			.endif
 		)";
 
 		selectedTemplate = templatePspImmediate;
@@ -410,31 +414,35 @@ CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& reg
 	{
 		const wchar_t* templatePspRegister = LR"(
 			.if %left%
-				subu	r1,r0,%rt%
+				negu	r1,%rt%
 				rotrv	%rd%,%rs%,r1
 			.else
 				rotrv	%rd%,%rs%,%rt%
-			.endif"
+			.endif
 		)";
 
 		selectedTemplate = templatePspRegister;
 	} else if (immediate)
 	{
 		const wchar_t* templateImmediate = LR"(
-			.if %left%
-				srl	r1,%rs%,32-%amount%
-				sll	%rd%,%rs%,%amount%
+			.if %amount% != 0
+				.if %left%
+					srl	r1,%rs%,-%amount%&31
+					sll	%rd%,%rs%,%amount%
+				.else
+					sll	r1,%rs%,-%amount%&31
+					srl	%rd%,%rs%,%amount%
+				.endif
+				or		%rd%,%rd%,r1
 			.else
-				sll	r1,%rs%,32-%amount%
-				srl	%rd%,%rs%,%amount%
-			.endif"
-			or	%rd%,r1"
+				move	%rd%,%rs%
+			.endif
 		)";
 		
 		selectedTemplate = templateImmediate;
 	} else {
 		const wchar_t* templateRegister = LR"(
-			subu	r1,r0,%rt%
+			negu	r1,%rt%
 			.if %left%
 				srlv	r1,%rs%,r1
 				sllv	%rd%,%rs%,%rt%
@@ -442,7 +450,7 @@ CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& reg
 				sllv	r1,%rs%,r1
 				srlv	%rd%,%rs%,%rt%
 			.endif
-			or	%rd%,r1"
+			or	%rd%,%rd%,r1
 		)";
 
 		selectedTemplate = templateRegister;
