@@ -787,7 +787,7 @@ abs   reg1,reg2
 dabs  reg1,reg2
 ```
 
-Stores absolute value of word/doubleword in reg2 into reg1 using a combination of `sra`/`dsra32`, `xor`, and `sub`/`dsub`.
+Stores absolute value of word/doubleword in reg2 into reg1 using a combination of `sra`/`dsra32`, `xor`, and `subu`/`dsubu`.
 
 ### Upper/lower versions
 
@@ -823,7 +823,7 @@ The assembler allows the creation of custom macros. This is an example macro, a 
 
 ```
 .macro myli,dest,value
-   .if value < 0x10000
+   .if value & ~0xFFFF
       ori   dest,r0,value
    .elseif (value & 0xFFFF8000) == 0xFFFF8000
       addiu dest,r0,value & 0xFFFF
