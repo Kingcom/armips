@@ -99,7 +99,7 @@ CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& regist
 CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLi = LR"(
-		.if (%imm% & ~0xFFFFFFFF) && ((%imm% < -0x80000000) || (%imm% >= 0x80000000))
+		.if abs(%imm%) > 0xFFFFFFFF
 			.error "Immediate value too big"
 		.elseif %imm% & ~0xFFFF
 			.if (%imm% & 0xFFFF8000) == 0xFFFF8000
