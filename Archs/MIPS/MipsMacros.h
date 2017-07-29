@@ -9,10 +9,12 @@
 #define MIPSM_W						0x00000005
 #define MIPSM_WU					0x00000006
 #define MIPSM_DW					0x00000007
-#define MIPSM_COP1					0x00000008
-#define MIPSM_COP2					0x00000009
-#define MIPSM_DCOP1					0x0000000a
-#define MIPSM_DCOP2					0x0000000b
+#define MIPSM_LLSCW					0x00000008
+#define MIPSM_LLSCDW				0x00000009
+#define MIPSM_COP1					0x0000000a
+#define MIPSM_COP2					0x0000000b
+#define MIPSM_DCOP1					0x0000000c
+#define MIPSM_DCOP2					0x0000000d
 #define MIPSM_ACCESSMASK			0x0000000f
 
 #define MIPSM_NE					0x00000001
