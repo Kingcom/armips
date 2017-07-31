@@ -767,7 +767,23 @@ bnel  reg,Imm,Dest
 beql  reg,Imm,Dest
 ```
 
-If reg/reg1 is less/greater than/equal/not equal to reg2/Imm, branches to the given address. A combination of `sltu` and `beq`/`bne` or `li`, `sltu` and `beq`/`bne` is used.
+If reg/reg1 is less than/greater than or equal to/equal to/not equal to reg2/Imm, branches to the given address. A combination of `sltu` and `beq`/`bne` or `li`, `sltu` and `beq`/`bne` is used.
+
+### Set macros
+
+```
+slt   reg1,reg2,Imm
+sltu  reg1,reg2,Imm
+sge   reg1,reg2,Imm
+sgeu  reg1,reg2,Imm
+sne   reg1,reg2,Imm
+seq   reg1,reg2,Imm
+sge   reg1,reg2,reg3
+sgeu  reg1,reg2,reg3
+sne   reg1,reg2,reg3
+seq   reg1,reg2,reg3
+
+If reg2 is less than/greater than or equal to/equal to/not equal to reg3/Imm, sets reg1 to `1`, otherwise sets reg1 to `0`. Various combinations of `li`, `slt`/`sltu`/`slti`/`sltiu` and `xor`/`xori` are used.
 
 ### Rotate macros
 
