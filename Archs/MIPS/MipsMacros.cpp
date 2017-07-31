@@ -108,21 +108,21 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 				.endif
 			.elseif (%imm% & 0xFFFF) == 0
 				.if %upper%
-					lui	%rs%,%imm% >> 16
+					lui		%rs%,%imm% >> 16
 				.elseif %lower%
 					nop
 				.endif
 			.else
 				.if %upper%
-					lui	%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+					lui		%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
 				.endif
 				.if %lower%
-					addiu %rs%,%imm% & 0xFFFF
+					addiu 	%rs%,%imm% & 0xFFFF
 				.endif
 			.endif
 		.else
 			.if %lower%
-				ori	%rs%,r0,%imm%
+				ori		%rs%,r0,%imm%
 			.endif
 		.endif
 	)";
@@ -150,7 +150,9 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLoadStore = LR"(
-		.if %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
+		.if %imm% & ~0xFFFFFFFF
+			.error "Address too big"
+		.elseif %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
 			.if %lower%
 				%op%	%rs%,%imm% & 0xFFFF(r0)
 			.elseif %upper%
@@ -158,7 +160,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 			.endif
 		.else
 			.if %upper%
-				lui	%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+				lui		%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
 			.endif
 			.if %lower%
 				%op%	%rs%,%imm% & 0xFFFF(%temp%)
@@ -276,9 +278,9 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
-				sb	%rd%,%off%(%rs%)
-				srl	r1,%rd%,8
-				sb	r1,%off%+1(%rs%)
+				sb		%rd%,%off%(%rs%)
+				srl		r1,%rd%,8
+				sb		r1,%off%+1(%rs%)
 			.endif
 		)";
 
@@ -335,8 +337,12 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	if (bne || beq)
 	{
 		const wchar_t* templateNeEq = LR"(
-			li		r1,%imm%
-			%op%	%rs%,r1,%dest%
+			.if %imm% == 0
+				%op%	%rs%,r0,%dest%
+			.else
+				li		r1,%imm%
+				%op%	%rs%,r1,%dest%
+			.endif
 		)";
 
 		selectedTemplate = templateNeEq;
