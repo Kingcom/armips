@@ -108,21 +108,21 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 				.endif
 			.elseif (%imm% & 0xFFFF) == 0
 				.if %upper%
-					lui	%rs%,%imm% >> 16
+					lui		%rs%,%imm% >> 16
 				.elseif %lower%
 					nop
 				.endif
 			.else
 				.if %upper%
-					lui	%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+					lui		%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
 				.endif
 				.if %lower%
-					addiu %rs%,%imm% & 0xFFFF
+					addiu 	%rs%,%imm% & 0xFFFF
 				.endif
 			.endif
 		.else
 			.if %lower%
-				ori	%rs%,r0,%imm%
+				ori		%rs%,r0,%imm%
 			.endif
 		.endif
 	)";
@@ -150,7 +150,9 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLoadStore = LR"(
-		.if %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
+		.if %imm% & ~0xFFFFFFFF
+			.error "Address too big"
+		.elseif %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
 			.if %lower%
 				%op%	%rs%,%imm% & 0xFFFF(r0)
 			.elseif %upper%
@@ -158,7 +160,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 			.endif
 		.else
 			.if %upper%
-				lui	%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+				lui		%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
 			.endif
 			.if %lower%
 				%op%	%rs%,%imm% & 0xFFFF(%temp%)
@@ -276,9 +278,9 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
-				sb	%rd%,%off%(%rs%)
-				srl	r1,%rd%,8
-				sb	r1,%off%+1(%rs%)
+				sb		%rd%,%off%(%rs%)
+				srl		r1,%rd%,8
+				sb		r1,%off%+1(%rs%)
 			.endif
 		)";
 
@@ -335,8 +337,12 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	if (bne || beq)
 	{
 		const wchar_t* templateNeEq = LR"(
-			li		r1,%imm%
-			%op%	%rs%,r1,%dest%
+			.if %imm% == 0
+				%op%	%rs%,r0,%dest%
+			.else
+				li		r1,%imm%
+				%op%	%rs%,r1,%dest%
+			.endif
 		)";
 
 		selectedTemplate = templateNeEq;
@@ -385,6 +391,88 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 			{ L"%rt%",		registers.grt.name },
 			{ L"%imm%",		immediates.primary.expression.toString() },
 			{ L"%dest%",	immediates.secondary.expression.toString() },
+	});
+}
+
+CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+{
+	const wchar_t* selectedTemplate;
+
+	int type = flags & MIPSM_CONDITIONMASK;
+
+	bool ne = type == MIPSM_NE;
+	bool eq = type == MIPSM_EQ;
+	bool ge = type == MIPSM_GE || type == MIPSM_GEU;
+	bool lt = type == MIPSM_LT || type == MIPSM_LTU;
+	bool unsigned_ = type == MIPSM_GEU || type == MIPSM_LTU;
+	bool immediate = (flags & MIPSM_IMM) != 0;
+
+	if (immediate && (ne || eq))
+	{
+		const wchar_t* templateImmediateEqNe = LR"(
+			.if %imm% & ~0xFFFF
+				li		%rd%,%imm%
+				xor		%rd%,%rs%,%rd%
+			.else
+				xori	%rd%,%rs%,%imm%
+			.endif
+			.if %eq%
+				sltiu	%rd%,%rd%,1
+			.else
+				sltu	%rd%,r0,%rd%
+			.endif
+		)";
+
+		selectedTemplate = templateImmediateEqNe;
+	} else if (ne || eq)
+	{
+		const wchar_t* templateEqNe = LR"(
+			xor		%rd%,%rs%,%rt%
+			.if %eq%
+				sltiu	%rd%,%rd%,1
+			.else
+				sltu	%rd%,r0,%rd%
+			.endif
+		)";
+
+		selectedTemplate = templateEqNe;
+	} else if (immediate && (ge || lt))
+	{
+		const wchar_t* templateImmediateGeLt = LR"(
+			.if (%imm% < -0x8000) || (%imm% >= 0x8000)
+				li		%rd%,%imm%
+				slt%u%	%rd%,%rs%,%rd%
+			.else
+				slti%u%	%rd%,%rs%,%imm%
+			.endif
+			.if %ge%
+				xori	%rd%,%rd%,1
+			.endif
+		)";
+
+		selectedTemplate = templateImmediateGeLt;
+	} else if (ge)
+	{
+		const wchar_t* templateGe = LR"(
+			slt%u%	%rd%,%rs%,%rt%
+			xori	%rd%,%rd%,1
+		)";
+
+		selectedTemplate = templateGe;
+	} else
+	{
+		return nullptr;
+	}
+
+	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
+	return createMacro(parser,macroText,flags, {
+			{ L"%u%",		unsigned_ ? L"u" : L""},
+			{ L"%eq%",		eq ? L"1" : L"0" },
+			{ L"%ge%",		ge ? L"1" : L"0" },
+			{ L"%rd%",		registers.grd.name },
+			{ L"%rs%",		registers.grs.name },
+			{ L"%rt%",		registers.grt.name },
+			{ L"%imm%",		immediates.secondary.expression.toString() },
 	});
 }
 
@@ -604,6 +692,17 @@ const MipsMacroDefinition mipsMacros[] = {
 	{ L"bgeul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bnel",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_NE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"beql",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_EQ|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+
+	{ L"slt",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_LT|MIPSM_IMM },
+	{ L"sltu",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_LTU|MIPSM_IMM },
+	{ L"sge",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_GE },
+	{ L"sge",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_GE|MIPSM_IMM },
+	{ L"sgeu",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_GEU },
+	{ L"sgeu",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_GEU|MIPSM_IMM },
+	{ L"sne",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_NE },
+	{ L"sne",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_NE|MIPSM_IMM },
+	{ L"seq",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_EQ },
+	{ L"seq",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_EQ|MIPSM_IMM },
 
 	{ L"rol",	L"d,s,t",	&generateMipsMacroRotate,			MIPSM_LEFT },
 	{ L"rol",	L"d,s,i",	&generateMipsMacroRotate,			MIPSM_LEFT|MIPSM_IMM },

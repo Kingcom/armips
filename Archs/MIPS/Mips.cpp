@@ -101,7 +101,7 @@ CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCt
 			{ L"%ctorContent%",		table },
 		});
 	} else {
-		return parser.parseTemplate(L"jr ra nop");
+		return parser.parseTemplate(L"jr ra :: nop");
 	}
 }
 
