@@ -782,6 +782,7 @@ sge   reg1,reg2,reg3
 sgeu  reg1,reg2,reg3
 sne   reg1,reg2,reg3
 seq   reg1,reg2,reg3
+```
 
 If reg2 is less than/greater than or equal to/equal to/not equal to reg3/Imm, sets reg1 to `1`, otherwise sets reg1 to `0`. Various combinations of `li`, `slt`/`sltu`/`slti`/`sltiu` and `xor`/`xori` are used.
 
