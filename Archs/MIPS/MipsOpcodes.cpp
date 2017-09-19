@@ -95,6 +95,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "swr",	"t,i16(s)",			MIPS_OP(0x2E),			MA_MIPS1,	0 },
 	{ "swr",	"t,(s)",			MIPS_OP(0x2E),			MA_MIPS1,	0 },
 	{ "cache",	"jc,i16(s)",		MIPS_OP(0x2F),			MA_MIPS2,	0 },
+	{ "cache",	"jc,(s)",			MIPS_OP(0x2F),			MA_MIPS2,	0 },
 	{ "ll",		"t,i16(s)",			MIPS_OP(0x30),			MA_MIPS2,	MO_DELAYRT|MO_IGNORERTD },
 	{ "ll",		"t,(s)",			MIPS_OP(0x30),			MA_MIPS2,	MO_DELAYRT|MO_IGNORERTD },
 	{ "lwc1",	"T,i16(s)",			MIPS_OP(0x31),			MA_MIPS1,	0 },
