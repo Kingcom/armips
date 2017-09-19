@@ -104,20 +104,20 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 		.elseif %imm% & ~0xFFFF
 			.if (%imm% & 0xFFFF8000) == 0xFFFF8000
 				.if %lower%
-					addiu	%rs%,r0,%imm% & 0xFFFF
+					addiu	%rs%,r0, lo(%imm%)
 				.endif
 			.elseif (%imm% & 0xFFFF) == 0
 				.if %upper%
-					lui		%rs%,%imm% >> 16
+					lui		%rs%, hi(%imm%)
 				.elseif %lower%
 					nop
 				.endif
 			.else
 				.if %upper%
-					lui		%rs%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+					lui		%rs%, hi(%imm%)
 				.endif
 				.if %lower%
-					addiu 	%rs%,%imm% & 0xFFFF
+					addiu 	%rs%, lo(%imm%)
 				.endif
 			.endif
 		.else
@@ -154,16 +154,16 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 			.error "Address too big"
 		.elseif %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
 			.if %lower%
-				%op%	%rs%,%imm% & 0xFFFF(r0)
+				%op%	%rs%, lo(%imm%)(r0)
 			.elseif %upper%
 				nop
 			.endif
 		.else
 			.if %upper%
-				lui		%temp%,(%imm% >> 16) + ((%imm% & 0x8000) != 0)
+				lui		%temp%, hi(%imm%)
 			.endif
 			.if %lower%
-				%op%	%rs%,%imm% & 0xFFFF(%temp%)
+				%op%	%rs%, lo(%imm%)(%temp%)
 			.endif
 		.endif
 	)";
@@ -657,7 +657,7 @@ const MipsMacroDefinition mipsMacros[] = {
 	{ L"sw.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_W|MIPSM_LOWER },
 	{ L"sd.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_DW|MIPSM_LOWER },
 	{ L"sc.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_LLSCW|MIPSM_LOWER },
-	{ L"scd.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_LLSCDW||MIPSM_LOWER },
+	{ L"scd.l",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_LLSCDW|MIPSM_LOWER },
 	{ L"swc1.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP1|MIPSM_LOWER },
 	{ L"s.s.l",	L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP1|MIPSM_LOWER },
 	{ L"swc2.l",L"S,I",		&generateMipsMacroLoadStore,		MIPSM_STORE|MIPSM_COP2|MIPSM_LOWER },
