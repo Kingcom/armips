@@ -747,22 +747,38 @@ Stores an unaligned halfword/word/doubleword to the address in sourcereg using a
 ```
 blt   reg1,reg2,Dest
 bltu  reg1,reg2,Dest
+bgt   reg1,reg2,Dest
+bgtu  reg1,reg2,Dest
 bge   reg1,reg2,Dest
 bgeu  reg1,reg2,Dest
+ble   reg1,reg2,Dest
+bleu  reg1,reg2,Dest
 bltl  reg1,reg2,Dest
 bltul reg1,reg2,Dest
+bgtl  reg1,reg2,Dest
+bgtul reg1,reg2,Dest
 bgel  reg1,reg2,Dest
 bgeul reg1,reg2,Dest
+blel  reg1,reg2,Dest
+bleul reg1,reg2,Dest
 blt   reg,Imm,Dest
 bltu  reg,Imm,Dest
+bgt   reg,Imm,Dest
+bgtu  reg,Imm,Dest
 bge   reg,Imm,Dest
 bgeu  reg,Imm,Dest
+ble   reg,Imm,Dest
+bleu  reg,Imm,Dest
 bne   reg,Imm,Dest
 beq   reg,Imm,Dest
 bltl  reg,Imm,Dest
 bltul reg,Imm,Dest
+bgtl  reg,Imm,Dest
+bgtul reg,Imm,Dest
 bgel  reg,Imm,Dest
 bgeul reg,Imm,Dest
+blel  reg,Imm,Dest
+bleul reg,Imm,Dest
 bnel  reg,Imm,Dest
 beql  reg,Imm,Dest
 ```
@@ -774,12 +790,18 @@ If reg/reg1 is less than/greater than or equal to/equal to/not equal to reg2/Imm
 ```
 slt   reg1,reg2,Imm
 sltu  reg1,reg2,Imm
+sgt   reg1,reg2,Imm
+sgtu  reg1,reg2,Imm
 sge   reg1,reg2,Imm
 sgeu  reg1,reg2,Imm
+sle   reg1,reg2,Imm
+sleu  reg1,reg2,Imm
 sne   reg1,reg2,Imm
 seq   reg1,reg2,Imm
 sge   reg1,reg2,reg3
 sgeu  reg1,reg2,reg3
+sle   reg1,reg2,reg3
+sleu  reg1,reg2,reg3
 sne   reg1,reg2,reg3
 seq   reg1,reg2,reg3
 ```

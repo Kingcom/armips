@@ -332,6 +332,7 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	bool unsigned_ = type == MIPSM_GEU || type == MIPSM_LTU;
 	bool immediate = (flags & MIPSM_IMM) != 0;
 	bool likely = (flags & MIPSM_LIKELY) != 0;
+	bool revcmp = (flags & MIPSM_REVCMP) != 0;
 
 	std::wstring op;
 	if (bne || beq)
@@ -353,7 +354,12 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	} else if (immediate && (beqz || bnez))
 	{
 		const wchar_t* templateImmediate = LR"(
-			.if (%imm% < -0x8000) || (%imm% >= 0x8000)
+			.if %revcmp% && %imm% == 0
+				slt%u% 	r1,r0,%rs%
+			.elseif %revcmp%
+				li		r1,%imm%
+				slt%u%	r1,r1,%rs%
+			.elseif (%imm% < -0x8000) || (%imm% >= 0x8000)
 				li		r1,%imm%
 				slt%u%	r1,%rs%,r1
 			.else
@@ -370,7 +376,11 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	} else if (beqz || bnez)
 	{
 		const wchar_t* templateRegister = LR"(
-			slt%u%	r1,%rs%,%rt%
+			.if %revcmp%
+				slt%u%	r1,%rt%,%rs%
+			.else
+				slt%u%	r1,%rs%,%rt%
+			.endif
 			%op%	r1,%dest%
 		)";
 
@@ -387,6 +397,7 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	return createMacro(parser,macroText,flags, {
 			{ L"%op%",		op },
 			{ L"%u%",		unsigned_ ? L"u" : L""},
+			{ L"%revcmp%",	revcmp ? L"1" : L"0"},
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rt%",		registers.grt.name },
 			{ L"%imm%",		immediates.primary.expression.toString() },
@@ -406,6 +417,7 @@ CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& regist
 	bool lt = type == MIPSM_LT || type == MIPSM_LTU;
 	bool unsigned_ = type == MIPSM_GEU || type == MIPSM_LTU;
 	bool immediate = (flags & MIPSM_IMM) != 0;
+	bool revcmp = (flags & MIPSM_REVCMP) != 0;
 
 	if (immediate && (ne || eq))
 	{
@@ -439,7 +451,12 @@ CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& regist
 	} else if (immediate && (ge || lt))
 	{
 		const wchar_t* templateImmediateGeLt = LR"(
-			.if (%imm% < -0x8000) || (%imm% >= 0x8000)
+			.if %revcmp% && %imm% == 0
+				slt%u%	%rd%,r0,%rs%
+			.elseif %revcmp%
+				li		%rd%,%imm%
+				slt%u%	%rd%,%rd%,%rs%
+			.elseif (%imm% < -0x8000) || (%imm% >= 0x8000)
 				li		%rd%,%imm%
 				slt%u%	%rd%,%rs%,%rd%
 			.else
@@ -454,7 +471,11 @@ CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& regist
 	} else if (ge)
 	{
 		const wchar_t* templateGe = LR"(
-			slt%u%	%rd%,%rs%,%rt%
+			.if %revcmp%
+				slt%u%	%rd%,%rt%,%rs%
+			.else
+				slt%u%	%rd%,%rs%,%rt%
+			.endif
 			xori	%rd%,%rd%,1
 		)";
 
@@ -469,6 +490,7 @@ CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& regist
 			{ L"%u%",		unsigned_ ? L"u" : L""},
 			{ L"%eq%",		eq ? L"1" : L"0" },
 			{ L"%ge%",		ge ? L"1" : L"0" },
+			{ L"%revcmp%",	revcmp ? L"1" : L"0" },
 			{ L"%rd%",		registers.grd.name },
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rt%",		registers.grt.name },
@@ -547,8 +569,8 @@ CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& reg
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
 	return createMacro(parser,macroText,flags, {
 			{ L"%left%",	left ? L"1" : L"0" },
-			{ L"%rs%",		registers.grs.name },
 			{ L"%rd%",		registers.grd.name },
+			{ L"%rs%",		registers.grs.name },
 			{ L"%rt%",		registers.grt.name },
 			{ L"%amount%",	immediates.primary.expression.toString() },
 	});
@@ -674,31 +696,53 @@ const MipsMacroDefinition mipsMacros[] = {
 
 	{ L"blt",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_DONTWARNDELAYSLOT },
 	{ L"blt",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bgt",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bgt",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bltu",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bltu",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bgtu",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bgtu",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bge",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bge",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"ble",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
+	{ L"ble",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bgeu",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bgeu",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bleu",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
+	{ L"bleu",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bne",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_NE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
 	{ L"beq",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_EQ|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT },
 	{ L"bltl",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bltl",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgtl",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgtl",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LT|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bltul",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bltul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgtul",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bgtul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_LTU|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bgel",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bgel",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"blel",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"blel",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GE|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bgeul",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bgeul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bleul",	L"s,t,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
+	{ L"bleul",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_GEU|MIPSM_IMM|MIPSM_REVCMP|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"bnel",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_NE|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 	{ L"beql",	L"s,i,I",	&generateMipsMacroBranch,			MIPSM_EQ|MIPSM_IMM|MIPSM_DONTWARNDELAYSLOT|MIPSM_LIKELY },
 
 	{ L"slt",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_LT|MIPSM_IMM },
 	{ L"sltu",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_LTU|MIPSM_IMM },
+	{ L"sgt",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_LT|MIPSM_IMM|MIPSM_REVCMP },
+	{ L"sgtu",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_LTU|MIPSM_IMM|MIPSM_REVCMP },
 	{ L"sge",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_GE },
 	{ L"sge",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_GE|MIPSM_IMM },
+	{ L"sle",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_GE|MIPSM_REVCMP },
+	{ L"sle",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_GE|MIPSM_IMM|MIPSM_REVCMP },
 	{ L"sgeu",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_GEU },
 	{ L"sgeu",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_GEU|MIPSM_IMM },
+	{ L"sleu",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_GEU|MIPSM_REVCMP },
+	{ L"sleu",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_GEU|MIPSM_IMM|MIPSM_REVCMP },
 	{ L"sne",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_NE },
 	{ L"sne",	L"d,s,I",	&generateMipsMacroSet,				MIPSM_NE|MIPSM_IMM },
 	{ L"seq",	L"d,s,t",	&generateMipsMacroSet,				MIPSM_EQ },

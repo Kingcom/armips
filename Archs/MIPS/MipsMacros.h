@@ -35,6 +35,7 @@
 #define MIPSM_LOAD					0x00010000
 #define MIPSM_STORE					0x00020000
 #define MIPSM_LIKELY				0x00040000
+#define MIPSM_REVCMP				0x00080000
 
 class Parser;
 
