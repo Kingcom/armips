@@ -687,6 +687,14 @@ la   reg,Immediate
 
 Loads Immediate into the specified register by using a combination of `lui`/`ori`, a simple `addiu`, or a simple `ori`, depending on the value of the Immediate.
 
+### Immediate float macros
+
+```
+li.s reg,Immediate
+```
+
+Loads float value Immediate into the specified FP register by using a combination of `li` and `mtc1`.
+
 ### Memory macros
 
 ```

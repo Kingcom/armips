@@ -96,6 +96,22 @@ CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& regist
 	});
 }
 
+CAssemblerCommand* generateMipsMacroLiFloat(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+{
+	const wchar_t* templateLiFloat = LR"(
+		li 		r1,float(%imm%)
+		mtc1	r1,%rs%
+	)";
+
+	std::wstring sraop, subop;
+
+	std::wstring macroText = preprocessMacro(templateLiFloat,immediates);
+	return createMacro(parser,macroText,flags, {
+			{ L"%imm%",		immediates.secondary.expression.toString() },
+			{ L"%rs%",		registers.frs.name },
+	});
+}
+
 CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLi = LR"(
@@ -590,6 +606,8 @@ const MipsMacroDefinition mipsMacros[] = {
 	{ L"la",	L"s,I",		&generateMipsMacroLi,				MIPSM_IMM|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"la.u",	L"s,I",		&generateMipsMacroLi,				MIPSM_IMM|MIPSM_UPPER },
 	{ L"la.l",	L"s,I",		&generateMipsMacroLi,				MIPSM_IMM|MIPSM_LOWER },
+
+	{ L"li.s",	L"S,I",		&generateMipsMacroLiFloat,			MIPSM_IMM },
 
 	{ L"lb",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_B|MIPSM_UPPER|MIPSM_LOWER },
 	{ L"lbu",	L"s,I",		&generateMipsMacroLoadStore,		MIPSM_LOAD|MIPSM_BU|MIPSM_UPPER|MIPSM_LOWER },
