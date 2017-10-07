@@ -224,6 +224,8 @@ Below is a table of functions built into the assembler that can be used with the
 | `float(val)` | cast int `val` to float |
 | `frac(val)` | fractional part of float `val` |
 | `abs(val)` | absolute value of int or float `val` |
+| `hi(val)` | High half of 32-bit value `val`, adjusted for sign extension of low half (MIPS) |
+| `lo(val)` | Sign-extended low half of 32-bit value `val` (MIPS) |
 | `strlen(str)` | number of characters in `str` |
 | `substr(str, start, count)` | substring of `str` from `start`, length `count` |
 | `regex_match(source, regex)` | `1` if `regex` matched entire `source`, `0` otherwise|
