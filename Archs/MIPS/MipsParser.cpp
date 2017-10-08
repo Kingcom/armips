@@ -1055,9 +1055,6 @@ static bool decodeImmediateSize(const char*& encoding, MipsImmediateType& dest)
 		case 16:
 			dest = MipsImmediateType::Immediate16;
 			break;
-		case 20:
-			dest = MipsImmediateType::Immediate20;
-			break;
 		case 26:
 			dest = MipsImmediateType::Immediate26;
 			break;
@@ -1314,6 +1311,14 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 'c':
 				CHECK(parseImmediate(parser,immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::CacheOp;
+				break;
+			case 's':
+				CHECK(parseImmediate(parser,immediate.secondary.expression));
+				immediate.secondary.type = MipsImmediateType::SyscallCode;
+				break;
+			case 'k':
+				CHECK(parseImmediate(parser,immediate.secondary.expression));
+				immediate.secondary.type = MipsImmediateType::BreakCode;
 				break;
 			case 'e':
 				CHECK(parseImmediate(parser,immediate.secondary.expression));

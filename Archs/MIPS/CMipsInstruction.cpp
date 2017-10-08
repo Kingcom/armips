@@ -34,7 +34,6 @@ int getImmediateBits(MipsImmediateType type)
 	case MipsImmediateType::Immediate16:
 	case MipsImmediateType::ImmediateHalfFloat:
 		return 16;
-	case MipsImmediateType::Immediate20:
 	case MipsImmediateType::Immediate20_0:
 		return 20;
 	case MipsImmediateType::Immediate26:
@@ -180,6 +179,20 @@ bool CMipsInstruction::Validate()
 
 		switch (immediateData.secondary.type)
 		{
+		case MipsImmediateType::SyscallCode:
+			if ((unsigned int)immediateData.secondary.value > 0xfffff)
+			{
+				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",immediateData.secondary.value);
+				return false;
+			}
+			break;
+		case MipsImmediateType::BreakCode:
+			if ((unsigned int)immediateData.secondary.value > 0x3ff)
+			{
+				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",immediateData.secondary.value);
+				return false;
+			}
+			break;
 		case MipsImmediateType::CacheOp:
 			if ((unsigned int)immediateData.secondary.value > 0x1f)
 			{
@@ -189,7 +202,7 @@ bool CMipsInstruction::Validate()
 			break;
 		case MipsImmediateType::Ext:
 		case MipsImmediateType::Ins:
-			if (immediateData.secondary.value > 32 || immediateData.secondary.value == 0)
+			if ((unsigned int)immediateData.secondary.value > 32 || immediateData.secondary.value == 0)
 			{
 				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",immediateData.secondary.value);
 				return false;
@@ -278,7 +291,6 @@ void CMipsInstruction::encodeNormal() const
 	{
 	case MipsImmediateType::Immediate5:
 	case MipsImmediateType::Immediate10:
-	case MipsImmediateType::Immediate20:
 		encoding |= immediateData.primary.value << 6;
 		break;
 	case MipsImmediateType::Immediate16:
@@ -292,6 +304,10 @@ void CMipsInstruction::encodeNormal() const
 
 	switch (immediateData.secondary.type)
 	{
+	case MipsImmediateType::SyscallCode:
+		encoding |= immediateData.secondary.value << 6;
+		break;
+	case MipsImmediateType::BreakCode:
 	case MipsImmediateType::CacheOp:
 		encoding |= immediateData.secondary.value << 16;
 		break;
