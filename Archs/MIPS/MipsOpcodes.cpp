@@ -9,7 +9,7 @@ const tMipsOpcode MipsOpcodes[] = {
 // 000 | *1    | *2    | J     | JAL   | BEQ   | BNE   | BLEZ  | BGTZ  | 00..07
 // 001 | ADDI  | ADDIU | SLTI  | SLTIU | ANDI  | ORI   | XORI  | LUI   | 08..0F
 // 010 | *3    | *4    | *5    | ---   | BEQL  | BNEL  | BLEZL | BGTZL | 10..17
-// 011 | DADDI | DADDIU| LDL   | LDR   | ---   | ---   | LQ    | SQ   | 18..1F
+// 011 | DADDI | DADDIU| LDL   | LDR   | ---   | ---   | LQ    | SQ    | 18..1F
 // 100 | LB    | LH    | LWL   | LW    | LBU   | LHU   | LWR   | LWU   | 20..27
 // 101 | SB    | SH    | SWL   | SW    | SDL   | SDR   | SWR   | CACHE | 28..2F
 // 110 | LL    | LWC1  | LV.S  | ---   | LLD   | ULV.Q | LV.Q  | LD    | 30..37
@@ -62,8 +62,10 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "ldl",	"t,(s)",			MIPS_OP(0x1A),			MA_MIPS3,	MO_64BIT|MO_DELAYRT|MO_IGNORERTD },
 	{ "ldr",	"t,i16(s)",			MIPS_OP(0x1B),			MA_MIPS3,	MO_64BIT|MO_DELAYRT|MO_IGNORERTD },
 	{ "ldr",	"t,(s)",			MIPS_OP(0x1B),			MA_MIPS3,	MO_64BIT|MO_DELAYRT|MO_IGNORERTD },
-	{ "lq",		"t,i16(s)",			MIPS_OP(0x1E),			MA_MIPS1,	MO_DELAYRT|MO_IGNORERTD },
-	{ "sq",		"t,i16(s)",			MIPS_OP(0x1F),			MA_MIPS1,	MO_DELAYRT|MO_IGNORERTD },
+	{ "lq",		"t,i16(s)",			MIPS_OP(0x1E),			MA_PS2,		MO_DELAYRT|MO_IGNORERTD },
+	{ "lq",		"t,(s)",			MIPS_OP(0x1E),			MA_PS2,		MO_DELAYRT|MO_IGNORERTD },
+	{ "sq",		"t,i16(s)",			MIPS_OP(0x1F),			MA_PS2,		MO_DELAYRT|MO_IGNORERTD },
+	{ "sq",		"t,(s)",			MIPS_OP(0x1F),			MA_PS2,		MO_DELAYRT|MO_IGNORERTD },
 	{ "lb",		"t,i16(s)",			MIPS_OP(0x20),			MA_MIPS1,	MO_DELAYRT|MO_IGNORERTD },
 	{ "lb",		"t,(s)",			MIPS_OP(0x20),			MA_MIPS1,	MO_DELAYRT|MO_IGNORERTD },
 	{ "lh",		"t,i16(s)",			MIPS_OP(0x21),			MA_MIPS1,	MO_DELAYRT|MO_IGNORERTD },
@@ -252,8 +254,12 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "mtsa",	"s",		MIPS_SPECIAL(0x29),				MA_PS2,		0 },
 	{ "slt",	"d,s,t",	MIPS_SPECIAL(0x2A),				MA_MIPS1,	0 },
 	{ "slt",	"s,t",		MIPS_SPECIAL(0x2A),				MA_MIPS1,	MO_RSD},
+	{ "sgt",	"d,t,s",	MIPS_SPECIAL(0x2A),				MA_MIPS1,	0 },
+	{ "sgt",	"d,s",		MIPS_SPECIAL(0x2A),				MA_MIPS1,	MO_RDT},
 	{ "sltu",	"d,s,t",	MIPS_SPECIAL(0x2B),				MA_MIPS1,	0 },
 	{ "sltu",	"s,t",		MIPS_SPECIAL(0x2B),				MA_MIPS1,	MO_RSD },
+	{ "sgtu",	"d,t,s",	MIPS_SPECIAL(0x2B),				MA_MIPS1,	0 },
+	{ "sgtu",	"d,s",		MIPS_SPECIAL(0x2B),				MA_MIPS1,	MO_RDT},
 	{ "dadd",	"d,s,t",	MIPS_SPECIAL(0x2C),				MA_MIPS3,	MO_64BIT },
 	{ "dadd",	"s,t",		MIPS_SPECIAL(0x2C),				MA_MIPS3,	MO_64BIT|MO_RSD },
 	{ "max",	"d,s,t",	MIPS_SPECIAL(0x2C),				MA_PSP,		0 },

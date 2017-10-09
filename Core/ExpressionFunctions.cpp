@@ -514,7 +514,7 @@ ExpressionValue expFuncLo(const std::wstring& funcName, const std::vector<Expres
 
 	GET_PARAM(parameters,0,value);
 
-	return ExpressionValue(value & 0xFFFF);
+	return ExpressionValue((int64_t)(int16_t)(value & 0xFFFF));
 }
 
 const ExpressionFunctionMap expressionFunctions = {
