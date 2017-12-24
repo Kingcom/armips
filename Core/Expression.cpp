@@ -125,42 +125,29 @@ ExpressionValue ExpressionValue::operator/(const ExpressionValue& other) const
 	switch (getValueCombination(type,other.type))
 	{
 	case ExpressionValueCombination::II:
-		if (other.intValue == 0)
-		{
-			result.type = ExpressionValueType::String;
-			result.strValue = L"undef";
+		result.type = ExpressionValueType::Integer;
+		if (intValue == INT64_MIN && other.intValue == -1){
+			result.intValue = INT64_MIN;
+			Logger::queueError(Logger::Warning,L"Division overflow in expression");
 			return result;
 		}
-		result.type = ExpressionValueType::Integer;
+		if (other.intValue == 0)
+		{
+			result.intValue = ~0;
+			Logger::queueError(Logger::Warning,L"Integer division by zero in expression");
+			return result;
+		}
 		result.intValue = intValue / other.intValue;
 		break;
 	case ExpressionValueCombination::FI:
-		if (other.intValue == 0)
-		{
-			result.type = ExpressionValueType::String;
-			result.strValue = L"undef";
-			return result;
-		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.intValue;
 		break;
 	case ExpressionValueCombination::IF:
-		if (other.floatValue == 0)
-		{
-			result.type = ExpressionValueType::String;
-			result.strValue = L"undef";
-			return result;
-		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = intValue / other.floatValue;
 		break;
 	case ExpressionValueCombination::FF:
-		if (other.floatValue == 0)
-		{
-			result.type = ExpressionValueType::String;
-			result.strValue = L"undef";
-			return result;
-		}
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.floatValue;
 		break;
@@ -175,13 +162,18 @@ ExpressionValue ExpressionValue::operator%(const ExpressionValue& other) const
 	switch (getValueCombination(type,other.type))
 	{
 	case ExpressionValueCombination::II:
-		if (other.intValue == 0)
-		{
-			result.type = ExpressionValueType::String;
-			result.strValue = L"undef";
+		result.type = ExpressionValueType::Integer;
+		if (intValue == INT64_MIN && other.intValue == -1){
+			result.intValue = 0;
+			Logger::queueError(Logger::Warning,L"Division overflow in expression");
 			return result;
 		}
-		result.type = ExpressionValueType::Integer;
+		if (other.intValue == 0)
+		{
+			result.intValue = intValue;
+			Logger::queueError(Logger::Warning,L"Integer division by zero in expression");
+			return result;
+		}
 		result.intValue = intValue % other.intValue;
 		break;
 	}
