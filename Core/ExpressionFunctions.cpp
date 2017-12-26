@@ -144,7 +144,7 @@ ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<
 		result.strValue = formatString(L"%d",parameters[0].intValue);
 		break;
 	case ExpressionValueType::Float:
-		result.strValue = formatString(L"%g",parameters[0].floatValue);
+		result.strValue = formatString(L"%#.17g",parameters[0].floatValue);
 		break;
 	default:
 		return result;
