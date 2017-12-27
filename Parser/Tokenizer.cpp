@@ -485,19 +485,11 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, int64_t& result)
 
 bool FileTokenizer::convertFloat(size_t start, size_t end, double& result)
 {
-	std::string str;
+	std::wstring str = currentLine.substr(start, end - start);
+	wchar_t* end_ptr;
 
-	for (size_t i = start; i < end; i++)
-	{
-		wchar_t c = currentLine[i];
-		if (c != '.' && (c < '0' || c > '9'))
-			return false;
-
-		str += (char) c;
-	}
-
-	result = atof(str.c_str());
-	return true;
+	result = wcstod(str.c_str(), &end_ptr);
+	return str.c_str() + str.size() == end_ptr;
 }
 
 Token FileTokenizer::loadToken()
@@ -580,24 +572,41 @@ Token FileTokenizer::loadToken()
 	}
 
 	// numbers
-	if ((first >= '0' && first <= '9') || first == '$')
+	if (first >= '0' && first <= '9')
 	{
 		// find end of number
 		size_t start = pos;
 		size_t end = pos;
-		bool isFloat = false;
 		bool isValid = true;
+		bool foundPoint = false;
+		bool foundExp = false;
 		while (end < currentLine.size() && (iswalnum(currentLine[end]) || currentLine[end] == '.'))
 		{
 			if (currentLine[end] == '.')
 			{
-				if (isFloat == true)
+				if (foundExp || foundPoint)
 					isValid = false;
-				isFloat = true;
+				foundPoint = true;
+			}
+			else if (towlower(currentLine[end]) == 'e')
+			{
+				if (foundExp)
+				{
+					isValid = false;
+				} else if (end+1 < currentLine.size() && (currentLine[end+1] == '+' || currentLine[end+1] == '-')){
+					end++;
+					if (end+1 >= currentLine.size() || !iswalnum(currentLine[end+1]))
+						isValid = false;
+				}
+				foundExp = true;
 			}
 
 			end++;
 		}
+
+		bool isFloat = foundPoint || (foundExp &&
+			towlower(currentLine[end-1]) != 'h' &&
+			!(towlower(currentLine[start]) == '0' && towlower(currentLine[start+1]) == 'x'));
 
 		if (!isFloat)
 		{

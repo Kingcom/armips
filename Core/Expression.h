@@ -8,7 +8,7 @@ inline std::wstring to_wstring(int64_t value)
 
 inline std::wstring to_wstring(double value)
 {
-	return formatString(L"%f", value);
+	return formatString(L"%#.17g", value);
 }
 
 enum class OperatorType

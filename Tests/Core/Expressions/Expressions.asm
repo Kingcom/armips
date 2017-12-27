@@ -88,11 +88,9 @@ check	3 * 2 * 1.5, 9
 check	5 / 2,2
 check	5 / 2.0, 2.5
 check	5.0 / 2, 2.5
-check	1 / 0, "undef"
 
 ; modulo
 check	3 % 2, 1
-check	1 % 0, "undef"
 
 ; combined addition and multiplication
 check	3*2+2,8
