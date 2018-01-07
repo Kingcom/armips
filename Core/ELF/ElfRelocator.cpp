@@ -317,6 +317,9 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 				loadRelocation(rel, relSection->getData(), relOffset, elf->isBigEndian());
 				int pos = rel.r_offset;
 
+				if (relocator->isDummyRelocationType(rel.getType()))
+					continue;
+
 				int symNum = rel.getSymbolNum();
 				if (symNum <= 0)
 				{

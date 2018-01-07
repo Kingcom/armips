@@ -15,6 +15,7 @@ class IElfRelocator
 {
 public:
 	virtual ~IElfRelocator() { };
+	virtual bool isDummyRelocationType(int type) const { return false; }
 	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
 	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }

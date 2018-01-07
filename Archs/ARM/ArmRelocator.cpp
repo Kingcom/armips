@@ -10,6 +10,13 @@ inline int signExtend(int value, int bitsLength)
 	return (value << (32-bitsLength)) >> (32-bitsLength);
 }
 
+bool ArmElfRelocator::isDummyRelocationType(int type) const
+{
+	// R_ARM_V4BX marks the position of a bx opcode, and does not
+	// cause any actual relocations
+	return type == R_ARM_V4BX;
+}
+
 /*
 	S = symbol address
 	T = 1 if symbol is a thumb mode function, 0 otherwise
