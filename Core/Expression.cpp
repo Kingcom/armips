@@ -541,8 +541,13 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	auto it = expressionFunctions.find(strValue);
 	if (it == expressionFunctions.end())
 	{
-		Logger::queueError(Logger::Error,L"Unknown function \"%s\"",strValue);
-		return invalid;
+		auto archExpressionFunctions = Arch->getExpressionFunctions();
+		it = archExpressionFunctions.find(strValue);
+		if (it == archExpressionFunctions.end())
+		{
+			Logger::queueError(Logger::Error,L"Unknown function \"%s\"",strValue);
+			return invalid;
+		}
 	}
 
 	if (checkParameterCount(it->second.minParams,it->second.maxParams) == false)

@@ -39,6 +39,9 @@
     <ClCompile Include="Archs\ARM\Arm.cpp">
       <Filter>Archs\ARM</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\ARM\ArmExpressionFunctions.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
     <ClCompile Include="Archs\ARM\ArmOpcodes.cpp">
       <Filter>Archs\ARM</Filter>
     </ClCompile>
@@ -64,6 +67,9 @@
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsExpressionFunctions.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp">
@@ -171,6 +177,9 @@
     <ClInclude Include="Archs\ARM\Arm.h">
       <Filter>Archs\ARM</Filter>
     </ClInclude>
+    <ClInclude Include="Archs\ARM\ArmExpressionFunctions.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
     <ClInclude Include="Archs\ARM\ArmOpcodes.h">
       <Filter>Archs\ARM</Filter>
     </ClInclude>
@@ -196,6 +205,9 @@
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\MipsElfFile.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsExpressionFunctions.h">
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\MipsMacros.h">

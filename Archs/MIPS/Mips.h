@@ -1,6 +1,5 @@
 #pragma once
 #include "Archs/Architecture.h"
-#include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
 
 enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_RSP, MARCH_INVALID };
@@ -27,6 +26,7 @@ public:
 	CMipsArchitecture();
 	virtual CAssemblerCommand* parseDirective(Parser& parser);
 	virtual CAssemblerCommand* parseOpcode(Parser& parser);
+	virtual const ExpressionFunctionMap& getExpressionFunctions();
 	virtual void NextSection();
 	virtual void Pass2() { return; };
 	virtual void Revalidate();

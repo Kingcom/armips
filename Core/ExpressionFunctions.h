@@ -2,7 +2,13 @@
 #include "Expression.h"
 #include <map>
 
-typedef ExpressionValue (*ExpressionFunction)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
+bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, int64_t& dest,
+	const std::wstring& funcName, bool optional);
+
+bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, const std::wstring*& dest,
+	const std::wstring& funcName, bool optional);
+
+using ExpressionFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
 
 enum class ExpFuncSafety
 {
@@ -22,8 +28,9 @@ struct ExpressionFunctionEntry
 	ExpFuncSafety safety;
 };
 
-typedef std::map<std::wstring, const ExpressionFunctionEntry> ExpressionFunctionMap;
+using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;;
 
 extern const ExpressionFunctionMap expressionFunctions;
 
 ExpressionValue expFuncDefined(ExpressionInternal* exp);
+

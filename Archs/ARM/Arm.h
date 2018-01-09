@@ -1,8 +1,5 @@
 #pragma once
-#include "Archs/Architecture.h"
 #include "Pool.h"
-#include "Core/Expression.h"
-#include "Parser/Tokenizer.h"
 
 #define ARM_SHIFT_LSL		0x00
 #define ARM_SHIFT_LSR		0x01
@@ -40,6 +37,7 @@ public:
 
 	virtual CAssemblerCommand* parseDirective(Parser& parser);
 	virtual CAssemblerCommand* parseOpcode(Parser& parser);
+	virtual const ExpressionFunctionMap& getExpressionFunctions();
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();

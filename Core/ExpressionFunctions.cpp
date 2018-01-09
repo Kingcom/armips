@@ -5,7 +5,6 @@
 #if ARMIPS_REGEXP
 #include <regex>
 #endif
-#include "../Archs/ARM/Arm.h"
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, int64_t& dest,
 	const std::wstring& funcName, bool optional)
@@ -487,35 +486,7 @@ ExpressionValue expFuncDefined(ExpressionInternal* exp)
 	return ExpressionValue(label->isDefined() ? INT64_C(1) : INT64_C(0));
 }
 
-ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	bool isArm = Arch == &Arm && Arm.GetThumbMode() == false;
-	return ExpressionValue(isArm ? INT64_C(1) : INT64_C(0));
-}
 
-ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	bool isThumb = Arch == &Arm && Arm.GetThumbMode() == true;
-	return ExpressionValue(isThumb ? INT64_C(1) : INT64_C(0));
-}
-
-ExpressionValue expFuncHi(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	int64_t value;
-
-	GET_PARAM(parameters,0,value);
-
-	return ExpressionValue((int64_t)((value >> 16) + ((value & 0x8000) != 0)) & 0xFFFF);
-}
-
-ExpressionValue expFuncLo(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	int64_t value;
-
-	GET_PARAM(parameters,0,value);
-
-	return ExpressionValue((int64_t)(int16_t)(value & 0xFFFF));
-}
 
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,			0,	0,	ExpFuncSafety::Safe } },
@@ -555,10 +526,4 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"reads32",		{ &expFuncRead<int32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"reads64",		{ &expFuncRead<int64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"readascii",		{ &expFuncReadAscii,		1,	3,	ExpFuncSafety::ConditionalUnsafe } },
-
-	{ L"lo",			{ &expFuncLo,				1,	1,	ExpFuncSafety::Safe } },
-	{ L"hi",			{ &expFuncHi,				1,	1,	ExpFuncSafety::Safe } },
-
-	{ L"isarm",			{ &expFuncIsArm,			0,	0,	ExpFuncSafety::Safe } },
-	{ L"isthumb",		{ &expFuncIsThumb,			0,	0,	ExpFuncSafety::Safe } },
 };
