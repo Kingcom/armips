@@ -1,14 +1,8 @@
 #include "stdafx.h"
 #include "Mips.h"
-#include "CMipsInstruction.h"
-#include "Core/Common.h"
-#include "MipsMacros.h"
-#include "Core/FileManager.h"
-#include "MipsElfFile.h"
-#include "Commands/CDirectiveFile.h"
-#include "PsxRelocator.h"
 #include "MipsParser.h"
 #include "Parser/Parser.h"
+#include "MipsExpressionFunctions.h"
 
 CMipsArchitecture Mips;
 
@@ -24,7 +18,7 @@ bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 		break;
 	case R_MIPS_32:
 		op += (int) data.relocationBase;
-		break;	
+		break;
 	case R_MIPS_HI16:
 		p = (op & 0xFFFF) + (int) data.relocationBase;
 		op = (op&0xffff0000) | (((p >> 16) + ((p & 0x8000) != 0)) & 0xFFFF);
@@ -130,6 +124,11 @@ CAssemblerCommand* CMipsArchitecture::parseOpcode(Parser& parser)
 		return macro;
 
 	return mipsParser.parseOpcode(parser);
+}
+
+const ExpressionFunctionMap& CMipsArchitecture::getExpressionFunctions()
+{
+	return mipsExpressionFunctions;
 }
 
 void CMipsArchitecture::NextSection()

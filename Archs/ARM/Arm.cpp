@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 #include "ArmRelocator.h"
 #include "ArmParser.h"
+#include "ArmExpressionFunctions.h"
 
 CArmArchitecture Arm;
 
@@ -31,6 +32,11 @@ CAssemblerCommand* CArmArchitecture::parseOpcode(Parser& parser)
 		return armParser.parseThumbOpcode(parser);
 	else
 		return armParser.parseArmOpcode(parser);
+}
+
+const ExpressionFunctionMap& CArmArchitecture::getExpressionFunctions()
+{
+	return armExpressionFunctions;
 }
 
 void CArmArchitecture::clear()

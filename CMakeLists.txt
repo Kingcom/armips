@@ -26,6 +26,8 @@ add_library(armips STATIC
 
 	Archs/ARM/Arm.cpp
 	Archs/ARM/Arm.h
+	Archs/ARM/ArmExpressionFunctions.cpp
+	Archs/ARM/ArmExpressionFunctions.h
 	Archs/ARM/ArmOpcodes.cpp
 	Archs/ARM/ArmOpcodes.h
 	Archs/ARM/ArmParser.cpp
@@ -47,6 +49,8 @@ add_library(armips STATIC
 	Archs/MIPS/Mips.h
 	Archs/MIPS/MipsElfFile.cpp
 	Archs/MIPS/MipsElfFile.h
+	Archs/MIPS/MipsExpressionFunctions.cpp
+	Archs/MIPS/MipsExpressionFunctions.h
 	Archs/MIPS/MipsMacros.cpp
 	Archs/MIPS/MipsMacros.h
 	Archs/MIPS/MipsOpcodes.cpp

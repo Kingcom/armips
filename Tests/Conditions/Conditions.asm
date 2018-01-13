@@ -1,4 +1,4 @@
-.psx
+.nds
 .create "output.bin", 0
 
 label:
@@ -29,9 +29,10 @@ label:
 	.byte 31h
 .endif
 
+.thumb
+
 			; test .ifndef and .ifarm
 			; expected: 42h
-
 .ifndef label
 	.byte 40h
 .else
@@ -41,9 +42,6 @@ label:
 		.byte 42h
 	.endif
 .endif
-
-.nds
-.thumb
 
 			; test nested ifs and .ifthumb
 			; expected: 50h

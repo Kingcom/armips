@@ -1,5 +1,6 @@
 #pragma once
 #include "../Commands/CAssemblerCommand.h"
+#include "../Core/ExpressionFunctions.h"
 #include "../Core/FileManager.h"
 
 class IElfRelocator;
@@ -9,13 +10,16 @@ class Parser;
 class CArchitecture
 {
 public:
-	virtual CAssemblerCommand* parseDirective(Parser& parserr) { return nullptr; };
-	virtual CAssemblerCommand* parseOpcode(Parser& parser) { return nullptr; };
+	virtual CAssemblerCommand* parseDirective(Parser& parser) { return nullptr; }
+	virtual CAssemblerCommand* parseOpcode(Parser& parser) { return nullptr; }
+	virtual const ExpressionFunctionMap& getExpressionFunctions() { return emptyMap; }
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;
 	virtual IElfRelocator* getElfRelocator() = 0;
 	virtual Endianness getEndianness() = 0;
+private:
+	const ExpressionFunctionMap emptyMap = {};
 };
 
 class ArchitectureCommand: public CAssemblerCommand
