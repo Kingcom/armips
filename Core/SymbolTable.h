@@ -15,7 +15,7 @@ bool operator<(SymbolKey const& lhs, SymbolKey const& rhs);
 class Label
 {
 public:
-	Label(std::wstring name): name(name), defined(false),info(0),data(false),updateInfo(true) { };
+	Label(std::wstring name): name(name),defined(false),data(false),updateInfo(true),info(0) { };
 	const std::wstring getName() { return name; };
 	void setOriginalName(const std::wstring& name) { originalName = name; }
 	const std::wstring getOriginalName() { return originalName.empty() ? name : originalName; }
@@ -36,8 +36,8 @@ private:
 	int64_t value;
 	bool defined;
 	bool data;
-	int info;
 	bool updateInfo;
+	int info;
 	int section;
 };
 

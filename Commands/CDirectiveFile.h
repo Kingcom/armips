@@ -38,8 +38,8 @@ public:
 	virtual void writeSymData(SymbolData& symData) const { };
 private:
 	void exec() const;
-	Type type;
 	Expression expression;
+	Type type;
 	int64_t position;
 	int64_t virtualAddress;
 };
@@ -61,8 +61,8 @@ private:
 
 	Expression startExpression;
 	Expression sizeExpression;
-	int64_t start;
 	int64_t size;
+	int64_t start;
 	int64_t virtualAddress;
 };
 

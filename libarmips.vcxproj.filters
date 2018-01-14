@@ -39,13 +39,13 @@
     <ClCompile Include="Archs\ARM\Arm.cpp">
       <Filter>Archs\ARM</Filter>
     </ClCompile>
+    <ClCompile Include="Archs\ARM\ArmElfRelocator.cpp">
+      <Filter>Archs\ARM</Filter>
+    </ClCompile>
     <ClCompile Include="Archs\ARM\ArmExpressionFunctions.cpp">
       <Filter>Archs\ARM</Filter>
     </ClCompile>
     <ClCompile Include="Archs\ARM\ArmOpcodes.cpp">
-      <Filter>Archs\ARM</Filter>
-    </ClCompile>
-    <ClCompile Include="Archs\ARM\ArmRelocator.cpp">
       <Filter>Archs\ARM</Filter>
     </ClCompile>
     <ClCompile Include="Archs\ARM\CArmInstruction.cpp">
@@ -67,6 +67,9 @@
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp">
+      <Filter>Archs\MIPS</Filter>
+    </ClCompile>
+    <ClCompile Include="Archs\MIPS\MipsElfRelocator.cpp">
       <Filter>Archs\MIPS</Filter>
     </ClCompile>
     <ClCompile Include="Archs\MIPS\MipsExpressionFunctions.cpp">
@@ -177,13 +180,13 @@
     <ClInclude Include="Archs\ARM\Arm.h">
       <Filter>Archs\ARM</Filter>
     </ClInclude>
+    <ClInclude Include="Archs\ARM\ArmElfRelocator.h">
+      <Filter>Archs\ARM</Filter>
+    </ClInclude>
     <ClInclude Include="Archs\ARM\ArmExpressionFunctions.h">
       <Filter>Archs\ARM</Filter>
     </ClInclude>
     <ClInclude Include="Archs\ARM\ArmOpcodes.h">
-      <Filter>Archs\ARM</Filter>
-    </ClInclude>
-    <ClInclude Include="Archs\ARM\ArmRelocator.h">
       <Filter>Archs\ARM</Filter>
     </ClInclude>
     <ClInclude Include="Archs\ARM\CArmInstruction.h">
@@ -205,6 +208,9 @@
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\MipsElfFile.h">
+      <Filter>Archs\MIPS</Filter>
+    </ClInclude>
+    <ClInclude Include="Archs\MIPS\MipsElfRelocator.h">
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Archs\MIPS\MipsExpressionFunctions.h">

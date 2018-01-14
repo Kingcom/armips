@@ -64,9 +64,9 @@ void CInvalidArchitecture::Revalidate()
 	Logger::printError(Logger::FatalError,L"No architecture specified");
 }
 
-IElfRelocator* CInvalidArchitecture::getElfRelocator()
+std::unique_ptr<IElfRelocator> CInvalidArchitecture::getElfRelocator()
 {
 	Logger::printError(Logger::FatalError,L"No architecture specified");
-	return NULL;
+	return nullptr;
 }
 

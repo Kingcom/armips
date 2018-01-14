@@ -7,6 +7,9 @@ typedef intptr_t ssize_t;
 #endif
 
 typedef unsigned char byte;
+
+enum class Endianness { Big, Little };
+
 class ByteArray
 {
 public:
@@ -26,12 +29,12 @@ public:
 	void reserveBytes(size_t count, byte value = 0);
 	void alignSize(size_t alignment);
 
-	int getWord(size_t pos, bool bigEndian = false) const
+	int getWord(size_t pos, Endianness endianness = Endianness::Little) const
 	{
 		if (pos+1 >= this->size()) return -1;
 		unsigned char* d = (unsigned char*) this->data();
 
-		if (bigEndian == false)
+		if (endianness == Endianness::Little)
 		{
 			return d[pos+0] | (d[pos+1] << 8);
 		} else {
@@ -39,12 +42,12 @@ public:
 		}
 	}
 
-	int getDoubleWord(size_t pos, bool bigEndian = false) const
+	int getDoubleWord(size_t pos, Endianness endianness = Endianness::Little) const
 	{
 		if (pos+3 >= this->size()) return -1;
 		unsigned char* d = (unsigned char*) this->data();
 
-		if (bigEndian == false)
+		if (endianness == Endianness::Little)
 		{
 			return d[pos+0] | (d[pos+1] << 8) | (d[pos+2] << 16) | (d[pos+3] << 24);
 		} else {
@@ -52,12 +55,12 @@ public:
 		}
 	}
 	
-	void replaceWord(size_t pos, unsigned int w, bool bigEndian = false)
+	void replaceWord(size_t pos, unsigned int w, Endianness endianness = Endianness::Little)
 	{
 		if (pos+1 >= this->size()) return;
 		unsigned char* d = (unsigned char*) this->data();
 
-		if (bigEndian == false)
+		if (endianness == Endianness::Little)
 		{
 			d[pos+0] = w & 0xFF;
 			d[pos+1] = (w >> 8) & 0xFF;
@@ -67,12 +70,12 @@ public:
 		}
 	}
 
-	void replaceDoubleWord(size_t pos, unsigned int w, bool bigEndian = false)
+	void replaceDoubleWord(size_t pos, unsigned int w, Endianness endianness = Endianness::Little)
 	{
 		if (pos+3 >= this->size()) return;
 		unsigned char* d = (unsigned char*) this->data();
 		
-		if (bigEndian == false)
+		if (endianness == Endianness::Little)
 		{
 			d[pos+0] = w & 0xFF;
 			d[pos+1] = (w >> 8) & 0xFF;

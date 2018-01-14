@@ -28,12 +28,12 @@ add_library(armips STATIC
 	Archs/ARM/Arm.h
 	Archs/ARM/ArmExpressionFunctions.cpp
 	Archs/ARM/ArmExpressionFunctions.h
+	Archs/ARM/ArmElfRelocator.cpp
+	Archs/ARM/ArmElfRelocator.h
 	Archs/ARM/ArmOpcodes.cpp
 	Archs/ARM/ArmOpcodes.h
 	Archs/ARM/ArmParser.cpp
 	Archs/ARM/ArmParser.h
-	Archs/ARM/ArmRelocator.cpp
-	Archs/ARM/ArmRelocator.h
 	Archs/ARM/CArmInstruction.cpp
 	Archs/ARM/CArmInstruction.h
 	Archs/ARM/CThumbInstruction.cpp
@@ -51,6 +51,8 @@ add_library(armips STATIC
 	Archs/MIPS/MipsElfFile.h
 	Archs/MIPS/MipsExpressionFunctions.cpp
 	Archs/MIPS/MipsExpressionFunctions.h
+	Archs/MIPS/MipsElfRelocator.cpp
+	Archs/MIPS/MipsElfRelocator.h
 	Archs/MIPS/MipsMacros.cpp
 	Archs/MIPS/MipsMacros.h
 	Archs/MIPS/MipsOpcodes.cpp

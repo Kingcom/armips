@@ -1,7 +1,7 @@
 #pragma once
 #include "Util/ByteArray.h"
 #include "Core/SymbolTable.h"
-#include "Mips.h"
+#include "MipsElfRelocator.h"
 #include "Commands/CAssemblerCommand.h"
 
 enum class PsxRelocationType { WordLiteral, UpperImmediate, LowerImmediate, FunctionCall };

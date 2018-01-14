@@ -41,7 +41,7 @@ public:
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
-	virtual IElfRelocator* getElfRelocator();
+	virtual std::unique_ptr<IElfRelocator> getElfRelocator();
 	virtual Endianness getEndianness() { return version == AARCH_BIG ? Endianness::Big : Endianness::Little; };
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };

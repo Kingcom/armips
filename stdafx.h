@@ -29,6 +29,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <memory>
 
 #include "ext/tinyformat/tinyformat.h"
 #define formatString tfm::format

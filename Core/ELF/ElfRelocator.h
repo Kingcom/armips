@@ -14,12 +14,15 @@ class Parser;
 class IElfRelocator
 {
 public:
-	virtual ~IElfRelocator() { };
+	virtual ~IElfRelocator() {};
+	virtual int expectedMachine() const = 0;
 	virtual bool isDummyRelocationType(int type) const { return false; }
 	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
+
 	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }
 };
+
 
 class Label;
 
@@ -62,10 +65,10 @@ public:
 	const ByteArray& getData() const { return outputData; };
 private:
 	bool relocateFile(ElfRelocatorFile& file, int64_t& relocationAddress);
-	void loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, bool bigEndian);
+	void loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, Endianness endianness);
 
 	ByteArray outputData;
-	IElfRelocator* relocator;
+	std::unique_ptr<IElfRelocator> relocator;
 	std::vector<ElfRelocatorFile> files;
 	std::vector<ElfRelocatorCtor> ctors;
 	bool dataChanged;
