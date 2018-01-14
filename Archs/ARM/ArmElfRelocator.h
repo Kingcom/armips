@@ -16,9 +16,12 @@ class ArmElfRelocator: public IElfRelocator
 {
 public:
 	ArmElfRelocator(bool arm9): arm9(arm9) { };
+	virtual int expectedMachine() const;
 	virtual bool isDummyRelocationType(int type) const;
+
 	virtual bool relocateOpcode(int type, RelocationData& data);
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType);
+
 	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 private:
 	bool arm9;

@@ -3,8 +3,6 @@
 #include "../Util/FileClasses.h"
 #include "SymbolData.h"
 
-enum class Endianness { Big, Little };
-
 class AssemblerFile
 {
 public:

@@ -270,7 +270,7 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& fileName)
 	if (file->load(this->inputName,this->inputName) == false)
 	{
 		delete file;
-		file = NULL;
+		file = nullptr;
 		return;
 	}
 	
@@ -286,7 +286,7 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& inputName, const 
 	if (file->load(this->inputName,this->outputName) == false)
 	{
 		delete file;
-		file = NULL;
+		file = nullptr;
 		return;
 	}
 	

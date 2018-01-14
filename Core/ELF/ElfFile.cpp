@@ -22,7 +22,7 @@ bool compareSection(ElfSection* a, ElfSection* b)
 
 ElfSection::ElfSection(Elf32_Shdr header): header(header)
 {
-	owner = NULL;
+	owner = nullptr;
 }
 
 void ElfSection::setOwner(ElfSegment* segment)
@@ -31,18 +31,18 @@ void ElfSection::setOwner(ElfSegment* segment)
 	owner = segment;
 }
 
-void ElfSection::writeHeader(ByteArray& data, int pos, bool bigEndian)
+void ElfSection::writeHeader(ByteArray& data, int pos, Endianness endianness)
 {
-	data.replaceDoubleWord(pos + 0x00, header.sh_name, bigEndian);
-	data.replaceDoubleWord(pos + 0x04, header.sh_type, bigEndian);
-	data.replaceDoubleWord(pos + 0x08, header.sh_flags, bigEndian);
-	data.replaceDoubleWord(pos + 0x0C, header.sh_addr, bigEndian);
-	data.replaceDoubleWord(pos + 0x10, header.sh_offset, bigEndian);
-	data.replaceDoubleWord(pos + 0x14, header.sh_size, bigEndian);
-	data.replaceDoubleWord(pos + 0x18, header.sh_link, bigEndian);
-	data.replaceDoubleWord(pos + 0x1C, header.sh_info, bigEndian);
-	data.replaceDoubleWord(pos + 0x20, header.sh_addralign, bigEndian);
-	data.replaceDoubleWord(pos + 0x24, header.sh_entsize, bigEndian);
+	data.replaceDoubleWord(pos + 0x00, header.sh_name, endianness);
+	data.replaceDoubleWord(pos + 0x04, header.sh_type, endianness);
+	data.replaceDoubleWord(pos + 0x08, header.sh_flags, endianness);
+	data.replaceDoubleWord(pos + 0x0C, header.sh_addr, endianness);
+	data.replaceDoubleWord(pos + 0x10, header.sh_offset, endianness);
+	data.replaceDoubleWord(pos + 0x14, header.sh_size, endianness);
+	data.replaceDoubleWord(pos + 0x18, header.sh_link, endianness);
+	data.replaceDoubleWord(pos + 0x1C, header.sh_info, endianness);
+	data.replaceDoubleWord(pos + 0x20, header.sh_addralign, endianness);
+	data.replaceDoubleWord(pos + 0x24, header.sh_entsize, endianness);
 }
 
 // only called for segmentless sections
@@ -70,7 +70,7 @@ void ElfSection::setOffsetBase(int base)
 ElfSegment::ElfSegment(Elf32_Phdr header, ByteArray& segmentData): header(header)
 {
 	data = segmentData;
-	paddrSection = NULL;
+	paddrSection = nullptr;
 }
 
 bool ElfSegment::isSectionPartOf(ElfSection* section)
@@ -142,16 +142,16 @@ void ElfSegment::writeData(ByteArray& output)
 	output.append(data);
 }
 
-void ElfSegment::writeHeader(ByteArray& data, int pos, bool bigEndian)
+void ElfSegment::writeHeader(ByteArray& data, int pos, Endianness endianness)
 {
-	data.replaceDoubleWord(pos + 0x00, header.p_type, bigEndian);
-	data.replaceDoubleWord(pos + 0x04, header.p_offset, bigEndian);
-	data.replaceDoubleWord(pos + 0x08, header.p_vaddr, bigEndian);
-	data.replaceDoubleWord(pos + 0x0C, header.p_paddr, bigEndian);
-	data.replaceDoubleWord(pos + 0x10, header.p_filesz, bigEndian);
-	data.replaceDoubleWord(pos + 0x14, header.p_memsz, bigEndian);
-	data.replaceDoubleWord(pos + 0x18, header.p_flags, bigEndian);
-	data.replaceDoubleWord(pos + 0x1C, header.p_align, bigEndian);
+	data.replaceDoubleWord(pos + 0x00, header.p_type, endianness);
+	data.replaceDoubleWord(pos + 0x04, header.p_offset, endianness);
+	data.replaceDoubleWord(pos + 0x08, header.p_vaddr, endianness);
+	data.replaceDoubleWord(pos + 0x0C, header.p_paddr, endianness);
+	data.replaceDoubleWord(pos + 0x10, header.p_filesz, endianness);
+	data.replaceDoubleWord(pos + 0x14, header.p_memsz, endianness);
+	data.replaceDoubleWord(pos + 0x18, header.p_flags, endianness);
+	data.replaceDoubleWord(pos + 0x1C, header.p_align, endianness);
 }
 
 void ElfSegment::splitSections()
@@ -282,66 +282,66 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 void ElfFile::loadElfHeader()
 {
 	memcpy(fileHeader.e_ident, &fileData[0], sizeof(fileHeader.e_ident));
-	bool bigEndian = isBigEndian();
-	fileHeader.e_type = fileData.getWord(0x10, bigEndian);
-	fileHeader.e_machine = fileData.getWord(0x12, bigEndian);
-	fileHeader.e_version = fileData.getDoubleWord(0x14, bigEndian);
-	fileHeader.e_entry = fileData.getDoubleWord(0x18, bigEndian);
-	fileHeader.e_phoff = fileData.getDoubleWord(0x1C, bigEndian);
-	fileHeader.e_shoff = fileData.getDoubleWord(0x20, bigEndian);
-	fileHeader.e_flags = fileData.getDoubleWord(0x24, bigEndian);
-	fileHeader.e_ehsize = fileData.getWord(0x28, bigEndian);
-	fileHeader.e_phentsize = fileData.getWord(0x2A, bigEndian);
-	fileHeader.e_phnum = fileData.getWord(0x2C, bigEndian);
-	fileHeader.e_shentsize = fileData.getWord(0x2E, bigEndian);
-	fileHeader.e_shnum = fileData.getWord(0x30, bigEndian);
-	fileHeader.e_shstrndx = fileData.getWord(0x32, bigEndian);
+	Endianness endianness = getEndianness();
+	fileHeader.e_type = fileData.getWord(0x10, endianness);
+	fileHeader.e_machine = fileData.getWord(0x12, endianness);
+	fileHeader.e_version = fileData.getDoubleWord(0x14, endianness);
+	fileHeader.e_entry = fileData.getDoubleWord(0x18, endianness);
+	fileHeader.e_phoff = fileData.getDoubleWord(0x1C, endianness);
+	fileHeader.e_shoff = fileData.getDoubleWord(0x20, endianness);
+	fileHeader.e_flags = fileData.getDoubleWord(0x24, endianness);
+	fileHeader.e_ehsize = fileData.getWord(0x28, endianness);
+	fileHeader.e_phentsize = fileData.getWord(0x2A, endianness);
+	fileHeader.e_phnum = fileData.getWord(0x2C, endianness);
+	fileHeader.e_shentsize = fileData.getWord(0x2E, endianness);
+	fileHeader.e_shnum = fileData.getWord(0x30, endianness);
+	fileHeader.e_shstrndx = fileData.getWord(0x32, endianness);
 }
 
-void ElfFile::writeHeader(ByteArray& data, int pos, bool bigEndian)
+void ElfFile::writeHeader(ByteArray& data, int pos, Endianness endianness)
 {
 	memcpy(&fileData[0], fileHeader.e_ident, sizeof(fileHeader.e_ident));
-	data.replaceWord(pos + 0x10, fileHeader.e_type, bigEndian);
-	data.replaceWord(pos + 0x12, fileHeader.e_machine, bigEndian);
-	data.replaceDoubleWord(pos + 0x14, fileHeader.e_version, bigEndian);
-	data.replaceDoubleWord(pos + 0x18, fileHeader.e_entry, bigEndian);
-	data.replaceDoubleWord(pos + 0x1C, fileHeader.e_phoff, bigEndian);
-	data.replaceDoubleWord(pos + 0x20, fileHeader.e_shoff, bigEndian);
-	data.replaceDoubleWord(pos + 0x24, fileHeader.e_flags, bigEndian);
-	data.replaceWord(pos + 0x28, fileHeader.e_ehsize, bigEndian);
-	data.replaceWord(pos + 0x2A, fileHeader.e_phentsize, bigEndian);
-	data.replaceWord(pos + 0x2C, fileHeader.e_phnum, bigEndian);
-	data.replaceWord(pos + 0x2E, fileHeader.e_shentsize, bigEndian);
-	data.replaceWord(pos + 0x30, fileHeader.e_shnum, bigEndian);
-	data.replaceWord(pos + 0x32, fileHeader.e_shstrndx, bigEndian);
+	data.replaceWord(pos + 0x10, fileHeader.e_type, endianness);
+	data.replaceWord(pos + 0x12, fileHeader.e_machine, endianness);
+	data.replaceDoubleWord(pos + 0x14, fileHeader.e_version, endianness);
+	data.replaceDoubleWord(pos + 0x18, fileHeader.e_entry, endianness);
+	data.replaceDoubleWord(pos + 0x1C, fileHeader.e_phoff, endianness);
+	data.replaceDoubleWord(pos + 0x20, fileHeader.e_shoff, endianness);
+	data.replaceDoubleWord(pos + 0x24, fileHeader.e_flags, endianness);
+	data.replaceWord(pos + 0x28, fileHeader.e_ehsize, endianness);
+	data.replaceWord(pos + 0x2A, fileHeader.e_phentsize, endianness);
+	data.replaceWord(pos + 0x2C, fileHeader.e_phnum, endianness);
+	data.replaceWord(pos + 0x2E, fileHeader.e_shentsize, endianness);
+	data.replaceWord(pos + 0x30, fileHeader.e_shnum, endianness);
+	data.replaceWord(pos + 0x32, fileHeader.e_shstrndx, endianness);
 }
 
 void ElfFile::loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos)
 {
-	bool bigEndian = isBigEndian();
-	header.p_type   = data.getDoubleWord(pos + 0x00, bigEndian);
-	header.p_offset = data.getDoubleWord(pos + 0x04, bigEndian);
-	header.p_vaddr  = data.getDoubleWord(pos + 0x08, bigEndian);
-	header.p_paddr  = data.getDoubleWord(pos + 0x0C, bigEndian);
-	header.p_filesz = data.getDoubleWord(pos + 0x10, bigEndian);
-	header.p_memsz  = data.getDoubleWord(pos + 0x14, bigEndian);
-	header.p_flags  = data.getDoubleWord(pos + 0x18, bigEndian);
-	header.p_align  = data.getDoubleWord(pos + 0x1C, bigEndian);
+	Endianness endianness = getEndianness();
+	header.p_type   = data.getDoubleWord(pos + 0x00, endianness);
+	header.p_offset = data.getDoubleWord(pos + 0x04, endianness);
+	header.p_vaddr  = data.getDoubleWord(pos + 0x08, endianness);
+	header.p_paddr  = data.getDoubleWord(pos + 0x0C, endianness);
+	header.p_filesz = data.getDoubleWord(pos + 0x10, endianness);
+	header.p_memsz  = data.getDoubleWord(pos + 0x14, endianness);
+	header.p_flags  = data.getDoubleWord(pos + 0x18, endianness);
+	header.p_align  = data.getDoubleWord(pos + 0x1C, endianness);
 }
 
 void ElfFile::loadSectionHeader(Elf32_Shdr& header, ByteArray& data, int pos)
 {
-	bool bigEndian = isBigEndian();
-	header.sh_name      = data.getDoubleWord(pos + 0x00, bigEndian);
-	header.sh_type      = data.getDoubleWord(pos + 0x04, bigEndian);
-	header.sh_flags     = data.getDoubleWord(pos + 0x08, bigEndian);
-	header.sh_addr      = data.getDoubleWord(pos + 0x0C, bigEndian);
-	header.sh_offset    = data.getDoubleWord(pos + 0x10, bigEndian);
-	header.sh_size      = data.getDoubleWord(pos + 0x14, bigEndian);
-	header.sh_link      = data.getDoubleWord(pos + 0x18, bigEndian);
-	header.sh_info      = data.getDoubleWord(pos + 0x1C, bigEndian);
-	header.sh_addralign = data.getDoubleWord(pos + 0x20, bigEndian);
-	header.sh_entsize   = data.getDoubleWord(pos + 0x24, bigEndian);
+	Endianness endianness = getEndianness();
+	header.sh_name      = data.getDoubleWord(pos + 0x00, endianness);
+	header.sh_type      = data.getDoubleWord(pos + 0x04, endianness);
+	header.sh_flags     = data.getDoubleWord(pos + 0x08, endianness);
+	header.sh_addr      = data.getDoubleWord(pos + 0x0C, endianness);
+	header.sh_offset    = data.getDoubleWord(pos + 0x10, endianness);
+	header.sh_size      = data.getDoubleWord(pos + 0x14, endianness);
+	header.sh_link      = data.getDoubleWord(pos + 0x18, endianness);
+	header.sh_info      = data.getDoubleWord(pos + 0x1C, endianness);
+	header.sh_addralign = data.getDoubleWord(pos + 0x20, endianness);
+	header.sh_entsize   = data.getDoubleWord(pos + 0x24, endianness);
 }
 
 bool ElfFile::load(const std::wstring& fileName, bool sort)
@@ -357,8 +357,8 @@ bool ElfFile::load(ByteArray& data, bool sort)
 	fileData = data;
 
 	loadElfHeader();
-	symTab = NULL;
-	strTab = NULL;
+	symTab = nullptr;
+	strTab = nullptr;
 
 	// load segments
 	for (size_t i = 0; i < fileHeader.e_phnum; i++)
@@ -385,7 +385,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 		sections.push_back(section);
 
 		// check if the section belongs to a segment
-		ElfSegment* owner = NULL;
+		ElfSegment* owner = nullptr;
 		for (int k = 0; k < (int)segments.size(); k++)
 		{
 			if (segments[k]->isSectionPartOf(section))
@@ -395,7 +395,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 			}
 		}
 
-		if (owner != NULL)
+		if (owner != nullptr)
 		{
 			owner->addSection(section);
 		} else {
@@ -475,18 +475,18 @@ void ElfFile::save(const std::wstring&fileName)
 	}
 
 	// copy data to the tables
-	bool bigEndian = isBigEndian();
-	writeHeader(fileData, 0, bigEndian);
+	Endianness endianness = getEndianness();
+	writeHeader(fileData, 0, endianness);
 	for (size_t i = 0; i < segments.size(); i++)
 	{
 		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
-		segments[i]->writeHeader(fileData, pos, bigEndian);
+		segments[i]->writeHeader(fileData, pos, endianness);
 	}
 	
 	for (size_t i = 0; i < sections.size(); i++)
 	{
 		int pos = fileHeader.e_shoff+i*fileHeader.e_shentsize;
-		sections[i]->writeHeader(fileData, pos, bigEndian);
+		sections[i]->writeHeader(fileData, pos, endianness);
 	}
 
 	fileData.toFile(fileName);
@@ -494,7 +494,7 @@ void ElfFile::save(const std::wstring&fileName)
 
 int ElfFile::getSymbolCount()
 {
-	if (symTab == NULL)
+	if (symTab == nullptr)
 		return 0;
 
 	return symTab->getSize()/sizeof(Elf32_Sym);
@@ -502,26 +502,26 @@ int ElfFile::getSymbolCount()
 
 bool ElfFile::getSymbol(Elf32_Sym& symbol, size_t index)
 {
-	if (symTab == NULL)
+	if (symTab == nullptr)
 		return false;
 
 	ByteArray &data = symTab->getData();
 	int pos = index*sizeof(Elf32_Sym);
-	bool bigEndian = isBigEndian();
-	symbol.st_name  = data.getDoubleWord(pos + 0x00, bigEndian);
-	symbol.st_value = data.getDoubleWord(pos + 0x04, bigEndian);
-	symbol.st_size  = data.getDoubleWord(pos + 0x08, bigEndian);
+	Endianness endianness = getEndianness();
+	symbol.st_name  = data.getDoubleWord(pos + 0x00, endianness);
+	symbol.st_value = data.getDoubleWord(pos + 0x04, endianness);
+	symbol.st_size  = data.getDoubleWord(pos + 0x08, endianness);
 	symbol.st_info  = data[pos + 0x0C];
 	symbol.st_other = data[pos + 0x0D];
-	symbol.st_shndx = data.getWord(pos + 0x0E, bigEndian);
+	symbol.st_shndx = data.getWord(pos + 0x0E, endianness);
 
 	return true;
 }
 
 const char* ElfFile::getStrTableString(size_t pos)
 {
-	if (strTab == NULL)
-		return NULL;
+	if (strTab == nullptr)
+		return nullptr;
 	
 	return (const char*) &strTab->getData()[pos];
 }

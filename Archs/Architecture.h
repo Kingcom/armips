@@ -2,8 +2,8 @@
 #include "../Commands/CAssemblerCommand.h"
 #include "../Core/ExpressionFunctions.h"
 #include "../Core/FileManager.h"
+#include "../Core/ELF/ElfRelocator.h"
 
-class IElfRelocator;
 class Tokenizer;
 class Parser;
 
@@ -16,7 +16,7 @@ public:
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;
-	virtual IElfRelocator* getElfRelocator() = 0;
+	virtual std::unique_ptr<IElfRelocator> getElfRelocator() = 0;
 	virtual Endianness getEndianness() = 0;
 private:
 	const ExpressionFunctionMap emptyMap = {};
@@ -43,8 +43,8 @@ public:
 	virtual void NextSection();
 	virtual void Pass2();
 	virtual void Revalidate();
-	virtual IElfRelocator* getElfRelocator();
-	virtual Endianness getEndianness() { return Endianness::Little; };
+	virtual std::unique_ptr<IElfRelocator> getElfRelocator();
+	virtual Endianness getEndianness() { return Endianness::Little; }
 };
 
 extern CInvalidArchitecture InvalidArchitecture;

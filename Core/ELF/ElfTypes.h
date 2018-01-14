@@ -19,13 +19,8 @@ enum ElfType
 enum ElfMachine
 {
 	EM_NONE  =0,
-	EM_M32   =1,
-	EM_SPARC =2,
-	EM_386   =3,
-	EM_68K   =4,
-	EM_88K   =5,
-	EM_860   =7,
-	EM_MIPS  =8
+	EM_MIPS  =8,
+	EM_ARM   =40,
 };
 
 // File version

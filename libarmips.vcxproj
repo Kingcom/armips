@@ -217,10 +217,10 @@
   <ItemGroup>
     <ClCompile Include="Archs\Architecture.cpp" />
     <ClCompile Include="Archs\ARM\Arm.cpp" />
+    <ClCompile Include="Archs\ARM\ArmElfRelocator.cpp" />
     <ClCompile Include="Archs\ARM\ArmExpressionFunctions.cpp" />
     <ClCompile Include="Archs\ARM\ArmOpcodes.cpp" />
     <ClCompile Include="Archs\ARM\ArmParser.cpp" />
-    <ClCompile Include="Archs\ARM\ArmRelocator.cpp" />
     <ClCompile Include="Archs\ARM\CArmInstruction.cpp" />
     <ClCompile Include="Archs\ARM\CThumbInstruction.cpp" />
     <ClCompile Include="Archs\ARM\Pool.cpp" />
@@ -228,6 +228,7 @@
     <ClCompile Include="Archs\MIPS\CMipsInstruction.cpp" />
     <ClCompile Include="Archs\MIPS\Mips.cpp" />
     <ClCompile Include="Archs\MIPS\MipsElfFile.cpp" />
+    <ClCompile Include="Archs\MIPS\MipsElfRelocator.cpp" />
     <ClCompile Include="Archs\MIPS\MipsExpressionFunctions.cpp" />
     <ClCompile Include="Archs\MIPS\MipsMacros.cpp" />
     <ClCompile Include="Archs\MIPS\MipsOpcodes.cpp" />
@@ -272,10 +273,10 @@
   <ItemGroup>
     <ClInclude Include="Archs\Architecture.h" />
     <ClInclude Include="Archs\ARM\Arm.h" />
+    <ClInclude Include="Archs\ARM\ArmElfRelocator.h" />
     <ClInclude Include="Archs\ARM\ArmExpressionFunctions.h" />
     <ClInclude Include="Archs\ARM\ArmOpcodes.h" />
     <ClInclude Include="Archs\ARM\ArmParser.h" />
-    <ClInclude Include="Archs\ARM\ArmRelocator.h" />
     <ClInclude Include="Archs\ARM\CArmInstruction.h" />
     <ClInclude Include="Archs\ARM\CThumbInstruction.h" />
     <ClInclude Include="Archs\ARM\Pool.h" />
@@ -283,6 +284,7 @@
     <ClInclude Include="Archs\MIPS\CMipsInstruction.h" />
     <ClInclude Include="Archs\MIPS\Mips.h" />
     <ClInclude Include="Archs\MIPS\MipsElfFile.h" />
+    <ClInclude Include="Archs\MIPS\MipsElfRelocator.h" />
     <ClInclude Include="Archs\MIPS\MipsExpressionFunctions.h" />
     <ClInclude Include="Archs\MIPS\MipsMacros.h" />
     <ClInclude Include="Archs\MIPS\MipsOpcodes.h" />

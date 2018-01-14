@@ -4,22 +4,6 @@
 
 enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_RSP, MARCH_INVALID };
 
-enum {
-	R_MIPS_NONE,
-	R_MIPS_16,
-	R_MIPS_32,
-	R_MIPS_REL32,
-	R_MIPS_26,
-	R_MIPS_HI16,
-	R_MIPS_LO16,
-	R_MIPS_GPREL16,
-	R_MIPS_LITERAL,
-	R_MIPS_GOT16,
-	R_MIPS_PC16,
-	R_MIPS_CALL16,
-	R_MIPS_GPREL32
-};
-
 class CMipsArchitecture: public CArchitecture
 {
 public:
@@ -30,7 +14,7 @@ public:
 	virtual void NextSection();
 	virtual void Pass2() { return; };
 	virtual void Revalidate();
-	virtual IElfRelocator* getElfRelocator();
+	virtual std::unique_ptr<IElfRelocator> getElfRelocator();
 	virtual Endianness getEndianness()
 	{
 		return Version == MARCH_N64 || Version == MARCH_RSP ? Endianness::Big : Endianness::Little;
@@ -86,10 +70,3 @@ bool MipsGetPs2VectorRegister(const char* source, int& RetLen, MipsRegisterInfo&
 int MipsGetFloatRegister(const char* source, int& RetLen);
 bool MipsCheckImmediate(const char* Source, Expression& Dest, int& RetLen);
 
-class MipsElfRelocator: public IElfRelocator
-{
-public:
-	virtual bool relocateOpcode(int type, RelocationData& data);
-	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType);
-	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
-};

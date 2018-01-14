@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ArmRelocator.h"
+#include "ArmElfRelocator.h"
 #include "Util/Util.h"
 #include "Arm.h"
 #include "Core/Common.h"
@@ -15,6 +15,11 @@ bool ArmElfRelocator::isDummyRelocationType(int type) const
 	// R_ARM_V4BX marks the position of a bx opcode, and does not
 	// cause any actual relocations
 	return type == R_ARM_V4BX;
+}
+
+int ArmElfRelocator::expectedMachine() const
+{
+	return EM_ARM;
 }
 
 /*
