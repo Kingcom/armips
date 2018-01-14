@@ -541,7 +541,7 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	auto it = expressionFunctions.find(strValue);
 	if (it == expressionFunctions.end())
 	{
-		auto archExpressionFunctions = Arch->getExpressionFunctions();
+		auto& archExpressionFunctions = Arch->getExpressionFunctions();
 		it = archExpressionFunctions.find(strValue);
 		if (it == archExpressionFunctions.end())
 		{
