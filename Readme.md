@@ -66,7 +66,7 @@ Specifies the working directory to be used during execution.
 # 2. Installation
 
 ## 2.1 Download binary
-Download the latest Windows 32-bit binary from the [Automated ARMIPS builds](http://buildbot.orphis.net/armips) site.
+Download the latest Windows 32-bit binary from the [Automated ARMIPS builds](http://buildbot.orphis.net/armips) site. You will need the [Microsoft Visual Studio 2015 x86 Redistributable](https://www.microsoft.com/en-US/download/details.aspx?id=48145).
 
 ## 2.2 Building from source
 
