@@ -1,6 +1,10 @@
 #pragma once
 #include "Util/Util.h"
 
+#if defined(__HAIKU__)
+#include <sys/stat.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
