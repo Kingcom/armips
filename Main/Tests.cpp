@@ -41,7 +41,14 @@ StringList TestRunner::listSubfolders(const std::wstring& dir)
 		auto elem = readdir(directory);
 		while (elem != NULL)
 		{
-			if(elem->d_type == DT_DIR)
+#if defined(__HAIKU__)
+			// dirent in Posix does not have a d_type
+			struct stat s;
+			stat(elem->d_name, &s);
+			if (s.st_mode & S_IFDIR)
+#else
+			if (elem->d_type == DT_DIR)
+#endif
 			{
 				std::wstring dirName = convertUtf8ToWString(elem->d_name);
 				if (dirName != L"." && dirName != L"..")
