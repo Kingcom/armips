@@ -101,6 +101,7 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 {
 	CommandSequence* sequence = new CommandSequence();
 
+	bool foundTerminaion = false;
 	while (atEnd() == false)
 	{
 		const Token &next = peekToken();
@@ -112,7 +113,10 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 		}
 
 		if (next.stringValueStartsWith(indicator) && isPartOfList(next.getStringValue(), terminators))
+		{
+			foundTerminaion = true;
 			break;
+		}
 
 		bool foundSomething = false;
 		while (checkEquLabel() || checkMacroDefinition())
@@ -137,6 +141,19 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 		}
 
 		sequence->addCommand(cmd);
+	}
+
+	if (!foundTerminaion && terminators.size())
+	{
+		std::wstring expected;
+		for (const wchar_t* terminator : terminators)
+		{
+			if (!expected.empty())
+				expected += L", ";
+			expected += terminator;
+		}
+
+		Logger::printError(Logger::Error, L"Unterminated command sequence, expected any of %s.", expected);
 	}
 
 	return sequence;
@@ -454,7 +471,10 @@ bool Parser::checkMacroDefinition()
 
 	// no .endmacro, not valid
 	if (valid == false)
+	{
+		printError(first, L"Macro \"%s\" not terminated", macro.name);
 		return true;
+	}
 
 	// get content
 	TokenizerPosition end = getTokenizer()->getPosition().previous();
