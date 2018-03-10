@@ -42,7 +42,10 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 					(*it) = replacement.value[0];
 					tokens.insert(insertIt,replacement.value.begin()+1, replacement.value.end());
 
-					replaced = true;
+					// If the value at this position didn't change, then just keep going.
+					// Otherwise we'd be stuck in an endless replace loop
+					if (stringValue != (*it).getStringValue())
+						replaced = true;
 					break;
 				}
 			}
