@@ -49,7 +49,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 
 ExpressionValue expFuncVersion(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	int64_t value = ARMIPS_VERSION_MAJOR*100 + ARMIPS_VERSION_MINOR*10 + ARMIPS_VERSION_REVISION;
+	int64_t value = ARMIPS_VERSION_MAJOR*1000 + ARMIPS_VERSION_MINOR*10 + ARMIPS_VERSION_REVISION;
 	return ExpressionValue(value);
 }
 

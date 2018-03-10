@@ -1,4 +1,4 @@
-# ARMIPS assembler v0.9
+# ARMIPS assembler v0.10
 * Author: Kingcom
 * Source: https://github.com/Kingcom/armips
 * Automated builds: http://buildbot.orphis.net/armips
@@ -920,6 +920,18 @@ Each call of the macro will increase the counter.
 
 ## 7.1 Change log
 
+* Version 0.10
+    * many bugfixes and enhancements
+    * several new MIPS macros and pseudo-ops
+    * improved command argument handling, allows the input file argument to be after flag arguments and detects errors better
+    * C-style block comments supported
+    * expression values are now signed
+    * 64-bit data defines now written in generated symbol files, same command as 32-bit for compatibility with current emulators
+    * ELF relocator now checks object file machine and endianness before linking
+    * new directives: `.asciiz`, `.skip`
+    * new expression functions: `hi` (MIPS only), `lo` (MIPS only), `reads{8,16,32,64}`
+    * float division by zero in expression now has standard float behaviour (returns `±∞` or `NaN`), while integer divisions by zero returns dummy value `-1`
+    * exponential notation for floats supported
 * Version 0.9
     * huge rewrite with many enhancements and fixes
     * can now read from UTF8, UTF16, and Shift-JIS files and convert the input correctly
@@ -965,4 +977,4 @@ There are several changes after version 0.7d that may break compatibility with c
 
 ## 7.3 License
 
-MIT Copyright (c) 2009-2017 Kingcom: [LICENSE.txt](LICENSE.txt)
+MIT Copyright (c) 2009-2018 Kingcom: [LICENSE.txt](LICENSE.txt)
