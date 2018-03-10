@@ -50,7 +50,7 @@ std::vector<PsxLibEntry> loadPsxLibrary(const std::wstring& inputName)
 
 		while (input[pos+skip] != 0)
 		{
-			skip += input[pos+skip++];
+			skip += 1+input[pos+skip];
 		}
 
 		skip++;
