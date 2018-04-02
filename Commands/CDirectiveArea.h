@@ -16,8 +16,8 @@ public:
 private:
 	int64_t position;
 	Expression sizeExpression;
-	size_t areaSize;
-	size_t contentSize;
+	int64_t areaSize;
+	int64_t contentSize;
 	Expression fillExpression;
 	int8_t fillValue;
 	CAssemblerCommand* content;

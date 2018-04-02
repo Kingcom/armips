@@ -26,14 +26,20 @@ void CDirectiveArea::setFillExpression(Expression& exp)
 
 bool CDirectiveArea::Validate()
 {
-	size_t oldAreaSize = areaSize;
-	size_t oldContentSize = contentSize;
+	int64_t oldAreaSize = areaSize;
+	int64_t oldContentSize = contentSize;
 
 	position = g_fileManager->getVirtualAddress();
 
 	if (sizeExpression.evaluateInteger(areaSize) == false)
 	{
 		Logger::queueError(Logger::Error,L"Invalid size expression");
+		return false;
+	}
+
+	if (areaSize < 0)
+	{
+		Logger::queueError(Logger::Error, L"Negative area size");
 		return false;
 	}
 
