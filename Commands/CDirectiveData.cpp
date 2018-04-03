@@ -383,7 +383,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 
 		for (size_t i = 0; i < customData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",(int8_t)customData[i]);
+			str += swprintf(str,20,L"0x%02X,",(uint8_t)customData[i]);
 		}
 		break;
 	case EncodingMode::U8:
@@ -392,7 +392,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 		
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",(int8_t)normalData[i]);
+			str += swprintf(str,20,L"0x%02X,",(uint8_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U16:
@@ -400,7 +400,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%04X,",(int16_t)normalData[i]);
+			str += swprintf(str,20,L"0x%04X,",(uint16_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U32:
@@ -409,7 +409,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%08X,",(int32_t)normalData[i]);
+			str += swprintf(str,20,L"0x%08X,",(uint32_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U64:
@@ -418,7 +418,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%16X,",(int64_t)normalData[i]);
+			str += swprintf(str,20,L"0x%16X,",(uint64_t)normalData[i]);
 		}
 		break;
 	}
