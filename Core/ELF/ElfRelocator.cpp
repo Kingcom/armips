@@ -351,8 +351,15 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 				relocator->setSymbolAddress(relData,sym.st_value,sym.st_info & 0xF);
 
 				// externs?
-				if (relData.targetSymbolType == STT_NOTYPE && sym.st_shndx == 0)
+				if (sym.st_shndx == 0)
 				{
+					if (sym.st_name == 0)
+					{
+						Logger::queueError(Logger::Error, L"Symbol without a name");
+						error = true;
+						continue;
+					}
+
 					std::wstring symName = toWLowercase(elf->getStrTableString(sym.st_name));
 
 					Label* label = Global.symbolTable.getLabel(symName,-1,-1);
