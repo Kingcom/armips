@@ -67,7 +67,7 @@ public:
 	void reset();
 	bool openFile(AssemblerFile* file, bool onlyCheck);
 	void addFile(AssemblerFile* file);
-	bool hasOpenFile() { return activeFile != NULL; };
+	bool hasOpenFile() { return activeFile != nullptr; };
 	void closeFile();
 	bool write(void* data, size_t length);
 	bool writeU8(uint8_t data);

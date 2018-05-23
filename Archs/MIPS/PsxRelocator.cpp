@@ -347,7 +347,7 @@ bool PsxRelocator::init(const std::wstring& inputName)
 			std::transform(lowered.begin(), lowered.end(), lowered.begin(), ::towlower);
 
 			sym.label = Global.symbolTable.getLabel(lowered,-1,-1);
-			if (sym.label == NULL)
+			if (sym.label == nullptr)
 			{
 				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
 				continue;

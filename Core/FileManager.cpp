@@ -229,13 +229,13 @@ FileManager::~FileManager()
 
 void FileManager::reset()
 {
-	activeFile = NULL;
+	activeFile = nullptr;
 	setEndianness(Endianness::Little);
 }
 
 bool FileManager::checkActiveFile()
 {
-	if (activeFile == NULL)
+	if (activeFile == nullptr)
 	{
 		Logger::queueError(Logger::Error,L"No file opened");
 		return false;
@@ -245,7 +245,7 @@ bool FileManager::checkActiveFile()
 
 bool FileManager::openFile(AssemblerFile* file, bool onlyCheck)
 {
-	if (activeFile != NULL)
+	if (activeFile != nullptr)
 	{
 		Logger::queueError(Logger::Warning,L"File not closed before opening a new one");
 		activeFile->close();
@@ -262,14 +262,14 @@ void FileManager::addFile(AssemblerFile* file)
 
 void FileManager::closeFile()
 {
-	if (activeFile == NULL)
+	if (activeFile == nullptr)
 	{
 		Logger::queueError(Logger::Warning,L"No file opened");
 		return;
 	}
 
 	activeFile->close();
-	activeFile = NULL;
+	activeFile = nullptr;
 }
 
 bool FileManager::write(void* data, size_t length)
@@ -317,21 +317,21 @@ bool FileManager::writeU64(uint64_t data)
 
 int64_t FileManager::getVirtualAddress()
 {
-	if (activeFile == NULL)
+	if (activeFile == nullptr)
 		return -1;
 	return activeFile->getVirtualAddress();
 }
 
 int64_t FileManager::getPhysicalAddress()
 {
-	if (activeFile == NULL)
+	if (activeFile == nullptr)
 		return -1;
 	return activeFile->getPhysicalAddress();
 }
 
 int64_t FileManager::getHeaderSize()
 {
-	if (activeFile == NULL)
+	if (activeFile == nullptr)
 		return -1;
 	return activeFile->getHeaderSize();
 }

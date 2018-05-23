@@ -15,7 +15,7 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 	const Token &tok = tokenizer.peekToken();
 
 	if (tok.type == TokenType::Invalid)
-		return NULL;
+		return nullptr;
 
 	switch (tok.type)
 	{

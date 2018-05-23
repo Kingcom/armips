@@ -63,7 +63,7 @@ std::unique_ptr<IElfRelocator> CMipsArchitecture::getElfRelocator()
 	case MARCH_PSX:
 	case MARCH_RSP:
 	default:
-		return NULL;
+		return nullptr;
 	}
 }
 

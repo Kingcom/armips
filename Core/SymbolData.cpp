@@ -20,7 +20,7 @@ void SymbolData::clear()
 	currentFunction = -1;
 	
 	SymDataModule defaultModule;
-	defaultModule.file = NULL;
+	defaultModule.file = nullptr;
 	modules.push_back(defaultModule);
 }
 

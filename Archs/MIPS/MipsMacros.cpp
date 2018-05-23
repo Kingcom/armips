@@ -771,5 +771,5 @@ const MipsMacroDefinition mipsMacros[] = {
 	{ L"ror",	L"d,s,t",	&generateMipsMacroRotate,			MIPSM_RIGHT },
 	{ L"ror",	L"d,s,i",	&generateMipsMacroRotate,			MIPSM_RIGHT|MIPSM_IMM },
 
-	{ NULL,		NULL,		NULL,								0 }
+	{ nullptr,	nullptr,	nullptr,							0 }
 };

@@ -1017,7 +1017,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{"stv",		"RtRo,i7(s)",	MIPS_RSP_SWC2(0x0b),		MA_RSP, MO_RSP_QWOFFSET },
 	{"stv",		"RtRo,(s)",		MIPS_RSP_SWC2(0x0b),		MA_RSP, MO_RSP_QWOFFSET },
 	// END
-	{ NULL,		NULL,			0,							0 }
+	{ nullptr,	nullptr,		0,							0 }
 };
 
 const MipsArchDefinition mipsArchs[] = {

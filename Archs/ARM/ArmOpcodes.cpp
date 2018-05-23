@@ -249,5 +249,5 @@ const tArmOpcode ArmOpcodes[] = {
 	{ "qdsubC",	"d1,m1,n1",				0x01600050,	ARM_MISC,	ARM_D|ARM_N|ARM_M|ARM_ARM9 },
 	{ "qdsubC",	"d1,n1",				0x01600050,	ARM_MISC,	ARM_D|ARM_N|ARM_M|ARM_ARM9|ARM_DM },
 
-	{ NULL, NULL, 0, 0, 0}
+	{ nullptr,	nullptr,				0,			0,			0 }
 };

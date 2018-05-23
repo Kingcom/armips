@@ -196,7 +196,7 @@ bool runArmips(ArmipsArguments& arguments)
 	}
 
 	// return errors
-	if (arguments.errorsResult != NULL)
+	if (arguments.errorsResult != nullptr)
 	{
 		StringList errors = Logger::getErrors();
 		for (size_t i = 0; i < errors.size(); i++)

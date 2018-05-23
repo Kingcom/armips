@@ -36,10 +36,10 @@ StringList TestRunner::listSubfolders(const std::wstring& dir)
 	std::string utf8 = convertWStringToUtf8(dir);
 	auto directory = opendir(utf8.c_str());
 
-	if (directory != NULL)
+	if (directory != nullptr)
 	{
 		auto elem = readdir(directory);
-		while (elem != NULL)
+		while (elem != nullptr)
 		{
 #if defined(__HAIKU__)
 			// dirent in Posix does not have a d_type

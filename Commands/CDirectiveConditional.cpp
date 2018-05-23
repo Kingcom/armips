@@ -19,7 +19,7 @@ CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstr
 	: CDirectiveConditional(type)
 {
 	label = Global.symbolTable.getLabel(name,Global.FileInfo.FileNum,Global.Section);
-	if (label == NULL)
+	if (label == nullptr)
 		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name);
 }
 
@@ -78,7 +78,7 @@ bool CDirectiveConditional::Validate()
 		ifBlock->applyFileInfo();
 		if (ifBlock->Validate())
 			returnValue = true;
-	} else if (elseBlock != NULL)
+	} else if (elseBlock != nullptr)
 	{
 		elseBlock->applyFileInfo();
 		if (elseBlock->Validate())
@@ -93,7 +93,7 @@ void CDirectiveConditional::Encode() const
 	if (previousResult)
 	{
 		ifBlock->Encode();
-	} else if (elseBlock != NULL)
+	} else if (elseBlock != nullptr)
 	{
 		elseBlock->Encode();
 	}
@@ -105,7 +105,7 @@ void CDirectiveConditional::writeTempData(TempData& tempData) const
 	{
 		ifBlock->applyFileInfo();
 		ifBlock->writeTempData(tempData);
-	} else if (elseBlock != NULL)
+	} else if (elseBlock != nullptr)
 	{
 		elseBlock->applyFileInfo();
 		elseBlock->writeTempData(tempData);
@@ -117,7 +117,7 @@ void CDirectiveConditional::writeSymData(SymbolData& symData) const
 	if (previousResult)
 	{
 		ifBlock->writeSymData(symData);
-	} else if (elseBlock != NULL)
+	} else if (elseBlock != nullptr)
 	{
 		elseBlock->writeSymData(symData);
 	}

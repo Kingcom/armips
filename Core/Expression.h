@@ -134,8 +134,8 @@ public:
 	ExpressionInternal(int64_t value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
-	ExpressionInternal(OperatorType op, ExpressionInternal* a = NULL,
-		ExpressionInternal* b = NULL, ExpressionInternal* c = NULL);
+	ExpressionInternal(OperatorType op, ExpressionInternal* a = nullptr,
+		ExpressionInternal* b = nullptr, ExpressionInternal* c = nullptr);
 	ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters);
 	ExpressionValue evaluate();
 	std::wstring toString();
@@ -171,7 +171,7 @@ class Expression
 public:
 	Expression();
 	ExpressionValue evaluate();
-	bool isLoaded() const { return expression != NULL; }
+	bool isLoaded() const { return expression != nullptr; }
 	void setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock);
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool isConstExpression() { return constExpression; }
@@ -179,7 +179,7 @@ public:
 	template<typename T>
 	bool evaluateInteger(T& dest)
 	{
-		if (expression == NULL)
+		if (expression == nullptr)
 			return false;
 
 		ExpressionValue value = expression->evaluate();
@@ -192,7 +192,7 @@ public:
 
 	bool evaluateString(std::wstring& dest, bool convert)
 	{
-		if (expression == NULL)
+		if (expression == nullptr)
 			return false;
 
 		ExpressionValue value = expression->evaluate();
@@ -217,14 +217,14 @@ public:
 	
 	bool evaluateIdentifier(std::wstring& dest)
 	{
-		if (expression == NULL || expression->isIdentifier() == false)
+		if (expression == nullptr || expression->isIdentifier() == false)
 			return false;
 
 		dest = expression->getStringValue();
 		return true;
 	}
 
-	std::wstring toString() { return expression != NULL ? expression->toString() : L""; };
+	std::wstring toString() { return expression != nullptr ? expression->toString() : L""; };
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;

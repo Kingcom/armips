@@ -688,7 +688,7 @@ bool FileTokenizer::init(TextFile* input)
 	currentLine = input->readLine();
 
 	this->input = input;
-	if (input != NULL && input->isOpen())
+	if (input != nullptr && input->isOpen())
 	{
 		while (!isInputAtEnd())
 		{

@@ -617,7 +617,7 @@ wchar_t sjisToUnicode(unsigned short SjisCharacter)
 
 BinaryFile::BinaryFile()
 {
-	handle = NULL;
+	handle = nullptr;
 }
 
 BinaryFile::~BinaryFile()
@@ -654,7 +654,7 @@ bool BinaryFile::open(Mode mode)
 		return false;
 	}
 
-	if (handle == NULL)
+	if (handle == nullptr)
 		return false;
 
 	if (mode != Write)
@@ -672,7 +672,7 @@ void BinaryFile::close()
 	if (isOpen())
 	{
 		fclose(handle);
-		handle = NULL;
+		handle = nullptr;
 	}
 }
 
@@ -696,7 +696,7 @@ const size_t TEXTFILE_BUF_MAX_SIZE = 4096;
 
 TextFile::TextFile()
 {
-	handle = NULL;
+	handle = nullptr;
 	recursion = false;
 	errorRetrieved = false;
 	fromMemory = false;
@@ -747,7 +747,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		break;
 	case Write:
 		handle = openFile(fileName,OpenFileMode::WriteBinary);
-		if (handle == NULL)
+		if (handle == nullptr)
 			return false;
 
 		buf.resize(TEXTFILE_BUF_MAX_SIZE);
@@ -761,7 +761,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		return false;
 	}
 
-	if (handle == NULL)
+	if (handle == nullptr)
 		return false;
 
 	// detect encoding
@@ -820,7 +820,7 @@ void TextFile::close()
 	{
 		bufDrainWrite();
 		fclose(handle);
-		handle = NULL;
+		handle = nullptr;
 	}
 	bufPos = 0;
 }

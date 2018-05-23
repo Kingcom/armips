@@ -492,7 +492,7 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 {
 	for (size_t i = 0; i < childrenCount; i++)
 	{
-		if (children[i] != NULL)
+		if (children[i] != nullptr)
 		{
 			children[i]->replaceMemoryPos(identifierName);
 		}
@@ -845,7 +845,7 @@ std::wstring ExpressionInternal::toString()
 
 Expression::Expression()
 {
-	expression = NULL;
+	expression = nullptr;
 	constExpression = true;
 }
 
@@ -860,7 +860,7 @@ void Expression::setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlo
 
 ExpressionValue Expression::evaluate()
 {
-	if (expression == NULL)
+	if (expression == nullptr)
 	{
 		ExpressionValue invalid;
 		return invalid;
@@ -871,7 +871,7 @@ ExpressionValue Expression::evaluate()
 
 void Expression::replaceMemoryPos(const std::wstring& identifierName)
 {
-	if (expression != NULL)
+	if (expression != nullptr)
 		expression->replaceMemoryPos(identifierName);
 }
 

@@ -12,7 +12,7 @@ public:
 
 	bool open(const std::wstring& fileName, Mode mode);
 	bool open(Mode mode);
-	bool isOpen() { return handle != NULL; };
+	bool isOpen() { return handle != nullptr; };
 	bool atEnd() { return isOpen() && mode != Write && ftell(handle) == size_; };
 	void setPos(long pos) { if (isOpen()) fseek(handle,pos,SEEK_SET); };
 	long pos() { return isOpen() ? ftell(handle) : -1; }
@@ -42,7 +42,7 @@ public:
 	void openMemory(const std::wstring& content);
 	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = GUESS);
 	bool open(Mode mode, Encoding defaultEncoding = GUESS);
-	bool isOpen() { return fromMemory || handle != NULL; };
+	bool isOpen() { return fromMemory || handle != nullptr; };
 	bool atEnd() { return isOpen() && mode == Read && tell() >= size_; };
 	long size() { return size_; };
 	void close();

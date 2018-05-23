@@ -8,13 +8,13 @@
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName)
 {
 	this->defined = false;
-	this->label = NULL;
+	this->label = nullptr;
 	
 	if (Global.symbolTable.isLocalSymbol(name) == false)	
 		updateSection(++Global.Section);
 
 	label = Global.symbolTable.getLabel(name, FileNum, getSection());
-	if (label == NULL)
+	if (label == nullptr)
 	{
 		Logger::printError(Logger::Error, L"Invalid label name \"%s\"", name);
 		return;

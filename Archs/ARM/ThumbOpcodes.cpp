@@ -149,6 +149,6 @@ const tThumbOpcode ThumbOpcodes[] = {
 	{ "bl",		"/#I\x16",			0xF800,	THUMB_TYPE19,	4,	THUMB_IMMEDIATE|THUMB_BRANCH|THUMB_LONG },
 	{ "blx",	"/#I\x16",			0xF800,	THUMB_TYPE19,	4,	THUMB_IMMEDIATE|THUMB_ARM9|THUMB_EXCHANGE|THUMB_BRANCH|THUMB_LONG },
 
-	{ NULL, NULL, 0, 0, 0}
+	{ nullptr,	nullptr,			0,		0,				0,	0 }
 };
 

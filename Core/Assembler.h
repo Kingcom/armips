@@ -46,7 +46,7 @@ struct ArmipsArguments
 		mode = ArmipsMode::FILE;
 		errorOnWarning = false;
 		silent = false;
-		errorsResult = NULL;
+		errorsResult = nullptr;
 	}
 };
 

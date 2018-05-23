@@ -208,7 +208,7 @@ bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
 	FILE* input = fopen(existingUtf8.c_str(),"rb");
 	FILE* output = fopen(newUtf8.c_str(),"wb");
 
-	if (input == NULL || output == NULL)
+	if (input == nullptr || output == nullptr)
 		return false;
 
 	size_t n;
@@ -260,7 +260,7 @@ FILE* openFile(const std::wstring& fileName, OpenFileMode mode)
 	}
 #endif
 
-	return NULL;
+	return nullptr;
 }
 
 std::wstring getCurrentDirectory()
@@ -270,7 +270,7 @@ std::wstring getCurrentDirectory()
 	_wgetcwd(dir,MAX_PATH-1);
 	return dir;
 #else
-	char* dir = getcwd(NULL,0);
+	char* dir = getcwd(nullptr,0);
 	std::wstring result = convertUtf8ToWString(dir);
 	free(dir);
 	return result;

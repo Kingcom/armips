@@ -59,7 +59,7 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, in
 Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 {
 	if (isValidSymbolName(symbol) == false)
-		return NULL;
+		return nullptr;
 
 	int actualSection = section;
 	setFileSectionValues(symbol,file,section);
@@ -83,7 +83,7 @@ Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 
 	// make sure not to match symbols that aren't labels
 	if (it->second.type != LabelSymbol)
-		return NULL;
+		return nullptr;
 
 	return labels[it->second.index];
 }
@@ -121,7 +121,7 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 
 	for (size_t i = start; i < size; i++)
 	{
-		if (wcschr(validSymbolCharacters,symbol[i]) == NULL)
+		if (wcschr(validSymbolCharacters,symbol[i]) == nullptr)
 			return false;
 	}
 
@@ -187,7 +187,7 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 			continue;
 
 		Label* label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
-		if (label == NULL)
+		if (label == nullptr)
 			continue;
 
 		if (isLocalSymbol(def.name) == false)

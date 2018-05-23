@@ -1409,7 +1409,7 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 	const MipsArchDefinition& arch = mipsArchs[Mips.GetVersion()];
 	const std::wstring stringValue = token.getStringValue();
 
-	for (int z = 0; MipsOpcodes[z].name != NULL; z++)
+	for (int z = 0; MipsOpcodes[z].name != nullptr; z++)
 	{
 		if ((MipsOpcodes[z].archs & arch.supportSets) == 0)
 			continue;
@@ -1502,7 +1502,7 @@ CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
 	
 	parser.eatToken();
 	const std::wstring stringValue = token.getStringValue();
-	for (int z = 0; mipsMacros[z].name != NULL; z++)
+	for (int z = 0; mipsMacros[z].name != nullptr; z++)
 	{
 		if (stringValue == mipsMacros[z].name)
 		{

@@ -640,7 +640,7 @@ CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 	bool paramFail = false;
 
 	const std::wstring stringValue = token.getStringValue();
-	for (int z = 0; ArmOpcodes[z].name != NULL; z++)
+	for (int z = 0; ArmOpcodes[z].name != nullptr; z++)
 	{
 		if ((ArmOpcodes[z].flags & ARM_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
@@ -737,7 +737,7 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 	bool paramFail = false;
 
 	const std::wstring stringValue = token.getStringValue();
-	for (int z = 0; ThumbOpcodes[z].name != NULL; z++)
+	for (int z = 0; ThumbOpcodes[z].name != nullptr; z++)
 	{
 		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;

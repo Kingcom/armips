@@ -4,20 +4,20 @@
 
 ByteArray::ByteArray()
 {
-	data_ = NULL;
+	data_ = nullptr;
 	size_ = allocatedSize_ = 0;
 }
 
 ByteArray::ByteArray(const ByteArray& other)
 {
-	data_ = NULL;
+	data_ = nullptr;
 	size_ = allocatedSize_ = 0;
 	append(other);
 }
 
 ByteArray::ByteArray(byte* data, size_t size)
 {
-	data_ = NULL;
+	data_ = nullptr;
 	size_ = allocatedSize_ = 0;
 	append(data,size);
 }
@@ -27,7 +27,7 @@ ByteArray::ByteArray(ByteArray&& other)
 	data_ = other.data_;
 	size_ = other.size_;
 	allocatedSize_ = other.allocatedSize_;
-	other.data_ = NULL;
+	other.data_ = nullptr;
 	other.allocatedSize_ = other.size_ = 0;
 }
 
@@ -39,7 +39,7 @@ ByteArray::~ByteArray()
 ByteArray& ByteArray::operator=(ByteArray& other)
 {
 	free(data_);
-	data_ = NULL;
+	data_ = nullptr;
 	size_ = allocatedSize_ = 0;
 	append(other);
 
@@ -51,7 +51,7 @@ ByteArray& ByteArray::operator=(ByteArray&& other)
 	data_ = other.data_;
 	size_ = other.size_;
 	allocatedSize_ = other.allocatedSize_;
-	other.data_ = NULL;
+	other.data_ = nullptr;
 	other.allocatedSize_ = other.size_ = 0;
 	return *this;
 }
@@ -62,7 +62,7 @@ void ByteArray::grow(size_t neededSize)
 
 	// align to next 0.5kb... it's a start
 	allocatedSize_ = ((neededSize+511)/512)*512;
-	if (data_ == NULL)
+	if (data_ == nullptr)
 	{
 		data_ = (byte*) malloc(allocatedSize_);
 	} else {
@@ -141,7 +141,7 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t s
 	ByteArray ret;
 	
 	FILE* input = openFile(fileName,OpenFileMode::ReadBinary);
-	if (input == NULL)
+	if (input == nullptr)
 		return ret;
 
 	fseek(input,0,SEEK_END);
@@ -168,7 +168,7 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t s
 bool ByteArray::toFile(const std::wstring& fileName)
 {
 	FILE* output = openFile(fileName,OpenFileMode::WriteBinary);
-	if (output == NULL) return false;
+	if (output == nullptr) return false;
 	size_t length = fwrite(data_,1,size_,output);
 	fclose(output);
 	return length == size_;
