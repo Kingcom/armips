@@ -15,6 +15,7 @@ enum class MipsRegisterType
 	VfpuMatrix,
 	RspCop0,
 	RspVector,
+	RspVectorControl,
 	RspBroadcastElement,
 	RspScalarElement,
 	RspOffsetElement

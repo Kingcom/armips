@@ -557,9 +557,9 @@ const tMipsOpcode MipsOpcodes[] = {
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 
 	{ "mfc2",	"t,RsRo",		MIPS_COP2(0x00),			MA_RSP, 0 },
-	{ "cfc2",	"t,d",			MIPS_COP2(0x02),			MA_RSP, 0 },
+	{ "cfc2",	"t,Rc",			MIPS_COP2(0x02),			MA_RSP, 0 },
 	{ "mtc2",	"t,RsRo",		MIPS_COP2(0x04),			MA_RSP, 0 },
-	{ "ctc2",	"t,d",			MIPS_COP2(0x06),			MA_RSP, 0 },
+	{ "ctc2",	"t,Rc",			MIPS_COP2(0x06),			MA_RSP, 0 },
 	// VVVVVV VVVVV ttttt -------- C DDDDDDD
 	{ "mfv",	"t,vd",			MIPS_COP2(0x03),			MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
 	{ "mfvc",	"t,vc",			MIPS_COP2(0x03) | 0x80,		MA_PSP,	MO_VFPU },

@@ -85,6 +85,10 @@ const MipsRegisterDescriptor mipsRspCop0Registers[] = {
 	{ L"dpc_tmem", 15 },
 };
 
+const MipsRegisterDescriptor mipsRspVectorControlRegisters[] = {
+	{ L"vco", 0 },		{ L"vcc", 1 }, 		{ L"vce", 2 },
+};
+
 const MipsRegisterDescriptor mipsRspVectorRegisters[] = {
 	{ L"v0", 0 },		{ L"v1", 1 },		{ L"v2", 2 },		{ L"v3", 3 },
 	{ L"v4", 4 },		{ L"v5", 5 },		{ L"v6", 6 },		{ L"v7", 7 },
@@ -277,6 +281,16 @@ bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
 		return true;
 
 	return parseRegisterTable(parser,dest,mipsRspCop0Registers,ARRAY_SIZE(mipsRspCop0Registers));
+}
+
+bool MipsParser::parseRspVectorControlRegister(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::RspVectorControl;
+
+	if (parseRegisterNumber(parser, dest, 32))
+		return true;
+
+	return parseRegisterTable(parser,dest,mipsRspVectorControlRegisters,ARRAY_SIZE(mipsRspVectorControlRegisters));
 }
 
 bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
@@ -1276,6 +1290,9 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			{
 			case 'z':	// cop0 register
 				CHECK(parseRspCop0Register(parser,registers.grd));
+				break;
+			case 'c':	// vector control register
+				CHECK(parseRspVectorControlRegister(parser,registers.grd));
 				break;
 			case 't':	// vector register
 				CHECK(parseRspVectorRegister(parser,registers.rspvrt));
