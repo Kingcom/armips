@@ -28,6 +28,7 @@ enum class MipsImmediateType
 	Immediate10,
 	Immediate16,
 	Immediate20,
+	Immediate25,
 	Immediate26,
 	Immediate20_0,
 	ImmediateHalfFloat,

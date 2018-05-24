@@ -1072,6 +1072,9 @@ static bool decodeImmediateSize(const char*& encoding, MipsImmediateType& dest)
 		case 20:
 			dest = MipsImmediateType::Immediate20;
 			break;
+		case 25:
+			dest = MipsImmediateType::Immediate25;
+			break;
 		case 26:
 			dest = MipsImmediateType::Immediate26;
 			break;

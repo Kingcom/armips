@@ -44,6 +44,7 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "xori",	"t,s,i16",			MIPS_OP(0x0E),			MA_MIPS1,	MO_IGNORERTD },
 	{ "xori",	"s,i16",			MIPS_OP(0x0E),			MA_MIPS1,	MO_RST },
 	{ "lui",	"t,i16",			MIPS_OP(0x0F),			MA_MIPS1,	MO_IGNORERTD },
+	{ "cop2",	"i25",				MIPS_OP(0x12)|1<<25, 			MA_PSX,	0 },
 	{ "beql",	"s,t,i16",			MIPS_OP(0x14),			MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
 	{ "beqzl",	"s,i16",			MIPS_OP(0x14),			MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
 	{ "bnel",	"s,t,i16",			MIPS_OP(0x15),			MA_MIPS2,	MO_IPCR|MO_DELAY|MO_NODELAYSLOT },
@@ -104,6 +105,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "lwc1",	"T,(s)",			MIPS_OP(0x31),			MA_MIPS1,	0 },
 	{ "l.s",	"T,i16(s)",			MIPS_OP(0x31),			MA_MIPS1,	0 },
 	{ "l.s",	"T,(s)",			MIPS_OP(0x31),			MA_MIPS1,	0 },
+	{ "lwc2",	"t,i16(s)",			MIPS_OP(0x32),			MA_PSX,	0 },
+	{ "lwc2",	"t,(s)",			MIPS_OP(0x32),			MA_PSX,	0 },
 	{ "lv.s",	"vt,i16(s)",		MIPS_OP(0x32),			MA_PSP,		MO_VFPU_SINGLE|MO_VFPU_MIXED|MO_IMMALIGNED },
 	{ "lv.s",	"vt,(s)",			MIPS_OP(0x32),			MA_PSP,		MO_VFPU_SINGLE|MO_VFPU_MIXED },
 	{ "lld",	"t,i16(s)",			MIPS_OP(0x34),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
@@ -129,6 +132,8 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "swc1",	"T,(s)",			MIPS_OP(0x39),			MA_MIPS1,	0 },
 	{ "s.s",	"T,i16(s)",			MIPS_OP(0x39),			MA_MIPS1,	0 },
 	{ "s.s",	"T,(s)",			MIPS_OP(0x39),			MA_MIPS1,	0 },
+	{ "swc2",	"t,i16(s)",			MIPS_OP(0x3A),			MA_PSX,	0 },
+	{ "swc2",	"t,(s)",			MIPS_OP(0x3A),			MA_PSX,	0 },
 	{ "sv.s",	"vt,i16(s)",		MIPS_OP(0x3A),			MA_PSP,		MO_VFPU_SINGLE|MO_VFPU_MIXED|MO_IMMALIGNED },
 	{ "sv.s",	"vt,(s)",			MIPS_OP(0x3A),			MA_PSP,		MO_VFPU_SINGLE|MO_VFPU_MIXED },
 	{ "scd",	"t,i16(s)",			MIPS_OP(0x3C),			MA_MIPS3,	MO_64BIT|MO_DELAYRT },
@@ -556,9 +561,13 @@ const tMipsOpcode MipsOpcodes[] = {
 //  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
 
+	{ "mfc2",	"t,d",			MIPS_COP2(0x00),			MA_PSX, 0 },
 	{ "mfc2",	"t,RsRo",		MIPS_COP2(0x00),			MA_RSP, 0 },
+	{ "cfc2",	"t,d",			MIPS_COP2(0x02),			MA_PSX, 0 },
 	{ "cfc2",	"t,Rc",			MIPS_COP2(0x02),			MA_RSP, 0 },
+	{ "mtc2",	"t,d",			MIPS_COP2(0x04),			MA_PSX, 0 },
 	{ "mtc2",	"t,RsRo",		MIPS_COP2(0x04),			MA_RSP, 0 },
+	{ "ctc2",	"t,d",			MIPS_COP2(0x06),			MA_PSX, 0 },
 	{ "ctc2",	"t,Rc",			MIPS_COP2(0x06),			MA_RSP, 0 },
 	// VVVVVV VVVVV ttttt -------- C DDDDDDD
 	{ "mfv",	"t,vd",			MIPS_COP2(0x03),			MA_PSP,	MO_VFPU|MO_VFPU_SINGLE },
@@ -1022,7 +1031,7 @@ const tMipsOpcode MipsOpcodes[] = {
 
 const MipsArchDefinition mipsArchs[] = {
 	// MARCH_PSX
-	{ "PSX",		MA_MIPS1,							MA_EXPSX,	0 },
+	{ "PSX",		MA_MIPS1|MA_PSX,					MA_EXPSX,	0 },
 	// MARCH_N64
 	{ "N64",		MA_MIPS1|MA_MIPS2|MA_MIPS3,			MA_EXN64,	MO_64BIT|MO_FPU|MO_DFPU },
 	// MARCH_PS2
