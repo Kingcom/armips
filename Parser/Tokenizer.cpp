@@ -35,7 +35,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 				{
 					TokenList::iterator insertIt = it;
 					insertIt++;
-				
+
 					// replace old token with the new tokens
 					// replace the first token manually so that any iterators
 					// are still guaranteed to be valid
@@ -59,7 +59,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 			{
 				TokenList::iterator insertIt = it;
 				insertIt++;
-			
+
 				// check if this is another equ with the same name.
 				// if so, keep equ redefinitions for later error handling
 				if (insertIt != tokens.end() && insertIt->type == TokenType::Equ)
@@ -101,7 +101,7 @@ const Token& Tokenizer::peekToken(int ahead)
 
 		it++;
 	}
-	
+
 	if (processElement(it) == false)
 		return invalidToken;
 
@@ -193,6 +193,9 @@ inline bool isWhitespace(const std::wstring& text, size_t pos)
 
 inline bool isComment(const std::wstring& text, size_t pos)
 {
+	if (pos < text.size() && text[pos] == '#')
+		return true;
+		
 	if (pos < text.size() && text[pos] == ';')
 		return true;
 
@@ -545,7 +548,7 @@ Token FileTokenizer::loadToken()
 					pos += 2;
 					continue;
 				}
-				
+
 				if (currentLine[pos+1] == '\\')
 				{
 					text += '\\';
@@ -569,7 +572,7 @@ Token FileTokenizer::loadToken()
 			createToken(TokenType::Invalid,pos-linePos,L"Unexpected end of line in string constant");
 			return std::move(token);
 		}
-		
+
 		createToken(TokenType::String,pos-linePos,text);
 		return std::move(token);
 	}
@@ -637,7 +640,7 @@ Token FileTokenizer::loadToken()
 
 			createToken(TokenType::Float,end-start,value);
 		}
-		
+
 		return std::move(token);
 	}
 
