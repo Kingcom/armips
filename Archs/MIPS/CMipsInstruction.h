@@ -11,7 +11,7 @@ enum class MipsRegisterType
 	FpuControl,
 	Cop0,
 	Ps2Cop2,
-        PsxCop2Data,
+	PsxCop2Data,
 	PsxCop2Control,
 	VfpuVector,
 	VfpuMatrix,

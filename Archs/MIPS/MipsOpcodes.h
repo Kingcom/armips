@@ -1,20 +1,20 @@
 #pragma once
 #include "Mips.h"
 
-#define MA_MIPS1		0x0000001
-#define MA_MIPS2		0x0000002
-#define MA_MIPS3		0x0000004
-#define MA_MIPS4		0x0000008
-#define MA_PS2			0x0000010
-#define MA_PSP			0x0000020
-#define MA_RSP			0x0000040
-#define MA_PSX			0x0000080
+#define MA_MIPS1		0x00000001
+#define MA_MIPS2		0x00000002
+#define MA_MIPS3		0x00000004
+#define MA_MIPS4		0x00000008
+#define MA_PSX			0x00000010
+#define MA_PS2			0x00000040
+#define MA_PSP			0x00000080
+#define MA_RSP			0x00000100
 
-#define MA_EXPSX		0x0000100
-#define MA_EXN64		0x0000200
-#define MA_EXPS2		0x0000400
-#define MA_EXPSP		0x0000800
-#define MA_EXRSP		0x0001000
+#define MA_EXPSX		0x00001000
+#define MA_EXN64		0x00002000
+#define MA_EXPS2		0x00004000
+#define MA_EXPSP		0x00008000
+#define MA_EXRSP		0x00010000
 
 #define MO_IPCA			0x00000001	// pc >> 2
 #define MO_IPCR			0x00000002	// PC, -> difference >> 2
