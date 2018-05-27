@@ -37,6 +37,8 @@ int getImmediateBits(MipsImmediateType type)
 	case MipsImmediateType::Immediate20:
 	case MipsImmediateType::Immediate20_0:
 		return 20;
+	case MipsImmediateType::Immediate25:
+		return 25;
 	case MipsImmediateType::Immediate26:
 		return 26;
 	default:
@@ -282,6 +284,7 @@ void CMipsInstruction::encodeNormal() const
 		encoding |= immediateData.primary.value << 6;
 		break;
 	case MipsImmediateType::Immediate16:
+	case MipsImmediateType::Immediate25:
 	case MipsImmediateType::Immediate26:
 	case MipsImmediateType::Immediate20_0:
 	case MipsImmediateType::Immediate7:

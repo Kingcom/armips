@@ -8,6 +8,7 @@
 #define MA_PS2			0x0000010
 #define MA_PSP			0x0000020
 #define MA_RSP			0x0000040
+#define MA_PSX			0x0000080
 
 #define MA_EXPSX		0x0000100
 #define MA_EXN64		0x0000200

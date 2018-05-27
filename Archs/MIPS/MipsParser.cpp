@@ -76,6 +76,28 @@ const MipsRegisterDescriptor mipsPs2Cop2FpRegisters[] = {
 	{ L"vf30", 30 },	{ L"vf31", 31 },
 };
 
+const MipsRegisterDescriptor mipsPsxCop2DataRegisters[] = {
+	{ L"vxy0", 0 },		{ L"vz0", 1 },		{ L"vxy1", 2 },		{ L"vz1", 3 },
+	{ L"vxy2", 4 },		{ L"vz2", 5 },		{ L"rgbc", 6 },		{ L"otz", 7 },
+	{ L"ir0", 8 },		{ L"ir1", 9 },		{ L"ir2", 10 },		{ L"ir3", 11 },
+	{ L"sxy0", 12 },	{ L"sxy1", 13 },	{ L"sxy2", 14 },	{ L"sxyp", 15 },
+	{ L"sz0", 16 },		{ L"sz1", 17 },		{ L"sz2", 18 },		{ L"sz3", 19 },
+	{ L"rgb0", 20 },	{ L"rgb1", 21 },	{ L"rgb2", 22 },	{ L"res1", 23 },
+	{ L"mac0", 24 },	{ L"mac1", 25 },	{ L"mac2", 26 },	{ L"mac3", 27 },
+	{ L"irgb", 28 },	{ L"orgb", 29 },	{ L"lzcs", 30 },	{ L"lzcr", 31 },
+};
+
+const MipsRegisterDescriptor mipsPsxCop2ControlRegisters[] = {
+	{ L"rt0", 0 },		{ L"rt1", 1 },		{ L"rt2", 2 },		{ L"rt3", 3 },
+	{ L"rt4", 4 },		{ L"trx", 5 },		{ L"try", 6 },		{ L"trz", 7 },
+	{ L"llm0", 8 },		{ L"llm1", 9 },		{ L"llm2", 10 },	{ L"llm3", 11 },
+	{ L"llm4", 12 },	{ L"rbk", 13 },		{ L"gbk", 14 },		{ L"bbk", 15 },
+	{ L"lcm0", 16 },	{ L"lcm1", 17 },	{ L"lcm2", 18 },	{ L"lcm3", 19 },
+	{ L"lcm4", 20 },	{ L"rfc", 21 },		{ L"gfc", 22 },		{ L"bfc", 23 },
+	{ L"ofx", 24 },		{ L"ofy", 25 },		{ L"h", 26 },		{ L"dqa", 27 },
+	{ L"dqb", 28 },		{ L"zsf3", 29 },	{ L"zsf4", 30 },	{ L"flag", 31 },
+};
+
 const MipsRegisterDescriptor mipsRspCop0Registers[] = {
 	{ L"sp_mem_addr", 0 },	{ L"sp_dram_addr", 1 }, { L"sp_rd_len", 2 },
 	{ L"sp_wr_len", 3 },	{ L"sp_status", 4 },	{ L"sp_dma_full", 5 },
@@ -271,6 +293,26 @@ bool MipsParser::parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Ps2Cop2;
 	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
+}
+
+bool MipsParser::parsePsxCop2DataRegister(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::PsxCop2Data;
+
+	if (parseRegisterNumber(parser, dest, 32))
+		return true;
+
+	return parseRegisterTable(parser,dest,mipsPsxCop2DataRegisters,ARRAY_SIZE(mipsPsxCop2DataRegisters));
+}
+
+bool MipsParser::parsePsxCop2ControlRegister(Parser& parser, MipsRegisterValue& dest)
+{
+	dest.type = MipsRegisterType::PsxCop2Control;
+
+	if (parseRegisterNumber(parser, dest, 32))
+		return true;
+
+	return parseRegisterTable(parser,dest,mipsPsxCop2ControlRegisters,ARRAY_SIZE(mipsPsxCop2ControlRegisters));
 }
 
 bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
@@ -1072,6 +1114,9 @@ static bool decodeImmediateSize(const char*& encoding, MipsImmediateType& dest)
 		case 20:
 			dest = MipsImmediateType::Immediate20;
 			break;
+		case 25:
+			dest = MipsImmediateType::Immediate25;
+			break;
 		case 26:
 			dest = MipsImmediateType::Immediate26;
 			break;
@@ -1276,6 +1321,22 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 				break;
 			case 's':	// register
 				CHECK(parsePs2Cop2Register(parser,registers.ps2vrs));
+				break;
+			default:
+				return false;
+			}
+			break;
+		case 'g':	// psx cop2 reg
+			switch (*encoding++)
+			{
+			case 't':	// gte data register
+				CHECK(parsePsxCop2DataRegister(parser,registers.grt));
+				break;
+			case 's':	// gte data register
+				CHECK(parsePsxCop2DataRegister(parser,registers.grd));
+				break;
+			case 'c':	// gte control register
+				CHECK(parsePsxCop2ControlRegister(parser,registers.grd));
 				break;
 			default:
 				return false;
