@@ -418,7 +418,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%16X,",(uint64_t)normalData[i]);
+			str += swprintf(str,20,L"0x%16llX,",(uint64_t)normalData[i]);
 		}
 		break;
 	}
