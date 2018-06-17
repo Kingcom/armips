@@ -4,6 +4,11 @@
 namespace std { class type_info; }
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER == 1800
+    // Disable spurious warning about printf format string mismatch in VS 2012
+#   pragma warning(disable:4313)
+#endif
+
 #include <stdexcept>
 #include <climits>
 #include <cfloat>
@@ -100,7 +105,7 @@ std::ostream& operator<<(std::ostream& os, const MyInt& obj) {
 int unitTests()
 {
     int nfailed = 0;
-#   ifdef _MSC_VER
+#   if defined(_MSC_VER) && _MSC_VER < 1900 // VC++ older than 2015
     // floats are printed with three digit exponents on windows, which messes
     // up the tests.  Turn this off for consistency:
     _set_output_format(_TWO_DIGIT_EXPONENT);
@@ -255,8 +260,8 @@ int unitTests()
     // which would noramlly go to the stdout
     std::ostringstream coutCapture;
     std::streambuf* coutBuf = std::cout.rdbuf(coutCapture.rdbuf());
-    tfm::printf("%s %s %d\n", "printf", "test", "1");
-    tfm::printfln("%s %s %d", "printfln", "test", "1");
+    tfm::printf("%s %s %d\n", "printf", "test", 1);
+    tfm::printfln("%s %s %d", "printfln", "test", 1);
     std::cout.rdbuf(coutBuf); // restore buffer
     CHECK_EQUAL(coutCapture.str(), "printf test 1\nprintfln test 1\n");
 
@@ -266,5 +271,13 @@ int unitTests()
 
 int main()
 {
-    return unitTests();
+    try
+    {
+        return unitTests();
+    }
+    catch (std::runtime_error & e)
+    {
+        std::cout << "Failure due to uncaught exception: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }
