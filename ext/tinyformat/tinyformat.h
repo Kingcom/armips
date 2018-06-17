@@ -133,29 +133,25 @@ namespace tfm = tinyformat;
 //------------------------------------------------------------------------------
 // Implementation details.
 #include <algorithm>
-#include <cassert>
 #include <iostream>
 #include <sstream>
+
+#ifndef TINYFORMAT_ASSERT
+#   include <cassert>
+#   define TINYFORMAT_ASSERT(cond) assert(cond)
+#endif
 
 #define TINYFORMAT_ALLOW_WCHAR_STRINGS
 #define TINYFORMAT_USE_VARIADIC_TEMPLATES
 
 #ifndef TINYFORMAT_ERROR
+#   include <cassert>
 #   define TINYFORMAT_ERROR(reason) assert(0 && reason)
 #endif
 
 #if !defined(TINYFORMAT_USE_VARIADIC_TEMPLATES) && !defined(TINYFORMAT_NO_VARIADIC_TEMPLATES)
 #   ifdef __GXX_EXPERIMENTAL_CXX0X__
 #       define TINYFORMAT_USE_VARIADIC_TEMPLATES
-#   endif
-#endif
-
-#ifdef TINYFORMAT_USE_VARIADIC_TEMPLATES
-#   include <array>
-#   if defined(_MSC_VER) && _MSC_VER <= 1800 // VS2013
-#       define TINYFORMAT_BRACED_INIT_WORKAROUND(x) (x)
-#   else
-#       define TINYFORMAT_BRACED_INIT_WORKAROUND(x) {x}
 #   endif
 #endif
 
@@ -222,7 +218,7 @@ template<int n> struct is_wchar<wchar_t[n]> {};
 template<typename T, typename fmtT, bool convertible = is_convertible<T, fmtT>::value>
 struct formatValueAsType
 {
-    static void invoke(std::wostream& /*out*/, const T& /*value*/) { assert(0); }
+    static void invoke(std::wostream& /*out*/, const T& /*value*/) { TINYFORMAT_ASSERT(0); }
 };
 // Specialized version for types that can actually be converted to fmtT, as
 // indicated by the "convertible" template parameter.
@@ -280,7 +276,7 @@ inline void formatTruncated(std::wostream& out, const T& value, int ntrunc)
     std::wostringstream tmp;
     tmp << value;
     std::wstring result = tmp.str();
-    out.write(result.c_str(), std::min(ntrunc, static_cast<int>(result.size())));
+    out.write(result.c_str(), (std::min)(ntrunc, static_cast<int>(result.size())));
 }
 #define TINYFORMAT_DEFINE_FORMAT_TRUNCATED_CSTR(type)       \
 inline void formatTruncated(std::wostream& out, type* value, int ntrunc) \
@@ -330,8 +326,8 @@ inline void formatValue(std::wostream& out, const wchar_t* /*fmtBegin*/,
     // void* respectively and format that instead of the value itself.  For the
     // %p conversion it's important to avoid dereferencing the pointer, which
     // could otherwise lead to a crash when printing a dangling (const wchar_t*).
-    bool canConvertToChar = detail::is_convertible<T,wchar_t>::value;
-    bool canConvertToVoidPtr = detail::is_convertible<T, const void*>::value;
+    const bool canConvertToChar = detail::is_convertible<T,wchar_t>::value;
+    const bool canConvertToVoidPtr = detail::is_convertible<T, const void*>::value;
     if(canConvertToChar && *(fmtEnd-1) == 'c')
         detail::formatValueAsType<T, wchar_t>::invoke(out, value);
     else if(canConvertToVoidPtr && *(fmtEnd-1) == 'p')
@@ -499,7 +495,11 @@ namespace detail {
 class FormatArg
 {
     public:
-        FormatArg() {}
+        FormatArg()
+            : m_value(NULL),
+            m_formatImpl(NULL),
+            m_toIntImpl(NULL)
+        { }
 
         template<typename T>
         FormatArg(const T& value)
@@ -511,11 +511,15 @@ class FormatArg
         void format(std::wostream& out, const wchar_t* fmtBegin,
                     const wchar_t* fmtEnd, int ntrunc) const
         {
+            TINYFORMAT_ASSERT(m_value);
+            TINYFORMAT_ASSERT(m_formatImpl);
             m_formatImpl(out, fmtBegin, fmtEnd, ntrunc, m_value);
         }
 
         int toInt() const
         {
+            TINYFORMAT_ASSERT(m_value);
+            TINYFORMAT_ASSERT(m_toIntImpl);
             return m_toIntImpl(m_value);
         }
 
@@ -564,14 +568,16 @@ inline const wchar_t* printFormatStringLiteral(std::wostream& out, const wchar_t
         switch(*c)
         {
             case '\0':
-                out.write(fmt, static_cast<std::streamsize>(c - fmt));
+                out.write(fmt, c - fmt);
                 return c;
             case '%':
-                out.write(fmt, static_cast<std::streamsize>(c - fmt));
+                out.write(fmt, c - fmt);
                 if(*(c+1) != '%')
                     return c;
                 // for "%%", tack trailing % onto next literal section.
                 fmt = ++c;
+                break;
+            default:
                 break;
         }
     }
@@ -642,6 +648,8 @@ inline const wchar_t* streamStateFromFormat(std::wostream& out, bool& spacePadPo
                 spacePadPositive = false;
                 widthExtra = 1;
                 continue;
+            default:
+                break;
         }
         break;
     }
@@ -712,23 +720,27 @@ inline const wchar_t* streamStateFromFormat(std::wostream& out, bool& spacePadPo
             break;
         case 'X':
             out.setf(std::ios::uppercase);
+            // Falls through
         case 'x': case 'p':
             out.setf(std::ios::hex, std::ios::basefield);
             intConversion = true;
             break;
         case 'E':
             out.setf(std::ios::uppercase);
+            // Falls through
         case 'e':
             out.setf(std::ios::scientific, std::ios::floatfield);
             out.setf(std::ios::dec, std::ios::basefield);
             break;
         case 'F':
             out.setf(std::ios::uppercase);
+            // Falls through
         case 'f':
             out.setf(std::ios::fixed, std::ios::floatfield);
             break;
         case 'G':
             out.setf(std::ios::uppercase);
+            // Falls through
         case 'g':
             out.setf(std::ios::dec, std::ios::basefield);
             // As in boost::format, let stream decide float format.
@@ -755,6 +767,8 @@ inline const wchar_t* streamStateFromFormat(std::wostream& out, bool& spacePadPo
             TINYFORMAT_ERROR("tinyformat: Conversion spec incorrectly "
                              "terminated by end of string");
             return c;
+        default:
+            break;
     }
     if(intConversion && precisionSet && !widthSet)
     {
@@ -867,22 +881,22 @@ class FormatListN : public FormatList
         template<typename... Args>
         FormatListN(const Args&... args)
             : FormatList(&m_formatterStore[0], N),
-            m_formatterStore TINYFORMAT_BRACED_INIT_WORKAROUND({ FormatArg(args)... })
+            m_formatterStore { FormatArg(args)... }
         { static_assert(sizeof...(args) == N, "Number of args must be N"); }
 #else // C++98 version
         void init(int) {}
-#       define TINYFORMAT_MAKE_FORMATLIST_CONSTRUCTOR(n)       \
-                                                               \
-        template<TINYFORMAT_ARGTYPES(n)>                       \
-        FormatListN(TINYFORMAT_VARARGS(n))                     \
-            : FormatList(&m_formatterStore[0], n)              \
-        { assert(n == N); init(0, TINYFORMAT_PASSARGS(n)); }   \
-                                                               \
-        template<TINYFORMAT_ARGTYPES(n)>                       \
-        void init(int i, TINYFORMAT_VARARGS(n))                \
-        {                                                      \
-            m_formatterStore[i] = FormatArg(v1);               \
-            init(i+1 TINYFORMAT_PASSARGS_TAIL(n));             \
+#       define TINYFORMAT_MAKE_FORMATLIST_CONSTRUCTOR(n)                \
+                                                                        \
+        template<TINYFORMAT_ARGTYPES(n)>                                \
+        FormatListN(TINYFORMAT_VARARGS(n))                              \
+            : FormatList(&m_formatterStore[0], n)                       \
+        { TINYFORMAT_ASSERT(n == N); init(0, TINYFORMAT_PASSARGS(n)); } \
+                                                                        \
+        template<TINYFORMAT_ARGTYPES(n)>                                \
+        void init(int i, TINYFORMAT_VARARGS(n))                         \
+        {                                                               \
+            m_formatterStore[i] = FormatArg(v1);                        \
+            init(i+1 TINYFORMAT_PASSARGS_TAIL(n));                      \
         }
 
         TINYFORMAT_FOREACH_ARGNUM(TINYFORMAT_MAKE_FORMATLIST_CONSTRUCTOR)
@@ -890,11 +904,7 @@ class FormatListN : public FormatList
 #endif
 
     private:
-#ifdef TINYFORMAT_USE_VARIADIC_TEMPLATES
-        std::array<FormatArg, N> m_formatterStore;
-#else // C++98 version
         FormatArg m_formatterStore[N];
-#endif
 };
 
 // Special 0-arg version - MSVC says zero-sized C array in struct is nonstandard
