@@ -5,6 +5,7 @@
 #include "Core/Misc.h"
 
 #ifndef _WIN32
+#include <strings.h>
 #define _stricmp strcasecmp
 #endif
 
