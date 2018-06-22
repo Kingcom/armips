@@ -97,11 +97,11 @@ bool Parser::parseIdentifier(std::wstring& dest)
 	return true;
 }
 
-CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::initializer_list<const wchar_t*> terminators)
+std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicator, const std::initializer_list<const wchar_t*> terminators)
 {
-	CommandSequence* sequence = new CommandSequence();
+	auto sequence = make_unique<CommandSequence>();
 
-	bool foundTerminaion = false;
+	bool foundTermination = false;
 	while (atEnd() == false)
 	{
 		const Token &next = peekToken();
@@ -114,7 +114,7 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 
 		if (next.stringValueStartsWith(indicator) && isPartOfList(next.getStringValue(), terminators))
 		{
-			foundTerminaion = true;
+			foundTermination = true;
 			break;
 		}
 
@@ -131,19 +131,18 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 		if (foundSomething)
 			continue;
 
-		CAssemblerCommand* cmd = parseCommand();
+		std::unique_ptr<CAssemblerCommand> cmd = parseCommand();
 
 		// omit commands inside blocks that are trivially false
 		if (isInsideTrueBlock() == false)
 		{
-			delete cmd;
 			continue;
 		}
 
-		sequence->addCommand(cmd);
+		sequence->addCommand(std::move(cmd));
 	}
 
-	if (!foundTerminaion && terminators.size())
+	if (!foundTermination && terminators.size())
 	{
 		std::wstring expected;
 		for (const wchar_t* terminator : terminators)
@@ -159,13 +158,13 @@ CAssemblerCommand* Parser::parseCommandSequence(wchar_t indicator, const std::in
 	return sequence;
 }
 
-CAssemblerCommand* Parser::parseFile(TextFile& file, bool virtualFile)
+std::unique_ptr<CAssemblerCommand> Parser::parseFile(TextFile& file, bool virtualFile)
 {
 	FileTokenizer tokenizer;
 	if (tokenizer.init(&file) == false)
 		return nullptr;
 
-	CAssemblerCommand* result = parse(&tokenizer,virtualFile,file.getFileName());
+	std::unique_ptr<CAssemblerCommand> result = parse(&tokenizer,virtualFile,file.getFileName());
 
 	if (file.isFromMemory() == false)
 		Global.FileInfo.TotalLineCount += file.getNumLines();
@@ -173,14 +172,14 @@ CAssemblerCommand* Parser::parseFile(TextFile& file, bool virtualFile)
 	return result;
 }
 
-CAssemblerCommand* Parser::parseString(const std::wstring& text)
+std::unique_ptr<CAssemblerCommand> Parser::parseString(const std::wstring& text)
 {
 	TextFile file;
 	file.openMemory(text);
 	return parseFile(file,true);
 }
 
-CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
+std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
 {
 	std::wstring fullText = text;
 
@@ -198,13 +197,13 @@ CAssemblerCommand* Parser::parseTemplate(const std::wstring& text, std::initiali
 #endif
 	}
 
-	CAssemblerCommand* result = parseString(fullText);
+	std::unique_ptr<CAssemblerCommand> result = parseString(fullText);
 	overrideFileInfo = false;
 
 	return result;
 }
 
-CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
+std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &directiveSet)
 {
 	const Token &tok = peekToken();
 	if (tok.type != TokenType::Identifier)
@@ -230,7 +229,7 @@ CAssemblerCommand* Parser::parseDirective(const DirectiveMap &directiveSet)
 			Arch->NextSection();
 
 		eatToken();
-		CAssemblerCommand* result = directive.function(*this,directive.flags);
+		std::unique_ptr<CAssemblerCommand> result = directive.function(*this,directive.flags);
 		if (result == nullptr)
 		{
 			if (hasError() == false)
@@ -261,7 +260,7 @@ bool Parser::matchToken(TokenType type, bool optional)
 	return nextToken().type == type;
 }
 
-CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name)
+std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name)
 {
 	if (entries.size() >= 150)
 	{
@@ -283,7 +282,7 @@ CAssemblerCommand* Parser::parse(Tokenizer* tokenizer, bool virtualFile, const s
 
 	entries.push_back(entry);
 
-	CAssemblerCommand* sequence = parseCommandSequence();
+	std::unique_ptr<CAssemblerCommand> sequence = parseCommandSequence();
 	entries.pop_back();
 
 	return sequence;
@@ -490,7 +489,7 @@ bool Parser::checkMacroDefinition()
 	return true;
 }
 
-CAssemblerCommand* Parser::parseMacroCall()
+std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 {
 	const Token& start = peekToken();
 	if (start.type != TokenType::Identifier)
@@ -566,13 +565,13 @@ CAssemblerCommand* Parser::parseMacroCall()
 
 	// skip macro instantiation in known false blocks
 	if (!isInsideUnknownBlock() && !isInsideTrueBlock())
-		return new DummyCommand();
+		return make_unique<DummyCommand>();
 
 	// a macro is fully parsed once when it's loaded
 	// to gather all labels. it's not necessary to
 	// instantiate other macros at that time
 	if (initializingMacro)
-		return new DummyCommand();
+		return make_unique<DummyCommand>();
 
 	// the first time a macro is instantiated, it needs to be analyzed
 	// for labels
@@ -583,9 +582,8 @@ CAssemblerCommand* Parser::parseMacroCall()
 		// parse the short lived next command
 		macroTokenizer.init(macro.content);
 		Logger::suppressErrors();
-		CAssemblerCommand* command =  parse(&macroTokenizer,true);
+		std::unique_ptr<CAssemblerCommand> command =  parse(&macroTokenizer,true);
 		Logger::unsuppressErrors();
-		delete command;
 
 		macro.labels = macroLabels;
 		macroLabels.clear();
@@ -620,7 +618,7 @@ CAssemblerCommand* Parser::parseMacroCall()
 
 }
 
-CAssemblerCommand* Parser::parseLabel()
+std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 {
 	updateFileInfo();
 
@@ -641,19 +639,19 @@ CAssemblerCommand* Parser::parseLabel()
 			return nullptr;
 		}
 
-		return new CAssemblerLabel(name,start.getOriginalText());
+		return make_unique<CAssemblerLabel>(name,start.getOriginalText());
 	}
 
 	return nullptr;
 }
 
-CAssemblerCommand* Parser::handleError()
+std::unique_ptr<CAssemblerCommand> Parser::handleError()
 {
 	// skip the rest of the statement
 	while (!atEnd() && nextToken().type != TokenType::Separator);
 
 	clearError();
-	return new InvalidCommand();
+	return make_unique<InvalidCommand>();
 }
 
 
@@ -688,14 +686,14 @@ void Parser::updateFileInfo()
 	}
 }
 
-CAssemblerCommand* Parser::parseCommand()
+std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 {
-	CAssemblerCommand* command;
+	std::unique_ptr<CAssemblerCommand> command;
 
 	updateFileInfo();
 
 	if (atEnd())
-		return new DummyCommand();
+		return make_unique<DummyCommand>();
 
 	if ((command = parseLabel()) != nullptr)
 		return command;

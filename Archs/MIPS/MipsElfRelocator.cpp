@@ -74,7 +74,7 @@ const wchar_t* mipsCtorTemplate = LR"(
 	.word	%ctorContent%
 )";
 
-CAssemblerCommand* MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
+std::unique_ptr<CAssemblerCommand> MipsElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 {
 	Parser parser;
 	if (ctors.size() != 0)

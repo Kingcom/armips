@@ -27,11 +27,6 @@ SymbolTable::~SymbolTable()
 
 void SymbolTable::clear()
 {
-	for (size_t i = 0; i < labels.size(); i++)
-	{
-		delete labels[i];
-	}
-
 	symbols.clear();
 	labels.clear();
 	equationsCount = 0;
@@ -56,7 +51,7 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, in
 	}
 }
 
-Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
+std::shared_ptr<Label> SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 {
 	if (isValidSymbolName(symbol) == false)
 		return nullptr;
@@ -72,7 +67,7 @@ Label* SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 		SymbolInfo value = { LabelSymbol, labels.size() };
 		symbols[key] = value;
 		
-		Label* result = new Label(symbol);
+		std::shared_ptr<Label> result = std::make_shared<Label>(symbol);
 		if (section == actualSection)
 			result->setSection(section);			// local, set section of parent
 		else
@@ -186,7 +181,7 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 		if (!isValidSymbolName(def.name))
 			continue;
 
-		Label* label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
+		std::shared_ptr<Label> label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
 		if (label == nullptr)
 			continue;
 

@@ -7,19 +7,11 @@ CommandSequence::CommandSequence()
 
 }
 
-CommandSequence::~CommandSequence()
-{
-	for (CAssemblerCommand* cmd: commands)
-	{
-		delete cmd;
-	}
-}
-
 bool CommandSequence::Validate()
 {
 	bool result = false;
 	
-	for (CAssemblerCommand* cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
 	{
 		cmd->applyFileInfo();
 		if (cmd->Validate())
@@ -31,7 +23,7 @@ bool CommandSequence::Validate()
 
 void CommandSequence::Encode() const
 {
-	for (CAssemblerCommand* cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
 	{
 		cmd->Encode();
 	}
@@ -39,7 +31,7 @@ void CommandSequence::Encode() const
 
 void CommandSequence::writeTempData(TempData& tempData) const
 {
-	for (CAssemblerCommand* cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
 	{
 		cmd->applyFileInfo();
 		cmd->writeTempData(tempData);
@@ -48,7 +40,7 @@ void CommandSequence::writeTempData(TempData& tempData) const
 
 void CommandSequence::writeSymData(SymbolData& symData) const
 {
-	for (CAssemblerCommand* cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
 	{
 		cmd->writeSymData(symData);
 	}

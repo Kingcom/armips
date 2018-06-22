@@ -196,7 +196,7 @@ const wchar_t* ctorTemplate =
 	L".word %ctorContent%"
 ;
 
-CAssemblerCommand* ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
+std::unique_ptr<CAssemblerCommand> ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 {
 	std::wstring ctorText;
 

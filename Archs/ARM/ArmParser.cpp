@@ -31,23 +31,23 @@ const ArmRegisterDescriptor armCopNumbers[] = {
 	{ L"p12", 12 },	{ L"p13", 13 },	{ L"p14", 14 },	{ L"p15", 15 },
 };
 
-CAssemblerCommand* parseDirectiveThumb(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveThumb(Parser& parser, int flags)
 {
 	Arm.SetThumbMode(true);
-	return new ArmStateCommand(false);
+	return make_unique<ArmStateCommand>(false);
 }
 
-CAssemblerCommand* parseDirectiveArm(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveArm(Parser& parser, int flags)
 {
 	Arm.SetThumbMode(false);
-	return new ArmStateCommand(true);
+	return make_unique<ArmStateCommand>(true);
 }
 
-CAssemblerCommand* parseDirectivePool(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 {
-	CommandSequence* seq = new CommandSequence();
-	seq->addCommand(new CDirectiveAlignFill(4,CDirectiveAlignFill::Align));
-	seq->addCommand(new ArmPoolCommand());
+	auto seq = make_unique<CommandSequence>();
+	seq->addCommand(make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::Align));
+	seq->addCommand(make_unique<ArmPoolCommand>());
 
 	return seq;
 }
@@ -61,7 +61,7 @@ const wchar_t* msgTemplate =
 	L"%after%:"
 ;
 
-CAssemblerCommand* parseDirectiveMsg(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 {
 	Expression text = parser.parseExpression();
 	if (text.isLoaded() == false)
@@ -81,7 +81,7 @@ const DirectiveMap armDirectives = {
 	{ L".msg",		{ &parseDirectiveMsg,	0 } },
 };
 
-CAssemblerCommand* ArmParser::parseDirective(Parser& parser)
+std::unique_ptr<CAssemblerCommand> ArmParser::parseDirective(Parser& parser)
 {
 	return parser.parseDirective(armDirectives);
 }
@@ -629,7 +629,7 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 	return parser.nextToken().type == TokenType::Separator;
 }
 
-CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
+std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 {
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
@@ -652,7 +652,7 @@ CArmInstruction* ArmParser::parseArmOpcode(Parser& parser)
 			if (parseArmParameters(parser,ArmOpcodes[z],vars) == true)
 			{
 				// success, return opcode
-				return new CArmInstruction(ArmOpcodes[z],vars);
+				return make_unique<CArmInstruction>(ArmOpcodes[z],vars);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -726,7 +726,7 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 	return parser.nextToken().type == TokenType::Separator;
 }
 
-CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
+std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 {
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
@@ -752,7 +752,7 @@ CThumbInstruction* ArmParser::parseThumbOpcode(Parser& parser)
 			if (parseThumbParameters(parser,ThumbOpcodes[z],vars) == true)
 			{
 				// success, return opcode
-				return new CThumbInstruction(ThumbOpcodes[z],vars);
+				return make_unique<CThumbInstruction>(ThumbOpcodes[z],vars);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);

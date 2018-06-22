@@ -264,12 +264,12 @@ bool ElfRelocator::exportSymbols()
 	return !error;
 }
 
-CAssemblerCommand* ElfRelocator::generateCtor(const std::wstring& ctorName)
+std::unique_ptr<CAssemblerCommand> ElfRelocator::generateCtor(const std::wstring& ctorName)
 {
-	CAssemblerCommand* content = relocator->generateCtorStub(ctors);
+	std::unique_ptr<CAssemblerCommand> content = relocator->generateCtorStub(ctors);
 
-	CDirectiveFunction* func = new CDirectiveFunction(ctorName,ctorName);
-	func->setContent(content);
+	auto func = make_unique<CDirectiveFunction>(ctorName,ctorName);
+	func->setContent(std::move(content));
 	return func;
 }
 
@@ -362,7 +362,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 
 					std::wstring symName = toWLowercase(elf->getStrTableString(sym.st_name));
 
-					Label* label = Global.symbolTable.getLabel(symName,-1,-1);
+					std::shared_ptr<Label> label = Global.symbolTable.getLabel(symName,-1,-1);
 					if (label == nullptr)
 					{
 						Logger::queueError(Logger::Error,L"Invalid external symbol %s",symName);	

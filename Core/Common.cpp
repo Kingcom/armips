@@ -45,7 +45,7 @@ std::wstring getFullPathName(const std::wstring& path)
 
 bool checkLabelDefined(const std::wstring& labelName, int section)
 {
-	Label* label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,section);
+	std::shared_ptr<Label> label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,section);
 	return label->isDefined();
 }
 

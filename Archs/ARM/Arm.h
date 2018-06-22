@@ -35,8 +35,8 @@ public:
 	~CArmArchitecture();
 	void clear();
 
-	virtual CAssemblerCommand* parseDirective(Parser& parser);
-	virtual CAssemblerCommand* parseOpcode(Parser& parser);
+	virtual std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
+	virtual std::unique_ptr<CAssemblerCommand> parseOpcode(Parser& parser);
 	virtual const ExpressionFunctionMap& getExpressionFunctions();
 	virtual void NextSection();
 	virtual void Pass2();

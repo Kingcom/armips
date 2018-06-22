@@ -15,7 +15,7 @@ void AddFileName(const std::wstring& FileName)
 	Global.FileInfo.LineNumber = 0;
 }
 
-bool encodeAssembly(CAssemblerCommand* content, SymbolData& symData, TempData& tempData)
+bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symData, TempData& tempData)
 {
 	bool Revalidate;
 	
@@ -181,12 +181,12 @@ bool runArmips(ArmipsArguments& arguments)
 		break;
 	}
 
-	CAssemblerCommand* content = parser.parseFile(input);
+	std::unique_ptr<CAssemblerCommand> content = parser.parseFile(input);
 	Logger::printQueue();
 
 	bool result = !Logger::hasError();
 	if (result == true && content != nullptr)
-		result = encodeAssembly(content, symData, tempData);
+		result = encodeAssembly(std::move(content), symData, tempData);
 	
 	if (g_fileManager->hasOpenFile())
 	{

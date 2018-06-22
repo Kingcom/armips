@@ -17,14 +17,14 @@ CArmArchitecture::~CArmArchitecture()
 	clear();
 }
 
-CAssemblerCommand* CArmArchitecture::parseDirective(Parser& parser)
+std::unique_ptr<CAssemblerCommand> CArmArchitecture::parseDirective(Parser& parser)
 {
 	ArmParser armParser;
 
 	return armParser.parseDirective(parser);
 }
 
-CAssemblerCommand* CArmArchitecture::parseOpcode(Parser& parser)
+std::unique_ptr<CAssemblerCommand> CArmArchitecture::parseOpcode(Parser& parser)
 {
 	ArmParser armParser;
 
@@ -68,7 +68,7 @@ void CArmArchitecture::NextSection()
 
 std::unique_ptr<IElfRelocator> CArmArchitecture::getElfRelocator()
 {
-	return std::unique_ptr<IElfRelocator>(new ArmElfRelocator(version != AARCH_GBA));
+	return make_unique<ArmElfRelocator>(version != AARCH_GBA);
 }
 
 void CArmArchitecture::addPoolValue(ArmOpcodeCommand* command, int32_t value)

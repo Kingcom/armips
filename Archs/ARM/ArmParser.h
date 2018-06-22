@@ -13,9 +13,9 @@ struct ArmRegisterDescriptor {
 class ArmParser
 {
 public:
-	CAssemblerCommand* parseDirective(Parser& parser);
-	CArmInstruction* parseArmOpcode(Parser& parser);
-	CThumbInstruction* parseThumbOpcode(Parser& parser);
+	std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
+	std::unique_ptr<CArmInstruction> parseArmOpcode(Parser& parser);
+	std::unique_ptr<CThumbInstruction> parseThumbOpcode(Parser& parser);
 private:
 	bool parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count);
 	bool parseRegister(Parser& parser, ArmRegisterValue& dest, int max = 15);

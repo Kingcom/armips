@@ -7,16 +7,11 @@
 #include "Parser/Parser.h"
 #include "MipsParser.h"
 
-MipsMacroCommand::MipsMacroCommand(CAssemblerCommand* content, int macroFlags)
+MipsMacroCommand::MipsMacroCommand(std::unique_ptr<CAssemblerCommand> content, int macroFlags)
 {
-	this->content = content;
+	this->content = std::move(content);
 	this->macroFlags = macroFlags;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
-}
-
-MipsMacroCommand::~MipsMacroCommand()
-{
-	delete content;
 }
 
 bool MipsMacroCommand::Validate()
@@ -64,13 +59,13 @@ std::wstring preprocessMacro(const wchar_t* text, MipsImmediateData& immediates)
 	return formatString(L"%s: %s",labelName,text);
 }
 
-CAssemblerCommand* createMacro(Parser& parser, const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)
+std::unique_ptr<CAssemblerCommand> createMacro(Parser& parser, const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)
 {
-	CAssemblerCommand* content = parser.parseTemplate(text,variables);
-	return new MipsMacroCommand(content,flags);
+	std::unique_ptr<CAssemblerCommand> content = parser.parseTemplate(text,variables);
+	return make_unique<MipsMacroCommand>(std::move(content),flags);
 }
 
-CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroAbs(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateAbs = LR"(
 		%sraop% 	r1,%rs%,31
@@ -96,7 +91,7 @@ CAssemblerCommand* generateMipsMacroAbs(Parser& parser, MipsRegisterData& regist
 	});
 }
 
-CAssemblerCommand* generateMipsMacroLiFloat(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroLiFloat(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLiFloat = LR"(
 		li 		r1,float(%imm%)
@@ -112,7 +107,7 @@ CAssemblerCommand* generateMipsMacroLiFloat(Parser& parser, MipsRegisterData& re
 	});
 }
 
-CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLi = LR"(
 		.if abs(%imm%) > 0xFFFFFFFF
@@ -163,7 +158,7 @@ CAssemblerCommand* generateMipsMacroLi(Parser& parser, MipsRegisterData& registe
 	});
 }
 
-CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* templateLoadStore = LR"(
 		.if %imm% & ~0xFFFFFFFF
@@ -227,7 +222,7 @@ CAssemblerCommand* generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& 
 	});
 }
 
-CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -262,7 +257,7 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 		if (registers.grs.num == registers.grd.num)
 		{
 			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
-			return new DummyCommand();
+			return make_unique<DummyCommand>();
 		}
 
 		op = type == MIPSM_W ? L"lw" : L"ld";
@@ -282,7 +277,7 @@ CAssemblerCommand* generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterDa
 	});
 }
 
-CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -315,7 +310,7 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 		if (registers.grs.num == registers.grd.num)
 		{
 			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
-			return new DummyCommand();
+			return make_unique<DummyCommand>();
 		}
 
 		op = type == MIPSM_W ? L"sw" : L"sd";
@@ -335,7 +330,7 @@ CAssemblerCommand* generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterD
 	});
 }
 
-CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -421,7 +416,7 @@ CAssemblerCommand* generateMipsMacroBranch(Parser& parser, MipsRegisterData& reg
 	});
 }
 
-CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -514,7 +509,7 @@ CAssemblerCommand* generateMipsMacroSet(Parser& parser, MipsRegisterData& regist
 	});
 }
 
-CAssemblerCommand* generateMipsMacroRotate(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	bool left = (flags & MIPSM_LEFT) != 0;
 	bool immediate = (flags & MIPSM_IMM) != 0;

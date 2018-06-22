@@ -10,8 +10,8 @@ class Parser;
 class CArchitecture
 {
 public:
-	virtual CAssemblerCommand* parseDirective(Parser& parser) { return nullptr; }
-	virtual CAssemblerCommand* parseOpcode(Parser& parser) { return nullptr; }
+	virtual std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser) { return nullptr; }
+	virtual std::unique_ptr<CAssemblerCommand> parseOpcode(Parser& parser) { return nullptr; }
 	virtual const ExpressionFunctionMap& getExpressionFunctions() { return emptyMap; }
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;

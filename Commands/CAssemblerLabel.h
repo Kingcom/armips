@@ -15,7 +15,7 @@ public:
 	virtual void writeSymData(SymbolData& symData) const;
 private:
 	Expression labelValue;
-	Label* label;
+	std::shared_ptr<Label> label;
 	bool defined;
 };
 
@@ -23,14 +23,13 @@ class CDirectiveFunction: public CAssemblerCommand
 {
 public:
 	CDirectiveFunction(const std::wstring& name, const std::wstring& originalName);
-	virtual ~CDirectiveFunction();
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
-	void setContent(CAssemblerCommand* content) { this->content = content; }
+	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
 private:
-	CAssemblerLabel* label;
-	CAssemblerCommand* content;
+	std::unique_ptr<CAssemblerLabel> label;
+	std::unique_ptr<CAssemblerCommand> content;
 	int64_t start, end;
 };

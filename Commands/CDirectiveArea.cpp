@@ -14,11 +14,6 @@ CDirectiveArea::CDirectiveArea(Expression& size)
 	this->content = nullptr;
 }
 
-CDirectiveArea::~CDirectiveArea()
-{
-	delete content;
-}
-
 void CDirectiveArea::setFillExpression(Expression& exp)
 {
 	fillExpression = exp;

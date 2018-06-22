@@ -5,14 +5,14 @@
 class CAssemblerCommand;
 class Parser;
 
-typedef CAssemblerCommand* (*DirectiveFunc)(Parser&,int);
+using DirectiveFunc = std::unique_ptr<CAssemblerCommand> (*)(Parser&,int);
 
 struct DirectiveEntry {
 	DirectiveFunc function;
 	int flags;
 };
 
-typedef std::unordered_multimap<std::wstring, const DirectiveEntry> DirectiveMap;
+using DirectiveMap = std::unordered_multimap<std::wstring, const DirectiveEntry>;
 
 #define DIRECTIVE_USERMASK			0x0000FFFF
 

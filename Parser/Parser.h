@@ -36,12 +36,12 @@ public:
 	Expression parseExpression();
 	bool parseExpressionList(std::vector<Expression>& list, int min = -1, int max = -1);
 	bool parseIdentifier(std::wstring& dest);
-	CAssemblerCommand* parseCommand();
-	CAssemblerCommand* parseCommandSequence(wchar_t indicator = 0, const std::initializer_list<const wchar_t*> terminators = {});
-	CAssemblerCommand* parseFile(TextFile& file, bool virtualFile = false);
-	CAssemblerCommand* parseString(const std::wstring& text);
-	CAssemblerCommand* parseTemplate(const std::wstring& text, const std::initializer_list<AssemblyTemplateArgument> variables = {});
-	CAssemblerCommand* parseDirective(const DirectiveMap &directiveSet);
+	std::unique_ptr<CAssemblerCommand> parseCommand();
+	std::unique_ptr<CAssemblerCommand> parseCommandSequence(wchar_t indicator = 0, const std::initializer_list<const wchar_t*> terminators = {});
+	std::unique_ptr<CAssemblerCommand> parseFile(TextFile& file, bool virtualFile = false);
+	std::unique_ptr<CAssemblerCommand> parseString(const std::wstring& text);
+	std::unique_ptr<CAssemblerCommand> parseTemplate(const std::wstring& text, const std::initializer_list<AssemblyTemplateArgument> variables = {});
+	std::unique_ptr<CAssemblerCommand> parseDirective(const DirectiveMap &directiveSet);
 	bool matchToken(TokenType type, bool optional = false);
 
 	Tokenizer* getTokenizer() { return entries.back().tokenizer; };
@@ -69,13 +69,13 @@ public:
 	void updateFileInfo();
 protected:
 	void clearError() { error = false; }
-	CAssemblerCommand* handleError();
+	std::unique_ptr<CAssemblerCommand> handleError();
 
-	CAssemblerCommand* parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name = L"");
-	CAssemblerCommand* parseLabel();
+	std::unique_ptr<CAssemblerCommand> parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name = L"");
+	std::unique_ptr<CAssemblerCommand> parseLabel();
 	bool checkEquLabel();
 	bool checkMacroDefinition();
-	CAssemblerCommand* parseMacroCall();
+	std::unique_ptr<CAssemblerCommand> parseMacroCall();
 
 	struct FileEntry
 	{
@@ -135,8 +135,8 @@ struct TokenSequenceValue
 	};
 };
 
-typedef std::initializer_list<TokenType> TokenSequence;
-typedef std::initializer_list<TokenSequenceValue> TokenValueSequence;
+using TokenSequence = std::initializer_list<TokenType>;
+using TokenValueSequence = std::initializer_list<TokenSequenceValue>;
 
 class TokenSequenceParser
 {

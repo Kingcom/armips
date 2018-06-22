@@ -54,7 +54,7 @@ public:
 	static bool isStaticSymbol(const std::wstring& symbol, size_t pos = 0) { return symbol.size() >= pos+1 && symbol[pos+0] == '@'; };
 	static bool isGlobalSymbol(const std::wstring& symbol, size_t pos = 0) { return !isLocalSymbol(symbol) && !isStaticSymbol(symbol); };
 
-	Label* getLabel(const std::wstring& symbol, int file, int section);
+	std::shared_ptr<Label> getLabel(const std::wstring& symbol, int file, int section);
 	bool addEquation(const std::wstring& name, int file, int section, size_t referenceIndex);
 	bool findEquation(const std::wstring& name, int file, int section, size_t& dest);
 	void addLabels(const std::vector<LabelDefinition>& labels);
@@ -75,7 +75,7 @@ private:
 	};
 
 	std::map<SymbolKey,SymbolInfo> symbols;
-	std::vector<Label*> labels;
+	std::vector<std::shared_ptr<Label>> labels;
 	size_t equationsCount;
 	size_t uniqueCount;
 	std::set<std::wstring> generatedLabels;

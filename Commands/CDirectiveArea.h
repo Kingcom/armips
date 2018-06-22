@@ -6,13 +6,12 @@ class CDirectiveArea: public CAssemblerCommand
 {
 public:
 	CDirectiveArea(Expression& size);
-	~CDirectiveArea();
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 	void setFillExpression(Expression& exp);
-	void setContent(CAssemblerCommand* content) { this->content = content; }
+	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
 private:
 	int64_t position;
 	Expression sizeExpression;
@@ -20,5 +19,5 @@ private:
 	int64_t contentSize;
 	Expression fillExpression;
 	int8_t fillValue;
-	CAssemblerCommand* content;
+	std::unique_ptr<CAssemblerCommand> content;
 };

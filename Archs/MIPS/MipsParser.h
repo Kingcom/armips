@@ -13,9 +13,9 @@ struct MipsRegisterDescriptor {
 class MipsParser
 {
 public:
-	CAssemblerCommand* parseDirective(Parser& parser);
-	CMipsInstruction* parseOpcode(Parser& parser);
-	CAssemblerCommand* parseMacro(Parser& parser);
+	std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
+	std::unique_ptr<CMipsInstruction> parseOpcode(Parser& parser);
+	std::unique_ptr<CAssemblerCommand> parseMacro(Parser& parser);
 private:
 	bool parseRegisterNumber(Parser& parser, MipsRegisterValue& dest, int numValues);
 	bool parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);

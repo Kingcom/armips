@@ -125,19 +125,19 @@ const MipsRegisterDescriptor mipsRspVectorRegisters[] = {
 	{ L"v30", 30 },		{ L"v31", 31 },
 };
 
-CAssemblerCommand* parseDirectiveResetDelay(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveResetDelay(Parser& parser, int flags)
 {
 	Mips.SetIgnoreDelay(true);
-	return new DummyCommand();
+	return make_unique<DummyCommand>();
 }
 
-CAssemblerCommand* parseDirectiveFixLoadDelay(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveFixLoadDelay(Parser& parser, int flags)
 {
 	Mips.SetFixLoadDelay(true);
-	return new DummyCommand();
+	return make_unique<DummyCommand>();
 }
 
-CAssemblerCommand* parseDirectiveLoadElf(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
 	if (parser.parseExpressionList(list,1,2) == false)
@@ -151,13 +151,13 @@ CAssemblerCommand* parseDirectiveLoadElf(Parser& parser, int flags)
 	{
 		if (list[1].evaluateString(outputName,true) == false)
 			return nullptr;
-		return new DirectiveLoadMipsElf(inputName,outputName);
+		return make_unique<DirectiveLoadMipsElf>(inputName,outputName);
 	} else {
-		return new DirectiveLoadMipsElf(inputName);
+		return make_unique<DirectiveLoadMipsElf>(inputName);
 	}
 }
 
-CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int flags)
 {
 	const Token& start = parser.peekToken();
 
@@ -178,16 +178,16 @@ CAssemblerCommand* parseDirectiveImportObj(Parser& parser, int flags)
 		if (Mips.GetVersion() == MARCH_PSX)
 		{
 			parser.printError(start,L"Constructor not supported for PSX libraries");
-			return new InvalidCommand();
+			return make_unique<InvalidCommand>();
 		}
 
-		return new DirectiveObjImport(inputName,ctorName);
+		return make_unique<DirectiveObjImport>(inputName,ctorName);
 	}
 
 	if (Mips.GetVersion() == MARCH_PSX)
-		return new DirectivePsxObjImport(inputName);
+		return make_unique<DirectivePsxObjImport>(inputName);
 	else
-		return new DirectiveObjImport(inputName);
+		return make_unique<DirectiveObjImport>(inputName);
 }
 
 const DirectiveMap mipsDirectives = {
@@ -198,7 +198,7 @@ const DirectiveMap mipsDirectives = {
 	{ L".importlib",		{ &parseDirectiveImportObj,		0 } },
 };
 
-CAssemblerCommand* MipsParser::parseDirective(Parser& parser)
+std::unique_ptr<CAssemblerCommand> MipsParser::parseDirective(Parser& parser)
 {
 	return parser.parseDirective(mipsDirectives);
 }
@@ -1459,7 +1459,7 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 
 }
 
-CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
+std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 {
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
@@ -1491,7 +1491,7 @@ CMipsInstruction* MipsParser::parseOpcode(Parser& parser)
 			if (parseParameters(parser,MipsOpcodes[z]) == true)
 			{
 				// success, return opcode
-				return new CMipsInstruction(opcodeData,immediate,registers);
+				return make_unique<CMipsInstruction>(opcodeData,immediate,registers);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -1552,7 +1552,7 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 	return parser.nextToken().type == TokenType::Separator;
 }
 
-CAssemblerCommand* MipsParser::parseMacro(Parser& parser)
+std::unique_ptr<CAssemblerCommand> MipsParser::parseMacro(Parser& parser)
 {
 	TokenizerPosition startPos = parser.getTokenizer()->getPosition();
 

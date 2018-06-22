@@ -37,7 +37,7 @@ struct PsxSymbol
 	int offset;
 	int id;
 	int size;
-	Label* label;
+	std::shared_ptr<Label> label;
 };
 
 struct PsxRelocatorFile

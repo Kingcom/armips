@@ -643,7 +643,7 @@ ExpressionValue ExpressionInternal::evaluate()
 {
 	ExpressionValue val;
 
-	Label* label;
+	std::shared_ptr<Label> label;
 	switch (type)
 	{
 	case OperatorType::Integer:

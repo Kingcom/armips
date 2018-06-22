@@ -478,7 +478,7 @@ ExpressionValue expFuncDefined(ExpressionInternal* exp)
 	}
 
 	const std::wstring& name = exp->getStringValue();
-	Label* label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
+	std::shared_ptr<Label> label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
 
 	if (label == nullptr)
 		return ExpressionValue();

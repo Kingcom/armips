@@ -29,16 +29,10 @@ CDirectiveConditional::CDirectiveConditional(ConditionType type, const Expressio
 	this->expression = exp;
 }
 
-CDirectiveConditional::~CDirectiveConditional()
+void CDirectiveConditional::setContent(std::unique_ptr<CAssemblerCommand> ifBlock, std::unique_ptr<CAssemblerCommand> elseBlock)
 {
-	delete ifBlock;
-	delete elseBlock;
-}
-
-void CDirectiveConditional::setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock)
-{
-	this->ifBlock = ifBlock;
-	this->elseBlock = elseBlock;
+	this->ifBlock = std::move(ifBlock);
+	this->elseBlock = std::move(elseBlock);
 }
 
 bool CDirectiveConditional::evaluate()

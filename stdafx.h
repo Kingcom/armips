@@ -33,3 +33,10 @@
 
 #include "ext/tinyformat/tinyformat.h"
 #define formatString tfm::format
+
+// Custom make_unique so that C++14 support will not be necessary for compilation
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}

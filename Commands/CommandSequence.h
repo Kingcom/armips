@@ -7,12 +7,11 @@ class CommandSequence: public CAssemblerCommand
 {
 public:
 	CommandSequence();
-	virtual ~CommandSequence();
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
-	void addCommand(CAssemblerCommand* cmd) { commands.push_back(cmd); }
+	void addCommand(std::unique_ptr<CAssemblerCommand> cmd) { commands.push_back(std::move(cmd)); }
 private:
-	std::vector<CAssemblerCommand*> commands;
+	std::vector<std::unique_ptr<CAssemblerCommand>> commands;
 };

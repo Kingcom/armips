@@ -16,17 +16,17 @@ CMipsArchitecture::CMipsArchitecture()
 	Version = MARCH_INVALID;
 }
 
-CAssemblerCommand* CMipsArchitecture::parseDirective(Parser& parser)
+std::unique_ptr<CAssemblerCommand> CMipsArchitecture::parseDirective(Parser& parser)
 {
 	MipsParser mipsParser;
 	return mipsParser.parseDirective(parser);
 }
 
-CAssemblerCommand* CMipsArchitecture::parseOpcode(Parser& parser)
+std::unique_ptr<CAssemblerCommand> CMipsArchitecture::parseOpcode(Parser& parser)
 {
 	MipsParser mipsParser;
 
-	CAssemblerCommand* macro = mipsParser.parseMacro(parser);
+	std::unique_ptr<CAssemblerCommand> macro = mipsParser.parseMacro(parser);
 	if (macro != nullptr)
 		return macro;
 
@@ -59,7 +59,7 @@ std::unique_ptr<IElfRelocator> CMipsArchitecture::getElfRelocator()
 	case MARCH_PS2:
 	case MARCH_PSP:
 	case MARCH_N64:
-		return std::unique_ptr<IElfRelocator>(new MipsElfRelocator());
+		return make_unique<MipsElfRelocator>();
 	case MARCH_PSX:
 	case MARCH_RSP:
 	default:

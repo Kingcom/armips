@@ -39,7 +39,7 @@
 
 class Parser;
 
-typedef CAssemblerCommand* (*MipsMacroFunc)(Parser&,MipsRegisterData&,MipsImmediateData&,int);
+using MipsMacroFunc = std::unique_ptr<CAssemblerCommand> (*)(Parser&,MipsRegisterData&,MipsImmediateData&,int);
 
 struct MipsMacroDefinition {
 	const wchar_t* name;
@@ -53,13 +53,12 @@ extern const MipsMacroDefinition mipsMacros[];
 class MipsMacroCommand: public CAssemblerCommand
 {
 public:
-	MipsMacroCommand(CAssemblerCommand* content, int macroFlags);
-	~MipsMacroCommand();
+	MipsMacroCommand(std::unique_ptr<CAssemblerCommand> content, int macroFlags);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 private:
-	CAssemblerCommand* content;
+	std::unique_ptr<CAssemblerCommand> content;
 	int macroFlags;
 	bool IgnoreLoadDelay;
 };

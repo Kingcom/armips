@@ -20,7 +20,7 @@ public:
 	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
 
-	virtual CAssemblerCommand* generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }
+	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }
 };
 
 
@@ -31,12 +31,12 @@ struct ElfRelocatorSection
 	ElfSection* section;
 	size_t index;
 	ElfSection* relSection;
-	Label* label;
+	std::shared_ptr<Label> label;
 };
 
 struct ElfRelocatorSymbol
 {
-	Label* label;
+	std::shared_ptr<Label> label;
 	std::wstring name;
 	int64_t relativeAddress;
 	int64_t relocatedAddress;
@@ -59,7 +59,7 @@ public:
 	bool init(const std::wstring& inputName);
 	bool exportSymbols();
 	void writeSymbols(SymbolData& symData) const;
-	CAssemblerCommand* generateCtor(const std::wstring& ctorName);
+	std::unique_ptr<CAssemblerCommand> generateCtor(const std::wstring& ctorName);
 	bool relocate(int64_t& memoryAddress);
 	bool hasDataChanged() { return dataChanged; };
 	const ByteArray& getData() const { return outputData; };

@@ -129,5 +129,5 @@ public:
 	virtual void writeSymData(SymbolData& symData) const;
 private:
 	ElfRelocator rel;
-	CAssemblerCommand* ctor;
+	std::unique_ptr<CAssemblerCommand> ctor;
 };

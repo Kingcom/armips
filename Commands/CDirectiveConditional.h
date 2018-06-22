@@ -18,20 +18,19 @@ public:
 	CDirectiveConditional(ConditionType type);
 	CDirectiveConditional(ConditionType type, const std::wstring& name);
 	CDirectiveConditional(ConditionType type, const Expression& exp);
-	~CDirectiveConditional();
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
-	void setContent(CAssemblerCommand* ifBlock, CAssemblerCommand* elseBlock);
+	void setContent(std::unique_ptr<CAssemblerCommand> ifBlock, std::unique_ptr<CAssemblerCommand> elseBlock);
 private:
 	bool evaluate();
 
 	Expression expression;
-	Label* label;
+	std::shared_ptr<Label> label;
 	bool previousResult;
 
 	ConditionType type;
-	CAssemblerCommand* ifBlock;
-	CAssemblerCommand* elseBlock;
+	std::unique_ptr<CAssemblerCommand> ifBlock;
+	std::unique_ptr<CAssemblerCommand> elseBlock;
 };
