@@ -26,7 +26,7 @@ typedef struct {
 	bool relativeInclude;
 	int validationPasses;
 	bool memoryMode;
-	AssemblerFile* memoryFile;
+	std::shared_ptr<AssemblerFile> memoryFile;
 	bool multiThreading;
 } tGlobal;
 

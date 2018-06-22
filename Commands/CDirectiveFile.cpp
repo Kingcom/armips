@@ -19,7 +19,7 @@ void CDirectiveFile::initOpen(const std::wstring& fileName, int64_t memory)
 	type = Type::Open;
 	std::wstring fullName = getFullPathName(fileName);
 
-	file = new GenericAssemblerFile(fullName,memory,false);
+	file = std::make_shared<GenericAssemblerFile>(fullName,memory,false);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
@@ -30,7 +30,7 @@ void CDirectiveFile::initCreate(const std::wstring& fileName, int64_t memory)
 	type = Type::Create;
 	std::wstring fullName = getFullPathName(fileName);
 
-	file = new GenericAssemblerFile(fullName,memory,true);
+	file = std::make_shared<GenericAssemblerFile>(fullName,memory,true);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
@@ -42,7 +42,7 @@ void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring&
 	std::wstring fullInputName = getFullPathName(inputName);
 	std::wstring fullOutputName = getFullPathName(outputName);
 	
-	file = new GenericAssemblerFile(fullOutputName,fullInputName,memory);
+	file = std::make_shared<GenericAssemblerFile>(fullOutputName,fullInputName,memory);
 	g_fileManager->addFile(file);
 
 	updateSection(++Global.Section);
@@ -431,13 +431,13 @@ CDirectiveHeaderSize::CDirectiveHeaderSize(Expression expression)
 
 void CDirectiveHeaderSize::exec() const
 {
-	AssemblerFile* openFile = g_fileManager->getOpenFile();
+	std::shared_ptr<AssemblerFile> openFile = g_fileManager->getOpenFile();
 	if (!openFile->hasFixedVirtualAddress())
 	{
 		Logger::printError(Logger::Error,L"Header size not applicable for this file");
 		return;
 	}
-	GenericAssemblerFile* file = static_cast<GenericAssemblerFile*>(openFile);
+	std::shared_ptr<GenericAssemblerFile> file = std::static_pointer_cast<GenericAssemblerFile>(openFile);
 	int64_t physicalAddress = file->getPhysicalAddress();
 	file->setHeaderSize(headerSize);
 	file->seekPhysical(physicalAddress);

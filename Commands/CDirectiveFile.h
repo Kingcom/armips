@@ -23,8 +23,8 @@ public:
 private:
 	Type type;
 	int64_t virtualAddress;
-	GenericAssemblerFile* file;
-	AssemblerFile* closeFile;
+	std::shared_ptr<GenericAssemblerFile> file;
+	std::shared_ptr<AssemblerFile> closeFile;
 };
 
 class CDirectivePosition: public CAssemblerCommand

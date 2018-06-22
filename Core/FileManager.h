@@ -65,8 +65,8 @@ public:
 	FileManager();
 	~FileManager();
 	void reset();
-	bool openFile(AssemblerFile* file, bool onlyCheck);
-	void addFile(AssemblerFile* file);
+	bool openFile(std::shared_ptr<AssemblerFile> file, bool onlyCheck);
+	void addFile(std::shared_ptr<AssemblerFile> file);
 	bool hasOpenFile() { return activeFile != nullptr; };
 	void closeFile();
 	bool write(void* data, size_t length);
@@ -80,13 +80,13 @@ public:
 	bool seekVirtual(int64_t virtualAddress);
 	bool seekPhysical(int64_t physicalAddress);
 	bool advanceMemory(size_t bytes);
-	AssemblerFile* getOpenFile() { return activeFile; };
+	std::shared_ptr<AssemblerFile> getOpenFile() { return activeFile; };
 	void setEndianness(Endianness endianness) { this->endianness = endianness; };
 	Endianness getEndianness() { return endianness; }
 private:
 	bool checkActiveFile();
-	std::vector<AssemblerFile*> files;
-	AssemblerFile* activeFile;
+	std::vector<std::shared_ptr<AssemblerFile>> files;
+	std::shared_ptr<AssemblerFile> activeFile;
 	Endianness endianness;
 	Endianness ownEndianness;
 };

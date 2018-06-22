@@ -71,7 +71,7 @@ ExpressionValue expFuncEndianness(const std::wstring& funcName, const std::vecto
 
 ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	AssemblerFile* file = g_fileManager->getOpenFile();
+	std::shared_ptr<AssemblerFile> file = g_fileManager->getOpenFile();
 	if (file == nullptr)
 	{
 		Logger::queueError(Logger::Error,L"outputName: no file opened");

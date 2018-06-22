@@ -48,7 +48,7 @@ public:
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 private:
-	MipsElfFile* file;
+	std::shared_ptr<MipsElfFile> file;
 	std::wstring inputName;
 	std::wstring outputName;
 };

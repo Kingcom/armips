@@ -264,12 +264,11 @@ void MipsElfFile::save()
 
 DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& fileName)
 {
-	file = new MipsElfFile();
+	file = std::make_shared<MipsElfFile>();
 
 	this->inputName = getFullPathName(fileName);
 	if (file->load(this->inputName,this->inputName) == false)
 	{
-		delete file;
 		file = nullptr;
 		return;
 	}
@@ -279,13 +278,12 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& fileName)
 
 DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& inputName, const std::wstring& outputName)
 {
-	file = new MipsElfFile();
+	file = std::make_shared<MipsElfFile>();
 
 	this->inputName = getFullPathName(inputName);
 	this->outputName = getFullPathName(outputName);
 	if (file->load(this->inputName,this->outputName) == false)
 	{
-		delete file;
 		file = nullptr;
 		return;
 	}

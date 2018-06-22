@@ -243,7 +243,7 @@ bool FileManager::checkActiveFile()
 	return true;
 }
 
-bool FileManager::openFile(AssemblerFile* file, bool onlyCheck)
+bool FileManager::openFile(std::shared_ptr<AssemblerFile> file, bool onlyCheck)
 {
 	if (activeFile != nullptr)
 	{
@@ -255,7 +255,7 @@ bool FileManager::openFile(AssemblerFile* file, bool onlyCheck)
 	return activeFile->open(onlyCheck);
 }
 
-void FileManager::addFile(AssemblerFile* file)
+void FileManager::addFile(std::shared_ptr<AssemblerFile> file)
 {
 	files.push_back(file);
 }

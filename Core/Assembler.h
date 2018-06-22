@@ -38,7 +38,7 @@ struct ArmipsArguments
 	std::wstring symFileName;
 
 	// memory mode
-	AssemblerFile* memoryFile;
+	std::shared_ptr<AssemblerFile> memoryFile;
 	std::wstring content;
 
 	ArmipsArguments()
