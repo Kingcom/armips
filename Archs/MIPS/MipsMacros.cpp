@@ -62,7 +62,7 @@ std::wstring preprocessMacro(const wchar_t* text, MipsImmediateData& immediates)
 std::unique_ptr<CAssemblerCommand> createMacro(Parser& parser, const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)
 {
 	std::unique_ptr<CAssemblerCommand> content = parser.parseTemplate(text,variables);
-	return make_unique<MipsMacroCommand>(std::move(content),flags);
+	return ::make_unique<MipsMacroCommand>(std::move(content),flags);
 }
 
 std::unique_ptr<CAssemblerCommand> generateMipsMacroAbs(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)

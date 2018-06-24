@@ -639,7 +639,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 			return nullptr;
 		}
 
-		return make_unique<CAssemblerLabel>(name,start.getOriginalText());
+		return ::make_unique<CAssemblerLabel>(name,start.getOriginalText());
 	}
 
 	return nullptr;

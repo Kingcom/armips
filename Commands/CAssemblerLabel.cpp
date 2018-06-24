@@ -102,7 +102,7 @@ void CAssemblerLabel::writeSymData(SymbolData& symData) const
 
 CDirectiveFunction::CDirectiveFunction(const std::wstring& name, const std::wstring& originalName)
 {
-	this->label = make_unique<CAssemblerLabel>(name,originalName);
+	this->label = ::make_unique<CAssemblerLabel>(name,originalName);
 	this->content = nullptr;
 	this->start = this->end = 0;
 }

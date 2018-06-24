@@ -151,9 +151,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int fla
 	{
 		if (list[1].evaluateString(outputName,true) == false)
 			return nullptr;
-		return make_unique<DirectiveLoadMipsElf>(inputName,outputName);
+		return ::make_unique<DirectiveLoadMipsElf>(inputName,outputName);
 	} else {
-		return make_unique<DirectiveLoadMipsElf>(inputName);
+		return ::make_unique<DirectiveLoadMipsElf>(inputName);
 	}
 }
 
@@ -181,13 +181,13 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 			return make_unique<InvalidCommand>();
 		}
 
-		return make_unique<DirectiveObjImport>(inputName,ctorName);
+		return ::make_unique<DirectiveObjImport>(inputName,ctorName);
 	}
 
 	if (Mips.GetVersion() == MARCH_PSX)
-		return make_unique<DirectivePsxObjImport>(inputName);
+		return ::make_unique<DirectivePsxObjImport>(inputName);
 	else
-		return make_unique<DirectiveObjImport>(inputName);
+		return ::make_unique<DirectiveObjImport>(inputName);
 }
 
 const DirectiveMap mipsDirectives = {

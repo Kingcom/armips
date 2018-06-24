@@ -85,7 +85,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flag
 	if (list[0].evaluateString(fileName,false) == false)
 		return nullptr;
 
-	auto incbin = make_unique<CDirectiveIncbin>(fileName);
+	auto incbin = ::make_unique<CDirectiveIncbin>(fileName);
 	if (list.size() >= 2)
 		incbin->setStart(list[1]);
 
@@ -179,10 +179,10 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveObjImport(Parser& parser, int f
 		if (list[1].evaluateIdentifier(ctorName) == false)
 			return nullptr;
 
-		return make_unique<DirectiveObjImport>(fileName,ctorName);
+		return ::make_unique<DirectiveObjImport>(fileName,ctorName);
 	}
 	
-	return make_unique<DirectiveObjImport>(fileName);
+	return ::make_unique<DirectiveObjImport>(fileName);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int flags)
@@ -292,7 +292,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	if (exp.isLoaded())
 		cond = make_unique<CDirectiveConditional>(type,exp);
 	else if (name.size() != 0)
-		cond = make_unique<CDirectiveConditional>(type,name);
+		cond = ::make_unique<CDirectiveConditional>(type,name);
 	else
 		cond = make_unique<CDirectiveConditional>(type);
 
@@ -328,7 +328,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveTable(Parser& parser, int flags
 		encoding = getEncodingFromString(encodingName);
 	}
 
-	return make_unique<TableCommand>(fileName,encoding);
+	return ::make_unique<TableCommand>(fileName,encoding);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
@@ -561,7 +561,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int
 		return nullptr;
 	}
 
-	return make_unique<CAssemblerLabel>(stringValue,tok.getOriginalText(),value);
+	return ::make_unique<CAssemblerLabel>(stringValue,tok.getOriginalText(),value);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int flags)
@@ -576,7 +576,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int fl
 		return nullptr;
 	}
 
-	auto func = make_unique<CDirectiveFunction>(tok.getStringValue(),tok.getOriginalText());
+	auto func = ::make_unique<CDirectiveFunction>(tok.getStringValue(),tok.getOriginalText());
 	std::unique_ptr<CAssemblerCommand> seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
 
 	const std::wstring stringValue = parser.peekToken().getStringValue();
