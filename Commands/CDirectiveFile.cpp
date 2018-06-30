@@ -70,6 +70,8 @@ bool CDirectiveFile::Validate()
 		closeFile = g_fileManager->getOpenFile();
 		g_fileManager->closeFile();
 		return false;
+	case Type::Invalid:
+		break;
 	}
 	
 	return false;
@@ -86,6 +88,9 @@ void CDirectiveFile::Encode() const
 		break;
 	case Type::Close:
 		g_fileManager->closeFile();
+		break;
+	case Type::Invalid:
+		// TODO: Assert?
 		break;
 	}
 }
@@ -109,6 +114,9 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 	case Type::Close:
 		str = L".close";
 		break;
+	case Type::Invalid:
+		// TODO: Assert?
+		break;
 	}
 
 	tempData.writeLine(virtualAddress,str);
@@ -126,6 +134,9 @@ void CDirectiveFile::writeSymData(SymbolData& symData) const
 	case Type::Close:
 		if (closeFile)
 			closeFile->endSymData(symData);
+		break;
+	case Type::Invalid:
+		// TODO: Assert?
 		break;
 	}
 }

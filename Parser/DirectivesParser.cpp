@@ -41,10 +41,10 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 			return nullptr;
 		
 		file->initCopy(inputName,outputName,memoryAddress);
-		return file;
+		return std::move(file);
 	} else {
 		file->initOpen(inputName,memoryAddress);
-		return file;
+		return std::move(file);
 	}
 }
 
@@ -65,14 +65,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flag
 
 	auto file = make_unique<CDirectiveFile>();
 	file->initCreate(inputName,memoryAddress);
-	return file;
+	return std::move(file);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveClose(Parser& parser, int flags)
 {
 	auto file = make_unique<CDirectiveFile>();
 	file->initClose();
-	return file;
+	return std::move(file);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flags)
@@ -92,7 +92,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flag
 	if (list.size() == 3)
 		incbin->setSize(list[2]);
 
-	return incbin;
+	return std::move(incbin);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectivePosition(Parser& parser, int flags)
@@ -240,7 +240,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	const Token &next = parser.nextToken();
 	const std::wstring stringValue = next.getStringValue();
 
-	ConditionalResult elseResult = condResult;
+	ConditionalResult elseResult;
 	switch (condResult)
 	{
 	case ConditionalResult::True:
@@ -248,6 +248,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		break;
 	case ConditionalResult::False:
 		elseResult = ConditionalResult::True;
+		break;
+	case ConditionalResult::Unknown:
+		elseResult = condResult;
 		break;
 	}
 
@@ -297,7 +300,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		cond = make_unique<CDirectiveConditional>(type);
 
 	cond->setContent(std::move(ifBlock),std::move(elseBlock));
-	return cond;
+	return std::move(cond);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveTable(Parser& parser, int flags)
@@ -376,7 +379,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 		break;
 	}
 	
-	return data;
+	return std::move(data);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMipsArch(Parser& parser, int flags)
@@ -451,7 +454,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 	parser.eatToken();
 
 	area->setContent(std::move(content));
-	return area;
+	return std::move(area);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, int flags)
@@ -592,7 +595,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int fl
 	}
 
 	func->setContent(std::move(seq));
-	return func;
+	return std::move(func);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMessage(Parser& parser, int flags)

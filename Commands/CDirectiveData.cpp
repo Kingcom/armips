@@ -123,6 +123,8 @@ size_t CDirectiveData::getUnitSize() const
 	case EncodingMode::U64:
 	case EncodingMode::Double:
 		return 8;
+	case EncodingMode::Invalid:
+		break;
 	}
 
 	return 0;
@@ -143,6 +145,8 @@ size_t CDirectiveData::getDataSize() const
 	case EncodingMode::Float:
 	case EncodingMode::Double:
 		return normalData.size()*getUnitSize();
+	case EncodingMode::Invalid:
+		break;
 	}
 
 	return 0;
@@ -366,6 +370,9 @@ void CDirectiveData::Encode() const
 			g_fileManager->writeU64((uint64_t)value);
 		}
 		break;
+	case EncodingMode::Invalid:
+		// TODO: Assert?
+		break;
 	}
 }
 
@@ -421,6 +428,9 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 			str += swprintf(str,20,L"0x%16llX,",(uint64_t)normalData[i]);
 		}
 		break;
+	case EncodingMode::Invalid:
+		// TODO: Assert?
+		break;
 	}
 
 	*(str-1) = 0;
@@ -450,6 +460,9 @@ void CDirectiveData::writeSymData(SymbolData& symData) const
 	case EncodingMode::U64:
 	case EncodingMode::Double:
 		symData.addData(position,getDataSize(),SymbolData::Data64);
+		break;
+	case EncodingMode::Invalid:
+		// TODO: Assert?
 		break;
 	}
 }

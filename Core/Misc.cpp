@@ -56,6 +56,8 @@ void Logger::setFlags(ErrorType type)
 		error = true;
 		fatalError = true;
 		break;
+	case Notice:
+		break;
 	}
 }
 

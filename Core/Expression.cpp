@@ -88,6 +88,8 @@ ExpressionValue ExpressionValue::operator-(const ExpressionValue& other) const
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue - other.floatValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;
@@ -113,6 +115,8 @@ ExpressionValue ExpressionValue::operator*(const ExpressionValue& other) const
 	case ExpressionValueCombination::FF:
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue * other.floatValue;
+		break;
+	default:
 		break;
 	}
 
@@ -151,6 +155,8 @@ ExpressionValue ExpressionValue::operator/(const ExpressionValue& other) const
 		result.type = ExpressionValueType::Float;
 		result.floatValue = floatValue / other.floatValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;
@@ -175,6 +181,8 @@ ExpressionValue ExpressionValue::operator%(const ExpressionValue& other) const
 			return result;
 		}
 		result.intValue = intValue % other.intValue;
+		break;
+	default:
 		break;
 	}
 
@@ -216,6 +224,8 @@ ExpressionValue ExpressionValue::operator<<(const ExpressionValue& other) const
 		result.type = ExpressionValueType::Integer;
 		result.intValue = ((uint64_t) intValue) << other.intValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;
@@ -229,6 +239,8 @@ ExpressionValue ExpressionValue::operator>>(const ExpressionValue& other) const
 	case ExpressionValueCombination::II:
 		result.type = ExpressionValueType::Integer;
 		result.intValue = ((uint64_t) intValue) >> other.intValue;
+		break;
+	default:
 		break;
 	}
 
@@ -247,6 +259,8 @@ bool ExpressionValue::operator<(const ExpressionValue& other) const
 		return intValue < other.floatValue;
 	case ExpressionValueCombination::FF:
 		return floatValue < other.floatValue;
+	default:
+		break;
 	}
 
 	return false;
@@ -264,6 +278,8 @@ bool ExpressionValue::operator<=(const ExpressionValue& other) const
 		return intValue <= other.floatValue;
 	case ExpressionValueCombination::FF:
 		return floatValue <= other.floatValue;
+	default:
+		break;
 	}
 
 	return false;
@@ -320,6 +336,8 @@ ExpressionValue ExpressionValue::operator&(const ExpressionValue& other) const
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue & other.intValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;
@@ -333,6 +351,8 @@ ExpressionValue ExpressionValue::operator|(const ExpressionValue& other) const
 	case ExpressionValueCombination::II:
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue | other.intValue;
+		break;
+	default:
 		break;
 	}
 
@@ -358,6 +378,8 @@ ExpressionValue ExpressionValue::operator&&(const ExpressionValue& other) const
 	case ExpressionValueCombination::FF:
 		result.floatValue = floatValue && other.floatValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;
@@ -382,6 +404,8 @@ ExpressionValue ExpressionValue::operator||(const ExpressionValue& other) const
 	case ExpressionValueCombination::FF:
 		result.floatValue = floatValue || other.floatValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;
@@ -395,6 +419,8 @@ ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
 	case ExpressionValueCombination::II:
 		result.type = ExpressionValueType::Integer;
 		result.intValue = intValue ^ other.intValue;
+		break;
+	default:
 		break;
 	}
 
@@ -439,6 +465,8 @@ ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType t
 		section = Global.Section;
 		break;
 	case OperatorType::String:
+		break;
+	default:
 		break;
 	}
 }
@@ -598,6 +626,8 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 	case OperatorType::FunctionCall:
 		if (isExpressionFunctionSafe(strValue, inUnknownOrFalseBlock) == false)
 			return false;
+		break;
+	default:
 		break;
 	}
 

@@ -14,9 +14,6 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 {
 	const Token &tok = tokenizer.peekToken();
 
-	if (tok.type == TokenType::Invalid)
-		return nullptr;
-
 	switch (tok.type)
 	{
 	case TokenType::Float:
@@ -38,16 +35,21 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 		tokenizer.eatToken();
 		return new ExpressionInternal(tok.intValue);
 	case TokenType::LParen:
-		tokenizer.eatToken();
-		ExpressionInternal* exp = expression(tokenizer);
-			
-		if (tokenizer.nextToken().type != TokenType::RParen)
 		{
-			delete exp;
-			return nullptr;
-		}
+			tokenizer.eatToken();
+			ExpressionInternal* exp = expression(tokenizer);
 
-		return exp;
+			if (tokenizer.nextToken().type != TokenType::RParen)
+			{
+				delete exp;
+				return nullptr;
+			}
+
+			return exp;
+		}
+	case TokenType::Invalid:
+	default:
+		break;
 	}
 
 	return nullptr;
@@ -140,6 +142,8 @@ static ExpressionInternal* multiplicativeExpression(Tokenizer& tokenizer)
 		case TokenType::Mod:
 			op = OperatorType::Mod;
 			break;
+		default:
+			break;
 		}
 
 		if (op == OperatorType::Invalid)
@@ -177,6 +181,8 @@ static ExpressionInternal* additiveExpression(Tokenizer& tokenizer)
 		case TokenType::Minus:
 			op = OperatorType::Sub;
 			break;
+		default:
+			break;
 		}
 
 		if (op == OperatorType::Invalid)
@@ -213,6 +219,8 @@ static ExpressionInternal* shiftExpression(Tokenizer& tokenizer)
 			break;
 		case TokenType::RightShift:
 			op = OperatorType::RightShift;
+			break;
+		default:
 			break;
 		}
 
@@ -257,6 +265,8 @@ static ExpressionInternal* relationalExpression(Tokenizer& tokenizer)
 		case TokenType::GreaterEqual:
 			op = OperatorType::GreaterEqual;
 			break;
+		default:
+			break;
 		}
 
 		if (op == OperatorType::Invalid)
@@ -293,6 +303,8 @@ static ExpressionInternal* equalityExpression(Tokenizer& tokenizer)
 			break;
 		case TokenType::NotEqual:
 			op = OperatorType::NotEqual;
+			break;
+		default:
 			break;
 		}
 

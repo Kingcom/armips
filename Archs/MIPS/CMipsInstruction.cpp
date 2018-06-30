@@ -201,6 +201,9 @@ bool CMipsInstruction::Validate()
 			if (immediateData.secondary.type == MipsImmediateType::Ins)
 				immediateData.secondary.value += immediateData.primary.value;
 			break;
+		case MipsImmediateType::Cop2BranchType:
+		default:
+			break;
 		}
 	}
 
@@ -291,6 +294,9 @@ void CMipsInstruction::encodeNormal() const
 	case MipsImmediateType::ImmediateHalfFloat:
 		encoding |= immediateData.primary.value;
 		break;
+	default:
+		// TODO: Assert?
+		break;
 	}
 
 	switch (immediateData.secondary.type)
@@ -304,6 +310,9 @@ void CMipsInstruction::encodeNormal() const
 		break;
 	case MipsImmediateType::Cop2BranchType:
 		encoding |= immediateData.secondary.value << 18;
+		break;
+	default:
+		// TODO: Assert?
 		break;
 	}
 
@@ -340,6 +349,9 @@ void CMipsInstruction::encodeVfpu() const
 		break;
 	case MipsImmediateType::Immediate7:
 		encoding |= immediateData.primary.value << 0;
+		break;
+	default:
+		// TODO: Assert?
 		break;
 	}
 

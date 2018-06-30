@@ -49,7 +49,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 	seq->addCommand(make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::Align));
 	seq->addCommand(make_unique<ArmPoolCommand>());
 
-	return seq;
+	return std::move(seq);
 }
 
 const wchar_t* msgTemplate =
