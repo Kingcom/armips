@@ -921,6 +921,9 @@ wchar_t TextFile::readCharacter()
 		value = bufGetChar();
 		contentPos++;
 		break;
+	case GUESS:
+		errorText = formatString(L"Cannot read from GUESS encoding");
+		break;
 	}
 
 	// convert \r\n to \n

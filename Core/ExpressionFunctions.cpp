@@ -257,6 +257,8 @@ ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<Expre
 		result.intValue = parameters[0].intValue >= 0 ?
 			parameters[0].intValue : -parameters[0].intValue;
 		break;
+	default:
+		break;
 	}
 
 	return result;

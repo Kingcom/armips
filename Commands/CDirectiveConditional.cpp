@@ -55,6 +55,8 @@ bool CDirectiveConditional::evaluate()
 		return label->isDefined();
 	case ConditionType::IFNDEF:
 		return !label->isDefined();
+	default:
+		break;
 	}
 			
 	Logger::queueError(Logger::Error,L"Invalid conditional type");

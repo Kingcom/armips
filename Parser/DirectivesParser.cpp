@@ -240,7 +240,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	const Token &next = parser.nextToken();
 	const std::wstring stringValue = next.getStringValue();
 
-	ConditionalResult elseResult = condResult;
+	ConditionalResult elseResult;
 	switch (condResult)
 	{
 	case ConditionalResult::True:
@@ -248,6 +248,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		break;
 	case ConditionalResult::False:
 		elseResult = ConditionalResult::True;
+		break;
+	case ConditionalResult::Unknown:
+		elseResult = condResult;
 		break;
 	}
 
