@@ -155,7 +155,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 		Logger::printError(Logger::Error, L"Unterminated command sequence, expected any of %s.", expected);
 	}
 
-	return sequence;
+	return std::move(sequence);
 }
 
 std::unique_ptr<CAssemblerCommand> Parser::parseFile(TextFile& file, bool virtualFile)
