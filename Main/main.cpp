@@ -78,6 +78,7 @@ int wmain(int argc, wchar_t* argv[])
 			{
 				EquationDefinition def;
 				def.name = arguments[argpos + 1];
+				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 				def.value = arguments[argpos + 2];
 				parameters.equList.push_back(def);
 				argpos += 3;
@@ -85,6 +86,7 @@ int wmain(int argc, wchar_t* argv[])
 			{
 				EquationDefinition def;
 				def.name = arguments[argpos + 1];
+				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 				def.value = formatString(L"\"%s\"", arguments[argpos + 2]);
 				parameters.equList.push_back(def);
 				argpos += 3;
