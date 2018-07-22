@@ -28,9 +28,9 @@ std::vector<ArFileEntry> loadArArchive(const std::wstring& inputName)
 	ByteArray input = ByteArray::fromFile(inputName);
 	std::vector<ArFileEntry> result;
 
-	if (memcmp(input.data(),"!<arch>\n",8) != 0)
+	if (input.size() < 8 || memcmp(input.data(),"!<arch>\n",8) != 0)
 	{
-		if (memcmp(input.data(),"\x7F""ELF",4) != 0)
+		if (input.size() < 4 || memcmp(input.data(),"\x7F""ELF",4) != 0)
 			return result;
 
 		ArFileEntry entry;
