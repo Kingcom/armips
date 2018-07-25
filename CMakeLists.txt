@@ -155,3 +155,8 @@ if(WIN32)
 	target_link_libraries(armips-bin shlwapi)
 	target_link_libraries(armipstests shlwapi)
 endif(WIN32)
+
+if(MINGW)
+	target_link_libraries(armips-bin -lstdc++)
+	target_link_libraries(armipstests -lstdc++)
+endif(MINGW)
