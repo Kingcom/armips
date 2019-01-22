@@ -4,6 +4,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <shlwapi.h>
+#if defined(WINAPI_FAMILY) && defined(WINAPI_FAMILY_PARTITION)
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && WINAPI_FAMILY != WINAPI_FAMILY_DESKTOP_APP
+#define ARMIPS_WINDOWS_UWP
+#endif
+#endif
 #else
 #include <unistd.h>
 #endif
@@ -182,10 +187,14 @@ int64_t fileSize(const std::wstring& fileName)
 bool fileExists(const std::wstring& strFilename)
 {
 #ifdef _WIN32
+#ifdef ARMIPS_WINDOWS_UWP
+	return GetFileAttributes(strFilename.c_str()) != INVALID_FILE_ATTRIBUTES;
+#else
 	int OldMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 	bool success = GetFileAttributes(strFilename.c_str()) != INVALID_FILE_ATTRIBUTES;
 	SetErrorMode(OldMode);
 	return success;
+#endif
 #else
 	std::string utf8 = convertWStringToUtf8(strFilename);
 	struct stat stFileInfo;
