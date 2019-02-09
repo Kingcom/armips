@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Tokenizer.h"
 #include "Core/Common.h"
+#include "Util/Util.h"
 #include <algorithm>
 
 
@@ -433,57 +434,7 @@ bool FileTokenizer::parseOperator()
 
 bool FileTokenizer::convertInteger(size_t start, size_t end, int64_t& result)
 {
-	// find base of number
-	int32_t base = 10;
-	if (currentLine[start] == '0')
-	{
-		if (towlower(currentLine[start+1]) == 'x')
-		{
-			base = 16;
-			start += 2;
-		} else if (towlower(currentLine[start+1]) == 'o')
-		{
-			base = 8;
-			start += 2;
-		} else if (towlower(currentLine[start+1]) == 'b' && towlower(currentLine[end-1]) != 'h')
-		{
-			base = 2;
-			start += 2;
-		}
-	}
-
-	if (base == 10)
-	{
-		if (towlower(currentLine[end-1]) == 'h')
-		{
-			base = 16;
-			end--;
-		} else if (towlower(currentLine[end-1]) == 'b')
-		{
-			base = 2;
-			end--;
-		} else if (towlower(currentLine[end-1]) == 'o')
-		{
-			base = 8;
-			end--;
-		}
-	}
-
-	// convert number
-	result = 0;
-	while (start < end)
-	{
-		wchar_t c = towlower(currentLine[start++]);
-
-		int32_t value = c >= 'a' ? c-'a'+10 : c-'0';
-
-		if (value >= base)
-			return false;
-
-		result = (result*base) + value;
-	}
-
-	return true;
+	return stringToInt(currentLine, start, end, result);
 }
 
 bool FileTokenizer::convertFloat(size_t start, size_t end, double& result)

@@ -60,6 +60,9 @@ Equivalent to using `name equ replacement` in the assembly code.
 #### `-strequ <name> <replacement>`
 Equivalent to using `name equ "replacement"` in the assembly code.
 
+#### `-definelabel <name> <replacement>`
+Equivalent to using `.definelabel name, replacement` in the assembly code.
+
 #### `-root <directory>`
 Specifies the working directory to be used during execution.
 

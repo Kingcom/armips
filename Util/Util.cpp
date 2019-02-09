@@ -141,6 +141,61 @@ std::wstring intToString(unsigned int value, int digits)
 	return result;
 }
 
+bool stringToInt(const std::wstring& line, size_t start, size_t end, int64_t& result)
+{
+	// find base of number
+	int32_t base = 10;
+	if (line[start] == '0')
+	{
+		if (towlower(line[start+1]) == 'x')
+		{
+			base = 16;
+			start += 2;
+		} else if (towlower(line[start+1]) == 'o')
+		{
+			base = 8;
+			start += 2;
+		} else if (towlower(line[start+1]) == 'b' && towlower(line[end-1]) != 'h')
+		{
+			base = 2;
+			start += 2;
+		}
+	}
+
+	if (base == 10)
+	{
+		if (towlower(line[end-1]) == 'h')
+		{
+			base = 16;
+			end--;
+		} else if (towlower(line[end-1]) == 'b')
+		{
+			base = 2;
+			end--;
+		} else if (towlower(line[end-1]) == 'o')
+		{
+			base = 8;
+			end--;
+		}
+	}
+
+	// convert number
+	result = 0;
+	while (start < end)
+	{
+		wchar_t c = towlower(line[start++]);
+
+		int32_t value = c >= 'a' ? c-'a'+10 : c-'0';
+
+		if (value >= base)
+			return false;
+
+		result = (result*base) + value;
+	}
+
+	return true;
+}
+
 int32_t getFloatBits(float value)
 {
 	union { float f; int32_t i; } u;
