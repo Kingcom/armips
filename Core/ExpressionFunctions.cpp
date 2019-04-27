@@ -243,47 +243,41 @@ ExpressionValue expFuncFrac(const std::wstring& funcName, const std::vector<Expr
 ExpressionValue expFuncMin(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	ExpressionValue result;
-	double floatA, floatB;
-	int64_t intA, intB;
+	double floatMin, floatCur;
+	int64_t intMin, intCur;
 
 	bool isInt = true;
 
-	switch (parameters[0].type)
+	for (size_t i = 0; i < parameters.size(); i++)
 	{
-	case ExpressionValueType::Integer:
-		intA = parameters[0].intValue;
-		floatA = (double)parameters[0].intValue;
-		break;
-	case ExpressionValueType::Float:
-		floatA = parameters[0].floatValue;
-		isInt = false;
-		break;
-	default:
-		return result;
-	}
+		switch (parameters[i].type)
+		{
+		case ExpressionValueType::Integer:
+			intCur = parameters[i].intValue;
+			floatCur = (double)parameters[i].intValue;
+			break;
+		case ExpressionValueType::Float:
+			floatCur = parameters[i].floatValue;
+			isInt = false;
+			break;
+		default:
+			return result;
+		}
 
-	switch (parameters[1].type)
-	{
-	case ExpressionValueType::Integer:
-		intB = parameters[1].intValue;
-		floatB = (double)parameters[1].intValue;
-		break;
-	case ExpressionValueType::Float:
-		floatB = parameters[1].floatValue;
-		isInt = false;
-		break;
-	default:
-		return result;
+		if (i == 0 || intCur < intMin)
+			intMin = intCur;
+		if (i == 0 || floatCur < floatMin)
+			floatMin = floatCur;
 	}
 
 	if (isInt)
 	{
-		result.intValue = std::min(intA, intB);
+		result.intValue = intMin;
 		result.type = ExpressionValueType::Integer;
 	}
 	else
 	{
-		result.floatValue = std::min(floatA, floatB);
+		result.floatValue = floatMin;
 		result.type = ExpressionValueType::Float;
 	}
 
@@ -293,47 +287,41 @@ ExpressionValue expFuncMin(const std::wstring& funcName, const std::vector<Expre
 ExpressionValue expFuncMax(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	ExpressionValue result;
-	double floatA, floatB;
-	int64_t intA, intB;
+	double floatMax, floatCur;
+	int64_t intMax, intCur;
 
 	bool isInt = true;
 
-	switch (parameters[0].type)
+	for (size_t i = 0; i < parameters.size(); i++)
 	{
-	case ExpressionValueType::Integer:
-		intA = parameters[0].intValue;
-		floatA = (double)parameters[0].intValue;
-		break;
-	case ExpressionValueType::Float:
-		floatA = parameters[0].floatValue;
-		isInt = false;
-		break;
-	default:
-		return result;
-	}
+		switch (parameters[i].type)
+		{
+		case ExpressionValueType::Integer:
+			intCur = parameters[i].intValue;
+			floatCur = (double)parameters[i].intValue;
+			break;
+		case ExpressionValueType::Float:
+			floatCur = parameters[i].floatValue;
+			isInt = false;
+			break;
+		default:
+			return result;
+		}
 
-	switch (parameters[1].type)
-	{
-	case ExpressionValueType::Integer:
-		intB = parameters[1].intValue;
-		floatB = (double)parameters[1].intValue;
-		break;
-	case ExpressionValueType::Float:
-		floatB = parameters[1].floatValue;
-		isInt = false;
-		break;
-	default:
-		return result;
+		if (i == 0 || intCur > intMax)
+			intMax = intCur;
+		if (i == 0 || floatCur > floatMax)
+			floatMax = floatCur;
 	}
 
 	if (isInt)
 	{
-		result.intValue = std::max(intA, intB);
+		result.intValue = intMax;
 		result.type = ExpressionValueType::Integer;
 	}
 	else
 	{
-		result.floatValue = std::max(floatA, floatB);
+		result.floatValue = floatMax;
 		result.type = ExpressionValueType::Float;
 	}
 
@@ -605,8 +593,8 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"frac",			{ &expFuncFrac,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"abs",			{ &expFuncAbs,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"round",			{ &expFuncRound,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"min",			{ &expFuncMin,				2,	2,	ExpFuncSafety::Safe } },
-	{ L"max",			{ &expFuncMax,				2,	2,	ExpFuncSafety::Safe } },
+	{ L"min",			{ &expFuncMin,				1,	std::numeric_limits<std::size_t>::max(),	ExpFuncSafety::Safe } },
+	{ L"max",			{ &expFuncMax,				1,	std::numeric_limits<std::size_t>::max(),	ExpFuncSafety::Safe } },
 
 	{ L"strlen",		{ &expFuncStrlen,			1,	1,	ExpFuncSafety::Safe } },
 	{ L"substr",		{ &expFuncSubstr,			3,	3,	ExpFuncSafety::Safe } },
