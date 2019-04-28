@@ -246,6 +246,8 @@ ExpressionValue expFuncMin(const std::wstring& funcName, const std::vector<Expre
 	double floatMin, floatCur;
 	int64_t intMin, intCur;
 
+	floatCur = floatMin = std::numeric_limits<double>::max();
+	intCur = intMin = std::numeric_limits<int64_t>::max();
 	bool isInt = true;
 
 	for (size_t i = 0; i < parameters.size(); i++)
@@ -264,9 +266,9 @@ ExpressionValue expFuncMin(const std::wstring& funcName, const std::vector<Expre
 			return result;
 		}
 
-		if (i == 0 || intCur < intMin)
+		if (intCur < intMin)
 			intMin = intCur;
-		if (i == 0 || floatCur < floatMin)
+		if (floatCur < floatMin)
 			floatMin = floatCur;
 	}
 
@@ -290,6 +292,8 @@ ExpressionValue expFuncMax(const std::wstring& funcName, const std::vector<Expre
 	double floatMax, floatCur;
 	int64_t intMax, intCur;
 
+	floatCur = floatMax = std::numeric_limits<double>::min();
+	intCur = intMax = std::numeric_limits<int64_t>::min();
 	bool isInt = true;
 
 	for (size_t i = 0; i < parameters.size(); i++)
@@ -308,9 +312,9 @@ ExpressionValue expFuncMax(const std::wstring& funcName, const std::vector<Expre
 			return result;
 		}
 
-		if (i == 0 || intCur > intMax)
+		if (intCur > intMax)
 			intMax = intCur;
-		if (i == 0 || floatCur > floatMax)
+		if (floatCur > floatMax)
 			floatMax = floatCur;
 	}
 
@@ -593,8 +597,8 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"frac",			{ &expFuncFrac,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"abs",			{ &expFuncAbs,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"round",			{ &expFuncRound,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"min",			{ &expFuncMin,				1,	std::numeric_limits<std::size_t>::max(),	ExpFuncSafety::Safe } },
-	{ L"max",			{ &expFuncMax,				1,	std::numeric_limits<std::size_t>::max(),	ExpFuncSafety::Safe } },
+	{ L"min",			{ &expFuncMin,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe } },
+	{ L"max",			{ &expFuncMax,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe } },
 
 	{ L"strlen",		{ &expFuncStrlen,			1,	1,	ExpFuncSafety::Safe } },
 	{ L"substr",		{ &expFuncSubstr,			3,	3,	ExpFuncSafety::Safe } },
