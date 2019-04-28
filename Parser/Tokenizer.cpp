@@ -146,9 +146,13 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, std::vector<
 
 void Tokenizer::registerReplacement(const std::wstring& identifier, const std::wstring& newValue)
 {
+	// Ensure the new identifier is lower case as it would be as a normally parsed string
+	std::wstring lowerCase = newValue;
+	std::transform(lowerCase.begin(), lowerCase.end(), lowerCase.begin(), ::towlower);
+
 	Token tok;
 	tok.type = TokenType::Identifier;
-	tok.setStringValue(newValue);
+	tok.setStringValue(lowerCase);
 	tok.setOriginalText(newValue);
 
 	Replacement replacement;
