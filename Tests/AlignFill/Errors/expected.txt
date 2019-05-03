@@ -1,0 +1,2 @@
+Errors.asm(5) error: Invalid alignment 3
+Errors.asm(6) error: Invalid alignment 3
