@@ -34,3 +34,15 @@ ExpressionFunctions.asm(81) notice: regex_extract("test123test","[0-9]+"): 123
 ExpressionFunctions.asm(84) notice: defined(label): 1
 ExpressionFunctions.asm(85) notice: defined(label1): 0
 ExpressionFunctions.asm(87) notice: readascii("file.bin",4,4): test
+ExpressionFunctions.asm(89) notice: max(1): 1
+ExpressionFunctions.asm(90) notice: max(1,2): 2
+ExpressionFunctions.asm(91) notice: max(1,2,3): 3
+ExpressionFunctions.asm(92) notice: max(1,2.5,4): 4.0000000000000000
+ExpressionFunctions.asm(93) notice: min(1): 1
+ExpressionFunctions.asm(94) notice: min(1,2): 1
+ExpressionFunctions.asm(95) notice: min(1,2,3): 1
+ExpressionFunctions.asm(96) notice: min(1,2.5,4): 1.0000000000000000
+ExpressionFunctions.asm(97) notice: max((-3),3): 3
+ExpressionFunctions.asm(98) notice: min((-3),3): -3
+ExpressionFunctions.asm(99) notice: max((-3),3): 3.0000000000000000
+ExpressionFunctions.asm(100) notice: min((-3),3): -3.0000000000000000
