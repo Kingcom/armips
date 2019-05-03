@@ -69,7 +69,7 @@ private:
 class CDirectiveAlignFill: public CAssemblerCommand
 {
 public:
-	enum Mode { Align, Fill };
+	enum Mode { AlignPhysical, AlignVirtual, Fill };
 
 	CDirectiveAlignFill(int64_t value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Mode mode);
