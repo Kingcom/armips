@@ -86,4 +86,17 @@ test1	defined,label1
 
 test3	readascii,fileA,4,4
 
+test1	max,1
+test2	max,1,2
+test3	max,1,2,3
+test3	max,1,2.5,4
+test1	min,1
+test2	min,1,2
+test3	min,1,2,3
+test3	min,1,2.5,4
+test2	max,-3,3
+test2	min,-3,3
+test2	max,-3.0,3.0
+test2	min,-3.0,3.0
+
 .close

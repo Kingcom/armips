@@ -240,7 +240,97 @@ ExpressionValue expFuncFrac(const std::wstring& funcName, const std::vector<Expr
 	return result;
 }
 
+ExpressionValue expFuncMin(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+	double floatMin, floatCur;
+	int64_t intMin, intCur;
 
+	floatCur = floatMin = std::numeric_limits<double>::max();
+	intCur = intMin = std::numeric_limits<int64_t>::max();
+	bool isInt = true;
+
+	for (size_t i = 0; i < parameters.size(); i++)
+	{
+		switch (parameters[i].type)
+		{
+		case ExpressionValueType::Integer:
+			intCur = parameters[i].intValue;
+			floatCur = (double)parameters[i].intValue;
+			break;
+		case ExpressionValueType::Float:
+			floatCur = parameters[i].floatValue;
+			isInt = false;
+			break;
+		default:
+			return result;
+		}
+
+		if (intCur < intMin)
+			intMin = intCur;
+		if (floatCur < floatMin)
+			floatMin = floatCur;
+	}
+
+	if (isInt)
+	{
+		result.intValue = intMin;
+		result.type = ExpressionValueType::Integer;
+	}
+	else
+	{
+		result.floatValue = floatMin;
+		result.type = ExpressionValueType::Float;
+	}
+
+	return result;
+}
+
+ExpressionValue expFuncMax(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+{
+	ExpressionValue result;
+	double floatMax, floatCur;
+	int64_t intMax, intCur;
+
+	floatCur = floatMax = std::numeric_limits<double>::min();
+	intCur = intMax = std::numeric_limits<int64_t>::min();
+	bool isInt = true;
+
+	for (size_t i = 0; i < parameters.size(); i++)
+	{
+		switch (parameters[i].type)
+		{
+		case ExpressionValueType::Integer:
+			intCur = parameters[i].intValue;
+			floatCur = (double)parameters[i].intValue;
+			break;
+		case ExpressionValueType::Float:
+			floatCur = parameters[i].floatValue;
+			isInt = false;
+			break;
+		default:
+			return result;
+		}
+
+		if (intCur > intMax)
+			intMax = intCur;
+		if (floatCur > floatMax)
+			floatMax = floatCur;
+	}
+
+	if (isInt)
+	{
+		result.intValue = intMax;
+		result.type = ExpressionValueType::Integer;
+	}
+	else
+	{
+		result.floatValue = floatMax;
+		result.type = ExpressionValueType::Float;
+	}
+
+	return result;
+}
 
 ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
@@ -507,6 +597,8 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"frac",			{ &expFuncFrac,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"abs",			{ &expFuncAbs,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"round",			{ &expFuncRound,			1,	1,	ExpFuncSafety::Safe } },
+	{ L"min",			{ &expFuncMin,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe } },
+	{ L"max",			{ &expFuncMax,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe } },
 
 	{ L"strlen",		{ &expFuncStrlen,			1,	1,	ExpFuncSafety::Safe } },
 	{ L"substr",		{ &expFuncSubstr,			3,	3,	ExpFuncSafety::Safe } },
