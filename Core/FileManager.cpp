@@ -166,11 +166,13 @@ bool GenericAssemblerFile::write(void* data, size_t length)
 
 bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 {
-	if (virtualAddress - headerSize < 0 || virtualAddress < 0)
+	if (virtualAddress - headerSize < 0)
 	{
-		Logger::queueError(Logger::Error,L"Seeking to invalid address");
+		Logger::queueError(Logger::Error,L"Seeking to virtual address with negative physical address");
 		return false;
 	}
+	if (virtualAddress < 0)
+		Logger::queueError(Logger::Warning,L"Seeking to negative virtual address");
 
 	this->virtualAddress = virtualAddress;
 	int64_t physicalAddress = virtualAddress-headerSize;
@@ -183,11 +185,13 @@ bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 
 bool GenericAssemblerFile::seekPhysical(int64_t physicalAddress)
 {
-	if (physicalAddress < 0 || physicalAddress + headerSize < 0)
+	if (physicalAddress < 0)
 	{
-		Logger::queueError(Logger::Error,L"Seeking to invalid address");
+		Logger::queueError(Logger::Error,L"Seeking to negative physical address");
 		return false;
 	}
+	if (physicalAddress + headerSize < 0)
+		Logger::queueError(Logger::Warning,L"Seeking to physical address with negative virtual address");
 
 	virtualAddress = physicalAddress+headerSize;
 
