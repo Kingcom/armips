@@ -27,8 +27,9 @@ using DirectiveMap = std::unordered_multimap<std::wstring, const DirectiveEntry>
 // file directive flags
 #define DIRECTIVE_POS_PHYSICAL		0x00000001
 #define DIRECTIVE_POS_VIRTUAL		0x00000002
-#define DIRECTIVE_FILE_ALIGN		0x00000001
-#define DIRECTIVE_FILE_FILL			0x00000002 
+#define DIRECTIVE_ALIGN_PHYSICAL	0x00000001
+#define DIRECTIVE_ALIGN_VIRTUAL		0x00000002
+#define DIRECTIVE_ALIGN_FILL		0x00000004
 
 // conditional directive flags
 #define DIRECTIVE_COND_IF			0x00000001

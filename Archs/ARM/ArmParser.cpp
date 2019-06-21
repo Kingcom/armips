@@ -46,7 +46,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArm(Parser& parser, int flags)
 std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 {
 	auto seq = make_unique<CommandSequence>();
-	seq->addCommand(make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::Align));
+	seq->addCommand(make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::AlignVirtual));
 	seq->addCommand(make_unique<ArmPoolCommand>());
 
 	return std::move(seq);

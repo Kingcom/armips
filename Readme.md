@@ -470,10 +470,11 @@ The following values  are supported:
 ### Align the output position
 
 ```
-.align [num[,value]]
+.align  [num[,value]]
+.aligna [num[,value]]
 ```
 
-Writes bytes of `value` into the output file until the memory position is a multiple of `num`. `num` has to be a power of two. If `num` isn't specified, then the alignment will be 4. If `value` isn't specified, zeros are inserted. Only the lowest 8 bits of `value` are inserted.
+Writes bytes of `value` into the output file until the memory position is a multiple of `num`. `num` has to be a power of two. If `num` isn't specified, then the alignment will be 4. If `value` isn't specified, zeros are inserted. Only the lowest 8 bits of `value` are inserted. `.align` aligns the memory address (i.e. `org()`), whereas `.aligna` aligns the file address (i.e. `orga()`).
 
 ### Fill space with a value
 

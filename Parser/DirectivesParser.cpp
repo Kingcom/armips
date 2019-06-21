@@ -122,17 +122,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveAlignFill(Parser& parser, int f
 	CDirectiveAlignFill::Mode mode;
 	switch (flags & DIRECTIVE_USERMASK)
 	{
-	case DIRECTIVE_FILE_ALIGN:
-		mode = CDirectiveAlignFill::Align;
+	case DIRECTIVE_ALIGN_VIRTUAL:
+		mode = CDirectiveAlignFill::AlignVirtual;
 		break;
-	case DIRECTIVE_FILE_FILL:
+	case DIRECTIVE_ALIGN_PHYSICAL:
+		mode = CDirectiveAlignFill::AlignPhysical;
+		break;
+	case DIRECTIVE_ALIGN_FILL:
 		mode = CDirectiveAlignFill::Fill;
 		break;
 	default:
 		return nullptr;
 	}
 
-	if (mode == CDirectiveAlignFill::Align && parser.peekToken().type == TokenType::Separator)
+	if (mode != CDirectiveAlignFill::Fill && parser.peekToken().type == TokenType::Separator)
 		return make_unique<CDirectiveAlignFill>(UINT64_C(4),mode);
 
 	std::vector<Expression> list;
@@ -674,9 +677,10 @@ const DirectiveMap directives = {
 	{ L".orga",				{ &parseDirectivePosition,			DIRECTIVE_POS_PHYSICAL } },
 	{ L"orga",				{ &parseDirectivePosition,			DIRECTIVE_POS_PHYSICAL } },
 	{ L".headersize",		{ &parseDirectiveHeaderSize,		0 } },
-	{ L".align",			{ &parseDirectiveAlignFill,			DIRECTIVE_FILE_ALIGN } },
-	{ L".fill",				{ &parseDirectiveAlignFill,			DIRECTIVE_FILE_FILL } },
-	{ L"defs",				{ &parseDirectiveAlignFill,			DIRECTIVE_FILE_FILL } },
+	{ L".align",			{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_VIRTUAL } },
+	{ L".aligna",			{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_PHYSICAL } },
+	{ L".fill",				{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_FILL } },
+	{ L"defs",				{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_FILL } },
 	{ L".skip",				{ &parseDirectiveSkip,				0 } },
 
 	{ L".if",				{ &parseDirectiveConditional,		DIRECTIVE_COND_IF } },

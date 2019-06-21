@@ -320,18 +320,22 @@ bool CDirectiveAlignFill::Validate()
 		}
 	}
 
+	if (mode != Fill && isPowerOfTwo(value) == false)
+	{
+		Logger::queueError(Logger::Error, L"Invalid alignment %d", value);
+		return false;
+	}
+
 	int64_t oldSize = finalSize;
 	int64_t mod;
 	switch (mode)
 	{
-	case Align:
-		if (isPowerOfTwo(value) == false)
-		{
-			Logger::queueError(Logger::Error,L"Invalid alignment %d",value);
-			return false;
-		}
-
+	case AlignVirtual:
 		mod = g_fileManager->getVirtualAddress() % value;
+		finalSize = mod ? value-mod : 0;
+		break;
+	case AlignPhysical:
+		mod = g_fileManager->getPhysicalAddress() % value;
 		finalSize = mod ? value-mod : 0;
 		break;
 	case Fill:
@@ -375,8 +379,11 @@ void CDirectiveAlignFill::writeTempData(TempData& tempData) const
 {
 	switch (mode)
 	{
-	case Align:
+	case AlignVirtual:
 		tempData.writeLine(virtualAddress,formatString(L".align 0x%08X",value));
+		break;
+	case AlignPhysical:
+		tempData.writeLine(virtualAddress, formatString(L".aligna 0x%08X", value));
 		break;
 	case Fill:
 		tempData.writeLine(virtualAddress,formatString(L".fill 0x%08X,0x%02X",value,fillByte));
@@ -388,7 +395,8 @@ void CDirectiveAlignFill::writeSymData(SymbolData& symData) const
 {
 	switch (mode)
 	{
-	case Align:	// ?
+	case AlignVirtual:	// ?
+	case AlignPhysical:	// ?
 		break;
 	case Fill:
 		symData.addData(virtualAddress,value,SymbolData::Data8);
