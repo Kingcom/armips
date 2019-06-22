@@ -362,10 +362,11 @@ const tMipsOpcode MipsOpcodes[] = {
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 30..37
 // 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | 38..3F
 //  hi |-------|-------|-------|-------|-------|-------|-------|-------|
-	{ "tlbr",	"",			MIPS_COP0FUNCT(0x01),			MA_MIPS3,	0 },
-	{ "tlbwi",	"",			MIPS_COP0FUNCT(0x02),			MA_MIPS3,	0 },
-	{ "tlbwr",	"",			MIPS_COP0FUNCT(0x06),			MA_MIPS3,	0 },
-	{ "tlbp",	"",			MIPS_COP0FUNCT(0x08),			MA_MIPS3,	0 },
+	{ "tlbr",	"",			MIPS_COP0FUNCT(0x01),			MA_MIPS1,	0 },
+	{ "tlbwi",	"",			MIPS_COP0FUNCT(0x02),			MA_MIPS1,	0 },
+	{ "tlbwr",	"",			MIPS_COP0FUNCT(0x06),			MA_MIPS1,	0 },
+	{ "tlbp",	"",			MIPS_COP0FUNCT(0x08),			MA_MIPS1,	0 },
+	{ "rfe",	"",			MIPS_COP0FUNCT(0x10),			MA_PSX,		0 },
 	{ "eret",	"",			MIPS_COP0FUNCT(0x18),			MA_MIPS3,	0 },
 
 //     31---------26---------21----------------------------------------0
