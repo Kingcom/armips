@@ -18,7 +18,7 @@ enum class MipsRegisterType
 	RspCop0,
 	RspVector,
 	RspVectorControl,
-	RspBroadcastElement,
+	RspVectorElement,
 	RspScalarElement,
 	RspOffsetElement
 };

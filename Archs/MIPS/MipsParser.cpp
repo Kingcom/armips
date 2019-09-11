@@ -341,9 +341,9 @@ bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
 	return parseRegisterTable(parser,dest,mipsRspVectorRegisters,ARRAY_SIZE(mipsRspVectorRegisters));
 }
 
-bool MipsParser::parseRspBroadcastElement(Parser& parser, MipsRegisterValue& dest)
+bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
 {
-	dest.type = MipsRegisterType::RspBroadcastElement;
+	dest.type = MipsRegisterType::RspVectorElement;
 
 	if (parser.peekToken().type == TokenType::LBrack)
 	{
@@ -407,7 +407,7 @@ bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
 		return false;
 
 	dest.name = formatString(L"%d", token.intValue);
-	dest.num = token.intValue;
+	dest.num = token.intValue + 8;
 
 	return parser.nextToken().type == TokenType::RBrack;
 }
@@ -1364,16 +1364,16 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 's':	// vector register
 				CHECK(parseRspVectorRegister(parser,registers.rspvrs));
 				break;
-			case 'e':	// vector broadcast element
-				CHECK(parseRspBroadcastElement(parser,registers.rspve));
+			case 'e':	// vector element
+				CHECK(parseRspVectorElement(parser,registers.rspve));
 				break;
-			case 'l':	// vector scalar element
+			case 'l':	// scalar element
 				CHECK(parseRspScalarElement(parser,registers.rspve));
 				break;
-			case 'm':	// vector scalar destination element
+			case 'm':	// scalar destination element
 				CHECK(parseRspScalarElement(parser,registers.rspvde));
 				break;
-			case 'o':	// vector byte offset element
+			case 'o':	// byte offset element
 				CHECK(parseRspOffsetElement(parser,registers.rspvealt));
 				break;
 			default:
