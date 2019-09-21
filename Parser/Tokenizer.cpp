@@ -538,8 +538,7 @@ Token FileTokenizer::loadToken()
 		bool isValid = true;
 		bool foundPoint = false;
 		bool foundExp = false;
-		bool isHex = start+1 < currentLine.size() && currentLine[start] == '0' &&
-			(currentLine[start+1] == 'x' || currentLine[start+1] == 'X');
+		bool isHex = start+1 < currentLine.size() && currentLine[start] == '0' && towlower(currentLine[start+1]) == 'x';
 
 		while (end < currentLine.size() && (iswalnum(currentLine[end]) || currentLine[end] == '.'))
 		{
@@ -548,7 +547,7 @@ Token FileTokenizer::loadToken()
 				if (isHex || foundExp || foundPoint)
 					isValid = false;
 				foundPoint = true;
-			} else if (currentLine[end] == 'h' || currentLine[end] == 'H') {
+			} else if (towlower(currentLine[end]) == 'h') {
 				isHex = true;
 			} else if (towlower(currentLine[end]) == 'e' && !isHex)
 			{
