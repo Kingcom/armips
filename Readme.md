@@ -214,6 +214,8 @@ A few examples:
 
 Three value types are supported: integers, floats and strings. Integers are defined by writing just a number in one of the supported bases as described above. A float is defined by an integer numerator, followed by a period, followed by the denominator, e.g. `2.5`. Floats can also use a different base prefix; in this case, both the numerator and denominator are evaluated using that base. For example, `11.5` is equivalent to `0xB.8`.
 
+Alternatively, a float can also be defined by exponential notation. This is formatted as an integer, followed by the letter `e`, followed by (optionally) a plus or minus representing the exponent sign, followed by an integer representing the exponent. For example, `314e-2` is equivalent to `3.14`; `5e3` and `5e+3` are equivalent to `5000.0`.
+
 Strings are defined by text wrapped in quotation marks (e.g. `"text"`). Quotation marks can be escaped by prefixing them with a backslash (`\`). Any backlash not followed by a quotation mark is kept as-is. If you want to use a backslash at the end of a string, prefix it by another backlash.
 For example, to write a quotation mark followed by a backlash:
 
