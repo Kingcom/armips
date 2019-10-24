@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Tests.h"
+#include "main.h"
 #include "Util/Util.h"
 #include "Core/Common.h"
 #include "Core/Assembler.h"
@@ -145,17 +146,63 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 
 	ArmipsArguments args;
 	StringList errors;
+	int expectedRetVal = 0;
+	int retVal = 0;
+	bool checkRetVal = false;
+	bool result = true;
 
-	args.inputFileName = testName + L".asm";
-	args.tempFileName = testName + L".temp.txt";
+	if (fileExists(L"commandLine.txt"))
+	{
+		TextFile f;
+		f.open(L"commandLine.txt",TextFile::Read);
+		std::wstring command = f.readLine();
+		f.close();
+		
+		StringList argv = splitStringIntoStringList(command,L' ',true);
+		checkRetVal = true;
+		
+		// first word is error code, rest is arguments
+		expectedRetVal = std::stoi(argv[0]);
+		retVal = parseArguments(argv,args,1,false);
+
+		// if exit code is already nonzero, we would abort here
+		if (retVal != 0)
+		{
+			if (retVal != expectedRetVal)
+			{
+				errorString += formatString(L"Exit code did not match while parsing arguments: expected %S, got %S\n",expectedRetVal,retVal);
+				result = false;
+			}
+			// already checked exit code
+			checkRetVal = false;
+		}
+	}
+	else
+	{
+		args.inputFileName = testName + L".asm";
+		args.tempFileName = testName + L".temp.txt";
+	}
+
 	args.errorsResult = &errors;
 	args.silent = true;
 
 	// may or may not be supposed to cause errors
-	runArmips(args);
+	if (runArmips(args) == false)
+	{
+		retVal = 1;
+	}
+	else
+	{
+		retVal = 0;
+	}
+
+	if (checkRetVal && retVal != expectedRetVal)
+	{
+		errorString += formatString(L"Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
+		result = false;
+	}
 
 	// check errors
-	bool result = true;
 	if (fileExists(L"expected.txt"))
 	{
 		TextFile f;

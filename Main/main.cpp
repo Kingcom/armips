@@ -5,6 +5,7 @@
 #include "Commands/CDirectiveFile.h"
 #include "Util/Util.h"
 #include "Tests.h"
+#include "main.h"
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__)
 #define ARMIPSNAME "ARMIPS64"
@@ -48,7 +49,22 @@ int wmain(int argc, wchar_t* argv[])
 #endif
 
 	StringList arguments = getStringListFromArray(argv,argc);
-	size_t argpos = 1;
+	int retval = parseArguments(arguments,parameters,1);
+	if (retval) return retval;
+
+	bool result = runArmips(parameters);
+
+	if (result == false)
+	{
+		Logger::printLine(L"Aborting.");
+		return 1;
+	}
+
+	return 0;
+}
+
+int parseArguments(StringList& arguments, ArmipsArguments& parameters, size_t argpos, bool absolute)
+{
 	bool readflags = true;
 	while (argpos < arguments.size())
 	{
@@ -148,7 +164,7 @@ int wmain(int argc, wchar_t* argv[])
 	}
 
 	// turn input filename into an absolute path
-	if (isAbsolutePath(parameters.inputFileName) == false)
+	if (absolute && isAbsolutePath(parameters.inputFileName) == false)
 		parameters.inputFileName = formatString(L"%s/%s", getCurrentDirectory(), parameters.inputFileName);
 
 	if (fileExists(parameters.inputFileName) == false)
@@ -156,15 +172,6 @@ int wmain(int argc, wchar_t* argv[])
 		Logger::printError(Logger::Error, L"File '%s' not found\n", parameters.inputFileName);
 		return 1;
 	}
-
-	bool result = runArmips(parameters);
-
-	if (result == false)
-	{
-		Logger::printLine(L"Aborting.");
-		return 1;
-	}
-
 	return 0;
 }
 

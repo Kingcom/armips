@@ -221,6 +221,20 @@ StringList getStringListFromArray(wchar_t** source, int count)
 	return result;
 }
 
+StringList splitStringIntoStringList(const std::wstring& str, const wchar_t delim, bool skipEmpty)
+{
+	StringList result;
+	std::wstringstream stream(str);
+	std::wstring arg;
+	while (std::getline(stream,arg,delim))
+	{
+		if (arg.empty() && skipEmpty) continue;
+		result.push_back(arg);
+	}
+
+	return result;
+}
+
 int64_t fileSize(const std::wstring& fileName)
 {
 #ifdef _WIN32

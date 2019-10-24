@@ -8,5 +8,6 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Main\Tests.h" />
+    <ClInclude Include="Main\main.h" />
   </ItemGroup>
 </Project>

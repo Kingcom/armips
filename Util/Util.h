@@ -17,6 +17,7 @@ int32_t getFloatBits(float value);
 int64_t getDoubleBits(double value);
 
 StringList getStringListFromArray(wchar_t** source, int count);
+StringList splitStringIntoStringList(const std::wstring& str, const wchar_t delim, bool skipEmpty);
 
 int64_t fileSize(const std::wstring& fileName);
 bool fileExists(const std::wstring& strFilename);
