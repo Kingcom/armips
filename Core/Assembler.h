@@ -12,7 +12,7 @@ enum class ArmipsMode { FILE, MEMORY };
 struct LabelDefinition
 {
 	std::wstring name;
-	int value;
+	int64_t value;
 };
 
 struct EquationDefinition
