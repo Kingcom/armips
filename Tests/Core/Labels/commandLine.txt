@@ -1,0 +1,1 @@
+1 -definelabel a0 0x00000000 -definelabel b0 0xFFFFFFFF -definelabel c0 0x12345678 -definelabel d0 0xFFFFFFFFFFFFFFFF -definelabel e0 0xFEDCBA9876543210 -definelabel f0 0x1234567890ABCDEF -definelabel g0 0x1122334455667788 Labels.asm
