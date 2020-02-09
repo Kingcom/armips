@@ -130,6 +130,7 @@ add_library(armips STATIC
 
 add_executable(armips-bin
 	Main/main.cpp
+	Main/main.h
 	Main/Tests.cpp
 	Main/Tests.h
 	stdafx.cpp
@@ -140,6 +141,7 @@ set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
 
 add_executable(armipstests
 	Main/main.cpp
+	Main/main.h
 	Main/Tests.cpp
 	Main/Tests.h
 	stdafx.cpp

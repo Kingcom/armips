@@ -36,6 +36,7 @@ struct ArmipsArguments
 	std::wstring inputFileName;
 	std::wstring tempFileName;
 	std::wstring symFileName;
+	bool useAbsoluteFileNames;
 
 	// memory mode
 	std::shared_ptr<AssemblerFile> memoryFile;
@@ -47,6 +48,7 @@ struct ArmipsArguments
 		errorOnWarning = false;
 		silent = false;
 		errorsResult = nullptr;
+		useAbsoluteFileNames = true;
 	}
 };
 

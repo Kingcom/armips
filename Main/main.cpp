@@ -13,6 +13,8 @@
 #define ARMIPSNAME "ARMIPS"
 #endif
 
+static bool parseArguments(StringList& arguments, ArmipsArguments& parameters);
+
 void printUsage(std::wstring executableName)
 {
 	Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
@@ -37,8 +39,6 @@ int wmain(int argc, wchar_t* argv[])
 {
 	std::setlocale(LC_CTYPE,"");
 
-	ArmipsArguments parameters;
-
 #ifdef ARMIPS_TESTS
 	std::wstring name;
 
@@ -49,22 +49,39 @@ int wmain(int argc, wchar_t* argv[])
 #endif
 
 	StringList arguments = getStringListFromArray(argv,argc);
-	int retval = parseArguments(arguments,parameters,1);
-	if (retval) return retval;
+	ArmipsArguments parameters;
 
-	bool result = runArmips(parameters);
+	return parseAndRunArmips(arguments, parameters);
+}
 
+int parseAndRunArmips(StringList& arguments, ArmipsArguments& parameters)
+{
+	bool result;
+
+	result = parseArguments(arguments, parameters);
 	if (result == false)
 	{
-		Logger::printLine(L"Aborting.");
+		if (!parameters.silent)
+			Logger::printLine(L"Cannot parse arguments; aborting.");
+		
+		return 1;
+	}
+
+	result = runArmips(parameters);
+	if (result == false)
+	{
+		if (!parameters.silent)
+			Logger::printLine(L"Aborting.");
+		
 		return 1;
 	}
 
 	return 0;
 }
 
-int parseArguments(StringList& arguments, ArmipsArguments& parameters, size_t argpos, bool absolute)
+static bool parseArguments(StringList& arguments, ArmipsArguments& parameters)
 {
+	size_t argpos = 0;
 	bool readflags = true;
 	while (argpos < arguments.size())
 	{
@@ -128,7 +145,7 @@ int parseArguments(StringList& arguments, ArmipsArguments& parameters, size_t ar
 				{
 					Logger::printError(Logger::Error, L"Invalid definelabel value '%s'\n", arguments[argpos + 2]);
 					printUsage(arguments[0]);
-					return 1;
+					return false;
 				}
 				def.value = value;
 
@@ -137,7 +154,7 @@ int parseArguments(StringList& arguments, ArmipsArguments& parameters, size_t ar
 			} else {
 				Logger::printError(Logger::Error, L"Invalid command line argument '%s'\n", arguments[argpos]);
 				printUsage(arguments[0]);
-				return 1;
+				return false;
 			}
 		} else {
 			// only allow one input filename
@@ -148,7 +165,7 @@ int parseArguments(StringList& arguments, ArmipsArguments& parameters, size_t ar
 			} else {
 				Logger::printError(Logger::Error, L"Multiple input assembly files specified\n");
 				printUsage(arguments[0]);
-				return 1;
+				return false;
 			}
 		}
 	}
@@ -160,19 +177,19 @@ int parseArguments(StringList& arguments, ArmipsArguments& parameters, size_t ar
 			Logger::printError(Logger::Error, L"Missing input assembly file\n");
 
 		printUsage(arguments[0]);
-		return 1;
+		return false;
 	}
 
 	// turn input filename into an absolute path
-	if (absolute && isAbsolutePath(parameters.inputFileName) == false)
+	if (parameters.useAbsoluteFileNames && isAbsolutePath(parameters.inputFileName) == false)
 		parameters.inputFileName = formatString(L"%s/%s", getCurrentDirectory(), parameters.inputFileName);
 
 	if (fileExists(parameters.inputFileName) == false)
 	{
 		Logger::printError(Logger::Error, L"File '%s' not found\n", parameters.inputFileName);
-		return 1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 
 #ifndef _WIN32
