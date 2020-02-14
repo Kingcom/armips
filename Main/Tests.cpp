@@ -1,6 +1,6 @@
 #include "stdafx.h"
+#include "CommandLineInterface.h"
 #include "Tests.h"
-#include "main.h"
 #include "Util/Util.h"
 #include "Core/Common.h"
 #include "Core/Assembler.h"
@@ -159,7 +159,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		std::wstring command = f.readLine();
 		f.close();
 		
-		params = splitStringIntoStringList(command,L' ',true);
+		params = splitString(command,L' ',true);
 		checkRetVal = true;
 		
 		// first word is error code, rest is arguments
@@ -177,7 +177,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	args.useAbsoluteFileNames = false;
 
 	// may or may not be supposed to cause errors
-	retVal = parseAndRunArmips(params, args);
+	retVal = runFromCommandLine(params, args);
 
 	if (checkRetVal && retVal != expectedRetVal)
 	{

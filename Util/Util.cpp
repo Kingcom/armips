@@ -221,7 +221,7 @@ StringList getStringListFromArray(wchar_t** source, int count)
 	return result;
 }
 
-StringList splitStringIntoStringList(const std::wstring& str, const wchar_t delim, bool skipEmpty)
+StringList splitString(const std::wstring& str, const wchar_t delim, bool skipEmpty)
 {
 	StringList result;
 	std::wstringstream stream(str);
