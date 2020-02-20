@@ -9,13 +9,15 @@
 
 TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding encoding)
 {
-	if (fileExists(fileName) == false)
+	auto fullName = getFullPathName(fileName);
+
+	if (fileExists(fullName) == false)
 	{
 		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
 		return;
 	}
 
-	if (table.load(fileName,encoding) == false)
+	if (table.load(fullName,encoding) == false)
 	{
 		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
 		return;
