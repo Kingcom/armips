@@ -45,6 +45,7 @@ struct ArmipsArguments
 	ArmipsArguments()
 	{
 		mode = ArmipsMode::FILE;
+		symFileVersion = 0;
 		errorOnWarning = false;
 		silent = false;
 		errorsResult = nullptr;
