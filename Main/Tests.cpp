@@ -144,13 +144,13 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	std::wstring oldDir = getCurrentDirectory();
 	changeDirectory(dir);
 
-	ArmipsArguments args;
+	ArmipsArguments settings;
 	StringList errors;
 	int expectedRetVal = 0;
 	int retVal = 0;
 	bool checkRetVal = false;
 	bool result = true;
-	StringList params;
+	StringList args;
 
 	if (fileExists(L"commandLine.txt"))
 	{
@@ -159,25 +159,25 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		std::wstring command = f.readLine();
 		f.close();
 		
-		params = splitString(command,L' ',true);
+		args = splitString(command,L' ',true);
 		checkRetVal = true;
 		
 		// first word is error code, rest is arguments
-		expectedRetVal = std::stoi(params[0]);
-		params.erase(params.begin());
+		expectedRetVal = std::stoi(args[0]);
+		args.erase(args.begin());
 	}
 	else
 	{
-		args.inputFileName = testName + L".asm";
-		args.tempFileName = testName + L".temp.txt";
+		settings.inputFileName = testName + L".asm";
+		settings.tempFileName = testName + L".temp.txt";
 	}
 
-	args.errorsResult = &errors;
-	args.silent = true;
-	args.useAbsoluteFileNames = false;
+	settings.errorsResult = &errors;
+	settings.silent = true;
+	settings.useAbsoluteFileNames = false;
 
 	// may or may not be supposed to cause errors
-	retVal = runFromCommandLine(params, args);
+	retVal = runFromCommandLine(args, settings);
 
 	if (checkRetVal && retVal != expectedRetVal)
 	{

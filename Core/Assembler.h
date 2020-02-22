@@ -53,4 +53,4 @@ struct ArmipsArguments
 	}
 };
 
-bool runArmips(ArmipsArguments& arguments);
+bool runArmips(ArmipsArguments& settings);

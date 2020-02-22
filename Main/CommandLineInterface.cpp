@@ -29,7 +29,7 @@ static void printUsage(std::wstring executableName)
 	Logger::printLine(L" <FILE>                    Main assembly code file");
 }
 
-static bool parseArguments(const StringList& arguments, ArmipsArguments& parameters)
+static bool parseArguments(const StringList& arguments, ArmipsArguments& settings)
 {
 	size_t argpos = 0;
 	bool readflags = true;
@@ -44,24 +44,24 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 			}
 			else if (arguments[argpos] == L"-temp" && argpos + 1 < arguments.size())
 			{
-				parameters.tempFileName = arguments[argpos + 1];
+				settings.tempFileName = arguments[argpos + 1];
 				argpos += 2;
 			}
 			else if (arguments[argpos] == L"-sym" && argpos + 1 < arguments.size())
 			{
-				parameters.symFileName = arguments[argpos + 1];
-				parameters.symFileVersion = 1;
+				settings.symFileName = arguments[argpos + 1];
+				settings.symFileVersion = 1;
 				argpos += 2;
 			}
 			else if (arguments[argpos] == L"-sym2" && argpos + 1 < arguments.size())
 			{
-				parameters.symFileName = arguments[argpos + 1];
-				parameters.symFileVersion = 2;
+				settings.symFileName = arguments[argpos + 1];
+				settings.symFileVersion = 2;
 				argpos += 2;
 			}
 			else if (arguments[argpos] == L"-erroronwarning")
 			{
-				parameters.errorOnWarning = true;
+				settings.errorOnWarning = true;
 				argpos += 1;
 			}
 			else if (arguments[argpos] == L"-equ" && argpos + 2 < arguments.size())
@@ -70,7 +70,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 				def.name = arguments[argpos + 1];
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 				def.value = arguments[argpos + 2];
-				parameters.equList.push_back(def);
+				settings.equList.push_back(def);
 				argpos += 3;
 			}
 			else if (arguments[argpos] == L"-strequ" && argpos + 2 < arguments.size())
@@ -79,7 +79,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 				def.name = arguments[argpos + 1];
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 				def.value = formatString(L"\"%s\"", arguments[argpos + 2]);
-				parameters.equList.push_back(def);
+				settings.equList.push_back(def);
 				argpos += 3;
 			}
 			else if (arguments[argpos] == L"-time")
@@ -108,7 +108,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 				}
 				def.value = value;
 
-				parameters.labels.push_back(def);
+				settings.labels.push_back(def);
 				argpos += 3;
 			}
 			else {
@@ -119,9 +119,9 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 		}
 		else {
 			// only allow one input filename
-			if (parameters.inputFileName == L"")
+			if (settings.inputFileName == L"")
 			{
-				parameters.inputFileName = arguments[argpos];
+				settings.inputFileName = arguments[argpos];
 				argpos++;
 			}
 			else {
@@ -133,7 +133,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 	}
 
 	// ensure input file was specified
-	if (parameters.inputFileName == L"")
+	if (settings.inputFileName == L"")
 	{
 		if (arguments.size() > 1)
 			Logger::printError(Logger::Error, L"Missing input assembly file\n");
@@ -143,30 +143,30 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& paramet
 	}
 
 	// turn input filename into an absolute path
-	if (parameters.useAbsoluteFileNames && isAbsolutePath(parameters.inputFileName) == false)
-		parameters.inputFileName = formatString(L"%s/%s", getCurrentDirectory(), parameters.inputFileName);
+	if (settings.useAbsoluteFileNames && isAbsolutePath(settings.inputFileName) == false)
+		settings.inputFileName = formatString(L"%s/%s", getCurrentDirectory(), settings.inputFileName);
 
-	if (fileExists(parameters.inputFileName) == false)
+	if (fileExists(settings.inputFileName) == false)
 	{
-		Logger::printError(Logger::Error, L"File '%s' not found\n", parameters.inputFileName);
+		Logger::printError(Logger::Error, L"File '%s' not found\n", settings.inputFileName);
 		return false;
 	}
 	return true;
 }
 
-int runFromCommandLine(const StringList& arguments, ArmipsArguments parameters)
+int runFromCommandLine(const StringList& arguments, ArmipsArguments settings)
 {
-	if (parseArguments(arguments, parameters) == false)
+	if (parseArguments(arguments, settings) == false)
 	{
-		if (!parameters.silent)
+		if (!settings.silent)
 			Logger::printLine(L"Cannot parse arguments; aborting.");
 
 		return 1;
 	}
 
-	if (runArmips(parameters) == false)
+	if (runArmips(settings) == false)
 	{
-		if (!parameters.silent)
+		if (!settings.silent)
 			Logger::printLine(L"Aborting.");
 
 		return 1;
