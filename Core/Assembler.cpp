@@ -112,7 +112,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	return true;
 }
 
-bool runArmips(ArmipsArguments& arguments)
+bool runArmips(ArmipsArguments& settings)
 {
 	// initialize and reset global data
 	Global.Section = 0;
@@ -137,28 +137,28 @@ bool runArmips(ArmipsArguments& arguments)
 
 	Arm.clear();
 
-	// process arguments
+	// process settings
 	Parser parser;
 	SymbolData symData;
 	TempData tempData;
 	
-	Logger::setSilent(arguments.silent);
-	Logger::setErrorOnWarning(arguments.errorOnWarning);
+	Logger::setSilent(settings.silent);
+	Logger::setErrorOnWarning(settings.errorOnWarning);
 
-	if (!arguments.symFileName.empty())
-		symData.setNocashSymFileName(arguments.symFileName,arguments.symFileVersion);
+	if (!settings.symFileName.empty())
+		symData.setNocashSymFileName(settings.symFileName, settings.symFileVersion);
 
-	if (!arguments.tempFileName.empty())
-		tempData.setFileName(arguments.tempFileName);
+	if (!settings.tempFileName.empty())
+		tempData.setFileName(settings.tempFileName);
 
 	Token token;
-	for (size_t i = 0; i < arguments.equList.size(); i++)
+	for (size_t i = 0; i < settings.equList.size(); i++)
 	{
-		parser.addEquation(token,arguments.equList[i].name, arguments.equList[i].value);
+		parser.addEquation(token, settings.equList[i].name, settings.equList[i].value);
 	}
 
-	Global.symbolTable.addLabels(arguments.labels);
-	for (const LabelDefinition& label : arguments.labels)
+	Global.symbolTable.addLabels(settings.labels);
+	for (const LabelDefinition& label : settings.labels)
 	{
 		symData.addLabel(label.value, label.name);
 	}
@@ -168,11 +168,11 @@ bool runArmips(ArmipsArguments& arguments)
 
 	// run assembler
 	TextFile input;
-	switch (arguments.mode)
+	switch (settings.mode)
 	{
 	case ArmipsMode::FILE:
 		Global.memoryMode = false;		
-		if (input.open(arguments.inputFileName,TextFile::Read) == false)
+		if (input.open(settings.inputFileName,TextFile::Read) == false)
 		{
 			Logger::printError(Logger::Error,L"Could not open file");
 			return false;
@@ -180,8 +180,8 @@ bool runArmips(ArmipsArguments& arguments)
 		break;
 	case ArmipsMode::MEMORY:
 		Global.memoryMode = true;
-		Global.memoryFile = arguments.memoryFile;
-		input.openMemory(arguments.content);
+		Global.memoryFile = settings.memoryFile;
+		input.openMemory(settings.content);
 		break;
 	}
 
@@ -200,11 +200,11 @@ bool runArmips(ArmipsArguments& arguments)
 	}
 
 	// return errors
-	if (arguments.errorsResult != nullptr)
+	if (settings.errorsResult != nullptr)
 	{
 		StringList errors = Logger::getErrors();
 		for (size_t i = 0; i < errors.size(); i++)
-			arguments.errorsResult->push_back(errors[i]);
+			settings.errorsResult->push_back(errors[i]);
 	}
 
 	return result;

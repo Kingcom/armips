@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "CommandLineInterface.h"
 #include "Tests.h"
 #include "Util/Util.h"
 #include "Core/Common.h"
@@ -143,19 +144,48 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	std::wstring oldDir = getCurrentDirectory();
 	changeDirectory(dir);
 
-	ArmipsArguments args;
+	ArmipsArguments settings;
 	StringList errors;
+	int expectedRetVal = 0;
+	int retVal = 0;
+	bool checkRetVal = false;
+	bool result = true;
+	StringList args;
 
-	args.inputFileName = testName + L".asm";
-	args.tempFileName = testName + L".temp.txt";
-	args.errorsResult = &errors;
-	args.silent = true;
+	if (fileExists(L"commandLine.txt"))
+	{
+		TextFile f;
+		f.open(L"commandLine.txt",TextFile::Read);
+		std::wstring command = f.readLine();
+		f.close();
+		
+		args = splitString(command,L' ',true);
+		checkRetVal = true;
+		
+		// first word is error code, rest is arguments
+		expectedRetVal = std::stoi(args[0]);
+		args.erase(args.begin());
+	}
+	else
+	{
+		settings.inputFileName = testName + L".asm";
+		settings.tempFileName = testName + L".temp.txt";
+	}
+
+	settings.errorsResult = &errors;
+	settings.silent = true;
+	settings.useAbsoluteFileNames = false;
 
 	// may or may not be supposed to cause errors
-	runArmips(args);
+	retVal = runFromCommandLine(args, settings);
+
+	if (checkRetVal && retVal != expectedRetVal)
+	{
+		errorString += formatString(L"Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
+		result = false;
+	}
 
 	// check errors
-	bool result = true;
 	if (fileExists(L"expected.txt"))
 	{
 		TextFile f;

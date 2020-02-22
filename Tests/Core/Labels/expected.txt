@@ -1,0 +1,23 @@
+﻿Labels.asm(19) error: Seeking to virtual address with negative physical address
+Labels.asm(20) error: Seeking to virtual address with negative physical address
+Labels.asm(24) notice: a0: 0000000000000000
+Labels.asm(25) notice: a1: 0000000000000000
+Labels.asm(26) notice: a2: 0000000000000000
+Labels.asm(27) notice: b0: 00000000FFFFFFFF
+Labels.asm(28) notice: b1: 00000000FFFFFFFF
+Labels.asm(29) notice: b2: 00000000FFFFFFFF
+Labels.asm(30) notice: c0: 0000000012345678
+Labels.asm(31) notice: c1: 0000000012345678
+Labels.asm(32) notice: c2: 0000000012345678
+Labels.asm(33) notice: d0: FFFFFFFFFFFFFFFF
+Labels.asm(34) notice: d1: FFFFFFFFFFFFFFFF
+Labels.asm(35) notice: d2: 00000000DEADDEAD
+Labels.asm(36) notice: e0: FEDCBA9876543210
+Labels.asm(37) notice: e1: FEDCBA9876543210
+Labels.asm(38) notice: e2: 00000000DEADDEAD
+Labels.asm(39) notice: f0: 1234567890ABCDEF
+Labels.asm(40) notice: f1: 1234567890ABCDEF
+Labels.asm(41) notice: f2: 1234567890ABCDEF
+Labels.asm(42) notice: g0: 1122334455667788
+Labels.asm(43) notice: g1: 1122334455667788
+Labels.asm(44) notice: g2: 1122334455667788

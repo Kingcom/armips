@@ -224,10 +224,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Main\CommandLineInterface.h" />
     <ClInclude Include="Main\Tests.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Main\CommandLineInterface.cpp" />
     <ClCompile Include="Main\main.cpp" />
     <ClCompile Include="Main\Tests.cpp" />
     <ClCompile Include="stdafx.cpp">
