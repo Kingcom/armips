@@ -8,6 +8,13 @@ struct ElfRelocatorCtor
 	size_t size;
 };
 
+struct RelocationAction
+{
+	RelocationAction(int64_t offset, uint32_t newValue) : offset(offset), newValue(newValue) {}
+	int64_t offset;
+	uint32_t newValue;
+};
+
 class CAssemblerCommand;
 class Parser;
 
@@ -17,7 +24,8 @@ public:
 	virtual ~IElfRelocator() {};
 	virtual int expectedMachine() const = 0;
 	virtual bool isDummyRelocationType(int type) const { return false; }
-	virtual bool relocateOpcode(int type, RelocationData& data) = 0;
+	virtual bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) = 0;
+	virtual bool finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) { return true; }
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
 
 	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }

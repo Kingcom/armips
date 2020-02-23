@@ -324,6 +324,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 		ElfSection* relSection = entry.relSection;
 		if (relSection != nullptr)
 		{
+			std::vector<RelocationAction> relocationActions;
 			for (unsigned int relOffset = 0; relOffset < relSection->getSize(); relOffset += sizeof(Elf32_Rel))
 			{
 				Elf32_Rel rel;
@@ -383,14 +384,33 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 					relData.relocationBase = relocationOffsets[symSection]+relData.symbolAddress;
 				}
 
-				if (relocator->relocateOpcode(rel.getType(),relData) == false)
+				std::vector<std::wstring> errors;
+				if (!relocator->relocateOpcode(rel.getType(),relData, relocationActions, errors))
 				{
-					Logger::queueError(Logger::Error,relData.errorMessage);
+					for (const std::wstring& error : errors)
+					{
+						Logger::queueError(Logger::Error, error);
+					}
 					error = true;
 					continue;
 				}
+			}
 
-				sectionData.replaceDoubleWord(pos,relData.opcode, elf->getEndianness());
+			// finish any dangling relocations
+			std::vector<std::wstring> errors;
+			if (!relocator->finish(relocationActions, errors))
+			{
+				for (const std::wstring& error : errors)
+				{
+					Logger::queueError(Logger::Error, error);
+				}
+				error = true;
+			}
+
+			// now actually write the relocated values
+			for (const RelocationAction& action : relocationActions)
+			{
+				sectionData.replaceDoubleWord(action.offset-relocationOffsets[index], action.newValue, elf->getEndianness());
 			}
 		}
 

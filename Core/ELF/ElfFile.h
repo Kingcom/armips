@@ -113,11 +113,9 @@ struct RelocationData
 {
 	int64_t opcodeOffset;
 	int64_t relocationBase;
-	unsigned int opcode;
+	uint32_t opcode;
 
 	int64_t symbolAddress;
 	int targetSymbolType;
 	int targetSymbolInfo;
-
-	std::wstring errorMessage;
 };

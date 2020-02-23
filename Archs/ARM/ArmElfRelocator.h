@@ -15,14 +15,14 @@ enum {
 class ArmElfRelocator: public IElfRelocator
 {
 public:
-	ArmElfRelocator(bool arm9): arm9(arm9) { };
-	virtual int expectedMachine() const;
-	virtual bool isDummyRelocationType(int type) const;
+	ArmElfRelocator(bool arm9): arm9(arm9) { }
+	int expectedMachine() const override;
+	bool isDummyRelocationType(int type) const override;
 
-	virtual bool relocateOpcode(int type, RelocationData& data);
-	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType);
+	bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) override;
+	void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) override;
 
-	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
+	std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) override;
 private:
 	bool arm9;
 };

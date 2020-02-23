@@ -7,11 +7,34 @@ int MipsElfRelocator::expectedMachine() const
 	return EM_MIPS;
 }
 
-bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
+bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16RelocationBase, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
 {
-	unsigned int p;
+	bool result = true;
 
+	for (const Hi16Entry &hi16: hi16Entries)
+	{
+		if (hi16.relocationBase != lo16RelocationBase)
+		{
+			errors.push_back(formatString(L"Mismatched R_MIPS_HI16 with	R_MIPS_LO16 of a different symbol"));
+			result = false;
+			continue;
+		}
+
+		int32_t addend = (int32_t)((hi16.opcode & 0xFFFF) << 16) + (int16_t)(lo16Opcode & 0xFFFF);
+		int64_t fullPosition = addend + hi16.relocationBase;
+		uint32_t opcode = (hi16.opcode & 0xffff0000) | (((fullPosition >> 16) + ((fullPosition & 0x8000) != 0)) & 0xFFFF);
+		actions.emplace_back(hi16.offset, opcode);
+	}
+
+	hi16Entries.clear();
+	return result;
+}
+
+bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+{
 	unsigned int op = data.opcode;
+	bool result = true;
+
 	switch (type)
 	{
 	case R_MIPS_26: //j, jal
@@ -21,18 +44,27 @@ bool MipsElfRelocator::relocateOpcode(int type, RelocationData& data)
 		op += (int) data.relocationBase;
 		break;
 	case R_MIPS_HI16:
-		p = (op & 0xFFFF) + (int) data.relocationBase;
-		op = (op&0xffff0000) | (((p >> 16) + ((p & 0x8000) != 0)) & 0xFFFF);
+		hi16Entries.emplace_back(data.opcodeOffset, data.relocationBase, data.opcode);
 		break;
 	case R_MIPS_LO16:
+		if (!processHi16Entries(op, data.relocationBase, actions, errors))
+			result = false;
 		op = (op&0xffff0000) | (((op&0xffff)+data.relocationBase)&0xffff);
 		break;
 	default:
-		data.errorMessage = formatString(L"Unknown MIPS relocation type %d",type);
+		errors.emplace_back(formatString(L"Unknown MIPS relocation type %d",type));
 		return false;
 	}
 
-	data.opcode = op;
+	actions.emplace_back(data.opcodeOffset, op);
+	return result;
+}
+
+bool MipsElfRelocator::finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+{
+	// This shouldn't happen. If it does, relocate as if there was no lo16 opcode
+	if (!hi16Entries.empty())
+		return processHi16Entries(0, hi16Entries.front().relocationBase, actions, errors);
 	return true;
 }
 

@@ -438,10 +438,13 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 	{
 		// relocate
 		ByteArray sectionData = seg.data;
+
+		std::vector<RelocationAction> relocationActions;
 		for (PsxRelocation& rel: seg.relocations)
 		{
 			RelocationData relData;
 			int pos = rel.segmentOffset;
+			relData.opcodeOffset = pos;
 			relData.opcode = sectionData.getDoubleWord(pos);
 
 			switch (rel.refType)
@@ -453,31 +456,58 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 				relData.relocationBase = relocationOffsets[rel.referenceId] + rel.referencePos+rel.relativeOffset;
 				break;
 			}
-			
+
+			std::vector<std::wstring> errors;
+			bool result = false;
+
 			switch (rel.type)
 			{
 			case PsxRelocationType::WordLiteral:
-				reloc->relocateOpcode(R_MIPS_32,relData);
+				result = reloc->relocateOpcode(R_MIPS_32,relData, relocationActions, errors);
 				break;
 			case PsxRelocationType::UpperImmediate:
-				reloc->relocateOpcode(R_MIPS_HI16,relData);
+				result = reloc->relocateOpcode(R_MIPS_HI16,relData, relocationActions, errors);
 				break;
 			case PsxRelocationType::LowerImmediate:
-				reloc->relocateOpcode(R_MIPS_LO16,relData);
+				result = reloc->relocateOpcode(R_MIPS_LO16,relData, relocationActions, errors);
 				break;
 			case PsxRelocationType::FunctionCall:
-				reloc->relocateOpcode(R_MIPS_26,relData);
+				result = reloc->relocateOpcode(R_MIPS_26,relData, relocationActions, errors);
 				break;
 			}
 
-			sectionData.replaceDoubleWord(pos,relData.opcode);
+			if (!result)
+			{
+				for (const std::wstring& error : errors)
+				{
+					Logger::queueError(Logger::Error, error);
+				}
+				error = true;
+			}
+		}
+
+		// finish any dangling relocations
+		std::vector<std::wstring> errors;
+		if (!reloc->finish(relocationActions, errors))
+		{
+			for (const std::wstring& error : errors)
+			{
+				Logger::queueError(Logger::Error, error);
+			}
+			error = true;
+		}
+
+		// now actually write the relocated values
+		for (const RelocationAction& action : relocationActions)
+		{
+			sectionData.replaceDoubleWord(action.offset, action.newValue);
 		}
 
 		size_t arrayStart = dataStart+relocationOffsets[seg.id]-start;
 		memcpy(outputData.data(arrayStart),sectionData.data(),sectionData.size());
 	}
 
-	return true;
+	return !error;
 }
 
 bool PsxRelocator::relocate(int& memoryAddress)

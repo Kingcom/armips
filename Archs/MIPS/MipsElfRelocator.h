@@ -20,8 +20,21 @@ enum {
 class MipsElfRelocator: public IElfRelocator
 {
 public:
-	virtual int expectedMachine() const;
-	virtual bool relocateOpcode(int type, RelocationData& data);
-	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType);
-	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
+	int expectedMachine() const override;
+	bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) override;
+	bool finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) override;
+	void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) override;
+	std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) override;
+private:
+	bool processHi16Entries(uint32_t lo16Opcode, int64_t lo16RelocationBase, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors);
+
+	struct Hi16Entry
+	{
+		Hi16Entry(int64_t offset, int64_t relocationBase, uint32_t opcode) : offset(offset), relocationBase(relocationBase), opcode(opcode) {}
+		int64_t offset;
+		int64_t relocationBase;
+		uint32_t opcode;
+	};
+
+	std::vector<Hi16Entry> hi16Entries;
 };

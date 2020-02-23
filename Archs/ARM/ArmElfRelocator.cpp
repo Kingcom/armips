@@ -29,22 +29,23 @@ int ArmElfRelocator::expectedMachine() const
 	A = addend
 */
 
-bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
+bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
 {
 	int t = (data.targetSymbolType == STT_FUNC && data.targetSymbolInfo != 0) ? 1 : 0;
 	int p = (int) data.opcodeOffset;
 	int s = (int) data.relocationBase;
 
+	uint32_t opcode = data.opcode;
 	switch (type)
 	{
 	case R_ARM_ABS32:		// (S + A) | T
 	case R_ARM_TARGET1:
-		data.opcode = (int) (data.opcode + data.relocationBase) | t;
+		opcode = (int) (opcode + data.relocationBase) | t;
 		break;
-	case R_ARM_THM_CALL:	// ((S + A) | T) – P
+	case R_ARM_THM_CALL:	// ((S + A) | T) - P
 		{
-			unsigned short first = data.opcode & 0xFFFF;
-			unsigned short second = (data.opcode >> 16) & 0xFFFF;
+			unsigned short first = opcode & 0xFFFF;
+			unsigned short second = (opcode >> 16) & 0xFFFF;
 			int opField = ((first & 0x7FF) << 11) | (second & 0x7FF);
 			int a = signExtend(opField << 1,23);
 			int value = (s+a) - p;
@@ -56,19 +57,19 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 			{
 				if (data.relocationBase % 2)
 				{
-					data.errorMessage = L"Branch target must be halfword aligned";
+					errors.emplace_back(L"Branch target must be halfword aligned");
 					return false;
 				}
 			} else {
 				if (arm9 == false)
 				{
-					data.errorMessage = L"Cannot call ARM function from THUMB code without stub";
+					errors.emplace_back(L"Cannot call ARM function from THUMB code without stub");
 					return false;
 				}
 
 				if (data.relocationBase % 4)
 				{
-					data.errorMessage = L"Branch target must be word aligned";
+					errors.emplace_back(L"Branch target must be word aligned");
 					return false;
 				}
 				
@@ -77,22 +78,22 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 
 			if (abs(value) >= 0x400000)
 			{
-				data.errorMessage = formatString(L"Branch target %08X out of range",data.relocationBase);
+				errors.emplace_back(formatString(L"Branch target %08X out of range",data.relocationBase));
 				return false;
 			}
 
 			value >>= 1;
 			first |= (value >> 11) & 0x7FF;
 			second |= value & 0x7FF;
-			data.opcode = first | (second << 16);
+			opcode = first | (second << 16);
 		}
 		break;
 	case R_ARM_CALL:		// ((S + A) | T) – P
 	case R_ARM_JUMP24:		// ((S + A) | T) – P
 		{
-			int condField = (data.opcode >> 28) & 0xF;
-			int opField = (data.opcode & 0xFFFFFF) << 2;
-			data.opcode &= ~0xFFFFFF;
+			int condField = (opcode >> 28) & 0xF;
+			int opField = (opcode & 0xFFFFFF) << 2;
+			opcode &= ~0xFFFFFF;
 
 			int a = signExtend(opField,26);
 			int value = (s+a) - p;
@@ -101,53 +102,54 @@ bool ArmElfRelocator::relocateOpcode(int type, RelocationData& data)
 			{
 				if (data.relocationBase % 2)
 				{
-					data.errorMessage = L"Branch target must be halfword aligned";
+					errors.emplace_back(L"Branch target must be halfword aligned");
 					return false;
 				}
 
 				if (type == R_ARM_JUMP24)
 				{
-					data.errorMessage = L"Cannot jump from ARM to THUMB without link";
+					errors.emplace_back(L"Cannot jump from ARM to THUMB without link");
 					return false;
 				}
 
 				if (arm9 == false)
 				{
-					data.errorMessage = L"Cannot call THUMB function from ARM code without stub";
+					errors.emplace_back(L"Cannot call THUMB function from ARM code without stub");
 					return false;
 				}
 
 				if (condField != 0xE)
 				{
-					data.errorMessage = L"Cannot convert conditional bl into blx";
+					errors.emplace_back(L"Cannot convert conditional bl into blx");
 					return false;
 				}
 
-				data.opcode = 0xFA000000;
+				opcode = 0xFA000000;
 				if (value & 2)
-					data.opcode |= (1 << 24);
+					opcode |= (1 << 24);
 			} else {
 				if (data.relocationBase % 4)
 				{
-					data.errorMessage = L"Branch target must be word aligned";
+					errors.emplace_back(L"Branch target must be word aligned");
 					return false;
 				}
 			}
 			
 			if (abs(value) >= 0x2000000)
 			{
-				data.errorMessage = formatString(L"Branch target %08X out of range",data.relocationBase);
+				errors.emplace_back(formatString(L"Branch target %08X out of range",data.relocationBase));
 				return false;
 			}
 
-			data.opcode |= (value >> 2) & 0xFFFFFF;
+			opcode |= (value >> 2) & 0xFFFFFF;
 		}
 		break;
 	default:
-		data.errorMessage = formatString(L"Unknown ARM relocation type %d",type);
+		errors.emplace_back(formatString(L"Unknown ARM relocation type %d",type));
 		return false;
 	}
 
+	actions.emplace_back(data.opcodeOffset, opcode);
 	return true;
 }
 
