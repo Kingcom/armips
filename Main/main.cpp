@@ -15,14 +15,14 @@ int wmain(int argc, wchar_t* argv[])
 	std::wstring name;
 
 	if (argc < 2)
-		return !runTests(L"Tests");
+		return !runTests(L"Tests", argv[0]);
 	else
-		return !runTests(argv[1]);
+		return !runTests(argv[1], argv[0]);
 #endif
 
 	StringList arguments = getStringListFromArray(argv,argc);
 	
-	runFromCommandLine(arguments);
+	return runFromCommandLine(arguments);
 }
 
 #ifndef _WIN32
