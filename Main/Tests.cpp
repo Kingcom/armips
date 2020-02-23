@@ -164,7 +164,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		
 		// first word is error code, rest is arguments
 		expectedRetVal = std::stoi(args[0]);
-		args.erase(args.begin());
+		args[0] = this->executableName;
 	}
 	else
 	{
@@ -242,8 +242,10 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	return result;
 }
 
-bool TestRunner::runTests(const std::wstring& dir)
+bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executableName)
 {
+	this->executableName = executableName;
+
 	StringList tests = getTestsList(dir);
 	if (tests.empty())
 	{
@@ -285,8 +287,8 @@ bool TestRunner::runTests(const std::wstring& dir)
 	return successCount == tests.size();
 }
 
-bool runTests(const std::wstring& dir)
+bool runTests(const std::wstring& dir, const std::wstring& executableName)
 {
 	TestRunner runner;
-	return runner.runTests(dir);
+	return runner.runTests(dir, executableName);
 }

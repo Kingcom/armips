@@ -12,9 +12,11 @@
 class TestRunner
 {
 public:
-	bool runTests(const std::wstring& dir);
+	bool runTests(const std::wstring& dir, const std::wstring& executableName);
 private:
 	enum class ConsoleColors { White, Red, Green };
+
+	std::wstring executableName;
 	
 	StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/");
 	bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString);
@@ -31,4 +33,4 @@ private:
 
 };
 
-bool runTests(const std::wstring& dir);
+bool runTests(const std::wstring& dir, const std::wstring& executableName);

@@ -31,7 +31,7 @@ static void printUsage(std::wstring executableName)
 
 static bool parseArguments(const StringList& arguments, ArmipsArguments& settings)
 {
-	size_t argpos = 0;
+	size_t argpos = 1;
 	bool readflags = true;
 	while (argpos < arguments.size())
 	{
