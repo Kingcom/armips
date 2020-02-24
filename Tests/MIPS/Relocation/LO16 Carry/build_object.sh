@@ -1,1 +1,1 @@
-clang -target mipsel test.asm -c
+clang -target mipsel object_code.s -c

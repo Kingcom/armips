@@ -3,6 +3,6 @@
 
 .definelabel value,10007FFFh
 
-.importobj "test.o"
+.importobj "object_code.o"
 
 .close
