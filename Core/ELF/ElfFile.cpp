@@ -412,7 +412,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 				symTab = section;
 				break;
 			case SHT_STRTAB:
-				if (i != fileHeader.e_shstrndx)
+				if (!strTab || i != fileHeader.e_shstrndx)
 				{
 					strTab = section;
 				}
