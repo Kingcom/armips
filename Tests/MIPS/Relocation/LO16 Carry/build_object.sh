@@ -1,0 +1,1 @@
+clang -target mipsel test.asm -c
