@@ -2,7 +2,7 @@
 ShiftInvalid.asm(6) error: Immediate value 0x20 out of range
 ShiftInvalid.asm(7) error: Immediate value 0x21 out of range
 ShiftInvalid.asm(8) error: Immediate value 0x21 out of range
-ShiftInvalid.asm(11) error: Shift amount out of range
-ShiftInvalid.asm(12) error: Shift amount out of range
-ShiftInvalid.asm(13) error: Shift amount out of range
-ShiftInvalid.asm(14) error: Shift amount out of range
+ShiftInvalid.asm(11) error: Shift amount 0x20 out of range
+ShiftInvalid.asm(12) error: Shift amount 0x20 out of range
+ShiftInvalid.asm(13) error: Shift amount 0x21 out of range
+ShiftInvalid.asm(14) error: Shift amount 0x21 out of range
