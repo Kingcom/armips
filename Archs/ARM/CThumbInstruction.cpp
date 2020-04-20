@@ -188,7 +188,10 @@ void CThumbInstruction::Encode() const
 		switch (Opcode.type)
 		{
 		case THUMB_TYPE1:	// THUMB.1: move shifted register
-			encoding |= (Vars.Immediate << 6);
+			if ((Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) && (Vars.Immediate == 0))
+			{
+				encoding = 0x0000;
+			}
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;
