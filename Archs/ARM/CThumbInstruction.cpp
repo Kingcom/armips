@@ -143,7 +143,7 @@ bool CThumbInstruction::Validate()
 		{
 			if (abs(Vars.Immediate) >= (1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Immediate value 0x%02X out of range",Vars.Immediate);
 				return false;
 			}
 			Vars.Immediate &= (1 << Vars.ImmediateBitLen)-1;
