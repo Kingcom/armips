@@ -86,7 +86,7 @@ bool CArmInstruction::Validate()
 		else if (num == 32 && mode == ARM_SHIFT_ASR) num = 0;
 		else if (num == 32 && mode == ARM_SHIFT_LSL)
 		{
-			Logger::queueError(Logger::Error,L"Invalid shift mode");
+			Logger::queueError(Logger::Error,L"Shift amount 0x%02X out of range",num);
 			return false;
 		} else if (mode == ARM_SHIFT_RRX)
 		{
@@ -101,7 +101,7 @@ bool CArmInstruction::Validate()
 
 		if (num > 32 || num < 0)
 		{
-			Logger::queueError(Logger::Error,L"Shift amount out of range");
+			Logger::queueError(Logger::Error,L"Shift amount 0x%02X out of range",num);
 			return false;
 		}
 

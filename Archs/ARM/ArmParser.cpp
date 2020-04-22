@@ -249,7 +249,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 		}
 	}
 
-	if (stringValue == L"lsl")
+	if (stringValue == L"lsl" || stringValue == L"asl")
 		vars.Shift.Type = 0;
 	else if (stringValue == L"lsr")
 		vars.Shift.Type = 1;

@@ -141,12 +141,12 @@ bool CThumbInstruction::Validate()
 
 		if (Vars.ImmediateBitLen != 32)
 		{
-			if (abs(Vars.Immediate) >= (1 << Vars.ImmediateBitLen))
+			int max = (1 << Vars.ImmediateBitLen) - ((Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 0 : 1);
+			if (abs(Vars.Immediate) > max)
 			{
-				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Immediate value 0x%02X out of range",Vars.Immediate);
 				return false;
 			}
-			Vars.Immediate &= (1 << Vars.ImmediateBitLen)-1;
 		}
 	}
 	
@@ -188,7 +188,11 @@ void CThumbInstruction::Encode() const
 		switch (Opcode.type)
 		{
 		case THUMB_TYPE1:	// THUMB.1: move shifted register
-			encoding |= (Vars.Immediate << 6);
+			if ((Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) && (Vars.Immediate == 0))
+			{
+				encoding = 0x0000;
+			}
+			encoding |= ((Vars.Immediate & 0x1F) << 6);
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;

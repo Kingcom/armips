@@ -37,6 +37,7 @@
 #define THUMB_DS					0x00004000	// rs = rd
 #define THUMB_PCADD					0x00008000
 #define THUMB_NEGATIVE_IMMEDIATE	0x00010000
+#define THUMB_RIGHTSHIFT_IMMEDIATE	0x00020000
 
 typedef struct {
 	const char* name;
