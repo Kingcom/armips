@@ -126,6 +126,9 @@ struct ExpressionValue
 
 class Label;
 
+struct ExpressionFunctionEntry;
+struct ExpressionLabelFunctionEntry;
+
 class ExpressionInternal
 {
 public:
@@ -149,6 +152,8 @@ private:
 	void allocate(size_t count);
 	void deallocate();
 	std::wstring formatFunctionCall();
+	ExpressionValue executeExpressionFunctionCall(const ExpressionFunctionEntry& entry);
+	ExpressionValue executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry);
 	ExpressionValue executeFunctionCall();
 	bool checkParameterCount(size_t min, size_t max);
 

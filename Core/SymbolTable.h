@@ -21,6 +21,9 @@ public:
 	const std::wstring getOriginalName() { return originalName.empty() ? name : originalName; }
 	int64_t getValue() { return value; };
 	void setValue(int64_t val) { value = val; };
+	bool hasPhysicalValue() { return physicalValueSet; }
+	int64_t getPhysicalValue() { return physicalValue; }
+	void setPhysicalValue(int64_t val) { physicalValue = val; physicalValueSet = true; }
 	bool isDefined() { return defined; };
 	void setDefined(bool b) { defined = b; };
 	bool isData() { return data; };
@@ -34,6 +37,8 @@ public:
 private:
 	std::wstring name, originalName;
 	int64_t value;
+	int64_t physicalValue;
+	bool physicalValueSet = false;
 	bool defined;
 	bool data;
 	bool updateInfo;

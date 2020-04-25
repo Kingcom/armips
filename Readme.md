@@ -235,8 +235,11 @@ Below is a table of functions built into the assembler that can be used with the
 | `endianness()` | current endianness as string, e.g. `"big"` or `"little"` |
 | `outputname()` | currently opened output filename, exactly as written in `.create` or `.open` directive |
 | `org()` | current memory address (like `.`) |
+| `org(label)` | memory address of `label` |
 | `orga()` | current absolute file address |
+| `orga(label)` | absolute file address of `label`|
 | `headersize()` | current header size (displacement of memory address against absolute file address) |
+| `headersize(label)` | header size of `label` (displacement of memory address against absolute file address) |
 | `defined(symbol)` | `1` if `symbol` is a defined symbol, `0` otherwise |
 | `fileexists(file)` | `1` if `file` exists, `0` otherwise |
 | `filesize(file)` | size of `file` in bytes |

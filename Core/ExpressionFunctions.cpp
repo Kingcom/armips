@@ -82,36 +82,6 @@ ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vecto
 	return ExpressionValue(value);
 }
 
-ExpressionValue expFuncOrg(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	if(!g_fileManager->hasOpenFile())
-	{
-		Logger::queueError(Logger::Error,L"org: no file opened");
-		return ExpressionValue();
-	}
-	return ExpressionValue(g_fileManager->getVirtualAddress());
-}
-
-ExpressionValue expFuncOrga(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	if(!g_fileManager->hasOpenFile())
-	{
-		Logger::queueError(Logger::Error,L"orga: no file opened");
-		return ExpressionValue();
-	}
-	return ExpressionValue(g_fileManager->getPhysicalAddress());
-}
-
-ExpressionValue expFuncHeaderSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
-{
-	if(!g_fileManager->hasOpenFile())
-	{
-		Logger::queueError(Logger::Error,L"headersize: no file opened");
-		return ExpressionValue();
-	}
-	return ExpressionValue(g_fileManager->getHeaderSize());
-}
-
 ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
@@ -561,32 +531,94 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	return ExpressionValue(result);
 }
 
-ExpressionValue expFuncDefined(ExpressionInternal* exp)
+ExpressionValue expLabelFuncDefined(const std::wstring &funcName, const std::vector<std::shared_ptr<Label>> &parameters)
 {
-	if (exp == nullptr || exp->isIdentifier() == false)
+	if (parameters.empty() || !parameters.front())
 	{
-		Logger::queueError(Logger::Error,L"Invalid parameter 1 for defined: expecting identifier");
+		Logger::queueError(Logger::Error,L"%s: Invalid parameters", funcName);
 		return ExpressionValue();
 	}
 
-	const std::wstring& name = exp->getStringValue();
-	std::shared_ptr<Label> label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
-
-	if (label == nullptr)
-		return ExpressionValue();
-
-	return ExpressionValue(label->isDefined() ? INT64_C(1) : INT64_C(0));
+	return ExpressionValue(parameters.front()->isDefined() ? INT64_C(1) : INT64_C(0));
 }
 
+ExpressionValue expLabelFuncOrg(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>>& parameters)
+{
+	// return physical address of label parameter
+	if (parameters.size())
+	{
+		Label* label = parameters.front().get();
+		if (!label)
+			return ExpressionValue();
 
+		return ExpressionValue(parameters.front()->getValue());
+	}
+
+	if(!g_fileManager->hasOpenFile())
+	{
+		Logger::queueError(Logger::Error,L"%s: no file opened", funcName);
+		return ExpressionValue();
+	}
+	return ExpressionValue(g_fileManager->getVirtualAddress());
+}
+
+ExpressionValue expLabelFuncOrga(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>>& parameters)
+{
+	// return physical address of label parameter
+	if (parameters.size())
+	{
+		Label* label = parameters.front().get();
+		if (!label)
+			return ExpressionValue();
+
+		if (!label->hasPhysicalValue())
+		{
+			Logger::queueError(Logger::Error,L"%s: parameter %s has no physical address", funcName, label->getName() );
+			return ExpressionValue();
+		}
+
+		return ExpressionValue(parameters.front()->getPhysicalValue());
+	}
+
+	// return current physical address otherwise
+	if(!g_fileManager->hasOpenFile())
+	{
+		Logger::queueError(Logger::Error,L"%s: no file opened", funcName);
+		return ExpressionValue();
+	}
+	return ExpressionValue(g_fileManager->getPhysicalAddress());
+}
+
+ExpressionValue expLabelFuncHeaderSize(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>>& parameters)
+{
+	// return difference between physical and virtual address of label parameter
+	if (parameters.size())
+	{
+		Label* label = parameters.front().get();
+		if (!label)
+			return ExpressionValue();
+
+		if (!label->hasPhysicalValue())
+		{
+			Logger::queueError(Logger::Error,L"%s: parameter %s has no physical address", funcName, label->getName() );
+			return ExpressionValue();
+		}
+
+		return ExpressionValue(label->getValue() - label->getPhysicalValue());
+	}
+
+	if(!g_fileManager->hasOpenFile())
+	{
+		Logger::queueError(Logger::Error,L"headersize: no file opened");
+		return ExpressionValue();
+	}
+	return ExpressionValue(g_fileManager->getHeaderSize());
+}
 
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,			0,	0,	ExpFuncSafety::Safe } },
 	{ L"endianness",	{ &expFuncEndianness,		0,	0,	ExpFuncSafety::Unsafe } },
 	{ L"outputname",	{ &expFuncOutputName,		0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"org",			{ &expFuncOrg,				0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"orga",			{ &expFuncOrga,				0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"headersize",	{ &expFuncHeaderSize,		0,	0,	ExpFuncSafety::Unsafe } },
 	{ L"fileexists",	{ &expFuncFileExists,		1,	1,	ExpFuncSafety::Safe } },
 	{ L"filesize",		{ &expFuncFileSize,			1,	1,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"tostring",		{ &expFuncToString,			1,	1,	ExpFuncSafety::Safe } },
@@ -620,4 +652,12 @@ const ExpressionFunctionMap expressionFunctions = {
 	{ L"reads32",		{ &expFuncRead<int32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"reads64",		{ &expFuncRead<int64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
 	{ L"readascii",		{ &expFuncReadAscii,		1,	3,	ExpFuncSafety::ConditionalUnsafe } },
+};
+
+extern const ExpressionLabelFunctionMap expressionLabelFunctions =
+{
+	{ L"defined",    { &expLabelFuncDefined,      1, 1, ExpFuncSafety::Unsafe } },
+	{ L"org",        { &expLabelFuncOrg,          0, 1, ExpFuncSafety::Unsafe } },
+	{ L"orga",       { &expLabelFuncOrga,         0, 1, ExpFuncSafety::Unsafe } },
+	{ L"headersize", { &expLabelFuncHeaderSize,   0, 1, ExpFuncSafety::Unsafe } },
 };

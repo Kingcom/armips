@@ -9,6 +9,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 	const std::wstring& funcName, bool optional);
 
 using ExpressionFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
+using ExpressionLabelFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>> &);
 
 enum class ExpFuncSafety
 {
@@ -28,9 +29,17 @@ struct ExpressionFunctionEntry
 	ExpFuncSafety safety;
 };
 
-using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;;
+struct ExpressionLabelFunctionEntry
+{
+	ExpressionLabelFunction function;
+	size_t minParams;
+	size_t maxParams;
+	ExpFuncSafety safety;
+};
+
+
+using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;
+using ExpressionLabelFunctionMap =  std::map<std::wstring, const ExpressionLabelFunctionEntry>;
 
 extern const ExpressionFunctionMap expressionFunctions;
-
-ExpressionValue expFuncDefined(ExpressionInternal* exp);
-
+extern const ExpressionLabelFunctionMap expressionLabelFunctions;
