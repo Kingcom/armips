@@ -552,34 +552,11 @@ bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
 	return true;
 }
 
-ExpressionValue ExpressionInternal::executeFunctionCall()
+ExpressionValue ExpressionInternal::executeExpressionFunctionCall(const ExpressionFunctionEntry& entry)
 {
-	ExpressionValue invalid;
-
-	// handle defined(x) seperately, it's kind of a special case
-	if (strValue == L"defined")
-	{
-		if (checkParameterCount(1,1) == false)
-			return invalid;
-
-		return expFuncDefined(children[0]);
-	}
-
-	// find function, check parameter counts
-	auto it = expressionFunctions.find(strValue);
-	if (it == expressionFunctions.end())
-	{
-		auto& archExpressionFunctions = Arch->getExpressionFunctions();
-		it = archExpressionFunctions.find(strValue);
-		if (it == archExpressionFunctions.end())
-		{
-			Logger::queueError(Logger::Error,L"Unknown function \"%s\"",strValue);
-			return invalid;
-		}
-	}
-
-	if (checkParameterCount(it->second.minParams,it->second.maxParams) == false)
-		return invalid;
+	// check parameters
+	if (!checkParameterCount(entry.minParams, entry.maxParams))
+		return {};
 
 	// evaluate parameters
 	std::vector<ExpressionValue> params;
@@ -588,9 +565,9 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	for (size_t i = 0; i < childrenCount; i++)
 	{
 		ExpressionValue result = children[i]->evaluate();
-		if (result.isValid() == false)
+		if (!result.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", strValue, i+1);
 			return result;
 		}
 
@@ -598,19 +575,98 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	}
 
 	// execute
-	return it->second.function(strValue,params);
+	return entry.function(strValue, params);
+}
+
+ExpressionValue ExpressionInternal::executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry)
+{
+	// check parameters
+	if (!checkParameterCount(entry.minParams, entry.maxParams))
+		return {};
+
+	// evaluate parameters
+	std::vector<std::shared_ptr<Label>> params;
+	params.reserve(childrenCount);
+
+	for (size_t i = 0; i < childrenCount; i++)
+	{
+		ExpressionInternal *exp = children[i];
+		if (!exp || !exp->isIdentifier())
+		{
+			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d, expecting identifier", strValue, i+1);
+			return {};
+		}
+
+		const std::wstring& name = exp->getStringValue();
+		std::shared_ptr<Label> label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
+		params.push_back(label);
+	}
+
+	// execute
+	return entry.function(strValue, params);
+}
+
+ExpressionValue ExpressionInternal::executeFunctionCall()
+{
+	// try expression functions
+	auto expFuncIt = expressionFunctions.find(strValue);
+	if (expFuncIt != expressionFunctions.end())
+		return executeExpressionFunctionCall(expFuncIt->second);
+
+	// try architecture specific expression functions
+	auto& archExpressionFunctions = Arch->getExpressionFunctions();
+	expFuncIt = archExpressionFunctions.find(strValue);
+	if (expFuncIt != archExpressionFunctions.end())
+		return executeExpressionFunctionCall(expFuncIt->second);
+
+	// try expression label functions
+	auto expLabelFuncIt = expressionLabelFunctions.find(strValue);
+	if (expLabelFuncIt != expressionLabelFunctions.end())
+		return executeExpressionLabelFunctionCall(expLabelFuncIt->second);
+
+	// error
+	Logger::queueError(Logger::Error, L"Unknown function \"%s\"", strValue);
+	return {};
 }
 
 bool isExpressionFunctionSafe(const std::wstring& name, bool inUnknownOrFalseBlock)
 {
-	auto it = expressionFunctions.find(name);
-	if (it == expressionFunctions.end())
-		return name != L"defined";
+	// expression functions may be unsafe, others are safe
+	ExpFuncSafety safety = ExpFuncSafety::Unsafe;
+	bool found = false;
 
-	if (inUnknownOrFalseBlock && it->second.safety == ExpFuncSafety::ConditionalUnsafe)
+	auto it = expressionFunctions.find(name);
+	if (it != expressionFunctions.end())
+	{
+		safety = it->second.safety;
+		found = true;
+	}
+
+	if (!found)
+	{
+		auto& archExpressionFunctions = Arch->getExpressionFunctions();
+		it = archExpressionFunctions.find(name);
+		if ( it != archExpressionFunctions.end() )
+		{
+			safety = it->second.safety;
+			found = true;
+		}
+	}
+
+	if (!found)
+	{
+		auto labelIt = expressionLabelFunctions.find(name);
+		if (labelIt != expressionLabelFunctions.end())
+		{
+			safety = labelIt->second.safety;
+			found = true;
+		}
+	}
+
+	if (inUnknownOrFalseBlock && safety == ExpFuncSafety::ConditionalUnsafe)
 		return false;
 
-	return it->second.safety != ExpFuncSafety::Unsafe;
+	return safety != ExpFuncSafety::Unsafe;
 }
 
 bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)

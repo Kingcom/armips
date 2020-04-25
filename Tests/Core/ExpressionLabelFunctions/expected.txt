@@ -1,0 +1,6 @@
+﻿ExpressionLabelFunctions.asm(8) notice: org(label1): 0000000000001100
+ExpressionLabelFunctions.asm(9) notice: orga(label1): 0000000000000100
+ExpressionLabelFunctions.asm(10) notice: headersize(label1): 0000000000001000
+ExpressionLabelFunctions.asm(14) notice: org(): 0000000000002800
+ExpressionLabelFunctions.asm(15) notice: orga(): 0000000000001800
+ExpressionLabelFunctions.asm(16) notice: headersize(): 0000000000001000

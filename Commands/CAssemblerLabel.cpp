@@ -54,23 +54,34 @@ bool CAssemblerLabel::Validate()
 		result = true;
 	}
 	
-	int64_t value;
+	bool hasPhysicalValue = false;
+	int64_t virtualValue = 0;
+	int64_t physicalValue = 0;
+
 	if (labelValue.isLoaded())
 	{
 		// label value is given by expression
-		if (labelValue.evaluateInteger(value) == false)
+		if (labelValue.evaluateInteger(virtualValue) == false)
 		{
 			Logger::printError(Logger::Error, L"Invalid expression");
 			return result;
 		}
 	} else {
 		// label value is given by current address
-		value = g_fileManager->getVirtualAddress();
+		virtualValue = g_fileManager->getVirtualAddress();
+		physicalValue = g_fileManager->getPhysicalAddress();
+		hasPhysicalValue = true;
 	}
 
-	if (label->getValue() != value)
+	if (label->getValue() != virtualValue)
 	{
-		label->setValue(value);
+		label->setValue(virtualValue);
+		result = true;
+	}
+
+	if (hasPhysicalValue && (!label->hasPhysicalValue() || physicalValue != label->getPhysicalValue()))
+	{
+		label->setPhysicalValue(physicalValue);
 		result = true;
 	}
 
