@@ -259,6 +259,8 @@ bool ExpressionValue::operator<(const ExpressionValue& other) const
 		return intValue < other.floatValue;
 	case ExpressionValueCombination::FF:
 		return floatValue < other.floatValue;
+	case ExpressionValueCombination::SS:
+		return strValue < other.strValue;
 	default:
 		break;
 	}
@@ -278,6 +280,8 @@ bool ExpressionValue::operator<=(const ExpressionValue& other) const
 		return intValue <= other.floatValue;
 	case ExpressionValueCombination::FF:
 		return floatValue <= other.floatValue;
+	case ExpressionValueCombination::SS:
+		return strValue <= other.strValue;
 	default:
 		break;
 	}
@@ -287,12 +291,12 @@ bool ExpressionValue::operator<=(const ExpressionValue& other) const
 
 bool ExpressionValue::operator>(const ExpressionValue& other) const
 {
-	return !(*this <= other);
+	return other < *this;
 }
 
 bool ExpressionValue::operator>=(const ExpressionValue& other) const
 {
-	return !(*this < other);
+	return other <= *this;
 }
 
 bool ExpressionValue::operator==(const ExpressionValue& other) const
@@ -359,6 +363,22 @@ ExpressionValue ExpressionValue::operator|(const ExpressionValue& other) const
 	return result;
 }
 
+ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
+{
+	ExpressionValue result;
+	switch (getValueCombination(type,other.type))
+	{
+	case ExpressionValueCombination::II:
+		result.type = ExpressionValueType::Integer;
+		result.intValue = intValue ^ other.intValue;
+		break;
+	default:
+		break;
+	}
+
+	return result;
+}
+
 ExpressionValue ExpressionValue::operator&&(const ExpressionValue& other) const
 {
 	ExpressionValue result;
@@ -403,22 +423,6 @@ ExpressionValue ExpressionValue::operator||(const ExpressionValue& other) const
 		break;
 	case ExpressionValueCombination::FF:
 		result.floatValue = floatValue || other.floatValue;
-		break;
-	default:
-		break;
-	}
-
-	return result;
-}
-
-ExpressionValue ExpressionValue::operator^(const ExpressionValue& other) const
-{
-	ExpressionValue result;
-	switch (getValueCombination(type,other.type))
-	{
-	case ExpressionValueCombination::II:
-		result.type = ExpressionValueType::Integer;
-		result.intValue = intValue ^ other.intValue;
 		break;
 	default:
 		break;

@@ -106,6 +106,13 @@ check	1 < 1, 0
 check	2.0 < 2.1, 1
 check	2.1 < 2.0, 0
 check	2.0 < 2.0, 0
+check	1 < 1.5, 1
+check	2 < 1.5, 0
+check	1.5 < 2, 1
+check	1.5 < 1, 0
+check	(0.0/0) < (0.0/0), 0
+check	"a" < "b", 1
+check	"b" < "a", 0
 
 check	1 > 2, 0
 check	2 > 1, 1
@@ -115,22 +122,46 @@ check	1 > 1, 0
 check	2.0 > 2.1, 0
 check	2.1 > 2.0, 1
 check	2.0 > 2.0, 0
+check	1 > 1.5, 0
+check	2 > 1.5, 1
+check	1.5 > 2, 0
+check	1.5 > 1, 1
+check	(0.0/0) > (0.0/0), 0
+check	"a" > "b", 0
+check	"a" < "b", 1
 
 check	1 >= 1, 1
+check	1 >= 2, 0
 check	2.0 >= 2.0, 1
+check	2.0 >= 2, 1
+check	(0.0/0) >= (0.0/0), 0
+check	"a" >= "a", 1
 
 check	1 <= 1, 1
+check	2 <= 1, 0
 check	2.0 <= 2.0, 1
+check	2.0 <= 2, 1
+check	(0.0/0) <= (0.0/0), 0
+check	"a" <= "a", 1
 
 check	2 == 1, 0
 check	2 == 2, 1
 check	2.0 == 1.0, 0
 check	2.0 == 2.0, 1
+check	2.0 == 1, 0
+check	2.0 == 2, 1
+check	(0.0/0) == (0.0/0), 0
+check	"a" == "b", 0
+check	"a" == "a", 1
 
 check	2 != 1, 1
 check	2 != 2, 0
 check	2.0 != 1.0, 1
 check	2.0 != 2.0, 0
+check	2.0 != 2, 0
+check	(0.0/0) != (0.0/0), 1
+check	"a" != "b", 1
+check	"a" != "a", 0
 
 ; bitwise operations
 check	~1,0xFFFFFFFFFFFFFFFE
