@@ -32,7 +32,7 @@ bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos 
 enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
 FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
 std::wstring getCurrentDirectory();
-void changeDirectory(const std::wstring& dir);
+bool changeDirectory(const std::wstring& dir);
 bool isAbsolutePath(const std::wstring& path);
 
 #ifndef ARRAY_SIZE

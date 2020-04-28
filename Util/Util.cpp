@@ -355,13 +355,13 @@ std::wstring getCurrentDirectory()
 #endif
 }
 
-void changeDirectory(const std::wstring& dir)
+bool changeDirectory(const std::wstring& dir)
 {
 #ifdef _WIN32
-	_wchdir(dir.c_str());
+	return _wchdir(dir.c_str()) == 0;
 #else
 	std::string utf8 = convertWStringToUtf8(dir);
-	chdir(utf8.c_str());
+	return chdir(utf8.c_str()) == 0;
 #endif
 }
 

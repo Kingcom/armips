@@ -89,7 +89,11 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			}
 			else if (arguments[argpos] == L"-root" && argpos + 1 < arguments.size())
 			{
-				changeDirectory(arguments[argpos + 1]);
+				if(!changeDirectory(arguments[argpos + 1]))
+				{
+					Logger::printError(Logger::Error, L"Could not open directory '%s'", arguments[argpos + 1]);
+					return false;
+				}
 				argpos += 2;
 			}
 			else if (arguments[argpos] == L"-definelabel" && argpos + 2 < arguments.size())
@@ -148,7 +152,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 
 	if (fileExists(settings.inputFileName) == false)
 	{
-		Logger::printError(Logger::Error, L"File '%s' not found\n", settings.inputFileName);
+		Logger::printError(Logger::Error, L"File '%s' not found", settings.inputFileName);
 		return false;
 	}
 	return true;
