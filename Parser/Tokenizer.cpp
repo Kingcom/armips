@@ -545,7 +545,7 @@ Token FileTokenizer::loadToken()
 		{
 			if (currentLine[end] == '.')
 			{
-				if (isHex || foundExp || foundPoint)
+				if (foundExp || foundPoint)
 					isValid = false;
 				foundPoint = true;
 			} else if (towlower(currentLine[end]) == 'h' && !foundExpSign) {
