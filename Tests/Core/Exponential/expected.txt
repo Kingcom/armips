@@ -25,3 +25,8 @@ Exponential.asm(35) notice: 1248
 Exponential.asm(36) notice: -1220
 Exponential.asm(37) notice: 14
 Exponential.asm(38) notice: 14
+Exponential.asm(39) notice: 1248
+Exponential.asm(40) notice: -1220
+Exponential.asm(41) notice: 5678
+Exponential.asm(42) notice: 5680
+Exponential.asm(43) notice: 5676

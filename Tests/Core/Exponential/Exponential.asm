@@ -36,5 +36,10 @@
 .notice 0xE-label
 .notice 0xE
 .notice 0Eh
+.notice 0Eh+label
+.notice 0Eh-label
+.notice e
+.notice e+2
+.notice e-2
 
 .close
