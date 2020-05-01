@@ -62,6 +62,13 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			{
 				EquationDefinition def;
 				def.name = arguments[argpos + 1];
+
+				if (!checkValidLabelName(def.name))
+				{
+					Logger::printError(Logger::Error, L"Invalid equation name %s", def.name);
+					return false;
+				}
+
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 				def.value = arguments[argpos + 2];
 				settings.equList.push_back(def);
@@ -71,6 +78,13 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			{
 				EquationDefinition def;
 				def.name = arguments[argpos + 1];
+
+				if (!checkValidLabelName(def.name))
+				{
+					Logger::printError(Logger::Error, L"Invalid equation name %s", def.name);
+					return false;
+				}
+
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 				def.value = formatString(L"\"%s\"", arguments[argpos + 2]);
 				settings.equList.push_back(def);
@@ -95,6 +109,13 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 				LabelDefinition def;
 
 				def.originalName = arguments[argpos + 1];
+
+				if (!checkValidLabelName(def.originalName))
+				{
+					Logger::printError(Logger::Error, L"Invalid definelabel name %s", def.originalName);
+					return false;
+				}
+
 				def.name = def.originalName;
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
