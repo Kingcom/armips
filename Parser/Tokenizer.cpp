@@ -58,20 +58,30 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 			size_t index;
 			if (Global.symbolTable.findEquation(stringValue,Global.FileInfo.FileNum,Global.Section,index))
 			{
-				TokenList::iterator insertIt = it;
-				insertIt++;
+				TokenList::iterator nextIt = it;
+				std::advance(nextIt, 1);
 			
 				// check if this is another equ with the same name.
 				// if so, keep equ redefinitions for later error handling
-				if (insertIt != tokens.end() && insertIt->type == TokenType::Equ)
+				if (nextIt != tokens.end() && nextIt->type == TokenType::Equ)
 					break;
 
-				// replace old token with the new tokens
-				// replace the first token manually so that any iterators
-				// are still guaranteed to be valid
-				std::vector<Token>& replacement = equValues[index];
-				(*it) = replacement[0];
-				tokens.insert(insertIt,replacement.begin()+1, replacement.end());
+				// make room for the replacement tokens
+				const std::vector<Token>& replacement = equValues[index];
+				tokens.insert(nextIt, replacement.size()-1, {});
+
+				// insert replacement tokens, while keeping the file info of the original token
+				Token originalToken = *it;
+
+				TokenList::iterator insertIt = it;
+				for (const Token& token: replacement)
+				{
+					(*insertIt) = token;
+					insertIt->line = originalToken.line;
+					insertIt->column = originalToken.column;
+					std::advance(insertIt, 1);
+				}
+
 				replaced = true;
 				continue;
 			}
