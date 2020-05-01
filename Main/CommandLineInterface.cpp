@@ -94,14 +94,14 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			{
 				LabelDefinition def;
 
-				def.name = arguments[argpos + 1];
+				def.originalName = arguments[argpos + 1];
+				def.name = def.originalName;
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
 				int64_t value;
 				if (!stringToInt(arguments[argpos + 2], 0, arguments[argpos + 2].size(), value))
 				{
 					Logger::printError(Logger::Error, L"Invalid definelabel value '%s'\n", arguments[argpos + 2]);
-					printUsage(arguments[0]);
 					return false;
 				}
 				def.value = value;
