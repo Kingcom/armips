@@ -61,15 +61,25 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			else if (arguments[argpos] == L"-equ" && argpos + 2 < arguments.size())
 			{
 				EquationDefinition def;
-				def.name = arguments[argpos + 1];
 
-				if (!checkValidLabelName(def.name))
+				auto originalName = arguments[argpos+1];
+				def.name = originalName;
+				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
+
+				if (!checkValidLabelName(originalName))
 				{
-					Logger::printError(Logger::Error, L"Invalid equation name %s", def.name);
+					Logger::printError(Logger::Error, L"Invalid equation name %s", originalName);
 					return false;
 				}
 
-				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
+				auto it = std::find_if(settings.equList.begin(), settings.equList.end(),
+						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
+				if(it != settings.equList.end())
+				{
+					Logger::printError(Logger::Error, L"Equation name %s defined more than once", originalName);
+					return false;
+				}
+
 				def.value = arguments[argpos + 2];
 				settings.equList.push_back(def);
 				argpos += 3;
@@ -77,15 +87,25 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			else if (arguments[argpos] == L"-strequ" && argpos + 2 < arguments.size())
 			{
 				EquationDefinition def;
-				def.name = arguments[argpos + 1];
 
-				if (!checkValidLabelName(def.name))
+				auto originalName = arguments[argpos+1];
+				def.name = originalName;
+				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
+
+				if (!checkValidLabelName(originalName))
 				{
-					Logger::printError(Logger::Error, L"Invalid equation name %s", def.name);
+					Logger::printError(Logger::Error, L"Invalid equation name %s", originalName);
 					return false;
 				}
 
-				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
+				auto it = std::find_if(settings.equList.begin(), settings.equList.end(),
+						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
+				if(it != settings.equList.end())
+				{
+					Logger::printError(Logger::Error, L"Equation name %s defined more than once", originalName);
+					return false;
+				}
+
 				def.value = formatString(L"\"%s\"", arguments[argpos + 2]);
 				settings.equList.push_back(def);
 				argpos += 3;
@@ -109,20 +129,27 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 				LabelDefinition def;
 
 				def.originalName = arguments[argpos + 1];
+				def.name = def.originalName;
+				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
 				if (!checkValidLabelName(def.originalName))
 				{
-					Logger::printError(Logger::Error, L"Invalid definelabel name %s", def.originalName);
+					Logger::printError(Logger::Error, L"Invalid label name %s", def.originalName);
 					return false;
 				}
 
-				def.name = def.originalName;
-				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
+				auto it = std::find_if(settings.labels.begin(), settings.labels.end(),
+						[&def](LabelDefinition x) -> bool {return def.name == x.name;});
+				if(it != settings.labels.end())
+				{
+					Logger::printError(Logger::Error, L"Label name %s defined more than once", def.originalName);
+					return false;
+				}
 
 				int64_t value;
 				if (!stringToInt(arguments[argpos + 2], 0, arguments[argpos + 2].size(), value))
 				{
-					Logger::printError(Logger::Error, L"Invalid definelabel value '%s'\n", arguments[argpos + 2]);
+					Logger::printError(Logger::Error, L"Invalid label value '%s'\n", arguments[argpos + 2]);
 					return false;
 				}
 				def.value = value;
@@ -177,7 +204,7 @@ int runFromCommandLine(const StringList& arguments, ArmipsArguments settings)
 {
 	if (parseArguments(arguments, settings) == false)
 	{
-		if (!settings.silent)
+		if (arguments.size() > 1 && !settings.silent)
 			Logger::printLine(L"Cannot parse arguments; aborting.");
 
 		return 1;
