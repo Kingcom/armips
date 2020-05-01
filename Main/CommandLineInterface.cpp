@@ -3,16 +3,10 @@
 #include "Core/Assembler.h"
 #include "CommandLineInterface.h"
 
-#if defined(_WIN64) || defined(__x86_64__) || defined(__amd64__)
-#define ARMIPSNAME "ARMIPS64"
-#else
-#define ARMIPSNAME "ARMIPS"
-#endif
-
 static void printUsage(std::wstring executableName)
 {
-	Logger::printLine(L"%s Assembler v%d.%d.%d (%s %s) by Kingcom",
-		ARMIPSNAME, ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
+	Logger::printLine(L"armips assembler v%d.%d.%d (%s %s) by Kingcom",
+		ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
 	Logger::printLine(L"Usage: %s [optional parameters] <FILE>", executableName);
 	Logger::printLine(L"");
 	Logger::printLine(L"Optional parameters:");

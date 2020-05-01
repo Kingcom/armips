@@ -9,11 +9,10 @@ Note: This file is still incomplete, some information is missing or may be outda
 
 ## 1.1 Usage
 
-The assembler is called from the command line. There is both an x86 and an x86-64 version. Depending on the version, the usage is as follows:
+The assembler is called from the command line. The usage is as follows:
 
 ```
 armips code.asm [optional parameters]
-armips64 code.asm [optional parameters]
 ```
 
 `code.asm` is the main file of your assembly code, which can open and include other files.
