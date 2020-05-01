@@ -185,6 +185,8 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 		if (label == nullptr)
 			continue;
 
+		label->setOriginalName(def.originalName);
+
 		if (isLocalSymbol(def.name) == false)
 			Global.Section++;
 

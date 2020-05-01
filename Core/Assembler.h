@@ -11,6 +11,7 @@ enum class ArmipsMode { FILE, MEMORY };
 
 struct LabelDefinition
 {
+	std::wstring originalName;
 	std::wstring name;
 	int64_t value;
 };

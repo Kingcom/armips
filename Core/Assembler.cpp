@@ -160,7 +160,7 @@ bool runArmips(ArmipsArguments& settings)
 	Global.symbolTable.addLabels(settings.labels);
 	for (const LabelDefinition& label : settings.labels)
 	{
-		symData.addLabel(label.value, label.name);
+		symData.addLabel(label.value, label.originalName);
 	}
 
 	if (Logger::hasError())
