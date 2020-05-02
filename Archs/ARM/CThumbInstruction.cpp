@@ -138,15 +138,24 @@ bool CThumbInstruction::Validate()
 			}
 			Vars.Immediate = pos >> 2;
 		}
-
-		if (Vars.ImmediateBitLen != 32)
+		
+		if (Opcode.type == THUMB_TYPE1)
 		{
-			int max = (1 << Vars.ImmediateBitLen) - ((Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 0 : 1);
+			int max = (Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 32 : 31;
+			if (Vars.Immediate < 0 || Vars.Immediate > max)
+			{
+				Logger::queueError(Logger::Error, L"Shift amount 0x%02X out of range",Vars.Immediate);
+				return false;
+			}
+		} else if (Vars.ImmediateBitLen != 32)
+		{
+			int max = (1 << Vars.ImmediateBitLen) - 1;
 			if (abs(Vars.Immediate) > max)
 			{
 				Logger::queueError(Logger::Error,L"Immediate value 0x%02X out of range",Vars.Immediate);
 				return false;
 			}
+			Vars.Immediate &= max;
 		}
 	}
 	
