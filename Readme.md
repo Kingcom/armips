@@ -1,4 +1,4 @@
-# ARMIPS assembler v0.10
+# armips assembler v0.11
 * Author: Kingcom
 * Source: https://github.com/Kingcom/armips
 * Automated builds: http://buildbot.orphis.net/armips
@@ -31,7 +31,7 @@ Specifies the output name for temporary assembly data. Example output:
 ```
 
 #### `-sym <filename>`
-Specifies the output name for symbol data in the sym format. This format is supported by the debuggers in NO$PSX and NO$GBA. Example output:
+Specifies the output name for symbol data in the sym format. This format is supported by the debuggers in NO\$PSX and NO\$GBA. Example output:
 ```
 00000000 0
 80000000 .dbl:0010
@@ -68,11 +68,11 @@ Specifies the working directory to be used during execution.
 # 2. Installation
 
 ## 2.1 Download binary
-Download the latest Windows 32-bit binary from the [Automated ARMIPS builds](http://buildbot.orphis.net/armips) site. You will need the [Microsoft Visual Studio 2015 x86 Redistributable](https://www.microsoft.com/en-US/download/details.aspx?id=48145).
+Download the latest Windows 32-bit binary from the [Automated armips builds](http://buildbot.orphis.net/armips) site. You will need the [Microsoft Visual Studio 2015 x86 Redistributable](https://www.microsoft.com/en-US/download/details.aspx?id=48145).
 
 ## 2.2 Building from source
 
-The latest code is available at the [ARMIPS GitHub repository](https://github.com/Kingcom/armips). Make sure to also initialize and update submodules. This can be accomplished with one command:
+The latest code is available at the [armips GitHub repository](https://github.com/Kingcom/armips). Make sure to also initialize and update submodules. This can be accomplished with one command:
 ```bash
 $ git clone --recursive https://github.com/Kingcom/armips.git
 ```
@@ -131,8 +131,10 @@ nop :: nop :: nop :: nop
 ### Statement line spanning
 Single statements can continue on to the next line by inserting a `\` at the end of a line. Comments and whitespace can follow. For example:
 ```
-addiu t3, t4, \
- FunctionJumpTable - headersize() + 0x1000 * filesize("blob.bin")
+.ascii "NSM", (VERSION == "us") ? "E" : \
+              (VERSION == "jp") ? "J" : \
+              (VERSION == "eu") ? "P" : \
+                                  "X"
 ```
 
 ## 4.3 Labels
@@ -696,7 +698,7 @@ Prints the message and sets warning/error flags. Useful with conditionals.
 .erroronwarning off
 ```
 
-By specifying `.erroronwarning on`, any warnings emitted by the assembler will be promoted to errors. Errors cause ARMIPS to abort the assembly process return a nonzero exit code. This property can also be enabled from the command line with the `-erroronwarning` flag, and can be turned off again with `.erroronwarning off`. By default, this feature is off.
+By specifying `.erroronwarning on`, any warnings emitted by the assembler will be promoted to errors. Errors cause armips to abort the assembly process return a nonzero exit code. This property can also be enabled from the command line with the `-erroronwarning` flag, and can be turned off again with `.erroronwarning off`. By default, this feature is off.
 
 ### Relative paths
 
@@ -1051,6 +1053,24 @@ will align the memory address to a multiple of 4, then create a label named `Mai
 
 ## 7.1 Change log
 
+* Version 0.11
+    * new `.aligna` directive for absolute address alignment
+    * new expression functions: `org(label)`, `orga(label)`, `headersize(label)`
+    * new expression functions: `min` and `max`
+    * fixed major bug in MIPS LO/HI ELF symbol relocation
+    * COP2, TLB\*, RFE instructions added to PSX
+    * fixed output of RSP VMOV/VRSQ\*/VRCP\* instructions
+    * RSP CTC2/CFC2 control register name support added
+    * fixed edge case bugs in ARM shift handling
+    * new `-definelabel` command line argument for defining label
+    * `-equ` command line option now normalizes the case of the name
+    * additional validations of command line arguments
+    * relativeinclude settings now respected in table directives
+    * fixed bugs in float exponential notation parsing
+    * fixed NaN and string comparisons with `<`, `<=`, `>`, `>=`
+    * negative initial header sizes now allowed (with warnings)
+    * correct line and column numbers for equ invocations
+    * other bugfixes and enhancements
 * Version 0.10
     * many bugfixes and enhancements
     * several new MIPS macros and pseudo-ops
@@ -1108,4 +1128,4 @@ There are several changes after version 0.7d that may break compatibility with c
 
 ## 7.3 License
 
-MIT Copyright (c) 2009-2018 Kingcom: [LICENSE.txt](LICENSE.txt)
+MIT Copyright (c) 2009-2020 Kingcom: [LICENSE.txt](LICENSE.txt)
