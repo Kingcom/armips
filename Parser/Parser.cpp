@@ -365,13 +365,13 @@ bool Parser::checkEquLabel()
 
 			if (Global.symbolTable.isValidSymbolName(name) == false)
 			{
-				printError(start,L"Invalid equation name %s",name);
+				printError(start,L"Invalid equation name \"%s\"",name);
 				return true;
 			}
 
 			if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 			{
-				printError(start,L"Equation name %s already defined",name);
+				printError(start,L"Equation name \"%s\" already defined",name);
 				return true;
 			}
 
@@ -635,7 +635,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 		
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
-			printError(start,L"Invalid label name");
+			printError(start,L"Invalid label name \"%s\"",name);
 			return nullptr;
 		}
 

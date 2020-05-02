@@ -62,13 +62,12 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			{
 				EquationDefinition def;
 
-				auto originalName = arguments[argpos+1];
-				def.name = originalName;
+				def.name = arguments[argpos+1];
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
-				if (!checkValidLabelName(originalName))
+				if (!checkValidLabelName(def.name))
 				{
-					Logger::printError(Logger::Error, L"Invalid equation name %s", originalName);
+					Logger::printError(Logger::Error, L"Invalid equation name \"%s\"", def.name);
 					return false;
 				}
 
@@ -76,7 +75,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
 				if(it != settings.equList.end())
 				{
-					Logger::printError(Logger::Error, L"Equation name %s defined more than once", originalName);
+					Logger::printError(Logger::Error, L"Equation name \"%s\" already defined", def.name);
 					return false;
 				}
 
@@ -88,13 +87,12 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			{
 				EquationDefinition def;
 
-				auto originalName = arguments[argpos+1];
-				def.name = originalName;
+				def.name = arguments[argpos+1];
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
-				if (!checkValidLabelName(originalName))
+				if (!checkValidLabelName(def.name))
 				{
-					Logger::printError(Logger::Error, L"Invalid equation name %s", originalName);
+					Logger::printError(Logger::Error, L"Invalid equation name \"%s\"", def.name);
 					return false;
 				}
 
@@ -102,7 +100,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
 				if(it != settings.equList.end())
 				{
-					Logger::printError(Logger::Error, L"Equation name %s defined more than once", originalName);
+					Logger::printError(Logger::Error, L"Equation name \"%s\" already defined", def.name);
 					return false;
 				}
 
@@ -119,7 +117,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			{
 				if(!changeDirectory(arguments[argpos + 1]))
 				{
-					Logger::printError(Logger::Error, L"Could not open directory '%s'", arguments[argpos + 1]);
+					Logger::printError(Logger::Error, L"Could not open directory \"%s\"", arguments[argpos + 1]);
 					return false;
 				}
 				argpos += 2;
@@ -132,9 +130,9 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 				def.name = def.originalName;
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
-				if (!checkValidLabelName(def.originalName))
+				if (!checkValidLabelName(def.name))
 				{
-					Logger::printError(Logger::Error, L"Invalid label name %s", def.originalName);
+					Logger::printError(Logger::Error, L"Invalid label name \"%s\"", def.name);
 					return false;
 				}
 
@@ -142,14 +140,14 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 						[&def](LabelDefinition x) -> bool {return def.name == x.name;});
 				if(it != settings.labels.end())
 				{
-					Logger::printError(Logger::Error, L"Label name %s defined more than once", def.originalName);
+					Logger::printError(Logger::Error, L"Label name \"%s\" already defined", def.name);
 					return false;
 				}
 
 				int64_t value;
 				if (!stringToInt(arguments[argpos + 2], 0, arguments[argpos + 2].size(), value))
 				{
-					Logger::printError(Logger::Error, L"Invalid label value '%s'\n", arguments[argpos + 2]);
+					Logger::printError(Logger::Error, L"Invalid label value \"%s\"", arguments[argpos + 2]);
 					return false;
 				}
 				def.value = value;
@@ -158,7 +156,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 				argpos += 3;
 			}
 			else {
-				Logger::printError(Logger::Error, L"Invalid command line argument '%s'\n", arguments[argpos]);
+				Logger::printError(Logger::Error, L"Invalid command line argument \"%s\"\n", arguments[argpos]);
 				printUsage(arguments[0]);
 				return false;
 			}
@@ -194,7 +192,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 
 	if (fileExists(settings.inputFileName) == false)
 	{
-		Logger::printError(Logger::Error, L"File '%s' not found", settings.inputFileName);
+		Logger::printError(Logger::Error, L"File \"%s\" not found", settings.inputFileName);
 		return false;
 	}
 	return true;
