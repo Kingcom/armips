@@ -1609,7 +1609,7 @@ void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int o
 	switch (type)
 	{
 	case MipsImmediateType::ImmediateHalfFloat:
-		buffer += formatString(L"%f",*((float*)&originalValue));
+		buffer += formatString(L"%f", bitsToFloat(originalValue));
 		break;
 	case MipsImmediateType::Immediate16:
 		if (!(opcodeFlags & MO_IPCR) && originalValue & 0x8000)

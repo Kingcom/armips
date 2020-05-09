@@ -270,7 +270,7 @@ std::unique_ptr<CAssemblerCommand> ElfRelocator::generateCtor(const std::wstring
 
 	auto func = ::make_unique<CDirectiveFunction>(ctorName,ctorName);
 	func->setContent(std::move(content));
-	return std::move(func);
+	return func;
 }
 
 void ElfRelocator::loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, Endianness endianness)

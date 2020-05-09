@@ -7,7 +7,7 @@
 
 Trie::Trie()
 {
-	Node root { 0, false };
+	Node root { 0, false, 0 };
 	nodes.push_back(root);
 }
 
@@ -30,7 +30,7 @@ void Trie::insert(const wchar_t* text, size_t value)
 	// add new nodes as necessary
 	while (*text != 0)
 	{
-		Node newNode { nodes.size(), false };
+		Node newNode { nodes.size(), false, 0 };
 		nodes.push_back(newNode);
 
 		LookupEntry lookupEntry { node, *text };

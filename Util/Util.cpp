@@ -203,6 +203,13 @@ int32_t getFloatBits(float value)
 	return u.i;
 }
 
+float bitsToFloat(int32_t value)
+{
+	union { float f; int32_t i; } u;
+	u.i = value;
+	return u.f;
+}
+
 int64_t getDoubleBits(double value)
 {
 	union { double f; int64_t i; } u;

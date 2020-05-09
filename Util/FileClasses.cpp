@@ -792,7 +792,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 					encoding = UTF8;
 					contentPos += 3;
 					break;
-				}
+				} // fallthrough
 			default:
 				if (defaultEncoding == GUESS)
 				{

@@ -6,7 +6,7 @@
 class CDirectiveMessage: public CAssemblerCommand
 {
 public:
-	enum class Type { Invalid, Warning, Error, Notice };	
+	enum class Type { Warning, Error, Notice };
 	CDirectiveMessage(Type type, Expression exp);
 	virtual bool Validate();
 	virtual void Encode() const {};

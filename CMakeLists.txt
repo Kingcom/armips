@@ -5,9 +5,9 @@ option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Haiku" OR WIIU)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-uninitialized")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-uninitialized")
 	else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wno-uninitialized")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wall -Wno-uninitialized -Wno-unused-parameter")
 	endif()
 endif()
 

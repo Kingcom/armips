@@ -41,10 +41,10 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 			return nullptr;
 		
 		file->initCopy(inputName,outputName,memoryAddress);
-		return std::move(file);
+		return file;
 	} else {
 		file->initOpen(inputName,memoryAddress);
-		return std::move(file);
+		return file;
 	}
 }
 
@@ -65,14 +65,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flag
 
 	auto file = make_unique<CDirectiveFile>();
 	file->initCreate(inputName,memoryAddress);
-	return std::move(file);
+	return file;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveClose(Parser& parser, int flags)
 {
 	auto file = make_unique<CDirectiveFile>();
 	file->initClose();
-	return std::move(file);
+	return file;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flags)
@@ -92,7 +92,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flag
 	if (list.size() == 3)
 		incbin->setSize(list[2]);
 
-	return std::move(incbin);
+	return incbin;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectivePosition(Parser& parser, int flags)
@@ -303,7 +303,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		cond = make_unique<CDirectiveConditional>(type);
 
 	cond->setContent(std::move(ifBlock),std::move(elseBlock));
-	return std::move(cond);
+	return cond;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveTable(Parser& parser, int flags)
@@ -382,7 +382,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 		break;
 	}
 	
-	return std::move(data);
+	return data;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMipsArch(Parser& parser, int flags)
@@ -457,7 +457,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 	parser.eatToken();
 
 	area->setContent(std::move(content));
-	return std::move(area);
+	return area;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, int flags)
@@ -598,7 +598,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int fl
 	}
 
 	func->setContent(std::move(seq));
-	return std::move(func);
+	return func;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMessage(Parser& parser, int flags)

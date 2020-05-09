@@ -155,7 +155,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 		Logger::printError(Logger::Error, L"Unterminated command sequence, expected any of %s.", expected);
 	}
 
-	return std::move(sequence);
+	return sequence;
 }
 
 std::unique_ptr<CAssemblerCommand> Parser::parseFile(TextFile& file, bool virtualFile)
@@ -190,7 +190,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& tex
 	for (auto& arg: variables)
 	{
 		size_t count = replaceAll(fullText,arg.variableName,arg.value);
-
+		(void)count;
 #ifdef _DEBUG
 		if (count != 0 && arg.value.empty())
 			Logger::printError(Logger::Warning,L"Empty replacement for %s",arg.variableName);
