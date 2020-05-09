@@ -128,13 +128,13 @@ const MipsRegisterDescriptor mipsRspVectorRegisters[] = {
 std::unique_ptr<CAssemblerCommand> parseDirectiveResetDelay(Parser& parser, int flags)
 {
 	Mips.SetIgnoreDelay(true);
-	return make_unique<DummyCommand>();
+	return ::make_unique<DummyCommand>();
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveFixLoadDelay(Parser& parser, int flags)
 {
 	Mips.SetFixLoadDelay(true);
-	return make_unique<DummyCommand>();
+	return ::make_unique<DummyCommand>();
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int flags)
@@ -178,7 +178,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 		if (Mips.GetVersion() == MARCH_PSX)
 		{
 			parser.printError(start,L"Constructor not supported for PSX libraries");
-			return make_unique<InvalidCommand>();
+			return ::make_unique<InvalidCommand>();
 		}
 
 		return ::make_unique<DirectiveObjImport>(inputName,ctorName);
@@ -1491,7 +1491,7 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 			if (parseParameters(parser,MipsOpcodes[z]) == true)
 			{
 				// success, return opcode
-				return make_unique<CMipsInstruction>(opcodeData,immediate,registers);
+				return ::make_unique<CMipsInstruction>(opcodeData,immediate,registers);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);

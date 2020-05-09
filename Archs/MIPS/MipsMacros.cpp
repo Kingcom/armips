@@ -257,7 +257,7 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadUnaligned(Parser& parser
 		if (registers.grs.num == registers.grd.num)
 		{
 			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
-			return make_unique<DummyCommand>();
+			return ::make_unique<DummyCommand>();
 		}
 
 		op = type == MIPSM_W ? L"lw" : L"ld";
@@ -310,7 +310,7 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroStoreUnaligned(Parser& parse
 		if (registers.grs.num == registers.grd.num)
 		{
 			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
-			return make_unique<DummyCommand>();
+			return ::make_unique<DummyCommand>();
 		}
 
 		op = type == MIPSM_W ? L"sw" : L"sd";

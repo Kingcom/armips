@@ -34,7 +34,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 	if (list.back().evaluateInteger(memoryAddress) == false)
 		return nullptr;
 
-	auto file = make_unique<CDirectiveFile>();
+	auto file = ::make_unique<CDirectiveFile>();
 	if (list.size() == 3)
 	{
 		if (list[1].evaluateString(outputName,false) == false)
@@ -63,14 +63,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flag
 	if (list.back().evaluateInteger(memoryAddress) == false)
 		return nullptr;
 
-	auto file = make_unique<CDirectiveFile>();
+	auto file = ::make_unique<CDirectiveFile>();
 	file->initCreate(inputName,memoryAddress);
 	return file;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveClose(Parser& parser, int flags)
 {
-	auto file = make_unique<CDirectiveFile>();
+	auto file = ::make_unique<CDirectiveFile>();
 	file->initClose();
 	return file;
 }
@@ -114,7 +114,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectivePosition(Parser& parser, int fl
 		return nullptr;
 	}
 
-	return make_unique<CDirectivePosition>(exp,type);
+	return ::make_unique<CDirectivePosition>(exp,type);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveAlignFill(Parser& parser, int flags)
@@ -136,16 +136,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveAlignFill(Parser& parser, int f
 	}
 
 	if (mode != CDirectiveAlignFill::Fill && parser.peekToken().type == TokenType::Separator)
-		return make_unique<CDirectiveAlignFill>(UINT64_C(4),mode);
+		return ::make_unique<CDirectiveAlignFill>(UINT64_C(4),mode);
 
 	std::vector<Expression> list;
 	if (parser.parseExpressionList(list,1,2) == false)
 		return nullptr;
 
 	if (list.size() == 2)
-		return make_unique<CDirectiveAlignFill>(list[0],list[1],mode);
+		return ::make_unique<CDirectiveAlignFill>(list[0],list[1],mode);
 	else
-		return make_unique<CDirectiveAlignFill>(list[0],mode);
+		return ::make_unique<CDirectiveAlignFill>(list[0],mode);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveSkip(Parser& parser, int flags)
@@ -154,7 +154,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveSkip(Parser& parser, int flags)
 	if (parser.parseExpressionList(list,1,1) == false)
 		return nullptr;
 
-	return make_unique<CDirectiveSkip>(list[0]);
+	return ::make_unique<CDirectiveSkip>(list[0]);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveHeaderSize(Parser& parser, int flags)
@@ -163,7 +163,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveHeaderSize(Parser& parser, int 
 	if (exp.isLoaded() == false)
 		return nullptr;
 
-	return make_unique<CDirectiveHeaderSize>(exp);
+	return ::make_unique<CDirectiveHeaderSize>(exp);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveObjImport(Parser& parser, int flags)
@@ -204,7 +204,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		if (exp.isLoaded() == false)
 		{
 			parser.printError(start,L"Invalid condition");
-			return make_unique<DummyCommand>();
+			return ::make_unique<DummyCommand>();
 		}
 
 		if (exp.isConstExpression())
@@ -291,16 +291,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		if (elseBlock != nullptr)
 			return elseBlock;
 		else
-			return make_unique<DummyCommand>();
+			return ::make_unique<DummyCommand>();
 	}
 
 	std::unique_ptr<CDirectiveConditional> cond;
 	if (exp.isLoaded())
-		cond = make_unique<CDirectiveConditional>(type,exp);
+		cond = ::make_unique<CDirectiveConditional>(type,exp);
 	else if (name.size() != 0)
 		cond = ::make_unique<CDirectiveConditional>(type,name);
 	else
-		cond = make_unique<CDirectiveConditional>(type);
+		cond = ::make_unique<CDirectiveConditional>(type);
 
 	cond->setContent(std::move(ifBlock),std::move(elseBlock));
 	return cond;
@@ -350,7 +350,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 	if (parser.parseExpressionList(list,1,-1) == false)
 		return nullptr;
 	
-	auto data = make_unique<CDirectiveData>();
+	auto data = ::make_unique<CDirectiveData>();
 	switch (flags & DIRECTIVE_USERMASK)
 	{
 	case DIRECTIVE_DATA_8:
@@ -394,19 +394,19 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMipsArch(Parser& parser, int fl
 	{
 	case DIRECTIVE_MIPS_PSX:
 		Mips.SetVersion(MARCH_PSX);
-		return make_unique<ArchitectureCommand>(L".psx", L"");
+		return ::make_unique<ArchitectureCommand>(L".psx", L"");
 	case DIRECTIVE_MIPS_PS2:
 		Mips.SetVersion(MARCH_PS2);
-		return make_unique<ArchitectureCommand>(L".ps2", L"");
+		return ::make_unique<ArchitectureCommand>(L".ps2", L"");
 	case DIRECTIVE_MIPS_PSP:
 		Mips.SetVersion(MARCH_PSP);
-		return make_unique<ArchitectureCommand>(L".psp", L"");
+		return ::make_unique<ArchitectureCommand>(L".psp", L"");
 	case DIRECTIVE_MIPS_N64:
 		Mips.SetVersion(MARCH_N64);
-		return make_unique<ArchitectureCommand>(L".n64", L"");
+		return ::make_unique<ArchitectureCommand>(L".n64", L"");
 	case DIRECTIVE_MIPS_RSP:
 		Mips.SetVersion(MARCH_RSP);
-		return make_unique<ArchitectureCommand>(L".rsp", L"");
+		return ::make_unique<ArchitectureCommand>(L".rsp", L"");
 	}
 
 	return nullptr;
@@ -421,23 +421,23 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int fla
 	case DIRECTIVE_ARM_GBA:
 		Arm.SetThumbMode(true);
 		Arm.setVersion(AARCH_GBA);
-		return make_unique<ArchitectureCommand>(L".gba\n.thumb", L".thumb");
+		return ::make_unique<ArchitectureCommand>(L".gba\n.thumb", L".thumb");
 	case DIRECTIVE_ARM_NDS:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_NDS);
-		return make_unique<ArchitectureCommand>(L".nds\n.arm", L".arm");
+		return ::make_unique<ArchitectureCommand>(L".nds\n.arm", L".arm");
 	case DIRECTIVE_ARM_3DS:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_3DS);
-		return make_unique<ArchitectureCommand>(L".3ds\n.arm", L".arm");
+		return ::make_unique<ArchitectureCommand>(L".3ds\n.arm", L".arm");
 	case DIRECTIVE_ARM_BIG:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_BIG);
-		return make_unique<ArchitectureCommand>(L".arm.big\n.arm", L".arm");
+		return ::make_unique<ArchitectureCommand>(L".arm.big\n.arm", L".arm");
 	case DIRECTIVE_ARM_LITTLE:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_LITTLE);
-		return make_unique<ArchitectureCommand>(L".arm.little\n.arm", L".arm");
+		return ::make_unique<ArchitectureCommand>(L".arm.little\n.arm", L".arm");
 	}
 
 	return nullptr;
@@ -449,7 +449,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 	if (parser.parseExpressionList(parameters,1,2) == false)
 		return nullptr;
 	
-	auto area = make_unique<CDirectiveArea>(parameters[0]);
+	auto area = ::make_unique<CDirectiveArea>(parameters[0]);
 	if (parameters.size() == 2)
 		area->setFillExpression(parameters[1]);
 
@@ -473,11 +473,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, in
 	if (stringValue == L"on")
 	{	
 		Logger::setErrorOnWarning(true);
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 	} else if (stringValue == L"off")
 	{
 		Logger::setErrorOnWarning(false);
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 	}
 
 	return nullptr;
@@ -496,11 +496,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveRelativeInclude(Parser& parser,
 	if (stringValue == L"on")
 	{	
 		Global.relativeInclude = true;
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 	} else if (stringValue == L"off")
 	{
 		Global.relativeInclude = false;
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 	}
 
 	return nullptr;
@@ -519,11 +519,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveNocash(Parser& parser, int flag
 	if (stringValue == L"on")
 	{	
 		Global.nocash = true;
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 	} else if (stringValue == L"off")
 	{
 		Global.nocash = false;
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 	}
 
 	return nullptr;
@@ -540,9 +540,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveSym(Parser& parser, int flags)
 	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
 	if (stringValue == L"on")
-		return make_unique<CDirectiveSym>(true);
+		return ::make_unique<CDirectiveSym>(true);
 	else if (stringValue == L"off")
-		return make_unique<CDirectiveSym>(false);
+		return ::make_unique<CDirectiveSym>(false);
 	else
 		return nullptr;
 }
@@ -608,11 +608,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMessage(Parser& parser, int fla
 	switch (flags)
 	{
 	case DIRECTIVE_MSG_WARNING:
-		return make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Warning,exp);
+		return ::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Warning,exp);
 	case DIRECTIVE_MSG_ERROR:
-		return make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Error,exp);
+		return ::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Error,exp);
 	case DIRECTIVE_MSG_NOTICE:
-		return make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Notice,exp);
+		return ::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Notice,exp);
 	}
 
 	return nullptr;
@@ -645,7 +645,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 
 	// don't include the file if it's inside a false block
 	if (parser.isInsideTrueBlock() == false)
-		return make_unique<DummyCommand>();
+		return ::make_unique<DummyCommand>();
 
 	if (fileExists(fileName) == false)
 	{
