@@ -4,7 +4,7 @@
 #include "FileManager.h"
 
 #define ARMIPS_VERSION_MAJOR    0
-#define ARMIPS_VERSION_MINOR    10
+#define ARMIPS_VERSION_MINOR    11
 #define ARMIPS_VERSION_REVISION 0
 
 enum class ArmipsMode { FILE, MEMORY };
