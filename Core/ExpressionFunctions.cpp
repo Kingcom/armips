@@ -511,22 +511,31 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 
 	file.setPos((long)start);
 
-	unsigned char* buffer = new unsigned char[length];
-	file.read(buffer,(size_t)length);
-
+	unsigned char buffer[1024];
+	bool stringTerminated = false;
 	std::wstring result;
-	for (size_t i = 0; i < (size_t) length; i++)
+
+	for (int64_t progress = 0; !stringTerminated && progress < length; progress += (int64_t) sizeof(buffer))
 	{
-		if (buffer[i] < 0x20 || buffer[i] > 0x7F)
+		const size_t bytesRead = file.read(buffer, (size_t) std::min((int64_t) sizeof(buffer), length - progress));
+
+		for (size_t i = 0; i < bytesRead; i++)
 		{
-			Logger::printError(Logger::Warning,L"%s: Non-ASCII character",funcName);
-			return ExpressionValue();
+			if (buffer[i] == 0x00)
+			{
+				stringTerminated = true;
+				break;
+			}
+
+			if (buffer[i] < 0x20 || buffer[i] > 0x7F)
+			{
+				Logger::printError(Logger::Warning, L"%s: Non-ASCII character", funcName);
+				return ExpressionValue();
+			}
+
+			result += (wchar_t) buffer[i];
 		}
-
-		result += (wchar_t) buffer[i];
 	}
-
-	delete[] buffer;
 
 	return ExpressionValue(result);
 }
