@@ -68,7 +68,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 		return nullptr;
 
 	return parser.parseTemplate(msgTemplate, {
-		{ L"%after%", Global.symbolTable.getUniqueLabelName() },
+		{ L"%after%", Global.symbolTable.getUniqueLabelName(true) },
 		{ L"%text%", text.toString() },
 		{ L"%alignment%", Arm.GetThumbMode() == true ? L"2" : L"4" }
 	});
