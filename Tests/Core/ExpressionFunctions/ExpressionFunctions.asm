@@ -99,4 +99,7 @@ test2	min,-3,3
 test2	max,-3.0,3.0
 test2	min,-3.0,3.0
 
+test2	readascii,fileA,9
+test3	readascii,fileA,9,5000
+
 .close

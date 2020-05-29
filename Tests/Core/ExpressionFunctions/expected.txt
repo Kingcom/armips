@@ -3,7 +3,7 @@ ExpressionFunctions.asm(39) notice: tostring(191): 191
 ExpressionFunctions.asm(40) notice: tohex(191,6): 0000BF
 ExpressionFunctions.asm(42) notice: fileexists("file.bin"): 1
 ExpressionFunctions.asm(43) notice: fileexists("file.dat"): 0
-ExpressionFunctions.asm(44) notice: filesize("file.bin"): 9
+ExpressionFunctions.asm(44) notice: filesize("file.bin"): 19
 ExpressionFunctions.asm(46) notice: readu8("file.bin",2): 00000000000000CC
 ExpressionFunctions.asm(47) notice: readu16("file.bin",2): 000000000000DDCC
 ExpressionFunctions.asm(48) notice: readu32("file.bin"): 00000000DDCCBBAA
@@ -46,3 +46,5 @@ ExpressionFunctions.asm(97) notice: max((-3),3): 3
 ExpressionFunctions.asm(98) notice: min((-3),3): -3
 ExpressionFunctions.asm(99) notice: max((-3),3): 3.0000000000000000
 ExpressionFunctions.asm(100) notice: min((-3),3): -3.0000000000000000
+ExpressionFunctions.asm(102) notice: readascii("file.bin",9): testtest
+ExpressionFunctions.asm(103) notice: readascii("file.bin",9,5000): testtest
