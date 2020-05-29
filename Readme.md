@@ -273,7 +273,7 @@ Below is a table of functions built into the assembler that can be used with the
 | `reads16(file, optional pos = 0)` | read signed 16-bit value from `file` at position `pos` |
 | `reads32(file, optional pos = 0)` | read signed 32-bit value from `file` at position `pos` |
 | `reads64(file, optional pos = 0)` | read signed 64-bit value from `file` at position `pos` |
-| `readascii(file, optional start = 0, optional len = 0)` | read ASCII string from `file` at `start` length `len` |
+| `readascii(file, optional start = 0, optional len = 0)` | read ASCII string from `file` at `start` length `len` until null terminator |
 | `isarm()` | `1` if in ARM mode, `0` otherwise (only available in ARM/THUMB) |
 | `isthumb()` | `1` if in THUMB mode, `0` otherwise (only available in ARM/THUMB) |
 
