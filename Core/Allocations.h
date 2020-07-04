@@ -25,7 +25,7 @@ class Allocations
 {
 public:
 	static void clear();
-	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill);
+	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill, bool shared);
 	static void forgetArea(int64_t fileID, int64_t position, int64_t space);
 
 	static void setPool(int64_t fileID, int64_t position, int64_t size);
@@ -54,6 +54,7 @@ private:
 		int64_t space;
 		int64_t usage;
 		bool usesFill;
+		bool shared;
 	};
 
 	struct SubArea

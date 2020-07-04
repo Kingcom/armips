@@ -12,10 +12,10 @@ void Allocations::clear()
 	allocations.clear();
 }
 
-void Allocations::setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill)
+void Allocations::setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill, bool shared)
 {
 	Key key{ fileID, position };
-	allocations[key] = Usage{ space, usage, usesFill };
+	allocations[key] = Usage{ space, usage, usesFill, shared };
 }
 
 void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
@@ -46,7 +46,7 @@ bool Allocations::allocateSubArea(int64_t fileID, int64_t& position, int64_t min
 {
 	for (auto it : allocations)
 	{
-		if (it.first.fileID != fileID)
+		if (it.first.fileID != fileID || !it.second.shared)
 			continue;
 		if (minRange != -1 && it.first.position + it.second.space < minRange)
 			continue;
