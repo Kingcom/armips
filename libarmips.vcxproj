@@ -242,6 +242,7 @@
     <ClCompile Include="Commands\CDirectiveFile.cpp" />
     <ClCompile Include="Commands\CDirectiveMessage.cpp" />
     <ClCompile Include="Commands\CommandSequence.cpp" />
+    <ClCompile Include="Core\Allocations.cpp" />
     <ClCompile Include="Core\Assembler.cpp" />
     <ClCompile Include="Core\Common.cpp" />
     <ClCompile Include="Core\ELF\ElfFile.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="Commands\CDirectiveFile.h" />
     <ClInclude Include="Commands\CDirectiveMessage.h" />
     <ClInclude Include="Commands\CommandSequence.h" />
+    <ClInclude Include="Core\Allocations.h" />
     <ClInclude Include="Core\Assembler.h" />
     <ClInclude Include="Core\Common.h" />
     <ClInclude Include="Core\ELF\ElfFile.h" />

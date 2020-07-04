@@ -88,6 +88,8 @@ add_library(armips STATIC
 	Core/ELF/ElfRelocator.h
 	Core/ELF/ElfFile.cpp
 	Core/ELF/ElfFile.h
+	Core/Allocations.cpp
+	Core/Allocations.h
 	Core/Assembler.cpp
 	Core/Assembler.h
 	Core/Common.cpp

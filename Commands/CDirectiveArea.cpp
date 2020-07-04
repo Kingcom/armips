@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveArea.h"
+#include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 #include <algorithm>
@@ -8,6 +9,7 @@ CDirectiveArea::CDirectiveArea(Expression& size)
 {
 	this->areaSize = 0;
 	this->contentSize = 0;
+	this->position = 0;
 	this->fillValue = 0;
 
 	this->sizeExpression = size;
@@ -23,6 +25,7 @@ bool CDirectiveArea::Validate()
 {
 	int64_t oldAreaSize = areaSize;
 	int64_t oldContentSize = contentSize;
+	int64_t oldPosition = position;
 
 	position = g_fileManager->getVirtualAddress();
 
@@ -64,6 +67,11 @@ bool CDirectiveArea::Validate()
 
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
 		result = true;
+
+	if ((oldPosition != position || areaSize == 0) && oldAreaSize != 0)
+		Allocations::forgetArea(oldPosition, oldAreaSize);
+	if (areaSize != 0)
+		Allocations::setArea(position, areaSize, contentSize);
 
 	return result;
 }

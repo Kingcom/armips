@@ -2,6 +2,7 @@
 #include "Assembler.h"
 #include "Core/Common.h"
 #include "Commands/CAssemblerCommand.h"
+#include "Core/Allocations.h"
 #include "Core/FileManager.h"
 #include "Parser/Parser.h"
 #include "Archs/ARM/Arm.h"
@@ -126,6 +127,7 @@ bool runArmips(ArmipsArguments& settings)
 
 	Tokenizer::clearEquValues();
 	Logger::clear();
+	Allocations::clear();
 	Global.Table.clear();
 	Global.symbolTable.clear();
 

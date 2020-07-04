@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Core/Common.h"
+#include "Core/Allocations.h"
 #include "Core/Assembler.h"
 #include "CommandLineInterface.h"
 
@@ -18,9 +19,18 @@ static void printUsage(std::wstring executableName)
 	Logger::printLine(L" -strequ <NAME> <VAL>      Equivalent to \'<NAME> equ \"<VAL>\"\' in code");
 	Logger::printLine(L" -definelabel <NAME> <VAL> Equivalent to \'.definelabel <NAME>, <VAL>\' in code");
 	Logger::printLine(L" -erroronwarning           Treat all warnings like errors");
+	Logger::printLine(L" -stat                     Show area usage statistics");
 	Logger::printLine(L"");
 	Logger::printLine(L"File arguments:");
 	Logger::printLine(L" <FILE>                    Main assembly code file");
+}
+
+static void printStats(const AllocationStats &stats)
+{
+	Logger::printLine(L"Total: %lld / %lld", stats.totalUsage, stats.totalSize);
+	Logger::printLine(L"Largest: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
+	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
+	Logger::printLine(L"Most free: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
 }
 
 static bool parseArguments(const StringList& arguments, ArmipsArguments& settings)
@@ -56,6 +66,11 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			else if (arguments[argpos] == L"-erroronwarning")
 			{
 				settings.errorOnWarning = true;
+				argpos += 1;
+			}
+			else if (arguments[argpos] == L"-stat")
+			{
+				settings.showStats = true;
 				argpos += 1;
 			}
 			else if (arguments[argpos] == L"-equ" && argpos + 2 < arguments.size())
@@ -215,6 +230,9 @@ int runFromCommandLine(const StringList& arguments, ArmipsArguments settings)
 
 		return 1;
 	}
+
+	if (settings.showStats)
+		printStats(Allocations::collectStats());
 
 	return 0;
 }
