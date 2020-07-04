@@ -25,14 +25,6 @@ static void printUsage(std::wstring executableName)
 	Logger::printLine(L" <FILE>                    Main assembly code file");
 }
 
-static void printStats(const AllocationStats &stats)
-{
-	Logger::printLine(L"Total: %lld / %lld", stats.totalUsage, stats.totalSize);
-	Logger::printLine(L"Largest: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
-	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
-	Logger::printLine(L"Most free: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
-}
-
 static bool parseArguments(const StringList& arguments, ArmipsArguments& settings)
 {
 	size_t argpos = 1;
@@ -230,9 +222,6 @@ int runFromCommandLine(const StringList& arguments, ArmipsArguments settings)
 
 		return 1;
 	}
-
-	if (settings.showStats)
-		printStats(Allocations::collectStats());
 
 	return 0;
 }
