@@ -13,8 +13,14 @@ struct AllocationStats
 	int64_t largestFreeSize;
 	int64_t largestFreeUsage;
 
+	int64_t sharedFreePosition;
+	int64_t sharedFreeSize;
+	int64_t sharedFreeUsage;
+
 	int64_t totalSize;
 	int64_t totalUsage;
+	int64_t sharedSize;
+	int64_t sharedUsage;
 
 	int64_t largestPoolPosition;
 	int64_t largestPoolSize;

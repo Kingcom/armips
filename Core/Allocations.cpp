@@ -158,8 +158,21 @@ void Allocations::collectAreaStats(AllocationStats &stats)
 			stats.largestFreeUsage = usage.usage;
 		}
 
+		// We assume overlaps agree on sharing, hopefully...
+		if (usage.shared && usage.space - usage.usage > stats.sharedFreeSize - stats.sharedFreeUsage)
+		{
+			stats.sharedFreePosition = position;
+			stats.sharedFreeSize = usage.space;
+			stats.sharedFreeUsage = usage.usage;
+		}
+
 		stats.totalSize += usage.space;
 		stats.totalUsage += usage.usage;
+		if (usage.shared)
+		{
+			stats.sharedSize += usage.space;
+			stats.sharedUsage += usage.usage;
+		}
 	};
 
 	for (auto it : allocations)

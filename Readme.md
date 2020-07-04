@@ -68,9 +68,11 @@ Specifies the working directory to be used during execution.
 #### `-stat`
 Outputs statistics for bytes used within areas after completion.  Example output:
 ```
-Total areas: 5342 / 7934
-Largest area: 0x0806E80C, 532 / 1156
-Most free area: 0x0806E80C, 532 / 1156 (free at 0x0806EA20)
+Total areas and regions: 5342 / 7934
+Total regions: 916 / 1624
+Largest area or region: 0x0806E80C, 564 / 1156
+Most free area or region: 0x0806E80C, 564 / 1156 (free at 0x0806EA40)
+Most free region: 0x0806E80C, 564 / 1156 (free at 0x0806EA40)
 ```
 
 # 2. Installation
