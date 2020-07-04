@@ -2,21 +2,23 @@
 #include "Core/Allocations.h"
 #include "Core/Common.h"
 
-std::map<int64_t, Allocations::Usage> Allocations::allocations;
+std::map<Allocations::Key, Allocations::Usage> Allocations::allocations;
 
 void Allocations::clear()
 {
 	allocations.clear();
 }
 
-void Allocations::setArea(int64_t position, int64_t space, int64_t usage, bool usesFill)
+void Allocations::setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill)
 {
-	allocations[position] = Usage{ space, usage, usesFill };
+	Key key{ fileID, position };
+	allocations[key] = Usage{ space, usage, usesFill };
 }
 
-void Allocations::forgetArea(int64_t position, int64_t space)
+void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
 {
-	auto it = allocations.find(position);
+	Key key{ fileID, position };
+	auto it = allocations.find(key);
 	if (it != allocations.end() && it->second.space == space) {
 		allocations.erase(it);
 	}
@@ -26,31 +28,31 @@ void Allocations::validateOverlap()
 {
 	// An easy mistake to make is a "subarea" where the parent area fills, and erases the subarea.
 	// Let's detect any sort of area overlap and report a warning.
-	int64_t lastPosition = -1;
+	Key lastKey{ -1, -1 };
 	int64_t lastEndPosition = -1;
 	Usage lastUsage{};
 
 	for (auto it : allocations) {
-		if (it.first > lastPosition && it.first < lastEndPosition) {
+		if (it.first.fileID == lastKey.fileID && it.first.position > lastKey.position && it.first.position < lastEndPosition) {
 			// First, the obvious: does the content overlap?
-			if (it.first < lastPosition + lastUsage.usage)
-				Logger::queueError(Logger::Warning, L"Content of areas %08llX and %08llx overlap", lastPosition, it.first);
+			if (it.first.position < lastKey.position + lastUsage.usage)
+				Logger::queueError(Logger::Warning, L"Content of areas %08llX and %08llx overlap", lastKey.position, it.first.position);
 			// Next question, does the earlier one fill?
 			else if (it.second.usesFill && lastUsage.usesFill)
-				Logger::queueError(Logger::Warning, L"Areas %08llX and %08llx overlap and both fill", lastPosition, it.first);
+				Logger::queueError(Logger::Warning, L"Areas %08llX and %08llx overlap and both fill", lastKey.position, it.first.position);
 
 			// If the new area ends before the last, keep it as the last.
-			if (lastEndPosition > it.first + it.second.space) {
+			if (lastEndPosition > it.first.position + it.second.space) {
 				// But update the usage to the max position.
-				int64_t newUsageEnd = it.first + it.second.usage;
-				lastUsage.usage = newUsageEnd - lastPosition;
+				int64_t newUsageEnd = it.first.position + it.second.usage;
+				lastUsage.usage = newUsageEnd - lastKey.position;
 				continue;
 			}
 		}
 
-		lastPosition = it.first;
+		lastKey = it.first;
 		lastUsage = it.second;
-		lastEndPosition = it.first + it.second.space;
+		lastEndPosition = it.first.position + it.second.space;
 	}
 }
 
@@ -59,7 +61,7 @@ AllocationStats Allocations::collectStats()
 	AllocationStats stats{};
 
 	// Need to work out overlaps.
-	int64_t lastPosition = -1;
+	Key lastKey{ -1, -1 };
 	int64_t lastEndPosition = -1;
 	Usage lastUsage{};
 
@@ -85,33 +87,33 @@ AllocationStats Allocations::collectStats()
 
 	for (auto it : allocations)
 	{
-		if (it.first > lastPosition && it.first < lastEndPosition)
+		if (it.first.fileID == lastKey.fileID && it.first.position > lastKey.position && it.first.position < lastEndPosition)
 		{
 			// Overlap, merge.
-			int64_t lastUsageEnd = lastPosition + lastUsage.usage;
-			int64_t newUsageEnd = it.first + it.second.usage;
+			int64_t lastUsageEnd = lastKey.position + lastUsage.usage;
+			int64_t newUsageEnd = it.first.position + it.second.usage;
 
-			if (lastUsageEnd >= it.first)
+			if (lastUsageEnd >= it.first.position)
 				lastUsage.usage += newUsageEnd - lastUsageEnd;
 			else
 				lastUsage.usage += it.second.usage;
 
-			lastEndPosition = it.first + it.second.space;
-			lastUsage.space = lastEndPosition - lastPosition;
+			lastEndPosition = it.first.position + it.second.space;
+			lastUsage.space = lastEndPosition - lastKey.position;
 
 			continue;
 		}
 
-		if (lastPosition != -1)
-			applyUsage(lastPosition, lastUsage);
+		if (lastKey.position != -1)
+			applyUsage(lastKey.position, lastUsage);
 
-		lastPosition = it.first;
+		lastKey = it.first;
 		lastUsage = it.second;
-		lastEndPosition = it.first + it.second.space;
+		lastEndPosition = it.first.position + it.second.space;
 	}
 
-	if (lastPosition != -1)
-		applyUsage(lastPosition, lastUsage);
+	if (lastKey.position != -1)
+		applyUsage(lastKey.position, lastUsage);
 
 	return stats;
 }

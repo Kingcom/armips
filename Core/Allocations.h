@@ -18,17 +18,26 @@ struct AllocationStats {
 class Allocations {
 public:
 	static void clear();
-	static void setArea(int64_t position, int64_t space, int64_t usage, bool usesFill);
-	static void forgetArea(int64_t position, int64_t space);
+	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill);
+	static void forgetArea(int64_t fileID, int64_t position, int64_t space);
 
 	static void validateOverlap();
 	static AllocationStats collectStats();
 
 private:
+	struct Key {
+		int64_t fileID;
+		int64_t position;
+
+		inline bool operator <(const Allocations::Key &other) const
+		{
+			return std::tie(fileID, position) < std::tie(other.fileID, other.position);
+		}
+	};
 	struct Usage {
 		int64_t space;
 		int64_t usage;
 		bool usesFill;
 	};
-	static std::map<int64_t, Usage> allocations;
+	static std::map<Key, Usage> allocations;
 };
