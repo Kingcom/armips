@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveArea.h"
+#include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 #include <algorithm>
@@ -8,6 +9,7 @@ CDirectiveArea::CDirectiveArea(Expression& size)
 {
 	this->areaSize = 0;
 	this->contentSize = 0;
+	this->position = 0;
 	this->fillValue = 0;
 
 	this->sizeExpression = size;
@@ -23,6 +25,7 @@ bool CDirectiveArea::Validate()
 {
 	int64_t oldAreaSize = areaSize;
 	int64_t oldContentSize = contentSize;
+	int64_t oldPosition = position;
 
 	position = g_fileManager->getVirtualAddress();
 
@@ -56,7 +59,7 @@ bool CDirectiveArea::Validate()
 
 	if (areaSize < contentSize)
 	{
-		Logger::queueError(Logger::Error,L"Area overflowed");
+		Logger::queueError(Logger::Error, L"Area at %08x overflowed by %d bytes", position, contentSize - areaSize);
 	}
 
 	if (fillExpression.isLoaded())
@@ -64,6 +67,13 @@ bool CDirectiveArea::Validate()
 
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
 		result = true;
+
+	std::shared_ptr<AssemblerFile> file = g_fileManager->getOpenFile();
+	static_assert(sizeof(int64_t) >= sizeof(intptr_t), "Assumes pointers are <= 64 bit");
+	if ((oldPosition != position || areaSize == 0) && oldAreaSize != 0)
+		Allocations::forgetArea((int64_t)(intptr_t)file.get(), oldPosition, oldAreaSize);
+	if (areaSize != 0)
+		Allocations::setArea((int64_t)(intptr_t)file.get(), position, areaSize, contentSize, fillExpression.isLoaded());
 
 	return result;
 }

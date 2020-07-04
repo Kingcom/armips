@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Core/Common.h"
+#include "Core/Allocations.h"
 #include "Core/Assembler.h"
 #include "CommandLineInterface.h"
 
@@ -18,6 +19,7 @@ static void printUsage(std::wstring executableName)
 	Logger::printLine(L" -strequ <NAME> <VAL>      Equivalent to \'<NAME> equ \"<VAL>\"\' in code");
 	Logger::printLine(L" -definelabel <NAME> <VAL> Equivalent to \'.definelabel <NAME>, <VAL>\' in code");
 	Logger::printLine(L" -erroronwarning           Treat all warnings like errors");
+	Logger::printLine(L" -stat                     Show area usage statistics");
 	Logger::printLine(L"");
 	Logger::printLine(L"File arguments:");
 	Logger::printLine(L" <FILE>                    Main assembly code file");
@@ -56,6 +58,11 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 			else if (arguments[argpos] == L"-erroronwarning")
 			{
 				settings.errorOnWarning = true;
+				argpos += 1;
+			}
+			else if (arguments[argpos] == L"-stat")
+			{
+				settings.showStats = true;
 				argpos += 1;
 			}
 			else if (arguments[argpos] == L"-equ" && argpos + 2 < arguments.size())

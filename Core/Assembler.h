@@ -29,6 +29,7 @@ struct ArmipsArguments
 	int symFileVersion;
 	bool errorOnWarning;
 	bool silent;
+	bool showStats;
 	StringList* errorsResult;
 	std::vector<EquationDefinition> equList;
 	std::vector<LabelDefinition> labels;
@@ -49,6 +50,7 @@ struct ArmipsArguments
 		symFileVersion = 0;
 		errorOnWarning = false;
 		silent = false;
+		showStats = false;
 		errorsResult = nullptr;
 		useAbsoluteFileNames = true;
 	}

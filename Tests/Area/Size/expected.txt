@@ -1,2 +1,2 @@
-Size.asm(13) error: Area overflowed
-Size.asm(20) error: Area overflowed
+Size.asm(13) error: Area at 00000010 overflowed by 4 bytes
+Size.asm(20) error: Area at 00000018 overflowed by 4 bytes

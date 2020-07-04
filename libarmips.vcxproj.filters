@@ -172,6 +172,9 @@
     <ClCompile Include="Core\ExpressionFunctions.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Allocations.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Archs\Architecture.h">
@@ -317,6 +320,9 @@
       <Filter>Archs\MIPS</Filter>
     </ClInclude>
     <ClInclude Include="Core\ExpressionFunctions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Allocations.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

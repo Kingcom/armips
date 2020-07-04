@@ -2,6 +2,7 @@
 #include "Assembler.h"
 #include "Core/Common.h"
 #include "Commands/CAssemblerCommand.h"
+#include "Core/Allocations.h"
 #include "Core/FileManager.h"
 #include "Parser/Parser.h"
 #include "Archs/ARM/Arm.h"
@@ -55,6 +56,8 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 		validationPasses++;
 	} while (Revalidate == true);
+
+	Allocations::validateOverlap();
 
 	Logger::printQueue();
 	if (Logger::hasError() == true)
@@ -112,6 +115,13 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	return true;
 }
 
+static void printStats(const AllocationStats &stats) {
+	Logger::printLine(L"Total: %lld / %lld", stats.totalUsage, stats.totalSize);
+	Logger::printLine(L"Largest: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
+	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
+	Logger::printLine(L"Most free: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+}
+
 bool runArmips(ArmipsArguments& settings)
 {
 	// initialize and reset global data
@@ -126,6 +136,7 @@ bool runArmips(ArmipsArguments& settings)
 
 	Tokenizer::clearEquValues();
 	Logger::clear();
+	Allocations::clear();
 	Global.Table.clear();
 	Global.symbolTable.clear();
 
@@ -206,6 +217,9 @@ bool runArmips(ArmipsArguments& settings)
 		for (size_t i = 0; i < errors.size(); i++)
 			settings.errorsResult->push_back(errors[i]);
 	}
+
+	if (settings.showStats)
+		printStats(Allocations::collectStats());
 
 	return result;
 }
