@@ -378,16 +378,34 @@ Optionally, a second parameter can be given. The remaining free size of the area
 
 ### Regions
 
-To help manage allocating new data in existing space, you can use `.autoregion` for armips to automatically find a region (similar to areas) with enough space.  Example:
+To help manage allocating new data in existing space, you can use `.region` and `.autoregion` for armips to automatically find an area with enough space.
+
+`.region` uses the same parameters as `.area`, but creates a space that shared for future `.autoregion` usage.  You can still use code in the region, and the remaining space is considered free (with or without fill.)
+
+Example `.autoregion` usage:
 
 ```
+.org @FreeSpace
+.region 0x4000
+.byte 0x12, 0x34
+.endregion
+
 .autoregion
 @TheAnswer:
   .byte 42
 .endautoregion
 ```
 
-By default, this will allocate to ANY region with sufficient space.  It can be limited to a specific range if needed:
+Auto region content will be allocated as if it was placed after the content of the region it's allocated to (potentially after other auto regions.)
+
+A shortcut is available for regions without content at a specific location, to quickly define pools.  These are equivalent:
+
+```
+.defineregion @FreeSpace,0x4000,0x00
+.org @FreeSpace :: .region 0x4000,0x00 :: .endregion
+```
+
+By default, `.autoregion` will allocate to any region with sufficient space.  It can be limited to a specific range of start addresses if necessary:
 
 ```
 .autoregion @TextStart,@TextStart+@TextEnd
@@ -395,6 +413,10 @@ By default, this will allocate to ANY region with sufficient space.  It can be l
   .asciiz "Don't Panic"
 .endautoregion
 ```
+
+For example, this might be used to ensure the code is reachable by `bl`.
+
+If only the first parameter is given, it will simply require allocation after that virtual address.
 
 ## 4.9 Symbol files
 
