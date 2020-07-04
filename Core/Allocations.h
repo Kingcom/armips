@@ -31,6 +31,10 @@ public:
 	static void setPool(int64_t fileID, int64_t position, int64_t size);
 	static void forgetPool(int64_t fileID, int64_t position, int64_t size);
 
+	static void clearSubAreas();
+	static bool allocateSubArea(int64_t fileID, int64_t& position, int64_t minRange, int64_t maxRange, int64_t size);
+	static int64_t getSubAreaUsage(int64_t fileID, int64_t position);
+
 	static void validateOverlap();
 	static AllocationStats collectStats();
 
@@ -52,9 +56,21 @@ private:
 		bool usesFill;
 	};
 
+	struct SubArea
+	{
+		int64_t offset;
+		int64_t size;
+	};
+
 	static void collectAreaStats(AllocationStats &stats);
 	static void collectPoolStats(AllocationStats &stats);
 
+	static int64_t getSubAreaUsage(Key key)
+	{
+		return getSubAreaUsage(key.fileID, key.position);
+	}
+
 	static std::map<Key, Usage> allocations;
 	static std::map<Key, int64_t> pools;
+	static std::multimap<Key, SubArea> subAreas;
 };

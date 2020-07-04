@@ -5,6 +5,7 @@
 
 std::map<Allocations::Key, Allocations::Usage> Allocations::allocations;
 std::map<Allocations::Key, int64_t> Allocations::pools;
+std::multimap<Allocations::Key, Allocations::SubArea> Allocations::subAreas;
 
 void Allocations::clear()
 {
@@ -23,6 +24,8 @@ void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
 	auto it = allocations.find(key);
 	if (it != allocations.end() && it->second.space == space)
 		allocations.erase(it);
+
+	subAreas.erase(key);
 }
 
 void Allocations::setPool(int64_t fileID, int64_t position, int64_t size)
@@ -37,6 +40,58 @@ void Allocations::forgetPool(int64_t fileID, int64_t position, int64_t size)
 	auto it = pools.find(key);
 	if (it != pools.end() && it->second == size)
 		pools.erase(it);
+}
+
+bool Allocations::allocateSubArea(int64_t fileID, int64_t& position, int64_t minRange, int64_t maxRange, int64_t size)
+{
+	for (auto it : allocations)
+	{
+		if (it.first.fileID != fileID)
+			continue;
+		if (minRange != -1 && it.first.position + it.second.space < minRange)
+			continue;
+		if (maxRange != -1 && it.first.position < maxRange)
+			continue;
+
+		int64_t actualUsage = it.second.usage + getSubAreaUsage(it.first);
+		int64_t possiblePosition = it.first.position + actualUsage;
+		if (minRange != -1 && possiblePosition < minRange)
+			continue;
+		if (maxRange != -1 && possiblePosition > maxRange)
+			continue;
+
+		if (it.second.space >= actualUsage + size)
+		{
+			position = possiblePosition;
+			subAreas.emplace(it.first, SubArea{ actualUsage, size });
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Allocations::clearSubAreas()
+{
+	subAreas.clear();
+}
+
+int64_t Allocations::getSubAreaUsage(int64_t fileID, int64_t position)
+{
+	Key key{ fileID, position };
+	// For safety, just find the end of the last sub area.
+	int64_t maxExtent = 0;
+	auto range = subAreas.equal_range(key);
+	for (auto it = range.first; it != range.second; ++it)
+	{
+		int64_t extent = it->second.offset + it->second.size;
+		maxExtent = std::max(extent, maxExtent);
+	}
+
+	// Now subtract out the original usage.
+	if (maxExtent <= allocations[key].usage)
+		return 0;
+	return maxExtent - allocations[key].usage;
 }
 
 void Allocations::validateOverlap()
@@ -59,7 +114,7 @@ void Allocations::validateOverlap()
 			// If the new area ends before the last, keep it as the last.
 			if (lastEndPosition > it.first.position + it.second.space) {
 				// But update the usage to the max position.
-				int64_t newUsageEnd = it.first.position + it.second.usage;
+				int64_t newUsageEnd = it.first.position + it.second.usage + getSubAreaUsage(it.first);
 				lastUsage.usage = newUsageEnd - lastKey.position;
 				continue;
 			}
@@ -67,6 +122,7 @@ void Allocations::validateOverlap()
 
 		lastKey = it.first;
 		lastUsage = it.second;
+		lastUsage.usage += getSubAreaUsage(lastKey);
 		lastEndPosition = it.first.position + it.second.space;
 	}
 }
@@ -112,12 +168,12 @@ void Allocations::collectAreaStats(AllocationStats &stats)
 		{
 			// Overlap, merge.
 			int64_t lastUsageEnd = lastKey.position + lastUsage.usage;
-			int64_t newUsageEnd = it.first.position + it.second.usage;
+			int64_t newUsageEnd = it.first.position + it.second.usage + getSubAreaUsage(it.first);
 
 			if (lastUsageEnd >= it.first.position)
 				lastUsage.usage += newUsageEnd - lastUsageEnd;
 			else
-				lastUsage.usage += it.second.usage;
+				lastUsage.usage += it.second.usage + getSubAreaUsage(it.first);
 
 			lastEndPosition = it.first.position + it.second.space;
 			lastUsage.space = lastEndPosition - lastKey.position;
@@ -130,6 +186,7 @@ void Allocations::collectAreaStats(AllocationStats &stats)
 
 		lastKey = it.first;
 		lastUsage = it.second;
+		lastUsage.usage += getSubAreaUsage(lastKey);
 		lastEndPosition = it.first.position + it.second.space;
 	}
 

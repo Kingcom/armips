@@ -461,6 +461,28 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 	return area;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveAutoRegion(Parser& parser, int flags)
+{
+	std::vector<Expression> parameters;
+	if (parser.peekToken().type != TokenType::Separator)
+	{
+		if (parser.parseExpressionList(parameters, 0, 2) == false)
+			return nullptr;
+	}
+
+	auto area = std::make_unique<CDirectiveAutoRegion>();
+	if (parameters.size() == 1)
+		area->setMinRangeExpression(parameters[0]);
+	else if (parameters.size() == 2)
+		area->setRangeExpressions(parameters[0], parameters[1]);
+
+	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence(L'.', {L".endautoregion"});
+	parser.eatToken();
+
+	area->setContent(std::move(content));
+	return area;
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, int flags)
 {
 	const Token &tok = parser.nextToken();
@@ -738,6 +760,7 @@ const DirectiveMap directives = {
 	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
 	
 	{ L".area",				{ &parseDirectiveArea,				0 } },
+	{ L".autoregion",		{ &parseDirectiveAutoRegion,		0 } },
 
 	{ L".importobj",		{ &parseDirectiveObjImport,			0 } },
 	{ L".importlib",		{ &parseDirectiveObjImport,			0 } },

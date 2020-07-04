@@ -374,6 +374,26 @@ Optionally, a second parameter can be given. The remaining free size of the area
 .endarea
 ```
 
+### Regions
+
+To help manage allocating new data in existing space, you can use `.autoregion` for armips to automatically find a region (similar to areas) with enough space.  Example:
+
+```
+.autoregion
+@TheAnswer:
+  .byte 42
+.endautoregion
+```
+
+By default, this will allocate to ANY region with sufficient space.  It can be limited to a specific range if needed:
+
+```
+.autoregion @TextStart,@TextStart+@TextEnd
+@CoverAdvisory:
+  .asciiz "Don't Panic"
+.endautoregion
+```
+
 ## 4.9 Symbol files
 
 Functions.

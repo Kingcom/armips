@@ -40,6 +40,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		}
 
 		g_fileManager->reset();
+		Allocations::clearSubAreas();
 
 #ifdef _DEBUG
 		if (!Logger::isSilent())

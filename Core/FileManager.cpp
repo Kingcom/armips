@@ -373,7 +373,8 @@ bool FileManager::advanceMemory(size_t bytes)
 	return activeFile->seekVirtual(pos+bytes);
 }
 
-int64_t FileManager::getOpenFileID() {
+int64_t FileManager::getOpenFileID()
+{
 	if (checkActiveFile() == false)
 		return 0;
 
