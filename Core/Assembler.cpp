@@ -57,6 +57,8 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		validationPasses++;
 	} while (Revalidate == true);
 
+	Allocations::validateOverlap();
+
 	Logger::printQueue();
 	if (Logger::hasError() == true)
 	{

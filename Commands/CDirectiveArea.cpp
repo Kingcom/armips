@@ -71,7 +71,7 @@ bool CDirectiveArea::Validate()
 	if ((oldPosition != position || areaSize == 0) && oldAreaSize != 0)
 		Allocations::forgetArea(oldPosition, oldAreaSize);
 	if (areaSize != 0)
-		Allocations::setArea(position, areaSize, contentSize);
+		Allocations::setArea(position, areaSize, contentSize, fillExpression.isLoaded());
 
 	return result;
 }

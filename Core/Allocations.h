@@ -18,15 +18,17 @@ struct AllocationStats {
 class Allocations {
 public:
 	static void clear();
-	static void setArea(int64_t position, int64_t space, int64_t usage);
+	static void setArea(int64_t position, int64_t space, int64_t usage, bool usesFill);
 	static void forgetArea(int64_t position, int64_t space);
 
+	static void validateOverlap();
 	static AllocationStats collectStats();
 
 private:
 	struct Usage {
 		int64_t space;
 		int64_t usage;
+		bool usesFill;
 	};
 	static std::map<int64_t, Usage> allocations;
 };
