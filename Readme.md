@@ -418,6 +418,8 @@ For example, this might be used to ensure the code is reachable by `bl`.
 
 If only the first parameter is given, it will simply require allocation after that virtual address.
 
+Note that after `.endautoregion`, the output position will be reset to what it was before the `.autoregion` directive.
+
 ## 4.9 Symbol files
 
 Functions.

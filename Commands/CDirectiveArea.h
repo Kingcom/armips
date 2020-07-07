@@ -39,6 +39,7 @@ public:
 	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
 
 private:
+	int64_t resetPosition;
 	int64_t position;
 	int64_t contentSize;
 	Expression minRangeExpression;

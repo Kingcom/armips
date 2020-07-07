@@ -177,6 +177,7 @@ void CDirectiveArea::writeSymData(SymbolData& symData) const
 CDirectiveAutoRegion::CDirectiveAutoRegion()
 {
 	this->contentSize = 0;
+	this->resetPosition = 0;
 	this->position = -1;
 
 	this->content = nullptr;
@@ -195,6 +196,8 @@ void CDirectiveAutoRegion::setRangeExpressions(Expression& minExp, Expression& m
 
 bool CDirectiveAutoRegion::Validate()
 {
+	resetPosition = g_fileManager->getVirtualAddress();
+
 	// We need at least one full pass run before we can get an address.
 	if (Global.validationPasses < 1)
 	{
@@ -203,6 +206,8 @@ bool CDirectiveAutoRegion::Validate()
 		content->applyFileInfo();
 		content->Validate();
 		contentSize = g_fileManager->getVirtualAddress() - position;
+
+		g_fileManager->seekVirtual(resetPosition);
 		return true;
 	}
 
@@ -244,6 +249,7 @@ bool CDirectiveAutoRegion::Validate()
 
 	// restore info of this command
 	applyFileInfo();
+	g_fileManager->seekVirtual(resetPosition);
 
 	if (position != oldPosition || contentSize != oldContentSize)
 		result = true;
@@ -256,6 +262,7 @@ void CDirectiveAutoRegion::Encode() const
 	Arch->NextSection();
 	g_fileManager->seekVirtual(position);
 	content->Encode();
+	g_fileManager->seekVirtual(resetPosition);
 }
 
 void CDirectiveAutoRegion::writeTempData(TempData& tempData) const
