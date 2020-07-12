@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <unordered_map>
 #include "Pool.h"
 #include "Arm.h"
 #include "Core/Common.h"
@@ -42,6 +43,7 @@ bool ArmPoolCommand::Validate()
 	size_t oldSize = values.size();
 	values.clear();
 
+	std::unordered_map<int32_t, size_t> usedValues;
 	for (ArmPoolEntry& entry: Arm.getPoolContent())
 	{
 		size_t index = values.size();
@@ -50,18 +52,16 @@ bool ArmPoolCommand::Validate()
 		// we aren't in an unordinarily long validation loop
 		if (Global.validationPasses < 10)
 		{
-			for (size_t i = 0; i < values.size(); i++)
-			{
-				if (values[i] == entry.value)
-				{
-					index = i;
-					break;
-				}
-			}
+			auto it = usedValues.find(entry.value);
+			if (it != usedValues.end())
+				index = it->second;
 		}
 
 		if (index == values.size())
+		{
+			usedValues[entry.value] = index;
 			values.push_back(entry.value);
+		}
 
 		entry.command->applyFileInfo();
 		entry.command->setPoolAddress(position+index*4);
