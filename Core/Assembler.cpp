@@ -115,11 +115,18 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	return true;
 }
 
-static void printStats(const AllocationStats &stats) {
-	Logger::printLine(L"Total: %lld / %lld", stats.totalUsage, stats.totalSize);
-	Logger::printLine(L"Largest: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
+static void printStats(const AllocationStats &stats)
+{
+	Logger::printLine(L"Total areas: %lld / %lld", stats.totalUsage, stats.totalSize);
+	Logger::printLine(L"Largest area: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
 	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
-	Logger::printLine(L"Most free: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+	Logger::printLine(L"Most free area: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+
+	if (stats.totalPoolSize != 0)
+	{
+		Logger::printLine(L"Total pool size: %lld", stats.totalPoolSize);
+		Logger::printLine(L"Largest pool: 0x%08llX, %lld", stats.largestPoolPosition, stats.largestPoolSize);
+	}
 }
 
 bool runArmips(ArmipsArguments& settings)

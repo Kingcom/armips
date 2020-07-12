@@ -371,3 +371,11 @@ bool FileManager::advanceMemory(size_t bytes)
 	int64_t pos = activeFile->getVirtualAddress();
 	return activeFile->seekVirtual(pos+bytes);
 }
+
+int64_t FileManager::getOpenFileID() {
+	if (checkActiveFile() == false)
+		return 0;
+
+	static_assert(sizeof(int64_t) >= sizeof(intptr_t), "Assumes pointers are <= 64 bit");
+	return (int64_t)(intptr_t)activeFile.get();
+}

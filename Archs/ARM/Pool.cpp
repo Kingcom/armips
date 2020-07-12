@@ -1,6 +1,8 @@
 #include "stdafx.h"
+#include <unordered_map>
 #include "Pool.h"
 #include "Arm.h"
+#include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 
@@ -32,16 +34,20 @@ void ArmStateCommand::writeSymData(SymbolData& symData) const
 
 ArmPoolCommand::ArmPoolCommand()
 {
-
+	position = -1;
 }
 
 bool ArmPoolCommand::Validate()
 {
+	int64_t fileID = g_fileManager->getOpenFileID();
+	if (position != -1)
+		Allocations::forgetPool(fileID, position, values.size() * 4);
 	position = g_fileManager->getVirtualAddress();
 
 	size_t oldSize = values.size();
 	values.clear();
 
+	std::unordered_map<int32_t, size_t> usedValues;
 	for (ArmPoolEntry& entry: Arm.getPoolContent())
 	{
 		size_t index = values.size();
@@ -50,18 +56,16 @@ bool ArmPoolCommand::Validate()
 		// we aren't in an unordinarily long validation loop
 		if (Global.validationPasses < 10)
 		{
-			for (size_t i = 0; i < values.size(); i++)
-			{
-				if (values[i] == entry.value)
-				{
-					index = i;
-					break;
-				}
-			}
+			auto it = usedValues.find(entry.value);
+			if (it != usedValues.end())
+				index = it->second;
 		}
 
 		if (index == values.size())
+		{
+			usedValues[entry.value] = index;
 			values.push_back(entry.value);
+		}
 
 		entry.command->applyFileInfo();
 		entry.command->setPoolAddress(position+index*4);
@@ -69,6 +73,7 @@ bool ArmPoolCommand::Validate()
 
 	Arm.clearPoolContent();
 	g_fileManager->advanceMemory(values.size()*4);
+	Allocations::setPool(fileID, position, values.size() * 4);
 
 	return oldSize != values.size();
 }

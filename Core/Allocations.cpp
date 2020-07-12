@@ -3,6 +3,7 @@
 #include "Core/Common.h"
 
 std::map<Allocations::Key, Allocations::Usage> Allocations::allocations;
+std::map<Allocations::Key, int64_t> Allocations::pools;
 
 void Allocations::clear()
 {
@@ -19,9 +20,22 @@ void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
 {
 	Key key{ fileID, position };
 	auto it = allocations.find(key);
-	if (it != allocations.end() && it->second.space == space) {
+	if (it != allocations.end() && it->second.space == space)
 		allocations.erase(it);
-	}
+}
+
+void Allocations::setPool(int64_t fileID, int64_t position, int64_t size)
+{
+	Key key{ fileID, position };
+	pools[key] = size;
+}
+
+void Allocations::forgetPool(int64_t fileID, int64_t position, int64_t size)
+{
+	Key key{ fileID, position };
+	auto it = pools.find(key);
+	if (it != pools.end() && it->second == size)
+		pools.erase(it);
 }
 
 void Allocations::validateOverlap()
@@ -59,7 +73,13 @@ void Allocations::validateOverlap()
 AllocationStats Allocations::collectStats()
 {
 	AllocationStats stats{};
+	collectAreaStats(stats);
+	collectPoolStats(stats);
+	return stats;
+}
 
+void Allocations::collectAreaStats(AllocationStats &stats)
+{
 	// Need to work out overlaps.
 	Key lastKey{ -1, -1 };
 	int64_t lastEndPosition = -1;
@@ -114,6 +134,18 @@ AllocationStats Allocations::collectStats()
 
 	if (lastKey.position != -1)
 		applyUsage(lastKey.position, lastUsage);
+}
 
-	return stats;
+void Allocations::collectPoolStats(AllocationStats &stats)
+{
+	for (auto it : pools)
+	{
+		if (it.second > stats.largestPoolSize)
+		{
+			stats.largestPoolPosition = it.first.position;
+			stats.largestPoolSize = it.second;
+		}
+
+		stats.totalPoolSize += it.second;
+	}
 }
