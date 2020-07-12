@@ -14,6 +14,10 @@ struct AllocationStats
 
 	int64_t totalSize;
 	int64_t totalUsage;
+
+	int64_t largestPoolPosition;
+	int64_t largestPoolSize;
+	int64_t totalPoolSize;
 };
 
 class Allocations
@@ -22,6 +26,9 @@ public:
 	static void clear();
 	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill);
 	static void forgetArea(int64_t fileID, int64_t position, int64_t space);
+
+	static void setPool(int64_t fileID, int64_t position, int64_t size);
+	static void forgetPool(int64_t fileID, int64_t position, int64_t size);
 
 	static void validateOverlap();
 	static AllocationStats collectStats();
@@ -43,5 +50,10 @@ private:
 		int64_t usage;
 		bool usesFill;
 	};
+
+	static void collectAreaStats(AllocationStats &stats);
+	static void collectPoolStats(AllocationStats &stats);
+
 	static std::map<Key, Usage> allocations;
+	static std::map<Key, int64_t> pools;
 };

@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "Pool.h"
 #include "Arm.h"
+#include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 
@@ -33,11 +34,14 @@ void ArmStateCommand::writeSymData(SymbolData& symData) const
 
 ArmPoolCommand::ArmPoolCommand()
 {
-
+	position = -1;
 }
 
 bool ArmPoolCommand::Validate()
 {
+	int64_t fileID = g_fileManager->getOpenFileID();
+	if (position != -1)
+		Allocations::forgetPool(fileID, position, values.size() * 4);
 	position = g_fileManager->getVirtualAddress();
 
 	size_t oldSize = values.size();
@@ -69,6 +73,7 @@ bool ArmPoolCommand::Validate()
 
 	Arm.clearPoolContent();
 	g_fileManager->advanceMemory(values.size()*4);
+	Allocations::setPool(fileID, position, values.size() * 4);
 
 	return oldSize != values.size();
 }
