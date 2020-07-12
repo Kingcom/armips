@@ -19,9 +19,8 @@ void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
 {
 	Key key{ fileID, position };
 	auto it = allocations.find(key);
-	if (it != allocations.end() && it->second.space == space) {
+	if (it != allocations.end() && it->second.space == space)
 		allocations.erase(it);
-	}
 }
 
 void Allocations::validateOverlap()

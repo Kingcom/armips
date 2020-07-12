@@ -2,7 +2,8 @@
 
 #include <map>
 
-struct AllocationStats {
+struct AllocationStats
+{
 	int64_t largestPosition;
 	int64_t largestSize;
 	int64_t largestUsage;
@@ -15,7 +16,8 @@ struct AllocationStats {
 	int64_t totalUsage;
 };
 
-class Allocations {
+class Allocations
+{
 public:
 	static void clear();
 	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill);
@@ -25,7 +27,8 @@ public:
 	static AllocationStats collectStats();
 
 private:
-	struct Key {
+	struct Key
+	{
 		int64_t fileID;
 		int64_t position;
 
@@ -34,7 +37,8 @@ private:
 			return std::tie(fileID, position) < std::tie(other.fileID, other.position);
 		}
 	};
-	struct Usage {
+	struct Usage
+	{
 		int64_t space;
 		int64_t usage;
 		bool usesFill;
