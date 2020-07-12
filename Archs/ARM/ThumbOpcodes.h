@@ -40,7 +40,7 @@
 #define THUMB_RIGHTSHIFT_IMMEDIATE	0x00020000
 
 typedef struct {
-	const char* name;
+	const wchar_t* name;
 	const char* mask;
 	unsigned short encoding;
 	unsigned char type:5;

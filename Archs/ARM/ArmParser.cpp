@@ -742,10 +742,7 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
-		// todo: save as wchar
-		std::wstring name = convertUtf8ToWString(ThumbOpcodes[z].name);
-
-		if (stringValue == name)
+		if (stringValue == ThumbOpcodes[z].name)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 			
