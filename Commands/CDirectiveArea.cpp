@@ -68,12 +68,11 @@ bool CDirectiveArea::Validate()
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
 		result = true;
 
-	std::shared_ptr<AssemblerFile> file = g_fileManager->getOpenFile();
-	static_assert(sizeof(int64_t) >= sizeof(intptr_t), "Assumes pointers are <= 64 bit");
+	int64_t fileID = g_fileManager->getOpenFileID();
 	if ((oldPosition != position || areaSize == 0) && oldAreaSize != 0)
-		Allocations::forgetArea((int64_t)(intptr_t)file.get(), oldPosition, oldAreaSize);
+		Allocations::forgetArea(fileID, oldPosition, oldAreaSize);
 	if (areaSize != 0)
-		Allocations::setArea((int64_t)(intptr_t)file.get(), position, areaSize, contentSize, fillExpression.isLoaded());
+		Allocations::setArea(fileID, position, areaSize, contentSize, fillExpression.isLoaded());
 
 	return result;
 }
