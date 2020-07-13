@@ -1,6 +1,8 @@
 #pragma once
-#include "ElfFile.h"
-#include "Core/SymbolData.h"
+
+#include <memory>
+
+#include "Core/ELF/ElfFile.h"
 
 struct ElfRelocatorCtor
 {
@@ -28,11 +30,12 @@ public:
 	virtual bool finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) { return true; }
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
 
-	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) { return nullptr; }
+	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 };
 
 
 class Label;
+class SymbolData;
 
 struct ElfRelocatorSection
 {

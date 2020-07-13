@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DirectivesParser.h"
 #include "Core/Common.h"
+#include "Core/Misc.h"
 #include "Commands/CDirectiveFile.h"
 #include "Commands/CDirectiveData.h"
 #include "Commands/CDirectiveConditional.h"

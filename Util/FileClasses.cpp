@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "Util/FileClasses.h"
 #include "Core/Common.h"
-#include "stdafx.h"
+#include "Util/Util.h"
+
+#include <cstring>
 
 const wchar_t SjisToUnicodeTable1[] =
 {
@@ -959,9 +961,9 @@ std::wstring TextFile::readLine()
 	return result;
 }
 
-StringList TextFile::readAll()
+std::vector<std::wstring> TextFile::readAll()
 {
-	StringList result;
+	std::vector<std::wstring> result;
 	while (!atEnd())
 	{
 		result.push_back(readLine());
@@ -1088,7 +1090,7 @@ void TextFile::writeLine(const std::string& line)
 	writeLine(line.c_str());
 }
 
-void TextFile::writeLines(StringList& list)
+void TextFile::writeLines(std::vector<std::wstring>& list)
 {
 	for (size_t i = 0; i < list.size(); i++)
 	{

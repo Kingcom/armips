@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ExpressionParser.h"
+#include "Core/Expression.h"
+#include "Parser/Tokenizer.h"
 
 static ExpressionInternal* expression(Tokenizer& tokenizer);
 

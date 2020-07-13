@@ -2,7 +2,9 @@
 #include "Core/Common.h"
 #include "Core/Allocations.h"
 #include "Core/Assembler.h"
+#include "Core/Misc.h"
 #include "CommandLineInterface.h"
+#include "Util/Util.h"
 
 static void printUsage(std::wstring executableName)
 {
@@ -25,7 +27,7 @@ static void printUsage(std::wstring executableName)
 	Logger::printLine(L" <FILE>                    Main assembly code file");
 }
 
-static bool parseArguments(const StringList& arguments, ArmipsArguments& settings)
+static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArguments& settings)
 {
 	size_t argpos = 1;
 	bool readflags = true;
@@ -205,7 +207,7 @@ static bool parseArguments(const StringList& arguments, ArmipsArguments& setting
 	return true;
 }
 
-int runFromCommandLine(const StringList& arguments, ArmipsArguments settings)
+int runFromCommandLine(const std::vector<std::wstring>& arguments, ArmipsArguments settings)
 {
 	if (parseArguments(arguments, settings) == false)
 	{

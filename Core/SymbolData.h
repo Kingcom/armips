@@ -1,6 +1,7 @@
 #pragma once
-#include "../Util/FileClasses.h"
+
 #include <set>
+#include <vector>
 
 class AssemblerFile;
 

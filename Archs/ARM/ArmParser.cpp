@@ -1,11 +1,15 @@
 #include "stdafx.h"
+#include "Arm.h"
 #include "ArmParser.h"
+#include "CArmInstruction.h"
+#include "CThumbInstruction.h"
 #include "Parser/Parser.h"
 #include "Parser/ExpressionParser.h"
 #include "Parser/DirectivesParser.h"
 #include "Util/Util.h"
 #include "Core/Common.h"
 #include "Commands/CDirectiveFile.h"
+#include "Commands/CommandSequence.h"
 
 #define CHECK(exp) if (!(exp)) return false;
 

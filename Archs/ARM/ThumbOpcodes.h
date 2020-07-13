@@ -39,13 +39,14 @@
 #define THUMB_NEGATIVE_IMMEDIATE	0x00010000
 #define THUMB_RIGHTSHIFT_IMMEDIATE	0x00020000
 
-typedef struct {
+struct tThumbOpcode
+{
 	const wchar_t* name;
 	const char* mask;
 	unsigned short encoding;
 	unsigned char type:5;
 	unsigned char length:3;
 	int flags;
-} tThumbOpcode;
+};
 
 extern const tThumbOpcode ThumbOpcodes[];

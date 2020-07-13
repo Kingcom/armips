@@ -1,15 +1,13 @@
 #pragma once
+
 #include <memory>
+#include <string>
+#include <vector>
 
-inline std::wstring to_wstring(int64_t value)
-{
-	return formatString(L"%d", value);
-}
+class Label;
 
-inline std::wstring to_wstring(double value)
-{
-	return formatString(L"%#.17g", value);
-}
+struct ExpressionFunctionEntry;
+struct ExpressionLabelFunctionEntry;
 
 enum class OperatorType
 {
@@ -124,11 +122,6 @@ struct ExpressionValue
 	ExpressionValue operator^(const ExpressionValue& other) const;
 };
 
-class Label;
-
-struct ExpressionFunctionEntry;
-struct ExpressionLabelFunctionEntry;
-
 class ExpressionInternal
 {
 public:
@@ -195,41 +188,9 @@ public:
 		return true;
 	}
 
-	bool evaluateString(std::wstring& dest, bool convert)
-	{
-		if (expression == nullptr)
-			return false;
-
-		ExpressionValue value = expression->evaluate();
-		if (convert && value.isInt())
-		{
-			dest = to_wstring(value.intValue);
-			return true;
-		}
-
-		if (convert && value.isFloat())
-		{
-			dest = to_wstring(value.floatValue);
-			return true;
-		}
-
-		if (value.isString() == false)
-			return false;
-
-		dest = value.strValue;
-		return true;
-	}
-	
-	bool evaluateIdentifier(std::wstring& dest)
-	{
-		if (expression == nullptr || expression->isIdentifier() == false)
-			return false;
-
-		dest = expression->getStringValue();
-		return true;
-	}
-
-	std::wstring toString() { return expression != nullptr ? expression->toString() : L""; };
+	bool evaluateString(std::wstring& dest, bool convert);
+	bool evaluateIdentifier(std::wstring& dest);
+	std::wstring toString();;
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;

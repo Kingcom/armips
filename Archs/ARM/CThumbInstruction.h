@@ -1,9 +1,8 @@
 #pragma once
-#include "Commands/CAssemblerCommand.h"
-#include "ThumbOpcodes.h"
-#include "Arm.h"
+
+#include "Archs/ARM/Arm.h"
+#include "Archs/ARM/ThumbOpcodes.h"
 #include "Core/Expression.h"
-#include "ThumbOpcodes.h"
 
 struct ThumbOpcodeVariables {
 	ArmRegisterValue rd;

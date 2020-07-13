@@ -1,5 +1,7 @@
 #pragma once
-#include "Util/Util.h"
+
+#include <string>
+#include <vector>
 
 #if defined(__HAIKU__)
 #include <sys/stat.h>
@@ -18,9 +20,9 @@ private:
 
 	std::wstring executableName;
 	
-	StringList getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/");
+	std::vector<std::wstring> getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/");
 	bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString);
-	StringList listSubfolders(const std::wstring& dir);
+	std::vector<std::wstring> listSubfolders(const std::wstring& dir);
 	void initConsole();
 	void changeConsoleColor(ConsoleColors color);
 	void restoreConsole();

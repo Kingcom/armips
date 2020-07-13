@@ -1,4 +1,6 @@
 #include "stdafx.h"
+
+#include "Core/Assembler.h"
 #include "Core/SymbolTable.h"
 #include "Util/FileClasses.h"
 #include "Util/Util.h"

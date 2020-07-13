@@ -1,8 +1,19 @@
 #include "stdafx.h"
 #include "Architecture.h"
 #include "Core/Common.h"
+#include "Core/ELF/ElfRelocator.h"
+#include "Core/ExpressionFunctions.h"
+#include "Core/FileManager.h"
+#include "Core/Misc.h"
+#include "Core/SymbolData.h"
 
 CInvalidArchitecture InvalidArchitecture;
+
+const ExpressionFunctionMap &CArchitecture::getExpressionFunctions()
+{
+	const static ExpressionFunctionMap emptyMap = {};
+	return emptyMap;
+}
 
 ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText)
 {
@@ -69,4 +80,3 @@ std::unique_ptr<IElfRelocator> CInvalidArchitecture::getElfRelocator()
 	Logger::printError(Logger::FatalError,L"No architecture specified");
 	return nullptr;
 }
-

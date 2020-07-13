@@ -1,13 +1,13 @@
 #pragma once
 
+#include <string>
 #include <vector>
-#include "SymbolTable.h"
-#include "Commands/CAssemblerCommand.h"
+
+#include "Core/SymbolTable.h"
 #include "Util/EncodingTable.h"
-#include "Util/FileClasses.h"
-#include "Core/Misc.h"
-#include "Core/SymbolData.h"
-#include "Archs/Architecture.h"
+
+class AssemblerFile;
+class CArchitecture;
 
 typedef struct {
 	std::vector<std::wstring> FileList;

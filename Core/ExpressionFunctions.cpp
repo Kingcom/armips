@@ -1,7 +1,14 @@
 #include "stdafx.h"
+#include "Core/Assembler.h"
+#include "Core/Expression.h"
+#include "Core/FileManager.h"
 #include "ExpressionFunctions.h"
 #include "Misc.h"
 #include "Common.h"
+#include "Util/Util.h"
+
+#include <cmath>
+
 #if ARMIPS_REGEXP
 #include <regex>
 #endif

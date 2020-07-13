@@ -1,5 +1,7 @@
 #pragma once
-#include "Pool.h"
+
+#include "Archs/Architecture.h"
+#include "Archs/ARM/Pool.h"
 
 #define ARM_SHIFT_LSL		0x00
 #define ARM_SHIFT_LSR		0x01

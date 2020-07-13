@@ -1,8 +1,8 @@
 #pragma once
+
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
 #include "Util/EncodingTable.h"
-#include "../Archs/Architecture.h"
 
 enum class EncodingMode { Invalid, U8, U16, U32, U64, Ascii, Float, Double, Sjis, Custom };
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "Mips.h"
 
 #define MA_MIPS1		0x00000001
 #define MA_MIPS2		0x00000002
@@ -106,12 +105,13 @@ struct MipsArchDefinition
 
 extern const MipsArchDefinition mipsArchs[];
 
-typedef struct {
+struct tMipsOpcode
+{
 	const char* name;
 	const char* encoding;
 	int destencoding;
 	int archs;
 	int flags;
-} tMipsOpcode;
+};
 
 extern const tMipsOpcode MipsOpcodes[];

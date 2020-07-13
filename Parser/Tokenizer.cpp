@@ -646,6 +646,11 @@ Token FileTokenizer::loadToken()
 	return std::move(token);
 }
 
+bool FileTokenizer::isInputAtEnd()
+{
+	return linePos >= currentLine.size() && input->atEnd();
+}
+
 bool FileTokenizer::init(TextFile* input)
 {
 	clearTokens();

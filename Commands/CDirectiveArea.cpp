@@ -3,7 +3,11 @@
 #include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
+#include "Core/Misc.h"
+#include "Core/SymbolData.h"
+
 #include <algorithm>
+#include <cstring>
 
 CDirectiveArea::CDirectiveArea(Expression& size)
 {

@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "Archs/MIPS/Mips.h"
+#include "Archs/MIPS/MipsMacros.h"
 #include "MipsParser.h"
 #include "Parser/Parser.h"
 #include "Parser/ExpressionParser.h"

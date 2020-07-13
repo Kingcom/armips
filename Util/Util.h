@@ -1,10 +1,7 @@
 #pragma once
+
 #include <string>
-#include <stdio.h>
-
-#include "ByteArray.h"
-
-typedef std::vector<std::wstring> StringList;
+#include <vector>
 
 std::wstring convertUtf8ToWString(const char* source);
 std::string convertWCharToUtf8(wchar_t character);
@@ -17,8 +14,8 @@ int32_t getFloatBits(float value);
 float bitsToFloat(int32_t value);
 int64_t getDoubleBits(double value);
 
-StringList getStringListFromArray(wchar_t** source, int count);
-StringList splitString(const std::wstring& str, const wchar_t delim, bool skipEmpty);
+std::vector<std::wstring> getStringListFromArray(wchar_t** source, int count);
+std::vector<std::wstring> splitString(const std::wstring& str, const wchar_t delim, bool skipEmpty);
 
 int64_t fileSize(const std::wstring& fileName);
 bool fileExists(const std::wstring& strFilename);

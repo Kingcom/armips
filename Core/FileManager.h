@@ -1,7 +1,14 @@
 #pragma once
+
+#include <memory>
 #include <vector>
-#include "../Util/FileClasses.h"
-#include "SymbolData.h"
+
+#include "Util/ByteArray.h"
+#include "Util/FileClasses.h"
+
+class SymbolData;
+
+struct SymDataModuleInfo;
 
 class AssemblerFile
 {

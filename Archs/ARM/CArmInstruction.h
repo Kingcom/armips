@@ -1,7 +1,7 @@
 #pragma once
-#include "Commands/CAssemblerCommand.h"
-#include "ArmOpcodes.h"
-#include "Arm.h"
+
+#include "Archs/ARM/ArmOpcodes.h"
+#include "Archs/ARM/Arm.h"
 #include "Core/Expression.h"
 
 struct ArmOpcodeVariables {

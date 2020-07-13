@@ -4,6 +4,7 @@
 #include "Mips.h"
 #include "MipsOpcodes.h"
 #include "Core/FileManager.h"
+#include "Core/Misc.h"
 #include "MipsParser.h"
 
 CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers)

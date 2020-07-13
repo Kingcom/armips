@@ -23,7 +23,7 @@ public:
 	virtual bool Validate() { return false; };
 	virtual void Encode() const { };
 	virtual void writeTempData(TempData& tempData) const { };
-	virtual void writeSymData(SymbolData& symData) const { symData.setEnabled(enabled); }
+	virtual void writeSymData(SymbolData& symData) const;
 private:
 	bool enabled;
 };

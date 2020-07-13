@@ -4,14 +4,17 @@
 #include "Util/Util.h"
 #include "Core/Common.h"
 #include "Core/Assembler.h"
+#include "Core/Misc.h"
+
+#include <cstring>
 
 #ifndef _WIN32
 #include <dirent.h>
 #endif
 
-StringList TestRunner::listSubfolders(const std::wstring& dir)
+std::vector<std::wstring> TestRunner::listSubfolders(const std::wstring& dir)
 {
-	StringList result;
+	std::vector<std::wstring> result;
 	
 #ifdef _WIN32
 	WIN32_FIND_DATAW findFileData;
@@ -115,11 +118,11 @@ void TestRunner::restoreConsole()
 #endif
 }
 
-StringList TestRunner::getTestsList(const std::wstring& dir, const std::wstring& prefix)
+std::vector<std::wstring> TestRunner::getTestsList(const std::wstring& dir, const std::wstring& prefix)
 {
-	StringList tests;
+	std::vector<std::wstring> tests;
 
-	StringList dirs = listSubfolders(dir+prefix);
+	std::vector<std::wstring> dirs = listSubfolders(dir+prefix);
 	for (std::wstring& dirName: dirs)
 	{
 		std::wstring testName = prefix + dirName;
@@ -131,7 +134,7 @@ StringList TestRunner::getTestsList(const std::wstring& dir, const std::wstring&
 				testName.erase(0,1);
 			tests.push_back(testName);
 		} else {
-			StringList subTests = getTestsList(dir,testName+L"/");
+			std::vector<std::wstring> subTests = getTestsList(dir,testName+L"/");
 			tests.insert(tests.end(),subTests.begin(),subTests.end());
 		}
 	}
@@ -145,12 +148,12 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	changeDirectory(dir);
 
 	ArmipsArguments settings;
-	StringList errors;
+	std::vector<std::wstring> errors;
 	int expectedRetVal = 0;
 	int retVal = 0;
 	bool checkRetVal = false;
 	bool result = true;
-	StringList args;
+	std::vector<std::wstring> args;
 
 	if (fileExists(L"commandLine.txt"))
 	{
@@ -190,7 +193,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	{
 		TextFile f;
 		f.open(L"expected.txt",TextFile::Read);
-		StringList expectedErrors = f.readAll();
+		std::vector<std::wstring> expectedErrors = f.readAll();
 
 		if (errors.size() == expectedErrors.size())
 		{
@@ -246,7 +249,7 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 {
 	this->executableName = executableName;
 
-	StringList tests = getTestsList(dir);
+	std::vector<std::wstring> tests = getTestsList(dir);
 	if (tests.empty())
 	{
 		Logger::printLine(L"No tests to run");

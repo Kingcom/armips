@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "Core/Misc.h"
 
+#include <cstring>
+
 #ifndef _WIN32
 #include <strings.h>
 #define _stricmp strcasecmp

@@ -1,9 +1,19 @@
 #pragma once
-#include <unordered_map>
-#include "Parser/DirectivesParser.h"
-#include "Parser/Tokenizer.h"
-#include "CThumbInstruction.h"
-#include "CArmInstruction.h"
+
+#include <memory>
+#include <string>
+
+class CAssemblerCommand;
+class CArmInstruction;
+class CThumbInstruction;
+class Expression;
+class Parser;
+
+struct ArmRegisterValue;
+struct ArmOpcodeVariables;
+struct ThumbOpcodeVariables;
+struct tArmOpcode;
+struct tThumbOpcode;
 
 struct ArmRegisterDescriptor {
 	const wchar_t* name;
