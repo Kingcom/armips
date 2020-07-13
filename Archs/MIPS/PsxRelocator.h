@@ -1,8 +1,14 @@
 #pragma once
-#include "Util/ByteArray.h"
-#include "Core/SymbolTable.h"
-#include "MipsElfRelocator.h"
+
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "Commands/CAssemblerCommand.h"
+#include "Util/ByteArray.h"
+
+class Label;
+class MipsElfRelocator;
 
 enum class PsxRelocationType { WordLiteral, UpperImmediate, LowerImmediate, FunctionCall };
 enum class PsxRelocationRefType { SymblId, SegmentOffset };

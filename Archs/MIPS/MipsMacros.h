@@ -1,6 +1,11 @@
 #pragma once
-#include "Mips.h"
-#include "CMipsInstruction.h"
+
+#include <memory>
+
+#include "Commands/CAssemblerCommand.h"
+
+struct MipsImmediateData;
+struct MipsRegisterData;
 
 #define MIPSM_B						0x00000001
 #define MIPSM_BU					0x00000002

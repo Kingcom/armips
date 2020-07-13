@@ -1,7 +1,25 @@
 #include "stdafx.h"
+
+#include "Archs/Architecture.h"
 #include "Expression.h"
 #include "Common.h"
+#include "Core/FileManager.h"
+#include "Core/Misc.h"
 #include "ExpressionFunctions.h"
+#include "Util/Util.h"
+
+namespace
+{
+	std::wstring to_wstring(int64_t value)
+	{
+		return formatString(L"%d", value);
+	}
+
+	std::wstring to_wstring(double value)
+	{
+		return formatString(L"%#.17g", value);
+	}
+}
 
 enum class ExpressionValueCombination
 {
@@ -963,6 +981,45 @@ void Expression::replaceMemoryPos(const std::wstring& identifierName)
 {
 	if (expression != nullptr)
 		expression->replaceMemoryPos(identifierName);
+}
+
+bool Expression::evaluateString(std::wstring &dest, bool convert)
+{
+	if (expression == nullptr)
+		return false;
+
+	ExpressionValue value = expression->evaluate();
+	if (convert && value.isInt())
+	{
+		dest = to_wstring(value.intValue);
+		return true;
+	}
+
+	if (convert && value.isFloat())
+	{
+		dest = to_wstring(value.floatValue);
+		return true;
+	}
+
+	if (value.isString() == false)
+		return false;
+
+	dest = value.strValue;
+	return true;
+}
+
+bool Expression::evaluateIdentifier(std::wstring &dest)
+{
+	if (expression == nullptr || expression->isIdentifier() == false)
+		return false;
+
+	dest = expression->getStringValue();
+	return true;
+}
+
+std::wstring Expression::toString()
+{
+	return expression != nullptr ? expression->toString() : L"";
 }
 
 Expression createConstExpression(int64_t value)

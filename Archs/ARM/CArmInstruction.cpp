@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "CArmInstruction.h"
 #include "Core/Common.h"
+#include "Core/Misc.h"
 #include "Arm.h"
 #include "Core/FileManager.h"
+#include "Util/Util.h"
 #include <cstddef>
 
 const char ArmConditions[16][3] = {

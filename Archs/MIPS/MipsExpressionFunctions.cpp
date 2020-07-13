@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Expression.h"
 #include "Core/ExpressionFunctions.h"
 #include "MipsExpressionFunctions.h"
 

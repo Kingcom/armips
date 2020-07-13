@@ -4,6 +4,8 @@
 #include "Arm.h"
 #include "ThumbOpcodes.h"
 #include "Core/FileManager.h"
+#include "Core/Misc.h"
+#include "Util/Util.h"
 
 bool CThumbInstruction::Load(char* Name, char* Params)
 {

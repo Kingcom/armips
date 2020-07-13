@@ -2,6 +2,8 @@
 #include "ByteArray.h"
 #include "Util/Util.h"
 
+#include <cstring>
+
 ByteArray::ByteArray()
 {
 	data_ = nullptr;

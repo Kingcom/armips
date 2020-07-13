@@ -1,10 +1,14 @@
 #include "stdafx.h"
+#include "Archs/Architecture.h"
 #include "ElfRelocator.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"
+#include "Core/SymbolData.h"
 #include "Util/CRC.h"
 #include "Util/Util.h"
 #include "Commands/CAssemblerLabel.h"
+
+#include <cstring>
 
 struct ArFileHeader
 {
@@ -498,4 +502,9 @@ void ElfRelocator::writeSymbols(SymbolData& symData) const
 			}
 		}
 	}
+}
+
+std::unique_ptr<CAssemblerCommand> IElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor> &ctors)
+{
+	return nullptr;
 }

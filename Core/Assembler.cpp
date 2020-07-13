@@ -4,6 +4,8 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Allocations.h"
 #include "Core/FileManager.h"
+#include "Core/Misc.h"
+#include "Core/SymbolData.h"
 #include "Parser/Parser.h"
 #include "Archs/ARM/Arm.h"
 #include "Archs/MIPS/Mips.h"
@@ -220,7 +222,7 @@ bool runArmips(ArmipsArguments& settings)
 	// return errors
 	if (settings.errorsResult != nullptr)
 	{
-		StringList errors = Logger::getErrors();
+		std::vector<std::wstring> errors = Logger::getErrors();
 		for (size_t i = 0; i < errors.size(); i++)
 			settings.errorsResult->push_back(errors[i]);
 	}

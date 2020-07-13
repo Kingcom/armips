@@ -3,6 +3,7 @@
 #include "Util/Util.h"
 #include "Arm.h"
 #include "Core/Common.h"
+#include "Parser/Parser.h"
 #include <algorithm>
 
 inline int signExtend(int value, int bitsLength)

@@ -1,5 +1,10 @@
 #pragma once
-#include "Util/FileClasses.h"
+
+#include <list>
+#include <string>
+#include <vector>
+
+class TextFile;
 
 enum class TokenType
 {
@@ -263,7 +268,7 @@ public:
 	bool init(TextFile* input);
 protected:
 	Token loadToken();
-	bool isInputAtEnd() { return linePos >= currentLine.size() && input->atEnd(); };
+	bool isInputAtEnd();;
 
 	void skipWhitespace();
 	void createToken(TokenType type, size_t length);

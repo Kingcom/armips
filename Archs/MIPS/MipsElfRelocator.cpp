@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "Commands/CAssemblerCommand.h"
 #include "MipsElfRelocator.h"
+#include "Core/Common.h"
 #include "Parser/Parser.h"
 
 int MipsElfRelocator::expectedMachine() const

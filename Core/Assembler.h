@@ -1,7 +1,10 @@
 #pragma once
-#include "../Util/FileClasses.h"
-#include "../Util/Util.h"
-#include "FileManager.h"
+
+#include <memory>
+#include <string>
+#include <vector>
+
+class AssemblerFile;
 
 #define ARMIPS_VERSION_MAJOR    0
 #define ARMIPS_VERSION_MINOR    11
@@ -30,7 +33,7 @@ struct ArmipsArguments
 	bool errorOnWarning;
 	bool silent;
 	bool showStats;
-	StringList* errorsResult;
+	std::vector<std::wstring>* errorsResult;
 	std::vector<EquationDefinition> equList;
 	std::vector<LabelDefinition> labels;
 

@@ -5,6 +5,8 @@
 #include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
+#include "Core/Misc.h"
+#include "Core/SymbolData.h"
 
 ArmStateCommand::ArmStateCommand(bool state)
 {

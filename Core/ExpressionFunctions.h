@@ -1,6 +1,12 @@
 #pragma once
-#include "Expression.h"
+
 #include <map>
+#include <memory>
+#include <vector>
+
+class Label;
+
+struct ExpressionValue;
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, int64_t& dest,
 	const std::wstring& funcName, bool optional);

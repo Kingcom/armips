@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveConditional.h"
 #include "Core/Common.h"
+#include "Core/Misc.h"
 #include "Archs/ARM/Arm.h"
 #include "Util/Util.h"
 

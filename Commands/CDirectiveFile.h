@@ -3,6 +3,7 @@
 #include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
 
+class AssemblerFile;
 class GenericAssemblerFile;
 
 class CDirectiveFile: public CAssemblerCommand

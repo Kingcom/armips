@@ -1,10 +1,13 @@
 #include "stdafx.h"
+
+#include "Archs/Architecture.h"
 #include "Parser.h"
 #include "ExpressionParser.h"
 #include "Core/Misc.h"
 #include "Commands/CommandSequence.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Core/Common.h"
+#include "Parser/DirectivesParser.h"
 #include "Util/Util.h"
 
 inline bool isPartOfList(const std::wstring& value, const std::initializer_list<const wchar_t*>& terminators)
@@ -32,6 +35,14 @@ void Parser::pushConditionalResult(ConditionalResult cond)
 	info.inTrueBlock = info.inTrueBlock && cond != ConditionalResult::False;
 	info.inUnknownBlock = info.inUnknownBlock || cond == ConditionalResult::Unknown;
 	conditionStack.push_back(info);
+}
+
+void Parser::printError(const Token &token, const std::wstring &text)
+{
+	errorLine = token.line;
+	Global.FileInfo.LineNumber = (int) token.line;
+	Logger::printError(Logger::Error, text);
+	error = true;
 }
 
 Expression Parser::parseExpression()

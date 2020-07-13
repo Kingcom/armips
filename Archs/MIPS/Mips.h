@@ -1,6 +1,8 @@
 #pragma once
+
 #include "Archs/Architecture.h"
-#include "Core/ELF/ElfRelocator.h"
+
+class Expression;
 
 enum MipsArchType { MARCH_PSX = 0, MARCH_N64, MARCH_PS2, MARCH_PSP, MARCH_RSP, MARCH_INVALID };
 

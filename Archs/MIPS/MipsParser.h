@@ -1,9 +1,16 @@
 #pragma once
-#include <unordered_map>
-#include "Parser/DirectivesParser.h"
-#include "Parser/Tokenizer.h"
-#include "CMipsInstruction.h"
-#include "MipsMacros.h"
+
+#include <memory>
+#include <string>
+
+#include "Archs/MIPS/CMipsInstruction.h"
+
+class CAssemblerCommand;
+class Expression;
+class Parser;
+
+struct MipsMacroDefinition;
+struct tMipsOpcode;
 
 struct MipsRegisterDescriptor {
 	const wchar_t* name;

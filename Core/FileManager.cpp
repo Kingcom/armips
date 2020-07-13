@@ -2,6 +2,7 @@
 #include "FileManager.h"
 #include "Misc.h"
 #include "Common.h"
+#include "Util/Util.h"
 
 inline uint64_t swapEndianness64(uint64_t value)
 {

@@ -2,10 +2,13 @@
 #include "MipsMacros.h"
 #include "CMipsInstruction.h"
 #include "Core/Common.h"
+#include "Core/FileManager.h"
+#include "Core/Misc.h"
 #include "Mips.h"
 #include "MipsOpcodes.h"
 #include "Parser/Parser.h"
 #include "MipsParser.h"
+#include "Util/Util.h"
 
 MipsMacroCommand::MipsMacroCommand(std::unique_ptr<CAssemblerCommand> content, int macroFlags)
 {

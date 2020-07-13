@@ -1,6 +1,7 @@
 #pragma once
+
 #include <vector>
-#include "Util/Util.h"
+
 #include "Util/FileClasses.h"
 
 class Logger
@@ -49,7 +50,7 @@ public:
 
 	static void printQueue();
 	static void clearQueue() { queue.clear(); };
-	static StringList getErrors() { return errors; };
+	static std::vector<std::wstring> getErrors() { return errors; };
 	static bool hasError() { return error; };
 	static bool hasFatalError() { return fatalError; };
 	static void setErrorOnWarning(bool b) { errorOnWarning = b; };

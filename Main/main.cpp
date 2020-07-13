@@ -7,6 +7,8 @@
 #include "CommandLineInterface.h"
 #include "Tests.h"
 
+#include <clocale>
+
 int wmain(int argc, wchar_t* argv[])
 {
 	std::setlocale(LC_CTYPE,"");
@@ -20,7 +22,7 @@ int wmain(int argc, wchar_t* argv[])
 		return !runTests(argv[1], argv[0]);
 #endif
 
-	StringList arguments = getStringListFromArray(argv,argc);
+	std::vector<std::wstring> arguments = getStringListFromArray(argv,argc);
 	
 	return runFromCommandLine(arguments);
 }

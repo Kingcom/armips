@@ -3,6 +3,8 @@
 #include "Core/Common.h"
 #include "Util/Util.h"
 #include "Core/FileManager.h"
+#include "Core/Misc.h"
+#include "Core/SymbolData.h"
 #include "Archs/ARM/Arm.h"
 
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName)

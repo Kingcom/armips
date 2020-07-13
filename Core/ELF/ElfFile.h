@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Util/ByteArray.h"
-#include "ElfTypes.h"
 #include <vector>
+
+#include "Core/ELF/ElfTypes.h"
+#include "Util/ByteArray.h"
 
 enum ElfPart { ELFPART_SEGMENTTABLE, ELFPART_SECTIONTABLE, ELFPART_SEGMENTS, ELFPART_SEGMENTLESSSECTIONS }; 
 

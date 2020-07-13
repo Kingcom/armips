@@ -1,6 +1,7 @@
 #pragma once
+
 #include <list>
-#include "Util.h"
+#include <vector>
 
 class BinaryFile
 {
@@ -56,7 +57,7 @@ public:
 
 	wchar_t readCharacter();
 	std::wstring readLine();
-	StringList readAll();
+	std::vector<std::wstring> readAll();
 	void writeCharacter(wchar_t character);
 	void write(const wchar_t* line);
 	void write(const std::wstring& line);
@@ -66,7 +67,7 @@ public:
 	void writeLine(const std::wstring& line);
 	void writeLine(const char* line);
 	void writeLine(const std::string& line);
-	void writeLines(StringList& list);
+	void writeLines(std::vector<std::wstring>& list);
 	
 	template <typename... Args>
 	void writeFormat(const wchar_t* text, const Args&... args)

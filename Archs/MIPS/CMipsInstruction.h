@@ -1,7 +1,7 @@
 #pragma once
+
+#include "Archs/MIPS/MipsOpcodes.h"
 #include "Commands/CAssemblerCommand.h"
-#include "Mips.h"
-#include "MipsOpcodes.h"
 #include "Core/Expression.h"
 
 enum class MipsRegisterType

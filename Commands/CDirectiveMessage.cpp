@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Commands/CDirectiveMessage.h"
 #include "Core/Common.h"
+#include "Core/Misc.h"
+#include "Core/SymbolData.h"
 
 CDirectiveMessage::CDirectiveMessage(Type type, Expression exp)
 {
@@ -30,4 +32,9 @@ bool CDirectiveMessage::Validate()
 		break;
 	}
 	return false;
+}
+
+void CDirectiveSym::writeSymData(SymbolData &symData) const
+{
+	symData.setEnabled(enabled);
 }
