@@ -154,6 +154,9 @@ public:
 	std::vector<Token> getTokens(TokenizerPosition start, TokenizerPosition end) const;
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
 	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
+	void registerReplacementString(const std::wstring& identifier, const std::wstring& newValue);
+	void registerReplacementInteger(const std::wstring& identifier, int64_t newValue);
+	void registerReplacementFloat(const std::wstring& identifier, double newValue);
 	static size_t addEquValue(const std::vector<Token>& tokens);
 	static void clearEquValues() { equValues.clear(); }
 	void resetLookaheadCheckMarks();

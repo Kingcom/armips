@@ -85,6 +85,8 @@ protected:
 	std::unique_ptr<CAssemblerCommand> parse(Tokenizer* tokenizer, bool virtualFile, const fs::path& name = {});
 	std::unique_ptr<CAssemblerCommand> parseLabel();
 	bool checkEquLabel();
+	bool parseFunctionDeclaration(std::wstring& name, std::vector<std::wstring>& parameters);
+	bool checkExpFuncDefinition();
 	bool checkMacroDefinition();
 
 	std::optional<std::vector<Token>> extractMacroParameter(const Token &macroStart);

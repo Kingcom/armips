@@ -5,6 +5,7 @@
 #include "Core/ExpressionFunctions.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
+#include "Parser/ExpressionParser.h"
 #include "Util/Util.h"
 
 namespace
@@ -644,6 +645,71 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	expFuncIt = archExpressionFunctions.find(strValue);
 	if (expFuncIt != archExpressionFunctions.end())
 		return executeExpressionFunctionCall(expFuncIt->second);
+
+	// try user defined expression functions
+	auto *userFunc = UserFunctions::instance().findFunction(strValue);
+	if (userFunc)
+	{
+		if (!checkParameterCount(userFunc->parameters.size(), userFunc->parameters.size()))
+			return {};
+
+		// evaluate parameters
+		std::vector<ExpressionValue> params;
+		params.reserve(childrenCount);
+
+		for (size_t i = 0; i < childrenCount; i++)
+		{
+			ExpressionValue result = children[i]->evaluate();
+			if (!result.isValid())
+			{
+				Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", strValue, i+1);
+				return result;
+			}
+
+			params.push_back(result);
+		}
+
+		// instantiate
+		TokenStreamTokenizer tok;
+		tok.init(userFunc->content);
+
+		for (size_t i = 0; i < childrenCount; ++i)
+		{
+			const auto &paramName = userFunc->parameters[i];
+			const auto &paramValue = params[i];
+
+			switch (paramValue.type)
+			{
+			case ExpressionValueType::Float:
+				tok.registerReplacementFloat(paramName, paramValue.floatValue);
+				break;
+			case ExpressionValueType::String:
+				tok.registerReplacementString(paramName, paramValue.strValue);
+				break;
+			case ExpressionValueType::Integer:
+				tok.registerReplacementInteger(paramName, paramValue.intValue);
+				break;
+			case ExpressionValueType::Invalid: // will not occur, invalid results are caught above
+				break;
+			}
+		}
+
+		Expression result = parseExpression(tok, false);
+		if (!result.isLoaded())
+		{
+			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", strValue);
+			return {};
+		}
+
+		if (!tok.atEnd())
+		{
+			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", strValue);
+			return {};
+		}
+
+		// evaluate expression
+		return result.evaluate();
+	}
 
 	// error
 	Logger::queueError(Logger::Error, L"Unknown function \"%s\"", strValue);

@@ -4,6 +4,7 @@
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CommandSequence.h"
 #include "Core/Common.h"
+#include "Core/ExpressionFunctions.h"
 #include "Core/Misc.h"
 #include "Parser/DirectivesParser.h"
 #include "Parser/ExpressionParser.h"
@@ -129,7 +130,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 		}
 
 		bool foundSomething = false;
-		while (checkEquLabel() || checkMacroDefinition())
+		while (checkEquLabel() || checkMacroDefinition() || checkExpFuncDefinition())
 		{
 			// do nothing, just parse all the equs and macros there are
 			if (hasError())
@@ -391,6 +392,104 @@ bool Parser::checkEquLabel()
 	}
 
 	return false;
+}
+
+bool Parser::parseFunctionDeclaration(std::wstring& name, std::vector<std::wstring>& parameters)
+{
+	const Token& first = peekToken();
+	if (first.type != TokenType::Identifier)
+		return false;
+
+	name = nextToken().getStringValue();
+
+	if (nextToken().type != TokenType::LParen)
+		return false;
+
+	parameters.clear();
+	while (!atEnd() && peekToken().type != TokenType::RParen)
+	{
+		if (!parameters.empty() && peekToken().type == TokenType::Comma)
+			eatToken();
+
+		const Token& token = nextToken();
+		if (token.type != TokenType::Identifier)
+			return false;
+
+		parameters.emplace_back(token.getStringValue());
+	}
+
+	return !atEnd() && nextToken().type == TokenType::RParen;
+}
+
+bool Parser::checkExpFuncDefinition()
+{
+	const Token& first = peekToken();
+	if (first.type != TokenType::Identifier)
+		return false;
+
+	if (!first.stringValueStartsWith(L'.') || first.getStringValue() != L".expfunc")
+		return false;
+
+	eatToken();
+
+	UserExpressionFunction func;
+
+	// load declarationn
+	if (!parseFunctionDeclaration(func.name, func.parameters))
+	{
+		printError(first, L"Invalid expression function declaration");
+		return false;
+	}
+
+	if (nextToken().type != TokenType::Comma)
+	{
+		printError(first, L"Invalid expression function declaration");
+		return false;
+	}
+
+	// load definition
+	TokenizerPosition start = getTokenizer()->getPosition();
+
+	Expression exp = parseExpression();
+	if (!exp.isLoaded())
+	{
+		printError(first, L"Invalid expression function declaration");
+		return false;
+	}
+
+	TokenizerPosition end = getTokenizer()->getPosition();
+	func.content = getTokenizer()->getTokens(start,end);
+
+	// checks
+
+	// Expression functions have to be defined at parse time, so they can't be defined in blocks
+	// with non-trivial conditions
+	if (isInsideUnknownBlock())
+	{
+		printError(first, L"Expression function definition not allowed inside of block with non-trivial condition");
+		return false;
+	}
+
+	// if we are in a known false block, don't define the function
+	if (!isInsideTrueBlock())
+		return true;
+
+	if(nextToken().type != TokenType::Separator)
+	{
+		printError(first, L".expfunc directive not terminated");
+		return false;
+	}
+
+	// duplicate check
+	if (UserFunctions::instance().findFunction(func.name))
+	{
+		printError(first, L"Expression function \"%s\" already declared", func.name);
+		return false;
+	}
+
+	// register function
+	UserFunctions::instance().addFunction(func);
+	return true;
 }
 
 bool Parser::checkMacroDefinition()

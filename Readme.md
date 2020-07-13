@@ -294,6 +294,25 @@ Below is a table of functions built into the assembler that can be used with the
 | `isarm()` | `1` if in ARM mode, `0` otherwise (only available in ARM/THUMB) |
 | `isthumb()` | `1` if in THUMB mode, `0` otherwise (only available in ARM/THUMB) |
 
+### User defined functions
+
+It is possible to define additional expression functions. These can contain any number of parameters, but their content is limited in scope to a single arbitrarily long expression. This expression can contain calls to other functions or user defined functions - including recursive calls to the function itself. User defined functions are defined as follows:
+
+```
+  .expfunc name(parameters), content
+```
+
+`name` is the name of the function and must be unique. `parameters` has to be a comma separated list of one or more identifiers. `content` has to be a single expression and encodes the return value of the function. The result of evaluating `content` is returned to the caller.
+
+As an example, the following will define a function to calculate a fibonacci number and then use it to print the 10th such number:
+
+```
+  .expfunc fib(n), n <= 2 ? 1 : fib(n-1)+fib(n-2)
+  .notice "The 10th fibonacci number is " + fib(10)
+```
+
+The ternary operator can be useful to chain various conditions in a single expression.
+
 ## 4.6 Load delay detection
 
 This feature is still unfinished and experimental. It works in most cases, though. On certain MIPS platforms (most notably the PlayStation 1), any load is asynchronously delayed by one cycle and the CPU won't stall if you attempt to use it before. Attempts to use it will return the old value on an actual system (emulators usually do not emulate this, which makes spotting these mistakes even more difficult). Therefore, the assembler will attempt to detect when such a case happens. The following code would result in a warning:

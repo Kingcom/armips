@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "Parser/Tokenizer.h"
+
 class Label;
 
 struct ExpressionValue;
@@ -44,6 +46,38 @@ struct ExpressionLabelFunctionEntry
 	ExpFuncSafety safety;
 };
 
+struct UserExpressionFunction
+{
+	std::wstring name;
+	std::vector<std::wstring> parameters;
+	std::vector<Token> content;
+};
+
+class UserFunctions
+{
+public:
+	static UserFunctions &instance()
+	{
+		static UserFunctions func;
+		return func;
+	}
+
+	bool addFunction(const UserExpressionFunction &func)
+	{
+		_entries.emplace(func.name, func);
+		return true;
+	}
+	const UserExpressionFunction *findFunction(const std::wstring &name) const
+	{
+		auto it = _entries.find(name);
+		return it != _entries.end() ? &it->second : nullptr;
+	}
+
+private:
+	UserFunctions() = default;
+
+	std::map<std::wstring, UserExpressionFunction> _entries;
+};
 
 using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;
 using ExpressionLabelFunctionMap =  std::map<std::wstring, const ExpressionLabelFunctionEntry>;
