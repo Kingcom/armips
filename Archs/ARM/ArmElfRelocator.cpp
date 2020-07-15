@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "ArmElfRelocator.h"
 #include "Util/Util.h"
 #include "Arm.h"

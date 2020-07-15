@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Util/FileClasses.h"
 #include "Core/Common.h"
 #include "Util/Util.h"

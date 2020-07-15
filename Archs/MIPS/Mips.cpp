@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Mips.h"
 #include "MipsParser.h"
 #include "MipsExpressionFunctions.h"

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "ElfFile.h"
 #include <vector>
 #include <algorithm>

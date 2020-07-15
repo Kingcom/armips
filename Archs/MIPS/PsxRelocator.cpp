@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Archs/MIPS/MipsElfRelocator.h"
 #include "PsxRelocator.h"
 #include "Core/Misc.h"

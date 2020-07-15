@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "CMipsInstruction.h"
 #include "Core/Common.h"
 #include "Mips.h"

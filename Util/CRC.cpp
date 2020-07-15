@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "CRC.h"
 #include <stdio.h>
 

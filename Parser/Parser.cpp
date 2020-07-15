@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "Archs/Architecture.h"
 #include "Parser.h"
 #include "ExpressionParser.h"

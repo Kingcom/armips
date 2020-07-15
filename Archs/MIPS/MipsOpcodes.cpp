@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "MipsOpcodes.h"
 
 const tMipsOpcode MipsOpcodes[] = {

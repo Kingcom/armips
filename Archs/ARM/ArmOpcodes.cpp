@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "ArmOpcodes.h"
 #include "Core/Common.h"
 #include "Arm.h"

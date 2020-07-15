@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Commands/CAssemblerCommand.h"
 #include "MipsElfRelocator.h"
 #include "Core/Common.h"
