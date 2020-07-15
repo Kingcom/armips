@@ -4,18 +4,20 @@
 #include <algorithm>
 #include "Core/Misc.h"
 
+#include <cctype>
 #include <cstring>
-
-#ifndef _WIN32
-#include <strings.h>
-#define _stricmp strcasecmp
-#endif
 
 static bool stringEqualInsensitive(const std::string& a, const std::string& b)
 {
 	if (a.size() != b.size())
 		return false;
-	return _stricmp(a.c_str(),b.c_str()) == 0;
+
+	auto compare = [](char c1, char c2)
+	{
+		return std::tolower(c1) == std::tolower(c2);
+	};
+
+	return std::equal(a.begin(), a.end(), b.begin(), compare);
 }
 
 bool compareSection(ElfSection* a, ElfSection* b)
