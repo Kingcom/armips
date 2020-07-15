@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 
 // opcode types
 #define ARM_TYPE3 0

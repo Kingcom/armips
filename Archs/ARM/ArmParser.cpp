@@ -38,20 +38,20 @@ const ArmRegisterDescriptor armCopNumbers[] = {
 std::unique_ptr<CAssemblerCommand> parseDirectiveThumb(Parser& parser, int flags)
 {
 	Arm.SetThumbMode(true);
-	return ::make_unique<ArmStateCommand>(false);
+	return std::make_unique<ArmStateCommand>(false);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveArm(Parser& parser, int flags)
 {
 	Arm.SetThumbMode(false);
-	return ::make_unique<ArmStateCommand>(true);
+	return std::make_unique<ArmStateCommand>(true);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 {
-	auto seq = ::make_unique<CommandSequence>();
-	seq->addCommand(::make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::AlignVirtual));
-	seq->addCommand(::make_unique<ArmPoolCommand>());
+	auto seq = std::make_unique<CommandSequence>();
+	seq->addCommand(std::make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::AlignVirtual));
+	seq->addCommand(std::make_unique<ArmPoolCommand>());
 
 	return seq;
 }
@@ -656,7 +656,7 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 			if (parseArmParameters(parser,ArmOpcodes[z],vars) == true)
 			{
 				// success, return opcode
-				return ::make_unique<CArmInstruction>(ArmOpcodes[z],vars);
+				return std::make_unique<CArmInstruction>(ArmOpcodes[z],vars);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -753,7 +753,7 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 			if (parseThumbParameters(parser,ThumbOpcodes[z],vars) == true)
 			{
 				// success, return opcode
-				return ::make_unique<CThumbInstruction>(ThumbOpcodes[z],vars);
+				return std::make_unique<CThumbInstruction>(ThumbOpcodes[z],vars);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);

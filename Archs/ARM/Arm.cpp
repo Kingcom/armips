@@ -71,7 +71,7 @@ void CArmArchitecture::NextSection()
 
 std::unique_ptr<IElfRelocator> CArmArchitecture::getElfRelocator()
 {
-	return ::make_unique<ArmElfRelocator>(version != AARCH_GBA);
+	return std::make_unique<ArmElfRelocator>(version != AARCH_GBA);
 }
 
 void CArmArchitecture::addPoolValue(ArmOpcodeCommand* command, int32_t value)
