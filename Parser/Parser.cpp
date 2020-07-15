@@ -613,11 +613,11 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		// otherwise make sure the name is unique
 		std::wstring fullName;
 		if (Global.symbolTable.isLocalSymbol(label))
-			fullName = formatString(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
+			fullName = tfm::format(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
 		else if (Global.symbolTable.isStaticSymbol(label))
-			fullName = formatString(L"@%s_%s_%08X",macro.name,label.substr(1),macro.counter);
+			fullName = tfm::format(L"@%s_%s_%08X",macro.name,label.substr(1),macro.counter);
 		else
-			fullName = formatString(L"%s_%s_%08X",macro.name,label,macro.counter);
+			fullName = tfm::format(L"%s_%s_%08X",macro.name,label,macro.counter);
 
 		macroTokenizer.registerReplacement(label,fullName);
 	}

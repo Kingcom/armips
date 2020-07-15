@@ -6,6 +6,8 @@
 #include "Util/Util.h"
 #include "Common.h"
 
+#include <tinyformat.h>
+
 const wchar_t validSymbolCharacters[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
 
 bool operator<(SymbolKey const& lhs, SymbolKey const& rhs)
@@ -168,7 +170,7 @@ bool SymbolTable::findEquation(const std::wstring& name, int file, int section, 
 // TODO: better
 std::wstring SymbolTable::getUniqueLabelName(bool local)
 {
-	std::wstring name = formatString(L"__armips_label_%08x__",uniqueCount++);
+	std::wstring name = tfm::format(L"__armips_label_%08x__",uniqueCount++);
 	if (local)
 		name = L"@@" + name;
 

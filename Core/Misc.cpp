@@ -23,19 +23,19 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 	if (Global.memoryMode == false && Global.FileInfo.FileList.size() > 0)
 	{
 		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-		position = formatString(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
+		position = tfm::format(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
 	}
 
 	switch (type)
 	{
 	case Warning:
-		return formatString(L"%swarning: %s",position,text);
+		return tfm::format(L"%swarning: %s",position,text);
 	case Error:
-		return formatString(L"%serror: %s",position,text);
+		return tfm::format(L"%serror: %s",position,text);
 	case FatalError:
-		return formatString(L"%sfatal error: %s",position,text);
+		return tfm::format(L"%sfatal error: %s",position,text);
 	case Notice:
-		return formatString(L"%snotice: %s",position,text);
+		return tfm::format(L"%snotice: %s",position,text);
 	}
 
 	return L"";
@@ -215,7 +215,7 @@ void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
 		while (str.size() < 70)
 			str += ' ';
 
-		str += formatString(L"; %S line %d",
+		str += tfm::format(L"; %S line %d",
 			Global.FileInfo.FileList[Global.FileInfo.FileNum],Global.FileInfo.LineNumber);
 
 		file.writeLine(str);

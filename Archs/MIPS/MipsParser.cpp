@@ -213,7 +213,7 @@ bool MipsParser::parseRegisterNumber(Parser& parser, MipsRegisterValue& dest, in
 		const Token& number = parser.peekToken(1);
 		if (number.type == TokenType::Integer && number.intValue < numValues)
 		{
-			dest.name = formatString(L"$%d", number.intValue);
+			dest.name = tfm::format(L"$%d", number.intValue);
 			dest.num = (int) number.intValue;
 
 			parser.eatTokens(2);
@@ -408,7 +408,7 @@ bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
 	if (token.type != TokenType::Integer || token.intValue >= 8)
 		return false;
 
-	dest.name = formatString(L"%d", token.intValue);
+	dest.name = tfm::format(L"%d", token.intValue);
 	dest.num = token.intValue + 8;
 
 	return parser.nextToken().type == TokenType::RBrack;
@@ -427,7 +427,7 @@ bool MipsParser::parseRspOffsetElement(Parser& parser, MipsRegisterValue& dest)
 		if (token.type != TokenType::Integer || token.intValue >= 16)
 			return false;
 
-		dest.name = formatString(L"%d", token.intValue);
+		dest.name = tfm::format(L"%d", token.intValue);
 		dest.num = token.intValue;
 
 		return parser.nextToken().type == TokenType::RBrack;
@@ -1611,16 +1611,16 @@ void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int o
 	switch (type)
 	{
 	case MipsImmediateType::ImmediateHalfFloat:
-		buffer += formatString(L"%f", bitsToFloat(originalValue));
+		buffer += tfm::format(L"%f", bitsToFloat(originalValue));
 		break;
 	case MipsImmediateType::Immediate16:
 		if (!(opcodeFlags & MO_IPCR) && originalValue & 0x8000)
-			buffer += formatString(L"-0x%X", 0x10000-(originalValue & 0xFFFF));
+			buffer += tfm::format(L"-0x%X", 0x10000-(originalValue & 0xFFFF));
 		else
-			buffer += formatString(L"0x%X", originalValue);
+			buffer += tfm::format(L"0x%X", originalValue);
 		break;
 	default:
-		buffer += formatString(L"0x%X", originalValue);
+		buffer += tfm::format(L"0x%X", originalValue);
 		break;
 	}
 }
@@ -1636,7 +1636,7 @@ void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, c
 		switch (*encoding++)
 		{
 		case 'r':	// forced register
-			buffer += formatString(L"r%d",*encoding);
+			buffer += tfm::format(L"r%d",*encoding);
 			encoding += 1;
 			break;
 		case 's':	// register

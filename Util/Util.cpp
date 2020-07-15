@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Util.h"
+#include <sstream>
 #include <sys/stat.h>
 #ifdef _WIN32
 #include <windows.h>

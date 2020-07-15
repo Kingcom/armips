@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <tinyformat.h>
+
 #include "Core/Misc.h"
 #include "Parser/Tokenizer.h"
 
@@ -70,7 +72,7 @@ public:
 	template <typename... Args>
 	void printError(const Token& token, const wchar_t* text, const Args&... args)
 	{
-		printError(token, formatString(text,args...));
+		printError(token, tfm::format(text,args...));
 	}
 
 	bool hasError() { return error; }

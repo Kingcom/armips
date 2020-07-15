@@ -98,7 +98,7 @@ void CAssemblerLabel::Encode() const
 void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
 	if (Global.symbolTable.isGeneratedLabel(label->getName()) == false)
-		tempData.writeLine(label->getValue(),formatString(L"%s:",label->getName()));
+		tempData.writeLine(label->getValue(),tfm::format(L"%s:",label->getName()));
 }
 
 void CAssemblerLabel::writeSymData(SymbolData& symData) const

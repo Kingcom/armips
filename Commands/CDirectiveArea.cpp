@@ -102,13 +102,13 @@ void CDirectiveArea::Encode() const
 
 void CDirectiveArea::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(position,formatString(L".area 0x%08X",areaSize));
+	tempData.writeLine(position,tfm::format(L".area 0x%08X",areaSize));
 	content->applyFileInfo();
 	content->writeTempData(tempData);
 
 	if (fillExpression.isLoaded())
 	{
-		std::wstring fillString = formatString(L".fill 0x%08X,0x%02X",areaSize-contentSize,fillValue);
+		std::wstring fillString = tfm::format(L".fill 0x%08X,0x%02X",areaSize-contentSize,fillValue);
 		tempData.writeLine(position+contentSize,fillString);
 		tempData.writeLine(position+areaSize,L".endarea");
 	} else {

@@ -113,7 +113,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 					return false;
 				}
 
-				def.value = formatString(L"\"%s\"", arguments[argpos + 2]);
+				def.value = tfm::format(L"\"%s\"", arguments[argpos + 2]);
 				settings.equList.push_back(def);
 				argpos += 3;
 			}
@@ -197,7 +197,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 	// turn input filename into an absolute path
 	if (settings.useAbsoluteFileNames && isAbsolutePath(settings.inputFileName) == false)
-		settings.inputFileName = formatString(L"%s/%s", getCurrentDirectory(), settings.inputFileName);
+		settings.inputFileName = tfm::format(L"%s/%s", getCurrentDirectory(), settings.inputFileName);
 
 	if (fileExists(settings.inputFileName) == false)
 	{

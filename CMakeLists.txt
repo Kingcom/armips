@@ -24,6 +24,9 @@ endif()
 
 include_directories(.)
 
+add_library(tinyformat INTERFACE)
+target_include_directories(tinyformat INTERFACE ext/tinyformat)
+
 add_library(armips STATIC
 	Archs/Architecture.h
 	Archs/Architecture.cpp
@@ -107,8 +110,6 @@ add_library(armips STATIC
 	Core/SymbolTable.cpp
 	Core/SymbolTable.h
 
-	ext/tinyformat/tinyformat.h
-
 	Parser/DirectivesParser.cpp
 	Parser/DirectivesParser.h
 	Parser/ExpressionParser.cpp
@@ -129,6 +130,8 @@ add_library(armips STATIC
 	Util/Util.cpp
 	Util/Util.h
 )
+
+target_link_libraries(armips PUBLIC tinyformat)
 
 add_executable(armips-bin
 	Main/CommandLineInterface.cpp

@@ -184,7 +184,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 
 	if (checkRetVal && retVal != expectedRetVal)
 	{
-		errorString += formatString(L"Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
+		errorString += tfm::format(L"Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
 		result = false;
 	}
 
@@ -201,7 +201,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 			{
 				if (errors[i] != expectedErrors[i])
 				{
-					errorString += formatString(L"Unexpected error: %S\n",errors[i]);
+					errorString += tfm::format(L"Unexpected error: %S\n",errors[i]);
 					result = false;
 				}
 			}
@@ -212,7 +212,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		// if no errors are expected, there should be none
 		for (size_t i = 0; i < errors.size(); i++)
 		{
-			errorString += formatString(L"Unexpected error: %S\n",errors[i]);
+			errorString += tfm::format(L"Unexpected error: %S\n",errors[i]);
 			result = false;
 		}
 	}
@@ -232,11 +232,11 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		{
 			if (memcmp(expected.data(),actual.data(),actual.size()) != 0)
 			{
-				errorString += formatString(L"Output data does not match\n");
+				errorString += tfm::format(L"Output data does not match\n");
 				result = false;
 			}
 		} else {
-			errorString += formatString(L"Output data size does not match\n");
+			errorString += tfm::format(L"Output data size does not match\n");
 			result = false;
 		}
 	}
@@ -263,7 +263,7 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 	{
 		changeConsoleColor(ConsoleColors::White);
 
-		std::wstring line = formatString(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
+		std::wstring line = tfm::format(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
 		Logger::print(L"%-50s",line);
 
 		std::wstring path = dir + L"/" + tests[i];

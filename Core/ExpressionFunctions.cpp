@@ -117,10 +117,10 @@ ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<
 		result.strValue = parameters[0].strValue;
 		break;
 	case ExpressionValueType::Integer:
-		result.strValue = formatString(L"%d",parameters[0].intValue);
+		result.strValue = tfm::format(L"%d",parameters[0].intValue);
 		break;
 	case ExpressionValueType::Float:
-		result.strValue = formatString(L"%#.17g",parameters[0].floatValue);
+		result.strValue = tfm::format(L"%#.17g",parameters[0].floatValue);
 		break;
 	default:
 		return result;
@@ -136,7 +136,7 @@ ExpressionValue expFuncToHex(const std::wstring& funcName, const std::vector<Exp
 	GET_PARAM(parameters,0,value);
 	GET_OPTIONAL_PARAM(parameters,1,digits,8);
 
-	return ExpressionValue(formatString(L"%0*X",digits,value));
+	return ExpressionValue(tfm::format(L"%0*X",digits,value));
 }
 
 ExpressionValue expFuncInt(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)

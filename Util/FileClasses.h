@@ -3,6 +3,8 @@
 #include <list>
 #include <vector>
 
+#include <tinyformat.h>
+
 class BinaryFile
 {
 public:
@@ -72,7 +74,7 @@ public:
 	template <typename... Args>
 	void writeFormat(const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = formatString(text,args...);
+		std::wstring message = tfm::format(text,args...);
 		write(message);
 	}
 

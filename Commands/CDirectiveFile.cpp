@@ -108,13 +108,13 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Type::Open:
-		str = formatString(L".open \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
+		str = tfm::format(L".open \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Create:
-		str = formatString(L".create \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
+		str = tfm::format(L".create \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = formatString(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName(),
+		str = tfm::format(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName(),
 			file->getFileName(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
@@ -196,10 +196,10 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(virtualAddress,formatString(L".orga 0x%08X",position));
+		tempData.writeLine(virtualAddress,tfm::format(L".orga 0x%08X",position));
 		break;
 	case Virtual:
-		tempData.writeLine(virtualAddress,formatString(L".org 0x%08X",position));
+		tempData.writeLine(virtualAddress,tfm::format(L".org 0x%08X",position));
 		break;
 	}
 }
@@ -280,7 +280,7 @@ void CDirectiveIncbin::Encode() const
 
 void CDirectiveIncbin::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,formatString(L".incbin \"%s\"",fileName));
+	tempData.writeLine(virtualAddress,tfm::format(L".incbin \"%s\"",fileName));
 }
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData) const
@@ -386,13 +386,13 @@ void CDirectiveAlignFill::writeTempData(TempData& tempData) const
 	switch (mode)
 	{
 	case AlignVirtual:
-		tempData.writeLine(virtualAddress,formatString(L".align 0x%08X",value));
+		tempData.writeLine(virtualAddress,tfm::format(L".align 0x%08X",value));
 		break;
 	case AlignPhysical:
-		tempData.writeLine(virtualAddress, formatString(L".aligna 0x%08X", value));
+		tempData.writeLine(virtualAddress, tfm::format(L".aligna 0x%08X", value));
 		break;
 	case Fill:
-		tempData.writeLine(virtualAddress,formatString(L".fill 0x%08X,0x%02X",value,fillByte));
+		tempData.writeLine(virtualAddress,tfm::format(L".fill 0x%08X,0x%02X",value,fillByte));
 		break;
 	}
 }
@@ -444,7 +444,7 @@ void CDirectiveSkip::Encode() const
 
 void CDirectiveSkip::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,formatString(L".skip 0x%08X",value));
+	tempData.writeLine(virtualAddress,tfm::format(L".skip 0x%08X",value));
 }
 
 //
@@ -489,7 +489,7 @@ void CDirectiveHeaderSize::Encode() const
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,formatString(L".headersize %s0x%08X",
+	tempData.writeLine(virtualAddress,tfm::format(L".headersize %s0x%08X",
 		headerSize < 0 ? L"-" : L"", headerSize < 0 ? -headerSize : headerSize));
 }
 
