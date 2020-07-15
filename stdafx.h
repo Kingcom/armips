@@ -17,12 +17,3 @@
 #else
 #define ARMIPS_EXCEPTIONS 0
 #endif
-
-#include <memory>
-
-// Custom make_unique so that C++14 support will not be necessary for compilation
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
