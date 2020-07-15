@@ -110,7 +110,7 @@ bool Parser::parseIdentifier(std::wstring& dest)
 
 std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicator, const std::initializer_list<const wchar_t*> terminators)
 {
-	auto sequence = ::make_unique<CommandSequence>();
+	auto sequence = std::make_unique<CommandSequence>();
 
 	bool foundTermination = false;
 	while (atEnd() == false)
@@ -576,13 +576,13 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 
 	// skip macro instantiation in known false blocks
 	if (!isInsideUnknownBlock() && !isInsideTrueBlock())
-		return ::make_unique<DummyCommand>();
+		return std::make_unique<DummyCommand>();
 
 	// a macro is fully parsed once when it's loaded
 	// to gather all labels. it's not necessary to
 	// instantiate other macros at that time
 	if (initializingMacro)
-		return ::make_unique<DummyCommand>();
+		return std::make_unique<DummyCommand>();
 
 	// the first time a macro is instantiated, it needs to be analyzed
 	// for labels
@@ -650,7 +650,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 			return nullptr;
 		}
 
-		return ::make_unique<CAssemblerLabel>(name,start.getOriginalText());
+		return std::make_unique<CAssemblerLabel>(name,start.getOriginalText());
 	}
 
 	return nullptr;
@@ -662,7 +662,7 @@ std::unique_ptr<CAssemblerCommand> Parser::handleError()
 	while (!atEnd() && nextToken().type != TokenType::Separator);
 
 	clearError();
-	return ::make_unique<InvalidCommand>();
+	return std::make_unique<InvalidCommand>();
 }
 
 
@@ -704,7 +704,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 	updateFileInfo();
 
 	if (atEnd())
-		return ::make_unique<DummyCommand>();
+		return std::make_unique<DummyCommand>();
 
 	if ((command = parseLabel()) != nullptr)
 		return command;

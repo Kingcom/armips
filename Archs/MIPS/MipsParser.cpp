@@ -130,13 +130,13 @@ const MipsRegisterDescriptor mipsRspVectorRegisters[] = {
 std::unique_ptr<CAssemblerCommand> parseDirectiveResetDelay(Parser& parser, int flags)
 {
 	Mips.SetIgnoreDelay(true);
-	return ::make_unique<DummyCommand>();
+	return std::make_unique<DummyCommand>();
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveFixLoadDelay(Parser& parser, int flags)
 {
 	Mips.SetFixLoadDelay(true);
-	return ::make_unique<DummyCommand>();
+	return std::make_unique<DummyCommand>();
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int flags)
@@ -153,9 +153,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int fla
 	{
 		if (list[1].evaluateString(outputName,true) == false)
 			return nullptr;
-		return ::make_unique<DirectiveLoadMipsElf>(inputName,outputName);
+		return std::make_unique<DirectiveLoadMipsElf>(inputName,outputName);
 	} else {
-		return ::make_unique<DirectiveLoadMipsElf>(inputName);
+		return std::make_unique<DirectiveLoadMipsElf>(inputName);
 	}
 }
 
@@ -180,16 +180,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 		if (Mips.GetVersion() == MARCH_PSX)
 		{
 			parser.printError(start,L"Constructor not supported for PSX libraries");
-			return ::make_unique<InvalidCommand>();
+			return std::make_unique<InvalidCommand>();
 		}
 
-		return ::make_unique<DirectiveObjImport>(inputName,ctorName);
+		return std::make_unique<DirectiveObjImport>(inputName,ctorName);
 	}
 
 	if (Mips.GetVersion() == MARCH_PSX)
-		return ::make_unique<DirectivePsxObjImport>(inputName);
+		return std::make_unique<DirectivePsxObjImport>(inputName);
 	else
-		return ::make_unique<DirectiveObjImport>(inputName);
+		return std::make_unique<DirectiveObjImport>(inputName);
 }
 
 const DirectiveMap mipsDirectives = {
@@ -1493,7 +1493,7 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 			if (parseParameters(parser,MipsOpcodes[z]) == true)
 			{
 				// success, return opcode
-				return ::make_unique<CMipsInstruction>(opcodeData,immediate,registers);
+				return std::make_unique<CMipsInstruction>(opcodeData,immediate,registers);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
