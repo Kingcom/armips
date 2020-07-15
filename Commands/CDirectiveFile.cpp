@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Archs/Architecture.h"
 #include "Commands/CDirectiveFile.h"
 #include "Core/Common.h"

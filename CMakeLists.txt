@@ -29,6 +29,7 @@ function(init_target TARGET_NAME)
 
 	if (MSVC)
 		target_compile_definitions(${TARGET_NAME} PRIVATE UNICODE _UNICODE)
+		target_compile_definitions(${TARGET_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 	endif()
 
 	if (MINGW)
@@ -167,8 +168,6 @@ target_sources(armips-bin PRIVATE
 	Main/main.cpp
 	Main/Tests.cpp
 	Main/Tests.h
-	stdafx.cpp
-	stdafx.h
 )
 
 # tests
@@ -183,8 +182,6 @@ target_sources(armipstests PRIVATE
 	Main/main.cpp
 	Main/Tests.cpp
 	Main/Tests.h
-	stdafx.cpp
-	stdafx.h
 )
 
 # install

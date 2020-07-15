@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Commands/CDirectiveArea.h"
 #include "Core/Allocations.h"
 #include "Core/Common.h"

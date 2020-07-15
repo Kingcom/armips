@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Archs/MIPS/Mips.h"
 #include "MipsElfFile.h"
 #include "Core/Misc.h"

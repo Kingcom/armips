@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Assembler.h"
 #include "Core/Common.h"
 #include "Commands/CAssemblerCommand.h"

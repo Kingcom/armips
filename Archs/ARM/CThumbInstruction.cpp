@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "CThumbInstruction.h"
 #include "Core/Common.h"
 #include "Arm.h"

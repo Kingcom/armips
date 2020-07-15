@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Arm.h"
 #include "ArmParser.h"
 #include "CArmInstruction.h"
