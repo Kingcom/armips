@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "Archs/Architecture.h"
 #include "Expression.h"
 #include "Common.h"

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Architecture.h"
 #include "Core/Common.h"
 #include "Core/ELF/ElfRelocator.h"

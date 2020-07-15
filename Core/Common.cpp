@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Core/Common.h"
 #include <sys/stat.h>
 #include "Assembler.h"

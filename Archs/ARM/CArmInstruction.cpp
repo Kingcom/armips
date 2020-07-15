@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "CArmInstruction.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"
@@ -560,7 +559,7 @@ void CArmInstruction::Encode() const
 				immediate = abs(immediate);
 			}
 			encoding |= (immediate << 0);
-		} else if (Opcode.flags & ARM_REGISTER)	// ... heißt der opcode nutzt shifts, mit immediates
+		} else if (Opcode.flags & ARM_REGISTER)	// ... means the opcocde uses shifts with immediates
 		{
 			if (Vars.Shift.UseShift == true)
 			{

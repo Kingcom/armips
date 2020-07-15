@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "ByteArray.h"
 #include "Util/Util.h"
 

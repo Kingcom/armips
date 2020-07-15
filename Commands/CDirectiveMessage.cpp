@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Commands/CDirectiveMessage.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"

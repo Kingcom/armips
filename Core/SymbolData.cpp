@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "SymbolData.h"
 #include "FileManager.h"
 #include "Misc.h"

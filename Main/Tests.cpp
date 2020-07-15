@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "CommandLineInterface.h"
 #include "Tests.h"
 #include "Util/Util.h"

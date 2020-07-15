@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Core/Expression.h"
 #include "Core/ExpressionFunctions.h"
 #include "Core/Common.h"

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Util.h"
 #include <sstream>
 #include <sys/stat.h>
