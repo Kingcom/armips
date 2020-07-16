@@ -11,7 +11,9 @@
 #include "Parser/Parser.h"
 #include "Util/Util.h"
 
-#define CHECK(exp) if (!(exp)) return false;
+#define CHECK(exp) \
+	if (!(exp))    \
+		return false;
 
 // clang-format off
 
@@ -146,19 +148,21 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFixLoadDelay(Parser& parser, in
 std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (parser.parseExpressionList(list, 1, 2) == false)
 		return nullptr;
 
 	std::wstring inputName, outputName;
-	if (list[0].evaluateString(inputName,true) == false)
+	if (list[0].evaluateString(inputName, true) == false)
 		return nullptr;
 
 	if (list.size() == 2)
 	{
-		if (list[1].evaluateString(outputName,true) == false)
+		if (list[1].evaluateString(outputName, true) == false)
 			return nullptr;
-		return std::make_unique<DirectiveLoadMipsElf>(inputName,outputName);
-	} else {
+		return std::make_unique<DirectiveLoadMipsElf>(inputName, outputName);
+	}
+	else
+	{
 		return std::make_unique<DirectiveLoadMipsElf>(inputName);
 	}
 }
@@ -168,26 +172,26 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 	const Token& start = parser.peekToken();
 
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (parser.parseExpressionList(list, 1, 2) == false)
 		return nullptr;
 
 	std::wstring inputName;
-	if (list[0].evaluateString(inputName,true) == false)
+	if (list[0].evaluateString(inputName, true) == false)
 		return nullptr;
-	
+
 	if (list.size() == 2)
 	{
 		std::wstring ctorName;
 		if (list[1].evaluateIdentifier(ctorName) == false)
 			return nullptr;
-		
+
 		if (Mips.GetVersion() == MARCH_PSX)
 		{
-			parser.printError(start,L"Constructor not supported for PSX libraries");
+			parser.printError(start, L"Constructor not supported for PSX libraries");
 			return std::make_unique<InvalidCommand>();
 		}
 
-		return std::make_unique<DirectiveObjImport>(inputName,ctorName);
+		return std::make_unique<DirectiveObjImport>(inputName, ctorName);
 	}
 
 	if (Mips.GetVersion() == MARCH_PSX)
@@ -197,11 +201,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 }
 
 const DirectiveMap mipsDirectives = {
-	{ L".resetdelay",		{ &parseDirectiveResetDelay,	0 } },
-	{ L".fixloaddelay",		{ &parseDirectiveFixLoadDelay,	0 } },
-	{ L".loadelf",			{ &parseDirectiveLoadElf,		0 } },
-	{ L".importobj",		{ &parseDirectiveImportObj,		0 } },
-	{ L".importlib",		{ &parseDirectiveImportObj,		0 } },
+	{L".resetdelay", {&parseDirectiveResetDelay, 0}}, {L".fixloaddelay", {&parseDirectiveFixLoadDelay, 0}},
+	{L".loadelf", {&parseDirectiveLoadElf, 0}},       {L".importobj", {&parseDirectiveImportObj, 0}},
+	{L".importlib", {&parseDirectiveImportObj, 0}},
 };
 
 std::unique_ptr<CAssemblerCommand> MipsParser::parseDirective(Parser& parser)
@@ -235,7 +237,7 @@ bool MipsParser::parseRegisterTable(Parser& parser, MipsRegisterValue& dest, con
 	if (hasDollar)
 		offset = 1;
 
-	const Token &token = parser.peekToken(offset);
+	const Token& token = parser.peekToken(offset);
 
 	if (token.type != TokenType::Identifier)
 		return false;
@@ -262,7 +264,7 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
+	return parseRegisterTable(parser, dest, mipsRegisters, ARRAY_SIZE(mipsRegisters));
 }
 
 bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
@@ -272,7 +274,7 @@ bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsFloatRegisters,ARRAY_SIZE(mipsFloatRegisters));
+	return parseRegisterTable(parser, dest, mipsFloatRegisters, ARRAY_SIZE(mipsFloatRegisters));
 }
 
 bool MipsParser::parseFpuControlRegister(Parser& parser, MipsRegisterValue& dest)
@@ -282,7 +284,7 @@ bool MipsParser::parseFpuControlRegister(Parser& parser, MipsRegisterValue& dest
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsFpuControlRegisters,ARRAY_SIZE(mipsFpuControlRegisters));
+	return parseRegisterTable(parser, dest, mipsFpuControlRegisters, ARRAY_SIZE(mipsFpuControlRegisters));
 }
 
 bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
@@ -292,13 +294,13 @@ bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsCop0Registers,ARRAY_SIZE(mipsCop0Registers));
+	return parseRegisterTable(parser, dest, mipsCop0Registers, ARRAY_SIZE(mipsCop0Registers));
 }
 
 bool MipsParser::parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Ps2Cop2;
-	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
+	return parseRegisterTable(parser, dest, mipsPs2Cop2FpRegisters, ARRAY_SIZE(mipsPs2Cop2FpRegisters));
 }
 
 bool MipsParser::parsePsxCop2DataRegister(Parser& parser, MipsRegisterValue& dest)
@@ -308,7 +310,7 @@ bool MipsParser::parsePsxCop2DataRegister(Parser& parser, MipsRegisterValue& des
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsPsxCop2DataRegisters,ARRAY_SIZE(mipsPsxCop2DataRegisters));
+	return parseRegisterTable(parser, dest, mipsPsxCop2DataRegisters, ARRAY_SIZE(mipsPsxCop2DataRegisters));
 }
 
 bool MipsParser::parsePsxCop2ControlRegister(Parser& parser, MipsRegisterValue& dest)
@@ -318,7 +320,7 @@ bool MipsParser::parsePsxCop2ControlRegister(Parser& parser, MipsRegisterValue& 
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsPsxCop2ControlRegisters,ARRAY_SIZE(mipsPsxCop2ControlRegisters));
+	return parseRegisterTable(parser, dest, mipsPsxCop2ControlRegisters, ARRAY_SIZE(mipsPsxCop2ControlRegisters));
 }
 
 bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
@@ -328,7 +330,7 @@ bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsRspCop0Registers,ARRAY_SIZE(mipsRspCop0Registers));
+	return parseRegisterTable(parser, dest, mipsRspCop0Registers, ARRAY_SIZE(mipsRspCop0Registers));
 }
 
 bool MipsParser::parseRspVectorControlRegister(Parser& parser, MipsRegisterValue& dest)
@@ -338,13 +340,13 @@ bool MipsParser::parseRspVectorControlRegister(Parser& parser, MipsRegisterValue
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsRspVectorControlRegisters,ARRAY_SIZE(mipsRspVectorControlRegisters));
+	return parseRegisterTable(parser, dest, mipsRspVectorControlRegisters, ARRAY_SIZE(mipsRspVectorControlRegisters));
 }
 
 bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::RspVector;
-	return parseRegisterTable(parser,dest,mipsRspVectorRegisters,ARRAY_SIZE(mipsRspVectorRegisters));
+	return parseRegisterTable(parser, dest, mipsRspVectorRegisters, ARRAY_SIZE(mipsRspVectorRegisters));
 }
 
 bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
@@ -354,12 +356,9 @@ bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
 	if (parser.peekToken().type == TokenType::LBrack)
 	{
 		static const MipsRegisterDescriptor rspElementNames[] = {
-			{ L"0q", 2 },		{ L"1q", 3 },		{ L"0h", 4 },		{ L"1h", 5 },
-			{ L"2h", 6 },		{ L"3h", 7 },		{ L"0w", 8 },		{ L"0", 8 },
-			{ L"1w", 9 },		{ L"1", 9 },		{ L"2w", 10 },		{ L"2", 10 },
-			{ L"3w", 11 },		{ L"3", 11 },		{ L"4w", 12 },		{ L"4", 12 },
-			{ L"5w", 13 },		{ L"5", 13 },		{ L"6w", 14 },		{ L"6", 14 },
-			{ L"7w", 15 },		{ L"7", 15 },
+			{L"0q", 2},  {L"1q", 3}, {L"0h", 4},  {L"1h", 5}, {L"2h", 6},  {L"3h", 7}, {L"0w", 8},  {L"0", 8},
+			{L"1w", 9},  {L"1", 9},  {L"2w", 10}, {L"2", 10}, {L"3w", 11}, {L"3", 11}, {L"4w", 12}, {L"4", 12},
+			{L"5w", 13}, {L"5", 13}, {L"6w", 14}, {L"6", 14}, {L"7w", 15}, {L"7", 15},
 		};
 
 		parser.eatToken();
@@ -372,7 +371,7 @@ bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
 		if (token.type != TokenType::Integer && token.type != TokenType::NumberString)
 			return false;
 
-		//ignore the numerical values, just use the original text as an identifier
+		// ignore the numerical values, just use the original text as an identifier
 		std::wstring stringValue = token.getOriginalText();
 		if (std::any_of(stringValue.begin(), stringValue.end(), iswupper))
 		{
@@ -397,7 +396,6 @@ bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
 	dest.name = L"";
 
 	return true;
-
 }
 
 bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
@@ -407,7 +405,7 @@ bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
 	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
 
-	const Token &token = parser.nextToken();
+	const Token& token = parser.nextToken();
 
 	if (token.type != TokenType::Integer || token.intValue >= 8)
 		return false;
@@ -426,7 +424,7 @@ bool MipsParser::parseRspOffsetElement(Parser& parser, MipsRegisterValue& dest)
 	{
 		parser.eatToken();
 
-		const Token &token = parser.nextToken();
+		const Token& token = parser.nextToken();
 
 		if (token.type != TokenType::Integer || token.intValue >= 16)
 			return false;
@@ -447,7 +445,7 @@ static bool decodeDigit(wchar_t digit, int& dest)
 {
 	if (digit >= '0' && digit <= '9')
 	{
-		dest = digit-'0';
+		dest = digit - '0';
 		return true;
 	}
 	return false;
@@ -460,10 +458,13 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 	if (token.type != TokenType::Identifier || stringValue.size() != 4)
 		return false;
 
-	int mtx,col,row;
-	if (decodeDigit(stringValue[1],mtx) == false) return false;
-	if (decodeDigit(stringValue[2],col) == false) return false;
-	if (decodeDigit(stringValue[3],row) == false) return false;
+	int mtx, col, row;
+	if (decodeDigit(stringValue[1], mtx) == false)
+		return false;
+	if (decodeDigit(stringValue[2], col) == false)
+		return false;
+	if (decodeDigit(stringValue[3], row) == false)
+		return false;
 	wchar_t mode = towlower(stringValue[0]);
 
 	if (size < 0 || size > 3)
@@ -475,20 +476,20 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 	reg.num = 0;
 	switch (mode)
 	{
-	case 'r':					// transposed vector
+	case 'r': // transposed vector
 		reg.num |= (1 << 5);
-		std::swap(col,row);		// fallthrough
-	case 'c':					// vector	
+		std::swap(col, row); // fallthrough
+	case 'c': // vector
 		reg.type = MipsRegisterType::VfpuVector;
 
 		switch (size)
 		{
-		case 1:	// pair
+		case 1: // pair
 		case 3: // quad
 			if (row & 1)
 				return false;
 			break;
-		case 2:	// triple
+		case 2: // triple
 			if (row & 2)
 				return false;
 			row <<= 1;
@@ -497,26 +498,26 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 			return false;
 		}
 		break;
-	case 's':					// single
+	case 's': // single
 		reg.type = MipsRegisterType::VfpuVector;
 
 		if (size != 0)
 			return false;
 		break;
-	case 'e':					// transposed matrix
-		reg.num |= (1 << 5);	// fallthrough
-	case 'm':					// matrix
+	case 'e': // transposed matrix
+		reg.num |= (1 << 5); // fallthrough
+	case 'm': // matrix
 		reg.type = MipsRegisterType::VfpuMatrix;
 
 		// check size
 		switch (size)
 		{
-		case 1:	// 2x2
-		case 3:	// 4x4
+		case 1: // 2x2
+		case 3: // 4x4
 			if (row & 1)
 				return false;
 			break;
-		case 2:	// 3x3
+		case 2: // 3x3
 			if (row & ~1)
 				return false;
 			row <<= 1;
@@ -541,10 +542,8 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 bool MipsParser::parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg)
 {
 	static const wchar_t* vfpuCtrlNames[16] = {
-		L"spfx",	L"tpfx",	L"dpfx",	L"cc",
-		L"inf4",	L"rsv5",	L"rsv6",	L"rev",
-		L"rcx0",	L"rcx1",	L"rcx2",	L"rcx3",
-		L"rcx4",	L"rcx5",	L"rcx6",	L"rcx7",
+		L"spfx", L"tpfx", L"dpfx", L"cc",   L"inf4", L"rsv5", L"rsv6", L"rev",
+		L"rcx0", L"rcx1", L"rcx2", L"rcx3", L"rcx4", L"rcx5", L"rcx6", L"rcx7",
 	};
 
 	const Token& token = parser.peekToken();
@@ -563,7 +562,8 @@ bool MipsParser::parseVfpuControlRegister(Parser& parser, MipsRegisterValue& reg
 				return true;
 			}
 		}
-	} else if (token.type == TokenType::Integer && token.intValue <= 15)
+	}
+	else if (token.type == TokenType::Integer && token.intValue <= 15)
 	{
 		reg.num = (int) token.intValue;
 		reg.name = vfpuCtrlNames[reg.num];
@@ -585,7 +585,7 @@ bool MipsParser::parseImmediate(Parser& parser, Expression& dest)
 		parser.eatToken();
 
 	MipsRegisterValue tempValue;
-	bool isRegister = parseRegister(parser,tempValue);
+	bool isRegister = parseRegister(parser, tempValue);
 	parser.getTokenizer()->setPosition(pos);
 
 	if (isRegister)
@@ -618,108 +618,64 @@ bool MipsParser::parseVcstParameter(Parser& parser, int& result)
 	if (sequenceParser.getEntryCount() == 0)
 	{
 		// maxfloat
-		sequenceParser.addEntry(1,
-			{TokenType::Identifier},
-			{L"maxfloat"}
-		);
+		sequenceParser.addEntry(1, {TokenType::Identifier}, {L"maxfloat"});
 		// sqrt(2)
-		sequenceParser.addEntry(2,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"sqrt", INT64_C(2)}
-		);
+		sequenceParser.addEntry(2, {TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
+								{L"sqrt", INT64_C(2)});
 		// sqrt(1/2)
 		sequenceParser.addEntry(3,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::Div, TokenType::Integer, TokenType::RParen},
-			{L"sqrt", INT64_C(1), INT64_C(2)}
-		);
+								{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::Div,
+								 TokenType::Integer, TokenType::RParen},
+								{L"sqrt", INT64_C(1), INT64_C(2)});
 		// sqrt(0.5)
-		sequenceParser.addEntry(3,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Float, TokenType::RParen},
-			{L"sqrt", 0.5}
-		);
+		sequenceParser.addEntry(3, {TokenType::Identifier, TokenType::LParen, TokenType::Float, TokenType::RParen}, {L"sqrt", 0.5});
 		// 2/sqrt(pi)
 		sequenceParser.addEntry(4,
-			{TokenType::Integer, TokenType::Div, TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
-			{INT64_C(2), L"sqrt", L"pi"}
-		);
+								{TokenType::Integer, TokenType::Div, TokenType::Identifier, TokenType::LParen,
+								 TokenType::Identifier, TokenType::RParen},
+								{INT64_C(2), L"sqrt", L"pi"});
 		// 2/pi
-		sequenceParser.addEntry(5,
-			{TokenType::Integer, TokenType::Div, TokenType::Identifier},
-			{INT64_C(2), L"pi"}
-		);
+		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Identifier}, {INT64_C(2), L"pi"});
 		// 1/pi
-		sequenceParser.addEntry(6,
-			{TokenType::Integer, TokenType::Div, TokenType::Identifier},
-			{INT64_C(1), L"pi"}
-		);
+		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Identifier}, {INT64_C(1), L"pi"});
 		// pi/4
-		sequenceParser.addEntry(7,
-			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", INT64_C(4)}
-		);
+		sequenceParser.addEntry(7, {TokenType::Identifier, TokenType::Div, TokenType::Integer}, {L"pi", INT64_C(4)});
 		// pi/2
-		sequenceParser.addEntry(8,
-			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", INT64_C(2)}
-		);
+		sequenceParser.addEntry(8, {TokenType::Identifier, TokenType::Div, TokenType::Integer}, {L"pi", INT64_C(2)});
 		// pi/6 - early because "pi" is a prefix of it
-		sequenceParser.addEntry(16,
-			{TokenType::Identifier, TokenType::Div, TokenType::Integer},
-			{L"pi", INT64_C(6)}
-		);
+		sequenceParser.addEntry(16, {TokenType::Identifier, TokenType::Div, TokenType::Integer}, {L"pi", INT64_C(6)});
 		// pi
-		sequenceParser.addEntry(9,
-			{TokenType::Identifier},
-			{L"pi"}
-		);
+		sequenceParser.addEntry(9, {TokenType::Identifier}, {L"pi"});
 		// e
-		sequenceParser.addEntry(10,
-			{TokenType::Identifier},
-			{L"e"}
-		);
+		sequenceParser.addEntry(10, {TokenType::Identifier}, {L"e"});
 		// log2(e)
-		sequenceParser.addEntry(11,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
-			{L"log2", L"e"}
-		);
+		sequenceParser.addEntry(11, {TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
+								{L"log2", L"e"});
 		// log10(e)
-		sequenceParser.addEntry(12,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
-			{L"log10", L"e"}
-		);
+		sequenceParser.addEntry(12, {TokenType::Identifier, TokenType::LParen, TokenType::Identifier, TokenType::RParen},
+								{L"log10", L"e"});
 		// ln(2)
-		sequenceParser.addEntry(13,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"ln", INT64_C(2)}
-		);
+		sequenceParser.addEntry(13, {TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
+								{L"ln", INT64_C(2)});
 		// ln(10)
-		sequenceParser.addEntry(14,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"ln", INT64_C(10)}
-		);
+		sequenceParser.addEntry(14, {TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
+								{L"ln", INT64_C(10)});
 		// 2*pi
-		sequenceParser.addEntry(15,
-			{TokenType::Integer, TokenType::Mult, TokenType::Identifier},
-			{INT64_C(2), L"pi"}
-		);
+		sequenceParser.addEntry(15, {TokenType::Integer, TokenType::Mult, TokenType::Identifier}, {INT64_C(2), L"pi"});
 		// log10(2)
-		sequenceParser.addEntry(17,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"log10", INT64_C(2)}
-		);
+		sequenceParser.addEntry(17, {TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
+								{L"log10", INT64_C(2)});
 		// log2(10)
-		sequenceParser.addEntry(18,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
-			{L"log2", INT64_C(10)}
-		);
+		sequenceParser.addEntry(18, {TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen},
+								{L"log2", INT64_C(10)});
 		// sqrt(3)/2
 		sequenceParser.addEntry(19,
-			{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen, TokenType::Div, TokenType::Integer},
-			{L"sqrt", INT64_C(3), INT64_C(2)}
-		);
+								{TokenType::Identifier, TokenType::LParen, TokenType::Integer, TokenType::RParen,
+								 TokenType::Div, TokenType::Integer},
+								{L"sqrt", INT64_C(3), INT64_C(2)});
 	}
 
-	return sequenceParser.parse(parser,result);
+	return sequenceParser.parse(parser, result);
 }
 
 bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
@@ -731,12 +687,12 @@ bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 
 	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
-	
-	int numElems = size+1;
+
+	int numElems = size + 1;
 	for (int i = 0; i < numElems; i++)
 	{
 		const Token* tokenFinder = &parser.nextToken();
-		
+
 		if (i != 0)
 		{
 			if (tokenFinder->type != TokenType::Comma)
@@ -780,47 +736,56 @@ bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 			return false;
 		}
 	}
-	
+
 	if (parser.nextToken().type != TokenType::RBrack)
 		return false;
-	
+
 	result = negSine ? 0x10 : 0;
 
 	if (sin == -1 && cos == -1)
 	{
 		return false;
-	} else if (sin == -1)
+	}
+	else if (sin == -1)
 	{
 		if (numElems == 4)
 			return false;
-		
+
 		result |= cos;
-		result |= ((size+1) << 2);
-	} else if (cos == -1)
+		result |= ((size + 1) << 2);
+	}
+	else if (cos == -1)
 	{
 		if (numElems == 4)
 			return false;
 
 		if (sineCount == 1)
 		{
-			result |= (size+1);
+			result |= (size + 1);
 			result |= (sin << 2);
-		} else if (sineCount == numElems)
+		}
+		else if (sineCount == numElems)
 		{
-			result |= (size+1);
-			result |= ((size+1) << 2);
-		} else {
+			result |= (size + 1);
+			result |= ((size + 1) << 2);
+		}
+		else
+		{
 			return false;
 		}
-	} else {
+	}
+	else
+	{
 		if (sineCount > 1)
 		{
-			if (sineCount+1 != numElems)
+			if (sineCount + 1 != numElems)
 				return false;
-			
+
 			result |= cos;
 			result |= (cos << 2);
-		} else {
+		}
+		else
+		{
 			result |= cos;
 			result |= (sin << 2);
 		}
@@ -831,10 +796,8 @@ bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 
 bool MipsParser::parseVfpuCondition(Parser& parser, int& result)
 {
-	static const wchar_t* conditions[] = {
-		L"fl", L"eq", L"lt", L"le", L"tr", L"ne", L"ge", L"gt",
-		L"ez", L"en", L"ei", L"es", L"nz", L"nn", L"ni", L"ns"
-	};
+	static const wchar_t* conditions[] = {L"fl", L"eq", L"lt", L"le", L"tr", L"ne", L"ge", L"gt",
+										  L"ez", L"en", L"ei", L"es", L"nz", L"nn", L"ni", L"ns"};
 
 	const Token& token = parser.nextToken();
 	if (token.type != TokenType::Identifier)
@@ -861,29 +824,29 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 	if (sequenceParser.getEntryCount() == 0)
 	{
 		// 0
-		sequenceParser.addEntry(0, {TokenType::Integer}, {INT64_C(0)} );
+		sequenceParser.addEntry(0, {TokenType::Integer}, {INT64_C(0)});
 		// 1
-		sequenceParser.addEntry(1, {TokenType::Integer}, {INT64_C(1)} );
+		sequenceParser.addEntry(1, {TokenType::Integer}, {INT64_C(1)});
 		// 2
-		sequenceParser.addEntry(2, {TokenType::Integer}, {INT64_C(2)} );
+		sequenceParser.addEntry(2, {TokenType::Integer}, {INT64_C(2)});
 		// 1/2
-		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(2)} );
+		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(2)});
 		// 3
-		sequenceParser.addEntry(4, {TokenType::Integer}, {INT64_C(3)} );
+		sequenceParser.addEntry(4, {TokenType::Integer}, {INT64_C(3)});
 		// 1/3
-		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(3)} );
+		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(3)});
 		// 1/4
-		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(4)} );
+		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(4)});
 		// 1/6
-		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(6)} );
+		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(6)});
 	}
 
 	if (parser.nextToken().type != TokenType::LBrack)
 		return false;
-	
+
 	for (int i = 0; i < 4; i++)
 	{
-		const Token *tokenFinder = &parser.nextToken();
+		const Token* tokenFinder = &parser.nextToken();
 
 		if (i != 0)
 		{
@@ -892,11 +855,11 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 
 			tokenFinder = &parser.nextToken();
 		}
-		
+
 		// negation
 		if (tokenFinder->type == TokenType::Minus)
 		{
-			result |= 1 << (16+i);
+			result |= 1 << (16 + i);
 			tokenFinder = &parser.nextToken();
 		}
 
@@ -904,40 +867,40 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 		bool abs = false;
 		if (tokenFinder->type == TokenType::BitOr)
 		{
-			result |= 1 << (8+i);
+			result |= 1 << (8 + i);
 			abs = true;
 			tokenFinder = &parser.nextToken();
 		}
 
 		const Token& token = *tokenFinder;
-		
+
 		// check for register
 		const wchar_t* reg;
 		static const wchar_t* vpfxstRegisters = L"xyzw";
 		const std::wstring stringValue = token.getStringValue();
-		if (stringValue.size() == 1 && (reg = wcschr(vpfxstRegisters,stringValue[0])) != nullptr)
+		if (stringValue.size() == 1 && (reg = wcschr(vpfxstRegisters, stringValue[0])) != nullptr)
 		{
-			result |= (reg-vpfxstRegisters) << (i*2);
+			result |= (reg - vpfxstRegisters) << (i * 2);
 
 			if (abs && parser.nextToken().type != TokenType::BitOr)
 				return false;
 
 			continue;
 		}
-		
+
 		// abs is invalid with constants
 		if (abs)
 			return false;
 
-		result |= 1 << (12+i);
+		result |= 1 << (12 + i);
 
 		int constNum = -1;
-		if (sequenceParser.parse(parser,constNum) == false)
+		if (sequenceParser.parse(parser, constNum) == false)
 			return false;
-		
-		result |= (constNum & 3) << (i*2);
+
+		result |= (constNum & 3) << (i * 2);
 		if (constNum & 4)
-			result |= 1 << (8+i);
+			result |= 1 << (8 + i);
 	}
 
 	return parser.nextToken().type == TokenType::RBrack;
@@ -951,37 +914,27 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 	if (sequenceParser.getEntryCount() == 0)
 	{
 		// 0-1
-		sequenceParser.addEntry(1,
-			{TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{INT64_C(0), INT64_C(1)} );
+		sequenceParser.addEntry(1, {TokenType::Integer, TokenType::Minus, TokenType::Integer}, {INT64_C(0), INT64_C(1)});
 		// 0-1
-		sequenceParser.addEntry(-1,
-			{TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{INT64_C(0), L"1m"} );
+		sequenceParser.addEntry(-1, {TokenType::Integer, TokenType::Minus, TokenType::NumberString},
+								{INT64_C(0), L"1m"});
 		// 0:1
-		sequenceParser.addEntry(1,
-			{TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{INT64_C(0), INT64_C(1)} );
+		sequenceParser.addEntry(1, {TokenType::Integer, TokenType::Colon, TokenType::Integer}, {INT64_C(0), INT64_C(1)});
 		// 0:1
-		sequenceParser.addEntry(-1,
-			{TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{INT64_C(0), L"1m"} );
+		sequenceParser.addEntry(-1, {TokenType::Integer, TokenType::Colon, TokenType::NumberString},
+								{INT64_C(0), L"1m"});
 		// -1-1
-		sequenceParser.addEntry(3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{INT64_C(1), INT64_C(1)} );
+		sequenceParser.addEntry(3, {TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::Integer},
+								{INT64_C(1), INT64_C(1)});
 		// -1-1m
-		sequenceParser.addEntry(-3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{INT64_C(1), L"1m"} );
+		sequenceParser.addEntry(-3, {TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::NumberString},
+								{INT64_C(1), L"1m"});
 		// -1:1
-		sequenceParser.addEntry(3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{INT64_C(1), INT64_C(1)} );
+		sequenceParser.addEntry(3, {TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::Integer},
+								{INT64_C(1), INT64_C(1)});
 		// -1:1m
-		sequenceParser.addEntry(-3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{INT64_C(1), L"1m"} );
+		sequenceParser.addEntry(-3, {TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::NumberString},
+								{INT64_C(1), L"1m"});
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -993,42 +946,42 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 		}
 
 		parser.eatToken();
-		
+
 		int num = 0;
-		if (sequenceParser.parse(parser,num) == false)
+		if (sequenceParser.parse(parser, num) == false)
 			return false;
 
 		// m versions
 		if (num < 0)
 		{
-			result |= 1 << (8+i);
+			result |= 1 << (8 + i);
 			num = abs(num);
 		}
 
-		result |= num << (2*i);
+		result |= num << (2 * i);
 	}
-	
+
 	return parser.nextToken().type == TokenType::RBrack;
 }
 
-
 bool MipsParser::decodeCop2BranchCondition(const std::wstring& text, size_t& pos, int& result)
 {
-	if (pos+3 == text.size())
+	if (pos + 3 == text.size())
 	{
-		if (startsWith(text,L"any",pos))
+		if (startsWith(text, L"any", pos))
 		{
 			result = 4;
 			pos += 3;
 			return true;
 		}
-		if (startsWith(text,L"all",pos))
+		if (startsWith(text, L"all", pos))
 		{
 			result = 5;
 			pos += 3;
 			return true;
 		}
-	} else if (pos+1 == text.size())
+	}
+	else if (pos + 1 == text.size())
 	{
 		switch (text[pos++])
 		{
@@ -1077,7 +1030,7 @@ bool MipsParser::parseCop2BranchCondition(Parser& parser, int& result)
 		return false;
 
 	size_t pos = 0;
-	return decodeCop2BranchCondition(token.getStringValue(),pos,result);
+	return decodeCop2BranchCondition(token.getStringValue(), pos, result);
 }
 
 bool MipsParser::parseWb(Parser& parser)
@@ -1091,15 +1044,17 @@ bool MipsParser::parseWb(Parser& parser)
 
 static bool decodeImmediateSize(const char*& encoding, MipsImmediateType& dest)
 {
-	if (*encoding == 'h')	// half float
+	if (*encoding == 'h') // half float
 	{
 		encoding++;
 		dest = MipsImmediateType::ImmediateHalfFloat;
-	} else {
+	}
+	else
+	{
 		int num = 0;
 		while (*encoding >= '0' && *encoding <= '9')
 		{
-			num = num*10 + *encoding-'0';
+			num = num * 10 + *encoding - '0';
 			encoding++;
 		}
 
@@ -1174,17 +1129,17 @@ bool MipsParser::decodeOpcode(const std::wstring& name, const tMipsOpcode& opcod
 		switch (*encoding++)
 		{
 		case 'S':
-			CHECK(decodeVfpuType(name,pos,opcodeData.vfpuSize));
+			CHECK(decodeVfpuType(name, pos, opcodeData.vfpuSize));
 			break;
 		case 'B':
-			CHECK(decodeCop2BranchCondition(name,pos,immediate.secondary.originalValue));
+			CHECK(decodeCop2BranchCondition(name, pos, immediate.secondary.originalValue));
 			immediate.secondary.type = MipsImmediateType::Cop2BranchType;
 			immediate.secondary.value = immediate.secondary.originalValue;
 			hasFixedSecondaryImmediate = true;
 			break;
 		default:
 			CHECK(pos < name.size());
-			CHECK(*(encoding-1) == name[pos++]);
+			CHECK(*(encoding - 1) == name[pos++]);
 			break;
 		}
 	}
@@ -1240,31 +1195,31 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 	{
 		switch (*encoding++)
 		{
-		case 't':	// register
-			CHECK(parseRegister(parser,registers.grt));
+		case 't': // register
+			CHECK(parseRegister(parser, registers.grt));
 			break;
-		case 'd':	// register
-			CHECK(parseRegister(parser,registers.grd));
+		case 'd': // register
+			CHECK(parseRegister(parser, registers.grd));
 			break;
-		case 's':	// register
-			CHECK(parseRegister(parser,registers.grs));
+		case 's': // register
+			CHECK(parseRegister(parser, registers.grs));
 			break;
-		case 'T':	// float register
-			CHECK(parseFpuRegister(parser,registers.frt));
+		case 'T': // float register
+			CHECK(parseFpuRegister(parser, registers.frt));
 			break;
-		case 'D':	// float register
-			CHECK(parseFpuRegister(parser,registers.frd));
+		case 'D': // float register
+			CHECK(parseFpuRegister(parser, registers.frd));
 			break;
-		case 'S':	// float register
-			CHECK(parseFpuRegister(parser,registers.frs));
+		case 'S': // float register
+			CHECK(parseFpuRegister(parser, registers.frs));
 			break;
-		case 'f':	// fpu control register
-			CHECK(parseFpuControlRegister(parser,registers.frs));
+		case 'f': // fpu control register
+			CHECK(parseFpuControlRegister(parser, registers.frs));
 			break;
-		case 'z':	// cop0 register
-			CHECK(parseCop0Register(parser,registers.grd));
+		case 'z': // cop0 register
+			CHECK(parseCop0Register(parser, registers.grd));
 			break;
-		case 'v':	// psp vfpu reg
+		case 'v': // psp vfpu reg
 			if (*encoding == 'S')
 			{
 				encoding++;
@@ -1274,141 +1229,144 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			switch (*encoding++)
 			{
 			case 's':
-				CHECK(parseVfpuRegister(parser,registers.vrs,actualSize));
+				CHECK(parseVfpuRegister(parser, registers.vrs, actualSize));
 				CHECK(registers.vrs.type == MipsRegisterType::VfpuVector);
-				if (opcode.flags & MO_VFPU_6BIT) CHECK(!(registers.vrs.num & 0x40));
+				if (opcode.flags & MO_VFPU_6BIT)
+					CHECK(!(registers.vrs.num & 0x40));
 				break;
 			case 't':
-				CHECK(parseVfpuRegister(parser,registers.vrt,actualSize));
+				CHECK(parseVfpuRegister(parser, registers.vrt, actualSize));
 				CHECK(registers.vrt.type == MipsRegisterType::VfpuVector);
-				if (opcode.flags & MO_VFPU_6BIT) CHECK(!(registers.vrt.num & 0x40));
+				if (opcode.flags & MO_VFPU_6BIT)
+					CHECK(!(registers.vrt.num & 0x40));
 				break;
 			case 'd':
-				CHECK(parseVfpuRegister(parser,registers.vrd,actualSize));
+				CHECK(parseVfpuRegister(parser, registers.vrd, actualSize));
 				CHECK(registers.vrd.type == MipsRegisterType::VfpuVector);
-				if (opcode.flags & MO_VFPU_6BIT) CHECK(!(registers.vrd.num & 0x40));
+				if (opcode.flags & MO_VFPU_6BIT)
+					CHECK(!(registers.vrd.num & 0x40));
 				break;
 			case 'c':
-				CHECK(parseVfpuControlRegister(parser,registers.vrd));
+				CHECK(parseVfpuControlRegister(parser, registers.vrd));
 				break;
 			default:
 				return false;
 			}
 			break;
-		case 'm':	// vfpu matrix register
+		case 'm': // vfpu matrix register
 			switch (*encoding++)
 			{
 			case 's':
-				CHECK(parseVfpuRegister(parser,registers.vrs,opcodeData.vfpuSize));
+				CHECK(parseVfpuRegister(parser, registers.vrs, opcodeData.vfpuSize));
 				CHECK(registers.vrs.type == MipsRegisterType::VfpuMatrix);
 				if (opcode.flags & MO_TRANSPOSE_VS)
 					registers.vrs.num ^= 0x20;
 				break;
 			case 't':
-				CHECK(parseVfpuRegister(parser,registers.vrt,opcodeData.vfpuSize));
+				CHECK(parseVfpuRegister(parser, registers.vrt, opcodeData.vfpuSize));
 				CHECK(registers.vrt.type == MipsRegisterType::VfpuMatrix);
 				break;
 			case 'd':
-				CHECK(parseVfpuRegister(parser,registers.vrd,opcodeData.vfpuSize));
+				CHECK(parseVfpuRegister(parser, registers.vrd, opcodeData.vfpuSize));
 				CHECK(registers.vrd.type == MipsRegisterType::VfpuMatrix);
 				break;
 			default:
 				return false;
 			}
 			break;
-		case 'V':	// ps2 vector reg
+		case 'V': // ps2 vector reg
 			switch (*encoding++)
 			{
-			case 't':	// register
-				CHECK(parsePs2Cop2Register(parser,registers.ps2vrt));
+			case 't': // register
+				CHECK(parsePs2Cop2Register(parser, registers.ps2vrt));
 				break;
-			case 'd':	// register
-				CHECK(parsePs2Cop2Register(parser,registers.ps2vrd));
+			case 'd': // register
+				CHECK(parsePs2Cop2Register(parser, registers.ps2vrd));
 				break;
-			case 's':	// register
-				CHECK(parsePs2Cop2Register(parser,registers.ps2vrs));
+			case 's': // register
+				CHECK(parsePs2Cop2Register(parser, registers.ps2vrs));
 				break;
 			default:
 				return false;
 			}
 			break;
-		case 'g':	// psx cop2 reg
+		case 'g': // psx cop2 reg
 			switch (*encoding++)
 			{
-			case 't':	// gte data register
-				CHECK(parsePsxCop2DataRegister(parser,registers.grt));
+			case 't': // gte data register
+				CHECK(parsePsxCop2DataRegister(parser, registers.grt));
 				break;
-			case 's':	// gte data register
-				CHECK(parsePsxCop2DataRegister(parser,registers.grd));
+			case 's': // gte data register
+				CHECK(parsePsxCop2DataRegister(parser, registers.grd));
 				break;
-			case 'c':	// gte control register
-				CHECK(parsePsxCop2ControlRegister(parser,registers.grd));
+			case 'c': // gte control register
+				CHECK(parsePsxCop2ControlRegister(parser, registers.grd));
 				break;
 			default:
 				return false;
 			}
 			break;
-		case 'r':	// forced register
-			CHECK(parseRegister(parser,tempRegister));
+		case 'r': // forced register
+			CHECK(parseRegister(parser, tempRegister));
 			CHECK(tempRegister.num == *encoding++);
 			break;
-		case 'R':	// rsp register
+		case 'R': // rsp register
 			switch (*encoding++)
 			{
-			case 'z':	// cop0 register
-				CHECK(parseRspCop0Register(parser,registers.grd));
+			case 'z': // cop0 register
+				CHECK(parseRspCop0Register(parser, registers.grd));
 				break;
-			case 'c':	// vector control register
-				CHECK(parseRspVectorControlRegister(parser,registers.grd));
+			case 'c': // vector control register
+				CHECK(parseRspVectorControlRegister(parser, registers.grd));
 				break;
-			case 't':	// vector register
-				CHECK(parseRspVectorRegister(parser,registers.rspvrt));
+			case 't': // vector register
+				CHECK(parseRspVectorRegister(parser, registers.rspvrt));
 				break;
-			case 'd':	// vector register
-				CHECK(parseRspVectorRegister(parser,registers.rspvrd));
+			case 'd': // vector register
+				CHECK(parseRspVectorRegister(parser, registers.rspvrd));
 				break;
-			case 's':	// vector register
-				CHECK(parseRspVectorRegister(parser,registers.rspvrs));
+			case 's': // vector register
+				CHECK(parseRspVectorRegister(parser, registers.rspvrs));
 				break;
-			case 'e':	// vector element
-				CHECK(parseRspVectorElement(parser,registers.rspve));
+			case 'e': // vector element
+				CHECK(parseRspVectorElement(parser, registers.rspve));
 				break;
-			case 'l':	// scalar element
-				CHECK(parseRspScalarElement(parser,registers.rspve));
+			case 'l': // scalar element
+				CHECK(parseRspScalarElement(parser, registers.rspve));
 				break;
-			case 'm':	// scalar destination element
-				CHECK(parseRspScalarElement(parser,registers.rspvde));
+			case 'm': // scalar destination element
+				CHECK(parseRspScalarElement(parser, registers.rspvde));
 				break;
-			case 'o':	// byte offset element
-				CHECK(parseRspOffsetElement(parser,registers.rspvealt));
+			case 'o': // byte offset element
+				CHECK(parseRspOffsetElement(parser, registers.rspvealt));
 				break;
 			default:
 				return false;
 			}
 			break;
-		case 'i':	// primary immediate
-			CHECK(parseImmediate(parser,immediate.primary.expression));
+		case 'i': // primary immediate
+			CHECK(parseImmediate(parser, immediate.primary.expression));
 			allowFunctionCallExpression(*encoding != '(');
-			CHECK(decodeImmediateSize(encoding,immediate.primary.type));
+			CHECK(decodeImmediateSize(encoding, immediate.primary.type));
 			allowFunctionCallExpression(true);
 			break;
-		case 'j':	// secondary immediate
+		case 'j': // secondary immediate
 			switch (*encoding++)
 			{
 			case 'c':
-				CHECK(parseImmediate(parser,immediate.secondary.expression));
+				CHECK(parseImmediate(parser, immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::CacheOp;
 				break;
 			case 'e':
-				CHECK(parseImmediate(parser,immediate.secondary.expression));
+				CHECK(parseImmediate(parser, immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::Ext;
 				break;
 			case 'i':
-				CHECK(parseImmediate(parser,immediate.secondary.expression));
+				CHECK(parseImmediate(parser, immediate.secondary.expression));
 				immediate.secondary.type = MipsImmediateType::Ins;
 				break;
 			case 'b':
-				CHECK(parseCop2BranchCondition(parser,immediate.secondary.originalValue));
+				CHECK(parseCop2BranchCondition(parser, immediate.secondary.originalValue));
 				immediate.secondary.type = MipsImmediateType::Cop2BranchType;
 				immediate.secondary.value = immediate.secondary.originalValue;
 				break;
@@ -1416,29 +1374,29 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 				return false;
 			}
 			break;
-		case 'C':	// vfpu condition
-			CHECK(parseVfpuCondition(parser,opcodeData.vectorCondition));
+		case 'C': // vfpu condition
+			CHECK(parseVfpuCondition(parser, opcodeData.vectorCondition));
 			break;
-		case 'W':	// vfpu argument
+		case 'W': // vfpu argument
 			switch (*encoding++)
 			{
 			case 's':
-				CHECK(parseVpfxsParameter(parser,immediate.primary.originalValue));
+				CHECK(parseVpfxsParameter(parser, immediate.primary.originalValue));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate20_0;
 				break;
 			case 'd':
-				CHECK(parseVpfxdParameter(parser,immediate.primary.originalValue));
+				CHECK(parseVpfxdParameter(parser, immediate.primary.originalValue));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate16;
 				break;
 			case 'c':
-				CHECK(parseVcstParameter(parser,immediate.primary.originalValue));
+				CHECK(parseVcstParameter(parser, immediate.primary.originalValue));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate5;
 				break;
 			case 'r':
-				CHECK(parseVfpuVrot(parser,immediate.primary.originalValue,opcodeData.vfpuSize));
+				CHECK(parseVfpuVrot(parser, immediate.primary.originalValue, opcodeData.vfpuSize));
 				immediate.primary.value = immediate.primary.originalValue;
 				immediate.primary.type = MipsImmediateType::Immediate5;
 				break;
@@ -1446,11 +1404,11 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 				return false;
 			}
 			break;
-		case 'w':	// 'wb' characters
+		case 'w': // 'wb' characters
 			CHECK(parseWb(parser));
 			break;
 		default:
-			CHECK(matchSymbol(parser,*(encoding-1)));
+			CHECK(matchSymbol(parser, *(encoding - 1)));
 			break;
 		}
 	}
@@ -1462,7 +1420,6 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 	// completely parsed
 
 	return parser.nextToken().type == TokenType::Separator;
-
 }
 
 std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
@@ -1470,7 +1427,7 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
 
-	const Token &token = parser.nextToken();
+	const Token& token = parser.nextToken();
 
 	bool paramFail = false;
 	const MipsArchDefinition& arch = mipsArchs[Mips.GetVersion()];
@@ -1490,14 +1447,14 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 		if ((MipsOpcodes[z].flags & MO_DFPU) && !(arch.flags & MO_DFPU))
 			continue;
 
-		if (decodeOpcode(stringValue,MipsOpcodes[z]) == true)
+		if (decodeOpcode(stringValue, MipsOpcodes[z]) == true)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseParameters(parser,MipsOpcodes[z]) == true)
+			if (parseParameters(parser, MipsOpcodes[z]) == true)
 			{
 				// success, return opcode
-				return std::make_unique<CMipsInstruction>(opcodeData,immediate,registers);
+				return std::make_unique<CMipsInstruction>(opcodeData, immediate, registers);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -1506,9 +1463,9 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 	}
 
 	if (paramFail == true)
-		parser.printError(token,L"MIPS parameter failure");
+		parser.printError(token, L"MIPS parameter failure");
 	else
-		parser.printError(token,L"Invalid MIPS opcode '%s'",stringValue);
+		parser.printError(token, L"Invalid MIPS opcode '%s'", stringValue);
 
 	return nullptr;
 }
@@ -1521,30 +1478,30 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 	{
 		switch (*encoding++)
 		{
-		case 't':	// register
-			CHECK(parseRegister(parser,registers.grt));
+		case 't': // register
+			CHECK(parseRegister(parser, registers.grt));
 			break;
-		case 'd':	// register
-			CHECK(parseRegister(parser,registers.grd));
+		case 'd': // register
+			CHECK(parseRegister(parser, registers.grd));
 			break;
-		case 's':	// register
-			CHECK(parseRegister(parser,registers.grs));
+		case 's': // register
+			CHECK(parseRegister(parser, registers.grs));
 			break;
-		case 'S':	// register
-			CHECK(parseFpuRegister(parser,registers.frs));
+		case 'S': // register
+			CHECK(parseFpuRegister(parser, registers.frs));
 			break;
-		case 'i':	// primary immediate
+		case 'i': // primary immediate
 			allowFunctionCallExpression(*encoding != '(');
-			CHECK(parseImmediate(parser,immediate.primary.expression));
+			CHECK(parseImmediate(parser, immediate.primary.expression));
 			allowFunctionCallExpression(true);
 			break;
-		case 'I':	// secondary immediate
+		case 'I': // secondary immediate
 			allowFunctionCallExpression(*encoding != '(');
-			CHECK(parseImmediate(parser,immediate.secondary.expression));
+			CHECK(parseImmediate(parser, immediate.secondary.expression));
 			allowFunctionCallExpression(true);
 			break;
 		default:
-			CHECK(matchSymbol(parser,*(encoding-1)));
+			CHECK(matchSymbol(parser, *(encoding - 1)));
 			break;
 		}
 	}
@@ -1566,7 +1523,7 @@ std::unique_ptr<CAssemblerCommand> MipsParser::parseMacro(Parser& parser)
 	const Token token = parser.peekToken();
 	if (token.type != TokenType::Identifier)
 		return nullptr;
-	
+
 	parser.eatToken();
 	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; mipsMacros[z].name != nullptr; z++)
@@ -1575,9 +1532,9 @@ std::unique_ptr<CAssemblerCommand> MipsParser::parseMacro(Parser& parser)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseMacroParameters(parser,mipsMacros[z]) == true)
+			if (parseMacroParameters(parser, mipsMacros[z]) == true)
 			{
-				return mipsMacros[z].function(parser,registers,immediate,mipsMacros[z].flags);
+				return mipsMacros[z].function(parser, registers, immediate, mipsMacros[z].flags);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -1604,7 +1561,7 @@ void MipsOpcodeFormatter::handleOpcodeName(const MipsOpcodeData& opData)
 			// TODO
 			break;
 		default:
-			buffer += *(encoding-1);
+			buffer += *(encoding - 1);
 			break;
 		}
 	}
@@ -1619,7 +1576,7 @@ void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int o
 		break;
 	case MipsImmediateType::Immediate16:
 		if (!(opcodeFlags & MO_IPCR) && originalValue & 0x8000)
-			buffer += tfm::format(L"-0x%X", 0x10000-(originalValue & 0xFFFF));
+			buffer += tfm::format(L"-0x%X", 0x10000 - (originalValue & 0xFFFF));
 		else
 			buffer += tfm::format(L"0x%X", originalValue);
 		break;
@@ -1630,7 +1587,7 @@ void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int o
 }
 
 void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, const MipsRegisterData& regData,
-	const MipsImmediateData& immData)
+												 const MipsImmediateData& immData)
 {
 	const char* encoding = opData.opcode.encoding;
 
@@ -1639,30 +1596,30 @@ void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, c
 	{
 		switch (*encoding++)
 		{
-		case 'r':	// forced register
-			buffer += tfm::format(L"r%d",*encoding);
+		case 'r': // forced register
+			buffer += tfm::format(L"r%d", *encoding);
 			encoding += 1;
 			break;
-		case 's':	// register
+		case 's': // register
 			buffer += regData.grs.name;
 			break;
-		case 'd':	// register
+		case 'd': // register
 			buffer += regData.grd.name;
 			break;
-		case 't':	// register
+		case 't': // register
 			buffer += regData.grt.name;
 			break;
-		case 'S':	// fpu register
+		case 'S': // fpu register
 			buffer += regData.frs.name;
 			break;
-		case 'D':	// fpu register
+		case 'D': // fpu register
 			buffer += regData.frd.name;
 			break;
-		case 'T':	// fpu register
+		case 'T': // fpu register
 			buffer += regData.frt.name;
 			break;
-		case 'v':	// psp vfpu reg
-		case 'm':	// vfpu matrix register
+		case 'v': // psp vfpu reg
+		case 'm': // vfpu matrix register
 			switch (*encoding++)
 			{
 			case 'd':
@@ -1676,7 +1633,7 @@ void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, c
 				break;
 			}
 			break;
-		case 'V':	// ps2 vector reg
+		case 'V': // ps2 vector reg
 			switch (*encoding++)
 			{
 			case 'd':
@@ -1690,30 +1647,30 @@ void MipsOpcodeFormatter::handleOpcodeParameters(const MipsOpcodeData& opData, c
 				break;
 			}
 			break;
-		case 'i':	// primary immediate
-			decodeImmediateSize(encoding,type);
-			handleImmediate(immData.primary.type,immData.primary.originalValue,opData.opcode.flags);
+		case 'i': // primary immediate
+			decodeImmediateSize(encoding, type);
+			handleImmediate(immData.primary.type, immData.primary.originalValue, opData.opcode.flags);
 			break;
-		case 'j':	// secondary immediate
-			handleImmediate(immData.secondary.type,immData.secondary.originalValue, opData.opcode.flags);
+		case 'j': // secondary immediate
+			handleImmediate(immData.secondary.type, immData.secondary.originalValue, opData.opcode.flags);
 			encoding++;
 			break;
-		case 'C':	// vfpu condition
-		case 'W':	// vfpu argument
+		case 'C': // vfpu condition
+		case 'W': // vfpu argument
 			// TODO
 			break;
-		case 'w':	// 'wb' characters
+		case 'w': // 'wb' characters
 			buffer += L"wb";
 			break;
 		default:
-			buffer += *(encoding-1);
+			buffer += *(encoding - 1);
 			break;
 		}
 	}
 }
 
 const std::wstring& MipsOpcodeFormatter::formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData,
-	const MipsImmediateData& immData)
+													  const MipsImmediateData& immData)
 {
 	buffer = L"   ";
 	handleOpcodeName(opData);
@@ -1721,6 +1678,6 @@ const std::wstring& MipsOpcodeFormatter::formatOpcode(const MipsOpcodeData& opDa
 	while (buffer.size() < 11)
 		buffer += ' ';
 
-	handleOpcodeParameters(opData,regData,immData);
+	handleOpcodeParameters(opData, regData, immData);
 	return buffer;
 }

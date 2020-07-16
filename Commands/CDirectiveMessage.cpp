@@ -13,28 +13,28 @@ CDirectiveMessage::CDirectiveMessage(Type type, Expression exp)
 bool CDirectiveMessage::Validate()
 {
 	std::wstring text;
-	if (exp.evaluateString(text,true) == false)
+	if (exp.evaluateString(text, true) == false)
 	{
-		Logger::queueError(Logger::Error,L"Invalid expression");
+		Logger::queueError(Logger::Error, L"Invalid expression");
 		return false;
 	}
 
 	switch (errorType)
 	{
 	case Type::Warning:
-		Logger::queueError(Logger::Warning,text);
+		Logger::queueError(Logger::Warning, text);
 		break;
 	case Type::Error:
-		Logger::queueError(Logger::Error,text);
+		Logger::queueError(Logger::Error, text);
 		break;
 	case Type::Notice:
-		Logger::queueError(Logger::Notice,text);
+		Logger::queueError(Logger::Notice, text);
 		break;
 	}
 	return false;
 }
 
-void CDirectiveSym::writeSymData(SymbolData &symData) const
+void CDirectiveSym::writeSymData(SymbolData& symData) const
 {
 	symData.setEnabled(enabled);
 }

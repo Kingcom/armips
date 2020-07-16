@@ -585,41 +585,48 @@ const wchar_t SjisToUnicodeTable5[] =
 	0x2171, 0x2172, 0x2173, 0x2174, 0x2175, 0x2176, 0x2177, 0x2178, 0x2179, 0xFFE2, 0xFFE4, 0xFF07, 0xFF02, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
- // clang-format on
+// clang-format on
 
 wchar_t sjisToUnicode(unsigned short SjisCharacter)
 {
 	if (SjisCharacter < 0x80)
 	{
 		return SjisCharacter;
-	} else if (SjisCharacter < 0x100)
+	}
+	else if (SjisCharacter < 0x100)
 	{
-		return SjisToUnicodeTable1[SjisCharacter-0x80];
+		return SjisToUnicodeTable1[SjisCharacter - 0x80];
 	}
 
-	if ((SjisCharacter & 0xFF) < 0x40) return 0xFFFF;
+	if ((SjisCharacter & 0xFF) < 0x40)
+		return 0xFFFF;
 
 	if (SjisCharacter >= 0x8100 && SjisCharacter < 0x8500)
 	{
 		SjisCharacter -= 0x8140;
 		SjisCharacter -= (SjisCharacter >> 8) * 0x40;
 		return SjisToUnicodeTable2[SjisCharacter];
-	} else if (SjisCharacter >= 0x8700 && SjisCharacter < 0xA000)
+	}
+	else if (SjisCharacter >= 0x8700 && SjisCharacter < 0xA000)
 	{
 		SjisCharacter -= 0x8740;
 		SjisCharacter -= (SjisCharacter >> 8) * 0x40;
 		return SjisToUnicodeTable3[SjisCharacter];
-	} else if (SjisCharacter >= 0xE000 && SjisCharacter < 0xEB00)
+	}
+	else if (SjisCharacter >= 0xE000 && SjisCharacter < 0xEB00)
 	{
 		SjisCharacter -= 0xE040;
 		SjisCharacter -= (SjisCharacter >> 8) * 0x40;
 		return SjisToUnicodeTable4[SjisCharacter];
-	} else if (SjisCharacter >= 0xED00 && SjisCharacter < 0xEF00)
+	}
+	else if (SjisCharacter >= 0xED00 && SjisCharacter < 0xEF00)
 	{
 		SjisCharacter -= 0xED40;
 		SjisCharacter -= (SjisCharacter >> 8) * 0x40;
 		return SjisToUnicodeTable5[SjisCharacter];
-	} else {
+	}
+	else
+	{
 		return 0xFFFF;
 	}
 }
@@ -651,13 +658,13 @@ bool BinaryFile::open(Mode mode)
 	switch (mode)
 	{
 	case Read:
-		handle = openFile(fileName,OpenFileMode::ReadBinary);
+		handle = openFile(fileName, OpenFileMode::ReadBinary);
 		break;
 	case Write:
-		handle = openFile(fileName,OpenFileMode::WriteBinary);
+		handle = openFile(fileName, OpenFileMode::WriteBinary);
 		break;
 	case ReadWrite:
-		handle = openFile(fileName,OpenFileMode::ReadWriteBinary);
+		handle = openFile(fileName, OpenFileMode::ReadWriteBinary);
 		break;
 	default:
 		return false;
@@ -668,9 +675,9 @@ bool BinaryFile::open(Mode mode)
 
 	if (mode != Write)
 	{
-		fseek(handle,0,SEEK_END);
+		fseek(handle, 0, SEEK_END);
 		size_ = ftell(handle);
-		fseek(handle,0,SEEK_SET);
+		fseek(handle, 0, SEEK_SET);
 	}
 
 	return true;
@@ -690,7 +697,7 @@ size_t BinaryFile::read(void* dest, size_t length)
 	if (isOpen() == false || mode == Write)
 		return 0;
 
-	return fread(dest,1,length,handle);
+	return fread(dest, 1, length, handle);
 }
 
 size_t BinaryFile::write(void* source, size_t length)
@@ -698,7 +705,7 @@ size_t BinaryFile::write(void* source, size_t length)
 	if (isOpen() == false || mode == Read)
 		return 0;
 
-	return fwrite(source,1,length,handle);
+	return fwrite(source, 1, length, handle);
 }
 
 const size_t TEXTFILE_BUF_MAX_SIZE = 4096;
@@ -732,7 +739,7 @@ void TextFile::openMemory(const std::wstring& content)
 bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
 {
 	setFileName(fileName);
-	return open(mode,defaultEncoding);
+	return open(mode, defaultEncoding);
 }
 
 bool TextFile::open(Mode mode, Encoding defaultEncoding)
@@ -752,10 +759,10 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 	switch (mode)
 	{
 	case Read:
-		handle = openFile(fileName,OpenFileMode::ReadBinary);
+		handle = openFile(fileName, OpenFileMode::ReadBinary);
 		break;
 	case Write:
-		handle = openFile(fileName,OpenFileMode::WriteBinary);
+		handle = openFile(fileName, OpenFileMode::WriteBinary);
 		if (handle == nullptr)
 			return false;
 
@@ -779,11 +786,11 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 
 	if (mode == Read)
 	{
-		fseek(handle,0,SEEK_END);
+		fseek(handle, 0, SEEK_END);
 		size_ = ftell(handle);
-		fseek(handle,0,SEEK_SET);
+		fseek(handle, 0, SEEK_SET);
 
-		if (fread(&num,2,1,handle) == 1)
+		if (fread(&num, 2, 1, handle) == 1)
 		{
 			switch (num)
 			{
@@ -808,10 +815,12 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 					encoding = UTF8;
 					guessedEncoding = true;
 				}
-				fseek(handle,0,SEEK_SET);
+				fseek(handle, 0, SEEK_SET);
 				break;
 			}
-		} else {
+		}
+		else
+		{
 			if (defaultEncoding == GUESS)
 			{
 				encoding = UTF8;
@@ -844,7 +853,7 @@ void TextFile::seek(long pos)
 	if (fromMemory)
 		contentPos = pos;
 	else
-		fseek(handle,pos,SEEK_SET);
+		fseek(handle, pos, SEEK_SET);
 }
 
 void TextFile::bufFillRead()
@@ -865,43 +874,47 @@ wchar_t TextFile::readCharacter()
 	switch (encoding)
 	{
 	case UTF8:
+	{
+		value = bufGetChar();
+		contentPos++;
+
+		int extraBytes = 0;
+		if ((value & 0xE0) == 0xC0)
 		{
-			value = bufGetChar();
+			extraBytes = 1;
+			value &= 0x1F;
+		}
+		else if ((value & 0xF0) == 0xE0)
+		{
+			extraBytes = 2;
+			value &= 0x0F;
+		}
+		else if (value > 0x7F)
+		{
+			errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
+		}
+
+		for (int i = 0; i < extraBytes; i++)
+		{
+			int b = bufGetChar();
 			contentPos++;
-			
-			int extraBytes = 0;
-			if ((value & 0xE0) == 0xC0)
-			{
-				extraBytes = 1;
-				value &= 0x1F;
-			} else if ((value & 0xF0) == 0xE0)
-			{
-				extraBytes = 2;
-				value &= 0x0F;
-			} else if (value > 0x7F)
+
+			if ((b & 0xC0) != 0x80)
 			{
 				errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
 			}
 
-			for (int i = 0; i < extraBytes; i++)
-			{
-				int b = bufGetChar();
-				contentPos++;
-
-				if ((b & 0xC0) != 0x80)
-				{
-					errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
-				}
-
-				value = (value << 6) | (b & 0x3F);
-			}
+			value = (value << 6) | (b & 0x3F);
 		}
-		break;
+	}
+	break;
 	case UTF16LE:
 		if (fromMemory)
 		{
 			value = content[contentPos++];
-		} else {
+		}
+		else
+		{
 			value = bufGet16LE();
 			contentPos += 2;
 		}
@@ -911,21 +924,21 @@ wchar_t TextFile::readCharacter()
 		contentPos += 2;
 		break;
 	case SJIS:
+	{
+		unsigned short sjis = bufGetChar();
+		contentPos++;
+		if (sjis >= 0x80)
 		{
-			unsigned short sjis = bufGetChar();
+			sjis = (sjis << 8) | bufGetChar();
 			contentPos++;
-			if (sjis >= 0x80)
-			{
-				sjis = (sjis << 8) | bufGetChar();
-				contentPos++;
-			}
-			value = sjisToUnicode(sjis);
-			if (value == (wchar_t)-1)
-			{
-				errorText = tfm::format(L"One or more invalid Shift-JIS characters in this file");
-			}
 		}
-		break;
+		value = sjisToUnicode(sjis);
+		if (value == (wchar_t) -1)
+		{
+			errorText = tfm::format(L"One or more invalid Shift-JIS characters in this file");
+		}
+	}
+	break;
 	case ASCII:
 		value = bufGetChar();
 		contentPos++;
@@ -979,7 +992,7 @@ std::vector<std::wstring> TextFile::readAll()
 	return result;
 }
 
-void TextFile::bufPut(const void *p, const size_t len)
+void TextFile::bufPut(const void* p, const size_t len)
 {
 	assert(mode == Write);
 
@@ -1017,7 +1030,8 @@ void TextFile::bufDrainWrite()
 
 void TextFile::writeCharacter(wchar_t character)
 {
-	if (mode != Write) return;
+	if (mode != Write)
+		return;
 
 	// only support utf8 for now
 	if (character < 0x80)
@@ -1029,13 +1043,16 @@ void TextFile::writeCharacter(wchar_t character)
 		}
 #endif
 		bufPut(character & 0x7F);
-	} else if (encoding != ASCII)
+	}
+	else if (encoding != ASCII)
 	{
 		if (character < 0x800)
 		{
 			bufPut(0xC0 | ((character >> 6) & 0x1F));
 			bufPut(0x80 | (character & 0x3F));
-		} else {
+		}
+		else
+		{
 			bufPut(0xE0 | ((character >> 12) & 0xF));
 			bufPut(0x80 | ((character >> 6) & 0x3F));
 			bufPut(0x80 | (character & 0x3F));
@@ -1045,7 +1062,8 @@ void TextFile::writeCharacter(wchar_t character)
 
 void TextFile::write(const wchar_t* line)
 {
-	if (mode != Write) return;
+	if (mode != Write)
+		return;
 	while (*line != 0)
 	{
 		writeCharacter(*line);
@@ -1060,7 +1078,8 @@ void TextFile::write(const std::wstring& line)
 
 void TextFile::write(const char* line)
 {
-	if (mode != Write) return;
+	if (mode != Write)
+		return;
 	while (*line != 0)
 	{
 		writeCharacter(*line);
@@ -1075,7 +1094,8 @@ void TextFile::write(const std::string& line)
 
 void TextFile::writeLine(const wchar_t* line)
 {
-	if (mode != Write) return;
+	if (mode != Write)
+		return;
 	write(line);
 	writeCharacter(L'\n');
 }
@@ -1087,7 +1107,8 @@ void TextFile::writeLine(const std::wstring& line)
 
 void TextFile::writeLine(const char* line)
 {
-	if (mode != Write) return;
+	if (mode != Write)
+		return;
 	write(line);
 	writeCharacter(L'\n');
 }
@@ -1112,20 +1133,14 @@ struct EncodingValue
 };
 
 const EncodingValue encodingValues[] = {
-	{ L"sjis",			TextFile::SJIS },
-	{ L"shift-jis",		TextFile::SJIS },
-	{ L"utf8",			TextFile::UTF8 },
-	{ L"utf-8",			TextFile::UTF8 },
-	{ L"utf16",			TextFile::UTF16LE },
-	{ L"utf-16",		TextFile::UTF16LE },
-	{ L"utf16-be",		TextFile::UTF16BE },
-	{ L"utf-16-be",		TextFile::UTF16BE },
-	{ L"ascii",			TextFile::ASCII },
+	{L"sjis", TextFile::SJIS},        {L"shift-jis", TextFile::SJIS},    {L"utf8", TextFile::UTF8},
+	{L"utf-8", TextFile::UTF8},       {L"utf16", TextFile::UTF16LE},     {L"utf-16", TextFile::UTF16LE},
+	{L"utf16-be", TextFile::UTF16BE}, {L"utf-16-be", TextFile::UTF16BE}, {L"ascii", TextFile::ASCII},
 };
 
 TextFile::Encoding getEncodingFromString(const std::wstring& str)
 {
-	for (size_t i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
+	for (size_t i = 0; i < sizeof(encodingValues) / sizeof(EncodingValue); i++)
 	{
 		if (str.compare(encodingValues[i].name) == 0)
 			return encodingValues[i].value;

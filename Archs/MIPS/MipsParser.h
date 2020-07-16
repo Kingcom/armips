@@ -12,7 +12,8 @@ class Parser;
 struct MipsMacroDefinition;
 struct tMipsOpcode;
 
-struct MipsRegisterDescriptor {
+struct MipsRegisterDescriptor
+{
 	const wchar_t* name;
 	int num;
 };
@@ -23,6 +24,7 @@ public:
 	std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
 	std::unique_ptr<CMipsInstruction> parseOpcode(Parser& parser);
 	std::unique_ptr<CAssemblerCommand> parseMacro(Parser& parser);
+
 private:
 	bool parseRegisterNumber(Parser& parser, MipsRegisterValue& dest, int numValues);
 	bool parseRegisterTable(Parser& parser, MipsRegisterValue& dest, const MipsRegisterDescriptor* table, size_t count);
@@ -68,12 +70,11 @@ private:
 class MipsOpcodeFormatter
 {
 public:
-	const std::wstring& formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData,
-		const MipsImmediateData& immData);
+	const std::wstring& formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData, const MipsImmediateData& immData);
+
 private:
-	void handleOpcodeName(const MipsOpcodeData& opData);	
-	void handleOpcodeParameters(const MipsOpcodeData& opData, const MipsRegisterData& regData,
-		const MipsImmediateData& immData);
+	void handleOpcodeName(const MipsOpcodeData& opData);
+	void handleOpcodeParameters(const MipsOpcodeData& opData, const MipsRegisterData& regData, const MipsImmediateData& immData);
 	void handleImmediate(MipsImmediateType type, unsigned int originalValue, unsigned int opcodeFlags);
 
 	std::wstring buffer;

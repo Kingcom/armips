@@ -15,7 +15,8 @@ struct ThumbOpcodeVariables;
 struct tArmOpcode;
 struct tThumbOpcode;
 
-struct ArmRegisterDescriptor {
+struct ArmRegisterDescriptor
+{
 	const wchar_t* name;
 	int num;
 };
@@ -26,6 +27,7 @@ public:
 	std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
 	std::unique_ptr<CArmInstruction> parseArmOpcode(Parser& parser);
 	std::unique_ptr<CThumbInstruction> parseThumbOpcode(Parser& parser);
+
 private:
 	bool parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const ArmRegisterDescriptor* table, size_t count);
 	bool parseRegister(Parser& parser, ArmRegisterValue& dest, int max = 15);
@@ -39,15 +41,15 @@ private:
 	void parsePsr(Parser& parser, bool& dest);
 	void parseSign(Parser& parser, bool& dest);
 	bool parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool shortVersion);
-	
+
 	bool matchSymbol(Parser& parser, wchar_t symbol, bool optional);
-	
+
 	int decodeCondition(const std::wstring& text, size_t& pos);
 	bool decodeAddressingMode(const std::wstring& text, size_t& pos, unsigned char& dest);
 	bool decodeXY(const std::wstring& text, size_t& pos, bool& dest);
 	void decodeS(const std::wstring& text, size_t& pos, bool& dest);
 	bool decodeArmOpcode(const std::wstring& name, const tArmOpcode& opcode, ArmOpcodeVariables& vars);
-	
+
 	bool parseArmParameters(Parser& parser, const tArmOpcode& opcode, ArmOpcodeVariables& vars);
 	bool parseThumbParameters(Parser& parser, const tThumbOpcode& opcode, ThumbOpcodeVariables& vars);
 };

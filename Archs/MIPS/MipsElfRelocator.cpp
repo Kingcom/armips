@@ -9,11 +9,12 @@ int MipsElfRelocator::expectedMachine() const
 	return EM_MIPS;
 }
 
-bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16RelocationBase, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16RelocationBase,
+										  std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
 {
 	bool result = true;
 
-	for (const Hi16Entry &hi16: hi16Entries)
+	for (const Hi16Entry& hi16 : hi16Entries)
 	{
 		if (hi16.relocationBase != lo16RelocationBase)
 		{
@@ -32,15 +33,16 @@ bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16Reloc
 	return result;
 }
 
-bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions,
+									  std::vector<std::wstring>& errors)
 {
 	unsigned int op = data.opcode;
 	bool result = true;
 
 	switch (type)
 	{
-	case R_MIPS_26: //j, jal
-		op = (op & 0xFC000000) | (((op&0x03FFFFFF)+(data.relocationBase>>2))&0x03FFFFFF);
+	case R_MIPS_26: // j, jal
+		op = (op & 0xFC000000) | (((op & 0x03FFFFFF) + (data.relocationBase >> 2)) & 0x03FFFFFF);
 		break;
 	case R_MIPS_32:
 		op += (int) data.relocationBase;
@@ -51,10 +53,10 @@ bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std:
 	case R_MIPS_LO16:
 		if (!processHi16Entries(op, data.relocationBase, actions, errors))
 			result = false;
-		op = (op&0xffff0000) | (((op&0xffff)+data.relocationBase)&0xffff);
+		op = (op & 0xffff0000) | (((op & 0xffff) + data.relocationBase) & 0xffff);
 		break;
 	default:
-		errors.emplace_back(tfm::format(L"Unknown MIPS relocation type %d",type));
+		errors.emplace_back(tfm::format(L"Unknown MIPS relocation type %d", type));
 		return false;
 	}
 
@@ -76,7 +78,8 @@ void MipsElfRelocator::setSymbolAddress(RelocationData& data, int64_t symbolAddr
 	data.targetSymbolType = symbolType;
 }
 
-const wchar_t* mipsCtorTemplate = LR"(
+const wchar_t* mipsCtorTemplate =
+	LR"(
 	addiu	sp,-32
 	sw		ra,0(sp)
 	sw		s0,4(sp)
@@ -119,17 +122,19 @@ std::unique_ptr<CAssemblerCommand> MipsElfRelocator::generateCtorStub(std::vecto
 		{
 			if (i != 0)
 				table += ',';
-			table += tfm::format(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+			table += tfm::format(L"%s,%s+0x%08X", ctors[i].symbolName, ctors[i].symbolName, ctors[i].size);
 		}
 
-		return parser.parseTemplate(mipsCtorTemplate,{
-			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorTableSize%",	tfm::format(L"%d",ctors.size()*8) },
-			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
-			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorContent%",		table },
-		});
-	} else {
+		return parser.parseTemplate(mipsCtorTemplate, {
+														  {L"%ctorTable%", Global.symbolTable.getUniqueLabelName()},
+														  {L"%ctorTableSize%", tfm::format(L"%d", ctors.size() * 8)},
+														  {L"%outerLoopLabel%", Global.symbolTable.getUniqueLabelName()},
+														  {L"%innerLoopLabel%", Global.symbolTable.getUniqueLabelName()},
+														  {L"%ctorContent%", table},
+													  });
+	}
+	else
+	{
 		return parser.parseTemplate(L"jr ra :: nop");
 	}
 }

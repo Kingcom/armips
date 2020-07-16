@@ -7,10 +7,17 @@
 class AssemblerFile;
 class GenericAssemblerFile;
 
-class CDirectiveFile: public CAssemblerCommand
+class CDirectiveFile : public CAssemblerCommand
 {
 public:
-	enum class Type { Invalid, Open, Create, Copy, Close };
+	enum class Type
+	{
+		Invalid,
+		Open,
+		Create,
+		Copy,
+		Close
+	};
 
 	CDirectiveFile();
 	void initOpen(const std::wstring& fileName, int64_t memory);
@@ -22,6 +29,7 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	Type type;
 	int64_t virtualAddress;
@@ -29,15 +37,20 @@ private:
 	std::shared_ptr<AssemblerFile> closeFile;
 };
 
-class CDirectivePosition: public CAssemblerCommand
+class CDirectivePosition : public CAssemblerCommand
 {
 public:
-	enum Type { Physical, Virtual };
+	enum Type
+	{
+		Physical,
+		Virtual
+	};
 	CDirectivePosition(Expression value, Type type);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	virtual void writeSymData(SymbolData& symData) const {};
+
 private:
 	void exec() const;
 	Expression expression;
@@ -46,17 +59,24 @@ private:
 	int64_t virtualAddress;
 };
 
-class CDirectiveIncbin: public CAssemblerCommand
+class CDirectiveIncbin : public CAssemblerCommand
 {
 public:
 	CDirectiveIncbin(const std::wstring& fileName);
-	void setStart(Expression& exp) { startExpression = exp; };
-	void setSize(Expression& exp) { sizeExpression = exp; };
+	void setStart(Expression& exp)
+	{
+		startExpression = exp;
+	};
+	void setSize(Expression& exp)
+	{
+		sizeExpression = exp;
+	};
 
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	std::wstring fileName;
 	int64_t fileSize;
@@ -68,10 +88,15 @@ private:
 	int64_t virtualAddress;
 };
 
-class CDirectiveAlignFill: public CAssemblerCommand
+class CDirectiveAlignFill : public CAssemblerCommand
 {
 public:
-	enum Mode { AlignPhysical, AlignVirtual, Fill };
+	enum Mode
+	{
+		AlignPhysical,
+		AlignVirtual,
+		Fill
+	};
 
 	CDirectiveAlignFill(int64_t value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Mode mode);
@@ -80,6 +105,7 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	Mode mode;
 	Expression valueExpression;
@@ -90,28 +116,30 @@ private:
 	int64_t virtualAddress;
 };
 
-class CDirectiveSkip: public CAssemblerCommand
+class CDirectiveSkip : public CAssemblerCommand
 {
 public:
 	CDirectiveSkip(Expression& value);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	virtual void writeSymData(SymbolData& symData) const {};
+
 private:
 	Expression expression;
 	int64_t value;
 	int64_t virtualAddress;
 };
 
-class CDirectiveHeaderSize: public CAssemblerCommand
+class CDirectiveHeaderSize : public CAssemblerCommand
 {
 public:
 	CDirectiveHeaderSize(Expression expression);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	virtual void writeSymData(SymbolData& symData) const {};
+
 private:
 	void exec() const;
 	Expression expression;
@@ -119,16 +147,17 @@ private:
 	int64_t virtualAddress;
 };
 
-class DirectiveObjImport: public CAssemblerCommand
+class DirectiveObjImport : public CAssemblerCommand
 {
 public:
 	DirectiveObjImport(const std::wstring& inputName);
 	DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName);
-	~DirectiveObjImport() { };
+	~DirectiveObjImport(){};
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	ElfRelocator rel;
 	std::unique_ptr<CAssemblerCommand> ctor;

@@ -13,13 +13,13 @@ void Allocations::clear()
 
 void Allocations::setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill)
 {
-	Key key{ fileID, position };
-	allocations[key] = Usage{ space, usage, usesFill };
+	Key key{fileID, position};
+	allocations[key] = Usage{space, usage, usesFill};
 }
 
 void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
 {
-	Key key{ fileID, position };
+	Key key{fileID, position};
 	auto it = allocations.find(key);
 	if (it != allocations.end() && it->second.space == space)
 		allocations.erase(it);
@@ -27,13 +27,13 @@ void Allocations::forgetArea(int64_t fileID, int64_t position, int64_t space)
 
 void Allocations::setPool(int64_t fileID, int64_t position, int64_t size)
 {
-	Key key{ fileID, position };
+	Key key{fileID, position};
 	pools[key] = size;
 }
 
 void Allocations::forgetPool(int64_t fileID, int64_t position, int64_t size)
 {
-	Key key{ fileID, position };
+	Key key{fileID, position};
 	auto it = pools.find(key);
 	if (it != pools.end() && it->second == size)
 		pools.erase(it);
@@ -43,21 +43,26 @@ void Allocations::validateOverlap()
 {
 	// An easy mistake to make is a "subarea" where the parent area fills, and erases the subarea.
 	// Let's detect any sort of area overlap and report a warning.
-	Key lastKey{ -1, -1 };
+	Key lastKey{-1, -1};
 	int64_t lastEndPosition = -1;
 	Usage lastUsage{};
 
-	for (auto it : allocations) {
-		if (it.first.fileID == lastKey.fileID && it.first.position > lastKey.position && it.first.position < lastEndPosition) {
+	for (auto it : allocations)
+	{
+		if (it.first.fileID == lastKey.fileID && it.first.position > lastKey.position && it.first.position < lastEndPosition)
+		{
 			// First, the obvious: does the content overlap?
 			if (it.first.position < lastKey.position + lastUsage.usage)
-				Logger::queueError(Logger::Warning, L"Content of areas %08llX and %08llx overlap", lastKey.position, it.first.position);
+				Logger::queueError(Logger::Warning, L"Content of areas %08llX and %08llx overlap", lastKey.position,
+								   it.first.position);
 			// Next question, does the earlier one fill?
 			else if (it.second.usesFill && lastUsage.usesFill)
-				Logger::queueError(Logger::Warning, L"Areas %08llX and %08llx overlap and both fill", lastKey.position, it.first.position);
+				Logger::queueError(Logger::Warning, L"Areas %08llX and %08llx overlap and both fill", lastKey.position,
+								   it.first.position);
 
 			// If the new area ends before the last, keep it as the last.
-			if (lastEndPosition > it.first.position + it.second.space) {
+			if (lastEndPosition > it.first.position + it.second.space)
+			{
 				// But update the usage to the max position.
 				int64_t newUsageEnd = it.first.position + it.second.usage;
 				lastUsage.usage = newUsageEnd - lastKey.position;
@@ -79,15 +84,14 @@ AllocationStats Allocations::collectStats()
 	return stats;
 }
 
-void Allocations::collectAreaStats(AllocationStats &stats)
+void Allocations::collectAreaStats(AllocationStats& stats)
 {
 	// Need to work out overlaps.
-	Key lastKey{ -1, -1 };
+	Key lastKey{-1, -1};
 	int64_t lastEndPosition = -1;
 	Usage lastUsage{};
 
-	auto applyUsage = [&stats](int64_t position, const Usage &usage)
-	{
+	auto applyUsage = [&stats](int64_t position, const Usage& usage) {
 		if (usage.space > stats.largestSize)
 		{
 			stats.largestPosition = position;
@@ -137,7 +141,7 @@ void Allocations::collectAreaStats(AllocationStats &stats)
 		applyUsage(lastKey.position, lastUsage);
 }
 
-void Allocations::collectPoolStats(AllocationStats &stats)
+void Allocations::collectPoolStats(AllocationStats& stats)
 {
 	for (auto it : pools)
 	{

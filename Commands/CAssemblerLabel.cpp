@@ -11,8 +11,8 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 {
 	this->defined = false;
 	this->label = nullptr;
-	
-	if (Global.symbolTable.isLocalSymbol(name) == false)	
+
+	if (Global.symbolTable.isLocalSymbol(name) == false)
 		updateSection(++Global.Section);
 
 	label = Global.symbolTable.getLabel(name, FileNum, getSection());
@@ -35,7 +35,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 }
 
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName, Expression& value)
-	: CAssemblerLabel(name,originalName)
+: CAssemblerLabel(name, originalName)
 {
 	labelValue = value;
 }
@@ -50,12 +50,12 @@ bool CAssemblerLabel::Validate()
 			Logger::queueError(Logger::Error, L"Label \"%s\" already defined", label->getName());
 			return false;
 		}
-		
+
 		label->setDefined(true);
 		defined = true;
 		result = true;
 	}
-	
+
 	bool hasPhysicalValue = false;
 	int64_t virtualValue = 0;
 	int64_t physicalValue = 0;
@@ -68,7 +68,9 @@ bool CAssemblerLabel::Validate()
 			Logger::printError(Logger::Error, L"Invalid expression");
 			return result;
 		}
-	} else {
+	}
+	else
+	{
 		// label value is given by current address
 		virtualValue = g_fileManager->getVirtualAddress();
 		physicalValue = g_fileManager->getPhysicalAddress();
@@ -92,13 +94,12 @@ bool CAssemblerLabel::Validate()
 
 void CAssemblerLabel::Encode() const
 {
-
 }
 
 void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
 	if (Global.symbolTable.isGeneratedLabel(label->getName()) == false)
-		tempData.writeLine(label->getValue(),tfm::format(L"%s:",label->getName()));
+		tempData.writeLine(label->getValue(), tfm::format(L"%s:", label->getName()));
 }
 
 void CAssemblerLabel::writeSymData(SymbolData& symData) const
@@ -107,15 +108,12 @@ void CAssemblerLabel::writeSymData(SymbolData& symData) const
 	if (label->getValue() == -1 || Global.symbolTable.isGeneratedLabel(label->getName()))
 		return;
 
-	symData.addLabel(label->getValue(),label->getOriginalName());
+	symData.addLabel(label->getValue(), label->getOriginalName());
 }
-
-
-
 
 CDirectiveFunction::CDirectiveFunction(const std::wstring& name, const std::wstring& originalName)
 {
-	this->label = std::make_unique<CAssemblerLabel>(name,originalName);
+	this->label = std::make_unique<CAssemblerLabel>(name, originalName);
 	this->content = nullptr;
 	this->start = this->end = 0;
 }

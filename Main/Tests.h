@@ -15,11 +15,17 @@ class TestRunner
 {
 public:
 	bool runTests(const std::wstring& dir, const std::wstring& executableName);
+
 private:
-	enum class ConsoleColors { White, Red, Green };
+	enum class ConsoleColors
+	{
+		White,
+		Red,
+		Green
+	};
 
 	std::wstring executableName;
-	
+
 	std::vector<std::wstring> getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/");
 	bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString);
 	std::vector<std::wstring> listSubfolders(const std::wstring& dir);
@@ -32,7 +38,6 @@ private:
 	HANDLE hstdout;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 #endif
-
 };
 
 bool runTests(const std::wstring& dir, const std::wstring& executableName);

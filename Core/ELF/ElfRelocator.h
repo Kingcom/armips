@@ -12,7 +12,9 @@ struct ElfRelocatorCtor
 
 struct RelocationAction
 {
-	RelocationAction(int64_t offset, uint32_t newValue) : offset(offset), newValue(newValue) {}
+	RelocationAction(int64_t offset, uint32_t newValue) : offset(offset), newValue(newValue)
+	{
+	}
 	int64_t offset;
 	uint32_t newValue;
 };
@@ -23,16 +25,22 @@ class Parser;
 class IElfRelocator
 {
 public:
-	virtual ~IElfRelocator() {};
+	virtual ~IElfRelocator(){};
 	virtual int expectedMachine() const = 0;
-	virtual bool isDummyRelocationType(int type) const { return false; }
-	virtual bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) = 0;
-	virtual bool finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) { return true; }
+	virtual bool isDummyRelocationType(int type) const
+	{
+		return false;
+	}
+	virtual bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions,
+								std::vector<std::wstring>& errors) = 0;
+	virtual bool finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+	{
+		return true;
+	}
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
 
 	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
 };
-
 
 class Label;
 class SymbolData;
@@ -72,8 +80,15 @@ public:
 	void writeSymbols(SymbolData& symData) const;
 	std::unique_ptr<CAssemblerCommand> generateCtor(const std::wstring& ctorName);
 	bool relocate(int64_t& memoryAddress);
-	bool hasDataChanged() { return dataChanged; };
-	const ByteArray& getData() const { return outputData; };
+	bool hasDataChanged()
+	{
+		return dataChanged;
+	};
+	const ByteArray& getData() const
+	{
+		return outputData;
+	};
+
 private:
 	bool relocateFile(ElfRelocatorFile& file, int64_t& relocationAddress);
 	void loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, Endianness endianness);

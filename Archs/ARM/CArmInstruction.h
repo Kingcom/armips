@@ -4,17 +4,20 @@
 #include "Archs/ARM/ArmOpcodes.h"
 #include "Core/Expression.h"
 
-struct ArmOpcodeVariables {
-	struct {
-		unsigned char c,a;
-		bool s,x,y;
+struct ArmOpcodeVariables
+{
+	struct
+	{
+		unsigned char c, a;
+		bool s, x, y;
 		unsigned int NewEncoding;
 		char NewType;
 		bool UseNewEncoding;
 		bool UseNewType;
 	} Opcode;
 
-	struct {
+	struct
+	{
 		unsigned char Type;
 		bool ShiftByRegister;
 		bool UseShift;
@@ -26,18 +29,20 @@ struct ArmOpcodeVariables {
 		bool UseFinal;
 	} Shift;
 
-	struct {
+	struct
+	{
 		bool spsr;
 		int field;
 	} PsrData;
 
-	struct {
-		ArmRegisterValue cd;	// cop register d
-		ArmRegisterValue cn;	// cop register n
-		ArmRegisterValue cm;	// cop register m
-		ArmRegisterValue pn;	// cop number
-		Expression CpopExpression;	// cp opc number
-		Expression CpinfExpression;	// cp information
+	struct
+	{
+		ArmRegisterValue cd; // cop register d
+		ArmRegisterValue cn; // cop register n
+		ArmRegisterValue cm; // cop register m
+		ArmRegisterValue pn; // cop number
+		Expression CpopExpression; // cp opc number
+		Expression CpinfExpression; // cp information
 		int Cpop;
 		int Cpinf;
 	} CopData;
@@ -58,16 +63,17 @@ struct ArmOpcodeVariables {
 	char RlistStr[64];
 };
 
-class CArmInstruction: public ArmOpcodeCommand
+class CArmInstruction : public ArmOpcodeCommand
 {
 public:
 	CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariables& vars);
-//	~CArmInstruction();
+	//	~CArmInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void setPoolAddress(int64_t address);
+
 private:
 	void FormatOpcode(char* Dest, const char* Source) const;
 	void FormatInstruction(const char* encoding, char* dest) const;

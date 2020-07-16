@@ -16,16 +16,16 @@ CThumbInstruction::CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpco
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
-	
+
 	OpcodeSize = Opcode.flags & THUMB_LONG ? 4 : 2;
 }
 
 void CThumbInstruction::setPoolAddress(int64_t address)
 {
-	int pos = (int) address-((RamPos+4) & 0xFFFFFFFD);
+	int pos = (int) address - ((RamPos + 4) & 0xFFFFFFFD);
 	if (pos < 0 || pos > 1020)
 	{
-		Logger::queueError(Logger::Error,L"Literal pool out of range");
+		Logger::queueError(Logger::Error, L"Literal pool out of range");
 		return;
 	}
 
@@ -38,7 +38,7 @@ bool CThumbInstruction::Validate()
 
 	if (RamPos & 1)
 	{
-		Logger::queueError(Logger::Warning,L"Opcode not halfword aligned");
+		Logger::queueError(Logger::Warning, L"Opcode not halfword aligned");
 	}
 
 	if (Opcode.flags & THUMB_DS)
@@ -59,19 +59,19 @@ bool CThumbInstruction::Validate()
 		case ExpressionValueType::Float:
 			if (!(Opcode.flags & THUMB_POOL))
 			{
-				Logger::queueError(Logger::Error,L"Invalid expression type");
+				Logger::queueError(Logger::Error, L"Invalid expression type");
 				return false;
 			}
 
-			Vars.Immediate = (int) getFloatBits((float)value.floatValue);
+			Vars.Immediate = (int) getFloatBits((float) value.floatValue);
 			break;
 		default:
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+			Logger::queueError(Logger::Error, L"Invalid expression type");
 			return false;
 		}
 
 		Vars.OriginalImmediate = Vars.Immediate;
-	
+
 		g_fileManager->advanceMemory(OpcodeSize);
 		memoryAdvanced = true;
 
@@ -81,86 +81,93 @@ bool CThumbInstruction::Validate()
 			{
 				if (Vars.Immediate & 3)
 				{
-					Logger::queueError(Logger::Error,L"Branch target must be word aligned");
+					Logger::queueError(Logger::Error, L"Branch target must be word aligned");
 					return false;
 				}
-			} else {
+			}
+			else
+			{
 				if (Vars.Immediate & 1)
 				{
-					Logger::queueError(Logger::Error,L"Branch target must be halfword aligned");
+					Logger::queueError(Logger::Error, L"Branch target must be halfword aligned");
 					return false;
 				}
 			}
 
-			int num = (int) (Vars.Immediate-RamPos-4);
-			
-			if (num >= (1 << Vars.ImmediateBitLen) || num < (0-(1 << Vars.ImmediateBitLen)))
+			int num = (int) (Vars.Immediate - RamPos - 4);
+
+			if (num >= (1 << Vars.ImmediateBitLen) || num < (0 - (1 << Vars.ImmediateBitLen)))
 			{
-				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, L"Branch target %08X out of range", Vars.Immediate);
 				return false;
 			}
 
 			Vars.Immediate = num >> 1;
 			if (Opcode.flags & THUMB_EXCHANGE)
 			{
-				Vars.Immediate += Vars.Immediate&1;
+				Vars.Immediate += Vars.Immediate & 1;
 			}
-		} else if (Opcode.flags & THUMB_WORD)
+		}
+		else if (Opcode.flags & THUMB_WORD)
 		{
-			if (Vars.Immediate & 3)	// not allowed
+			if (Vars.Immediate & 3) // not allowed
 			{
-				Logger::queueError(Logger::Error,L"Immediate value must be a multiple of 4");
+				Logger::queueError(Logger::Error, L"Immediate value must be a multiple of 4");
 				return false;
 			}
 			Vars.Immediate >>= 2;
-		} else if (Opcode.flags & THUMB_HALFWORD)
+		}
+		else if (Opcode.flags & THUMB_HALFWORD)
 		{
-			if (Vars.Immediate & 1)	// not allowed
+			if (Vars.Immediate & 1) // not allowed
 			{
-				Logger::queueError(Logger::Error,L"Immediate value must be a multiple of 2");
+				Logger::queueError(Logger::Error, L"Immediate value must be a multiple of 2");
 				return false;
 			}
 			Vars.Immediate >>= 1;
-		} else if (Opcode.flags & THUMB_POOL)
+		}
+		else if (Opcode.flags & THUMB_POOL)
 		{
-			Arm.addPoolValue(this,Vars.Immediate);
-		} else if (Opcode.flags & THUMB_PCR)
+			Arm.addPoolValue(this, Vars.Immediate);
+		}
+		else if (Opcode.flags & THUMB_PCR)
 		{
 			if (Vars.Immediate & 3)
 			{
-				Logger::queueError(Logger::Error,L"PC relative address must be word aligned");
+				Logger::queueError(Logger::Error, L"PC relative address must be word aligned");
 				return false;
 			}
 
-			int pos = Vars.Immediate-((RamPos+4) & 0xFFFFFFFD);
+			int pos = Vars.Immediate - ((RamPos + 4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
-				Logger::queueError(Logger::Error,L"PC relative address out of range");
+				Logger::queueError(Logger::Error, L"PC relative address out of range");
 				return false;
 			}
 			Vars.Immediate = pos >> 2;
 		}
-		
+
 		if (Opcode.type == THUMB_TYPE1)
 		{
 			int max = (Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 32 : 31;
 			if (Vars.Immediate < 0 || Vars.Immediate > max)
 			{
-				Logger::queueError(Logger::Error, L"Shift amount 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, L"Shift amount 0x%02X out of range", Vars.Immediate);
 				return false;
 			}
-		} else if (Vars.ImmediateBitLen != 32)
+		}
+		else if (Vars.ImmediateBitLen != 32)
 		{
 			int max = (1 << Vars.ImmediateBitLen) - 1;
 			if (abs(Vars.Immediate) > max)
 			{
-				Logger::queueError(Logger::Error,L"Immediate value 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, L"Immediate value 0x%02X out of range", Vars.Immediate);
 				return false;
 			}
 			Vars.Immediate &= max;
 		}
 	}
-	
+
 	if (!memoryAdvanced)
 		g_fileManager->advanceMemory(OpcodeSize);
 
@@ -174,10 +181,11 @@ void CThumbInstruction::WriteInstruction(unsigned short encoding) const
 
 void CThumbInstruction::Encode() const
 {
-	unsigned int encoding = Opcode.encoding;;
+	unsigned int encoding = Opcode.encoding;
+	;
 	int immediate;
 
-	if (Opcode.type == THUMB_TYPE19)	// THUMB.19: long branch with link
+	if (Opcode.type == THUMB_TYPE19) // THUMB.19: long branch with link
 	{
 		if (Opcode.flags & THUMB_LONG)
 		{
@@ -187,18 +195,24 @@ void CThumbInstruction::Encode() const
 			if (Opcode.flags & THUMB_EXCHANGE)
 			{
 				WriteInstruction(0xE800 | (Vars.Immediate & 0x7FF));
-			} else {
+			}
+			else
+			{
 				WriteInstruction(0xF800 | (Vars.Immediate & 0x7FF));
 			}
-		} else {
+		}
+		else
+		{
 			if (Opcode.flags & THUMB_IMMEDIATE)
 				encoding |= Vars.Immediate & 0x7FF;
 			WriteInstruction(encoding);
 		}
-	} else {
+	}
+	else
+	{
 		switch (Opcode.type)
 		{
-		case THUMB_TYPE1:	// THUMB.1: move shifted register
+		case THUMB_TYPE1: // THUMB.1: move shifted register
 			if ((Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) && (Vars.Immediate == 0))
 			{
 				encoding = 0x0000;
@@ -207,83 +221,89 @@ void CThumbInstruction::Encode() const
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;
-		case THUMB_TYPE2:	// THUMB.2: add/subtract
+		case THUMB_TYPE2: // THUMB.2: add/subtract
 			if (Opcode.flags & THUMB_IMMEDIATE)
 			{
 				encoding |= (Vars.Immediate << 6);
-			} else if (Opcode.flags & THUMB_REGISTER)
+			}
+			else if (Opcode.flags & THUMB_REGISTER)
 			{
 				encoding |= (Vars.rn.num << 6);
 			}
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;
-		case THUMB_TYPE3:	// THUMB.3: move/compare/add/subtract immediate
+		case THUMB_TYPE3: // THUMB.3: move/compare/add/subtract immediate
 			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
-		case THUMB_TYPE4:	// THUMB.4: ALU operations
+		case THUMB_TYPE4: // THUMB.4: ALU operations
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;
-		case THUMB_TYPE5:	// THUMB.5: Hi register operations/branch exchange
+		case THUMB_TYPE5: // THUMB.5: Hi register operations/branch exchange
 			if (Opcode.flags & THUMB_D)
 			{
-				if (Vars.rd.num > 0x7) encoding |= (1 << 7);
+				if (Vars.rd.num > 0x7)
+					encoding |= (1 << 7);
 				encoding |= (Vars.rd.num & 0x7);
 			}
 			if (Opcode.flags & THUMB_S)
 			{
-				if (Vars.rs.num > 0x7) encoding |= (1 << 6);
+				if (Vars.rs.num > 0x7)
+					encoding |= (1 << 6);
 				encoding |= ((Vars.rs.num & 0x7) << 3);
 			}
 			break;
-		case THUMB_TYPE6:	// THUMB.6: load PC-relative
+		case THUMB_TYPE6: // THUMB.6: load PC-relative
 			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
-		case THUMB_TYPE7:	// THUMB.7: load/store with register offset
-		case THUMB_TYPE8:	// THUMB.8: load/store sign-extended byte/halfword
+		case THUMB_TYPE7: // THUMB.7: load/store with register offset
+		case THUMB_TYPE8: // THUMB.8: load/store sign-extended byte/halfword
 			encoding |= (Vars.ro.num << 6);
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;
-		case THUMB_TYPE9:	// THUMB.9: load/store with immediate offset
-		case THUMB_TYPE10:	// THUMB.10: load/store halfword
-			if (Opcode.flags & THUMB_IMMEDIATE) encoding |= (Vars.Immediate << 6);
+		case THUMB_TYPE9: // THUMB.9: load/store with immediate offset
+		case THUMB_TYPE10: // THUMB.10: load/store halfword
+			if (Opcode.flags & THUMB_IMMEDIATE)
+				encoding |= (Vars.Immediate << 6);
 			encoding |= (Vars.rs.num << 3);
 			encoding |= (Vars.rd.num << 0);
 			break;
-		case THUMB_TYPE11:	// THUMB.11: load/store SP-relative
+		case THUMB_TYPE11: // THUMB.11: load/store SP-relative
 			encoding |= (Vars.rd.num << 8);
-			if (Opcode.flags & THUMB_IMMEDIATE) encoding |= (Vars.Immediate << 0);
+			if (Opcode.flags & THUMB_IMMEDIATE)
+				encoding |= (Vars.Immediate << 0);
 			break;
-		case THUMB_TYPE12:	// THUMB.12: get relative address
+		case THUMB_TYPE12: // THUMB.12: get relative address
 			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
-		case THUMB_TYPE13:	// THUMB.13: add offset to stack pointer
+		case THUMB_TYPE13: // THUMB.13: add offset to stack pointer
 			immediate = Vars.Immediate;
-			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE) 
-				immediate = (unsigned char)(0-immediate);
-			if (immediate & 0x80)	// sub
+			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE)
+				immediate = (unsigned char) (0 - immediate);
+			if (immediate & 0x80) // sub
 			{
 				encoding |= 1 << 7;
-				immediate = 0x100-immediate;
+				immediate = 0x100 - immediate;
 			}
 			encoding |= (immediate << 0);
 			break;
-		case THUMB_TYPE14:	// THUMB.14: push/pop registers
-			if (Vars.rlist & 0xC000) encoding |= (1 << 8); // r14 oder r15
+		case THUMB_TYPE14: // THUMB.14: push/pop registers
+			if (Vars.rlist & 0xC000)
+				encoding |= (1 << 8); // r14 oder r15
 			encoding |= (Vars.rlist & 0xFF);
 			break;
-		case THUMB_TYPE15:	// THUMB.15: multiple load/store
+		case THUMB_TYPE15: // THUMB.15: multiple load/store
 			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.rlist & 0xFF);
 			break;
-		case THUMB_TYPE16:	// THUMB.16: conditional branch
-		case THUMB_TYPE17:	// THUMB.17: software interrupt and breakpoint
-		case THUMB_TYPE18:	// THUMB.18: unconditional branch
+		case THUMB_TYPE16: // THUMB.16: conditional branch
+		case THUMB_TYPE17: // THUMB.17: software interrupt and breakpoint
+		case THUMB_TYPE18: // THUMB.18: unconditional branch
 			encoding |= (Vars.Immediate << 0);
 			break;
 		}
@@ -348,10 +368,11 @@ void CThumbInstruction::writeTempData(TempData& tempData) const
 {
 	char str[256];
 
-	int pos = sprintf(str,"   %s",Opcode.name);
-	while (pos < 11) str[pos++] = ' ';
+	int pos = sprintf(str, "   %s", Opcode.name);
+	while (pos < 11)
+		str[pos++] = ' ';
 	str[pos] = 0;
-	FormatInstruction(Opcode.mask,&str[pos]);
+	FormatInstruction(Opcode.mask, &str[pos]);
 
-	tempData.writeLine(RamPos,convertUtf8ToWString(str));
+	tempData.writeLine(RamPos, convertUtf8ToWString(str));
 }

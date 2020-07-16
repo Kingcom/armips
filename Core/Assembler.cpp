@@ -22,12 +22,12 @@ void AddFileName(const std::wstring& FileName)
 bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symData, TempData& tempData)
 {
 	bool Revalidate;
-	
+
 	Arm.Pass2();
 	Mips.Pass2();
 
 	int validationPasses = 0;
-	do	// loop until everything is constant
+	do // loop until everything is constant
 	{
 		Global.validationPasses = validationPasses;
 		Logger::clearQueue();
@@ -35,7 +35,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 		if (validationPasses >= 100)
 		{
-			Logger::queueError(Logger::Error,L"Stuck in infinite validation loop");
+			Logger::queueError(Logger::Error, L"Stuck in infinite validation loop");
 			break;
 		}
 
@@ -43,11 +43,11 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 #ifdef _DEBUG
 		if (!Logger::isSilent())
-			printf("Validate %d...\n",validationPasses);
+			printf("Validate %d...\n", validationPasses);
 #endif
 
 		if (Global.memoryMode)
-			g_fileManager->openFile(Global.memoryFile,true);
+			g_fileManager->openFile(Global.memoryFile, true);
 
 		Revalidate = content->Validate();
 
@@ -75,18 +75,16 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 	// and finally encode
 	if (Global.memoryMode)
-		g_fileManager->openFile(Global.memoryFile,false);
+		g_fileManager->openFile(Global.memoryFile, false);
 
-	auto writeTempData = [&]()
-	{
+	auto writeTempData = [&]() {
 		tempData.start();
 		if (tempData.isOpen())
 			content->writeTempData(tempData);
 		tempData.end();
 	};
 
-	auto writeSymData = [&]()
-	{
+	auto writeSymData = [&]() {
 		content->writeSymData(symData);
 		symData.write();
 	};
@@ -102,7 +100,9 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 		tempThread.join();
 		symThread.join();
-	} else {
+	}
+	else
+	{
 		writeTempData();
 		writeSymData();
 		content->Encode();
@@ -111,19 +111,20 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	if (g_fileManager->hasOpenFile())
 	{
 		if (!Global.memoryMode)
-			Logger::printError(Logger::Warning,L"File not closed");
+			Logger::printError(Logger::Warning, L"File not closed");
 		g_fileManager->closeFile();
 	}
 
 	return true;
 }
 
-static void printStats(const AllocationStats &stats)
+static void printStats(const AllocationStats& stats)
 {
 	Logger::printLine(L"Total areas: %lld / %lld", stats.totalUsage, stats.totalSize);
 	Logger::printLine(L"Largest area: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
 	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
-	Logger::printLine(L"Most free area: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+	Logger::printLine(L"Most free area: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition,
+					  stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
 
 	if (stats.totalPoolSize != 0)
 	{
@@ -162,7 +163,7 @@ bool runArmips(ArmipsArguments& settings)
 	Parser parser;
 	SymbolData symData;
 	TempData tempData;
-	
+
 	Logger::setSilent(settings.silent);
 	Logger::setErrorOnWarning(settings.errorOnWarning);
 
@@ -192,10 +193,10 @@ bool runArmips(ArmipsArguments& settings)
 	switch (settings.mode)
 	{
 	case ArmipsMode::FILE:
-		Global.memoryMode = false;		
-		if (input.open(settings.inputFileName,TextFile::Read) == false)
+		Global.memoryMode = false;
+		if (input.open(settings.inputFileName, TextFile::Read) == false)
 		{
-			Logger::printError(Logger::Error,L"Could not open file");
+			Logger::printError(Logger::Error, L"Could not open file");
 			return false;
 		}
 		break;
@@ -212,11 +213,11 @@ bool runArmips(ArmipsArguments& settings)
 	bool result = !Logger::hasError();
 	if (result == true && content != nullptr)
 		result = encodeAssembly(std::move(content), symData, tempData);
-	
+
 	if (g_fileManager->hasOpenFile())
 	{
 		if (!Global.memoryMode)
-			Logger::printError(Logger::Warning,L"File not closed");
+			Logger::printError(Logger::Warning, L"File not closed");
 		g_fileManager->closeFile();
 	}
 

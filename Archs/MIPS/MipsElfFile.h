@@ -4,13 +4,16 @@
 #include "Core/ELF/ElfFile.h"
 #include "Core/FileManager.h"
 
-class MipsElfFile: public AssemblerFile
+class MipsElfFile : public AssemblerFile
 {
 public:
 	MipsElfFile();
 	virtual bool open(bool onlyCheck);
 	virtual void close();
-	virtual bool isOpen() { return opened; };
+	virtual bool isOpen()
+	{
+		return opened;
+	};
 	virtual bool write(void* data, size_t length);
 	virtual int64_t getVirtualAddress();
 	virtual int64_t getPhysicalAddress();
@@ -20,11 +23,15 @@ public:
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
 	virtual void beginSymData(SymbolData& symData);
 	virtual void endSymData(SymbolData& symData);
-	virtual const std::wstring& getFileName() { return fileName; };
+	virtual const std::wstring& getFileName()
+	{
+		return fileName;
+	};
 
 	bool load(const std::wstring& fileName, const std::wstring& outputFileName);
 	void save();
 	bool setSection(const std::wstring& name);
+
 private:
 	ElfFile elf;
 	std::wstring fileName;
@@ -37,8 +44,7 @@ private:
 	size_t sectionOffset;
 };
 
-
-class DirectiveLoadMipsElf: public CAssemblerCommand
+class DirectiveLoadMipsElf : public CAssemblerCommand
 {
 public:
 	DirectiveLoadMipsElf(const std::wstring& fileName);
@@ -47,6 +53,7 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	std::shared_ptr<MipsElfFile> file;
 	std::wstring inputName;

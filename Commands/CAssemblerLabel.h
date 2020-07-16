@@ -5,7 +5,7 @@
 
 class Label;
 
-class CAssemblerLabel: public CAssemblerCommand
+class CAssemblerLabel : public CAssemblerCommand
 {
 public:
 	CAssemblerLabel(const std::wstring& name, const std::wstring& originalName);
@@ -14,13 +14,14 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	Expression labelValue;
 	std::shared_ptr<Label> label;
 	bool defined;
 };
 
-class CDirectiveFunction: public CAssemblerCommand
+class CDirectiveFunction : public CAssemblerCommand
 {
 public:
 	CDirectiveFunction(const std::wstring& name, const std::wstring& originalName);
@@ -28,7 +29,11 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
-	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
+	void setContent(std::unique_ptr<CAssemblerCommand> content)
+	{
+		this->content = std::move(content);
+	}
+
 private:
 	std::unique_ptr<CAssemblerLabel> label;
 	std::unique_ptr<CAssemblerCommand> content;

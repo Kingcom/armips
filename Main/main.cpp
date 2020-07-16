@@ -10,7 +10,7 @@
 
 int wmain(int argc, wchar_t* argv[])
 {
-	std::setlocale(LC_CTYPE,"");
+	std::setlocale(LC_CTYPE, "");
 
 #ifdef ARMIPS_TESTS
 	std::wstring name;
@@ -21,8 +21,8 @@ int wmain(int argc, wchar_t* argv[])
 		return !runTests(argv[1], argv[0]);
 #endif
 
-	std::vector<std::wstring> arguments = getStringListFromArray(argv,argc);
-	
+	std::vector<std::wstring> arguments = getStringListFromArray(argv, argc);
+
 	return runFromCommandLine(arguments);
 }
 
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 		wargv[i] = (wchar_t*) wideStrings[i].c_str();
 	}
 
-	int result = wmain(argc,wargv);
+	int result = wmain(argc, wargv);
 
 	delete[] wargv;
 	return result;

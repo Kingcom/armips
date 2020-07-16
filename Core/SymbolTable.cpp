@@ -44,11 +44,15 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, in
 		{
 			// static label, @. the section doesn't matter
 			section = -1;
-		} else {
+		}
+		else
+		{
 			// local label, @@. the file doesn't matter
 			file = -1;
 		}
-	} else {
+	}
+	else
+	{
 		// global label. neither file nor section matters
 		file = section = -1;
 	}
@@ -60,21 +64,21 @@ std::shared_ptr<Label> SymbolTable::getLabel(const std::wstring& symbol, int fil
 		return nullptr;
 
 	int actualSection = section;
-	setFileSectionValues(symbol,file,section);
-	SymbolKey key = { symbol, file, section };
+	setFileSectionValues(symbol, file, section);
+	SymbolKey key = {symbol, file, section};
 
 	// find label, create new one if it doesn't exist
 	auto it = symbols.find(key);
 	if (it == symbols.end())
 	{
-		SymbolInfo value = { LabelSymbol, labels.size() };
+		SymbolInfo value = {LabelSymbol, labels.size()};
 		symbols[key] = value;
-		
+
 		std::shared_ptr<Label> result = std::make_shared<Label>(symbol);
 		if (section == actualSection)
-			result->setSection(section);			// local, set section of parent
+			result->setSection(section); // local, set section of parent
 		else
-			result->setSection(actualSection+1);	// global, set section of children
+			result->setSection(actualSection + 1); // global, set section of children
 		labels.push_back(result);
 		return result;
 	}
@@ -91,9 +95,9 @@ bool SymbolTable::symbolExists(const std::wstring& symbol, int file, int section
 	if (isValidSymbolName(symbol) == false)
 		return false;
 
-	setFileSectionValues(symbol,file,section);
+	setFileSectionValues(symbol, file, section);
 
-	SymbolKey key = { symbol, file, section };
+	SymbolKey key = {symbol, file, section};
 	auto it = symbols.find(key);
 	return it != symbols.end();
 }
@@ -119,7 +123,7 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 
 	for (size_t i = start; i < size; i++)
 	{
-		if (wcschr(validSymbolCharacters,symbol[i]) == nullptr)
+		if (wcschr(validSymbolCharacters, symbol[i]) == nullptr)
 			return false;
 	}
 
@@ -128,10 +132,14 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 
 bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 {
-	if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) return true;
-	if (!first && (character >= '0' && character <= '9')) return true;
-	if (character == '_' || character == '.') return true;
-	if (character == '@') return true;
+	if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z'))
+		return true;
+	if (!first && (character >= '0' && character <= '9'))
+		return true;
+	if (character == '_' || character == '.')
+		return true;
+	if (character == '@')
+		return true;
 	return false;
 }
 
@@ -140,13 +148,13 @@ bool SymbolTable::addEquation(const std::wstring& name, int file, int section, s
 	if (isValidSymbolName(name) == false)
 		return false;
 
-	if (symbolExists(name,file,section))
+	if (symbolExists(name, file, section))
 		return false;
-	
-	setFileSectionValues(name,file,section);
 
-	SymbolKey key = { name, file, section };
-	SymbolInfo value = { EquationSymbol, referenceIndex };
+	setFileSectionValues(name, file, section);
+
+	SymbolKey key = {name, file, section};
+	SymbolInfo value = {EquationSymbol, referenceIndex};
 	symbols[key] = value;
 
 	equationsCount++;
@@ -155,9 +163,9 @@ bool SymbolTable::addEquation(const std::wstring& name, int file, int section, s
 
 bool SymbolTable::findEquation(const std::wstring& name, int file, int section, size_t& dest)
 {
-	setFileSectionValues(name,file,section);
-	
-	SymbolKey key = { name, file, section };
+	setFileSectionValues(name, file, section);
+
+	SymbolKey key = {name, file, section};
 	auto it = symbols.find(key);
 	if (it == symbols.end() || it->second.type != EquationSymbol)
 		return false;
@@ -169,7 +177,7 @@ bool SymbolTable::findEquation(const std::wstring& name, int file, int section, 
 // TODO: better
 std::wstring SymbolTable::getUniqueLabelName(bool local)
 {
-	std::wstring name = tfm::format(L"__armips_label_%08x__",uniqueCount++);
+	std::wstring name = tfm::format(L"__armips_label_%08x__", uniqueCount++);
 	if (local)
 		name = L"@@" + name;
 
@@ -179,12 +187,12 @@ std::wstring SymbolTable::getUniqueLabelName(bool local)
 
 void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 {
-	for (const LabelDefinition& def: labels)
+	for (const LabelDefinition& def : labels)
 	{
 		if (!isValidSymbolName(def.name))
 			continue;
 
-		std::shared_ptr<Label> label = getLabel(def.name,Global.FileInfo.FileNum,Global.Section);
+		std::shared_ptr<Label> label = getLabel(def.name, Global.FileInfo.FileNum, Global.Section);
 		if (label == nullptr)
 			continue;
 
@@ -203,9 +211,9 @@ int SymbolTable::findSection(int64_t address)
 	int64_t smallestBefore = -1;
 	int64_t smallestDiff = 0x7FFFFFFF;
 
-	for (auto& lab: labels)
+	for (auto& lab : labels)
 	{
-		int diff = address-lab->getValue();
+		int diff = address - lab->getValue();
 		if (diff >= 0 && diff < smallestDiff)
 		{
 			smallestDiff = diff;

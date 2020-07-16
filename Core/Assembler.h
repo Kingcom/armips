@@ -10,7 +10,11 @@ class AssemblerFile;
 #define ARMIPS_VERSION_MINOR    11
 #define ARMIPS_VERSION_REVISION 0
 
-enum class ArmipsMode { FILE, MEMORY };
+enum class ArmipsMode
+{
+	FILE,
+	MEMORY
+};
 
 struct LabelDefinition
 {

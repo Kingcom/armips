@@ -16,16 +16,14 @@ CDirectiveConditional::CDirectiveConditional(ConditionType type)
 	previousResult = false;
 }
 
-CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstring& name)
-	: CDirectiveConditional(type)
+CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstring& name) : CDirectiveConditional(type)
 {
-	label = Global.symbolTable.getLabel(name,Global.FileInfo.FileNum,Global.Section);
+	label = Global.symbolTable.getLabel(name, Global.FileInfo.FileNum, Global.Section);
 	if (label == nullptr)
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name);
+		Logger::printError(Logger::Error, L"Invalid label name \"%s\"", name);
 }
 
-CDirectiveConditional::CDirectiveConditional(ConditionType type, const Expression& exp)
-	: CDirectiveConditional(type)
+CDirectiveConditional::CDirectiveConditional(ConditionType type, const Expression& exp) : CDirectiveConditional(type)
 {
 	this->expression = exp;
 }
@@ -43,7 +41,7 @@ bool CDirectiveConditional::evaluate()
 	{
 		if (expression.evaluateInteger(value) == false)
 		{
-			Logger::queueError(Logger::Error,L"Invalid conditional expression");
+			Logger::queueError(Logger::Error, L"Invalid conditional expression");
 			return false;
 		}
 	}
@@ -59,8 +57,8 @@ bool CDirectiveConditional::evaluate()
 	default:
 		break;
 	}
-			
-	Logger::queueError(Logger::Error,L"Invalid conditional type");
+
+	Logger::queueError(Logger::Error, L"Invalid conditional type");
 	return false;
 }
 
@@ -75,7 +73,8 @@ bool CDirectiveConditional::Validate()
 		ifBlock->applyFileInfo();
 		if (ifBlock->Validate())
 			returnValue = true;
-	} else if (elseBlock != nullptr)
+	}
+	else if (elseBlock != nullptr)
 	{
 		elseBlock->applyFileInfo();
 		if (elseBlock->Validate())
@@ -90,7 +89,8 @@ void CDirectiveConditional::Encode() const
 	if (previousResult)
 	{
 		ifBlock->Encode();
-	} else if (elseBlock != nullptr)
+	}
+	else if (elseBlock != nullptr)
 	{
 		elseBlock->Encode();
 	}
@@ -102,7 +102,8 @@ void CDirectiveConditional::writeTempData(TempData& tempData) const
 	{
 		ifBlock->applyFileInfo();
 		ifBlock->writeTempData(tempData);
-	} else if (elseBlock != nullptr)
+	}
+	else if (elseBlock != nullptr)
 	{
 		elseBlock->applyFileInfo();
 		elseBlock->writeTempData(tempData);
@@ -114,7 +115,8 @@ void CDirectiveConditional::writeSymData(SymbolData& symData) const
 	if (previousResult)
 	{
 		ifBlock->writeSymData(symData);
-	} else if (elseBlock != nullptr)
+	}
+	else if (elseBlock != nullptr)
 	{
 		elseBlock->writeSymData(symData);
 	}

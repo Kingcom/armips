@@ -10,8 +10,18 @@
 class Label;
 class MipsElfRelocator;
 
-enum class PsxRelocationType { WordLiteral, UpperImmediate, LowerImmediate, FunctionCall };
-enum class PsxRelocationRefType { SymblId, SegmentOffset };
+enum class PsxRelocationType
+{
+	WordLiteral,
+	UpperImmediate,
+	LowerImmediate,
+	FunctionCall
+};
+enum class PsxRelocationRefType
+{
+	SymblId,
+	SegmentOffset
+};
 
 struct PsxRelocation
 {
@@ -32,8 +42,14 @@ struct PsxSegment
 	std::vector<PsxRelocation> relocations;
 };
 
-
-enum class PsxSymbolType { Internal, InternalID, External, BSS, Function };
+enum class PsxSymbolType
+{
+	Internal,
+	InternalID,
+	External,
+	BSS,
+	Function
+};
 
 struct PsxSymbol
 {
@@ -58,29 +74,37 @@ class PsxRelocator
 public:
 	bool init(const std::wstring& inputName);
 	bool relocate(int& memoryAddress);
-	bool hasDataChanged() { return dataChanged; };
-	const ByteArray& getData() const { return outputData; };
+	bool hasDataChanged()
+	{
+		return dataChanged;
+	};
+	const ByteArray& getData() const
+	{
+		return outputData;
+	};
 	void writeSymbols(SymbolData& symData) const;
+
 private:
 	size_t loadString(ByteArray& data, size_t pos, std::wstring& dest);
 	bool parseObject(ByteArray data, PsxRelocatorFile& dest);
 	bool relocateFile(PsxRelocatorFile& file, int& relocationAddress);
-	
+
 	ByteArray outputData;
 	std::vector<PsxRelocatorFile> files;
 	MipsElfRelocator* reloc;
 	bool dataChanged;
 };
 
-class DirectivePsxObjImport: public CAssemblerCommand
+class DirectivePsxObjImport : public CAssemblerCommand
 {
 public:
 	DirectivePsxObjImport(const std::wstring& fileName);
-	~DirectivePsxObjImport() { };
+	~DirectivePsxObjImport(){};
 	virtual bool Validate();
 	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const { };
+	virtual void writeTempData(TempData& tempData) const {};
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	PsxRelocator rel;
 };

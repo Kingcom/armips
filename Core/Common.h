@@ -9,7 +9,8 @@
 class AssemblerFile;
 class CArchitecture;
 
-typedef struct {
+typedef struct
+{
 	std::vector<std::wstring> FileList;
 	int FileCount;
 	int FileNum;
@@ -17,7 +18,8 @@ typedef struct {
 	int TotalLineCount;
 } tFileInfo;
 
-typedef struct {
+typedef struct
+{
 	tFileInfo FileInfo;
 	SymbolTable symbolTable;
 	EncodingTable Table;

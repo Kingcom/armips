@@ -5,8 +5,8 @@
 #include "Core/Expression.h"
 #include "Core/ExpressionFunctions.h"
 
-#define GET_PARAM(params,index,dest) \
-	if (getExpFuncParameter(params,index,dest,funcName,false) == false) \
+#define GET_PARAM(params, index, dest)                                      \
+	if (getExpFuncParameter(params, index, dest, funcName, false) == false) \
 		return ExpressionValue();
 
 ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)

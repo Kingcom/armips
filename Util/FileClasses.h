@@ -8,25 +8,53 @@
 class BinaryFile
 {
 public:
-	enum Mode { Read, Write, ReadWrite };
+	enum Mode
+	{
+		Read,
+		Write,
+		ReadWrite
+	};
 
 	BinaryFile();
 	~BinaryFile();
 
 	bool open(const std::wstring& fileName, Mode mode);
 	bool open(Mode mode);
-	bool isOpen() { return handle != nullptr; };
-	bool atEnd() { return isOpen() && mode != Write && ftell(handle) == size_; };
-	void setPos(long pos) { if (isOpen()) fseek(handle,pos,SEEK_SET); };
-	long pos() { return isOpen() ? ftell(handle) : -1; }
-	long size() { return size_; };
+	bool isOpen()
+	{
+		return handle != nullptr;
+	};
+	bool atEnd()
+	{
+		return isOpen() && mode != Write && ftell(handle) == size_;
+	};
+	void setPos(long pos)
+	{
+		if (isOpen())
+			fseek(handle, pos, SEEK_SET);
+	};
+	long pos()
+	{
+		return isOpen() ? ftell(handle) : -1;
+	}
+	long size()
+	{
+		return size_;
+	};
 	void close();
-	
-	void setFileName(const std::wstring& name) { fileName = name; };
-	const std::wstring& getFileName() { return fileName; };
+
+	void setFileName(const std::wstring& name)
+	{
+		fileName = name;
+	};
+	const std::wstring& getFileName()
+	{
+		return fileName;
+	};
 
 	size_t read(void* dest, size_t length);
 	size_t write(void* source, size_t length);
+
 private:
 	FILE* handle;
 	std::wstring fileName;
@@ -37,25 +65,61 @@ private:
 class TextFile
 {
 public:
-	enum Encoding { ASCII, UTF8, UTF16LE, UTF16BE, SJIS, GUESS };
-	enum Mode { Read, Write };
-	
+	enum Encoding
+	{
+		ASCII,
+		UTF8,
+		UTF16LE,
+		UTF16BE,
+		SJIS,
+		GUESS
+	};
+	enum Mode
+	{
+		Read,
+		Write
+	};
+
 	TextFile();
 	~TextFile();
 	void openMemory(const std::wstring& content);
 	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = GUESS);
 	bool open(Mode mode, Encoding defaultEncoding = GUESS);
-	bool isOpen() { return fromMemory || handle != nullptr; };
-	bool atEnd() { return isOpen() && mode == Read && tell() >= size_; };
-	long size() { return size_; };
+	bool isOpen()
+	{
+		return fromMemory || handle != nullptr;
+	};
+	bool atEnd()
+	{
+		return isOpen() && mode == Read && tell() >= size_;
+	};
+	long size()
+	{
+		return size_;
+	};
 	void close();
 
-	bool hasGuessedEncoding() { return guessedEncoding; };
-	bool isFromMemory() { return fromMemory; }
-	int getNumLines() { return lineCount; }
+	bool hasGuessedEncoding()
+	{
+		return guessedEncoding;
+	};
+	bool isFromMemory()
+	{
+		return fromMemory;
+	}
+	int getNumLines()
+	{
+		return lineCount;
+	}
 
-	void setFileName(const std::wstring& name) { fileName = name; };
-	const std::wstring& getFileName() { return fileName; };
+	void setFileName(const std::wstring& name)
+	{
+		fileName = name;
+	};
+	const std::wstring& getFileName()
+	{
+		return fileName;
+	};
 
 	wchar_t readCharacter();
 	std::wstring readLine();
@@ -70,16 +134,23 @@ public:
 	void writeLine(const char* line);
 	void writeLine(const std::string& line);
 	void writeLines(std::vector<std::wstring>& list);
-	
-	template <typename... Args>
-	void writeFormat(const wchar_t* text, const Args&... args)
+
+	template <typename... Args> void writeFormat(const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::wstring message = tfm::format(text, args...);
 		write(message);
 	}
 
-	bool hasError() { return errorText.size() != 0 && !errorRetrieved; };
-	const std::wstring& getErrorText() { errorRetrieved = true; return errorText; };
+	bool hasError()
+	{
+		return errorText.size() != 0 && !errorRetrieved;
+	};
+	const std::wstring& getErrorText()
+	{
+		errorRetrieved = true;
+		return errorText;
+	};
+
 private:
 	long tell();
 	void seek(long pos);
@@ -124,7 +195,7 @@ private:
 		return c2 | (c1 << 8);
 	}
 
-	void bufPut(const void *p, const size_t len);
+	void bufPut(const void* p, const size_t len);
 	void bufPut(const char c);
 
 	void bufFillRead();

@@ -17,13 +17,13 @@ TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding enco
 
 	if (fileExists(fullName) == false)
 	{
-		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
+		Logger::printError(Logger::Error, L"Table file \"%s\" does not exist", fileName);
 		return;
 	}
 
-	if (table.load(fullName,encoding) == false)
+	if (table.load(fullName, encoding) == false)
 	{
-		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
+		Logger::printError(Logger::Error, L"Invalid table file \"%s\"", fileName);
 		return;
 	}
 }
@@ -33,7 +33,6 @@ bool TableCommand::Validate()
 	Global.Table = table;
 	return false;
 }
-
 
 //
 // CDirectiveData
@@ -48,7 +47,6 @@ CDirectiveData::CDirectiveData()
 
 CDirectiveData::~CDirectiveData()
 {
-
 }
 
 void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize)
@@ -68,10 +66,10 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 		this->mode = EncodingMode::U64;
 		break;
 	default:
-		Logger::printError(Logger::Error,L"Invalid data unit size %d",unitSize);
+		Logger::printError(Logger::Error, L"Invalid data unit size %d", unitSize);
 		return;
 	}
-	
+
 	this->entries = entries;
 	this->writeTermination = false;
 	normalData.reserve(entries.size());
@@ -150,7 +148,7 @@ size_t CDirectiveData::getDataSize() const
 	case EncodingMode::U64:
 	case EncodingMode::Float:
 	case EncodingMode::Double:
-		return normalData.size()*getUnitSize();
+		return normalData.size() * getUnitSize();
 	case EncodingMode::Invalid:
 		break;
 	}
@@ -166,23 +164,26 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, L"Invalid expression");
 			continue;
 		}
-		
+
 		if (value.isInt())
 		{
 			customData.appendByte(value.intValue);
-		} else if (value.isString())
+		}
+		else if (value.isString())
 		{
-			ByteArray encoded = table.encodeString(value.strValue,false);
+			ByteArray encoded = table.encodeString(value.strValue, false);
 			if (encoded.size() == 0 && value.strValue.size() > 0)
 			{
-				Logger::queueError(Logger::Error,L"Failed to encode \"%s\"",value.strValue);
+				Logger::queueError(Logger::Error, L"Failed to encode \"%s\"", value.strValue);
 			}
 			customData.append(encoded);
-		} else {
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+		}
+		else
+		{
+			Logger::queueError(Logger::Error, L"Invalid expression type");
 		}
 	}
 
@@ -199,8 +200,8 @@ void CDirectiveData::encodeSjis()
 	if (sjisTable.isLoaded() == false)
 	{
 		unsigned char hexBuffer[2];
-		
-		sjisTable.setTerminationEntry((unsigned char*)"\0",1);
+
+		sjisTable.setTerminationEntry((unsigned char*) "\0", 1);
 
 		for (unsigned short SJISValue = 0x0001; SJISValue < 0x0100; SJISValue++)
 		{
@@ -234,28 +235,33 @@ void CDirectiveData::encodeFloat()
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, L"Invalid expression");
 			continue;
 		}
 
 		if (value.isInt() && mode == EncodingMode::Float)
 		{
-			int32_t num = getFloatBits((float)value.intValue);
+			int32_t num = getFloatBits((float) value.intValue);
 			normalData.push_back(num);
-		} else if (value.isInt() && mode == EncodingMode::Double)
+		}
+		else if (value.isInt() && mode == EncodingMode::Double)
 		{
-			int64_t num = getDoubleBits((double)value.intValue);
+			int64_t num = getDoubleBits((double) value.intValue);
 			normalData.push_back(num);
-		} else if (value.isFloat() && mode == EncodingMode::Float)
+		}
+		else if (value.isFloat() && mode == EncodingMode::Float)
 		{
-			int32_t num = getFloatBits((float)value.floatValue);
+			int32_t num = getFloatBits((float) value.floatValue);
 			normalData.push_back(num);
-		} else if (value.isFloat() && mode == EncodingMode::Double)
+		}
+		else if (value.isFloat() && mode == EncodingMode::Double)
 		{
-			int64_t num = getDoubleBits((double)value.floatValue);
+			int64_t num = getDoubleBits((double) value.floatValue);
 			normalData.push_back(num);
-		} else {
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+		}
+		else
+		{
+			Logger::queueError(Logger::Error, L"Invalid expression type");
 		}
 	}
 }
@@ -268,7 +274,7 @@ void CDirectiveData::encodeNormal()
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, L"Invalid expression");
 			continue;
 		}
 
@@ -282,23 +288,29 @@ void CDirectiveData::encodeNormal()
 
 				if (num >= 0x80 && hadNonAscii == false)
 				{
-					Logger::printError(Logger::Warning,L"Non-ASCII character in data directive. Use .string instead");
+					Logger::printError(Logger::Warning, L"Non-ASCII character in data directive. Use .string instead");
 					hadNonAscii = true;
 				}
 			}
-		} else if (value.isInt())
+		}
+		else if (value.isInt())
 		{
 			int64_t num = value.intValue;
 			normalData.push_back(num);
-		} else if (value.isFloat() && mode == EncodingMode::U32)
+		}
+		else if (value.isFloat() && mode == EncodingMode::U32)
 		{
-			int32_t num = getFloatBits((float)value.floatValue);
+			int32_t num = getFloatBits((float) value.floatValue);
 			normalData.push_back(num);
-		} else if(value.isFloat() && mode == EncodingMode::U64) {
-			int64_t num = getDoubleBits((double)value.floatValue);
+		}
+		else if (value.isFloat() && mode == EncodingMode::U64)
+		{
+			int64_t num = getDoubleBits((double) value.floatValue);
 			normalData.push_back(num);
-		} else {
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+		}
+		else
+		{
+			Logger::queueError(Logger::Error, L"Invalid expression type");
 		}
 	}
 
@@ -333,7 +345,7 @@ bool CDirectiveData::Validate()
 		encodeCustom(Global.Table);
 		break;
 	default:
-		Logger::queueError(Logger::Error,L"Invalid encoding type");
+		Logger::queueError(Logger::Error, L"Invalid encoding type");
 		break;
 	}
 
@@ -347,33 +359,33 @@ void CDirectiveData::Encode() const
 	{
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		g_fileManager->write(customData.data(),customData.size());
+		g_fileManager->write(customData.data(), customData.size());
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Ascii:
-		for (auto value: normalData)
+		for (auto value : normalData)
 		{
-			g_fileManager->writeU8((uint8_t)value);
+			g_fileManager->writeU8((uint8_t) value);
 		}
 		break;
 	case EncodingMode::U16:
-		for (auto value: normalData)
+		for (auto value : normalData)
 		{
-			g_fileManager->writeU16((uint16_t)value);
+			g_fileManager->writeU16((uint16_t) value);
 		}
 		break;
 	case EncodingMode::U32:
 	case EncodingMode::Float:
-		for (auto value: normalData)
+		for (auto value : normalData)
 		{
-			g_fileManager->writeU32((uint32_t)value);
+			g_fileManager->writeU32((uint32_t) value);
 		}
 		break;
 	case EncodingMode::U64:
 	case EncodingMode::Double:
-		for (auto value: normalData)
+		for (auto value : normalData)
 		{
-			g_fileManager->writeU64((uint64_t)value);
+			g_fileManager->writeU64((uint64_t) value);
 		}
 		break;
 	case EncodingMode::Invalid:
@@ -384,7 +396,7 @@ void CDirectiveData::Encode() const
 
 void CDirectiveData::writeTempData(TempData& tempData) const
 {
-	size_t size = (getUnitSize()*2+3)*getDataSize()+20;
+	size_t size = (getUnitSize() * 2 + 3) * getDataSize() + 20;
 	wchar_t* str = new wchar_t[size];
 	wchar_t* start = str;
 
@@ -392,46 +404,46 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 	{
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		str += swprintf(str,20,L".byte ");
+		str += swprintf(str, 20, L".byte ");
 
 		for (size_t i = 0; i < customData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",(uint8_t)customData[i]);
+			str += swprintf(str, 20, L"0x%02X,", (uint8_t) customData[i]);
 		}
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Ascii:
-		str += swprintf(str,20,L".byte ");
-		
-		for (size_t i = 0; i < normalData.size(); i++)
-		{
-			str += swprintf(str,20,L"0x%02X,",(uint8_t)normalData[i]);
-		}
-		break;
-	case EncodingMode::U16:
-		str += swprintf(str,20,L".halfword ");
+		str += swprintf(str, 20, L".byte ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%04X,",(uint16_t)normalData[i]);
+			str += swprintf(str, 20, L"0x%02X,", (uint8_t) normalData[i]);
+		}
+		break;
+	case EncodingMode::U16:
+		str += swprintf(str, 20, L".halfword ");
+
+		for (size_t i = 0; i < normalData.size(); i++)
+		{
+			str += swprintf(str, 20, L"0x%04X,", (uint16_t) normalData[i]);
 		}
 		break;
 	case EncodingMode::U32:
 	case EncodingMode::Float:
-		str += swprintf(str,20,L".word ");
+		str += swprintf(str, 20, L".word ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%08X,",(uint32_t)normalData[i]);
+			str += swprintf(str, 20, L"0x%08X,", (uint32_t) normalData[i]);
 		}
 		break;
 	case EncodingMode::U64:
 	case EncodingMode::Double:
-		str += swprintf(str,20,L".doubleword ");
+		str += swprintf(str, 20, L".doubleword ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%16llX,",(uint64_t)normalData[i]);
+			str += swprintf(str, 20, L"0x%16llX,", (uint64_t) normalData[i]);
 		}
 		break;
 	case EncodingMode::Invalid:
@@ -439,8 +451,8 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 		break;
 	}
 
-	*(str-1) = 0;
-	tempData.writeLine(position,start);
+	*(str - 1) = 0;
+	tempData.writeLine(position, start);
 	delete[] start;
 }
 
@@ -449,23 +461,23 @@ void CDirectiveData::writeSymData(SymbolData& symData) const
 	switch (mode)
 	{
 	case EncodingMode::Ascii:
-		symData.addData(position,getDataSize(),SymbolData::DataAscii);
+		symData.addData(position, getDataSize(), SymbolData::DataAscii);
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		symData.addData(position,getDataSize(),SymbolData::Data8);
+		symData.addData(position, getDataSize(), SymbolData::Data8);
 		break;
 	case EncodingMode::U16:
-		symData.addData(position,getDataSize(),SymbolData::Data16);
+		symData.addData(position, getDataSize(), SymbolData::Data16);
 		break;
 	case EncodingMode::U32:
 	case EncodingMode::Float:
-		symData.addData(position,getDataSize(),SymbolData::Data32);
+		symData.addData(position, getDataSize(), SymbolData::Data32);
 		break;
 	case EncodingMode::U64:
 	case EncodingMode::Double:
-		symData.addData(position,getDataSize(),SymbolData::Data64);
+		symData.addData(position, getDataSize(), SymbolData::Data64);
 		break;
 	case EncodingMode::Invalid:
 		// TODO: Assert?

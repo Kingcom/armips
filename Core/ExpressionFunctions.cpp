@@ -28,14 +28,14 @@
 #endif
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, int64_t& dest,
-	const std::wstring& funcName, bool optional)
+						 const std::wstring& funcName, bool optional)
 {
 	if (optional && index >= parameters.size())
 		return true;
 
 	if (index >= parameters.size() || parameters[index].isInt() == false)
 	{
-		Logger::queueError(Logger::Error,L"Invalid parameter %d for %s: expecting integer",index+1,funcName);
+		Logger::queueError(Logger::Error, L"Invalid parameter %d for %s: expecting integer", index + 1, funcName);
 		return false;
 	}
 
@@ -44,14 +44,14 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 }
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, const std::wstring*& dest,
-	const std::wstring& funcName, bool optional)
+						 const std::wstring& funcName, bool optional)
 {
 	if (optional && index >= parameters.size())
 		return true;
 
 	if (index >= parameters.size() || parameters[index].isString() == false)
 	{
-		Logger::queueError(Logger::Error,L"Invalid parameter %d for %s: expecting string",index+1,funcName);
+		Logger::queueError(Logger::Error, L"Invalid parameter %d for %s: expecting string", index + 1, funcName);
 		return false;
 	}
 
@@ -59,18 +59,17 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 	return true;
 }
 
-#define GET_PARAM(params,index,dest) \
-	if (getExpFuncParameter(params,index,dest,funcName,false) == false) \
+#define GET_PARAM(params, index, dest)                                      \
+	if (getExpFuncParameter(params, index, dest, funcName, false) == false) \
 		return ExpressionValue();
-#define GET_OPTIONAL_PARAM(params,index,dest,defaultValue) \
-	dest = defaultValue; \
-	if (getExpFuncParameter(params,index,dest,funcName,true) == false) \
+#define GET_OPTIONAL_PARAM(params, index, dest, defaultValue)              \
+	dest = defaultValue;                                                   \
+	if (getExpFuncParameter(params, index, dest, funcName, true) == false) \
 		return ExpressionValue();
-
 
 ExpressionValue expFuncVersion(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	int64_t value = ARMIPS_VERSION_MAJOR*1000 + ARMIPS_VERSION_MINOR*10 + ARMIPS_VERSION_REVISION;
+	int64_t value = ARMIPS_VERSION_MAJOR * 1000 + ARMIPS_VERSION_MINOR * 10 + ARMIPS_VERSION_REVISION;
 	return ExpressionValue(value);
 }
 
@@ -95,7 +94,7 @@ ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vecto
 	std::shared_ptr<AssemblerFile> file = g_fileManager->getOpenFile();
 	if (file == nullptr)
 	{
-		Logger::queueError(Logger::Error,L"outputName: no file opened");
+		Logger::queueError(Logger::Error, L"outputName: no file opened");
 		return ExpressionValue();
 	}
 
@@ -106,7 +105,7 @@ ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vecto
 ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
-	GET_PARAM(parameters,0,fileName);
+	GET_PARAM(parameters, 0, fileName);
 
 	std::wstring fullName = getFullPathName(*fileName);
 	return ExpressionValue(fileExists(fullName) ? INT64_C(1) : INT64_C(0));
@@ -115,7 +114,7 @@ ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vecto
 ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
-	GET_PARAM(parameters,0,fileName);
+	GET_PARAM(parameters, 0, fileName);
 
 	std::wstring fullName = getFullPathName(*fileName);
 	return ExpressionValue((int64_t) fileSize(fullName));
@@ -131,10 +130,10 @@ ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<
 		result.strValue = parameters[0].strValue;
 		break;
 	case ExpressionValueType::Integer:
-		result.strValue = tfm::format(L"%d",parameters[0].intValue);
+		result.strValue = tfm::format(L"%d", parameters[0].intValue);
 		break;
 	case ExpressionValueType::Float:
-		result.strValue = tfm::format(L"%#.17g",parameters[0].floatValue);
+		result.strValue = tfm::format(L"%#.17g", parameters[0].floatValue);
 		break;
 	default:
 		return result;
@@ -147,10 +146,10 @@ ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<
 ExpressionValue expFuncToHex(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	int64_t value, digits;
-	GET_PARAM(parameters,0,value);
-	GET_OPTIONAL_PARAM(parameters,1,digits,8);
+	GET_PARAM(parameters, 0, value);
+	GET_OPTIONAL_PARAM(parameters, 1, digits, 8);
 
-	return ExpressionValue(tfm::format(L"%0*X",digits,value));
+	return ExpressionValue(tfm::format(L"%0*X", digits, value));
 }
 
 ExpressionValue expFuncInt(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -221,7 +220,7 @@ ExpressionValue expFuncFrac(const std::wstring& funcName, const std::vector<Expr
 	switch (parameters[0].type)
 	{
 	case ExpressionValueType::Float:
-		result.floatValue = modf(parameters[0].floatValue,&intPart);
+		result.floatValue = modf(parameters[0].floatValue, &intPart);
 		break;
 	default:
 		return result;
@@ -247,7 +246,7 @@ ExpressionValue expFuncMin(const std::wstring& funcName, const std::vector<Expre
 		{
 		case ExpressionValueType::Integer:
 			intCur = parameters[i].intValue;
-			floatCur = (double)parameters[i].intValue;
+			floatCur = (double) parameters[i].intValue;
 			break;
 		case ExpressionValueType::Float:
 			floatCur = parameters[i].floatValue;
@@ -293,7 +292,7 @@ ExpressionValue expFuncMax(const std::wstring& funcName, const std::vector<Expre
 		{
 		case ExpressionValueType::Integer:
 			intCur = parameters[i].intValue;
-			floatCur = (double)parameters[i].intValue;
+			floatCur = (double) parameters[i].intValue;
 			break;
 		case ExpressionValueType::Float:
 			floatCur = parameters[i].floatValue;
@@ -335,8 +334,7 @@ ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<Expre
 		break;
 	case ExpressionValueType::Integer:
 		result.type = ExpressionValueType::Integer;
-		result.intValue = parameters[0].intValue >= 0 ?
-			parameters[0].intValue : -parameters[0].intValue;
+		result.intValue = parameters[0].intValue >= 0 ? parameters[0].intValue : -parameters[0].intValue;
 		break;
 	default:
 		break;
@@ -348,9 +346,9 @@ ExpressionValue expFuncAbs(const std::wstring& funcName, const std::vector<Expre
 ExpressionValue expFuncStrlen(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* source;
-	GET_PARAM(parameters,0,source);
+	GET_PARAM(parameters, 0, source);
 
-	return ExpressionValue((int64_t)source->size());
+	return ExpressionValue((int64_t) source->size());
 }
 
 ExpressionValue expFuncSubstr(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -358,11 +356,11 @@ ExpressionValue expFuncSubstr(const std::wstring& funcName, const std::vector<Ex
 	int64_t start, count;
 	const std::wstring* source;
 
-	GET_PARAM(parameters,0,source);
-	GET_PARAM(parameters,1,start);
-	GET_PARAM(parameters,2,count);
+	GET_PARAM(parameters, 0, source);
+	GET_PARAM(parameters, 1, start);
+	GET_PARAM(parameters, 2, count);
 
-	return ExpressionValue(source->substr((size_t)start,(size_t)count));
+	return ExpressionValue(source->substr((size_t) start, (size_t) count));
 }
 
 #if ARMIPS_REGEXP
@@ -371,20 +369,21 @@ ExpressionValue expFuncRegExMatch(const std::wstring& funcName, const std::vecto
 	const std::wstring* source;
 	const std::wstring* regexString;
 
-	GET_PARAM(parameters,0,source);
-	GET_PARAM(parameters,1,regexString);
+	GET_PARAM(parameters, 0, source);
+	GET_PARAM(parameters, 1, regexString);
 
 #if ARMIPS_EXCEPTIONS
 	try
 	{
 #endif
 		std::wregex regex(*regexString);
-		bool found = std::regex_match(*source,regex);
+		bool found = std::regex_match(*source, regex);
 		return ExpressionValue(found ? INT64_C(1) : INT64_C(0));
 #if ARMIPS_EXCEPTIONS
-	} catch (std::regex_error&)
+	}
+	catch (std::regex_error&)
 	{
-		Logger::queueError(Logger::Error,L"Invalid regular expression");
+		Logger::queueError(Logger::Error, L"Invalid regular expression");
 		return ExpressionValue();
 	}
 #endif
@@ -395,20 +394,21 @@ ExpressionValue expFuncRegExSearch(const std::wstring& funcName, const std::vect
 	const std::wstring* source;
 	const std::wstring* regexString;
 
-	GET_PARAM(parameters,0,source);
-	GET_PARAM(parameters,1,regexString);
+	GET_PARAM(parameters, 0, source);
+	GET_PARAM(parameters, 1, regexString);
 
 #if ARMIPS_EXCEPTIONS
 	try
 	{
 #endif
 		std::wregex regex(*regexString);
-		bool found = std::regex_search(*source,regex);
+		bool found = std::regex_search(*source, regex);
 		return ExpressionValue(found ? INT64_C(1) : INT64_C(0));
 #if ARMIPS_EXCEPTIONS
-	} catch (std::regex_error&)
+	}
+	catch (std::regex_error&)
 	{
-		Logger::queueError(Logger::Error,L"Invalid regular expression");
+		Logger::queueError(Logger::Error, L"Invalid regular expression");
 		return ExpressionValue();
 	}
 #endif
@@ -420,9 +420,9 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 	const std::wstring* regexString;
 	int64_t matchIndex;
 
-	GET_PARAM(parameters,0,source);
-	GET_PARAM(parameters,1,regexString);
-	GET_OPTIONAL_PARAM(parameters,2,matchIndex,0);
+	GET_PARAM(parameters, 0, source);
+	GET_PARAM(parameters, 1, regexString);
+	GET_OPTIONAL_PARAM(parameters, 2, matchIndex, 0);
 
 #if ARMIPS_EXCEPTIONS
 	try
@@ -430,18 +430,19 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 #endif
 		std::wregex regex(*regexString);
 		std::wsmatch result;
-		bool found = std::regex_search(*source,result,regex);
-		if (found == false || (size_t)matchIndex >= result.size())
+		bool found = std::regex_search(*source, result, regex);
+		if (found == false || (size_t) matchIndex >= result.size())
 		{
-			Logger::queueError(Logger::Error,L"Capture group index %d does not exist",matchIndex);
+			Logger::queueError(Logger::Error, L"Capture group index %d does not exist", matchIndex);
 			return ExpressionValue();
 		}
-	
-		return ExpressionValue(result[(size_t)matchIndex].str());
+
+		return ExpressionValue(result[(size_t) matchIndex].str());
 #if ARMIPS_EXCEPTIONS
-	} catch (std::regex_error&)
+	}
+	catch (std::regex_error&)
 	{
-		Logger::queueError(Logger::Error,L"Invalid regular expression");
+		Logger::queueError(Logger::Error, L"Invalid regular expression");
 		return ExpressionValue();
 	}
 #endif
@@ -454,11 +455,11 @@ ExpressionValue expFuncFind(const std::wstring& funcName, const std::vector<Expr
 	const std::wstring* source;
 	const std::wstring* value;
 
-	GET_PARAM(parameters,0,source);
-	GET_PARAM(parameters,1,value);
-	GET_OPTIONAL_PARAM(parameters,2,start,0);
+	GET_PARAM(parameters, 0, source);
+	GET_PARAM(parameters, 1, value);
+	GET_OPTIONAL_PARAM(parameters, 2, start, 0);
 
-	size_t pos = source->find(*value,(size_t)start);
+	size_t pos = source->find(*value, (size_t) start);
 	return ExpressionValue(pos == std::wstring::npos ? INT64_C(-1) : (int64_t) pos);
 }
 
@@ -468,30 +469,29 @@ ExpressionValue expFuncRFind(const std::wstring& funcName, const std::vector<Exp
 	const std::wstring* source;
 	const std::wstring* value;
 
-	GET_PARAM(parameters,0,source);
-	GET_PARAM(parameters,1,value);
-	GET_OPTIONAL_PARAM(parameters,2,start,std::wstring::npos);
+	GET_PARAM(parameters, 0, source);
+	GET_PARAM(parameters, 1, value);
+	GET_OPTIONAL_PARAM(parameters, 2, start, std::wstring::npos);
 
-	size_t pos = source->rfind(*value,(size_t)start);
+	size_t pos = source->rfind(*value, (size_t) start);
 	return ExpressionValue(pos == std::wstring::npos ? INT64_C(-1) : (int64_t) pos);
 }
 
-
-template<typename T>
+template <typename T>
 ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
 	const std::wstring* fileName;
 	int64_t pos;
 
-	GET_PARAM(parameters,0,fileName);
-	GET_OPTIONAL_PARAM(parameters,1,pos,0);
+	GET_PARAM(parameters, 0, fileName);
+	GET_OPTIONAL_PARAM(parameters, 1, pos, 0);
 
 	std::wstring fullName = getFullPathName(*fileName);
 
 	BinaryFile file;
-	if (file.open(fullName,BinaryFile::Read) == false)
+	if (file.open(fullName, BinaryFile::Read) == false)
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",*fileName);
+		Logger::queueError(Logger::Error, L"Could not open %s", *fileName);
 		return ExpressionValue();
 	}
 
@@ -513,24 +513,24 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	int64_t start;
 	int64_t length;
 
-	GET_PARAM(parameters,0,fileName);
-	GET_OPTIONAL_PARAM(parameters,1,start,0);
-	GET_OPTIONAL_PARAM(parameters,2,length,0);
+	GET_PARAM(parameters, 0, fileName);
+	GET_OPTIONAL_PARAM(parameters, 1, start, 0);
+	GET_OPTIONAL_PARAM(parameters, 2, length, 0);
 
 	std::wstring fullName = getFullPathName(*fileName);
 
 	int64_t totalSize = fileSize(fullName);
-	if (length == 0 || start+length > totalSize)
-		length = totalSize-start;
+	if (length == 0 || start + length > totalSize)
+		length = totalSize - start;
 
 	BinaryFile file;
-	if (file.open(fullName,BinaryFile::Read) == false)
+	if (file.open(fullName, BinaryFile::Read) == false)
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
+		Logger::queueError(Logger::Error, L"Could not open %s", fileName);
 		return ExpressionValue();
 	}
 
-	file.setPos((long)start);
+	file.setPos((long) start);
 
 	unsigned char buffer[1024];
 	bool stringTerminated = false;
@@ -561,11 +561,11 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	return ExpressionValue(result);
 }
 
-ExpressionValue expLabelFuncDefined(const std::wstring &funcName, const std::vector<std::shared_ptr<Label>> &parameters)
+ExpressionValue expLabelFuncDefined(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>>& parameters)
 {
 	if (parameters.empty() || !parameters.front())
 	{
-		Logger::queueError(Logger::Error,L"%s: Invalid parameters", funcName);
+		Logger::queueError(Logger::Error, L"%s: Invalid parameters", funcName);
 		return ExpressionValue();
 	}
 
@@ -584,9 +584,9 @@ ExpressionValue expLabelFuncOrg(const std::wstring& funcName, const std::vector<
 		return ExpressionValue(parameters.front()->getValue());
 	}
 
-	if(!g_fileManager->hasOpenFile())
+	if (!g_fileManager->hasOpenFile())
 	{
-		Logger::queueError(Logger::Error,L"%s: no file opened", funcName);
+		Logger::queueError(Logger::Error, L"%s: no file opened", funcName);
 		return ExpressionValue();
 	}
 	return ExpressionValue(g_fileManager->getVirtualAddress());
@@ -603,7 +603,7 @@ ExpressionValue expLabelFuncOrga(const std::wstring& funcName, const std::vector
 
 		if (!label->hasPhysicalValue())
 		{
-			Logger::queueError(Logger::Error,L"%s: parameter %s has no physical address", funcName, label->getName() );
+			Logger::queueError(Logger::Error, L"%s: parameter %s has no physical address", funcName, label->getName());
 			return ExpressionValue();
 		}
 
@@ -611,9 +611,9 @@ ExpressionValue expLabelFuncOrga(const std::wstring& funcName, const std::vector
 	}
 
 	// return current physical address otherwise
-	if(!g_fileManager->hasOpenFile())
+	if (!g_fileManager->hasOpenFile())
 	{
-		Logger::queueError(Logger::Error,L"%s: no file opened", funcName);
+		Logger::queueError(Logger::Error, L"%s: no file opened", funcName);
 		return ExpressionValue();
 	}
 	return ExpressionValue(g_fileManager->getPhysicalAddress());
@@ -630,22 +630,22 @@ ExpressionValue expLabelFuncHeaderSize(const std::wstring& funcName, const std::
 
 		if (!label->hasPhysicalValue())
 		{
-			Logger::queueError(Logger::Error,L"%s: parameter %s has no physical address", funcName, label->getName() );
+			Logger::queueError(Logger::Error, L"%s: parameter %s has no physical address", funcName, label->getName());
 			return ExpressionValue();
 		}
 
 		return ExpressionValue(label->getValue() - label->getPhysicalValue());
 	}
 
-	if(!g_fileManager->hasOpenFile())
+	if (!g_fileManager->hasOpenFile())
 	{
-		Logger::queueError(Logger::Error,L"headersize: no file opened");
+		Logger::queueError(Logger::Error, L"headersize: no file opened");
 		return ExpressionValue();
 	}
 	return ExpressionValue(g_fileManager->getHeaderSize());
 }
 
- // clang-format off
+// clang-format off
 
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,			0,	0,	ExpFuncSafety::Safe } },

@@ -60,7 +60,7 @@ struct Token
 	{
 	}
 
-	Token(Token &&src)
+	Token(Token&& src)
 	{
 		// Move strings.
 		originalText = src.originalText;
@@ -76,7 +76,8 @@ struct Token
 		checked = src.checked;
 	}
 
-	Token(const Token &src) {
+	Token(const Token& src)
+	{
 		// Copy strings.
 		originalText = nullptr;
 		if (src.originalText)
@@ -190,14 +191,14 @@ protected:
 	void clearOriginalText()
 	{
 		if (originalText != stringValue)
-			delete [] originalText;
+			delete[] originalText;
 		originalText = nullptr;
 	}
 
 	void clearStringValue()
 	{
 		if (stringValue != originalText)
-			delete [] stringValue;
+			delete[] stringValue;
 		stringValue = nullptr;
 	}
 
@@ -219,6 +220,7 @@ struct TokenizerPosition
 		pos.it--;
 		return pos;
 	}
+
 private:
 	TokenList::iterator it;
 };
@@ -229,22 +231,45 @@ public:
 	Tokenizer();
 	const Token& nextToken();
 	const Token& peekToken(int ahead = 0);
-	void eatToken() { eatTokens(1); }
+	void eatToken()
+	{
+		eatTokens(1);
+	}
 	void eatTokens(int num);
-	bool atEnd() { return position.it == tokens.end(); }
-	TokenizerPosition getPosition() { return position; }
-	void setPosition(TokenizerPosition pos) { position = pos; }
+	bool atEnd()
+	{
+		return position.it == tokens.end();
+	}
+	TokenizerPosition getPosition()
+	{
+		return position;
+	}
+	void setPosition(TokenizerPosition pos)
+	{
+		position = pos;
+	}
 	void skipLookahead();
 	std::vector<Token> getTokens(TokenizerPosition start, TokenizerPosition end) const;
 	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
 	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
 	static size_t addEquValue(const std::vector<Token>& tokens);
-	static void clearEquValues() { equValues.clear(); }
+	static void clearEquValues()
+	{
+		equValues.clear();
+	}
 	void resetLookaheadCheckMarks();
+
 protected:
-	void clearTokens() { tokens.clear(); };
-	void resetPosition() { position.it = tokens.begin(); } 
+	void clearTokens()
+	{
+		tokens.clear();
+	};
+	void resetPosition()
+	{
+		position.it = tokens.begin();
+	}
 	void addToken(Token token);
+
 private:
 	bool processElement(TokenList::iterator& it);
 
@@ -262,13 +287,15 @@ private:
 	static std::vector<std::vector<Token>> equValues;
 };
 
-class FileTokenizer: public Tokenizer
+class FileTokenizer : public Tokenizer
 {
 public:
 	bool init(TextFile* input);
+
 protected:
 	Token loadToken();
-	bool isInputAtEnd();;
+	bool isInputAtEnd();
+	;
 
 	void skipWhitespace();
 	void createToken(TokenType type, size_t length);
@@ -286,21 +313,21 @@ protected:
 	std::wstring currentLine;
 	size_t lineNumber;
 	size_t linePos;
-	
+
 	Token token;
 	bool equActive;
 };
 
-class TokenStreamTokenizer: public Tokenizer
+class TokenStreamTokenizer : public Tokenizer
 {
 public:
 	void init(const std::vector<Token>& tokens)
 	{
 		clearTokens();
 
-		for (const Token &tok: tokens)
+		for (const Token& tok : tokens)
 			addToken(tok);
-		
+
 		resetPosition();
 	}
 };

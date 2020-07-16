@@ -4,21 +4,34 @@
 #include "Core/Expression.h"
 #include "Util/EncodingTable.h"
 
-enum class EncodingMode { Invalid, U8, U16, U32, U64, Ascii, Float, Double, Sjis, Custom };
+enum class EncodingMode
+{
+	Invalid,
+	U8,
+	U16,
+	U32,
+	U64,
+	Ascii,
+	Float,
+	Double,
+	Sjis,
+	Custom
+};
 
-class TableCommand: public CAssemblerCommand
+class TableCommand : public CAssemblerCommand
 {
 public:
 	TableCommand(const std::wstring& fileName, TextFile::Encoding encoding);
 	virtual bool Validate();
-	virtual void Encode() const { };
-	virtual void writeTempData(TempData& tempData) const { };
-	virtual void writeSymData(SymbolData& symData) const { };
+	virtual void Encode() const {};
+	virtual void writeTempData(TempData& tempData) const {};
+	virtual void writeSymData(SymbolData& symData) const {};
+
 private:
 	EncodingTable table;
 };
 
-class CDirectiveData: public CAssemblerCommand
+class CDirectiveData : public CAssemblerCommand
 {
 public:
 	CDirectiveData();
@@ -33,6 +46,7 @@ public:
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
+
 private:
 	void encodeCustom(EncodingTable& table);
 	void encodeSjis();
@@ -41,7 +55,7 @@ private:
 	void encodeNormal();
 	size_t getUnitSize() const;
 	size_t getDataSize() const;
-	
+
 	int64_t position;
 	EncodingMode mode;
 	bool writeTermination;

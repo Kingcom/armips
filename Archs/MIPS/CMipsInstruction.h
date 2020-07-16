@@ -48,29 +48,30 @@ struct MipsRegisterValue
 	int num;
 };
 
-struct MipsRegisterData {
-	MipsRegisterValue grs;			// general source reg
-	MipsRegisterValue grt;			// general target reg
-	MipsRegisterValue grd;			// general dest reg
+struct MipsRegisterData
+{
+	MipsRegisterValue grs; // general source reg
+	MipsRegisterValue grt; // general target reg
+	MipsRegisterValue grd; // general dest reg
 
-	MipsRegisterValue frs;			// float source reg
-	MipsRegisterValue frt;			// float target reg
-	MipsRegisterValue frd;			// float dest reg
+	MipsRegisterValue frs; // float source reg
+	MipsRegisterValue frt; // float target reg
+	MipsRegisterValue frd; // float dest reg
 
-	MipsRegisterValue ps2vrs;		// ps2 vector source reg
-	MipsRegisterValue ps2vrt;		// ps2 vector target reg
-	MipsRegisterValue ps2vrd;		// ps2 vector dest reg
+	MipsRegisterValue ps2vrs; // ps2 vector source reg
+	MipsRegisterValue ps2vrt; // ps2 vector target reg
+	MipsRegisterValue ps2vrd; // ps2 vector dest reg
 
-	MipsRegisterValue rspvrs;		// rsp vector source reg
-	MipsRegisterValue rspvrt;		// rsp vector target reg
-	MipsRegisterValue rspvrd;		// rsp vector dest reg
-	MipsRegisterValue rspve;		// rsp vector element reg
-	MipsRegisterValue rspvde;		// rsp vector dest element reg
-	MipsRegisterValue rspvealt;		// rsp vector element reg (alt. placement)
+	MipsRegisterValue rspvrs; // rsp vector source reg
+	MipsRegisterValue rspvrt; // rsp vector target reg
+	MipsRegisterValue rspvrd; // rsp vector dest reg
+	MipsRegisterValue rspve; // rsp vector element reg
+	MipsRegisterValue rspvde; // rsp vector dest element reg
+	MipsRegisterValue rspvealt; // rsp vector element reg (alt. placement)
 
-	MipsRegisterValue vrs;			// vfpu source reg
-	MipsRegisterValue vrt;			// vfpu target reg
-	MipsRegisterValue vrd;			// vfpu dest reg
+	MipsRegisterValue vrs; // vfpu source reg
+	MipsRegisterValue vrt; // vfpu target reg
+	MipsRegisterValue vrd; // vfpu dest reg
 
 	void reset()
 	{
@@ -106,7 +107,7 @@ struct MipsImmediateData
 		primary.type = MipsImmediateType::None;
 		if (primary.expression.isLoaded())
 			primary.expression = Expression();
-		
+
 		secondary.type = MipsImmediateType::None;
 		if (secondary.expression.isLoaded())
 			secondary.expression = Expression();
@@ -125,7 +126,7 @@ struct MipsOpcodeData
 	}
 };
 
-class CMipsInstruction: public CAssemblerCommand
+class CMipsInstruction : public CAssemblerCommand
 {
 public:
 	CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers);
@@ -133,6 +134,7 @@ public:
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
+
 private:
 	void encodeNormal() const;
 	void encodeVfpu() const;

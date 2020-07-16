@@ -25,7 +25,7 @@ std::wstring getFolderNameFromPath(const std::wstring& src)
 		return L".";
 	}
 
-	return src.substr(0,s);
+	return src.substr(0, s);
 }
 
 std::wstring getFullPathName(const std::wstring& path)
@@ -35,18 +35,22 @@ std::wstring getFullPathName(const std::wstring& path)
 		if (isAbsolutePath(path))
 		{
 			return path;
-		} else {
+		}
+		else
+		{
 			std::wstring source = Global.FileInfo.FileList[Global.FileInfo.FileNum];
 			return getFolderNameFromPath(source) + L"/" + path;
 		}
-	} else {
+	}
+	else
+	{
 		return path;
 	}
 }
 
 bool checkLabelDefined(const std::wstring& labelName, int section)
 {
-	std::shared_ptr<Label> label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,section);
+	std::shared_ptr<Label> label = Global.symbolTable.getLabel(labelName, Global.FileInfo.FileNum, section);
 	return label->isDefined();
 }
 
@@ -57,6 +61,7 @@ bool checkValidLabelName(const std::wstring& labelName)
 
 bool isPowerOfTwo(int64_t n)
 {
-	if (n == 0) return false;
+	if (n == 0)
+		return false;
 	return !(n & (n - 1));
 }

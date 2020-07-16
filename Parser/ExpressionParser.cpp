@@ -1,4 +1,5 @@
 #include "Parser/ExpressionParser.h"
+
 #include "Core/Expression.h"
 #include "Parser/Tokenizer.h"
 
@@ -13,7 +14,7 @@ void allowFunctionCallExpression(bool allow)
 
 static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 {
-	const Token &tok = tokenizer.peekToken();
+	const Token& tok = tokenizer.peekToken();
 
 	switch (tok.type)
 	{
@@ -21,33 +22,33 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 		tokenizer.eatToken();
 		return new ExpressionInternal(tok.floatValue);
 	case TokenType::Identifier:
-		{
-			const std::wstring stringValue = tok.getStringValue();
-			tokenizer.eatToken();
-			if (stringValue == L".")
-				return new ExpressionInternal(OperatorType::MemoryPos);
-			else
-				return new ExpressionInternal(stringValue,OperatorType::Identifier);
-		}
+	{
+		const std::wstring stringValue = tok.getStringValue();
+		tokenizer.eatToken();
+		if (stringValue == L".")
+			return new ExpressionInternal(OperatorType::MemoryPos);
+		else
+			return new ExpressionInternal(stringValue, OperatorType::Identifier);
+	}
 	case TokenType::String:
 		tokenizer.eatToken();
-		return new ExpressionInternal(tok.getStringValue(),OperatorType::String);
+		return new ExpressionInternal(tok.getStringValue(), OperatorType::String);
 	case TokenType::Integer:
 		tokenizer.eatToken();
 		return new ExpressionInternal(tok.intValue);
 	case TokenType::LParen:
+	{
+		tokenizer.eatToken();
+		ExpressionInternal* exp = expression(tokenizer);
+
+		if (tokenizer.nextToken().type != TokenType::RParen)
 		{
-			tokenizer.eatToken();
-			ExpressionInternal* exp = expression(tokenizer);
-
-			if (tokenizer.nextToken().type != TokenType::RParen)
-			{
-				delete exp;
-				return nullptr;
-			}
-
-			return exp;
+			delete exp;
+			return nullptr;
 		}
+
+		return exp;
+	}
 	case TokenType::Invalid:
 	default:
 		break;
@@ -58,9 +59,7 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 
 static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
 {
-	if (allowFunctionCall &&
-		tokenizer.peekToken(0).type == TokenType::Identifier &&
-		tokenizer.peekToken(1).type == TokenType::LParen)
+	if (allowFunctionCall && tokenizer.peekToken(0).type == TokenType::Identifier && tokenizer.peekToken(1).type == TokenType::LParen)
 	{
 		const std::wstring functionName = tokenizer.nextToken().getStringValue();
 		tokenizer.eatToken();
@@ -70,7 +69,7 @@ static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
 		{
 			if (parameters.size() != 0 && tokenizer.nextToken().type != TokenType::Comma)
 			{
-				for (ExpressionInternal* exp: parameters)
+				for (ExpressionInternal* exp : parameters)
 					delete exp;
 				return nullptr;
 			}
@@ -78,7 +77,7 @@ static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
 			ExpressionInternal* exp = expression(tokenizer);
 			if (exp == nullptr)
 			{
-				for (ExpressionInternal* exp: parameters)
+				for (ExpressionInternal* exp : parameters)
 					delete exp;
 				return nullptr;
 			}
@@ -88,7 +87,7 @@ static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
 
 		tokenizer.eatToken();
 
-		return new ExpressionInternal(functionName,parameters);
+		return new ExpressionInternal(functionName, parameters);
 	}
 
 	return primaryExpression(tokenizer);
@@ -110,13 +109,13 @@ static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
 	case TokenType::Plus:
 		return exp;
 	case TokenType::Minus:
-		return new ExpressionInternal(OperatorType::Neg,exp);
+		return new ExpressionInternal(OperatorType::Neg, exp);
 	case TokenType::Tilde:
-		return new ExpressionInternal(OperatorType::BitNot,exp);
+		return new ExpressionInternal(OperatorType::BitNot, exp);
 	case TokenType::Exclamation:
-		return new ExpressionInternal(OperatorType::LogNot,exp);
+		return new ExpressionInternal(OperatorType::LogNot, exp);
 	case TokenType::Degree:
-		return new ExpressionInternal(OperatorType::ToString,exp);
+		return new ExpressionInternal(OperatorType::ToString, exp);
 	default:
 		delete exp;
 		return nullptr;
@@ -126,7 +125,7 @@ static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
 static ExpressionInternal* multiplicativeExpression(Tokenizer& tokenizer)
 {
 	ExpressionInternal* exp = unaryExpression(tokenizer);
-	if (exp ==  nullptr)
+	if (exp == nullptr)
 		return nullptr;
 
 	while (true)
@@ -159,7 +158,7 @@ static ExpressionInternal* multiplicativeExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = new ExpressionInternal(op, exp, exp2);
 	}
 
 	return exp;
@@ -198,7 +197,7 @@ static ExpressionInternal* additiveExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = new ExpressionInternal(op, exp, exp2);
 	}
 
 	return exp;
@@ -237,7 +236,7 @@ static ExpressionInternal* shiftExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = new ExpressionInternal(op, exp, exp2);
 	}
 
 	return exp;
@@ -282,7 +281,7 @@ static ExpressionInternal* relationalExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = new ExpressionInternal(op, exp, exp2);
 	}
 
 	return exp;
@@ -321,7 +320,7 @@ static ExpressionInternal* equalityExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = new ExpressionInternal(op, exp, exp2);
 	}
 
 	return exp;
@@ -344,7 +343,7 @@ static ExpressionInternal* andExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(OperatorType::BitAnd,exp,exp2);
+		exp = new ExpressionInternal(OperatorType::BitAnd, exp, exp2);
 	}
 
 	return exp;
@@ -367,7 +366,7 @@ static ExpressionInternal* exclusiveOrExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(OperatorType::Xor,exp,exp2);
+		exp = new ExpressionInternal(OperatorType::Xor, exp, exp2);
 	}
 
 	return exp;
@@ -390,7 +389,7 @@ static ExpressionInternal* inclusiveOrExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(OperatorType::BitOr,exp,exp2);
+		exp = new ExpressionInternal(OperatorType::BitOr, exp, exp2);
 	}
 
 	return exp;
@@ -413,7 +412,7 @@ static ExpressionInternal* logicalAndExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(OperatorType::LogAnd,exp,exp2);
+		exp = new ExpressionInternal(OperatorType::LogAnd, exp, exp2);
 	}
 
 	return exp;
@@ -436,7 +435,7 @@ static ExpressionInternal* logicalOrExpression(Tokenizer& tokenizer)
 			return nullptr;
 		}
 
-		exp = new ExpressionInternal(OperatorType::LogOr,exp,exp2);
+		exp = new ExpressionInternal(OperatorType::LogOr, exp, exp2);
 	}
 
 	return exp;
@@ -459,7 +458,7 @@ static ExpressionInternal* conditionalExpression(Tokenizer& tokenizer)
 	{
 		ExpressionInternal* third = expression(tokenizer);
 		if (third != nullptr)
-			return new ExpressionInternal(OperatorType::TertiaryIf,exp,second,third);
+			return new ExpressionInternal(OperatorType::TertiaryIf, exp, second, third);
 
 		delete third;
 	}

@@ -43,7 +43,13 @@ enum class OperatorType
 	FunctionCall
 };
 
-enum class ExpressionValueType { Invalid, Integer, Float, String};
+enum class ExpressionValueType
+{
+	Invalid,
+	Integer,
+	Float,
+	String
+};
 
 struct ExpressionValue
 {
@@ -76,7 +82,7 @@ struct ExpressionValue
 	{
 		return type == ExpressionValueType::Float;
 	}
-	
+
 	bool isInt() const
 	{
 		return type == ExpressionValueType::Integer;
@@ -99,7 +105,7 @@ struct ExpressionValue
 	};
 
 	std::wstring strValue;
-	
+
 	ExpressionValue operator!() const;
 	ExpressionValue operator~() const;
 	bool operator<(const ExpressionValue& other) const;
@@ -130,17 +136,30 @@ public:
 	ExpressionInternal(int64_t value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
-	ExpressionInternal(OperatorType op, ExpressionInternal* a = nullptr,
-		ExpressionInternal* b = nullptr, ExpressionInternal* c = nullptr);
+	ExpressionInternal(OperatorType op, ExpressionInternal* a = nullptr, ExpressionInternal* b = nullptr,
+					   ExpressionInternal* c = nullptr);
 	ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters);
 	ExpressionValue evaluate();
 	std::wstring toString();
-	bool isIdentifier() { return type == OperatorType::Identifier; }
-	std::wstring getStringValue() { return strValue; }
+	bool isIdentifier()
+	{
+		return type == OperatorType::Identifier;
+	}
+	std::wstring getStringValue()
+	{
+		return strValue;
+	}
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool simplify(bool inUnknownOrFalseBlock);
-	unsigned int getFileNum() { return fileNum; }
-	unsigned int getSection() { return section; }
+	unsigned int getFileNum()
+	{
+		return fileNum;
+	}
+	unsigned int getSection()
+	{
+		return section;
+	}
+
 private:
 	void allocate(size_t count);
 	void deallocate();
@@ -169,13 +188,18 @@ class Expression
 public:
 	Expression();
 	ExpressionValue evaluate();
-	bool isLoaded() const { return expression != nullptr; }
+	bool isLoaded() const
+	{
+		return expression != nullptr;
+	}
 	void setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock);
 	void replaceMemoryPos(const std::wstring& identifierName);
-	bool isConstExpression() { return constExpression; }
+	bool isConstExpression()
+	{
+		return constExpression;
+	}
 
-	template<typename T>
-	bool evaluateInteger(T& dest)
+	template <typename T> bool evaluateInteger(T& dest)
 	{
 		if (expression == nullptr)
 			return false;
@@ -190,7 +214,9 @@ public:
 
 	bool evaluateString(std::wstring& dest, bool convert);
 	bool evaluateIdentifier(std::wstring& dest);
-	std::wstring toString();;
+	std::wstring toString();
+	;
+
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;

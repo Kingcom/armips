@@ -24,16 +24,18 @@ std::wstring convertUtf8ToWString(const char* source)
 	{
 		int extraBytes = 0;
 		int value = source[index++];
-			
+
 		if ((value & 0xE0) == 0xC0)
 		{
 			extraBytes = 1;
 			value &= 0x1F;
-		} else if ((value & 0xF0) == 0xE0)
+		}
+		else if ((value & 0xF0) == 0xE0)
 		{
 			extraBytes = 2;
 			value &= 0x0F;
-		} else if (value > 0x7F)
+		}
+		else if (value > 0x7F)
 		{
 			// error
 			return std::wstring();
@@ -44,8 +46,8 @@ std::wstring convertUtf8ToWString(const char* source)
 			int b = source[index++];
 			if ((b & 0xC0) != 0x80)
 			{
-			// error
-			return std::wstring();
+				// error
+				return std::wstring();
 			}
 
 			value = (value << 6) | (b & 0x3F);
@@ -60,15 +62,18 @@ std::wstring convertUtf8ToWString(const char* source)
 std::string convertWCharToUtf8(wchar_t character)
 {
 	std::string result;
-	
+
 	if (character < 0x80)
 	{
 		result += character & 0x7F;
-	} else if (character < 0x800)
+	}
+	else if (character < 0x800)
 	{
 		result += 0xC0 | ((character >> 6) & 0x1F);
 		result += (0x80 | (character & 0x3F));
-	} else {
+	}
+	else
+	{
 		result += 0xE0 | ((character >> 12) & 0xF);
 		result += 0x80 | ((character >> 6) & 0x3F);
 		result += 0x80 | (character & 0x3F);
@@ -80,18 +85,21 @@ std::string convertWCharToUtf8(wchar_t character)
 std::string convertWStringToUtf8(const std::wstring& source)
 {
 	std::string result;
-	
+
 	for (size_t i = 0; i < source.size(); i++)
 	{
 		wchar_t character = source[i];
 		if (character < 0x80)
 		{
 			result += character & 0x7F;
-		} else if (character < 0x800)
+		}
+		else if (character < 0x800)
 		{
 			result += 0xC0 | ((character >> 6) & 0x1F);
 			result += (0x80 | (character & 0x3F));
-		} else {
+		}
+		else
+		{
 			result += 0xE0 | ((character >> 12) & 0xF);
 			result += 0x80 | ((character >> 6) & 0x3F);
 			result += 0x80 | (character & 0x3F);
@@ -104,7 +112,7 @@ std::string convertWStringToUtf8(const std::wstring& source)
 std::wstring intToHexString(unsigned int value, int digits, bool prefix)
 {
 	std::wstring result;
-	result.reserve((digits+prefix) ? 2 : 0);
+	result.reserve((digits + prefix) ? 2 : 0);
 
 	if (prefix)
 	{
@@ -117,9 +125,9 @@ std::wstring intToHexString(unsigned int value, int digits, bool prefix)
 		result += '0';
 		digits--;
 	}
-	
+
 	wchar_t buf[9];
-	swprintf(buf,9,L"%0*X",digits,value);
+	swprintf(buf, 9, L"%0*X", digits, value);
 	result += buf;
 
 	return result;
@@ -135,9 +143,9 @@ std::wstring intToString(unsigned int value, int digits)
 		result += ' ';
 		digits--;
 	}
-	
+
 	wchar_t buf[9];
-	swprintf(buf,9,L"%*d",digits,value);
+	swprintf(buf, 9, L"%*d", digits, value);
 	result += buf;
 
 	return result;
@@ -149,15 +157,17 @@ bool stringToInt(const std::wstring& line, size_t start, size_t end, int64_t& re
 	int32_t base = 10;
 	if (line[start] == '0')
 	{
-		if (towlower(line[start+1]) == 'x')
+		if (towlower(line[start + 1]) == 'x')
 		{
 			base = 16;
 			start += 2;
-		} else if (towlower(line[start+1]) == 'o')
+		}
+		else if (towlower(line[start + 1]) == 'o')
 		{
 			base = 8;
 			start += 2;
-		} else if (towlower(line[start+1]) == 'b' && towlower(line[end-1]) != 'h')
+		}
+		else if (towlower(line[start + 1]) == 'b' && towlower(line[end - 1]) != 'h')
 		{
 			base = 2;
 			start += 2;
@@ -166,15 +176,17 @@ bool stringToInt(const std::wstring& line, size_t start, size_t end, int64_t& re
 
 	if (base == 10)
 	{
-		if (towlower(line[end-1]) == 'h')
+		if (towlower(line[end - 1]) == 'h')
 		{
 			base = 16;
 			end--;
-		} else if (towlower(line[end-1]) == 'b')
+		}
+		else if (towlower(line[end - 1]) == 'b')
 		{
 			base = 2;
 			end--;
-		} else if (towlower(line[end-1]) == 'o')
+		}
+		else if (towlower(line[end - 1]) == 'o')
 		{
 			base = 8;
 			end--;
@@ -187,12 +199,12 @@ bool stringToInt(const std::wstring& line, size_t start, size_t end, int64_t& re
 	{
 		wchar_t c = towlower(line[start++]);
 
-		int32_t value = c >= 'a' ? c-'a'+10 : c-'0';
+		int32_t value = c >= 'a' ? c - 'a' + 10 : c - '0';
 
 		if (value >= base)
 			return false;
 
-		result = (result*base) + value;
+		result = (result * base) + value;
 	}
 
 	return true;
@@ -200,21 +212,33 @@ bool stringToInt(const std::wstring& line, size_t start, size_t end, int64_t& re
 
 int32_t getFloatBits(float value)
 {
-	union { float f; int32_t i; } u;
+	union
+	{
+		float f;
+		int32_t i;
+	} u;
 	u.f = value;
 	return u.i;
 }
 
 float bitsToFloat(int32_t value)
 {
-	union { float f; int32_t i; } u;
+	union
+	{
+		float f;
+		int32_t i;
+	} u;
 	u.i = value;
 	return u.f;
 }
 
 int64_t getDoubleBits(double value)
 {
-	union { double f; int64_t i; } u;
+	union
+	{
+		double f;
+		int64_t i;
+	} u;
 	u.f = value;
 	return u.i;
 }
@@ -235,9 +259,10 @@ std::vector<std::wstring> splitString(const std::wstring& str, const wchar_t del
 	std::vector<std::wstring> result;
 	std::wstringstream stream(str);
 	std::wstring arg;
-	while (std::getline(stream,arg,delim))
+	while (std::getline(stream, arg, delim))
 	{
-		if (arg.empty() && skipEmpty) continue;
+		if (arg.empty() && skipEmpty)
+			continue;
 		result.push_back(arg);
 	}
 
@@ -248,17 +273,16 @@ int64_t fileSize(const std::wstring& fileName)
 {
 #ifdef _WIN32
 	WIN32_FILE_ATTRIBUTE_DATA attr;
-	if (!GetFileAttributesEx(fileName.c_str(),GetFileExInfoStandard,&attr)
-		|| (attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+	if (!GetFileAttributesEx(fileName.c_str(), GetFileExInfoStandard, &attr) || (attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		return 0;
 	return ((int64_t) attr.nFileSizeHigh << 32) | (int64_t) attr.nFileSizeLow;
-#else	
+#else
 	std::string utf8 = convertWStringToUtf8(fileName);
 	struct stat fileStat;
-	int err = stat(utf8.c_str(),&fileStat);
+	int err = stat(utf8.c_str(), &fileStat);
 	if (0 != err)
-		return 0; 
-	return fileStat.st_size; 
+		return 0;
+	return fileStat.st_size;
 #endif
 }
 
@@ -276,7 +300,7 @@ bool fileExists(const std::wstring& strFilename)
 #else
 	std::string utf8 = convertWStringToUtf8(strFilename);
 	struct stat stFileInfo;
-	int intStat = stat(utf8.c_str(),&stFileInfo);
+	int intStat = stat(utf8.c_str(), &stFileInfo);
 	return intStat == 0;
 #endif
 }
@@ -284,7 +308,7 @@ bool fileExists(const std::wstring& strFilename)
 bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
 {
 #ifdef _WIN32
-	return CopyFileW(existingFile.c_str(),newFile.c_str(),false) != FALSE;
+	return CopyFileW(existingFile.c_str(), newFile.c_str(), false) != FALSE;
 #else
 	unsigned char buffer[BUFSIZ];
 	bool error = false;
@@ -292,16 +316,16 @@ bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
 	std::string existingUtf8 = convertWStringToUtf8(existingFile);
 	std::string newUtf8 = convertWStringToUtf8(newFile);
 
-	FILE* input = fopen(existingUtf8.c_str(),"rb");
-	FILE* output = fopen(newUtf8.c_str(),"wb");
+	FILE* input = fopen(existingUtf8.c_str(), "rb");
+	FILE* output = fopen(newUtf8.c_str(), "wb");
 
 	if (input == nullptr || output == nullptr)
 		return false;
 
 	size_t n;
-	while ((n = fread(buffer,1,BUFSIZ,input)) > 0)
+	while ((n = fread(buffer, 1, BUFSIZ, input)) > 0)
 	{
-		if (fwrite(buffer,1,n,output) != n)
+		if (fwrite(buffer, 1, n, output) != n)
 			error = true;
 	}
 
@@ -327,23 +351,23 @@ FILE* openFile(const std::wstring& fileName, OpenFileMode mode)
 	switch (mode)
 	{
 	case OpenFileMode::ReadBinary:
-		return _wfopen(fileName.c_str(),L"rb");
+		return _wfopen(fileName.c_str(), L"rb");
 	case OpenFileMode::WriteBinary:
-		return _wfopen(fileName.c_str(),L"wb");
+		return _wfopen(fileName.c_str(), L"wb");
 	case OpenFileMode::ReadWriteBinary:
-		return _wfopen(fileName.c_str(),L"rb+");
+		return _wfopen(fileName.c_str(), L"rb+");
 	}
 #else
 	std::string nameUtf8 = convertWStringToUtf8(fileName);
-	
+
 	switch (mode)
 	{
 	case OpenFileMode::ReadBinary:
-		return fopen(nameUtf8.c_str(),"rb");
+		return fopen(nameUtf8.c_str(), "rb");
 	case OpenFileMode::WriteBinary:
-		return fopen(nameUtf8.c_str(),"wb");
+		return fopen(nameUtf8.c_str(), "wb");
 	case OpenFileMode::ReadWriteBinary:
-		return fopen(nameUtf8.c_str(),"rb+");
+		return fopen(nameUtf8.c_str(), "rb+");
 	}
 #endif
 
@@ -354,10 +378,10 @@ std::wstring getCurrentDirectory()
 {
 #ifdef _WIN32
 	wchar_t dir[MAX_PATH];
-	_wgetcwd(dir,MAX_PATH-1);
+	_wgetcwd(dir, MAX_PATH - 1);
 	return dir;
 #else
-	char* dir = getcwd(nullptr,0);
+	char* dir = getcwd(nullptr, 0);
 	std::wstring result = convertUtf8ToWString(dir);
 	free(dir);
 	return result;
@@ -393,7 +417,7 @@ std::wstring getFileNameFromPath(const std::wstring& path)
 	return path.substr(n);
 }
 
-size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue)
+size_t replaceAll(std::wstring& str, const wchar_t* oldValue, const std::wstring& newValue)
 {
 	size_t pos = 0;
 	size_t len = wcslen(oldValue);
@@ -401,7 +425,7 @@ size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring&
 	size_t count = 0;
 	while ((pos = str.find(oldValue, pos)) != std::string::npos)
 	{
-		str.replace(pos,len,newValue);
+		str.replace(pos, len, newValue);
 		pos += newValue.length();
 		count++;
 	}

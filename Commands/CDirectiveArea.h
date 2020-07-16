@@ -3,7 +3,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
 
-class CDirectiveArea: public CAssemblerCommand
+class CDirectiveArea : public CAssemblerCommand
 {
 public:
 	CDirectiveArea(Expression& size);
@@ -12,7 +12,11 @@ public:
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 	void setFillExpression(Expression& exp);
-	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
+	void setContent(std::unique_ptr<CAssemblerCommand> content)
+	{
+		this->content = std::move(content);
+	}
+
 private:
 	int64_t position;
 	Expression sizeExpression;

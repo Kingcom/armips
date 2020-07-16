@@ -9,7 +9,7 @@
 
 CInvalidArchitecture InvalidArchitecture;
 
-const ExpressionFunctionMap &CArchitecture::getExpressionFunctions()
+const ExpressionFunctionMap& CArchitecture::getExpressionFunctions()
 {
 	const static ExpressionFunctionMap emptyMap = {};
 	return emptyMap;
@@ -41,10 +41,10 @@ void ArchitectureCommand::writeTempData(TempData& tempData) const
 		std::wstringstream stream(tempText);
 
 		std::wstring line;
-		while (std::getline(stream,line,L'\n'))
+		while (std::getline(stream, line, L'\n'))
 		{
 			if (line.size() != 0)
-				tempData.writeLine(position,line);
+				tempData.writeLine(position, line);
 		}
 	}
 }
@@ -54,29 +54,28 @@ void ArchitectureCommand::writeSymData(SymbolData& symData) const
 	// TODO: find a less ugly way to check for undefined memory positions
 	if (position == -1)
 		return;
-	
-	if (symText.size() != 0)
-		symData.addLabel(position,symText);
-}
 
+	if (symText.size() != 0)
+		symData.addLabel(position, symText);
+}
 
 void CInvalidArchitecture::NextSection()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, L"No architecture specified");
 }
 
 void CInvalidArchitecture::Pass2()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, L"No architecture specified");
 }
 
 void CInvalidArchitecture::Revalidate()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, L"No architecture specified");
 }
 
 std::unique_ptr<IElfRelocator> CInvalidArchitecture::getElfRelocator()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, L"No architecture specified");
 	return nullptr;
 }

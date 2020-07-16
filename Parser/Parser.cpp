@@ -11,7 +11,7 @@
 
 inline bool isPartOfList(const std::wstring& value, const std::initializer_list<const wchar_t*>& terminators)
 {
-	for (const wchar_t* term: terminators)
+	for (const wchar_t* term : terminators)
 	{
 		if (value == term)
 			return true;
@@ -24,7 +24,7 @@ Parser::Parser()
 {
 	initializingMacro = false;
 	overrideFileInfo = false;
-	conditionStack.push_back({true,false});
+	conditionStack.push_back({true, false});
 	clearError();
 }
 
@@ -36,7 +36,7 @@ void Parser::pushConditionalResult(ConditionalResult cond)
 	conditionStack.push_back(info);
 }
 
-void Parser::printError(const Token &token, const std::wstring &text)
+void Parser::printError(const Token& token, const std::wstring& text)
 {
 	errorLine = token.line;
 	Global.FileInfo.LineNumber = (int) token.line;
@@ -62,7 +62,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 	if (exp.isLoaded() == false)
 	{
-		printError(start,L"Parameter failure");
+		printError(start, L"Parameter failure");
 		getTokenizer()->skipLookahead();
 		valid = false;
 	}
@@ -76,7 +76,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 		if (exp.isLoaded() == false)
 		{
-			printError(start,L"Parameter failure");
+			printError(start, L"Parameter failure");
 			getTokenizer()->skipLookahead();
 			valid = false;
 		}
@@ -84,13 +84,13 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 	if (list.size() < (size_t) min)
 	{
-		printError(start,L"Not enough parameters (min %d)",min);
+		printError(start, L"Not enough parameters (min %d)", min);
 		return false;
 	}
 
 	if (max != -1 && (size_t) max < list.size())
 	{
-		printError(start,L"Too many parameters (max %d)",max);
+		printError(start, L"Too many parameters (max %d)", max);
 		return false;
 	}
 
@@ -114,9 +114,9 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 	bool foundTermination = false;
 	while (atEnd() == false)
 	{
-		const Token &next = peekToken();
+		const Token& next = peekToken();
 
-		if(next.type == TokenType::Separator)
+		if (next.type == TokenType::Separator)
 		{
 			eatToken();
 			continue;
@@ -174,7 +174,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseFile(TextFile& file, bool virtua
 	if (tokenizer.init(&file) == false)
 		return nullptr;
 
-	std::unique_ptr<CAssemblerCommand> result = parse(&tokenizer,virtualFile,file.getFileName());
+	std::unique_ptr<CAssemblerCommand> result = parse(&tokenizer, virtualFile, file.getFileName());
 
 	if (file.isFromMemory() == false)
 		Global.FileInfo.TotalLineCount += file.getNumLines();
@@ -186,10 +186,11 @@ std::unique_ptr<CAssemblerCommand> Parser::parseString(const std::wstring& text)
 {
 	TextFile file;
 	file.openMemory(text);
-	return parseFile(file,true);
+	return parseFile(file, true);
 }
 
-std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
+std::unique_ptr<CAssemblerCommand>
+Parser::parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
 {
 	std::wstring fullText = text;
 
@@ -197,13 +198,13 @@ std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& tex
 	overrideFileNum = Global.FileInfo.FileNum;
 	overrideLineNum = Global.FileInfo.LineNumber;
 
-	for (auto& arg: variables)
+	for (auto& arg : variables)
 	{
-		size_t count = replaceAll(fullText,arg.variableName,arg.value);
-		(void)count;
+		size_t count = replaceAll(fullText, arg.variableName, arg.value);
+		(void) count;
 #ifdef _DEBUG
 		if (count != 0 && arg.value.empty())
-			Logger::printError(Logger::Warning,L"Empty replacement for %s",arg.variableName);
+			Logger::printError(Logger::Warning, L"Empty replacement for %s", arg.variableName);
 #endif
 	}
 
@@ -213,9 +214,9 @@ std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& tex
 	return result;
 }
 
-std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &directiveSet)
+std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap& directiveSet)
 {
-	const Token &tok = peekToken();
+	const Token& tok = peekToken();
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
@@ -224,7 +225,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 	auto matchRange = directiveSet.equal_range(stringValue);
 	for (auto it = matchRange.first; it != matchRange.second; ++it)
 	{
-		const DirectiveEntry &directive = it->second;
+		const DirectiveEntry& directive = it->second;
 
 		if (directive.flags & DIRECTIVE_DISABLED)
 			continue;
@@ -239,15 +240,16 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 			Arch->NextSection();
 
 		eatToken();
-		std::unique_ptr<CAssemblerCommand> result = directive.function(*this,directive.flags);
+		std::unique_ptr<CAssemblerCommand> result = directive.function(*this, directive.flags);
 		if (result == nullptr)
 		{
 			if (hasError() == false)
-				printError(tok,L"Directive parameter failure");
+				printError(tok, L"Directive parameter failure");
 			return nullptr;
-		} else if (!(directive.flags & DIRECTIVE_MANUALSEPARATOR) && nextToken().type != TokenType::Separator)
+		}
+		else if (!(directive.flags & DIRECTIVE_MANUALSEPARATOR) && nextToken().type != TokenType::Separator)
 		{
-			printError(tok,L"Directive not terminated");
+			printError(tok, L"Directive not terminated");
 			return nullptr;
 		}
 
@@ -266,7 +268,7 @@ bool Parser::matchToken(TokenType type, bool optional)
 			eatToken();
 		return true;
 	}
-	
+
 	return nextToken().type == type;
 }
 
@@ -286,7 +288,9 @@ std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virt
 	{
 		entry.fileNum = (int) Global.FileInfo.FileList.size();
 		Global.FileInfo.FileList.push_back(name);
-	} else {
+	}
+	else
+	{
 		entry.fileNum = -1;
 	}
 
@@ -313,13 +317,13 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 		const Token& token = tok.nextToken();
 		if (token.type == TokenType::Identifier && token.getStringValue() == name)
 		{
-			printError(startToken,L"Recursive equ definition for \"%s\" not allowed",name);
+			printError(startToken, L"Recursive equ definition for \"%s\" not allowed", name);
 			return;
 		}
 
 		if (token.type == TokenType::Equ)
 		{
-			printError(startToken,L"equ value must not contain another equ instance");
+			printError(startToken, L"equ value must not contain another equ instance");
 			return;
 		}
 	}
@@ -347,12 +351,11 @@ bool Parser::checkEquLabel()
 		if (peekToken(pos).type == TokenType::Colon)
 			pos++;
 
-		if (peekToken(pos).type == TokenType::Equ &&
-			peekToken(pos+1).type == TokenType::EquValue)
+		if (peekToken(pos).type == TokenType::Equ && peekToken(pos + 1).type == TokenType::EquValue)
 		{
 			std::wstring name = peekToken(0).getStringValue();
-			std::wstring value = peekToken(pos+1).getStringValue();
-			eatTokens(pos+2);
+			std::wstring value = peekToken(pos + 1).getStringValue();
+			eatTokens(pos + 2);
 
 			// skip the equ if it's inside a false conditional block
 			if (isInsideTrueBlock() == false)
@@ -362,30 +365,30 @@ bool Parser::checkEquLabel()
 			// evaluated during validation
 			if (isInsideUnknownBlock())
 			{
-				printError(start,L"equ not allowed inside of block with non-trivial condition");
+				printError(start, L"equ not allowed inside of block with non-trivial condition");
 				return true;
 			}
 
 			// equs are not allowed in macros
 			if (initializingMacro)
 			{
-				printError(start,L"equ not allowed in macro");
+				printError(start, L"equ not allowed in macro");
 				return true;
 			}
 
 			if (Global.symbolTable.isValidSymbolName(name) == false)
 			{
-				printError(start,L"Invalid equation name \"%s\"",name);
+				printError(start, L"Invalid equation name \"%s\"", name);
 				return true;
 			}
 
-			if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
+			if (Global.symbolTable.symbolExists(name, Global.FileInfo.FileNum, Global.Section))
 			{
-				printError(start,L"Equation name \"%s\" already defined",name);
+				printError(start, L"Equation name \"%s\" already defined", name);
 				return true;
 			}
 
-			addEquation(start,name,value);
+			addEquation(start, name, value);
 			return true;
 		}
 	}
@@ -407,7 +410,7 @@ bool Parser::checkMacroDefinition()
 	// nested macro definitions are not allowed
 	if (initializingMacro)
 	{
-		printError(first,L"Nested macro definitions not allowed");
+		printError(first, L"Nested macro definitions not allowed");
 		while (!atEnd())
 		{
 			const Token& token = nextToken();
@@ -419,7 +422,7 @@ bool Parser::checkMacroDefinition()
 	}
 
 	std::vector<Expression> parameters;
-	if (parseExpressionList(parameters,1,-1) == false)
+	if (parseExpressionList(parameters, 1, -1) == false)
 		return false;
 
 	ParserMacro macro;
@@ -439,9 +442,9 @@ bool Parser::checkMacroDefinition()
 		macro.parameters.push_back(name);
 	}
 
-	if(nextToken().type != TokenType::Separator)
+	if (nextToken().type != TokenType::Separator)
 	{
-		printError(first,L"Macro directive not terminated");
+		printError(first, L"Macro directive not terminated");
 		return false;
 	}
 
@@ -470,7 +473,7 @@ bool Parser::checkMacroDefinition()
 	// if we are in a known false block, don't define the macro
 	if (!isInsideTrueBlock())
 		return true;
-	
+
 	// duplicate check
 	if (macros.find(macro.name) != macros.end())
 	{
@@ -487,11 +490,11 @@ bool Parser::checkMacroDefinition()
 
 	// get content
 	TokenizerPosition end = getTokenizer()->getPosition().previous();
-	macro.content = getTokenizer()->getTokens(start,end);
+	macro.content = getTokenizer()->getTokens(start, end);
 
-	if(nextToken().type != TokenType::Separator)
+	if (nextToken().type != TokenType::Separator)
 	{
-		printError(first,L"Endmacro directive not terminated");
+		printError(first, L"Endmacro directive not terminated");
 		return false;
 	}
 
@@ -521,7 +524,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 	{
 		if (peekToken().type == TokenType::Separator)
 		{
-			printError(start,L"Too few macro arguments (%d vs %d)",i,macro.parameters.size());
+			printError(start, L"Too few macro arguments (%d vs %d)", i, macro.parameters.size());
 			return nullptr;
 		}
 
@@ -529,7 +532,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		{
 			if (nextToken().type != TokenType::Comma)
 			{
-				printError(start,L"Macro arguments not comma-separated");
+				printError(start, L"Macro arguments not comma-separated");
 				return nullptr;
 			}
 		}
@@ -538,19 +541,19 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		Expression exp = parseExpression();
 		if (exp.isLoaded() == false)
 		{
-			printError(start,L"Invalid macro argument expression");
+			printError(start, L"Invalid macro argument expression");
 			return nullptr;
 		}
 
 		TokenizerPosition endPos = getTokenizer()->getPosition();
-		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
+		std::vector<Token> tokens = getTokenizer()->getTokens(startPos, endPos);
 
 		// remember any single identifier parameters for the label replacement
 		if (tokens.size() == 1 && tokens[0].type == TokenType::Identifier)
 			identifierParameters.insert(tokens[0].getStringValue());
 
 		// give them as a replacement to new tokenizer
-		macroTokenizer.registerReplacement(macro.parameters[i],tokens);
+		macroTokenizer.registerReplacement(macro.parameters[i], tokens);
 	}
 
 	if (peekToken().type == TokenType::Comma)
@@ -563,13 +566,13 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 			count++;
 		}
 
-		printError(start,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
+		printError(start, L"Too many macro arguments (%d vs %d)", count, macro.parameters.size());
 		return nullptr;
 	}
 
-	if(nextToken().type != TokenType::Separator)
+	if (nextToken().type != TokenType::Separator)
 	{
-		printError(start,L"Macro call not terminated");
+		printError(start, L"Macro call not terminated");
 		return nullptr;
 	}
 
@@ -588,21 +591,21 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 	if (macro.counter == 0)
 	{
 		initializingMacro = true;
-		
+
 		// parse the short lived next command
 		macroTokenizer.init(macro.content);
 		Logger::suppressErrors();
-		std::unique_ptr<CAssemblerCommand> command =  parse(&macroTokenizer,true);
+		std::unique_ptr<CAssemblerCommand> command = parse(&macroTokenizer, true);
 		Logger::unsuppressErrors();
 
 		macro.labels = macroLabels;
 		macroLabels.clear();
-		
+
 		initializingMacro = false;
 	}
 
 	// register labels and replacements
-	for (const std::wstring& label: macro.labels)
+	for (const std::wstring& label : macro.labels)
 	{
 		// check if the label is using the name of a parameter
 		// in that case, don't register a unique replacement
@@ -612,20 +615,19 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		// otherwise make sure the name is unique
 		std::wstring fullName;
 		if (Global.symbolTable.isLocalSymbol(label))
-			fullName = tfm::format(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
+			fullName = tfm::format(L"@@%s_%s_%08X", macro.name, label.substr(2), macro.counter);
 		else if (Global.symbolTable.isStaticSymbol(label))
-			fullName = tfm::format(L"@%s_%s_%08X",macro.name,label.substr(1),macro.counter);
+			fullName = tfm::format(L"@%s_%s_%08X", macro.name, label.substr(1), macro.counter);
 		else
-			fullName = tfm::format(L"%s_%s_%08X",macro.name,label,macro.counter);
+			fullName = tfm::format(L"%s_%s_%08X", macro.name, label, macro.counter);
 
-		macroTokenizer.registerReplacement(label,fullName);
+		macroTokenizer.registerReplacement(label, fullName);
 	}
 
 	macroTokenizer.init(macro.content);
 	macro.counter++;
 
-	return parse(&macroTokenizer,true);
-
+	return parse(&macroTokenizer, true);
 }
 
 std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
@@ -634,22 +636,21 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 
 	const Token& start = peekToken(0);
 
-	if (peekToken(0).type == TokenType::Identifier &&
-		peekToken(1).type == TokenType::Colon)
+	if (peekToken(0).type == TokenType::Identifier && peekToken(1).type == TokenType::Colon)
 	{
 		const std::wstring name = start.getStringValue();
 		eatTokens(2);
-		
+
 		if (initializingMacro)
 			macroLabels.insert(name);
-		
+
 		if (Global.symbolTable.isValidSymbolName(name) == false)
 		{
-			printError(start,L"Invalid label name \"%s\"",name);
+			printError(start, L"Invalid label name \"%s\"", name);
 			return nullptr;
 		}
 
-		return std::make_unique<CAssemblerLabel>(name,start.getOriginalText());
+		return std::make_unique<CAssemblerLabel>(name, start.getOriginalText());
 	}
 
 	return nullptr;
@@ -658,12 +659,12 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 std::unique_ptr<CAssemblerCommand> Parser::handleError()
 {
 	// skip the rest of the statement
-	while (!atEnd() && nextToken().type != TokenType::Separator);
+	while (!atEnd() && nextToken().type != TokenType::Separator)
+		;
 
 	clearError();
 	return std::make_unique<InvalidCommand>();
 }
-
 
 void Parser::updateFileInfo()
 {
@@ -676,7 +677,7 @@ void Parser::updateFileInfo()
 
 	for (size_t i = entries.size(); i > 0; i--)
 	{
-		size_t index = i-1;
+		size_t index = i - 1;
 
 		if (entries[index].virtualFile == false && entries[index].fileNum != -1)
 		{
@@ -688,7 +689,7 @@ void Parser::updateFileInfo()
 				Global.FileInfo.LineNumber = entries[index].previousCommandLine;
 			else
 			{
-				Global.FileInfo.LineNumber = (int)entries[index].tokenizer->peekToken().line;
+				Global.FileInfo.LineNumber = (int) entries[index].tokenizer->peekToken().line;
 				entries[index].previousCommandLine = Global.FileInfo.LineNumber;
 			}
 			return;
@@ -731,25 +732,25 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 		return handleError();
 
 	const Token& token = peekToken();
-	printError(token,L"Parse error '%s'",token.getOriginalText());
+	printError(token, L"Parse error '%s'", token.getOriginalText());
 	return handleError();
 }
 
 void TokenSequenceParser::addEntry(int result, TokenSequence tokens, TokenValueSequence values)
 {
-	Entry entry = { tokens, values, result };
+	Entry entry = {tokens, values, result};
 	entries.push_back(entry);
 }
 
 bool TokenSequenceParser::parse(Parser& parser, int& result)
 {
-	for (Entry& entry: entries)
+	for (Entry& entry : entries)
 	{
 		TokenizerPosition pos = parser.getTokenizer()->getPosition();
 		auto values = entry.values.begin();
 
 		bool valid = true;
-		for (TokenType type: entry.tokens)
+		for (TokenType type : entry.tokens)
 		{
 			// check of token type matches
 			const Token& token = parser.nextToken();
@@ -767,18 +768,19 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 					valid = false;
 					break;
 				}
-				
+
 				values++;
-			} else if (type == TokenType::Integer)
+			}
+			else if (type == TokenType::Integer)
 			{
 				if (values == entry.values.end() || values->intValue != token.intValue)
 				{
 					valid = false;
 					break;
 				}
-				
+
 				values++;
-			} 
+			}
 		}
 
 		if (valid && values == entry.values.end())

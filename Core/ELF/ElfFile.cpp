@@ -12,8 +12,7 @@ static bool stringEqualInsensitive(const std::string& a, const std::string& b)
 	if (a.size() != b.size())
 		return false;
 
-	auto compare = [](char c1, char c2)
-	{
+	auto compare = [](char c1, char c2) {
 		return std::tolower(c1) == std::tolower(c2);
 	};
 
@@ -25,7 +24,7 @@ bool compareSection(ElfSection* a, ElfSection* b)
 	return a->getOffset() < b->getOffset();
 }
 
-ElfSection::ElfSection(Elf32_Shdr header): header(header)
+ElfSection::ElfSection(Elf32_Shdr header) : header(header)
 {
 	owner = nullptr;
 }
@@ -53,7 +52,8 @@ void ElfSection::writeHeader(ByteArray& data, int pos, Endianness endianness)
 // only called for segmentless sections
 void ElfSection::writeData(ByteArray& output)
 {
-	if (header.sh_type == SHT_NULL) return;
+	if (header.sh_type == SHT_NULL)
+		return;
 
 	// nobits sections still get a provisional file address
 	if (header.sh_type == SHT_NOBITS)
@@ -72,7 +72,7 @@ void ElfSection::setOffsetBase(int base)
 	header.sh_offset += base;
 }
 
-ElfSegment::ElfSegment(Elf32_Phdr header, ByteArray& segmentData): header(header)
+ElfSegment::ElfSegment(Elf32_Phdr header, ByteArray& segmentData) : header(header)
 {
 	data = segmentData;
 	paddrSection = nullptr;
@@ -82,21 +82,23 @@ bool ElfSegment::isSectionPartOf(ElfSection* section)
 {
 	int sectionStart = section->getOffset();
 	int sectionSize = section->getType() == SHT_NOBITS ? 0 : section->getSize();
-	int sectionEnd = sectionStart+sectionSize;
+	int sectionEnd = sectionStart + sectionSize;
 
 	int segmentStart = header.p_offset;
-	int segmentEnd = segmentStart+header.p_filesz;
+	int segmentEnd = segmentStart + header.p_filesz;
 
 	// exclusive > in case the size is 0
-	if (sectionStart < (int)header.p_offset || sectionStart > segmentEnd) return false;
+	if (sectionStart < (int) header.p_offset || sectionStart > segmentEnd)
+		return false;
 
 	// does an empty section belong to this or the next segment? hm...
-	if (sectionStart == segmentEnd) return sectionSize == 0;
+	if (sectionStart == segmentEnd)
+		return sectionSize == 0;
 
 	// the start is inside the section and the size is not 0, so the end should be in here too
 	if (sectionEnd > segmentEnd)
 	{
-		Logger::printError(Logger::Error,L"Section partially contained in segment");
+		Logger::printError(Logger::Error, L"Section partially contained in segment");
 		return false;
 	}
 
@@ -130,11 +132,11 @@ void ElfSegment::writeData(ByteArray& output)
 	}
 
 	// align segment to alignment of first section
-	int align = std::max<int>(sections[0]->getAlignment(),16);
+	int align = std::max<int>(sections[0]->getAlignment(), 16);
 	output.alignSize(align);
 
 	header.p_offset = (Elf32_Off) output.size();
-	for (int i = 0; i < (int)sections.size(); i++)
+	for (int i = 0; i < (int) sections.size(); i++)
 	{
 		sections[i]->setOffsetBase(header.p_offset);
 	}
@@ -161,14 +163,13 @@ void ElfSegment::writeHeader(ByteArray& data, int pos, Endianness endianness)
 
 void ElfSegment::splitSections()
 {
-
 }
 
 int ElfSegment::findSection(const std::string& name)
 {
 	for (size_t i = 0; i < sections.size(); i++)
 	{
-		if (stringEqualInsensitive(name,sections[i]->getName()))
+		if (stringEqualInsensitive(name, sections[i]->getName()))
 			return i;
 	}
 
@@ -179,18 +180,19 @@ void ElfSegment::writeToData(size_t offset, void* src, size_t size)
 {
 	for (size_t i = 0; i < size; i++)
 	{
-		data[offset+i] = ((byte*)src)[i];
+		data[offset + i] = ((byte*) src)[i];
 	}
 }
 
 void ElfSegment::sortSections()
 {
-	std::sort(sections.begin(),sections.end(),compareSection);
+	std::sort(sections.begin(), sections.end(), compareSection);
 }
 
 void ElfFile::loadSectionNames()
 {
-	if (fileHeader.e_shstrndx == SHN_UNDEF) return;
+	if (fileHeader.e_shstrndx == SHN_UNDEF)
+		return;
 
 	// check if the string table is actually a string table
 	// sometimes it gives the wrong section id
@@ -198,19 +200,20 @@ void ElfFile::loadSectionNames()
 	size_t strTableSize = sections[fileHeader.e_shstrndx]->getSize();
 	for (size_t i = 0; i < strTableSize; i++)
 	{
-		if (fileData[strTablePos+i] != 0 && fileData[strTablePos+i] < 0x20)
+		if (fileData[strTablePos + i] != 0 && fileData[strTablePos + i] < 0x20)
 			return;
-		if (fileData[strTablePos+i] > 0x7F)
+		if (fileData[strTablePos + i] > 0x7F)
 			return;
 	}
 
 	for (size_t i = 0; i < sections.size(); i++)
 	{
 		ElfSection* section = sections[i];
-		if (section->getType() == SHT_NULL) continue;
+		if (section->getType() == SHT_NULL)
+			continue;
 
 		int strTablePos = sections[fileHeader.e_shstrndx]->getOffset();
-		int offset = strTablePos+section->getNameOffset();
+		int offset = strTablePos + section->getNameOffset();
 
 		char* name = (char*) fileData.data(offset);
 		std::string strName = name;
@@ -227,45 +230,54 @@ void ElfFile::determinePartOrder()
 	size_t firstSegmentStart = fileData.size(), lastSegmentEnd = 0;
 	for (size_t i = 0; i < fileHeader.e_phnum; i++)
 	{
-		size_t pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
-		
+		size_t pos = fileHeader.e_phoff + i * fileHeader.e_phentsize;
+
 		Elf32_Phdr segmentHeader;
 		loadProgramHeader(segmentHeader, fileData, pos);
 		size_t end = segmentHeader.p_offset + segmentHeader.p_filesz;
 
-		if (segmentHeader.p_offset < firstSegmentStart) firstSegmentStart = segmentHeader.p_offset;
-		if (lastSegmentEnd < end) lastSegmentEnd = end;
+		if (segmentHeader.p_offset < firstSegmentStart)
+			firstSegmentStart = segmentHeader.p_offset;
+		if (lastSegmentEnd < end)
+			lastSegmentEnd = end;
 	}
 
 	// segmentless sections
 	size_t firstSectionStart = fileData.size(), lastSectionEnd = 0;
 	for (size_t i = 0; i < segmentlessSections.size(); i++)
 	{
-		if (segmentlessSections[i]->getType() == SHT_NULL) continue;
+		if (segmentlessSections[i]->getType() == SHT_NULL)
+			continue;
 
 		size_t start = segmentlessSections[i]->getOffset();
-		size_t end = start+segmentlessSections[i]->getSize();
+		size_t end = start + segmentlessSections[i]->getSize();
 
 		if (start == 0 && end == 0)
 			continue;
-		if (start < firstSectionStart) firstSectionStart = start;
-		if (lastSectionEnd < end) lastSectionEnd = end;
+		if (start < firstSectionStart)
+			firstSectionStart = start;
+		if (lastSectionEnd < end)
+			lastSectionEnd = end;
 	}
 
-	struct PartsSort {
+	struct PartsSort
+	{
 		size_t offset;
 		ElfPart type;
-		bool operator<(const PartsSort& other) const { return offset < other.offset; };
+		bool operator<(const PartsSort& other) const
+		{
+			return offset < other.offset;
+		};
 	};
 
 	PartsSort temp[4] = {
-		{ segmentTable,				ELFPART_SEGMENTTABLE },
-		{ sectionTable,				ELFPART_SECTIONTABLE },
-		{ firstSegmentStart,		ELFPART_SEGMENTS },
-		{ firstSectionStart,		ELFPART_SEGMENTLESSSECTIONS },
+		{segmentTable, ELFPART_SEGMENTTABLE},
+		{sectionTable, ELFPART_SECTIONTABLE},
+		{firstSegmentStart, ELFPART_SEGMENTS},
+		{firstSectionStart, ELFPART_SEGMENTLESSSECTIONS},
 	};
 
-	std::sort(&temp[0],&temp[4]);
+	std::sort(&temp[0], &temp[4]);
 
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -277,7 +289,7 @@ int ElfFile::findSegmentlessSection(const std::string& name)
 {
 	for (size_t i = 0; i < segmentlessSections.size(); i++)
 	{
-		if (stringEqualInsensitive(name,segmentlessSections[i]->getName()))
+		if (stringEqualInsensitive(name, segmentlessSections[i]->getName()))
 			return i;
 	}
 
@@ -324,29 +336,29 @@ void ElfFile::writeHeader(ByteArray& data, int pos, Endianness endianness)
 void ElfFile::loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos)
 {
 	Endianness endianness = getEndianness();
-	header.p_type   = data.getDoubleWord(pos + 0x00, endianness);
+	header.p_type = data.getDoubleWord(pos + 0x00, endianness);
 	header.p_offset = data.getDoubleWord(pos + 0x04, endianness);
-	header.p_vaddr  = data.getDoubleWord(pos + 0x08, endianness);
-	header.p_paddr  = data.getDoubleWord(pos + 0x0C, endianness);
+	header.p_vaddr = data.getDoubleWord(pos + 0x08, endianness);
+	header.p_paddr = data.getDoubleWord(pos + 0x0C, endianness);
 	header.p_filesz = data.getDoubleWord(pos + 0x10, endianness);
-	header.p_memsz  = data.getDoubleWord(pos + 0x14, endianness);
-	header.p_flags  = data.getDoubleWord(pos + 0x18, endianness);
-	header.p_align  = data.getDoubleWord(pos + 0x1C, endianness);
+	header.p_memsz = data.getDoubleWord(pos + 0x14, endianness);
+	header.p_flags = data.getDoubleWord(pos + 0x18, endianness);
+	header.p_align = data.getDoubleWord(pos + 0x1C, endianness);
 }
 
 void ElfFile::loadSectionHeader(Elf32_Shdr& header, ByteArray& data, int pos)
 {
 	Endianness endianness = getEndianness();
-	header.sh_name      = data.getDoubleWord(pos + 0x00, endianness);
-	header.sh_type      = data.getDoubleWord(pos + 0x04, endianness);
-	header.sh_flags     = data.getDoubleWord(pos + 0x08, endianness);
-	header.sh_addr      = data.getDoubleWord(pos + 0x0C, endianness);
-	header.sh_offset    = data.getDoubleWord(pos + 0x10, endianness);
-	header.sh_size      = data.getDoubleWord(pos + 0x14, endianness);
-	header.sh_link      = data.getDoubleWord(pos + 0x18, endianness);
-	header.sh_info      = data.getDoubleWord(pos + 0x1C, endianness);
+	header.sh_name = data.getDoubleWord(pos + 0x00, endianness);
+	header.sh_type = data.getDoubleWord(pos + 0x04, endianness);
+	header.sh_flags = data.getDoubleWord(pos + 0x08, endianness);
+	header.sh_addr = data.getDoubleWord(pos + 0x0C, endianness);
+	header.sh_offset = data.getDoubleWord(pos + 0x10, endianness);
+	header.sh_size = data.getDoubleWord(pos + 0x14, endianness);
+	header.sh_link = data.getDoubleWord(pos + 0x18, endianness);
+	header.sh_info = data.getDoubleWord(pos + 0x1C, endianness);
 	header.sh_addralign = data.getDoubleWord(pos + 0x20, endianness);
-	header.sh_entsize   = data.getDoubleWord(pos + 0x24, endianness);
+	header.sh_entsize = data.getDoubleWord(pos + 0x24, endianness);
 }
 
 bool ElfFile::load(const std::wstring& fileName, bool sort)
@@ -354,7 +366,7 @@ bool ElfFile::load(const std::wstring& fileName, bool sort)
 	ByteArray data = ByteArray::fromFile(fileName);
 	if (data.size() == 0)
 		return false;
-	return load(data,sort);
+	return load(data, sort);
 }
 
 bool ElfFile::load(ByteArray& data, bool sort)
@@ -368,20 +380,20 @@ bool ElfFile::load(ByteArray& data, bool sort)
 	// load segments
 	for (size_t i = 0; i < fileHeader.e_phnum; i++)
 	{
-		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
-		
+		int pos = fileHeader.e_phoff + i * fileHeader.e_phentsize;
+
 		Elf32_Phdr sectionHeader;
 		loadProgramHeader(sectionHeader, fileData, pos);
 
-		ByteArray segmentData = fileData.mid(sectionHeader.p_offset,sectionHeader.p_filesz);
-		ElfSegment* segment = new ElfSegment(sectionHeader,segmentData);
+		ByteArray segmentData = fileData.mid(sectionHeader.p_offset, sectionHeader.p_filesz);
+		ElfSegment* segment = new ElfSegment(sectionHeader, segmentData);
 		segments.push_back(segment);
 	}
-	
+
 	// load sections and assign them to segments
 	for (int i = 0; i < fileHeader.e_shnum; i++)
 	{
-		int pos = fileHeader.e_shoff+i*fileHeader.e_shentsize;
+		int pos = fileHeader.e_shoff + i * fileHeader.e_shentsize;
 
 		Elf32_Shdr sectionHeader;
 		loadSectionHeader(sectionHeader, fileData, pos);
@@ -391,7 +403,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 
 		// check if the section belongs to a segment
 		ElfSegment* owner = nullptr;
-		for (int k = 0; k < (int)segments.size(); k++)
+		for (int k = 0; k < (int) segments.size(); k++)
 		{
 			if (segments[k]->isSectionPartOf(section))
 			{
@@ -403,10 +415,12 @@ bool ElfFile::load(ByteArray& data, bool sort)
 		if (owner != nullptr)
 		{
 			owner->addSection(section);
-		} else {
+		}
+		else
+		{
 			if (section->getType() != SHT_NOBITS && section->getType() != SHT_NULL)
 			{
-				ByteArray data = fileData.mid(section->getOffset(),section->getSize());
+				ByteArray data = fileData.mid(section->getOffset(), section->getSize());
 				section->setData(data);
 			}
 
@@ -426,15 +440,15 @@ bool ElfFile::load(ByteArray& data, bool sort)
 			segmentlessSections.push_back(section);
 		}
 	}
-	
+
 	determinePartOrder();
 	loadSectionNames();
 
 	if (sort)
 	{
-		std::sort(segmentlessSections.begin(),segmentlessSections.end(),compareSection);
+		std::sort(segmentlessSections.begin(), segmentlessSections.end(), compareSection);
 
-		for (int i = 0; i < (int)segments.size(); i++)
+		for (int i = 0; i < (int) segments.size(); i++)
 		{
 			segments[i]->sortSections();
 		}
@@ -443,7 +457,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 	return true;
 }
 
-void ElfFile::save(const std::wstring&fileName)
+void ElfFile::save(const std::wstring& fileName)
 {
 	fileData.clear();
 
@@ -457,12 +471,12 @@ void ElfFile::save(const std::wstring&fileName)
 		case ELFPART_SEGMENTTABLE:
 			fileData.alignSize(4);
 			fileHeader.e_phoff = (Elf32_Off) fileData.size();
-			fileData.reserveBytes(segments.size()*fileHeader.e_phentsize);
+			fileData.reserveBytes(segments.size() * fileHeader.e_phentsize);
 			break;
 		case ELFPART_SECTIONTABLE:
 			fileData.alignSize(4);
 			fileHeader.e_shoff = (Elf32_Off) fileData.size();
-			fileData.reserveBytes(sections.size()*fileHeader.e_shentsize);
+			fileData.reserveBytes(sections.size() * fileHeader.e_shentsize);
 			break;
 		case ELFPART_SEGMENTS:
 			for (size_t i = 0; i < segments.size(); i++)
@@ -484,13 +498,13 @@ void ElfFile::save(const std::wstring&fileName)
 	writeHeader(fileData, 0, endianness);
 	for (size_t i = 0; i < segments.size(); i++)
 	{
-		int pos = fileHeader.e_phoff+i*fileHeader.e_phentsize;
+		int pos = fileHeader.e_phoff + i * fileHeader.e_phentsize;
 		segments[i]->writeHeader(fileData, pos, endianness);
 	}
-	
+
 	for (size_t i = 0; i < sections.size(); i++)
 	{
-		int pos = fileHeader.e_shoff+i*fileHeader.e_shentsize;
+		int pos = fileHeader.e_shoff + i * fileHeader.e_shentsize;
 		sections[i]->writeHeader(fileData, pos, endianness);
 	}
 
@@ -502,7 +516,7 @@ int ElfFile::getSymbolCount()
 	if (symTab == nullptr)
 		return 0;
 
-	return symTab->getSize()/sizeof(Elf32_Sym);
+	return symTab->getSize() / sizeof(Elf32_Sym);
 }
 
 bool ElfFile::getSymbol(Elf32_Sym& symbol, size_t index)
@@ -510,13 +524,13 @@ bool ElfFile::getSymbol(Elf32_Sym& symbol, size_t index)
 	if (symTab == nullptr)
 		return false;
 
-	ByteArray &data = symTab->getData();
-	int pos = index*sizeof(Elf32_Sym);
+	ByteArray& data = symTab->getData();
+	int pos = index * sizeof(Elf32_Sym);
 	Endianness endianness = getEndianness();
-	symbol.st_name  = data.getDoubleWord(pos + 0x00, endianness);
+	symbol.st_name = data.getDoubleWord(pos + 0x00, endianness);
 	symbol.st_value = data.getDoubleWord(pos + 0x04, endianness);
-	symbol.st_size  = data.getDoubleWord(pos + 0x08, endianness);
-	symbol.st_info  = data[pos + 0x0C];
+	symbol.st_size = data.getDoubleWord(pos + 0x08, endianness);
+	symbol.st_info = data[pos + 0x0C];
 	symbol.st_other = data[pos + 0x0D];
 	symbol.st_shndx = data.getWord(pos + 0x0E, endianness);
 
@@ -527,6 +541,6 @@ const char* ElfFile::getStrTableString(size_t pos)
 {
 	if (strTab == nullptr)
 		return nullptr;
-	
+
 	return (const char*) &strTab->getData()[pos];
 }

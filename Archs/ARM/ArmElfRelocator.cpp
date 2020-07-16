@@ -11,7 +11,7 @@
 
 inline int signExtend(int value, int bitsLength)
 {
-	return (value << (32-bitsLength)) >> (32-bitsLength);
+	return (value << (32 - bitsLength)) >> (32 - bitsLength);
 }
 
 bool ArmElfRelocator::isDummyRelocationType(int type) const
@@ -33,7 +33,8 @@ int ArmElfRelocator::expectedMachine() const
 	A = addend
 */
 
-bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions,
+									 std::vector<std::wstring>& errors)
 {
 	int t = (data.targetSymbolType == STT_FUNC && data.targetSymbolInfo != 0) ? 1 : 0;
 	int p = (int) data.opcodeOffset;
@@ -42,114 +43,118 @@ bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::
 	uint32_t opcode = data.opcode;
 	switch (type)
 	{
-	case R_ARM_ABS32:		// (S + A) | T
+	case R_ARM_ABS32: // (S + A) | T
 	case R_ARM_TARGET1:
 		opcode = (int) (opcode + data.relocationBase) | t;
 		break;
-	case R_ARM_THM_CALL:	// ((S + A) | T) - P
+	case R_ARM_THM_CALL: // ((S + A) | T) - P
+	{
+		unsigned short first = opcode & 0xFFFF;
+		unsigned short second = (opcode >> 16) & 0xFFFF;
+		int opField = ((first & 0x7FF) << 11) | (second & 0x7FF);
+		int a = signExtend(opField << 1, 23);
+		int value = (s + a) - p;
+
+		first &= ~0x7FF;
+		second &= ~0x7FF;
+
+		if (t == 1)
 		{
-			unsigned short first = opcode & 0xFFFF;
-			unsigned short second = (opcode >> 16) & 0xFFFF;
-			int opField = ((first & 0x7FF) << 11) | (second & 0x7FF);
-			int a = signExtend(opField << 1,23);
-			int value = (s+a) - p;
-
-			first &= ~0x7FF;
-			second &= ~0x7FF;
-
-			if (t == 1)
+			if (data.relocationBase % 2)
 			{
-				if (data.relocationBase % 2)
-				{
-					errors.emplace_back(L"Branch target must be halfword aligned");
-					return false;
-				}
-			} else {
-				if (arm9 == false)
-				{
-					errors.emplace_back(L"Cannot call ARM function from THUMB code without stub");
-					return false;
-				}
-
-				if (data.relocationBase % 4)
-				{
-					errors.emplace_back(L"Branch target must be word aligned");
-					return false;
-				}
-				
-				second = 0xE800;
+				errors.emplace_back(L"Branch target must be halfword aligned");
+				return false;
 			}
-
-			if (abs(value) >= 0x400000)
+		}
+		else
+		{
+			if (arm9 == false)
 			{
-				errors.emplace_back(tfm::format(L"Branch target %08X out of range",data.relocationBase));
+				errors.emplace_back(L"Cannot call ARM function from THUMB code without stub");
 				return false;
 			}
 
-			value >>= 1;
-			first |= (value >> 11) & 0x7FF;
-			second |= value & 0x7FF;
-			opcode = first | (second << 16);
-		}
-		break;
-	case R_ARM_CALL:		// ((S + A) | T) – P
-	case R_ARM_JUMP24:		// ((S + A) | T) – P
-		{
-			int condField = (opcode >> 28) & 0xF;
-			int opField = (opcode & 0xFFFFFF) << 2;
-			opcode &= ~0xFFFFFF;
-
-			int a = signExtend(opField,26);
-			int value = (s+a) - p;
-
-			if (t == 1)
+			if (data.relocationBase % 4)
 			{
-				if (data.relocationBase % 2)
-				{
-					errors.emplace_back(L"Branch target must be halfword aligned");
-					return false;
-				}
-
-				if (type == R_ARM_JUMP24)
-				{
-					errors.emplace_back(L"Cannot jump from ARM to THUMB without link");
-					return false;
-				}
-
-				if (arm9 == false)
-				{
-					errors.emplace_back(L"Cannot call THUMB function from ARM code without stub");
-					return false;
-				}
-
-				if (condField != 0xE)
-				{
-					errors.emplace_back(L"Cannot convert conditional bl into blx");
-					return false;
-				}
-
-				opcode = 0xFA000000;
-				if (value & 2)
-					opcode |= (1 << 24);
-			} else {
-				if (data.relocationBase % 4)
-				{
-					errors.emplace_back(L"Branch target must be word aligned");
-					return false;
-				}
-			}
-			
-			if (abs(value) >= 0x2000000)
-			{
-				errors.emplace_back(tfm::format(L"Branch target %08X out of range",data.relocationBase));
+				errors.emplace_back(L"Branch target must be word aligned");
 				return false;
 			}
 
-			opcode |= (value >> 2) & 0xFFFFFF;
+			second = 0xE800;
 		}
-		break;
+
+		if (abs(value) >= 0x400000)
+		{
+			errors.emplace_back(tfm::format(L"Branch target %08X out of range", data.relocationBase));
+			return false;
+		}
+
+		value >>= 1;
+		first |= (value >> 11) & 0x7FF;
+		second |= value & 0x7FF;
+		opcode = first | (second << 16);
+	}
+	break;
+	case R_ARM_CALL: // ((S + A) | T) – P
+	case R_ARM_JUMP24: // ((S + A) | T) – P
+	{
+		int condField = (opcode >> 28) & 0xF;
+		int opField = (opcode & 0xFFFFFF) << 2;
+		opcode &= ~0xFFFFFF;
+
+		int a = signExtend(opField, 26);
+		int value = (s + a) - p;
+
+		if (t == 1)
+		{
+			if (data.relocationBase % 2)
+			{
+				errors.emplace_back(L"Branch target must be halfword aligned");
+				return false;
+			}
+
+			if (type == R_ARM_JUMP24)
+			{
+				errors.emplace_back(L"Cannot jump from ARM to THUMB without link");
+				return false;
+			}
+
+			if (arm9 == false)
+			{
+				errors.emplace_back(L"Cannot call THUMB function from ARM code without stub");
+				return false;
+			}
+
+			if (condField != 0xE)
+			{
+				errors.emplace_back(L"Cannot convert conditional bl into blx");
+				return false;
+			}
+
+			opcode = 0xFA000000;
+			if (value & 2)
+				opcode |= (1 << 24);
+		}
+		else
+		{
+			if (data.relocationBase % 4)
+			{
+				errors.emplace_back(L"Branch target must be word aligned");
+				return false;
+			}
+		}
+
+		if (abs(value) >= 0x2000000)
+		{
+			errors.emplace_back(tfm::format(L"Branch target %08X out of range", data.relocationBase));
+			return false;
+		}
+
+		opcode |= (value >> 2) & 0xFFFFFF;
+	}
+	break;
 	default:
-		errors.emplace_back(tfm::format(L"Unknown ARM relocation type %d",type));
+		errors.emplace_back(tfm::format(L"Unknown ARM relocation type %d", type));
 		return false;
 	}
 
@@ -199,8 +204,7 @@ const wchar_t* ctorTemplate =
 	L".endif\n"
 	L".pool\n"
 	L"%ctorTable%:\n"
-	L".word %ctorContent%"
-;
+	L".word %ctorContent%";
 
 std::unique_ptr<CAssemblerCommand> ArmElfRelocator::generateCtorStub(std::vector<ElfRelocatorCtor>& ctors)
 {
@@ -217,19 +221,21 @@ std::unique_ptr<CAssemblerCommand> ArmElfRelocator::generateCtorStub(std::vector
 		{
 			if (i != 0)
 				table += ',';
-			table += tfm::format(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+			table += tfm::format(L"%s,%s+0x%08X", ctors[i].symbolName, ctors[i].symbolName, ctors[i].size);
 		}
 
-		return parser.parseTemplate(ctorTemplate,{
-			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorTableSize%",	tfm::format(L"%d",ctors.size()*8) },
-			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
-			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
-			{ L"%stubName%",		Global.symbolTable.getUniqueLabelName() },
-			{ L"%simpleMode%",		simpleMode ? L"1" : L"0" },
-			{ L"%ctorContent%",		table },
-		});
-	} else {
+		return parser.parseTemplate(ctorTemplate, {
+													  {L"%ctorTable%", Global.symbolTable.getUniqueLabelName()},
+													  {L"%ctorTableSize%", tfm::format(L"%d", ctors.size() * 8)},
+													  {L"%outerLoopLabel%", Global.symbolTable.getUniqueLabelName()},
+													  {L"%innerLoopLabel%", Global.symbolTable.getUniqueLabelName()},
+													  {L"%stubName%", Global.symbolTable.getUniqueLabelName()},
+													  {L"%simpleMode%", simpleMode ? L"1" : L"0"},
+													  {L"%ctorContent%", table},
+												  });
+	}
+	else
+	{
 		return parser.parseTemplate(L"bx r14");
 	}
 }

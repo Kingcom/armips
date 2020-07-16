@@ -19,7 +19,7 @@ void SymbolData::clear()
 	files.clear();
 	currentModule = 0;
 	currentFunction = -1;
-	
+
 	SymDataModule defaultModule;
 	defaultModule.file = nullptr;
 	modules.push_back(defaultModule);
@@ -50,7 +50,7 @@ void SymbolData::writeNocashSym()
 		for (size_t i = 0; i < module.symbols.size(); i++)
 		{
 			SymDataSymbol& sym = module.symbols[i];
-			
+
 			size_t size = 0;
 			for (size_t f = 0; f < module.functions.size(); f++)
 			{
@@ -65,7 +65,7 @@ void SymbolData::writeNocashSym()
 			entry.address = sym.address;
 
 			if (size != 0 && nocashSymVersion >= 2)
-				entry.text = tfm::format(L"%s,%08X",sym.name,size);
+				entry.text = tfm::format(L"%s,%08X", sym.name, size);
 			else
 				entry.text = sym.name;
 
@@ -75,7 +75,7 @@ void SymbolData::writeNocashSym()
 			entries.push_back(entry);
 		}
 
-		for (const SymDataData& data: module.data)
+		for (const SymDataData& data : module.data)
 		{
 			NocashSymEntry entry;
 			entry.address = data.address;
@@ -83,19 +83,19 @@ void SymbolData::writeNocashSym()
 			switch (data.type)
 			{
 			case Data8:
-				entry.text = tfm::format(L".byt:%04X",data.size);
+				entry.text = tfm::format(L".byt:%04X", data.size);
 				break;
 			case Data16:
-				entry.text = tfm::format(L".wrd:%04X",data.size);
+				entry.text = tfm::format(L".wrd:%04X", data.size);
 				break;
 			case Data32:
-				entry.text = tfm::format(L".dbl:%04X",data.size);
+				entry.text = tfm::format(L".dbl:%04X", data.size);
 				break;
 			case Data64:
-				entry.text = tfm::format(L".dbl:%04X",data.size);
+				entry.text = tfm::format(L".dbl:%04X", data.size);
 				break;
 			case DataAscii:
-				entry.text = tfm::format(L".asc:%04X",data.size);
+				entry.text = tfm::format(L".asc:%04X", data.size);
 				break;
 			}
 
@@ -103,19 +103,19 @@ void SymbolData::writeNocashSym()
 		}
 	}
 
-	std::sort(entries.begin(),entries.end());
-	
+	std::sort(entries.begin(), entries.end());
+
 	TextFile file;
-	if (file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII) == false)
+	if (file.open(nocashSymFileName, TextFile::Write, TextFile::ASCII) == false)
 	{
-		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName());
+		Logger::printError(Logger::Error, L"Could not open sym file %s.", file.getFileName());
 		return;
 	}
 	file.writeLine(L"00000000 0");
 
 	for (size_t i = 0; i < entries.size(); i++)
 	{
-		file.writeFormat(L"%08X %s\n",entries[i].address,entries[i].text);
+		file.writeFormat(L"%08X %s\n", entries[i].address, entries[i].text);
 	}
 
 	file.write("\x1A");
@@ -131,12 +131,12 @@ void SymbolData::addLabel(int64_t memoryAddress, const std::wstring& name)
 {
 	if (!enabled)
 		return;
-	
+
 	SymDataSymbol sym;
 	sym.address = memoryAddress;
 	sym.name = name;
 
-	for (SymDataSymbol& symbol: modules[currentModule].symbols)
+	for (SymDataSymbol& symbol : modules[currentModule].symbols)
 	{
 		if (symbol.address == sym.address && symbol.name == sym.name)
 			return;
@@ -166,7 +166,7 @@ size_t SymbolData::addFileName(const std::wstring& fileName)
 	}
 
 	files.push_back(fileName);
-	return files.size()-1;
+	return files.size() - 1;
 }
 
 void SymbolData::startModule(AssemblerFile* file)
@@ -183,7 +183,7 @@ void SymbolData::startModule(AssemblerFile* file)
 	SymDataModule module;
 	module.file = file;
 	modules.push_back(module);
-	currentModule = modules.size()-1;
+	currentModule = modules.size() - 1;
 }
 
 void SymbolData::endModule(AssemblerFile* file)
@@ -193,13 +193,13 @@ void SymbolData::endModule(AssemblerFile* file)
 
 	if (currentModule == 0)
 	{
-		Logger::printError(Logger::Error,L"No module opened");
+		Logger::printError(Logger::Error, L"No module opened");
 		return;
 	}
 
 	if (currentFunction != -1)
 	{
-		Logger::printError(Logger::Error,L"Module closed before function end");
+		Logger::printError(Logger::Error, L"Module closed before function end");
 		currentFunction = -1;
 	}
 
@@ -225,11 +225,11 @@ void SymbolData::endFunction(int64_t address)
 {
 	if (currentFunction == -1)
 	{
-		Logger::printError(Logger::Error,L"Not inside a function");
+		Logger::printError(Logger::Error, L"Not inside a function");
 		return;
 	}
 
 	SymDataFunction& func = modules[currentModule].functions[currentFunction];
-	func.size = (size_t) (address-func.address);
+	func.size = (size_t)(address - func.address);
 	currentFunction = -1;
 }

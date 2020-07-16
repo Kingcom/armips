@@ -9,13 +9,13 @@ class Label;
 struct ExpressionValue;
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, int64_t& dest,
-	const std::wstring& funcName, bool optional);
+						 const std::wstring& funcName, bool optional);
 
 bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t index, const std::wstring*& dest,
-	const std::wstring& funcName, bool optional);
+						 const std::wstring& funcName, bool optional);
 
 using ExpressionFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
-using ExpressionLabelFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>> &);
+using ExpressionLabelFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>>&);
 
 enum class ExpFuncSafety
 {
@@ -43,9 +43,8 @@ struct ExpressionLabelFunctionEntry
 	ExpFuncSafety safety;
 };
 
-
-using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;
-using ExpressionLabelFunctionMap =  std::map<std::wstring, const ExpressionLabelFunctionEntry>;
+using ExpressionFunctionMap = std::map<std::wstring, const ExpressionFunctionEntry>;
+using ExpressionLabelFunctionMap = std::map<std::wstring, const ExpressionLabelFunctionEntry>;
 
 extern const ExpressionFunctionMap expressionFunctions;
 extern const ExpressionLabelFunctionMap expressionLabelFunctions;

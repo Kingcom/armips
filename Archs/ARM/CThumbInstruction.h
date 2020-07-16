@@ -4,7 +4,8 @@
 #include "Archs/ARM/ThumbOpcodes.h"
 #include "Core/Expression.h"
 
-struct ThumbOpcodeVariables {
+struct ThumbOpcodeVariables
+{
 	ArmRegisterValue rd;
 	ArmRegisterValue rs;
 	ArmRegisterValue rn;
@@ -15,19 +16,23 @@ struct ThumbOpcodeVariables {
 	int OriginalImmediate;
 	int rlist;
 	char RlistStr[32];
-} ;
+};
 
-class CThumbInstruction: public ArmOpcodeCommand
+class CThumbInstruction : public ArmOpcodeCommand
 {
 public:
 	CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars);
-//	~CThumbInstruction();
+	//	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
 	virtual bool Validate();
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
-	size_t GetSize() { return OpcodeSize; };
+	size_t GetSize()
+	{
+		return OpcodeSize;
+	};
 	virtual void setPoolAddress(int64_t address);
+
 private:
 	void FormatInstruction(const char* encoding, char* dest) const;
 	void WriteInstruction(unsigned short encoding) const;

@@ -35,7 +35,7 @@ bool CDirectiveArea::Validate()
 
 	if (sizeExpression.evaluateInteger(areaSize) == false)
 	{
-		Logger::queueError(Logger::Error,L"Invalid size expression");
+		Logger::queueError(Logger::Error, L"Invalid size expression");
 		return false;
 	}
 
@@ -49,14 +49,14 @@ bool CDirectiveArea::Validate()
 	{
 		if (fillExpression.evaluateInteger(fillValue) == false)
 		{
-			Logger::queueError(Logger::Error,L"Invalid fill expression");
+			Logger::queueError(Logger::Error, L"Invalid fill expression");
 			return false;
 		}
 	}
 
 	content->applyFileInfo();
 	bool result = content->Validate();
-	contentSize = g_fileManager->getVirtualAddress()-position;
+	contentSize = g_fileManager->getVirtualAddress() - position;
 
 	// restore info of this command
 	applyFileInfo();
@@ -67,7 +67,7 @@ bool CDirectiveArea::Validate()
 	}
 
 	if (fillExpression.isLoaded())
-		g_fileManager->advanceMemory(areaSize-contentSize);
+		g_fileManager->advanceMemory(areaSize - contentSize);
 
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
 		result = true;
@@ -88,13 +88,13 @@ void CDirectiveArea::Encode() const
 	if (fillExpression.isLoaded())
 	{
 		unsigned char buffer[64];
-		memset(buffer,fillValue,64);
-		
-		size_t writeSize = areaSize-contentSize;
+		memset(buffer, fillValue, 64);
+
+		size_t writeSize = areaSize - contentSize;
 		while (writeSize > 0)
 		{
-			size_t part = std::min<size_t>(64,writeSize);
-			g_fileManager->write(buffer,part);
+			size_t part = std::min<size_t>(64, writeSize);
+			g_fileManager->write(buffer, part);
 			writeSize -= part;
 		}
 	}
@@ -102,17 +102,19 @@ void CDirectiveArea::Encode() const
 
 void CDirectiveArea::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(position,tfm::format(L".area 0x%08X",areaSize));
+	tempData.writeLine(position, tfm::format(L".area 0x%08X", areaSize));
 	content->applyFileInfo();
 	content->writeTempData(tempData);
 
 	if (fillExpression.isLoaded())
 	{
-		std::wstring fillString = tfm::format(L".fill 0x%08X,0x%02X",areaSize-contentSize,fillValue);
-		tempData.writeLine(position+contentSize,fillString);
-		tempData.writeLine(position+areaSize,L".endarea");
-	} else {
-		tempData.writeLine(position+contentSize,L".endarea");
+		std::wstring fillString = tfm::format(L".fill 0x%08X,0x%02X", areaSize - contentSize, fillValue);
+		tempData.writeLine(position + contentSize, fillString);
+		tempData.writeLine(position + areaSize, L".endarea");
+	}
+	else
+	{
+		tempData.writeLine(position + contentSize, L".endarea");
 	}
 }
 
@@ -121,5 +123,5 @@ void CDirectiveArea::writeSymData(SymbolData& symData) const
 	content->writeSymData(symData);
 
 	if (fillExpression.isLoaded())
-		symData.addData(position+contentSize,areaSize-contentSize,SymbolData::Data8);
+		symData.addData(position + contentSize, areaSize - contentSize, SymbolData::Data8);
 }

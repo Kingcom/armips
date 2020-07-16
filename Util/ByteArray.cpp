@@ -21,7 +21,7 @@ ByteArray::ByteArray(byte* data, size_t size)
 {
 	data_ = nullptr;
 	size_ = allocatedSize_ = 0;
-	append(data,size);
+	append(data, size);
 }
 
 ByteArray::ByteArray(ByteArray&& other)
@@ -60,15 +60,18 @@ ByteArray& ByteArray::operator=(ByteArray&& other)
 
 void ByteArray::grow(size_t neededSize)
 {
-	if (neededSize < allocatedSize_) return;
+	if (neededSize < allocatedSize_)
+		return;
 
 	// align to next 0.5kb... it's a start
-	allocatedSize_ = ((neededSize+511)/512)*512;
+	allocatedSize_ = ((neededSize + 511) / 512) * 512;
 	if (data_ == nullptr)
 	{
 		data_ = (byte*) malloc(allocatedSize_);
-	} else {
-		data_ = (byte*) realloc(data_,allocatedSize_);
+	}
+	else
+	{
+		data_ = (byte*) realloc(data_, allocatedSize_);
 	}
 }
 
@@ -76,8 +79,8 @@ size_t ByteArray::append(const ByteArray& other)
 {
 	size_t oldSize = size();
 	size_t otherSize = other.size();
-	grow(size()+otherSize);
-	memcpy(&data_[size_],other.data(),otherSize);
+	grow(size() + otherSize);
+	memcpy(&data_[size_], other.data(), otherSize);
 	size_ += otherSize;
 	return oldSize;
 }
@@ -85,8 +88,8 @@ size_t ByteArray::append(const ByteArray& other)
 size_t ByteArray::append(void* data, size_t size)
 {
 	size_t oldSize = this->size();
-	grow(this->size()+size);
-	memcpy(&data_[size_],data,size);
+	grow(this->size() + size);
+	memcpy(&data_[size_], data, size);
 	this->size_ += size;
 	return oldSize;
 }
@@ -95,20 +98,21 @@ void ByteArray::replaceBytes(size_t pos, byte* data, size_t size)
 {
 	for (size_t i = 0; i < size; i++)
 	{
-		replaceByte(pos+i,data[i]);
+		replaceByte(pos + i, data[i]);
 	}
 }
 
 void ByteArray::reserveBytes(size_t count, byte value)
 {
-	grow(this->size()+count);
-	memset(&data_[size_],value,count);
+	grow(this->size() + count);
+	memset(&data_[size_], value, count);
 	size_ += count;
 }
 
 void ByteArray::alignSize(size_t alignment)
 {
-	if (alignment <= 0) return;
+	if (alignment <= 0)
+		return;
 
 	while (size_ % alignment)
 	{
@@ -127,26 +131,26 @@ ByteArray ByteArray::mid(size_t start, ssize_t length)
 	ByteArray ret;
 
 	if (length < 0)
-		length = size_-start;
+		length = size_ - start;
 
 	if (start >= size_)
 		return ret;
 
 	ret.grow(length);
 	ret.size_ = length;
-	memcpy(ret.data_,&data_[start],length);
+	memcpy(ret.data_, &data_[start], length);
 	return ret;
 }
 
 ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t size)
 {
 	ByteArray ret;
-	
-	FILE* input = openFile(fileName,OpenFileMode::ReadBinary);
+
+	FILE* input = openFile(fileName, OpenFileMode::ReadBinary);
 	if (input == nullptr)
 		return ret;
 
-	fseek(input,0,SEEK_END);
+	fseek(input, 0, SEEK_END);
 	long fileSize = ftell(input);
 
 	if (start >= fileSize)
@@ -155,13 +159,13 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t s
 		return ret;
 	}
 
-	if (size == 0 || start+(long)size > fileSize)
-		size = fileSize-start;
+	if (size == 0 || start + (long) size > fileSize)
+		size = fileSize - start;
 
-	fseek(input,start,SEEK_SET);
+	fseek(input, start, SEEK_SET);
 
 	ret.grow(size);
-	ret.size_ = fread(ret.data(),1,size,input);
+	ret.size_ = fread(ret.data(), 1, size, input);
 	fclose(input);
 
 	return ret;
@@ -169,9 +173,10 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t s
 
 bool ByteArray::toFile(const std::wstring& fileName)
 {
-	FILE* output = openFile(fileName,OpenFileMode::WriteBinary);
-	if (output == nullptr) return false;
-	size_t length = fwrite(data_,1,size_,output);
+	FILE* output = openFile(fileName, OpenFileMode::WriteBinary);
+	if (output == nullptr)
+		return false;
+	size_t length = fwrite(data_, 1, size_, output);
 	fclose(output);
 	return length == size_;
 }

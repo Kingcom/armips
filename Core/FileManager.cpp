@@ -6,9 +6,9 @@
 
 inline uint64_t swapEndianness64(uint64_t value)
 {
-	return ((value & 0xFF) << 56) | ((value & 0xFF00) << 40) | ((value & 0xFF0000) << 24) | ((value & 0xFF000000) << 8) |
-	((value & 0xFF00000000) >> 8) | ((value & 0xFF0000000000) >> 24) |
-	((value & 0xFF000000000000) >> 40) | ((value & 0xFF00000000000000) >> 56);
+	return ((value & 0xFF) << 56) | ((value & 0xFF00) << 40) | ((value & 0xFF0000) << 24) |
+		   ((value & 0xFF000000) << 8) | ((value & 0xFF00000000) >> 8) | ((value & 0xFF0000000000) >> 24) |
+		   ((value & 0xFF000000000000) >> 40) | ((value & 0xFF00000000000000) >> 56);
 }
 
 inline uint32_t swapEndianness32(uint32_t value)
@@ -20,7 +20,6 @@ inline uint16_t swapEndianness16(uint16_t value)
 {
 	return ((value & 0xFF) << 8) | ((value & 0xFF00) >> 8);
 }
-
 
 GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t headerSize, bool overwrite)
 {
@@ -53,35 +52,35 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		switch (mode)
 		{
 		case Open:
-			success = handle.open(fileName,BinaryFile::ReadWrite);
+			success = handle.open(fileName, BinaryFile::ReadWrite);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName);
+				Logger::printError(Logger::FatalError, L"Could not open file %s", fileName);
 				return false;
 			}
 			return true;
 
 		case Create:
-			success = handle.open(fileName,BinaryFile::Write);
+			success = handle.open(fileName, BinaryFile::Write);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
+				Logger::printError(Logger::FatalError, L"Could not create file %s", fileName);
 				return false;
 			}
 			return true;
 
 		case Copy:
-			success = copyFile(originalName,fileName);
+			success = copyFile(originalName, fileName);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName);
+				Logger::printError(Logger::FatalError, L"Could not copy file %s", originalName);
 				return false;
 			}
 
-			success = handle.open(fileName,BinaryFile::ReadWrite);
+			success = handle.open(fileName, BinaryFile::ReadWrite);
 			if (success == false)
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
+				Logger::printError(Logger::FatalError, L"Could not create file %s", fileName);
 				return false;
 			}
 			return true;
@@ -97,10 +96,10 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 	switch (mode)
 	{
 	case Open:
-		success = temp.open(fileName,BinaryFile::ReadWrite);
+		success = temp.open(fileName, BinaryFile::ReadWrite);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName);
+			Logger::queueError(Logger::FatalError, L"Could not open file %s", fileName);
 			return false;
 		}
 		temp.close();
@@ -110,10 +109,10 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		// if it exists, check if you can open it with read/write access
 		// otherwise open it with write access and remove it afterwards
 		exists = fileExists(fileName);
-		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
+		success = temp.open(fileName, exists ? BinaryFile::ReadWrite : BinaryFile::Write);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
+			Logger::queueError(Logger::FatalError, L"Could not create file %s", fileName);
 			return false;
 		}
 		temp.close();
@@ -125,24 +124,24 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 
 	case Copy:
 		// check original file
-		success = temp.open(originalName,BinaryFile::ReadWrite);
+		success = temp.open(originalName, BinaryFile::ReadWrite);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName);
+			Logger::queueError(Logger::FatalError, L"Could not open file %s", originalName);
 			return false;
 		}
 		temp.close();
 
 		// check new file, same as create
 		exists = fileExists(fileName);
-		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
+		success = temp.open(fileName, exists ? BinaryFile::ReadWrite : BinaryFile::Write);
 		if (success == false)
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
+			Logger::queueError(Logger::FatalError, L"Could not create file %s", fileName);
 			return false;
 		}
 		temp.close();
-		
+
 		if (exists == false)
 			deleteFile(fileName);
 
@@ -160,7 +159,7 @@ bool GenericAssemblerFile::write(void* data, size_t length)
 	if (isOpen() == false)
 		return false;
 
-	size_t len = handle.write(data,length);
+	size_t len = handle.write(data, length);
 	virtualAddress += len;
 	return len == length;
 }
@@ -169,17 +168,17 @@ bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 {
 	if (virtualAddress - headerSize < 0)
 	{
-		Logger::queueError(Logger::Error,L"Seeking to virtual address with negative physical address");
+		Logger::queueError(Logger::Error, L"Seeking to virtual address with negative physical address");
 		return false;
 	}
 	if (virtualAddress < 0)
-		Logger::queueError(Logger::Warning,L"Seeking to negative virtual address");
+		Logger::queueError(Logger::Warning, L"Seeking to negative virtual address");
 
 	this->virtualAddress = virtualAddress;
-	int64_t physicalAddress = virtualAddress-headerSize;
+	int64_t physicalAddress = virtualAddress - headerSize;
 
 	if (isOpen())
-		handle.setPos((long)physicalAddress);
+		handle.setPos((long) physicalAddress);
 
 	return true;
 }
@@ -188,21 +187,19 @@ bool GenericAssemblerFile::seekPhysical(int64_t physicalAddress)
 {
 	if (physicalAddress < 0)
 	{
-		Logger::queueError(Logger::Error,L"Seeking to negative physical address");
+		Logger::queueError(Logger::Error, L"Seeking to negative physical address");
 		return false;
 	}
 	if (physicalAddress + headerSize < 0)
-		Logger::queueError(Logger::Warning,L"Seeking to physical address with negative virtual address");
+		Logger::queueError(Logger::Warning, L"Seeking to physical address with negative virtual address");
 
-	virtualAddress = physicalAddress+headerSize;
+	virtualAddress = physicalAddress + headerSize;
 
 	if (isOpen())
-		handle.setPos((long)physicalAddress);
+		handle.setPos((long) physicalAddress);
 
 	return true;
 }
-
-
 
 FileManager::FileManager()
 {
@@ -222,14 +219,13 @@ FileManager::FileManager()
 	else if (u.i == 0xAABBCCDD)
 		ownEndianness = Endianness::Little;
 	else
-		Logger::printError(Logger::Error,L"Running on unknown endianness");
+		Logger::printError(Logger::Error, L"Running on unknown endianness");
 
 	reset();
 }
 
 FileManager::~FileManager()
 {
-
 }
 
 void FileManager::reset()
@@ -242,7 +238,7 @@ bool FileManager::checkActiveFile()
 {
 	if (activeFile == nullptr)
 	{
-		Logger::queueError(Logger::Error,L"No file opened");
+		Logger::queueError(Logger::Error, L"No file opened");
 		return false;
 	}
 	return true;
@@ -252,7 +248,7 @@ bool FileManager::openFile(std::shared_ptr<AssemblerFile> file, bool onlyCheck)
 {
 	if (activeFile != nullptr)
 	{
-		Logger::queueError(Logger::Warning,L"File not closed before opening a new one");
+		Logger::queueError(Logger::Warning, L"File not closed before opening a new one");
 		activeFile->close();
 	}
 
@@ -269,7 +265,7 @@ void FileManager::closeFile()
 {
 	if (activeFile == nullptr)
 	{
-		Logger::queueError(Logger::Warning,L"No file opened");
+		Logger::queueError(Logger::Warning, L"No file opened");
 		return;
 	}
 
@@ -284,16 +280,16 @@ bool FileManager::write(void* data, size_t length)
 
 	if (activeFile->isOpen() == false)
 	{
-		Logger::queueError(Logger::Error,L"No file opened");
+		Logger::queueError(Logger::Error, L"No file opened");
 		return false;
 	}
 
-	return activeFile->write(data,length);
+	return activeFile->write(data, length);
 }
 
 bool FileManager::writeU8(uint8_t data)
 {
-	return write(&data,1);
+	return write(&data, 1);
 }
 
 bool FileManager::writeU16(uint16_t data)
@@ -301,7 +297,7 @@ bool FileManager::writeU16(uint16_t data)
 	if (endianness != ownEndianness)
 		data = swapEndianness16(data);
 
-	return write(&data,2);
+	return write(&data, 2);
 }
 
 bool FileManager::writeU32(uint32_t data)
@@ -309,7 +305,7 @@ bool FileManager::writeU32(uint32_t data)
 	if (endianness != ownEndianness)
 		data = swapEndianness32(data);
 
-	return write(&data,4);
+	return write(&data, 4);
 }
 
 bool FileManager::writeU64(uint64_t data)
@@ -317,7 +313,7 @@ bool FileManager::writeU64(uint64_t data)
 	if (endianness != ownEndianness)
 		data = swapEndianness64(data);
 
-	return write(&data,8);
+	return write(&data, 8);
 }
 
 int64_t FileManager::getVirtualAddress()
@@ -370,13 +366,14 @@ bool FileManager::advanceMemory(size_t bytes)
 		return false;
 
 	int64_t pos = activeFile->getVirtualAddress();
-	return activeFile->seekVirtual(pos+bytes);
+	return activeFile->seekVirtual(pos + bytes);
 }
 
-int64_t FileManager::getOpenFileID() {
+int64_t FileManager::getOpenFileID()
+{
 	if (checkActiveFile() == false)
 		return 0;
 
 	static_assert(sizeof(int64_t) >= sizeof(intptr_t), "Assumes pointers are <= 64 bit");
-	return (int64_t)(intptr_t)activeFile.get();
+	return (int64_t)(intptr_t) activeFile.get();
 }

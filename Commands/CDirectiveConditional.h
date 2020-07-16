@@ -13,7 +13,7 @@ enum class ConditionType
 	IFNDEF,
 };
 
-class CDirectiveConditional: public CAssemblerCommand
+class CDirectiveConditional : public CAssemblerCommand
 {
 public:
 	CDirectiveConditional(ConditionType type);
@@ -24,6 +24,7 @@ public:
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
 	void setContent(std::unique_ptr<CAssemblerCommand> ifBlock, std::unique_ptr<CAssemblerCommand> elseBlock);
+
 private:
 	bool evaluate();
 

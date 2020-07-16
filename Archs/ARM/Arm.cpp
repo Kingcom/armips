@@ -55,10 +55,10 @@ void CArmArchitecture::Pass2()
 
 void CArmArchitecture::Revalidate()
 {
-	for (ArmPoolEntry& entry: currentPoolContent)
+	for (ArmPoolEntry& entry : currentPoolContent)
 	{
 		entry.command->applyFileInfo();
-		Logger::queueError(Logger::Error,L"Unable to find literal pool");
+		Logger::queueError(Logger::Error, L"Unable to find literal pool");
 	}
 
 	currentPoolContent.clear();
@@ -66,7 +66,6 @@ void CArmArchitecture::Revalidate()
 
 void CArmArchitecture::NextSection()
 {
-
 }
 
 std::unique_ptr<IElfRelocator> CArmArchitecture::getElfRelocator()

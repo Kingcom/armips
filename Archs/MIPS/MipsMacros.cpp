@@ -26,14 +26,14 @@ bool MipsMacroCommand::Validate()
 
 	applyFileInfo();
 
-	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && (newMemoryPos-memoryPos) > 4
-		&& (macroFlags & MIPSM_DONTWARNDELAYSLOT) == 0)
+	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && (newMemoryPos - memoryPos) > 4 &&
+		(macroFlags & MIPSM_DONTWARNDELAYSLOT) == 0)
 	{
-		Logger::queueError(Logger::Warning,L"Macro with multiple opcodes used inside a delay slot");
+		Logger::queueError(Logger::Warning, L"Macro with multiple opcodes used inside a delay slot");
 	}
 
 	if (newMemoryPos == memoryPos)
-		Logger::queueError(Logger::Warning,L"Empty macro content");
+		Logger::queueError(Logger::Warning, L"Empty macro content");
 
 	return result;
 }
@@ -59,18 +59,21 @@ std::wstring preprocessMacro(const wchar_t* text, MipsImmediateData& immediates)
 	immediates.primary.expression.replaceMemoryPos(labelName);
 	immediates.secondary.expression.replaceMemoryPos(labelName);
 
-	return tfm::format(L"%s: %s",labelName,text);
+	return tfm::format(L"%s: %s", labelName, text);
 }
 
-std::unique_ptr<CAssemblerCommand> createMacro(Parser& parser, const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)
+std::unique_ptr<CAssemblerCommand> createMacro(Parser& parser, const std::wstring& text, int flags,
+											   std::initializer_list<AssemblyTemplateArgument> variables)
 {
-	std::unique_ptr<CAssemblerCommand> content = parser.parseTemplate(text,variables);
-	return std::make_unique<MipsMacroCommand>(std::move(content),flags);
+	std::unique_ptr<CAssemblerCommand> content = parser.parseTemplate(text, variables);
+	return std::make_unique<MipsMacroCommand>(std::move(content), flags);
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroAbs(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroAbs(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
-	const wchar_t* templateAbs = LR"(
+	const wchar_t* templateAbs =
+		LR"(
 		%sraop% 	r1,%rs%,31
 		xor 		%rd%,%rs%,r1
 		%subop% 	%rd%,%rd%,r1
@@ -80,39 +83,52 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroAbs(Parser& parser, MipsRegi
 
 	switch (flags & MIPSM_ACCESSMASK)
 	{
-	case MIPSM_W:	sraop = L"sra"; subop = L"subu"; break;
-	case MIPSM_DW:	sraop = L"dsra32"; subop = L"dsubu"; break;
-	default: return nullptr;
+	case MIPSM_W:
+		sraop = L"sra";
+		subop = L"subu";
+		break;
+	case MIPSM_DW:
+		sraop = L"dsra32";
+		subop = L"dsubu";
+		break;
+	default:
+		return nullptr;
 	}
 
-	std::wstring macroText = preprocessMacro(templateAbs,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%rd%",		registers.grd.name },
-			{ L"%rs%",		registers.grs.name },
-			{ L"%sraop%",	sraop },
-			{ L"%subop%",	subop },
-	});
+	std::wstring macroText = preprocessMacro(templateAbs, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%rd%", registers.grd.name},
+						   {L"%rs%", registers.grs.name},
+						   {L"%sraop%", sraop},
+						   {L"%subop%", subop},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroLiFloat(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroLiFloat(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
-	const wchar_t* templateLiFloat = LR"(
+	const wchar_t* templateLiFloat =
+		LR"(
 		li 		r1,float(%imm%)
 		mtc1	r1,%rs%
 	)";
 
 	std::wstring sraop, subop;
 
-	std::wstring macroText = preprocessMacro(templateLiFloat,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%imm%",		immediates.secondary.expression.toString() },
-			{ L"%rs%",		registers.frs.name },
-	});
+	std::wstring macroText = preprocessMacro(templateLiFloat, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%imm%", immediates.secondary.expression.toString()},
+						   {L"%rs%", registers.frs.name},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroLi(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
-	const wchar_t* templateLi = LR"(
+	const wchar_t* templateLi =
+		LR"(
 		.if abs(%imm%) > 0xFFFFFFFF
 			.error "Immediate value too big"
 		.elseif %imm% & ~0xFFFF
@@ -147,23 +163,26 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroLi(Parser& parser, MipsRegis
 		ExpressionValue value = immediates.secondary.expression.evaluate();
 		if (value.isFloat())
 		{
-			int32_t newValue = getFloatBits((float)value.floatValue);
+			int32_t newValue = getFloatBits((float) value.floatValue);
 			immediates.secondary.expression = createConstExpression(newValue);
 		}
 	}
 
-	std::wstring macroText = preprocessMacro(templateLi,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
-			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
-			{ L"%rs%",		registers.grs.name },
-			{ L"%imm%",		immediates.secondary.expression.toString() },
-	});
+	std::wstring macroText = preprocessMacro(templateLi, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%upper%", (flags & MIPSM_UPPER) ? L"1" : L"0"},
+						   {L"%lower%", (flags & MIPSM_LOWER) ? L"1" : L"0"},
+						   {L"%rs%", registers.grs.name},
+						   {L"%imm%", immediates.secondary.expression.toString()},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroLoadStore(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
-	const wchar_t* templateLoadStore = LR"(
+	const wchar_t* templateLoadStore =
+		LR"(
 		.if %imm% & ~0xFFFFFFFF
 			.error "Address too big"
 		.elseif %imm% < 0x8000 || (%imm% & 0xFFFF8000) == 0xFFFF8000
@@ -184,48 +203,105 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadStore(Parser& parser, Mi
 
 	const wchar_t* op;
 	bool isCop = false;
-	switch (flags & (MIPSM_ACCESSMASK|MIPSM_LOAD|MIPSM_STORE))
+	switch (flags & (MIPSM_ACCESSMASK | MIPSM_LOAD | MIPSM_STORE))
 	{
-	case MIPSM_LOAD|MIPSM_B:		op = L"lb"; break;
-	case MIPSM_LOAD|MIPSM_BU:		op = L"lbu"; break;
-	case MIPSM_LOAD|MIPSM_HW:		op = L"lh"; break;
-	case MIPSM_LOAD|MIPSM_HWU:		op = L"lhu"; break;
-	case MIPSM_LOAD|MIPSM_W:		op = L"lw"; break;
-	case MIPSM_LOAD|MIPSM_WU:		op = L"lwu"; break;
-	case MIPSM_LOAD|MIPSM_DW:		op = L"ld"; break;
-	case MIPSM_LOAD|MIPSM_LLSCW:	op = L"ll"; break;
-	case MIPSM_LOAD|MIPSM_LLSCDW:	op = L"lld"; break;
-	case MIPSM_LOAD|MIPSM_COP1:		op = L"lwc1"; isCop = true; break;
-	case MIPSM_LOAD|MIPSM_COP2:		op = L"lwc2"; isCop = true; break;
-	case MIPSM_LOAD|MIPSM_DCOP1:	op = L"ldc1"; isCop = true; break;
-	case MIPSM_LOAD|MIPSM_DCOP2:	op = L"ldc2"; isCop = true; break;
-	case MIPSM_STORE|MIPSM_B:		op = L"sb"; break;
-	case MIPSM_STORE|MIPSM_HW:		op = L"sh"; break;
-	case MIPSM_STORE|MIPSM_W:		op = L"sw"; break;
-	case MIPSM_STORE|MIPSM_DW:		op = L"sd"; break;
-	case MIPSM_STORE|MIPSM_LLSCW:	op = L"sc"; break;
-	case MIPSM_STORE|MIPSM_LLSCDW:	op = L"scd"; break;
-	case MIPSM_STORE|MIPSM_COP1:	op = L"swc1"; isCop = true; break;
-	case MIPSM_STORE|MIPSM_COP2:	op = L"swc2"; isCop = true; break;
-	case MIPSM_STORE|MIPSM_DCOP1:	op = L"sdc1"; isCop = true; break;
-	case MIPSM_STORE|MIPSM_DCOP2:	op = L"sdc2"; isCop = true; break;
-	default: return nullptr;
+	case MIPSM_LOAD | MIPSM_B:
+		op = L"lb";
+		break;
+	case MIPSM_LOAD | MIPSM_BU:
+		op = L"lbu";
+		break;
+	case MIPSM_LOAD | MIPSM_HW:
+		op = L"lh";
+		break;
+	case MIPSM_LOAD | MIPSM_HWU:
+		op = L"lhu";
+		break;
+	case MIPSM_LOAD | MIPSM_W:
+		op = L"lw";
+		break;
+	case MIPSM_LOAD | MIPSM_WU:
+		op = L"lwu";
+		break;
+	case MIPSM_LOAD | MIPSM_DW:
+		op = L"ld";
+		break;
+	case MIPSM_LOAD | MIPSM_LLSCW:
+		op = L"ll";
+		break;
+	case MIPSM_LOAD | MIPSM_LLSCDW:
+		op = L"lld";
+		break;
+	case MIPSM_LOAD | MIPSM_COP1:
+		op = L"lwc1";
+		isCop = true;
+		break;
+	case MIPSM_LOAD | MIPSM_COP2:
+		op = L"lwc2";
+		isCop = true;
+		break;
+	case MIPSM_LOAD | MIPSM_DCOP1:
+		op = L"ldc1";
+		isCop = true;
+		break;
+	case MIPSM_LOAD | MIPSM_DCOP2:
+		op = L"ldc2";
+		isCop = true;
+		break;
+	case MIPSM_STORE | MIPSM_B:
+		op = L"sb";
+		break;
+	case MIPSM_STORE | MIPSM_HW:
+		op = L"sh";
+		break;
+	case MIPSM_STORE | MIPSM_W:
+		op = L"sw";
+		break;
+	case MIPSM_STORE | MIPSM_DW:
+		op = L"sd";
+		break;
+	case MIPSM_STORE | MIPSM_LLSCW:
+		op = L"sc";
+		break;
+	case MIPSM_STORE | MIPSM_LLSCDW:
+		op = L"scd";
+		break;
+	case MIPSM_STORE | MIPSM_COP1:
+		op = L"swc1";
+		isCop = true;
+		break;
+	case MIPSM_STORE | MIPSM_COP2:
+		op = L"swc2";
+		isCop = true;
+		break;
+	case MIPSM_STORE | MIPSM_DCOP1:
+		op = L"sdc1";
+		isCop = true;
+		break;
+	case MIPSM_STORE | MIPSM_DCOP2:
+		op = L"sdc2";
+		isCop = true;
+		break;
+	default:
+		return nullptr;
 	}
 
-	std::wstring macroText = preprocessMacro(templateLoadStore,immediates);
+	std::wstring macroText = preprocessMacro(templateLoadStore, immediates);
 
 	bool store = (flags & MIPSM_STORE) != 0;
-	return createMacro(parser,macroText,flags, {
-			{ L"%upper%",	(flags & MIPSM_UPPER) ? L"1" : L"0" },
-			{ L"%lower%",	(flags & MIPSM_LOWER) ? L"1" : L"0" },
-			{ L"%rs%",		isCop ? registers.frs.name : registers.grs.name },
-			{ L"%temp%",	isCop || store ? L"r1" : registers.grs.name },
-			{ L"%imm%",		immediates.secondary.expression.toString() },
-			{ L"%op%",		op },
-	});
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%upper%", (flags & MIPSM_UPPER) ? L"1" : L"0"},
+						   {L"%lower%", (flags & MIPSM_LOWER) ? L"1" : L"0"},
+						   {L"%rs%", isCop ? registers.frs.name : registers.grs.name},
+						   {L"%temp%", isCop || store ? L"r1" : registers.grs.name},
+						   {L"%imm%", immediates.secondary.expression.toString()},
+						   {L"%op%", op},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroLoadUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -233,7 +309,8 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadUnaligned(Parser& parser
 	int type = flags & MIPSM_ACCESSMASK;
 	if (type == MIPSM_HW || type == MIPSM_HWU)
 	{
-		const wchar_t* templateHalfword = LR"(
+		const wchar_t* templateHalfword =
+			LR"(
 			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
@@ -246,9 +323,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadUnaligned(Parser& parser
 
 		op = type == MIPSM_HWU ? L"lbu" : L"lb";
 		selectedTemplate = templateHalfword;
-	} else if (type == MIPSM_W || type == MIPSM_DW)
+	}
+	else if (type == MIPSM_W || type == MIPSM_DW)
 	{
-		const wchar_t* templateWord = LR"(
+		const wchar_t* templateWord =
+			LR"(
 			.if (%off% < 0x8000) && ((%off%+%size%-1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
@@ -259,28 +338,32 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroLoadUnaligned(Parser& parser
 
 		if (registers.grs.num == registers.grd.num)
 		{
-			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
+			Logger::printError(Logger::Error, L"Cannot use same register as source and destination");
 			return std::make_unique<DummyCommand>();
 		}
 
 		op = type == MIPSM_W ? L"lw" : L"ld";
 		size = type == MIPSM_W ? L"4" : L"8";
 		selectedTemplate = templateWord;
-	} else {
+	}
+	else
+	{
 		return nullptr;
 	}
 
-	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%rs%",		registers.grs.name },
-			{ L"%rd%",		registers.grd.name },
-			{ L"%off%",		immediates.primary.expression.toString() },
-			{ L"%op%",		op },
-			{ L"%size%",    size },
-	});
+	std::wstring macroText = preprocessMacro(selectedTemplate, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%rs%", registers.grs.name},
+						   {L"%rd%", registers.grd.name},
+						   {L"%off%", immediates.primary.expression.toString()},
+						   {L"%op%", op},
+						   {L"%size%", size},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroStoreUnaligned(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -288,7 +371,8 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroStoreUnaligned(Parser& parse
 	int type = flags & MIPSM_ACCESSMASK;
 	if (type == MIPSM_HW)
 	{
-		const wchar_t* templateHalfword = LR"(
+		const wchar_t* templateHalfword =
+			LR"(
 			.if (%off% < 0x8000) && ((%off%+1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
@@ -299,9 +383,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroStoreUnaligned(Parser& parse
 		)";
 
 		selectedTemplate = templateHalfword;
-	} else if (type == MIPSM_W || type == MIPSM_DW)
+	}
+	else if (type == MIPSM_W || type == MIPSM_DW)
 	{
-		const wchar_t* templateWord = LR"(
+		const wchar_t* templateWord =
+			LR"(
 			.if (%off% < 0x8000) && ((%off%+%size%-1) >= 0x8000)
 				.error "Immediate offset too big"
 			.else
@@ -312,28 +398,32 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroStoreUnaligned(Parser& parse
 
 		if (registers.grs.num == registers.grd.num)
 		{
-			Logger::printError(Logger::Error,L"Cannot use same register as source and destination");
+			Logger::printError(Logger::Error, L"Cannot use same register as source and destination");
 			return std::make_unique<DummyCommand>();
 		}
 
 		op = type == MIPSM_W ? L"sw" : L"sd";
 		size = type == MIPSM_W ? L"4" : L"8";
 		selectedTemplate = templateWord;
-	} else {
+	}
+	else
+	{
 		return nullptr;
 	}
 
-	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%rs%",		registers.grs.name },
-			{ L"%rd%",		registers.grd.name },
-			{ L"%off%",		immediates.primary.expression.toString() },
-			{ L"%op%",		op },
-			{ L"%size%",	size },
-	});
+	std::wstring macroText = preprocessMacro(selectedTemplate, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%rs%", registers.grs.name},
+						   {L"%rd%", registers.grd.name},
+						   {L"%off%", immediates.primary.expression.toString()},
+						   {L"%op%", op},
+						   {L"%size%", size},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroBranch(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -351,7 +441,8 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsR
 	std::wstring op;
 	if (bne || beq)
 	{
-		const wchar_t* templateNeEq = LR"(
+		const wchar_t* templateNeEq =
+			LR"(
 			.if %imm% == 0
 				%op%	%rs%,r0,%dest%
 			.else
@@ -361,13 +452,15 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsR
 		)";
 
 		selectedTemplate = templateNeEq;
-		if(likely)
+		if (likely)
 			op = bne ? L"bnel" : L"beql";
 		else
 			op = bne ? L"bne" : L"beq";
-	} else if (immediate && (beqz || bnez))
+	}
+	else if (immediate && (beqz || bnez))
 	{
-		const wchar_t* templateImmediate = LR"(
+		const wchar_t* templateImmediate =
+			LR"(
 			.if %revcmp% && %imm% == 0
 				slt%u% 	r1,r0,%rs%
 			.elseif %revcmp%
@@ -383,13 +476,15 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsR
 		)";
 
 		selectedTemplate = templateImmediate;
-		if(likely)
+		if (likely)
 			op = bnez ? L"bnezl" : L"beqzl";
 		else
 			op = bnez ? L"bnez" : L"beqz";
-	} else if (beqz || bnez)
+	}
+	else if (beqz || bnez)
 	{
-		const wchar_t* templateRegister = LR"(
+		const wchar_t* templateRegister =
+			LR"(
 			.if %revcmp%
 				slt%u%	r1,%rt%,%rs%
 			.else
@@ -399,27 +494,31 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsR
 		)";
 
 		selectedTemplate = templateRegister;
-		if(likely)
+		if (likely)
 			op = bnez ? L"bnezl" : L"beqzl";
 		else
 			op = bnez ? L"bnez" : L"beqz";
-	} else {
+	}
+	else
+	{
 		return nullptr;
 	}
-	
-	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%op%",		op },
-			{ L"%u%",		unsigned_ ? L"u" : L""},
-			{ L"%revcmp%",	revcmp ? L"1" : L"0"},
-			{ L"%rs%",		registers.grs.name },
-			{ L"%rt%",		registers.grt.name },
-			{ L"%imm%",		immediates.primary.expression.toString() },
-			{ L"%dest%",	immediates.secondary.expression.toString() },
-	});
+
+	std::wstring macroText = preprocessMacro(selectedTemplate, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%op%", op},
+						   {L"%u%", unsigned_ ? L"u" : L""},
+						   {L"%revcmp%", revcmp ? L"1" : L"0"},
+						   {L"%rs%", registers.grs.name},
+						   {L"%rt%", registers.grt.name},
+						   {L"%imm%", immediates.primary.expression.toString()},
+						   {L"%dest%", immediates.secondary.expression.toString()},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroSet(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	const wchar_t* selectedTemplate;
 
@@ -435,7 +534,8 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegi
 
 	if (immediate && (ne || eq))
 	{
-		const wchar_t* templateImmediateEqNe = LR"(
+		const wchar_t* templateImmediateEqNe =
+			LR"(
 			.if %imm% & ~0xFFFF
 				li		%rd%,%imm%
 				xor		%rd%,%rs%,%rd%
@@ -450,9 +550,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegi
 		)";
 
 		selectedTemplate = templateImmediateEqNe;
-	} else if (ne || eq)
+	}
+	else if (ne || eq)
 	{
-		const wchar_t* templateEqNe = LR"(
+		const wchar_t* templateEqNe =
+			LR"(
 			xor		%rd%,%rs%,%rt%
 			.if %eq%
 				sltiu	%rd%,%rd%,1
@@ -462,9 +564,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegi
 		)";
 
 		selectedTemplate = templateEqNe;
-	} else if (immediate && (ge || lt))
+	}
+	else if (immediate && (ge || lt))
 	{
-		const wchar_t* templateImmediateGeLt = LR"(
+		const wchar_t* templateImmediateGeLt =
+			LR"(
 			.if %revcmp% && %imm% == 0
 				slt%u%	%rd%,r0,%rs%
 			.elseif %revcmp%
@@ -482,9 +586,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegi
 		)";
 
 		selectedTemplate = templateImmediateGeLt;
-	} else if (ge)
+	}
+	else if (ge)
 	{
-		const wchar_t* templateGe = LR"(
+		const wchar_t* templateGe =
+			LR"(
 			.if %revcmp%
 				slt%u%	%rd%,%rt%,%rs%
 			.else
@@ -494,25 +600,28 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegi
 		)";
 
 		selectedTemplate = templateGe;
-	} else
+	}
+	else
 	{
 		return nullptr;
 	}
 
-	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%u%",		unsigned_ ? L"u" : L""},
-			{ L"%eq%",		eq ? L"1" : L"0" },
-			{ L"%ge%",		ge ? L"1" : L"0" },
-			{ L"%revcmp%",	revcmp ? L"1" : L"0" },
-			{ L"%rd%",		registers.grd.name },
-			{ L"%rs%",		registers.grs.name },
-			{ L"%rt%",		registers.grt.name },
-			{ L"%imm%",		immediates.secondary.expression.toString() },
-	});
+	std::wstring macroText = preprocessMacro(selectedTemplate, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%u%", unsigned_ ? L"u" : L""},
+						   {L"%eq%", eq ? L"1" : L"0"},
+						   {L"%ge%", ge ? L"1" : L"0"},
+						   {L"%revcmp%", revcmp ? L"1" : L"0"},
+						   {L"%rd%", registers.grd.name},
+						   {L"%rs%", registers.grs.name},
+						   {L"%rt%", registers.grt.name},
+						   {L"%imm%", immediates.secondary.expression.toString()},
+					   });
 }
 
-std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
+std::unique_ptr<CAssemblerCommand>
+generateMipsMacroRotate(Parser& parser, MipsRegisterData& registers, MipsImmediateData& immediates, int flags)
 {
 	bool left = (flags & MIPSM_LEFT) != 0;
 	bool immediate = (flags & MIPSM_IMM) != 0;
@@ -521,7 +630,8 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsR
 	const wchar_t* selectedTemplate;
 	if (psp && immediate)
 	{
-		const wchar_t* templatePspImmediate = LR"(
+		const wchar_t* templatePspImmediate =
+			LR"(
 			.if %amount% != 0
 				.if %left%
 					rotr	%rd%,%rs%,-%amount%&31
@@ -534,9 +644,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsR
 		)";
 
 		selectedTemplate = templatePspImmediate;
-	} else if (psp)
+	}
+	else if (psp)
 	{
-		const wchar_t* templatePspRegister = LR"(
+		const wchar_t* templatePspRegister =
+			LR"(
 			.if %left%
 				negu	r1,%rt%
 				rotrv	%rd%,%rs%,r1
@@ -546,9 +658,11 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsR
 		)";
 
 		selectedTemplate = templatePspRegister;
-	} else if (immediate)
+	}
+	else if (immediate)
 	{
-		const wchar_t* templateImmediate = LR"(
+		const wchar_t* templateImmediate =
+			LR"(
 			.if %amount% != 0
 				.if %left%
 					srl	r1,%rs%,-%amount%&31
@@ -562,10 +676,13 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsR
 				move	%rd%,%rs%
 			.endif
 		)";
-		
+
 		selectedTemplate = templateImmediate;
-	} else {
-		const wchar_t* templateRegister = LR"(
+	}
+	else
+	{
+		const wchar_t* templateRegister =
+			LR"(
 			negu	r1,%rt%
 			.if %left%
 				srlv	r1,%rs%,r1
@@ -579,15 +696,16 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsR
 
 		selectedTemplate = templateRegister;
 	}
-	
-	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
-	return createMacro(parser,macroText,flags, {
-			{ L"%left%",	left ? L"1" : L"0" },
-			{ L"%rd%",		registers.grd.name },
-			{ L"%rs%",		registers.grs.name },
-			{ L"%rt%",		registers.grt.name },
-			{ L"%amount%",	immediates.primary.expression.toString() },
-	});
+
+	std::wstring macroText = preprocessMacro(selectedTemplate, immediates);
+	return createMacro(parser, macroText, flags,
+					   {
+						   {L"%left%", left ? L"1" : L"0"},
+						   {L"%rd%", registers.grd.name},
+						   {L"%rs%", registers.grs.name},
+						   {L"%rt%", registers.grt.name},
+						   {L"%amount%", immediates.primary.expression.toString()},
+					   });
 }
 
 // clang-format off

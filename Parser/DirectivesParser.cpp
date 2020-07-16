@@ -23,13 +23,13 @@
 std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,2,3) == false)
+	if (parser.parseExpressionList(list, 2, 3) == false)
 		return nullptr;
 
 	int64_t memoryAddress;
 	std::wstring inputName, outputName;
 
-	if (list[0].evaluateString(inputName,false) == false)
+	if (list[0].evaluateString(inputName, false) == false)
 		return nullptr;
 
 	if (list.back().evaluateInteger(memoryAddress) == false)
@@ -38,13 +38,15 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 	auto file = std::make_unique<CDirectiveFile>();
 	if (list.size() == 3)
 	{
-		if (list[1].evaluateString(outputName,false) == false)
+		if (list[1].evaluateString(outputName, false) == false)
 			return nullptr;
-		
-		file->initCopy(inputName,outputName,memoryAddress);
+
+		file->initCopy(inputName, outputName, memoryAddress);
 		return file;
-	} else {
-		file->initOpen(inputName,memoryAddress);
+	}
+	else
+	{
+		file->initOpen(inputName, memoryAddress);
 		return file;
 	}
 }
@@ -52,20 +54,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,2,2) == false)
+	if (parser.parseExpressionList(list, 2, 2) == false)
 		return nullptr;
 
 	int64_t memoryAddress;
 	std::wstring inputName, outputName;
 
-	if (list[0].evaluateString(inputName,false) == false)
+	if (list[0].evaluateString(inputName, false) == false)
 		return nullptr;
 
 	if (list.back().evaluateInteger(memoryAddress) == false)
 		return nullptr;
 
 	auto file = std::make_unique<CDirectiveFile>();
-	file->initCreate(inputName,memoryAddress);
+	file->initCreate(inputName, memoryAddress);
 	return file;
 }
 
@@ -79,11 +81,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveClose(Parser& parser, int flags
 std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,3) == false)
+	if (parser.parseExpressionList(list, 1, 3) == false)
 		return nullptr;
-	
+
 	std::wstring fileName;
-	if (list[0].evaluateString(fileName,false) == false)
+	if (list[0].evaluateString(fileName, false) == false)
 		return nullptr;
 
 	auto incbin = std::make_unique<CDirectiveIncbin>(fileName);
@@ -115,7 +117,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectivePosition(Parser& parser, int fl
 		return nullptr;
 	}
 
-	return std::make_unique<CDirectivePosition>(exp,type);
+	return std::make_unique<CDirectivePosition>(exp, type);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveAlignFill(Parser& parser, int flags)
@@ -137,22 +139,22 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveAlignFill(Parser& parser, int f
 	}
 
 	if (mode != CDirectiveAlignFill::Fill && parser.peekToken().type == TokenType::Separator)
-		return std::make_unique<CDirectiveAlignFill>(UINT64_C(4),mode);
+		return std::make_unique<CDirectiveAlignFill>(UINT64_C(4), mode);
 
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (parser.parseExpressionList(list, 1, 2) == false)
 		return nullptr;
 
 	if (list.size() == 2)
-		return std::make_unique<CDirectiveAlignFill>(list[0],list[1],mode);
+		return std::make_unique<CDirectiveAlignFill>(list[0], list[1], mode);
 	else
-		return std::make_unique<CDirectiveAlignFill>(list[0],mode);
+		return std::make_unique<CDirectiveAlignFill>(list[0], mode);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveSkip(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,1) == false)
+	if (parser.parseExpressionList(list, 1, 1) == false)
 		return nullptr;
 
 	return std::make_unique<CDirectiveSkip>(list[0]);
@@ -170,11 +172,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveHeaderSize(Parser& parser, int 
 std::unique_ptr<CAssemblerCommand> parseDirectiveObjImport(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (parser.parseExpressionList(list, 1, 2) == false)
 		return nullptr;
 
 	std::wstring fileName;
-	if (list[0].evaluateString(fileName,true) == false)
+	if (list[0].evaluateString(fileName, true) == false)
 		return nullptr;
 
 	if (list.size() == 2)
@@ -183,9 +185,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveObjImport(Parser& parser, int f
 		if (list[1].evaluateIdentifier(ctorName) == false)
 			return nullptr;
 
-		return std::make_unique<DirectiveObjImport>(fileName,ctorName);
+		return std::make_unique<DirectiveObjImport>(fileName, ctorName);
 	}
-	
+
 	return std::make_unique<DirectiveObjImport>(fileName);
 }
 
@@ -204,7 +206,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		exp = parser.parseExpression();
 		if (exp.isLoaded() == false)
 		{
-			parser.printError(start,L"Invalid condition");
+			parser.printError(start, L"Invalid condition");
 			return std::make_unique<DummyCommand>();
 		}
 
@@ -218,7 +220,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	case DIRECTIVE_COND_IFDEF:
 		type = ConditionType::IFDEF;
 		if (parser.parseIdentifier(name) == false)
-			return nullptr;		
+			return nullptr;
 		break;
 	case DIRECTIVE_COND_IFNDEF:
 		type = ConditionType::IFNDEF;
@@ -227,21 +229,22 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		break;
 	}
 
-	if(parser.nextToken().type != TokenType::Separator)
+	if (parser.nextToken().type != TokenType::Separator)
 	{
-		parser.printError(start,L"Directive not terminated");
+		parser.printError(start, L"Directive not terminated");
 		return nullptr;
 	}
 
 	parser.pushConditionalResult(condResult);
-	std::unique_ptr<CAssemblerCommand> ifBlock = parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	std::unique_ptr<CAssemblerCommand> ifBlock =
+		parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
 	parser.popConditionalResult();
 
 	// update the file info so that else commands get the right line number
 	parser.updateFileInfo();
 
 	std::unique_ptr<CAssemblerCommand> elseBlock = nullptr;
-	const Token &next = parser.nextToken();
+	const Token& next = parser.nextToken();
 	const std::wstring stringValue = next.getStringValue();
 
 	ConditionalResult elseResult;
@@ -263,17 +266,21 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	{
 		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
 
-		parser.eatToken();	// eat .endif
-	} else if (stringValue == L".elseif")
+		parser.eatToken(); // eat .endif
+	}
+	else if (stringValue == L".elseif")
 	{
-		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IF);
-	} else if (stringValue == L".elseifdef")
+		elseBlock = parseDirectiveConditional(parser, DIRECTIVE_COND_IF);
+	}
+	else if (stringValue == L".elseifdef")
 	{
-		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFDEF);
-	} else if (stringValue == L".elseifndef")
+		elseBlock = parseDirectiveConditional(parser, DIRECTIVE_COND_IFDEF);
+	}
+	else if (stringValue == L".elseifndef")
 	{
-		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFNDEF);
-	} else if (stringValue != L".endif")
+		elseBlock = parseDirectiveConditional(parser, DIRECTIVE_COND_IFNDEF);
+	}
+	else if (stringValue != L".endif")
 	{
 		parser.popConditionalResult();
 		return nullptr;
@@ -286,7 +293,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	{
 		return ifBlock;
 	}
-	
+
 	if (condResult == ConditionalResult::False)
 	{
 		if (elseBlock != nullptr)
@@ -297,13 +304,13 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 
 	std::unique_ptr<CDirectiveConditional> cond;
 	if (exp.isLoaded())
-		cond = std::make_unique<CDirectiveConditional>(type,exp);
+		cond = std::make_unique<CDirectiveConditional>(type, exp);
 	else if (name.size() != 0)
-		cond = std::make_unique<CDirectiveConditional>(type,name);
+		cond = std::make_unique<CDirectiveConditional>(type, name);
 	else
 		cond = std::make_unique<CDirectiveConditional>(type);
 
-	cond->setContent(std::move(ifBlock),std::move(elseBlock));
+	cond->setContent(std::move(ifBlock), std::move(elseBlock));
 	return cond;
 }
 
@@ -312,13 +319,13 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveTable(Parser& parser, int flags
 	const Token& start = parser.peekToken();
 
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (parser.parseExpressionList(list, 1, 2) == false)
 		return nullptr;
 
 	std::wstring fileName;
-	if (list[0].evaluateString(fileName,true) == false)
+	if (list[0].evaluateString(fileName, true) == false)
 	{
-		parser.printError(start,L"Invalid file name");
+		parser.printError(start, L"Invalid file name");
 		return nullptr;
 	}
 
@@ -326,16 +333,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveTable(Parser& parser, int flags
 	if (list.size() == 2)
 	{
 		std::wstring encodingName;
-		if (list[1].evaluateString(encodingName,true) == false)
+		if (list[1].evaluateString(encodingName, true) == false)
 		{
-			parser.printError(start,L"Invalid encoding name");
+			parser.printError(start, L"Invalid encoding name");
 			return nullptr;
 		}
 
 		encoding = getEncodingFromString(encodingName);
 	}
 
-	return std::make_unique<TableCommand>(fileName,encoding);
+	return std::make_unique<TableCommand>(fileName, encoding);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
@@ -348,32 +355,32 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 	}
 
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,-1) == false)
+	if (parser.parseExpressionList(list, 1, -1) == false)
 		return nullptr;
-	
+
 	auto data = std::make_unique<CDirectiveData>();
 	switch (flags & DIRECTIVE_USERMASK)
 	{
 	case DIRECTIVE_DATA_8:
-		data->setNormal(list,1);
+		data->setNormal(list, 1);
 		break;
 	case DIRECTIVE_DATA_16:
-		data->setNormal(list,2);
+		data->setNormal(list, 2);
 		break;
 	case DIRECTIVE_DATA_32:
-		data->setNormal(list,4);
+		data->setNormal(list, 4);
 		break;
 	case DIRECTIVE_DATA_64:
-		data->setNormal(list,8);
+		data->setNormal(list, 8);
 		break;
 	case DIRECTIVE_DATA_ASCII:
-		data->setAscii(list,terminate);
+		data->setAscii(list, terminate);
 		break;
 	case DIRECTIVE_DATA_SJIS:
-		data->setSjis(list,terminate);
+		data->setSjis(list, terminate);
 		break;
 	case DIRECTIVE_DATA_CUSTOM:
-		data->setCustom(list,terminate);
+		data->setCustom(list, terminate);
 		break;
 	case DIRECTIVE_DATA_FLOAT:
 		data->setFloat(list);
@@ -382,7 +389,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 		data->setDouble(list);
 		break;
 	}
-	
+
 	return data;
 }
 
@@ -447,9 +454,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int fla
 std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
-	if (parser.parseExpressionList(parameters,1,2) == false)
+	if (parser.parseExpressionList(parameters, 1, 2) == false)
 		return nullptr;
-	
+
 	auto area = std::make_unique<CDirectiveArea>(parameters[0]);
 	if (parameters.size() == 2)
 		area->setFillExpression(parameters[1]);
@@ -463,19 +470,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
+	const Token& tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
 	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
+	std::transform(stringValue.begin(), stringValue.end(), stringValue.begin(), ::towlower);
 
 	if (stringValue == L"on")
-	{	
+	{
 		Logger::setErrorOnWarning(true);
 		return std::make_unique<DummyCommand>();
-	} else if (stringValue == L"off")
+	}
+	else if (stringValue == L"off")
 	{
 		Logger::setErrorOnWarning(false);
 		return std::make_unique<DummyCommand>();
@@ -486,19 +494,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, in
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveRelativeInclude(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
+	const Token& tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
 	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
+	std::transform(stringValue.begin(), stringValue.end(), stringValue.begin(), ::towlower);
 
 	if (stringValue == L"on")
-	{	
+	{
 		Global.relativeInclude = true;
 		return std::make_unique<DummyCommand>();
-	} else if (stringValue == L"off")
+	}
+	else if (stringValue == L"off")
 	{
 		Global.relativeInclude = false;
 		return std::make_unique<DummyCommand>();
@@ -509,19 +518,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveRelativeInclude(Parser& parser,
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveNocash(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
+	const Token& tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
 	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
+	std::transform(stringValue.begin(), stringValue.end(), stringValue.begin(), ::towlower);
 
 	if (stringValue == L"on")
-	{	
+	{
 		Global.nocash = true;
 		return std::make_unique<DummyCommand>();
-	} else if (stringValue == L"off")
+	}
+	else if (stringValue == L"off")
 	{
 		Global.nocash = false;
 		return std::make_unique<DummyCommand>();
@@ -532,13 +542,13 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveNocash(Parser& parser, int flag
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveSym(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
+	const Token& tok = parser.nextToken();
 
 	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
 		return nullptr;
 
 	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
+	std::transform(stringValue.begin(), stringValue.end(), stringValue.begin(), ::towlower);
 
 	if (stringValue == L"on")
 		return std::make_unique<CDirectiveSym>(true);
@@ -564,11 +574,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int
 	const std::wstring stringValue = tok.getStringValue();
 	if (Global.symbolTable.isValidSymbolName(stringValue) == false)
 	{
-		parser.printError(tok,L"Invalid label name \"%s\"",stringValue);
+		parser.printError(tok, L"Invalid label name \"%s\"", stringValue);
 		return nullptr;
 	}
 
-	return std::make_unique<CAssemblerLabel>(stringValue,tok.getOriginalText(),value);
+	return std::make_unique<CAssemblerLabel>(stringValue, tok.getOriginalText(), value);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int flags)
@@ -579,21 +589,21 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int fl
 
 	if (parser.nextToken().type != TokenType::Separator)
 	{
-		parser.printError(tok,L"Directive not terminated");
+		parser.printError(tok, L"Directive not terminated");
 		return nullptr;
 	}
 
-	auto func = std::make_unique<CDirectiveFunction>(tok.getStringValue(),tok.getOriginalText());
-	std::unique_ptr<CAssemblerCommand> seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
+	auto func = std::make_unique<CDirectiveFunction>(tok.getStringValue(), tok.getOriginalText());
+	std::unique_ptr<CAssemblerCommand> seq =
+		parser.parseCommandSequence(L'.', {L".endfunc", L".endfunction", L".func", L".function"});
 
 	const std::wstring stringValue = parser.peekToken().getStringValue();
-	if (stringValue == L".endfunc" ||
-		stringValue == L".endfunction")
+	if (stringValue == L".endfunc" || stringValue == L".endfunction")
 	{
 		parser.eatToken();
-		if(parser.nextToken().type != TokenType::Separator)
+		if (parser.nextToken().type != TokenType::Separator)
 		{
-			parser.printError(tok,L"Directive not terminated");
+			parser.printError(tok, L"Directive not terminated");
 			return nullptr;
 		}
 	}
@@ -609,11 +619,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMessage(Parser& parser, int fla
 	switch (flags)
 	{
 	case DIRECTIVE_MSG_WARNING:
-		return std::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Warning,exp);
+		return std::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Warning, exp);
 	case DIRECTIVE_MSG_ERROR:
-		return std::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Error,exp);
+		return std::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Error, exp);
 	case DIRECTIVE_MSG_NOTICE:
-		return std::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Notice,exp);
+		return std::make_unique<CDirectiveMessage>(CDirectiveMessage::Type::Notice, exp);
 	}
 
 	return nullptr;
@@ -624,11 +634,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 	const Token& start = parser.peekToken();
 
 	std::vector<Expression> parameters;
-	if (parser.parseExpressionList(parameters,1,2) == false)
+	if (parser.parseExpressionList(parameters, 1, 2) == false)
 		return nullptr;
 
 	std::wstring fileName;
-	if (parameters[0].evaluateString(fileName,true) == false)
+	if (parameters[0].evaluateString(fileName, true) == false)
 		return nullptr;
 
 	fileName = getFullPathName(fileName);
@@ -637,10 +647,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 	if (parameters.size() == 2)
 	{
 		std::wstring encodingName;
-		if (parameters[1].evaluateString(encodingName,true) == false
-			&& parameters[1].evaluateIdentifier(encodingName) == false)
+		if (parameters[1].evaluateString(encodingName, true) == false && parameters[1].evaluateIdentifier(encodingName) == false)
 			return nullptr;
-		
+
 		encoding = getEncodingFromString(encodingName);
 	}
 
@@ -650,14 +659,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 
 	if (fileExists(fileName) == false)
 	{
-		parser.printError(start,L"Included file \"%s\" does not exist",fileName);
+		parser.printError(start, L"Included file \"%s\" does not exist", fileName);
 		return nullptr;
 	}
 
 	TextFile f;
-	if (f.open(fileName,TextFile::Read,encoding) == false)
+	if (f.open(fileName, TextFile::Read, encoding) == false)
 	{
-		parser.printError(start,L"Could not open included file \"%s\"",fileName);
+		parser.printError(start, L"Could not open included file \"%s\"", fileName);
 		return nullptr;
 	}
 

@@ -1,16 +1,14 @@
 #include "Commands/CommandSequence.h"
 
-CommandSequence::CommandSequence()
-	: CAssemblerCommand()
+CommandSequence::CommandSequence() : CAssemblerCommand()
 {
-
 }
 
 bool CommandSequence::Validate()
 {
 	bool result = false;
-	
-	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
+
+	for (const std::unique_ptr<CAssemblerCommand>& cmd : commands)
 	{
 		cmd->applyFileInfo();
 		if (cmd->Validate())
@@ -22,7 +20,7 @@ bool CommandSequence::Validate()
 
 void CommandSequence::Encode() const
 {
-	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd : commands)
 	{
 		cmd->Encode();
 	}
@@ -30,7 +28,7 @@ void CommandSequence::Encode() const
 
 void CommandSequence::writeTempData(TempData& tempData) const
 {
-	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd : commands)
 	{
 		cmd->applyFileInfo();
 		cmd->writeTempData(tempData);
@@ -39,7 +37,7 @@ void CommandSequence::writeTempData(TempData& tempData) const
 
 void CommandSequence::writeSymData(SymbolData& symData) const
 {
-	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
+	for (const std::unique_ptr<CAssemblerCommand>& cmd : commands)
 	{
 		cmd->writeSymData(symData);
 	}

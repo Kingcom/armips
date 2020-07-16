@@ -11,28 +11,24 @@
 #include "Parser/Parser.h"
 #include "Util/Util.h"
 
-#define CHECK(exp) if (!(exp)) return false;
+#define CHECK(exp) \
+	if (!(exp))    \
+		return false;
 
 const ArmRegisterDescriptor armRegisters[] = {
-	{ L"r0", 0 },	{ L"r1", 1 },	{ L"r2", 2 },	{ L"r3", 3 },
-	{ L"r4", 4 },	{ L"r5", 5 },	{ L"r6", 6 },	{ L"r7", 7 },
-	{ L"r8", 8 },	{ L"r9", 9 },	{ L"r10", 10 },	{ L"r11", 11 },
-	{ L"r12", 12 },	{ L"r13", 13 },	{ L"sp", 13 },	{ L"r14", 14 },
-	{ L"lr", 14 },	{ L"r15", 15 }, { L"pc", 15 },
+	{L"r0", 0},  {L"r1", 1},   {L"r2", 2},  {L"r3", 3},   {L"r4", 4},   {L"r5", 5},   {L"r6", 6},
+	{L"r7", 7},  {L"r8", 8},   {L"r9", 9},  {L"r10", 10}, {L"r11", 11}, {L"r12", 12}, {L"r13", 13},
+	{L"sp", 13}, {L"r14", 14}, {L"lr", 14}, {L"r15", 15}, {L"pc", 15},
 };
 
 const ArmRegisterDescriptor armCopRegisters[] = {
-	{ L"c0", 0 },	{ L"c1", 1 },	{ L"c2", 2 },	{ L"c3", 3 },
-	{ L"c4", 4 },	{ L"c5", 5 },	{ L"c6", 6 },	{ L"c7", 7 },
-	{ L"c8", 8 },	{ L"c9", 9 },	{ L"c10", 10 },	{ L"c11", 11 },
-	{ L"c12", 12 },	{ L"c13", 13 },	{ L"c14", 14 },	{ L"c15", 15 },
+	{L"c0", 0}, {L"c1", 1}, {L"c2", 2},   {L"c3", 3},   {L"c4", 4},   {L"c5", 5},   {L"c6", 6},   {L"c7", 7},
+	{L"c8", 8}, {L"c9", 9}, {L"c10", 10}, {L"c11", 11}, {L"c12", 12}, {L"c13", 13}, {L"c14", 14}, {L"c15", 15},
 };
 
 const ArmRegisterDescriptor armCopNumbers[] = {
-	{ L"p0", 0 },	{ L"p1", 1 },	{ L"p2", 2 },	{ L"p3", 3 },
-	{ L"p4", 4 },	{ L"p5", 5 },	{ L"p6", 6 },	{ L"p7", 7 },
-	{ L"p8", 8 },	{ L"p9", 9 },	{ L"p10", 10 },	{ L"p11", 11 },
-	{ L"p12", 12 },	{ L"p13", 13 },	{ L"p14", 14 },	{ L"p15", 15 },
+	{L"p0", 0}, {L"p1", 1}, {L"p2", 2},   {L"p3", 3},   {L"p4", 4},   {L"p5", 5},   {L"p6", 6},   {L"p7", 7},
+	{L"p8", 8}, {L"p9", 9}, {L"p10", 10}, {L"p11", 11}, {L"p12", 12}, {L"p13", 13}, {L"p14", 14}, {L"p15", 15},
 };
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveThumb(Parser& parser, int flags)
@@ -50,7 +46,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArm(Parser& parser, int flags)
 std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 {
 	auto seq = std::make_unique<CommandSequence>();
-	seq->addCommand(std::make_unique<CDirectiveAlignFill>(4,CDirectiveAlignFill::AlignVirtual));
+	seq->addCommand(std::make_unique<CDirectiveAlignFill>(4, CDirectiveAlignFill::AlignVirtual));
 	seq->addCommand(std::make_unique<ArmPoolCommand>());
 
 	return seq;
@@ -62,8 +58,7 @@ const wchar_t* msgTemplate =
 	L".byte  0x64,0x64,0x00,0x00\n"
 	L".ascii %text%\n"
 	L".align %alignment%\n"
-	L"%after%:"
-;
+	L"%after%:";
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 {
@@ -71,18 +66,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 	if (text.isLoaded() == false)
 		return nullptr;
 
-	return parser.parseTemplate(msgTemplate, {
-		{ L"%after%", Global.symbolTable.getUniqueLabelName(true) },
-		{ L"%text%", text.toString() },
-		{ L"%alignment%", Arm.GetThumbMode() == true ? L"2" : L"4" }
-	});
+	return parser.parseTemplate(msgTemplate, {{L"%after%", Global.symbolTable.getUniqueLabelName(true)},
+											  {L"%text%", text.toString()},
+											  {L"%alignment%", Arm.GetThumbMode() == true ? L"2" : L"4"}});
 }
 
 const DirectiveMap armDirectives = {
-	{ L".thumb",	{ &parseDirectiveThumb,	0 } },
-	{ L".arm",		{ &parseDirectiveArm,	0 } },
-	{ L".pool",		{ &parseDirectivePool,	0 } },
-	{ L".msg",		{ &parseDirectiveMsg,	0 } },
+	{L".thumb", {&parseDirectiveThumb, 0}},
+	{L".arm", {&parseDirectiveArm, 0}},
+	{L".pool", {&parseDirectivePool, 0}},
+	{L".msg", {&parseDirectiveMsg, 0}},
 };
 
 std::unique_ptr<CAssemblerCommand> ArmParser::parseDirective(Parser& parser)
@@ -113,7 +106,7 @@ bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const
 
 bool ArmParser::parseRegister(Parser& parser, ArmRegisterValue& dest, int max)
 {
-	if (parseRegisterTable(parser,dest,armRegisters,ARRAY_SIZE(armRegisters)) == false)
+	if (parseRegisterTable(parser, dest, armRegisters, ARRAY_SIZE(armRegisters)) == false)
 		return false;
 
 	return dest.num <= max;
@@ -121,12 +114,12 @@ bool ArmParser::parseRegister(Parser& parser, ArmRegisterValue& dest, int max)
 
 bool ArmParser::parseCopRegister(Parser& parser, ArmRegisterValue& dest)
 {
-	return parseRegisterTable(parser,dest,armCopRegisters,ARRAY_SIZE(armCopRegisters));
+	return parseRegisterTable(parser, dest, armCopRegisters, ARRAY_SIZE(armCopRegisters));
 }
 
 bool ArmParser::parseCopNumber(Parser& parser, ArmRegisterValue& dest)
 {
-	return parseRegisterTable(parser,dest,armCopNumbers,ARRAY_SIZE(armCopNumbers));
+	return parseRegisterTable(parser, dest, armCopNumbers, ARRAY_SIZE(armCopNumbers));
 }
 
 bool ArmParser::parseRegisterList(Parser& parser, int& dest, int validMask)
@@ -136,21 +129,23 @@ bool ArmParser::parseRegisterList(Parser& parser, int& dest, int validMask)
 	dest = 0;
 	while (true)
 	{
-		if (parseRegister(parser,reg) == false)
+		if (parseRegister(parser, reg) == false)
 			return false;
 
 		if (parser.peekToken().type == TokenType::Minus)
 		{
 			parser.eatToken();
 
-			if (parseRegister(parser,reg2) == false || reg2.num < reg.num)
+			if (parseRegister(parser, reg2) == false || reg2.num < reg.num)
 				return false;
-			
+
 			for (int i = reg.num; i <= reg2.num; i++)
 			{
 				dest |= (1 << i);
 			}
-		} else {
+		}
+		else
+		{
 			dest |= (1 << reg.num);
 		}
 
@@ -169,21 +164,21 @@ bool ArmParser::parseImmediate(Parser& parser, Expression& dest)
 
 	// check if it really is an immediate
 	ArmOpcodeVariables tempVars;
-	if (parsePsrTransfer(parser,tempVars,false))
+	if (parsePsrTransfer(parser, tempVars, false))
 		return false;
 
 	parser.getTokenizer()->setPosition(pos);
-	if (parseRegister(parser,tempVars.rd))
+	if (parseRegister(parser, tempVars.rd))
 		return false;
-	
+
 	parser.getTokenizer()->setPosition(pos);
-	if (parseCopNumber(parser,tempVars.rd))
+	if (parseCopNumber(parser, tempVars.rd))
 		return false;
-	
+
 	parser.getTokenizer()->setPosition(pos);
-	if (parseCopRegister(parser,tempVars.rd))
+	if (parseCopRegister(parser, tempVars.rd))
 		return false;
-	
+
 	parser.getTokenizer()->setPosition(pos);
 	dest = parser.parseExpression();
 	return dest.isLoaded();
@@ -194,23 +189,23 @@ bool ArmParser::matchSymbol(Parser& parser, wchar_t symbol, bool optional)
 	switch (symbol)
 	{
 	case '[':
-		return parser.matchToken(TokenType::LBrack,optional);
+		return parser.matchToken(TokenType::LBrack, optional);
 	case ']':
-		return parser.matchToken(TokenType::RBrack,optional);
+		return parser.matchToken(TokenType::RBrack, optional);
 	case ',':
-		return parser.matchToken(TokenType::Comma,optional);
+		return parser.matchToken(TokenType::Comma, optional);
 	case '!':
-		return parser.matchToken(TokenType::Exclamation,optional);
+		return parser.matchToken(TokenType::Exclamation, optional);
 	case '{':
-		return parser.matchToken(TokenType::LBrace,optional);
+		return parser.matchToken(TokenType::LBrace, optional);
 	case '}':
-		return parser.matchToken(TokenType::RBrace,optional);
+		return parser.matchToken(TokenType::RBrace, optional);
 	case '#':
-		return parser.matchToken(TokenType::Hash,optional);
+		return parser.matchToken(TokenType::Hash, optional);
 	case '=':
-		return parser.matchToken(TokenType::Assign,optional);
+		return parser.matchToken(TokenType::Assign, optional);
 	case '+':
-		return parser.matchToken(TokenType::Plus,optional);
+		return parser.matchToken(TokenType::Plus, optional);
 	}
 
 	return false;
@@ -236,7 +231,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 		return false;
 
 	std::wstring stringValue = shiftMode.getStringValue();
-	
+
 	bool hasNumber = isNumber(stringValue.back());
 	int64_t number;
 
@@ -247,7 +242,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 		int64_t multiplier = 1;
 		while (isNumber(stringValue.back()))
 		{
-			number += multiplier*(stringValue.back() - '0');
+			number += multiplier * (stringValue.back() - '0');
 			multiplier *= 10;
 			stringValue.pop_back();
 		}
@@ -263,29 +258,32 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 		vars.Shift.Type = 3;
 	else if (stringValue == L"rrx")
 		vars.Shift.Type = 4;
-	else 
+	else
 		return false;
 
 	if (hasNumber)
 	{
 		vars.Shift.ShiftExpression = createConstExpression(number);
 		vars.Shift.ShiftByRegister = false;
-	} else if (parseRegister(parser,vars.Shift.reg) == true)
+	}
+	else if (parseRegister(parser, vars.Shift.reg) == true)
 	{
 		if (immediateOnly)
 			return false;
 
 		vars.Shift.ShiftByRegister = true;
-	} else {
+	}
+	else
+	{
 		if (parser.peekToken().type == TokenType::Hash)
 			parser.eatToken();
-		
-		if (parseImmediate(parser,vars.Shift.ShiftExpression) == false)
+
+		if (parseImmediate(parser, vars.Shift.ShiftExpression) == false)
 			return false;
 
 		vars.Shift.ShiftByRegister = false;
 	}
-	
+
 	vars.Shift.UseShift = true;
 	return true;
 }
@@ -294,48 +292,67 @@ bool ArmParser::parsePseudoShift(Parser& parser, ArmOpcodeVariables& vars, int t
 {
 	vars.Shift.Type = type;
 
-	if (parseRegister(parser,vars.Shift.reg) == true)
+	if (parseRegister(parser, vars.Shift.reg) == true)
 	{
 		vars.Shift.ShiftByRegister = true;
-	} else {
+	}
+	else
+	{
 		if (parser.peekToken().type == TokenType::Hash)
 			parser.eatToken();
-		
-		if (parseImmediate(parser,vars.Shift.ShiftExpression) == false)
+
+		if (parseImmediate(parser, vars.Shift.ShiftExpression) == false)
 			return false;
 
 		vars.Shift.ShiftByRegister = false;
 	}
-	
+
 	vars.Shift.UseShift = true;
 	return true;
 }
 
 int ArmParser::decodeCondition(const std::wstring& text, size_t& pos)
 {
-	if (pos+2 <= text.size())
+	if (pos + 2 <= text.size())
 	{
-		wchar_t c1 = text[pos+0];
-		wchar_t c2 = text[pos+1];
+		wchar_t c1 = text[pos + 0];
+		wchar_t c2 = text[pos + 1];
 		pos += 2;
 
-		if (c1 == 'e' && c2 == 'q') return 0;
-		if (c1 == 'n' && c2 == 'e') return 1;
-		if (c1 == 'c' && c2 == 's') return 2;
-		if (c1 == 'h' && c2 == 's') return 2;
-		if (c1 == 'c' && c2 == 'c') return 3;
-		if (c1 == 'l' && c2 == 'o') return 3;
-		if (c1 == 'm' && c2 == 'i') return 4;
-		if (c1 == 'p' && c2 == 'l') return 5;
-		if (c1 == 'v' && c2 == 's') return 6;
-		if (c1 == 'v' && c2 == 'c') return 7;
-		if (c1 == 'h' && c2 == 'i') return 8;
-		if (c1 == 'l' && c2 == 's') return 9;
-		if (c1 == 'g' && c2 == 'e') return 10;
-		if (c1 == 'l' && c2 == 't') return 11;
-		if (c1 == 'g' && c2 == 't') return 12;
-		if (c1 == 'l' && c2 == 'e') return 13;
-		if (c1 == 'a' && c2 == 'l') return 14;
+		if (c1 == 'e' && c2 == 'q')
+			return 0;
+		if (c1 == 'n' && c2 == 'e')
+			return 1;
+		if (c1 == 'c' && c2 == 's')
+			return 2;
+		if (c1 == 'h' && c2 == 's')
+			return 2;
+		if (c1 == 'c' && c2 == 'c')
+			return 3;
+		if (c1 == 'l' && c2 == 'o')
+			return 3;
+		if (c1 == 'm' && c2 == 'i')
+			return 4;
+		if (c1 == 'p' && c2 == 'l')
+			return 5;
+		if (c1 == 'v' && c2 == 's')
+			return 6;
+		if (c1 == 'v' && c2 == 'c')
+			return 7;
+		if (c1 == 'h' && c2 == 'i')
+			return 8;
+		if (c1 == 'l' && c2 == 's')
+			return 9;
+		if (c1 == 'g' && c2 == 'e')
+			return 10;
+		if (c1 == 'l' && c2 == 't')
+			return 11;
+		if (c1 == 'g' && c2 == 't')
+			return 12;
+		if (c1 == 'l' && c2 == 'e')
+			return 13;
+		if (c1 == 'a' && c2 == 'l')
+			return 14;
 
 		pos -= 2;
 	}
@@ -345,20 +362,28 @@ int ArmParser::decodeCondition(const std::wstring& text, size_t& pos)
 
 bool ArmParser::decodeAddressingMode(const std::wstring& text, size_t& pos, unsigned char& dest)
 {
-	if (pos+2 > text.size())
+	if (pos + 2 > text.size())
 		return false;
 
-	wchar_t c1 = text[pos+0];	
-	wchar_t c2 = text[pos+1];
+	wchar_t c1 = text[pos + 0];
+	wchar_t c2 = text[pos + 1];
 
-	if      (c1 == 'i' && c2 == 'b') dest = ARM_AMODE_IB;
-	else if (c1 == 'i' && c2 == 'a') dest = ARM_AMODE_IA;
-	else if (c1 == 'd' && c2 == 'b') dest = ARM_AMODE_DB;
-	else if (c1 == 'd' && c2 == 'a') dest = ARM_AMODE_DA;
-	else if (c1 == 'e' && c2 == 'd') dest = ARM_AMODE_ED;
-	else if (c1 == 'f' && c2 == 'd') dest = ARM_AMODE_FD;
-	else if (c1 == 'e' && c2 == 'a') dest = ARM_AMODE_EA;
-	else if (c1 == 'f' && c2 == 'a') dest = ARM_AMODE_FA;
+	if (c1 == 'i' && c2 == 'b')
+		dest = ARM_AMODE_IB;
+	else if (c1 == 'i' && c2 == 'a')
+		dest = ARM_AMODE_IA;
+	else if (c1 == 'd' && c2 == 'b')
+		dest = ARM_AMODE_DB;
+	else if (c1 == 'd' && c2 == 'a')
+		dest = ARM_AMODE_DA;
+	else if (c1 == 'e' && c2 == 'd')
+		dest = ARM_AMODE_ED;
+	else if (c1 == 'f' && c2 == 'd')
+		dest = ARM_AMODE_FD;
+	else if (c1 == 'e' && c2 == 'a')
+		dest = ARM_AMODE_EA;
+	else if (c1 == 'f' && c2 == 'a')
+		dest = ARM_AMODE_FA;
 	else
 		return false;
 
@@ -401,24 +426,24 @@ bool ArmParser::decodeArmOpcode(const std::wstring& name, const tArmOpcode& opco
 	{
 		switch (*encoding++)
 		{
-		case 'C':	// condition
-			vars.Opcode.c = decodeCondition(name,pos);
+		case 'C': // condition
+			vars.Opcode.c = decodeCondition(name, pos);
 			break;
-		case 'S':	// set flag
-			decodeS(name,pos,vars.Opcode.s);
+		case 'S': // set flag
+			decodeS(name, pos, vars.Opcode.s);
 			break;
-		case 'A':	// addressing mode
-			CHECK(decodeAddressingMode(name,pos,vars.Opcode.a));
+		case 'A': // addressing mode
+			CHECK(decodeAddressingMode(name, pos, vars.Opcode.a));
 			break;
-		case 'X':	// x flag
-			CHECK(decodeXY(name,pos,vars.Opcode.x));
+		case 'X': // x flag
+			CHECK(decodeXY(name, pos, vars.Opcode.x));
 			break;
-		case 'Y':	// y flag
-			CHECK(decodeXY(name,pos,vars.Opcode.y));
+		case 'Y': // y flag
+			CHECK(decodeXY(name, pos, vars.Opcode.y));
 			break;
 		default:
 			CHECK(pos < name.size());
-			CHECK(*(encoding-1) == name[pos++]);
+			CHECK(*(encoding - 1) == name[pos++]);
 			break;
 		}
 	}
@@ -466,15 +491,18 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 
 	const std::wstring stringValue = token.getStringValue();
 	size_t pos = 0;
-	if (startsWith(stringValue,L"cpsr"))
+	if (startsWith(stringValue, L"cpsr"))
 	{
 		vars.PsrData.spsr = false;
 		pos = 4;
-	} else if (startsWith(stringValue,L"spsr"))
+	}
+	else if (startsWith(stringValue, L"spsr"))
 	{
 		vars.PsrData.spsr = true;
 		pos = 4;
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 
@@ -490,48 +518,48 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 	if (stringValue[pos++] != '_')
 		return false;
 
-	if (startsWith(stringValue,L"ctl",pos))
+	if (startsWith(stringValue, L"ctl", pos))
 	{
 		vars.PsrData.field = 1;
-		return pos+3 == stringValue.size();
-	} 
-	
-	if (startsWith(stringValue,L"flg",pos))
+		return pos + 3 == stringValue.size();
+	}
+
+	if (startsWith(stringValue, L"flg", pos))
 	{
 		vars.PsrData.field = 8;
-		return pos+3 == stringValue.size();
+		return pos + 3 == stringValue.size();
 	}
-	
+
 	vars.PsrData.field = 0;
 	for (int i = 0; i < 4; i++)
 	{
 		if (pos == stringValue.size())
 			break;
 
-		switch(stringValue[pos++])
+		switch (stringValue[pos++])
 		{
 		case 'f':
 			if (vars.PsrData.field & 8)
-				return false;	// can only appear once
+				return false; // can only appear once
 			vars.PsrData.field |= 8;
 			break;
 		case 's':
 			if (vars.PsrData.field & 4)
-				return false;	// can only appear once
+				return false; // can only appear once
 			vars.PsrData.field |= 4;
 			break;
 		case 'x':
 			if (vars.PsrData.field & 2)
-				return false;	// can only appear once
+				return false; // can only appear once
 			vars.PsrData.field |= 2;
 			break;
 		case 'c':
 			if (vars.PsrData.field & 1)
-				return false;	// can only appear once
+				return false; // can only appear once
 			vars.PsrData.field |= 1;
 			break;
 		default:
-			return false;	// has to be one of those
+			return false; // has to be one of those
 		}
 	}
 
@@ -543,7 +571,7 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 	const char* encoding = opcode.mask;
 
 	ArmRegisterValue tempRegister;
-	
+
 	vars.Shift.UseShift = false;
 	vars.Shift.UseFinal = false;
 	vars.psr = false;
@@ -561,69 +589,69 @@ bool ArmParser::parseArmParameters(Parser& parser, const tArmOpcode& opcode, Arm
 		switch (*encoding++)
 		{
 		case 'd': // register
-			CHECK(parseRegister(parser,vars.rd,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser, vars.rd, *encoding++ == '1' ? 14 : 15));
 			break;
 		case 's': // register
-			CHECK(parseRegister(parser,vars.rs,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser, vars.rs, *encoding++ == '1' ? 14 : 15));
 			break;
 		case 'n': // register
-			CHECK(parseRegister(parser,vars.rn,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser, vars.rn, *encoding++ == '1' ? 14 : 15));
 			break;
 		case 'm': // register
-			CHECK(parseRegister(parser,vars.rm,*encoding++ == '1' ? 14 : 15));
+			CHECK(parseRegister(parser, vars.rm, *encoding++ == '1' ? 14 : 15));
 			break;
 		case 'D': // cop register
-			CHECK(parseCopRegister(parser,vars.CopData.cd));
+			CHECK(parseCopRegister(parser, vars.CopData.cd));
 			break;
 		case 'N': // cop register
-			CHECK(parseCopRegister(parser,vars.CopData.cn));
+			CHECK(parseCopRegister(parser, vars.CopData.cn));
 			break;
 		case 'M': // cop register
-			CHECK(parseCopRegister(parser,vars.CopData.cm));
+			CHECK(parseCopRegister(parser, vars.CopData.cm));
 			break;
-		case 'W':	// writeback
-			parseWriteback(parser,vars.writeback);
+		case 'W': // writeback
+			parseWriteback(parser, vars.writeback);
 			break;
-		case 'p':	// psr
-			parsePsr(parser,vars.psr);
+		case 'p': // psr
+			parsePsr(parser, vars.psr);
 			break;
-		case 'P':	// msr/mrs psr data
-			CHECK(parsePsrTransfer(parser,vars,*encoding++ == '1'));
+		case 'P': // msr/mrs psr data
+			CHECK(parsePsrTransfer(parser, vars, *encoding++ == '1'));
 			break;
-		case 'R':	// register list
-			CHECK(parseRegisterList(parser,vars.rlist,0xFFFF));
+		case 'R': // register list
+			CHECK(parseRegisterList(parser, vars.rlist, 0xFFFF));
 			break;
-		case 'S':	// shift
-			CHECK(parseShift(parser,vars,*encoding++ == '1'));
+		case 'S': // shift
+			CHECK(parseShift(parser, vars, *encoding++ == '1'));
 			break;
-		case 'I':	// immediate
+		case 'I': // immediate
 		case 'i':
-			CHECK(parseImmediate(parser,vars.ImmediateExpression));
+			CHECK(parseImmediate(parser, vars.ImmediateExpression));
 			vars.ImmediateBitLen = 32;
 			break;
-		case 'j':	// variable bit immediate
-			CHECK(parseImmediate(parser,vars.ImmediateExpression));
+		case 'j': // variable bit immediate
+			CHECK(parseImmediate(parser, vars.ImmediateExpression));
 			vars.ImmediateBitLen = *encoding++;
 			break;
 		case 'X': // cop number
-			CHECK(parseCopNumber(parser,vars.CopData.pn));
+			CHECK(parseCopNumber(parser, vars.CopData.pn));
 			break;
-		case 'Y':	// cop opcode number
-			CHECK(parseImmediate(parser,vars.CopData.CpopExpression));
+		case 'Y': // cop opcode number
+			CHECK(parseImmediate(parser, vars.CopData.CpopExpression));
 			vars.ImmediateBitLen = 4;
 			break;
-		case 'Z':	// cop info number
-			CHECK(parseImmediate(parser,vars.CopData.CpinfExpression));
+		case 'Z': // cop info number
+			CHECK(parseImmediate(parser, vars.CopData.CpinfExpression));
 			vars.ImmediateBitLen = 3;
 			break;
-		case 'z':	// shift for pseudo opcodes
-			CHECK(parsePseudoShift(parser,vars,*encoding++));
+		case 'z': // shift for pseudo opcodes
+			CHECK(parsePseudoShift(parser, vars, *encoding++));
 			break;
-		case 'v':	// sign for register index parameter
-			parseSign(parser,vars.SignPlus);
+		case 'v': // sign for register index parameter
+			parseSign(parser, vars.SignPlus);
 			break;
 		default:
-			CHECK(matchSymbol(parser,*(encoding-1),optional));
+			CHECK(matchSymbol(parser, *(encoding - 1), optional));
 			break;
 		}
 	}
@@ -638,7 +666,7 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
 
-	const Token &token = parser.nextToken();
+	const Token& token = parser.nextToken();
 
 	ArmOpcodeVariables vars;
 	bool paramFail = false;
@@ -649,14 +677,14 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 		if ((ArmOpcodes[z].flags & ARM_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
-		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars) == true)
+		if (decodeArmOpcode(stringValue, ArmOpcodes[z], vars) == true)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseArmParameters(parser,ArmOpcodes[z],vars) == true)
+			if (parseArmParameters(parser, ArmOpcodes[z], vars) == true)
 			{
 				// success, return opcode
-				return std::make_unique<CArmInstruction>(ArmOpcodes[z],vars);
+				return std::make_unique<CArmInstruction>(ArmOpcodes[z], vars);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -665,9 +693,9 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 	}
 
 	if (paramFail == true)
-		parser.printError(token,L"ARM parameter failure");
+		parser.printError(token, L"ARM parameter failure");
 	else
-		parser.printError(token,L"Invalid ARM opcode");
+		parser.printError(token, L"Invalid ARM opcode");
 
 	return nullptr;
 }
@@ -688,43 +716,43 @@ bool ArmParser::parseThumbParameters(Parser& parser, const tThumbOpcode& opcode,
 		switch (*encoding++)
 		{
 		case 'd': // register
-			CHECK(parseRegister(parser,vars.rd,7));
+			CHECK(parseRegister(parser, vars.rd, 7));
 			break;
 		case 's': // register
-			CHECK(parseRegister(parser,vars.rs,7));
+			CHECK(parseRegister(parser, vars.rs, 7));
 			break;
 		case 'n': // register
-			CHECK(parseRegister(parser,vars.rn,7));
+			CHECK(parseRegister(parser, vars.rn, 7));
 			break;
 		case 'o': // register
-			CHECK(parseRegister(parser,vars.ro,7));
+			CHECK(parseRegister(parser, vars.ro, 7));
 			break;
 		case 'D': // register
-			CHECK(parseRegister(parser,vars.rd,15));
+			CHECK(parseRegister(parser, vars.rd, 15));
 			break;
 		case 'S': // register
-			CHECK(parseRegister(parser,vars.rs,15));
+			CHECK(parseRegister(parser, vars.rs, 15));
 			break;
 		case 'r': // forced register
-			CHECK(parseRegister(parser,tempRegister,15));
+			CHECK(parseRegister(parser, tempRegister, 15));
 			CHECK(*encoding++ == tempRegister.num);
 			break;
-		case 'R':	// register list
+		case 'R': // register list
 			value = encoding[0] | (encoding[1] << 8);
-			CHECK(parseRegisterList(parser,vars.rlist,value));
+			CHECK(parseRegisterList(parser, vars.rlist, value));
 			encoding += 2;
 			break;
-		case 'I':	// immediate
+		case 'I': // immediate
 		case 'i':
-			CHECK(parseImmediate(parser,vars.ImmediateExpression));
+			CHECK(parseImmediate(parser, vars.ImmediateExpression));
 			vars.ImmediateBitLen = *encoding++;
 			break;
 		default:
-			CHECK(matchSymbol(parser,*(encoding-1),optional));
+			CHECK(matchSymbol(parser, *(encoding - 1), optional));
 			break;
 		}
 	}
-	
+
 	// the next token has to be a separator, else the parameters aren't
 	// completely parsed
 	return parser.nextToken().type == TokenType::Separator;
@@ -735,7 +763,7 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
 
-	const Token &token = parser.nextToken();
+	const Token& token = parser.nextToken();
 
 	ThumbOpcodeVariables vars;
 	bool paramFail = false;
@@ -749,11 +777,11 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 		if (stringValue == ThumbOpcodes[z].name)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
-			
-			if (parseThumbParameters(parser,ThumbOpcodes[z],vars) == true)
+
+			if (parseThumbParameters(parser, ThumbOpcodes[z], vars) == true)
 			{
 				// success, return opcode
-				return std::make_unique<CThumbInstruction>(ThumbOpcodes[z],vars);
+				return std::make_unique<CThumbInstruction>(ThumbOpcodes[z], vars);
 			}
 
 			parser.getTokenizer()->setPosition(tokenPos);
@@ -762,9 +790,9 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 	}
 
 	if (paramFail == true)
-		parser.printError(token,L"THUMB parameter failure in %S",stringValue);
+		parser.printError(token, L"THUMB parameter failure in %S", stringValue);
 	else
-		parser.printError(token,L"Invalid THUMB opcode: %S",stringValue);
-	
+		parser.printError(token, L"Invalid THUMB opcode: %S", stringValue);
+
 	return nullptr;
 }

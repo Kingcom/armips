@@ -8,8 +8,8 @@
 
 static void printUsage(std::wstring executableName)
 {
-	Logger::printLine(L"armips assembler v%d.%d.%d (%s %s) by Kingcom",
-		ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
+	Logger::printLine(L"armips assembler v%d.%d.%d (%s %s) by Kingcom", ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR,
+					  ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
 	Logger::printLine(L"Usage: %s [optional parameters] <FILE>", executableName);
 	Logger::printLine(L"");
 	Logger::printLine(L"Optional parameters:");
@@ -71,7 +71,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 			{
 				EquationDefinition def;
 
-				def.name = arguments[argpos+1];
+				def.name = arguments[argpos + 1];
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
 				if (!checkValidLabelName(def.name))
@@ -81,8 +81,8 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 				}
 
 				auto it = std::find_if(settings.equList.begin(), settings.equList.end(),
-						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
-				if(it != settings.equList.end())
+									   [&def](EquationDefinition x) -> bool { return def.name == x.name; });
+				if (it != settings.equList.end())
 				{
 					Logger::printError(Logger::Error, L"Equation name \"%s\" already defined", def.name);
 					return false;
@@ -96,7 +96,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 			{
 				EquationDefinition def;
 
-				def.name = arguments[argpos+1];
+				def.name = arguments[argpos + 1];
 				std::transform(def.name.begin(), def.name.end(), def.name.begin(), ::towlower);
 
 				if (!checkValidLabelName(def.name))
@@ -106,8 +106,8 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 				}
 
 				auto it = std::find_if(settings.equList.begin(), settings.equList.end(),
-						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
-				if(it != settings.equList.end())
+									   [&def](EquationDefinition x) -> bool { return def.name == x.name; });
+				if (it != settings.equList.end())
 				{
 					Logger::printError(Logger::Error, L"Equation name \"%s\" already defined", def.name);
 					return false;
@@ -124,7 +124,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 			}
 			else if (arguments[argpos] == L"-root" && argpos + 1 < arguments.size())
 			{
-				if(!changeDirectory(arguments[argpos + 1]))
+				if (!changeDirectory(arguments[argpos + 1]))
 				{
 					Logger::printError(Logger::Error, L"Could not open directory \"%s\"", arguments[argpos + 1]);
 					return false;
@@ -146,8 +146,8 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 				}
 
 				auto it = std::find_if(settings.labels.begin(), settings.labels.end(),
-						[&def](LabelDefinition x) -> bool {return def.name == x.name;});
-				if(it != settings.labels.end())
+									   [&def](LabelDefinition x) -> bool { return def.name == x.name; });
+				if (it != settings.labels.end())
 				{
 					Logger::printError(Logger::Error, L"Label name \"%s\" already defined", def.name);
 					return false;
@@ -164,20 +164,23 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 				settings.labels.push_back(def);
 				argpos += 3;
 			}
-			else {
+			else
+			{
 				Logger::printError(Logger::Error, L"Invalid command line argument \"%s\"\n", arguments[argpos]);
 				printUsage(arguments[0]);
 				return false;
 			}
 		}
-		else {
+		else
+		{
 			// only allow one input filename
 			if (settings.inputFileName == L"")
 			{
 				settings.inputFileName = arguments[argpos];
 				argpos++;
 			}
-			else {
+			else
+			{
 				Logger::printError(Logger::Error, L"Multiple input assembly files specified\n");
 				printUsage(arguments[0]);
 				return false;

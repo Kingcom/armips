@@ -35,13 +35,21 @@ struct ParserMacro
 	size_t counter;
 };
 
-enum class ConditionalResult { Unknown, True, False };
+enum class ConditionalResult
+{
+	Unknown,
+	True,
+	False
+};
 
 class Parser
 {
 public:
 	Parser();
-	bool atEnd() { return entries.back().tokenizer->atEnd(); }
+	bool atEnd()
+	{
+		return entries.back().tokenizer->atEnd();
+	}
 
 	void addEquation(const Token& start, const std::wstring& name, const std::wstring& value);
 
@@ -49,36 +57,68 @@ public:
 	bool parseExpressionList(std::vector<Expression>& list, int min = -1, int max = -1);
 	bool parseIdentifier(std::wstring& dest);
 	std::unique_ptr<CAssemblerCommand> parseCommand();
-	std::unique_ptr<CAssemblerCommand> parseCommandSequence(wchar_t indicator = 0, const std::initializer_list<const wchar_t*> terminators = {});
+	std::unique_ptr<CAssemblerCommand>
+	parseCommandSequence(wchar_t indicator = 0, const std::initializer_list<const wchar_t*> terminators = {});
 	std::unique_ptr<CAssemblerCommand> parseFile(TextFile& file, bool virtualFile = false);
 	std::unique_ptr<CAssemblerCommand> parseString(const std::wstring& text);
-	std::unique_ptr<CAssemblerCommand> parseTemplate(const std::wstring& text, const std::initializer_list<AssemblyTemplateArgument> variables = {});
-	std::unique_ptr<CAssemblerCommand> parseDirective(const DirectiveMap &directiveSet);
+	std::unique_ptr<CAssemblerCommand>
+	parseTemplate(const std::wstring& text, const std::initializer_list<AssemblyTemplateArgument> variables = {});
+	std::unique_ptr<CAssemblerCommand> parseDirective(const DirectiveMap& directiveSet);
 	bool matchToken(TokenType type, bool optional = false);
 
-	Tokenizer* getTokenizer() { return entries.back().tokenizer; };
-	const Token& peekToken(int ahead = 0) { return getTokenizer()->peekToken(ahead); };
-	const Token& nextToken() { return getTokenizer()->nextToken(); };
-	void eatToken() { getTokenizer()->eatToken(); };
-	void eatTokens(int num) { getTokenizer()->eatTokens(num); };
-	
-	void pushConditionalResult(ConditionalResult cond);
-	void popConditionalResult() { conditionStack.pop_back(); };
-	bool isInsideTrueBlock() { return conditionStack.back().inTrueBlock; }
-	bool isInsideUnknownBlock() { return conditionStack.back().inUnknownBlock; }
-
-	void printError(const Token &token, const std::wstring &text);
-
-	template <typename... Args>
-	void printError(const Token& token, const wchar_t* text, const Args&... args)
+	Tokenizer* getTokenizer()
 	{
-		printError(token, tfm::format(text,args...));
+		return entries.back().tokenizer;
+	};
+	const Token& peekToken(int ahead = 0)
+	{
+		return getTokenizer()->peekToken(ahead);
+	};
+	const Token& nextToken()
+	{
+		return getTokenizer()->nextToken();
+	};
+	void eatToken()
+	{
+		getTokenizer()->eatToken();
+	};
+	void eatTokens(int num)
+	{
+		getTokenizer()->eatTokens(num);
+	};
+
+	void pushConditionalResult(ConditionalResult cond);
+	void popConditionalResult()
+	{
+		conditionStack.pop_back();
+	};
+	bool isInsideTrueBlock()
+	{
+		return conditionStack.back().inTrueBlock;
+	}
+	bool isInsideUnknownBlock()
+	{
+		return conditionStack.back().inUnknownBlock;
 	}
 
-	bool hasError() { return error; }
+	void printError(const Token& token, const std::wstring& text);
+
+	template <typename... Args> void printError(const Token& token, const wchar_t* text, const Args&... args)
+	{
+		printError(token, tfm::format(text, args...));
+	}
+
+	bool hasError()
+	{
+		return error;
+	}
 	void updateFileInfo();
+
 protected:
-	void clearError() { error = false; }
+	void clearError()
+	{
+		error = false;
+	}
 	std::unique_ptr<CAssemblerCommand> handleError();
 
 	std::unique_ptr<CAssemblerCommand> parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name = L"");
@@ -96,7 +136,7 @@ protected:
 	};
 
 	std::vector<FileEntry> entries;
-	std::map<std::wstring,ParserMacro> macros;
+	std::map<std::wstring, ParserMacro> macros;
 	std::set<std::wstring> macroLabels;
 	bool initializingMacro;
 	bool error;
@@ -122,19 +162,18 @@ struct TokenSequenceValue
 		type = TokenType::Identifier;
 		textValue = text;
 	}
-	
+
 	TokenSequenceValue(int64_t num)
 	{
 		type = TokenType::Integer;
 		intValue = num;
 	}
-	
+
 	TokenSequenceValue(double num)
 	{
 		type = TokenType::Float;
 		floatValue = num;
 	}
-	
 
 	TokenType type;
 	union
@@ -153,7 +192,11 @@ class TokenSequenceParser
 public:
 	void addEntry(int result, TokenSequence tokens, TokenValueSequence values);
 	bool parse(Parser& parser, int& result);
-	size_t getEntryCount() { return entries.size(); }
+	size_t getEntryCount()
+	{
+		return entries.size();
+	}
+
 private:
 	struct Entry
 	{

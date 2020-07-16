@@ -40,7 +40,7 @@ private:
 		int64_t fileID;
 		int64_t position;
 
-		inline bool operator <(const Allocations::Key &other) const
+		inline bool operator<(const Allocations::Key& other) const
 		{
 			return std::tie(fileID, position) < std::tie(other.fileID, other.position);
 		}
@@ -52,8 +52,8 @@ private:
 		bool usesFill;
 	};
 
-	static void collectAreaStats(AllocationStats &stats);
-	static void collectPoolStats(AllocationStats &stats);
+	static void collectAreaStats(AllocationStats& stats);
+	static void collectPoolStats(AllocationStats& stats);
 
 	static std::map<Key, Usage> allocations;
 	static std::map<Key, int64_t> pools;

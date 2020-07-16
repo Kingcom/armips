@@ -24,19 +24,19 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 	if (Global.memoryMode == false && Global.FileInfo.FileList.size() > 0)
 	{
 		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-		position = tfm::format(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
+		position = tfm::format(L"%s(%d) ", fileName, Global.FileInfo.LineNumber);
 	}
 
 	switch (type)
 	{
 	case Warning:
-		return tfm::format(L"%swarning: %s",position,text);
+		return tfm::format(L"%swarning: %s", position, text);
 	case Error:
-		return tfm::format(L"%serror: %s",position,text);
+		return tfm::format(L"%serror: %s", position, text);
 	case FatalError:
-		return tfm::format(L"%sfatal error: %s",position,text);
+		return tfm::format(L"%sfatal error: %s", position, text);
 	case Notice:
-		return tfm::format(L"%snotice: %s",position,text);
+		return tfm::format(L"%snotice: %s", position, text);
 	}
 
 	return L"";
@@ -91,7 +91,7 @@ void Logger::printLine(const std::string& text)
 		return;
 
 	std::cout << text << std::endl;
-	
+
 #if defined(_MSC_VER) && defined(_DEBUG)
 	OutputDebugStringA(text.c_str());
 	OutputDebugStringA("\n");
@@ -104,7 +104,7 @@ void Logger::print(const std::wstring& text)
 		return;
 
 	std::wcout << text;
-	
+
 #if defined(_MSC_VER) && defined(_DEBUG)
 	OutputDebugStringW(text.c_str());
 #endif
@@ -115,7 +115,7 @@ void Logger::printError(ErrorType type, const std::wstring& text)
 	if (suppressLevel)
 		return;
 
-	std::wstring errorText = formatError(type,text.c_str());
+	std::wstring errorText = formatError(type, text.c_str());
 	errors.push_back(errorText);
 
 	if (!silent)
@@ -129,7 +129,7 @@ void Logger::printError(ErrorType type, const wchar_t* text)
 	if (suppressLevel)
 		return;
 
-	std::wstring errorText = formatError(type,text);
+	std::wstring errorText = formatError(type, text);
 	errors.push_back(errorText);
 
 	if (!silent)
@@ -145,7 +145,7 @@ void Logger::queueError(ErrorType type, const std::wstring& text)
 
 	QueueEntry entry;
 	entry.type = type;
-	entry.text = formatError(type,text.c_str());
+	entry.text = formatError(type, text.c_str());
 	queue.push_back(entry);
 }
 
@@ -156,7 +156,7 @@ void Logger::queueError(ErrorType type, const wchar_t* text)
 
 	QueueEntry entry;
 	entry.type = type;
-	entry.text = formatError(type,text);
+	entry.text = formatError(type, text);
 	queue.push_back(entry);
 }
 
@@ -179,7 +179,7 @@ void TempData::start()
 	{
 		if (file.open(TextFile::Write) == false)
 		{
-			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName());
+			Logger::printError(Logger::Error, L"Could not open temp file %s.", file.getFileName());
 			return;
 		}
 
@@ -188,13 +188,13 @@ void TempData::start()
 		size_t labelCount = Global.symbolTable.getLabelCount();
 		size_t equCount = Global.symbolTable.getEquationCount();
 
-		file.writeFormat(L"; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
-		file.writeFormat(L"; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
-		file.writeFormat(L"; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
-		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
+		file.writeFormat(L"; %d %S included\n", fileCount, fileCount == 1 ? "file" : "files");
+		file.writeFormat(L"; %d %S\n", lineCount, lineCount == 1 ? "line" : "lines");
+		file.writeFormat(L"; %d %S\n", labelCount, labelCount == 1 ? "label" : "labels");
+		file.writeFormat(L"; %d %S\n\n", equCount, equCount == 1 ? "equation" : "equations");
 		for (size_t i = 0; i < fileCount; i++)
 		{
-			file.writeFormat(L"; %S\n",Global.FileInfo.FileList[i]);
+			file.writeFormat(L"; %S\n", Global.FileInfo.FileList[i]);
 		}
 		file.writeLine("");
 	}
@@ -216,8 +216,7 @@ void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
 		while (str.size() < 70)
 			str += ' ';
 
-		str += tfm::format(L"; %S line %d",
-			Global.FileInfo.FileList[Global.FileInfo.FileNum],Global.FileInfo.LineNumber);
+		str += tfm::format(L"; %S line %d", Global.FileInfo.FileList[Global.FileInfo.FileNum], Global.FileInfo.LineNumber);
 
 		file.writeLine(str);
 	}
