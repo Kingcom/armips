@@ -645,6 +645,8 @@ ExpressionValue expLabelFuncHeaderSize(const std::wstring& funcName, const std::
 	return ExpressionValue(g_fileManager->getHeaderSize());
 }
 
+ // clang-format off
+
 const ExpressionFunctionMap expressionFunctions = {
 	{ L"version",		{ &expFuncVersion,			0,	0,	ExpFuncSafety::Safe } },
 	{ L"endianness",	{ &expFuncEndianness,		0,	0,	ExpFuncSafety::Unsafe } },

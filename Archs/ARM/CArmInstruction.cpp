@@ -356,7 +356,8 @@ void CArmInstruction::FormatOpcode(char* Dest, const char* Source) const
 
 void CArmInstruction::FormatInstruction(const char* encoding, char* dest) const
 {
-/*	while (*encoding != 0)
+#if 0
+	while (*encoding != 0)
 	{
 		switch (*encoding)
 		{
@@ -452,7 +453,8 @@ void CArmInstruction::FormatInstruction(const char* encoding, char* dest) const
 			break;
 		}
 	}
-	*dest = 0;*/
+	*dest = 0;
+#endif
 }
 
 void CArmInstruction::writeTempData(TempData& tempData) const

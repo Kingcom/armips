@@ -21,6 +21,8 @@ ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<E
 	return ExpressionValue(isThumb ? INT64_C(1) : INT64_C(0));
 }
 
+// clang-format off
+
 const ExpressionFunctionMap armExpressionFunctions = {
 	{ L"isarm",			{ &expFuncIsArm,			0,	0,	ExpFuncSafety::Safe } },
 	{ L"isthumb",		{ &expFuncIsThumb,			0,	0,	ExpFuncSafety::Safe } },

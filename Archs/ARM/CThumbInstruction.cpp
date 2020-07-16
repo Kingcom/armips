@@ -293,7 +293,8 @@ void CThumbInstruction::Encode() const
 
 void CThumbInstruction::FormatInstruction(const char* encoding, char* dest) const
 {
-/*	while (*encoding != 0)
+#if 0
+	while (*encoding != 0)
 	{
 		switch (*encoding)
 		{
@@ -339,7 +340,8 @@ void CThumbInstruction::FormatInstruction(const char* encoding, char* dest) cons
 			break;
 		}
 	}
-	*dest = 0;*/
+	*dest = 0;
+#endif
 }
 
 void CThumbInstruction::writeTempData(TempData& tempData) const

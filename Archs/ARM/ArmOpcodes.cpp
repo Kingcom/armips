@@ -4,6 +4,7 @@
 #include "Archs/ARM/CArmInstruction.h"
 #include "Core/Common.h"
 
+// clang-format off
 
 const unsigned char LdmModes[8] = { 3,1,2,0,3,1,2,0 };
 const unsigned char StmModes[8] = { 3,1,2,0,0,2,1,3 };

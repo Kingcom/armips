@@ -13,6 +13,8 @@
 
 #define CHECK(exp) if (!(exp)) return false;
 
+// clang-format off
+
 const MipsRegisterDescriptor mipsRegisters[] = {
 	{ L"r0", 0 },		{ L"zero", 0},		{ L"at", 1 },		{ L"r1", 1 },
 	{ L"v0", 2 },		{ L"r2", 2 },		{ L"v1", 3 },		{ L"r3", 3 },
@@ -126,6 +128,8 @@ const MipsRegisterDescriptor mipsRspVectorRegisters[] = {
 	{ L"v26", 26 },		{ L"v27", 27 },		{ L"v28", 28 },		{ L"v29", 29 },
 	{ L"v30", 30 },		{ L"v31", 31 },
 };
+
+// clang-format on
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveResetDelay(Parser& parser, int flags)
 {

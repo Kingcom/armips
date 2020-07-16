@@ -590,6 +590,8 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroRotate(Parser& parser, MipsR
 	});
 }
 
+// clang-format off
+
 /* Placeholders
 	i = i1 = 16 bit immediate
 	I = i2 = 32 bit immediate

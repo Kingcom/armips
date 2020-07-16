@@ -25,6 +25,8 @@ ExpressionValue expFuncLo(const std::wstring& funcName, const std::vector<Expres
 	return ExpressionValue((int64_t)(int16_t)(value & 0xFFFF));
 }
 
+// clang-format off
+
 const ExpressionFunctionMap mipsExpressionFunctions = {
 	{ L"lo",			{ &expFuncLo,				1,	1,	ExpFuncSafety::Safe } },
 	{ L"hi",			{ &expFuncHi,				1,	1,	ExpFuncSafety::Safe } },

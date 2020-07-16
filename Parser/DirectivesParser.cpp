@@ -664,6 +664,8 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 	return parser.parseFile(f);
 }
 
+// clang-format off
+
 const DirectiveMap directives = {
 	{ L".open",				{ &parseDirectiveOpen,				DIRECTIVE_NOTINMEMORY } },
 	{ L".openfile",			{ &parseDirectiveOpen,				DIRECTIVE_NOTINMEMORY } },

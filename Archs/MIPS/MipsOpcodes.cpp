@@ -1,5 +1,7 @@
 #include "Archs/MIPS/MipsOpcodes.h"
 
+// clang-format off
+
 const tMipsOpcode MipsOpcodes[] = {
 //     31---------26---------------------------------------------------0
 //     |  opcode   |                                                   |

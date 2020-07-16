@@ -3,6 +3,8 @@
 #include "Archs/ARM/Arm.h"
 #include "Core/Common.h"
 
+// clang-format off
+
 /*	Placeholders:
 	d	register
 	s	register
