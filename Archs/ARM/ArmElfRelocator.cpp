@@ -1,8 +1,10 @@
-#include "ArmElfRelocator.h"
-#include "Util/Util.h"
-#include "Arm.h"
+#include "Archs/ARM/ArmElfRelocator.h"
+
+#include "Archs/ARM/Arm.h"
 #include "Core/Common.h"
 #include "Parser/Parser.h"
+#include "Util/Util.h"
+
 #include <algorithm>
 
 #include <tinyformat.h>

@@ -1,10 +1,11 @@
 #include "Commands/CAssemblerLabel.h"
+
+#include "Archs/ARM/Arm.h"
 #include "Core/Common.h"
-#include "Util/Util.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
-#include "Archs/ARM/Arm.h"
+#include "Util/Util.h"
 
 CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName)
 {

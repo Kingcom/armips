@@ -1,6 +1,7 @@
+#include "Archs/MIPS/MipsExpressionFunctions.h"
+
 #include "Core/Expression.h"
 #include "Core/ExpressionFunctions.h"
-#include "MipsExpressionFunctions.h"
 
 #define GET_PARAM(params,index,dest) \
 	if (getExpFuncParameter(params,index,dest,funcName,false) == false) \

@@ -1,6 +1,7 @@
 #include "Util/EncodingTable.h"
-#include "Util/Util.h"
+
 #include "Core/Common.h"
+#include "Util/Util.h"
 
 #define MAXHEXLENGTH 32
 

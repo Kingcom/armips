@@ -1,14 +1,15 @@
-#include "Arm.h"
-#include "ArmParser.h"
-#include "CArmInstruction.h"
-#include "CThumbInstruction.h"
-#include "Parser/Parser.h"
-#include "Parser/ExpressionParser.h"
-#include "Parser/DirectivesParser.h"
-#include "Util/Util.h"
-#include "Core/Common.h"
+#include "Archs/ARM/ArmParser.h"
+
+#include "Archs/ARM/Arm.h"
+#include "Archs/ARM/CArmInstruction.h"
+#include "Archs/ARM/CThumbInstruction.h"
 #include "Commands/CDirectiveFile.h"
 #include "Commands/CommandSequence.h"
+#include "Core/Common.h"
+#include "Parser/DirectivesParser.h"
+#include "Parser/ExpressionParser.h"
+#include "Parser/Parser.h"
+#include "Util/Util.h"
 
 #define CHECK(exp) if (!(exp)) return false;
 

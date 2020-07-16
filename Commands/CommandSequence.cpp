@@ -1,4 +1,4 @@
-#include "CommandSequence.h"
+#include "Commands/CommandSequence.h"
 
 CommandSequence::CommandSequence()
 	: CAssemblerCommand()

@@ -1,10 +1,11 @@
-#include "CMipsInstruction.h"
+#include "Archs/MIPS/CMipsInstruction.h"
+
+#include "Archs/MIPS/Mips.h"
+#include "Archs/MIPS/MipsOpcodes.h"
+#include "Archs/MIPS/MipsParser.h"
 #include "Core/Common.h"
-#include "Mips.h"
-#include "MipsOpcodes.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
-#include "MipsParser.h"
 
 CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers)
 {

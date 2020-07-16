@@ -1,7 +1,8 @@
-#include "CThumbInstruction.h"
+#include "Archs/ARM/CThumbInstruction.h"
+
+#include "Archs/ARM/Arm.h"
+#include "Archs/ARM/ThumbOpcodes.h"
 #include "Core/Common.h"
-#include "Arm.h"
-#include "ThumbOpcodes.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Util/Util.h"

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-
 #include "Core/ELF/ElfFile.h"
+
+#include <memory>
 
 struct ElfRelocatorCtor
 {

@@ -1,5 +1,6 @@
-#include "Archs/Architecture.h"
 #include "Commands/CDirectiveData.h"
+
+#include "Archs/Architecture.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"

@@ -1,7 +1,8 @@
+#include "Archs/MIPS/MipsElfFile.h"
+
 #include "Archs/MIPS/Mips.h"
-#include "MipsElfFile.h"
-#include "Core/Misc.h"
 #include "Core/Common.h"
+#include "Core/Misc.h"
 #include "Core/SymbolData.h"
 #include "Util/CRC.h"
 #include "Util/Util.h"

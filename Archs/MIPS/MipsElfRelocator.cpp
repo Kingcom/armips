@@ -1,5 +1,6 @@
+#include "Archs/MIPS/MipsElfRelocator.h"
+
 #include "Commands/CAssemblerCommand.h"
-#include "MipsElfRelocator.h"
 #include "Core/Common.h"
 #include "Parser/Parser.h"
 

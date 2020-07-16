@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-
 #include "Commands/CAssemblerCommand.h"
+
+#include <memory>
 
 struct MipsImmediateData;
 struct MipsRegisterData;

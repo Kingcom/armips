@@ -1,13 +1,15 @@
-#include "Assembler.h"
-#include "Core/Common.h"
+#include "Core/Assembler.h"
+
+#include "Archs/ARM/Arm.h"
+#include "Archs/MIPS/Mips.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Allocations.h"
+#include "Core/Common.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 #include "Parser/Parser.h"
-#include "Archs/ARM/Arm.h"
-#include "Archs/MIPS/Mips.h"
+
 #include <thread>
 
 void AddFileName(const std::wstring& FileName)

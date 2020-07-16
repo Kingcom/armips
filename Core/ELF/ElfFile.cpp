@@ -1,10 +1,11 @@
-#include "ElfFile.h"
-#include <vector>
-#include <algorithm>
+#include "Core/ELF/ElfFile.h"
+
 #include "Core/Misc.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <vector>
 
 static bool stringEqualInsensitive(const std::string& a, const std::string& b)
 {

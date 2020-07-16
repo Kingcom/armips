@@ -1,4 +1,5 @@
-#include "Architecture.h"
+#include "Archs/Architecture.h"
+
 #include "Core/Common.h"
 #include "Core/ELF/ElfRelocator.h"
 #include "Core/ExpressionFunctions.h"

@@ -1,11 +1,13 @@
-#include <unordered_map>
-#include "Pool.h"
-#include "Arm.h"
+#include "Archs/ARM/Pool.h"
+
+#include "Archs/ARM/Arm.h"
 #include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
+
+#include <unordered_map>
 
 ArmStateCommand::ArmStateCommand(bool state)
 {

@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string>
 #include <vector>
 
 struct LabelDefinition;

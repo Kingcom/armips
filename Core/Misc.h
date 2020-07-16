@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Util/FileClasses.h"
+
 #include <vector>
 
 #include <tinyformat.h>
-
-#include "Util/FileClasses.h"
 
 class Logger
 {

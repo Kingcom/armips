@@ -1,4 +1,5 @@
 #include "Commands/CAssemblerCommand.h"
+
 #include "Core/Common.h"
 
 CAssemblerCommand::CAssemblerCommand()

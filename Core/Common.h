@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "Core/SymbolTable.h"
 #include "Util/EncodingTable.h"
+
+#include <string>
+#include <vector>
 
 class AssemblerFile;
 class CArchitecture;

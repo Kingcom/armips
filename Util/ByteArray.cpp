@@ -1,4 +1,5 @@
-#include "ByteArray.h"
+#include "Util/ByteArray.h"
+
 #include "Util/Util.h"
 
 #include <cstring>

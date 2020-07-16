@@ -1,6 +1,8 @@
-#include "Misc.h"
-#include "Common.h"
+#include "Core/Misc.h"
+
+#include "Core/Common.h"
 #include "Core/FileManager.h"
+
 #include <iostream>
 
 #ifdef _WIN32

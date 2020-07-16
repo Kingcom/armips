@@ -1,7 +1,9 @@
 #include "SymbolData.h"
+
+#include "Core/Common.h"
+#include "Core/Misc.h"
 #include "FileManager.h"
-#include "Misc.h"
-#include "Common.h"
+
 #include <algorithm>
 
 SymbolData::SymbolData()
