@@ -85,14 +85,21 @@ The latest code is available at the [armips GitHub repository](https://github.co
 $ git clone --recursive https://github.com/Kingcom/armips.git
 ```
 
-Build instructions per platform:
-* Building on Windows: You will need Visual Studio 2015 (Community Edition is sufficient). Simply open armips.sln, select the desired configuration and platform, and build the solution. Alternatively, you can build using [CMake](https://cmake.org/) with [MSYS2/MinGW](https://msys2.github.io/), but the VS2015 project is the only Windows build officially supported.
-* Building on Unix: You will need CMake and a C++11 compliant compiler (recent versions of both gcc and clang have been tested). Create a build directory, invoke CMake from there, and then simply run `make`.
+You will need CMake and a C++17 compliant compiler (recent versions of Visual Studio, GCC and Clang have been tested). All CMake generators should be supported, but Ninja is recommended and the most well tested. Create a build directory, invoke CMake from there, and then simply run the chosen build tool. E.g. on Unix platforms:
 ```bash
 $ mkdir build && cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release ..
-$ make
+$ cmake --build .
 ```
+
+Or on Windows using Visual Studio:
+```bash
+$ mkdir build && cd build
+$ cmake ..
+$ cmake --build . --config Release
+```
+
+Please refer to the CMake documentation for further information.
 
 # 3. Overview
 
