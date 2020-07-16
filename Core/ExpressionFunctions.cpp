@@ -1,9 +1,10 @@
+#include "Core/ExpressionFunctions.h"
+
 #include "Core/Assembler.h"
+#include "Core/Common.h"
 #include "Core/Expression.h"
 #include "Core/FileManager.h"
-#include "ExpressionFunctions.h"
-#include "Misc.h"
-#include "Common.h"
+#include "Core/Misc.h"
 #include "Util/Util.h"
 
 #include <cmath>

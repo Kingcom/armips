@@ -1,6 +1,7 @@
-#include "ThumbOpcodes.h"
+#include "Archs/ARM/ThumbOpcodes.h"
+
+#include "Archs/ARM/Arm.h"
 #include "Core/Common.h"
-#include "Arm.h"
 
 /*	Placeholders:
 	d	register

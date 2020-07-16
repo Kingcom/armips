@@ -1,10 +1,10 @@
 ﻿#include "Core/Common.h"
-#include "Core/Assembler.h"
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CDirectiveFile.h"
+#include "Core/Assembler.h"
+#include "Main/CommandLineInterface.h"
+#include "Main/Tests.h"
 #include "Util/Util.h"
-#include "CommandLineInterface.h"
-#include "Tests.h"
 
 #include <clocale>
 

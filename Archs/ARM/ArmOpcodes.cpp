@@ -1,7 +1,8 @@
-#include "ArmOpcodes.h"
+#include "Archs/ARM/ArmOpcodes.h"
+
+#include "Archs/ARM/Arm.h"
+#include "Archs/ARM/CArmInstruction.h"
 #include "Core/Common.h"
-#include "Arm.h"
-#include "CArmInstruction.h"
 
 
 const unsigned char LdmModes[8] = { 3,1,2,0,3,1,2,0 };

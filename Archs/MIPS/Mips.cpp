@@ -1,7 +1,8 @@
-#include "Mips.h"
-#include "MipsParser.h"
-#include "MipsExpressionFunctions.h"
-#include "MipsElfRelocator.h"
+#include "Archs/MIPS/Mips.h"
+
+#include "Archs/MIPS/MipsElfRelocator.h"
+#include "Archs/MIPS/MipsExpressionFunctions.h"
+#include "Archs/MIPS/MipsParser.h"
 
 CMipsArchitecture Mips;
 

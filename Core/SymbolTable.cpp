@@ -1,8 +1,9 @@
-#include "Core/Assembler.h"
 #include "Core/SymbolTable.h"
+
+#include "Core/Assembler.h"
+#include "Core/Common.h"
 #include "Util/FileClasses.h"
 #include "Util/Util.h"
-#include "Common.h"
 
 #include <tinyformat.h>
 

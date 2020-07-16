@@ -1,11 +1,12 @@
+#include "Parser/Parser.h"
+
 #include "Archs/Architecture.h"
-#include "Parser.h"
-#include "ExpressionParser.h"
-#include "Core/Misc.h"
-#include "Commands/CommandSequence.h"
 #include "Commands/CAssemblerLabel.h"
+#include "Commands/CommandSequence.h"
 #include "Core/Common.h"
+#include "Core/Misc.h"
 #include "Parser/DirectivesParser.h"
+#include "Parser/ExpressionParser.h"
 #include "Util/Util.h"
 
 inline bool isPartOfList(const std::wstring& value, const std::initializer_list<const wchar_t*>& terminators)

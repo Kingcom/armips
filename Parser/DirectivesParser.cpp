@@ -1,23 +1,24 @@
-#include "DirectivesParser.h"
-#include "Core/Common.h"
-#include "Core/Misc.h"
-#include "Commands/CDirectiveFile.h"
-#include "Commands/CDirectiveData.h"
-#include "Commands/CDirectiveConditional.h"
-#include "Commands/CDirectiveMessage.h"
-#include "Commands/CDirectiveArea.h"
-#include "Commands/CAssemblerLabel.h"
-#include "Commands/CommandSequence.h"
-#include "Archs/MIPS/Mips.h"
+#include "Parser/DirectivesParser.h"
+
 #include "Archs/ARM/Arm.h"
+#include "Archs/MIPS/Mips.h"
+#include "Commands/CAssemblerLabel.h"
+#include "Commands/CDirectiveArea.h"
+#include "Commands/CDirectiveConditional.h"
+#include "Commands/CDirectiveData.h"
+#include "Commands/CDirectiveFile.h"
+#include "Commands/CDirectiveMessage.h"
+#include "Commands/CommandSequence.h"
+#include "Core/Common.h"
 #include "Core/Expression.h"
+#include "Core/Misc.h"
+#include "Parser/ExpressionParser.h"
+#include "Parser/Parser.h"
+#include "Parser/Tokenizer.h"
 #include "Util/Util.h"
 
-#include "Tokenizer.h"
-#include "ExpressionParser.h"
-#include <initializer_list>
 #include <algorithm>
-#include "Parser.h"
+#include <initializer_list>
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 {

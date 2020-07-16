@@ -1,9 +1,10 @@
 #include "Util/FileClasses.h"
+
 #include "Core/Common.h"
 #include "Util/Util.h"
 
-#include <cstring>
 #include <cassert>
+#include <cstring>
 
 #include <tinyformat.h>
 

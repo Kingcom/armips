@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
-
 #include "Core/ELF/ElfTypes.h"
 #include "Util/ByteArray.h"
 
-enum ElfPart { ELFPART_SEGMENTTABLE, ELFPART_SECTIONTABLE, ELFPART_SEGMENTS, ELFPART_SEGMENTLESSSECTIONS }; 
+#include <vector>
+
+enum ElfPart { ELFPART_SEGMENTTABLE, ELFPART_SECTIONTABLE, ELFPART_SEGMENTS, ELFPART_SEGMENTLESSSECTIONS };
 
 class ElfSegment;
 class ElfSection;

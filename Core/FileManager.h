@@ -1,10 +1,10 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include "Util/ByteArray.h"
 #include "Util/FileClasses.h"
+
+#include <memory>
+#include <vector>
 
 class SymbolData;
 

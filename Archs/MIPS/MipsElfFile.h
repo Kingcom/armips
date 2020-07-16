@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Commands/CAssemblerCommand.h"
 #include "Core/ELF/ElfFile.h"
 #include "Core/FileManager.h"
-#include "Commands/CAssemblerCommand.h"
 
 class MipsElfFile: public AssemblerFile
 {

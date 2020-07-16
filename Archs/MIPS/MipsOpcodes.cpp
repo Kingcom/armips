@@ -1,4 +1,4 @@
-#include "MipsOpcodes.h"
+#include "Archs/MIPS/MipsOpcodes.h"
 
 const tMipsOpcode MipsOpcodes[] = {
 //     31---------26---------------------------------------------------0

@@ -1,4 +1,5 @@
 #include "Commands/CDirectiveArea.h"
+
 #include "Core/Allocations.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"

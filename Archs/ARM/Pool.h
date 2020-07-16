@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "Commands/CAssemblerCommand.h"
+
+#include <cstdint>
+#include <vector>
 
 class ArmStateCommand: public CAssemblerCommand
 {

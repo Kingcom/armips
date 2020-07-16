@@ -1,7 +1,8 @@
 #pragma once
+
 #include "Commands/CAssemblerCommand.h"
-#include "Core/Expression.h"
 #include "Core/ELF/ElfRelocator.h"
+#include "Core/Expression.h"
 
 class AssemblerFile;
 class GenericAssemblerFile;

@@ -1,11 +1,12 @@
+#include "Core/ELF/ElfRelocator.h"
+
 #include "Archs/Architecture.h"
-#include "ElfRelocator.h"
+#include "Commands/CAssemblerLabel.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 #include "Util/CRC.h"
 #include "Util/Util.h"
-#include "Commands/CAssemblerLabel.h"
 
 #include <cstring>
 

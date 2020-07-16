@@ -1,4 +1,5 @@
 #include "Commands/CDirectiveMessage.h"
+
 #include "Core/Common.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
