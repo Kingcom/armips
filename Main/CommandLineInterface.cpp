@@ -1,8 +1,9 @@
-#include "Core/Common.h"
+#include "Main/CommandLineInterface.h"
+
 #include "Core/Allocations.h"
 #include "Core/Assembler.h"
+#include "Core/Common.h"
 #include "Core/Misc.h"
-#include "CommandLineInterface.h"
 #include "Util/Util.h"
 
 static void printUsage(std::wstring executableName)

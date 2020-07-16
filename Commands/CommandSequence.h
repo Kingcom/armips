@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Commands/CAssemblerCommand.h"
+
 #include <memory>
 #include <vector>
-
-#include "Commands/CAssemblerCommand.h"
 
 class Label;
 

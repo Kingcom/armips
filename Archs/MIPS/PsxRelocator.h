@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Commands/CAssemblerCommand.h"
+#include "Util/ByteArray.h"
+
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "Commands/CAssemblerCommand.h"
-#include "Util/ByteArray.h"
 
 class Label;
 class MipsElfRelocator;

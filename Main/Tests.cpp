@@ -1,9 +1,10 @@
-#include "CommandLineInterface.h"
-#include "Tests.h"
-#include "Util/Util.h"
-#include "Core/Common.h"
+#include "Main/Tests.h"
+
 #include "Core/Assembler.h"
+#include "Core/Common.h"
 #include "Core/Misc.h"
+#include "Main/CommandLineInterface.h"
+#include "Util/Util.h"
 
 #include <cstring>
 

@@ -1,11 +1,12 @@
-#include "Arm.h"
-#include "CArmInstruction.h"
-#include "CThumbInstruction.h"
+#include "Archs/ARM/Arm.h"
+
+#include "Archs/ARM/ArmElfRelocator.h"
+#include "Archs/ARM/ArmExpressionFunctions.h"
+#include "Archs/ARM/ArmParser.h"
+#include "Archs/ARM/CArmInstruction.h"
+#include "Archs/ARM/CThumbInstruction.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"
-#include "ArmElfRelocator.h"
-#include "ArmParser.h"
-#include "ArmExpressionFunctions.h"
 
 CArmArchitecture Arm;
 

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Misc.h"
+#include "Parser/Tokenizer.h"
+
 #include <map>
 #include <memory>
 #include <set>
@@ -8,9 +11,6 @@
 #include <vector>
 
 #include <tinyformat.h>
-
-#include "Core/Misc.h"
-#include "Parser/Tokenizer.h"
 
 class CAssemblerCommand;
 class Expression;

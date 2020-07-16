@@ -1,10 +1,10 @@
 #pragma once
 
-#include <map>
-#include <memory>
-
 #include "Commands/CAssemblerCommand.h"
 #include "Util/ByteArray.h"
+
+#include <map>
+#include <memory>
 
 class IElfRelocator;
 class Tokenizer;

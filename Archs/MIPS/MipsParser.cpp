@@ -1,14 +1,15 @@
+#include "Archs/MIPS/MipsParser.h"
+
 #include "Archs/MIPS/Mips.h"
+#include "Archs/MIPS/MipsElfFile.h"
 #include "Archs/MIPS/MipsMacros.h"
-#include "MipsParser.h"
-#include "Parser/Parser.h"
-#include "Parser/ExpressionParser.h"
-#include "Util/Util.h"
-#include "Core/Common.h"
-#include "PsxRelocator.h"
-#include "MipsElfFile.h"
+#include "Archs/MIPS/PsxRelocator.h"
 #include "Commands/CDirectiveFile.h"
+#include "Core/Common.h"
 #include "Parser/DirectivesParser.h"
+#include "Parser/ExpressionParser.h"
+#include "Parser/Parser.h"
+#include "Util/Util.h"
 
 #define CHECK(exp) if (!(exp)) return false;
 

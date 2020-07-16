@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Archs/MIPS/CMipsInstruction.h"
+
 #include <memory>
 #include <string>
-
-#include "Archs/MIPS/CMipsInstruction.h"
 
 class CAssemblerCommand;
 class Expression;

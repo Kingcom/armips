@@ -1,9 +1,10 @@
+#include "Core/Expression.h"
+
 #include "Archs/Architecture.h"
-#include "Expression.h"
-#include "Common.h"
+#include "Core/Common.h"
+#include "Core/ExpressionFunctions.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
-#include "ExpressionFunctions.h"
 #include "Util/Util.h"
 
 namespace

@@ -1,10 +1,11 @@
-#include "Archs/Architecture.h"
 #include "Commands/CDirectiveFile.h"
+
+#include "Archs/Architecture.h"
 #include "Core/Common.h"
-#include "Util/FileClasses.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
+#include "Util/FileClasses.h"
 #include "Util/Util.h"
 
 #include <cstring>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
 #include "Util/ByteArray.h"
 #include "Util/FileClasses.h"
+
+#include <map>
+#include <vector>
 
 class Trie
 {
