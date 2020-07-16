@@ -3,31 +3,55 @@ project(armips)
 
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
 
-if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Haiku" OR WIIU)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-uninitialized")
-	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wall -Wno-uninitialized -Wno-unused-parameter")
+# Helper function to set common parameters for a target
+function(init_target TARGET_NAME)
+	set_target_properties(${TARGET_NAME} PROPERTIES
+		CXX_STANDARD 17
+		CXX_STANDARD_REQUIRED TRUE
+		CXX_EXTENSIONS FALSE)
+
+	target_include_directories(${TARGET_NAME} PUBLIC ${CMAKE_SOURCE_DIR})
+
+	if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
+		target_compile_options(${TARGET_NAME} PRIVATE -Wall)
+		target_compile_options(${TARGET_NAME} PRIVATE -Wno-uninitialized)
+		target_compile_options(${TARGET_NAME} PRIVATE -Wno-unused-parameter)
+
+		if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku" OR NOT WIIU)
+			find_package(Threads REQUIRED)
+			target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
+		endif()
 	endif()
-endif()
 
-if(MSVC)
-	add_definitions(-DUNICODE -D_UNICODE)
-elseif(MINGW)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-endif()
+	if (ARMIPS_REGEXP)
+		target_compile_definitions(${TARGET_NAME} PRIVATE ARMIPS_REGEXP=1)
+	endif()
 
-if(ARMIPS_REGEXP)
-	add_definitions(-DARMIPS_REGEXP=1)
-endif()
+	if (MSVC)
+		target_compile_definitions(${TARGET_NAME} PRIVATE UNICODE _UNICODE)
+	endif()
 
-include_directories(.)
+	if (MINGW)
+		target_compile_options(${TARGET_NAME} PRIVATE -municode)
+		target_link_libraries(${TARGET_NAME} PRIVATE -lstdc++)
+		target_link_options(${TARGET_NAME} PRIVATE -static)
+	endif()
+endfunction()
 
+# tinyformat
 add_library(tinyformat INTERFACE)
 target_include_directories(tinyformat INTERFACE ext/tinyformat)
 
-add_library(armips STATIC
+# libarmips
+add_library(armips STATIC)
+init_target(armips)
+target_link_libraries(armips PUBLIC tinyformat)
+
+if (WIN32)
+	target_link_libraries(armips PUBLIC shlwapi)
+endif()
+
+target_sources(armips PRIVATE
 	Archs/Architecture.h
 	Archs/Architecture.cpp
 
@@ -131,21 +155,13 @@ add_library(armips STATIC
 	Util/Util.h
 )
 
-target_link_libraries(armips PUBLIC tinyformat)
-
-add_executable(armips-bin
-	Main/CommandLineInterface.cpp
-	Main/CommandLineInterface.h
-	Main/main.cpp
-	Main/Tests.cpp
-	Main/Tests.h
-	stdafx.cpp
-	stdafx.h
-)
-# workaround library and executable having same name
+# armips-bin
+add_executable(armips-bin)
+init_target(armips-bin)
 set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
+target_link_libraries(armips-bin PRIVATE armips)
 
-add_executable(armipstests
+target_sources(armips-bin PRIVATE
 	Main/CommandLineInterface.cpp
 	Main/CommandLineInterface.h
 	Main/main.cpp
@@ -155,17 +171,22 @@ add_executable(armipstests
 	stdafx.h
 )
 
+# tests
+add_executable(armipstests)
+init_target(armipstests)
 target_compile_definitions(armipstests PUBLIC ARMIPS_TESTS)
+target_link_libraries(armipstests PRIVATE armips)
 
-target_link_libraries(armips-bin armips)
-target_link_libraries(armipstests armips)
+target_sources(armipstests PRIVATE
+	Main/CommandLineInterface.cpp
+	Main/CommandLineInterface.h
+	Main/main.cpp
+	Main/Tests.cpp
+	Main/Tests.h
+	stdafx.cpp
+	stdafx.h
+)
 
-if(WIN32)
-	target_link_libraries(armips-bin shlwapi)
-	target_link_libraries(armipstests shlwapi)
-endif(WIN32)
-
-if(MINGW)
-	target_link_libraries(armips-bin -lstdc++)
-	target_link_libraries(armipstests -lstdc++)
-endif(MINGW)
+# install
+install(TARGETS armips-bin RUNTIME DESTINATION .)
+install(FILES Readme.md DESTINATION .)
