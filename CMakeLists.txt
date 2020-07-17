@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.13)
 project(armips) 
 
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
@@ -10,14 +10,14 @@ function(init_target TARGET_NAME)
 		CXX_STANDARD_REQUIRED TRUE
 		CXX_EXTENSIONS FALSE)
 
-	target_include_directories(${TARGET_NAME} PUBLIC ${CMAKE_SOURCE_DIR})
+	target_include_directories(${TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 	if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
 		target_compile_options(${TARGET_NAME} PRIVATE -Wall)
 		target_compile_options(${TARGET_NAME} PRIVATE -Wno-uninitialized)
 		target_compile_options(${TARGET_NAME} PRIVATE -Wno-unused-parameter)
 
-		if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku" OR NOT WIIU)
+		if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku" AND NOT WIIU)
 			find_package(Threads REQUIRED)
 			target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
 		endif()
