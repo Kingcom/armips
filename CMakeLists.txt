@@ -39,6 +39,12 @@ function(init_target TARGET_NAME)
 	endif()
 endfunction()
 
+# Helper function to automatically set source groups for all source files
+function(armips_target_sources TARGET SCOPE)
+	target_sources("${TARGET}" "${SCOPE}" ${ARGN})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ARGN})
+endfunction()
+
 # tinyformat
 add_library(tinyformat INTERFACE)
 target_include_directories(tinyformat INTERFACE ext/tinyformat)
@@ -52,7 +58,7 @@ if (WIN32)
 	target_link_libraries(armips PUBLIC shlwapi)
 endif()
 
-target_sources(armips PRIVATE
+armips_target_sources(armips PRIVATE
 	Archs/Architecture.h
 	Archs/Architecture.cpp
 
@@ -162,7 +168,7 @@ init_target(armips-bin)
 set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
 target_link_libraries(armips-bin PRIVATE armips)
 
-target_sources(armips-bin PRIVATE
+armips_target_sources(armips-bin PRIVATE
 	Main/CommandLineInterface.cpp
 	Main/CommandLineInterface.h
 	Main/main.cpp
@@ -176,7 +182,7 @@ init_target(armipstests)
 target_compile_definitions(armipstests PUBLIC ARMIPS_TESTS)
 target_link_libraries(armipstests PRIVATE armips)
 
-target_sources(armipstests PRIVATE
+armips_target_sources(armipstests PRIVATE
 	Main/CommandLineInterface.cpp
 	Main/CommandLineInterface.h
 	Main/main.cpp
