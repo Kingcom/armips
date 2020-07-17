@@ -190,6 +190,9 @@ armips_target_sources(armipstests PRIVATE
 	Main/Tests.h
 )
 
+enable_testing()
+add_test(NAME armipstests COMMAND armipstests ${CMAKE_CURRENT_SOURCE_DIR}/Tests)
+
 # install
 install(TARGETS armips-bin RUNTIME DESTINATION .)
 install(FILES Readme.md DESTINATION .)
