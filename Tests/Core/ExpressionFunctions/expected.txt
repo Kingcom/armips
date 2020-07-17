@@ -15,7 +15,6 @@ ExpressionFunctions.asm(54) notice: int(3.7): 3
 ExpressionFunctions.asm(55) notice: int(3): 3
 ExpressionFunctions.asm(57) notice: float(3.7): 3.7000000000000002
 ExpressionFunctions.asm(58) notice: float(3): 3.0000000000000000
-ExpressionFunctions.asm(60) notice: frac(3): 0.0000000000000000
 ExpressionFunctions.asm(61) notice: frac(3.7): 0.70000000000000018
 ExpressionFunctions.asm(62) notice: frac((-3.7)): -0.70000000000000018
 ExpressionFunctions.asm(64) notice: abs(3): 3
