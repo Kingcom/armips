@@ -5,6 +5,7 @@
 #include "Core/Expression.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 #include <cmath>
@@ -99,7 +100,7 @@ ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vecto
 		return ExpressionValue();
 	}
 
-	std::wstring value = file->getFileName();
+	std::wstring value = file->getFileName().wstring();
 	return ExpressionValue(value);
 }
 
@@ -108,8 +109,8 @@ ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vecto
 	const std::wstring* fileName;
 	GET_PARAM(parameters,0,fileName);
 
-	std::wstring fullName = getFullPathName(*fileName);
-	return ExpressionValue(fileExists(fullName) ? INT64_C(1) : INT64_C(0));
+	auto fullName = getFullPathName(*fileName);
+	return ExpressionValue(fs::exists(fullName) ? INT64_C(1) : INT64_C(0));
 }
 
 ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -117,8 +118,10 @@ ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<
 	const std::wstring* fileName;
 	GET_PARAM(parameters,0,fileName);
 
-	std::wstring fullName = getFullPathName(*fileName);
-	return ExpressionValue((int64_t) fileSize(fullName));
+	auto fullName = getFullPathName(*fileName);
+
+	std::error_code error;
+	return ExpressionValue(static_cast<int64_t>(fs::file_size(fullName, error)));
 }
 
 ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -486,7 +489,7 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 	GET_PARAM(parameters,0,fileName);
 	GET_OPTIONAL_PARAM(parameters,1,pos,0);
 
-	std::wstring fullName = getFullPathName(*fileName);
+	auto fullName = getFullPathName(*fileName);
 
 	BinaryFile file;
 	if (!file.open(fullName,BinaryFile::Read))
@@ -517,9 +520,11 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	GET_OPTIONAL_PARAM(parameters,1,start,0);
 	GET_OPTIONAL_PARAM(parameters,2,length,0);
 
-	std::wstring fullName = getFullPathName(*fileName);
+	auto fullName = getFullPathName(*fileName);
 
-	int64_t totalSize = fileSize(fullName);
+	std::error_code error;
+	int64_t totalSize = static_cast<int64_t>(fs::file_size(fullName, error));
+
 	if (length == 0 || start+length > totalSize)
 		length = totalSize-start;
 

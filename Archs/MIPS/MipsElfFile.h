@@ -20,15 +20,15 @@ public:
 	virtual bool getModuleInfo(SymDataModuleInfo& info);
 	virtual void beginSymData(SymbolData& symData);
 	virtual void endSymData(SymbolData& symData);
-	virtual const std::wstring& getFileName() { return fileName; };
+	virtual const fs::path& getFileName() { return fileName; };
 
-	bool load(const std::wstring& fileName, const std::wstring& outputFileName);
+	bool load(const fs::path& fileName, const fs::path& outputFileName);
 	void save();
 	bool setSection(const std::wstring& name);
 private:
 	ElfFile elf;
-	std::wstring fileName;
-	std::wstring outputFileName;
+	fs::path fileName;
+	fs::path outputFileName;
 	bool opened;
 	int platform;
 
@@ -41,14 +41,14 @@ private:
 class DirectiveLoadMipsElf: public CAssemblerCommand
 {
 public:
-	DirectiveLoadMipsElf(const std::wstring& fileName);
-	DirectiveLoadMipsElf(const std::wstring& inputName, const std::wstring& outputName);
+	DirectiveLoadMipsElf(const fs::path& fileName);
+	DirectiveLoadMipsElf(const fs::path& inputName, const fs::path& outputName);
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;
 	void writeTempData(TempData& tempData) const override;
 	void writeSymData(SymbolData& symData) const override;
 private:
 	std::shared_ptr<MipsElfFile> file;
-	std::wstring inputName;
-	std::wstring outputName;
+	fs::path inputName;
+	fs::path outputName;
 };

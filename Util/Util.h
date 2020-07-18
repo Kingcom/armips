@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <string>
 #include <vector>
 
@@ -17,21 +19,12 @@ int64_t getDoubleBits(double value);
 std::vector<std::wstring> getStringListFromArray(wchar_t** source, int count);
 std::vector<std::wstring> splitString(const std::wstring& str, const wchar_t delim, bool skipEmpty);
 
-int64_t fileSize(const std::wstring& fileName);
-bool fileExists(const std::wstring& strFilename);
-bool copyFile(const std::wstring& existingFile, const std::wstring& newFile);
-bool deleteFile(const std::wstring& fileName);;
-
 std::wstring toWLowercase(const std::string& str);
-std::wstring getFileNameFromPath(const std::wstring& path);
 size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue);
 bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos = 0);
 
 enum class OpenFileMode { ReadBinary, WriteBinary, ReadWriteBinary };
-FILE* openFile(const std::wstring& fileName, OpenFileMode mode);
-std::wstring getCurrentDirectory();
-bool changeDirectory(const std::wstring& dir);
-bool isAbsolutePath(const std::wstring& path);
+FILE* openFile(const fs::path& fileName, OpenFileMode mode);
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof((x)) / sizeof((x)[0]))

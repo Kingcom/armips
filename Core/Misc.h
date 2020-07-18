@@ -82,8 +82,8 @@ private:
 class TempData
 {
 public:
-	void setFileName(const std::wstring& name) { file.setFileName(name); };
-	void clear() { file.setFileName(L""); }
+	void setFileName(const fs::path& name) { file.setFileName(name); };
+	void clear() { file.setFileName({}); }
 	void start();
 	void end();
 	void writeLine(int64_t memoryAddress, const std::wstring& text);

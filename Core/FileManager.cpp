@@ -2,6 +2,7 @@
 
 #include "Core/Common.h"
 #include "Core/Misc.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 inline uint64_t swapEndianness64(uint64_t value)
@@ -22,7 +23,7 @@ inline uint16_t swapEndianness16(uint16_t value)
 }
 
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t headerSize, bool overwrite)
+GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, int64_t headerSize, bool overwrite)
 {
 	this->fileName = fileName;
 	this->headerSize = headerSize;
@@ -31,7 +32,7 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t
 	mode = overwrite ? Create : Open;
 }
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int64_t headerSize)
+GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, const fs::path& originalFileName, int64_t headerSize)
 {
 	this->fileName = fileName;
 	this->originalName = originalFileName;
@@ -43,6 +44,8 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const s
 
 bool GenericAssemblerFile::open(bool onlyCheck)
 {
+	std::error_code errorCode;
+
 	headerSize = originalHeaderSize;
 	virtualAddress = headerSize;
 
@@ -71,7 +74,8 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			return true;
 
 		case Copy:
-			success = copyFile(originalName,fileName);
+			success = fs::copy_file(originalName, fileName, fs::copy_options::overwrite_existing, errorCode);
+
 			if (!success)
 			{
 				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName);
@@ -109,7 +113,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 	case Create:
 		// if it exists, check if you can open it with read/write access
 		// otherwise open it with write access and remove it afterwards
-		exists = fileExists(fileName);
+		exists = fs::exists(fileName);
 		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
 		if (!success)
 		{
@@ -119,7 +123,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.close();
 
 		if (!exists)
-			deleteFile(fileName);
+			fs::remove(fileName, errorCode);
 
 		return true;
 
@@ -134,7 +138,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.close();
 
 		// check new file, same as create
-		exists = fileExists(fileName);
+		exists = fs::exists(fileName);
 		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
 		if (!success)
 		{
@@ -142,9 +146,9 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			return false;
 		}
 		temp.close();
-		
+
 		if (!exists)
-			deleteFile(fileName);
+			fs::remove(fileName, errorCode);
 
 		return true;
 

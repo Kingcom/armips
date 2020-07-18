@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <list>
 #include <vector>
 
@@ -13,7 +15,7 @@ public:
 	BinaryFile();
 	~BinaryFile();
 
-	bool open(const std::wstring& fileName, Mode mode);
+	bool open(const fs::path& fileName, Mode mode);
 	bool open(Mode mode);
 	bool isOpen() { return handle != nullptr; };
 	bool atEnd() { return isOpen() && mode != Write && ftell(handle) == size_; };
@@ -22,14 +24,14 @@ public:
 	long size() { return size_; };
 	void close();
 	
-	void setFileName(const std::wstring& name) { fileName = name; };
-	const std::wstring& getFileName() { return fileName; };
+	void setFileName(const fs::path& name) { fileName = name; };
+	const fs::path& getFileName() { return fileName; };
 
 	size_t read(void* dest, size_t length);
 	size_t write(void* source, size_t length);
 private:
 	FILE* handle;
-	std::wstring fileName;
+	fs::path fileName;
 	Mode mode;
 	long size_;
 };
@@ -43,7 +45,7 @@ public:
 	TextFile();
 	~TextFile();
 	void openMemory(const std::wstring& content);
-	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = GUESS);
+	bool open(const fs::path& fileName, Mode mode, Encoding defaultEncoding = GUESS);
 	bool open(Mode mode, Encoding defaultEncoding = GUESS);
 	bool isOpen() { return fromMemory || handle != nullptr; };
 	bool atEnd() { return isOpen() && mode == Read && tell() >= size_; };
@@ -54,8 +56,8 @@ public:
 	bool isFromMemory() { return fromMemory; }
 	int getNumLines() { return lineCount; }
 
-	void setFileName(const std::wstring& name) { fileName = name; };
-	const std::wstring& getFileName() { return fileName; };
+	void setFileName(const fs::path& name) { fileName = name; };
+	const fs::path& getFileName() { return fileName; };
 
 	wchar_t readCharacter();
 	std::wstring readLine();
@@ -85,7 +87,7 @@ private:
 	void seek(long pos);
 
 	FILE* handle;
-	std::wstring fileName;
+	fs::path fileName;
 	Encoding encoding;
 	Mode mode;
 	bool recursion;

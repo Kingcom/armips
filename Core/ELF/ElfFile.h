@@ -14,9 +14,9 @@ class ElfFile
 {
 public:
 
-	bool load(const std::wstring&fileName, bool sort);
+	bool load(const fs::path&fileName, bool sort);
 	bool load(ByteArray& data, bool sort);
-	void save(const std::wstring&fileName);
+	void save(const fs::path& fileName);
 
 	Elf32_Half getType() { return fileHeader.e_type; };
 	Elf32_Half getMachine() { return fileHeader.e_machine; };

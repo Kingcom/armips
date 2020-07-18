@@ -44,7 +44,7 @@ public:
 	EncodingTable();
 	~EncodingTable();
 	void clear();
-	bool load(const std::wstring& fileName, TextFile::Encoding encoding = TextFile::GUESS);
+	bool load(const fs::path& fileName, TextFile::Encoding encoding = TextFile::GUESS);
 	bool isLoaded() { return entries.size() != 0; };
 	void addEntry(unsigned char* hex, size_t hexLength, const std::wstring& value);
 	void addEntry(unsigned char* hex, size_t hexLength, wchar_t value);

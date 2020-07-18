@@ -4,6 +4,7 @@
 #include "Core/Common.h"
 #include "Core/Misc.h"
 #include "Main/CommandLineInterface.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 #include <cstring>
@@ -128,7 +129,7 @@ std::vector<std::wstring> TestRunner::getTestsList(const std::wstring& dir, cons
 		std::wstring testName = prefix + dirName;
 		std::wstring fileName = dir + testName + L"/" + dirName + L".asm";
 
-		if (fileExists(fileName))
+		if (fs::exists(fileName))
 		{
 			if (testName[0] == L'/')
 				testName.erase(0,1);
@@ -144,8 +145,8 @@ std::vector<std::wstring> TestRunner::getTestsList(const std::wstring& dir, cons
 
 bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString)
 {
-	std::wstring oldDir = getCurrentDirectory();
-	changeDirectory(dir);
+	fs::path oldDir = fs::current_path();
+	fs::current_path(dir);
 
 	ArmipsArguments settings;
 	std::vector<std::wstring> errors;
@@ -155,10 +156,10 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	bool result = true;
 	std::vector<std::wstring> args;
 
-	if (fileExists(L"commandLine.txt"))
+	if (fs::exists("commandLine.txt"))
 	{
 		TextFile f;
-		f.open(L"commandLine.txt",TextFile::Read);
+		f.open("commandLine.txt", TextFile::Read);
 		std::wstring command = f.readLine();
 		f.close();
 		
@@ -189,10 +190,10 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	}
 
 	// check errors
-	if (fileExists(L"expected.txt"))
+	if (fs::exists("expected.txt"))
 	{
 		TextFile f;
-		f.open(L"expected.txt",TextFile::Read);
+		f.open("expected.txt", TextFile::Read);
 		std::vector<std::wstring> expectedErrors = f.readAll();
 
 		if (errors.size() == expectedErrors.size())
@@ -219,14 +220,14 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 
 	// write errors to file
 	TextFile output;
-	output.open(L"output.txt",TextFile::Write);
+	output.open("output.txt", TextFile::Write);
 	output.writeLines(errors);
 	output.close();
 
-	if (fileExists(L"expected.bin"))
+	if (fs::exists("expected.bin"))
 	{
-		ByteArray expected = ByteArray::fromFile(L"expected.bin");
-		ByteArray actual = ByteArray::fromFile(L"output.bin");
+		ByteArray expected = ByteArray::fromFile("expected.bin");
+		ByteArray actual = ByteArray::fromFile("output.bin");
 
 		if (expected.size() == actual.size())
 		{
@@ -241,7 +242,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		}
 	}
 
-	changeDirectory(oldDir);
+	fs::current_path(oldDir);
 	return result;
 }
 

@@ -630,7 +630,7 @@ BinaryFile::~BinaryFile()
 	close();
 }
 
-bool BinaryFile::open(const std::wstring& fileName, Mode mode)
+bool BinaryFile::open(const fs::path& fileName, Mode mode)
 {
 	setFileName(fileName);
 	return open(mode);
@@ -725,7 +725,7 @@ void TextFile::openMemory(const std::wstring& content)
 	lineCount = 0;
 }
 
-bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
+bool TextFile::open(const fs::path& fileName, Mode mode, Encoding defaultEncoding)
 {
 	setFileName(fileName);
 	return open(mode,defaultEncoding);

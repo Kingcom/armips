@@ -2,6 +2,7 @@
 
 #include "Core/Common.h"
 #include "Core/FileManager.h"
+#include "Util/FileSystem.h"
 
 #include <iostream>
 
@@ -23,8 +24,8 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 
 	if (!Global.memoryMode && Global.FileInfo.FileList.size() > 0)
 	{
-		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-		position = tfm::format(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
+		const auto fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum].lexically_proximate(fs::current_path());
+		position = tfm::format(L"%s(%d) ", fileName.generic_wstring(), Global.FileInfo.LineNumber);
 	}
 
 	switch (type)

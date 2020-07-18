@@ -2,6 +2,7 @@
 
 #include "Core/SymbolTable.h"
 #include "Util/EncodingTable.h"
+#include "Util/FileSystem.h"
 
 #include <string>
 #include <vector>
@@ -10,7 +11,7 @@ class AssemblerFile;
 class CArchitecture;
 
 typedef struct {
-	std::vector<std::wstring> FileList;
+	std::vector<fs::path> FileList;
 	int FileCount;
 	int FileNum;
 	int LineNumber;
@@ -35,8 +36,7 @@ extern CArchitecture* Arch;
 class FileManager;
 extern FileManager* g_fileManager;
 
-std::wstring getFolderNameFromPath(const std::wstring& src);
-std::wstring getFullPathName(const std::wstring& path);
+fs::path getFullPathName(const fs::path& path);
 
 bool checkLabelDefined(const std::wstring& labelName, int section);
 bool checkValidLabelName(const std::wstring& labelName);

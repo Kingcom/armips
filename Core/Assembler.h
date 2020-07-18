@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -38,9 +40,9 @@ struct ArmipsArguments
 	std::vector<LabelDefinition> labels;
 
 	// file mode
-	std::wstring inputFileName;
-	std::wstring tempFileName;
-	std::wstring symFileName;
+	fs::path inputFileName;
+	fs::path tempFileName;
+	fs::path symFileName;
 	bool useAbsoluteFileNames;
 
 	// memory mode

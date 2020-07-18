@@ -13,34 +13,16 @@ FileManager* g_fileManager = &fileManager;
 tGlobal Global;
 CArchitecture* Arch;
 
-std::wstring getFolderNameFromPath(const std::wstring& src)
+fs::path getFullPathName(const fs::path& path)
 {
-#ifdef _WIN32
-	size_t s = src.find_last_of(L"\\/");
-#else
-	size_t s = src.rfind(L"/");
-#endif
-	if (s == std::wstring::npos)
+	if (Global.relativeInclude && !path.is_absolute())
 	{
-		return L".";
+		const fs::path &source = Global.FileInfo.FileList[Global.FileInfo.FileNum];
+		return fs::absolute(source.parent_path() / path).lexically_normal();
 	}
-
-	return src.substr(0,s);
-}
-
-std::wstring getFullPathName(const std::wstring& path)
-{
-	if (Global.relativeInclude)
+	else
 	{
-		if (isAbsolutePath(path))
-		{
-			return path;
-		} else {
-			std::wstring source = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-			return getFolderNameFromPath(source) + L"/" + path;
-		}
-	} else {
-		return path;
+		return fs::absolute(path).lexically_normal();
 	}
 }
 

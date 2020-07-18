@@ -121,7 +121,7 @@ int parseHexString(std::wstring& hex, unsigned char* dest)
 	return (int) hex.size()/2;
 }
 
-bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encoding)
+bool EncodingTable::load(const fs::path& fileName, TextFile::Encoding encoding)
 {
 	unsigned char hexBuffer[MAXHEXLENGTH];
 

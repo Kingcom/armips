@@ -5,6 +5,7 @@
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 //
@@ -15,7 +16,7 @@ TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding enco
 {
 	auto fullName = getFullPathName(fileName);
 
-	if (!fileExists(fullName))
+	if (!fs::exists(fullName))
 	{
 		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
 		return;

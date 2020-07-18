@@ -138,11 +138,11 @@ ByteArray ByteArray::mid(size_t start, ssize_t length)
 	return ret;
 }
 
-ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t size)
+ByteArray ByteArray::fromFile(const fs::path& fileName, long start, size_t size)
 {
 	ByteArray ret;
 	
-	FILE* input = openFile(fileName,OpenFileMode::ReadBinary);
+	FILE* input = openFile(fileName, OpenFileMode::ReadBinary);
 	if (input == nullptr)
 		return ret;
 
@@ -167,9 +167,9 @@ ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t s
 	return ret;
 }
 
-bool ByteArray::toFile(const std::wstring& fileName)
+bool ByteArray::toFile(const fs::path& fileName)
 {
-	FILE* output = openFile(fileName,OpenFileMode::WriteBinary);
+	FILE* output = openFile(fileName, OpenFileMode::WriteBinary);
 	if (output == nullptr) return false;
 	size_t length = fwrite(data_,1,size_,output);
 	fclose(output);

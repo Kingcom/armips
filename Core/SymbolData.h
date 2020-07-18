@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <cstdint>
 #include <set>
 #include <string>
@@ -79,7 +81,7 @@ public:
 
 	SymbolData();
 	void clear();
-	void setNocashSymFileName(const std::wstring& name, int version) { nocashSymFileName = name; nocashSymVersion = version; };
+	void setNocashSymFileName(const fs::path& name, int version) { nocashSymFileName = name; nocashSymVersion = version; };
 	void write();
 	void setEnabled(bool b) { enabled = b; };
 
@@ -93,7 +95,7 @@ private:
 	void writeNocashSym();
 	size_t addFileName(const std::wstring& fileName);
 
-	std::wstring nocashSymFileName;
+	fs::path nocashSymFileName;
 	bool enabled;
 	int nocashSymVersion;
 

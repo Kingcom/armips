@@ -67,7 +67,7 @@ struct ElfRelocatorFile
 class ElfRelocator
 {
 public:
-	bool init(const std::wstring& inputName);
+	bool init(const fs::path& inputName);
 	bool exportSymbols();
 	void writeSymbols(SymbolData& symData) const;
 	std::unique_ptr<CAssemblerCommand> generateCtor(const std::wstring& ctorName);

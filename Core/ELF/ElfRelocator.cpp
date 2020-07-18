@@ -6,6 +6,7 @@
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 #include "Util/CRC.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 #include <cstring>
@@ -27,7 +28,7 @@ struct ArFileEntry
 	ByteArray data;
 };
 
-std::vector<ArFileEntry> loadArArchive(const std::wstring& inputName)
+std::vector<ArFileEntry> loadArArchive(const fs::path& inputName)
 {
 	ByteArray input = ByteArray::fromFile(inputName);
 	std::vector<ArFileEntry> result;
@@ -38,7 +39,7 @@ std::vector<ArFileEntry> loadArArchive(const std::wstring& inputName)
 			return result;
 
 		ArFileEntry entry;
-		entry.name = getFileNameFromPath(inputName);
+		entry.name = inputName.filename().wstring();
 		entry.data = input;
 		result.push_back(entry);
 		return result;
@@ -95,7 +96,7 @@ std::vector<ArFileEntry> loadArArchive(const std::wstring& inputName)
 	return result;
 }
 
-bool ElfRelocator::init(const std::wstring& inputName)
+bool ElfRelocator::init(const fs::path& inputName)
 {
 	relocator = Arch->getElfRelocator();
 	if (relocator == nullptr)
