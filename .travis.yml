@@ -1,0 +1,63 @@
+language: cpp
+
+jobs:
+  include:
+    - os: linux
+      dist: focal
+      compiler: "gcc"
+      sudo: true
+      before_install:
+        - |-
+            sudo rm -rf /usr/local/cmake-3.12.4
+            sudo apt-get install cmake ninja-build
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
+    - os: linux
+      dist: focal
+      compiler: "clang"
+      before_install:
+        - |-
+            sudo rm -rf /usr/local/cmake-3.12.4
+            sudo apt-get install cmake ninja-build
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
+    - os: mac
+      compiler: "clang"
+      before_install:
+        - brew install ninja
+      cache:
+        directories:
+          - $HOME/Library/Caches/Homebrew
+          - /usr/local/Homebrew
+      before_cache:
+        - brew cleanup
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
+    - os: windows
+      compiler: "msvc2017"
+      script:
+        - cmake CMakeLists.txt
+        - cmake  --build . --config Release
+        - ctest -C Release --output-on-failure
+    - os: windows
+      compiler: "clang"
+      before_install:
+        - choco install ninja
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
+    - os: windows
+      compiler: "mingw"
+      before_install:
+        - choco install ninja
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
