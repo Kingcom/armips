@@ -172,7 +172,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 		
 		if (value.isInt())
 		{
-			customData.appendByte(value.intValue);
+			customData.appendByte((byte)value.intValue);
 		} else if (value.isString())
 		{
 			ByteArray encoded = table.encodeString(value.strValue,false);
