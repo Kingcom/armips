@@ -88,7 +88,7 @@ bool CDirectiveArea::Validate()
 		Logger::queueError(Logger::Error, L"Area at %08x overflowed by %d bytes", position, contentSize - areaSize);
 	}
 
-	if (fillExpression.isLoaded())
+	if (fillExpression.isLoaded() || shared)
 		g_fileManager->advanceMemory(areaSize-contentSize);
 
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
@@ -132,6 +132,8 @@ void CDirectiveArea::Encode() const
 			writeSize -= part;
 		}
 	}
+	else if (shared)
+		g_fileManager->advanceMemory(areaSize-contentSize);
 }
 
 void CDirectiveArea::writeTempData(TempData& tempData) const
