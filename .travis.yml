@@ -42,7 +42,7 @@ jobs:
     - os: windows
       compiler: "msvc2017"
       script:
-        - cmake CMakeLists.txt
+        - cmake -DCMAKE_GENERATOR_PLATFORM=x64 CMakeLists.txt
         - cmake  --build . --config Release
         - ctest -C Release --output-on-failure
     - os: windows
