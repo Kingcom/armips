@@ -1,0 +1,4 @@
+AutoRange.asm(11) notice: Allocated A at 00000010
+AutoRange.asm(16) notice: Allocated B at 00000080
+AutoRange.asm(21) notice: Allocated C at 00000018
+AutoRange.asm(26) notice: Allocated D at 00000088

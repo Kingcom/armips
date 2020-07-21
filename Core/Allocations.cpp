@@ -50,7 +50,7 @@ bool Allocations::allocateSubArea(int64_t fileID, int64_t& position, int64_t min
 			continue;
 		if (minRange != -1 && it.first.position + it.second.space < minRange)
 			continue;
-		if (maxRange != -1 && it.first.position < maxRange)
+		if (maxRange != -1 && it.first.position > maxRange)
 			continue;
 
 		int64_t actualUsage = it.second.usage + getSubAreaUsage(it.first);
