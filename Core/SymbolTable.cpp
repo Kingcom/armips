@@ -205,7 +205,7 @@ int SymbolTable::findSection(int64_t address)
 
 	for (auto& lab: labels)
 	{
-		int diff = address-lab->getValue();
+		int64_t diff = address-lab->getValue();
 		if (diff >= 0 && diff < smallestDiff)
 		{
 			smallestDiff = diff;

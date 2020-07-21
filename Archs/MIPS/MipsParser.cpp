@@ -409,7 +409,7 @@ bool MipsParser::parseRspScalarElement(Parser& parser, MipsRegisterValue& dest)
 		return false;
 
 	dest.name = tfm::format(L"%d", token.intValue);
-	dest.num = token.intValue + 8;
+	dest.num = (int)token.intValue + 8;
 
 	return parser.nextToken().type == TokenType::RBrack;
 }
@@ -428,7 +428,7 @@ bool MipsParser::parseRspOffsetElement(Parser& parser, MipsRegisterValue& dest)
 			return false;
 
 		dest.name = tfm::format(L"%d", token.intValue);
-		dest.num = token.intValue;
+		dest.num = (int)token.intValue;
 
 		return parser.nextToken().type == TokenType::RBrack;
 	}
@@ -841,7 +841,7 @@ bool MipsParser::parseVfpuCondition(Parser& parser, int& result)
 	{
 		if (stringValue == conditions[i])
 		{
-			result = i;
+			result = (int)i;
 			return true;
 		}
 	}

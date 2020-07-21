@@ -175,7 +175,7 @@ void SymbolData::startModule(AssemblerFile* file)
 	{
 		if (modules[i].file == file)
 		{
-			currentModule = i;
+			currentModule = (int)i;
 			return;
 		}
 	}
@@ -183,7 +183,7 @@ void SymbolData::startModule(AssemblerFile* file)
 	SymDataModule module;
 	module.file = file;
 	modules.push_back(module);
-	currentModule = modules.size()-1;
+	currentModule = (int)modules.size()-1;
 }
 
 void SymbolData::endModule(AssemblerFile* file)
@@ -213,7 +213,7 @@ void SymbolData::startFunction(int64_t address)
 		endFunction(address);
 	}
 
-	currentFunction = modules[currentModule].functions.size();
+	currentFunction = (int)modules[currentModule].functions.size();
 
 	SymDataFunction func;
 	func.address = address;

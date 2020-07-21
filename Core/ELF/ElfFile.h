@@ -37,9 +37,9 @@ public:
 	const char* getStrTableString(size_t pos);
 private:
 	void loadElfHeader();
-	void writeHeader(ByteArray& data, int pos, Endianness endianness);
-	void loadProgramHeader(Elf32_Phdr& header, ByteArray& data, int pos);
-	void loadSectionHeader(Elf32_Shdr& header, ByteArray& data, int pos);
+	void writeHeader(ByteArray& data, size_t pos, Endianness endianness);
+	void loadProgramHeader(Elf32_Phdr& header, ByteArray& data, size_t pos);
+	void loadSectionHeader(Elf32_Shdr& header, ByteArray& data, size_t pos);
 	void loadSectionNames();
 	void determinePartOrder();
 
@@ -64,7 +64,7 @@ public:
 	void setData(ByteArray& data) { this->data = data; };
 	void setOwner(ElfSegment* segment);
 	bool hasOwner() { return owner != nullptr; };
-	void writeHeader(ByteArray& data, int pos, Endianness endianness);
+	void writeHeader(ByteArray& data, size_t pos, Endianness endianness);
 	void writeData(ByteArray& output);
 	void setOffsetBase(int base);
 	ByteArray& getData() { return data; };
@@ -95,7 +95,7 @@ public:
 	Elf32_Word getType() { return header.p_type; };
 	Elf32_Addr getVirtualAddress() { return header.p_vaddr; };
 	size_t getSectionCount() { return sections.size(); };
-	void writeHeader(ByteArray& data, int pos, Endianness endianness);
+	void writeHeader(ByteArray& data, size_t pos, Endianness endianness);
 	void writeData(ByteArray& output);
 	void splitSections();
 
