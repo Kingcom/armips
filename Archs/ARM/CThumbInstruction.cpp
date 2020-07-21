@@ -346,7 +346,7 @@ void CThumbInstruction::writeTempData(TempData& tempData) const
 {
 	char str[256];
 
-	int pos = sprintf(str,"   %s",Opcode.name);
+	int pos = sprintf(str,"   %S",Opcode.name);
 	while (pos < 11) str[pos++] = ' ';
 	str[pos] = 0;
 	FormatInstruction(Opcode.mask,&str[pos]);
