@@ -1,0 +1,4 @@
+Auto.asm(9) notice: Allocated at 00000010
+Auto.asm(14) notice: Allocated at 00000014
+Auto.asm(19) notice: Allocated at 00000018
+Auto.asm(24) notice: Allocated at 0000001C

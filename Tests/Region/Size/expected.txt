@@ -1,0 +1,3 @@
+Size.asm(10) error: Area at 00000020 overflowed by 4 bytes
+Size.asm(16) warning: Allocated at 00000010
+Size.asm(21) error: No space available for .autoregion of size 8
