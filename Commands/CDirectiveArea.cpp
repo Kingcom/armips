@@ -139,14 +139,17 @@ void CDirectiveArea::writeTempData(TempData& tempData) const
 	const wchar_t *directiveType = shared ? L"region" : L"area";
 	if (positionExpression.isLoaded())
 		tempData.writeLine(position, tfm::format(L".org 0x%08llX", position));
-	tempData.writeLine(position,tfm::format(L".%S 0x%08X",directiveType,areaSize));
+	if (shared && fillExpression.isLoaded())
+		tempData.writeLine(position,tfm::format(L".%S 0x%08X,0x%02x",directiveType,areaSize,fillValue));
+	else
+		tempData.writeLine(position,tfm::format(L".%S 0x%08X",directiveType,areaSize));
 	if (content)
 	{
 		content->applyFileInfo();
 		content->writeTempData(tempData);
 	}
 
-	if (fillExpression.isLoaded())
+	if (fillExpression.isLoaded() && !shared)
 	{
 		int64_t fileID = g_fileManager->getOpenFileID();
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
