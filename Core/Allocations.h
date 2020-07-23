@@ -13,8 +13,14 @@ struct AllocationStats
 	int64_t largestFreeSize;
 	int64_t largestFreeUsage;
 
+	int64_t sharedFreePosition;
+	int64_t sharedFreeSize;
+	int64_t sharedFreeUsage;
+
 	int64_t totalSize;
 	int64_t totalUsage;
+	int64_t sharedSize;
+	int64_t sharedUsage;
 
 	int64_t largestPoolPosition;
 	int64_t largestPoolSize;
@@ -25,11 +31,15 @@ class Allocations
 {
 public:
 	static void clear();
-	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill);
+	static void setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill, bool shared);
 	static void forgetArea(int64_t fileID, int64_t position, int64_t space);
 
 	static void setPool(int64_t fileID, int64_t position, int64_t size);
 	static void forgetPool(int64_t fileID, int64_t position, int64_t size);
+
+	static void clearSubAreas();
+	static bool allocateSubArea(int64_t fileID, int64_t& position, int64_t minRange, int64_t maxRange, int64_t size);
+	static int64_t getSubAreaUsage(int64_t fileID, int64_t position);
 
 	static void validateOverlap();
 	static AllocationStats collectStats();
@@ -50,11 +60,24 @@ private:
 		int64_t space;
 		int64_t usage;
 		bool usesFill;
+		bool shared;
+	};
+
+	struct SubArea
+	{
+		int64_t offset;
+		int64_t size;
 	};
 
 	static void collectAreaStats(AllocationStats &stats);
 	static void collectPoolStats(AllocationStats &stats);
 
+	static int64_t getSubAreaUsage(Key key)
+	{
+		return getSubAreaUsage(key.fileID, key.position);
+	}
+
 	static std::map<Key, Usage> allocations;
 	static std::map<Key, int64_t> pools;
+	static std::multimap<Key, SubArea> subAreas;
 };

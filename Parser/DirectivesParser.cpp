@@ -449,12 +449,50 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 	std::vector<Expression> parameters;
 	if (parser.parseExpressionList(parameters,1,2) == false)
 		return nullptr;
-	
-	auto area = std::make_unique<CDirectiveArea>(parameters[0]);
+
+	bool shared = (flags & DIRECTIVE_AREA_SHARED) != 0;
+	auto area = std::make_unique<CDirectiveArea>(shared, parameters[0]);
 	if (parameters.size() == 2)
 		area->setFillExpression(parameters[1]);
 
-	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence(L'.', {L".endarea"});
+	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence(L'.', { L".endarea", L".endregion" });
+	parser.eatToken();
+
+	area->setContent(std::move(content));
+	return area;
+}
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineArea(Parser& parser, int flags)
+{
+	std::vector<Expression> parameters;
+	if (parser.parseExpressionList(parameters,2,3) == false)
+		return nullptr;
+
+	bool shared = (flags & DIRECTIVE_AREA_SHARED) != 0;
+	auto area = std::make_unique<CDirectiveArea>(shared, parameters[1]);
+	area->setPositionExpression(parameters[0]);
+	if (parameters.size() == 3)
+		area->setFillExpression(parameters[2]);
+
+	return area;
+}
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveAutoRegion(Parser& parser, int flags)
+{
+	std::vector<Expression> parameters;
+	if (parser.peekToken().type != TokenType::Separator)
+	{
+		if (parser.parseExpressionList(parameters, 0, 2) == false)
+			return nullptr;
+	}
+
+	auto area = std::make_unique<CDirectiveAutoRegion>();
+	if (parameters.size() == 1)
+		area->setMinRangeExpression(parameters[0]);
+	else if (parameters.size() == 2)
+		area->setRangeExpressions(parameters[0], parameters[1]);
+
+	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence(L'.', {L".endautoregion"});
 	parser.eatToken();
 
 	area->setContent(std::move(content));
@@ -738,6 +776,9 @@ const DirectiveMap directives = {
 	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
 	
 	{ L".area",				{ &parseDirectiveArea,				0 } },
+	{ L".autoregion",		{ &parseDirectiveAutoRegion,		0 } },
+	{ L".region",			{ &parseDirectiveArea,				DIRECTIVE_AREA_SHARED } },
+	{ L".defineregion",		{ &parseDirectiveDefineArea,		DIRECTIVE_AREA_SHARED } },
 
 	{ L".importobj",		{ &parseDirectiveObjImport,			0 } },
 	{ L".importlib",		{ &parseDirectiveObjImport,			0 } },

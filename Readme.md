@@ -68,9 +68,11 @@ Specifies the working directory to be used during execution.
 #### `-stat`
 Outputs statistics for bytes used within areas after completion.  Example output:
 ```
-Total areas: 5342 / 7934
-Largest area: 0x0806E80C, 532 / 1156
-Most free area: 0x0806E80C, 532 / 1156 (free at 0x0806EA20)
+Total areas and regions: 5342 / 7934
+Total regions: 916 / 1624
+Largest area or region: 0x0806E80C, 564 / 1156
+Most free area or region: 0x0806E80C, 564 / 1156 (free at 0x0806EA40)
+Most free region: 0x0806E80C, 564 / 1156 (free at 0x0806EA40)
 ```
 
 # 2. Installation
@@ -373,6 +375,50 @@ Optionally, a second parameter can be given. The remaining free size of the area
   .byte 1,2,3,4
 .endarea
 ```
+
+### Regions
+
+To help manage allocating new data in existing space, you can use `.region` and `.autoregion` for armips to automatically find an area with enough space.
+
+`.region` uses the same parameters as `.area`, but creates a space that shared for future `.autoregion` usage.  You can still use code in the region, and the remaining space is considered free (with or without fill.)
+
+Example `.autoregion` usage:
+
+```
+.org @FreeSpace
+.region 0x4000
+.byte 0x12, 0x34
+.endregion
+
+.autoregion
+@TheAnswer:
+  .byte 42
+.endautoregion
+```
+
+Auto region content will be allocated as if it was placed after the content of the region it's allocated to (potentially after other auto regions.)
+
+A shortcut is available for regions without content at a specific location, to quickly define pools.  These are equivalent:
+
+```
+.defineregion @FreeSpace,0x4000,0x00
+.org @FreeSpace :: .region 0x4000,0x00 :: .endregion
+```
+
+By default, `.autoregion` will allocate to any region with sufficient space.  It can be limited to a specific range of start addresses if necessary:
+
+```
+.autoregion @TextStart,@TextStart+@TextEnd
+@CoverAdvisory:
+  .asciiz "Don't Panic"
+.endautoregion
+```
+
+For example, this might be used to ensure the code is reachable by `bl`.
+
+If only the first parameter is given, it will simply require allocation after that virtual address.
+
+Note that after `.endautoregion`, the output position will be reset to what it was before the `.autoregion` directive.
 
 ## 4.9 Symbol files
 

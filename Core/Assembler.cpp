@@ -40,6 +40,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		}
 
 		g_fileManager->reset();
+		Allocations::clearSubAreas();
 
 #ifdef _DEBUG
 		if (!Logger::isSilent())
@@ -120,10 +121,14 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 static void printStats(const AllocationStats &stats)
 {
-	Logger::printLine(L"Total areas: %lld / %lld", stats.totalUsage, stats.totalSize);
-	Logger::printLine(L"Largest area: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
+	Logger::printLine(L"Total areas and regions: %lld / %lld", stats.totalUsage, stats.totalSize);
+	Logger::printLine(L"Total regions: %lld / %lld", stats.sharedUsage, stats.sharedSize);
+	Logger::printLine(L"Largest area or region: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
+
 	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
-	Logger::printLine(L"Most free area: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+	Logger::printLine(L"Most free area or region: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+	int64_t startSharedFreePosition = stats.sharedFreePosition + stats.sharedFreeUsage;
+	Logger::printLine(L"Most free region: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.sharedFreePosition, stats.sharedFreeUsage, stats.sharedFreeSize, startSharedFreePosition);
 
 	if (stats.totalPoolSize != 0)
 	{
