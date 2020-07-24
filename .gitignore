@@ -8,3 +8,7 @@
 
 # Temporary dir for compiled headers.
 /ipch/
+
+# Visual Studio CMake directories.
+/.vs/
+/out/
