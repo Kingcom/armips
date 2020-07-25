@@ -38,8 +38,8 @@ public:
 	GenericAssemblerFile(const fs::path& fileName, const fs::path& originalFileName, int64_t headerSize);
 
 	virtual bool open(bool onlyCheck);
-	virtual void close() { if (handle.isOpen()) handle.close(); };
-	virtual bool isOpen() { return handle.isOpen(); };
+	virtual void close() { if (stream.is_open()) stream.close(); };
+	virtual bool isOpen() { return stream.is_open(); };
 	virtual bool write(void* data, size_t length);
 	virtual int64_t getVirtualAddress() { return virtualAddress; };
 	virtual int64_t getPhysicalAddress() { return virtualAddress-headerSize; };
@@ -60,7 +60,7 @@ private:
 	int64_t originalHeaderSize;
 	int64_t headerSize;
 	int64_t virtualAddress;
-	BinaryFile handle;
+	fs::ofstream stream;
 	fs::path fileName;
 	fs::path originalName;
 };

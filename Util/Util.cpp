@@ -231,33 +231,6 @@ std::vector<std::wstring> splitString(const std::wstring& str, const wchar_t del
 	return result;
 }
 
-FILE* openFile(const fs::path& fileName, OpenFileMode mode)
-{
-#ifdef _WIN32
-	switch (mode)
-	{
-	case OpenFileMode::ReadBinary:
-		return _wfopen(fileName.wstring().c_str(),L"rb");
-	case OpenFileMode::WriteBinary:
-		return _wfopen(fileName.wstring().c_str(),L"wb");
-	case OpenFileMode::ReadWriteBinary:
-		return _wfopen(fileName.wstring().c_str(),L"rb+");
-	}
-#else
-	switch (mode)
-	{
-	case OpenFileMode::ReadBinary:
-		return fopen(fileName.string().c_str(),"rb");
-	case OpenFileMode::WriteBinary:
-		return fopen(fileName.string().c_str(),"wb");
-	case OpenFileMode::ReadWriteBinary:
-		return fopen(fileName.string().c_str(),"rb+");
-	}
-#endif
-
-	return nullptr;
-}
-
 std::wstring toWLowercase(const std::string& str)
 {
 	std::wstring result;

@@ -491,17 +491,24 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 
 	auto fullName = getFullPathName(*fileName);
 
-	BinaryFile file;
-	if (!file.open(fullName,BinaryFile::Read))
+	fs::ifstream file(fullName, fs::ifstream::in | fs::ifstream::binary);
+	if (!file.is_open())
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",*fileName);
+		Logger::queueError(Logger::Error, L"Could not open %s",*fileName);
 		return ExpressionValue();
 	}
 
-	file.setPos(pos);
+	file.seekg(pos);
+	if (file.eof() || file.fail())
+	{
+		Logger::queueError(Logger::Error, L"Invalid offset 0x%08X of %s", pos, *fileName);
+		return ExpressionValue();
+	}
 
 	T buffer;
-	if (file.read(&buffer, sizeof(T)) != sizeof(T))
+	file.read(reinterpret_cast<char*>(&buffer), sizeof(T));
+
+	if (file.fail())
 	{
 		Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", sizeof(T), pos, *fileName);
 		return ExpressionValue();
@@ -528,24 +535,36 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	if (length == 0 || start+length > totalSize)
 		length = totalSize-start;
 
-	BinaryFile file;
-	if (!file.open(fullName,BinaryFile::Read))
+	fs::ifstream file(fullName, fs::ifstream::in | fs::ifstream::binary);
+	if (!file.is_open())
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
+		Logger::queueError(Logger::Error, L"Could not open %s",*fileName);
 		return ExpressionValue();
 	}
 
-	file.setPos((long)start);
+	file.seekg(start);
+	if (file.eof() || file.fail())
+	{
+		Logger::queueError(Logger::Error, L"Invalid offset 0x%08X of %s", start, *fileName);
+		return ExpressionValue();
+	}
 
-	unsigned char buffer[1024];
+	char buffer[1024];
 	bool stringTerminated = false;
 	std::wstring result;
 
 	for (int64_t progress = 0; !stringTerminated && progress < length; progress += (int64_t) sizeof(buffer))
 	{
-		const size_t bytesRead = file.read(buffer, (size_t) std::min((int64_t) sizeof(buffer), length - progress));
+		auto bytesToRead = (size_t) std::min((int64_t) sizeof(buffer), length - progress);
 
-		for (size_t i = 0; i < bytesRead; i++)
+		file.read(buffer, bytesToRead);
+		if (file.fail())
+		{
+			Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", bytesToRead, *fileName);
+			return ExpressionValue();
+		}
+
+		for (size_t i = 0; i < file.gcount(); i++)
 		{
 			if (buffer[i] == 0x00)
 			{
@@ -553,7 +572,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 				break;
 			}
 
-			if (buffer[i] < 0x20 || buffer[i] > 0x7F)
+			if (buffer[i] < 0x20)
 			{
 				Logger::printError(Logger::Warning, L"%s: Non-ASCII character", funcName);
 				return ExpressionValue();
