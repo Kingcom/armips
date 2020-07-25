@@ -16,6 +16,20 @@ jobs:
         - ctest --output-on-failure
     - os: linux
       dist: focal
+      compiler: "gcc"
+      sudo: true
+      env:
+        - WITH_STD_FILESYSTEM=1
+      before_install:
+        - |-
+            sudo rm -rf /usr/local/cmake-3.12.4
+            sudo apt-get install cmake ninja-build
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DARMIPS_USE_STD_FILESYSTEM=1 CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
+    - os: linux
+      dist: focal
       compiler: "clang"
       before_install:
         - |-
@@ -39,10 +53,35 @@ jobs:
         - cmake -GNinja -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
         - cmake  --build .
         - ctest --output-on-failure
+    - os: mac
+      compiler: "clang"
+      osx_image: xcode11.6
+      env:
+        - WITH_STD_FILESYSTEM=1
+      before_install:
+        - brew install ninja
+      cache:
+        directories:
+          - $HOME/Library/Caches/Homebrew
+          - /usr/local/Homebrew
+      before_cache:
+        - brew cleanup
+      script:
+        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DARMIPS_USE_STD_FILESYSTEM=1 CMakeLists.txt
+        - cmake  --build .
+        - ctest --output-on-failure
     - os: windows
       compiler: "msvc2017"
       script:
         - cmake -DCMAKE_GENERATOR_PLATFORM=x64 CMakeLists.txt
+        - cmake  --build . --config Release
+        - ctest -C Release --output-on-failure
+    - os: windows
+      compiler: "msvc2017"
+      env:
+        - WITH_STD_FILESYSTEM=1
+      script:
+        - cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DARMIPS_USE_STD_FILESYSTEM=1 CMakeLists.txt
         - cmake  --build . --config Release
         - ctest -C Release --output-on-failure
     - os: windows
