@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 project(armips) 
 
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
+option(ARMIPS_USE_STD_FILESYSTEM "Use std::filesystem instead of third party implementation" OFF)
+
+add_subdirectory(ext/filesystem)
 
 macro(check_compiler VARIABLE NAME)
 	if (${CMAKE_CXX_COMPILER_ID} MATCHES ${NAME})
@@ -43,6 +46,8 @@ function(init_target TARGET_NAME)
 
 	if (WIN32)
 		if (MSVC)
+			target_compile_options(${TARGET_NAME} PRIVATE /Zc:__cplusplus)
+			target_compile_options(${TARGET_NAME} PRIVATE /permissive-)
 			target_compile_definitions(${TARGET_NAME} PRIVATE UNICODE _UNICODE)
 			target_compile_definitions(${TARGET_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 		else()
@@ -66,6 +71,12 @@ target_include_directories(tinyformat INTERFACE ext/tinyformat)
 add_library(armips STATIC)
 init_target(armips)
 target_link_libraries(armips PUBLIC tinyformat)
+
+if (ARMIPS_USE_STD_FILESYSTEM)
+	target_compile_definitions(armips PUBLIC ARMIPS_USE_STD_FILESYSTEM)
+else()
+	target_link_libraries(armips PUBLIC ghc_filesystem)
+endif()
 
 if (WIN32)
 	target_link_libraries(armips PUBLIC shlwapi)
@@ -171,6 +182,8 @@ armips_target_sources(armips PRIVATE
 	Util/EncodingTable.h
 	Util/FileClasses.cpp
 	Util/FileClasses.h
+	Util/FileSystem.cpp
+	Util/FileSystem.h
 	Util/Util.cpp
 	Util/Util.h
 )
