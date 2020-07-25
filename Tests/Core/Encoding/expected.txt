@@ -1,0 +1,5 @@
+﻿shift_jis.asm(1) notice: Shift-JIS: ○●◎◇◆□■△▲▽▼
+utf8.asm(1) notice: UTF8: ○●◎◇◆□■△▲▽▼
+utf8_bom.asm(1) notice: UTF8 BOM: ○●◎◇◆□■△▲▽▼
+utf16_be.asm(1) notice: UTF 16 BE: ○●◎◇◆□■△▲▽▼
+utf16_le.asm(1) notice: UTF 16 LE: ○●◎◇◆□■△▲▽▼

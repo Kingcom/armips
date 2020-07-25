@@ -113,14 +113,14 @@ private:
 	}
 	inline unsigned short bufGet16LE()
 	{
-		char c1 = bufGetChar();
-		char c2 = bufGetChar();
+		unsigned char c1 = bufGetChar();
+		unsigned char c2 = bufGetChar();
 		return c1 | (c2 << 8);
 	}
 	inline unsigned short bufGet16BE()
 	{
-		char c1 = bufGetChar();
-		char c2 = bufGetChar();
+		unsigned char c1 = bufGetChar();
+		unsigned char c2 = bufGetChar();
 		return c2 | (c1 << 8);
 	}
 
