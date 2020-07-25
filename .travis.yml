@@ -46,6 +46,16 @@ jobs:
         - cmake  --build . --config Release
         - ctest -C Release --output-on-failure
     - os: windows
+      compiler: "msvc2019"
+      env:
+        - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+      install:
+        - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+      script:
+        - cmake -DCMAKE_GENERATOR_PLATFORM=x64 CMakeLists.txt
+        - cmake  --build . --config Release
+        - ctest -C Release --output-on-failure
+    - os: windows
       compiler: "clang"
       before_install:
         - choco install ninja
