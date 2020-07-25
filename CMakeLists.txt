@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(armips) 
 
+option(ARMIPS_PRECOMPILE_HEADERS "Use precompiled headers" OFF)
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
 option(ARMIPS_USE_STD_FILESYSTEM "Use std::filesystem instead of third party implementation" OFF)
 
@@ -187,6 +188,14 @@ armips_target_sources(armips PRIVATE
 	Util/Util.cpp
 	Util/Util.h
 )
+
+if (ARMIPS_PRECOMPILE_HEADERS)
+	target_precompile_headers(armips PRIVATE
+		[["Util/FileSystem.h"]]
+		<tinyformat.h>
+	)
+	set_source_files_properties(Util/FileSystem.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+endif()
 
 # armips-bin
 add_executable(armips-bin)

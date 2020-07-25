@@ -703,17 +703,19 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		{
 		case 0xFFFE:
 			encoding = UTF16BE;
-			contentPos += 2;
+			stream.seekg(2);
+			contentPos = 2;
 			break;
 		case 0xFEFF:
 			encoding = UTF16LE;
-			contentPos += 2;
+			stream.seekg(2);
+			contentPos = 2;
 			break;
 		case 0xBBEF:
 			if (numBuffer[2] == 0xBF)
 			{
 				encoding = UTF8;
-				contentPos += 3;
+				contentPos = 3;
 				break;
 			}
 			[[fallthrough]];
@@ -765,9 +767,8 @@ void TextFile::bufFillRead()
 	assert(mode == Read);
 
 	buf.resize(TEXTFILE_BUF_MAX_SIZE);
-	stream.read(const_cast<char *>(buf.c_str()), TEXTFILE_BUF_MAX_SIZE); // TODO: don't do this...
+	stream.read(&buf[0], TEXTFILE_BUF_MAX_SIZE);
 	buf.resize(stream.gcount());
-
 	bufPos = 0;
 }
 
