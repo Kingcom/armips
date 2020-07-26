@@ -561,7 +561,7 @@ DirectivePsxObjImport::DirectivePsxObjImport(const std::wstring& fileName)
 	}
 }
 
-bool DirectivePsxObjImport::Validate()
+bool DirectivePsxObjImport::Validate(const ValidateState &state)
 {
 	int memory = (int) g_fileManager->getVirtualAddress();
 	rel.relocate(memory);

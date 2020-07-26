@@ -7,7 +7,7 @@ class CDirectiveArea: public CAssemblerCommand
 {
 public:
 	CDirectiveArea(bool shared, Expression& size);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
@@ -30,7 +30,7 @@ class CDirectiveAutoRegion : public CAssemblerCommand
 {
 public:
 	CDirectiveAutoRegion();
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

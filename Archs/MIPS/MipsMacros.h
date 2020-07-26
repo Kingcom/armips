@@ -59,7 +59,7 @@ class MipsMacroCommand: public CAssemblerCommand
 {
 public:
 	MipsMacroCommand(std::unique_ptr<CAssemblerCommand> content, int macroFlags);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 private:

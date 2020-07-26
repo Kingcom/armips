@@ -58,7 +58,7 @@ void CArmInstruction::setPoolAddress(int64_t address)
 	Vars.Immediate = pos;
 }
 
-bool CArmInstruction::Validate()
+bool CArmInstruction::Validate(const ValidateState &state)
 {
 	RamPos = g_fileManager->getVirtualAddress();
 

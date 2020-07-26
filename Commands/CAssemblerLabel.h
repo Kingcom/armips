@@ -10,7 +10,7 @@ class CAssemblerLabel: public CAssemblerCommand
 public:
 	CAssemblerLabel(const std::wstring& name, const std::wstring& originalName);
 	CAssemblerLabel(const std::wstring& name, const std::wstring& originalName, Expression& value);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
@@ -24,7 +24,7 @@ class CDirectiveFunction: public CAssemblerCommand
 {
 public:
 	CDirectiveFunction(const std::wstring& name, const std::wstring& originalName);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

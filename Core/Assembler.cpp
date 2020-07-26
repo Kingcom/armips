@@ -50,7 +50,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		if (Global.memoryMode)
 			g_fileManager->openFile(Global.memoryFile,true);
 
-		Revalidate = content->Validate();
+		Revalidate = content->Validate(ValidateState{});
 
 		Arm.Revalidate();
 		Mips.Revalidate();

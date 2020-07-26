@@ -294,7 +294,7 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& inputName, const 
 	g_fileManager->addFile(file);
 }
 
-bool DirectiveLoadMipsElf::Validate()
+bool DirectiveLoadMipsElf::Validate(const ValidateState &state)
 {
 	Arch->NextSection();
 	g_fileManager->openFile(file,true);

@@ -28,7 +28,7 @@ TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding enco
 	}
 }
 
-bool TableCommand::Validate()
+bool TableCommand::Validate(const ValidateState &state)
 {
 	Global.Table = table;
 	return false;
@@ -308,7 +308,7 @@ void CDirectiveData::encodeNormal()
 	}
 }
 
-bool CDirectiveData::Validate()
+bool CDirectiveData::Validate(const ValidateState &state)
 {
 	position = g_fileManager->getVirtualAddress();
 

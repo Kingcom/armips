@@ -10,7 +10,7 @@ class TableCommand: public CAssemblerCommand
 {
 public:
 	TableCommand(const std::wstring& fileName, TextFile::Encoding encoding);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const { };
 	virtual void writeTempData(TempData& tempData) const { };
 	virtual void writeSymData(SymbolData& symData) const { };
@@ -29,7 +29,7 @@ public:
 	void setAscii(std::vector<Expression>& entries, bool terminate);
 	void setSjis(std::vector<Expression>& entries, bool terminate);
 	void setCustom(std::vector<Expression>& entries, bool terminate);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

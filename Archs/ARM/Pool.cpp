@@ -14,7 +14,7 @@ ArmStateCommand::ArmStateCommand(bool state)
 	armstate = state;
 }
 
-bool ArmStateCommand::Validate()
+bool ArmStateCommand::Validate(const ValidateState &state)
 {
 	RamPos = g_fileManager->getVirtualAddress();
 	return false;
@@ -40,7 +40,7 @@ ArmPoolCommand::ArmPoolCommand()
 	position = -1;
 }
 
-bool ArmPoolCommand::Validate()
+bool ArmPoolCommand::Validate(const ValidateState &state)
 {
 	int64_t fileID = g_fileManager->getOpenFileID();
 	if (position != -1)

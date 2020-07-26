@@ -77,7 +77,7 @@ class DirectivePsxObjImport: public CAssemblerCommand
 public:
 	DirectivePsxObjImport(const std::wstring& fileName);
 	~DirectivePsxObjImport() { };
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const { };
 	virtual void writeSymData(SymbolData& symData) const;

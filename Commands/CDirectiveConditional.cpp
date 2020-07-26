@@ -64,7 +64,7 @@ bool CDirectiveConditional::evaluate()
 	return false;
 }
 
-bool CDirectiveConditional::Validate()
+bool CDirectiveConditional::Validate(const ValidateState &state)
 {
 	bool result = evaluate();
 	bool returnValue = result != previousResult;
@@ -73,12 +73,12 @@ bool CDirectiveConditional::Validate()
 	if (result)
 	{
 		ifBlock->applyFileInfo();
-		if (ifBlock->Validate())
+		if (ifBlock->Validate(state))
 			returnValue = true;
 	} else if (elseBlock != nullptr)
 	{
 		elseBlock->applyFileInfo();
-		if (elseBlock->Validate())
+		if (elseBlock->Validate(state))
 			returnValue = true;
 	}
 

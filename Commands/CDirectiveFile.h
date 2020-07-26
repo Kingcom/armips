@@ -18,7 +18,7 @@ public:
 	void initCopy(const std::wstring& inputName, const std::wstring& outputName, int64_t memory);
 	void initClose();
 
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
@@ -34,7 +34,7 @@ class CDirectivePosition: public CAssemblerCommand
 public:
 	enum Type { Physical, Virtual };
 	CDirectivePosition(Expression value, Type type);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const { };
@@ -53,7 +53,7 @@ public:
 	void setStart(Expression& exp) { startExpression = exp; };
 	void setSize(Expression& exp) { sizeExpression = exp; };
 
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
@@ -76,7 +76,7 @@ public:
 	CDirectiveAlignFill(int64_t value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Expression& fillValue, Mode mode);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;
@@ -94,7 +94,7 @@ class CDirectiveSkip: public CAssemblerCommand
 {
 public:
 	CDirectiveSkip(Expression& value);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const { };
@@ -108,7 +108,7 @@ class CDirectiveHeaderSize: public CAssemblerCommand
 {
 public:
 	CDirectiveHeaderSize(Expression expression);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const { };
@@ -125,7 +125,7 @@ public:
 	DirectiveObjImport(const std::wstring& inputName);
 	DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName);
 	~DirectiveObjImport() { };
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

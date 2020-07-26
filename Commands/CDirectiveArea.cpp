@@ -32,7 +32,7 @@ void CDirectiveArea::setPositionExpression(Expression& exp)
 	positionExpression = exp;
 }
 
-bool CDirectiveArea::Validate()
+bool CDirectiveArea::Validate(const ValidateState &state)
 {
 	int64_t oldAreaSize = areaSize;
 	int64_t oldContentSize = contentSize;
@@ -76,7 +76,7 @@ bool CDirectiveArea::Validate()
 	if (content)
 	{
 		content->applyFileInfo();
-		result = content->Validate();
+		result = content->Validate(state);
 	}
 	contentSize = g_fileManager->getVirtualAddress()-position;
 
@@ -199,7 +199,7 @@ void CDirectiveAutoRegion::setRangeExpressions(Expression& minExp, Expression& m
 	maxRangeExpression = maxExp;
 }
 
-bool CDirectiveAutoRegion::Validate()
+bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 {
 	resetPosition = g_fileManager->getVirtualAddress();
 
@@ -209,7 +209,7 @@ bool CDirectiveAutoRegion::Validate()
 		// Just calculate contentSize.
 		position = g_fileManager->getVirtualAddress();
 		content->applyFileInfo();
-		content->Validate();
+		content->Validate(state);
 		contentSize = g_fileManager->getVirtualAddress() - position;
 
 		g_fileManager->seekVirtual(resetPosition);
@@ -249,7 +249,7 @@ bool CDirectiveAutoRegion::Validate()
 	g_fileManager->seekVirtual(position);
 
 	content->applyFileInfo();
-	bool result = content->Validate();
+	bool result = content->Validate(state);
 	contentSize = g_fileManager->getVirtualAddress() - position;
 
 	// restore info of this command

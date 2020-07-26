@@ -32,7 +32,7 @@ void CThumbInstruction::setPoolAddress(int64_t address)
 	Vars.Immediate = pos >> 2;
 }
 
-bool CThumbInstruction::Validate()
+bool CThumbInstruction::Validate(const ValidateState &state)
 {
 	RamPos = g_fileManager->getVirtualAddress();
 
