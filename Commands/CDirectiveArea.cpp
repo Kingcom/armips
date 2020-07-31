@@ -211,7 +211,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	contentValidation.noFileChangeDirective = L"region";
 
 	// We need at least one full pass run before we can get an address.
-	if (Global.validationPasses < 1)
+	if (state.passes < 1)
 	{
 		// Just calculate contentSize.
 		position = g_fileManager->getVirtualAddress();

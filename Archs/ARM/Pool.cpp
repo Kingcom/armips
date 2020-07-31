@@ -57,7 +57,7 @@ bool ArmPoolCommand::Validate(const ValidateState &state)
 		
 		// try to filter redundant values, but only if
 		// we aren't in an unordinarily long validation loop
-		if (Global.validationPasses < 10)
+		if (state.passes < 10)
 		{
 			auto it = usedValues.find(entry.value);
 			if (it != usedValues.end())

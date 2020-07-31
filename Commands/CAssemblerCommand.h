@@ -7,6 +7,7 @@ struct ValidateState
 {
 	bool noFileChange = false;
 	const wchar_t *noFileChangeDirective = nullptr;
+	int passes = 0;
 };
 
 class CAssemblerCommand

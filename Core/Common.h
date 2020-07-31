@@ -24,7 +24,6 @@ typedef struct {
 	int Section;
 	bool nocash;
 	bool relativeInclude;
-	int validationPasses;
 	bool memoryMode;
 	std::shared_ptr<AssemblerFile> memoryFile;
 	bool multiThreading;

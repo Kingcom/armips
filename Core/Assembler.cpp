@@ -26,14 +26,13 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	Arm.Pass2();
 	Mips.Pass2();
 
-	int validationPasses = 0;
+	ValidateState validation;
 	do	// loop until everything is constant
 	{
-		Global.validationPasses = validationPasses;
 		Logger::clearQueue();
 		Revalidate = false;
 
-		if (validationPasses >= 100)
+		if (validation.passes >= 100)
 		{
 			Logger::queueError(Logger::Error,L"Stuck in infinite validation loop");
 			break;
@@ -44,13 +43,13 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 #ifdef _DEBUG
 		if (!Logger::isSilent())
-			printf("Validate %d...\n",validationPasses);
+			printf("Validate %d...\n",validation.passes);
 #endif
 
 		if (Global.memoryMode)
 			g_fileManager->openFile(Global.memoryFile,true);
 
-		Revalidate = content->Validate(ValidateState{});
+		Revalidate = content->Validate(validation);
 
 		Arm.Revalidate();
 		Mips.Revalidate();
@@ -58,7 +57,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		if (Global.memoryMode)
 			g_fileManager->closeFile();
 
-		validationPasses++;
+		validation.passes++;
 	} while (Revalidate == true);
 
 	Allocations::validateOverlap();
@@ -145,7 +144,6 @@ bool runArmips(ArmipsArguments& settings)
 	Global.FileInfo.FileCount = 0;
 	Global.FileInfo.TotalLineCount = 0;
 	Global.relativeInclude = false;
-	Global.validationPasses = 0;
 	Global.multiThreading = true;
 	Arch = &InvalidArchitecture;
 
