@@ -127,8 +127,11 @@ bool CDirectiveFunction::Validate(const ValidateState &state)
 	label->applyFileInfo();
 	bool result = label->Validate(state);
 
+	ValidateState contentValidation = state;
+	contentValidation.noFileChange = true;
+	contentValidation.noFileChangeDirective = L"function";
 	content->applyFileInfo();
-	if (content->Validate(state))
+	if (content->Validate(contentValidation))
 		result = true;
 
 	end = g_fileManager->getVirtualAddress();

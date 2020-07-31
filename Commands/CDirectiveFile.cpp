@@ -62,6 +62,15 @@ void CDirectiveFile::initClose()
 
 bool CDirectiveFile::Validate(const ValidateState &state)
 {
+	if (state.noFileChange)
+	{
+		if (type == Type::Close)
+			Logger::queueError(Logger::Error, L"Cannot close file within %S", state.noFileChangeDirective);
+		else
+			Logger::queueError(Logger::Error, L"Cannot open new file within %S", state.noFileChangeDirective);
+		return false;
+	}
+
 	virtualAddress = g_fileManager->getVirtualAddress();
 	Arch->NextSection();
 

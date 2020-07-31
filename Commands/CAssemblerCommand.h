@@ -5,7 +5,8 @@ class SymbolData;
 
 struct ValidateState
 {
-	bool allowFileChange = true;
+	bool noFileChange = false;
+	const wchar_t *noFileChangeDirective = nullptr;
 };
 
 class CAssemblerCommand
