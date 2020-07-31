@@ -32,7 +32,7 @@ void CDirectiveArea::setPositionExpression(Expression& exp)
 	positionExpression = exp;
 }
 
-bool CDirectiveArea::Validate()
+bool CDirectiveArea::Validate(const ValidateState &state)
 {
 	int64_t oldAreaSize = areaSize;
 	int64_t oldContentSize = contentSize;
@@ -75,8 +75,11 @@ bool CDirectiveArea::Validate()
 	bool result = false;
 	if (content)
 	{
+		ValidateState contentValidation = state;
+		contentValidation.noFileChange = true;
+		contentValidation.noFileChangeDirective = L"area";
 		content->applyFileInfo();
-		result = content->Validate();
+		result = content->Validate(contentValidation);
 	}
 	contentSize = g_fileManager->getVirtualAddress()-position;
 
@@ -199,17 +202,21 @@ void CDirectiveAutoRegion::setRangeExpressions(Expression& minExp, Expression& m
 	maxRangeExpression = maxExp;
 }
 
-bool CDirectiveAutoRegion::Validate()
+bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 {
 	resetPosition = g_fileManager->getVirtualAddress();
 
+	ValidateState contentValidation = state;
+	contentValidation.noFileChange = true;
+	contentValidation.noFileChangeDirective = L"region";
+
 	// We need at least one full pass run before we can get an address.
-	if (Global.validationPasses < 1)
+	if (state.passes < 1)
 	{
 		// Just calculate contentSize.
 		position = g_fileManager->getVirtualAddress();
 		content->applyFileInfo();
-		content->Validate();
+		content->Validate(contentValidation);
 		contentSize = g_fileManager->getVirtualAddress() - position;
 
 		g_fileManager->seekVirtual(resetPosition);
@@ -249,7 +256,7 @@ bool CDirectiveAutoRegion::Validate()
 	g_fileManager->seekVirtual(position);
 
 	content->applyFileInfo();
-	bool result = content->Validate();
+	bool result = content->Validate(contentValidation);
 	contentSize = g_fileManager->getVirtualAddress() - position;
 
 	// restore info of this command

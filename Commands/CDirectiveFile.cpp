@@ -60,8 +60,17 @@ void CDirectiveFile::initClose()
 	updateSection(++Global.Section);
 }
 
-bool CDirectiveFile::Validate()
+bool CDirectiveFile::Validate(const ValidateState &state)
 {
+	if (state.noFileChange)
+	{
+		if (type == Type::Close)
+			Logger::queueError(Logger::Error, L"Cannot close file within %S", state.noFileChangeDirective);
+		else
+			Logger::queueError(Logger::Error, L"Cannot open new file within %S", state.noFileChangeDirective);
+		return false;
+	}
+
 	virtualAddress = g_fileManager->getVirtualAddress();
 	Arch->NextSection();
 
@@ -170,7 +179,7 @@ void CDirectivePosition::exec() const
 	}
 }
 
-bool CDirectivePosition::Validate()
+bool CDirectivePosition::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
@@ -221,7 +230,7 @@ CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
 	this->fileSize = ::fileSize(this->fileName);
 }
 
-bool CDirectiveIncbin::Validate()
+bool CDirectiveIncbin::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
@@ -313,7 +322,7 @@ CDirectiveAlignFill::CDirectiveAlignFill(Expression& value, Expression& fillValu
 	fillExpression = fillValue;
 }
 
-bool CDirectiveAlignFill::Validate()
+bool CDirectiveAlignFill::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
@@ -417,7 +426,7 @@ void CDirectiveAlignFill::writeSymData(SymbolData& symData) const
 CDirectiveSkip::CDirectiveSkip(Expression& expression)
 	: expression(expression) {}
 
-bool CDirectiveSkip::Validate()
+bool CDirectiveSkip::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
@@ -468,7 +477,7 @@ void CDirectiveHeaderSize::exec() const
 	file->seekPhysical(physicalAddress);
 }
 
-bool CDirectiveHeaderSize::Validate()
+bool CDirectiveHeaderSize::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
@@ -516,10 +525,10 @@ DirectiveObjImport::DirectiveObjImport(const std::wstring& inputName, const std:
 	}
 }
 
-bool DirectiveObjImport::Validate()
+bool DirectiveObjImport::Validate(const ValidateState &state)
 {
 	bool result = false;
-	if (ctor != nullptr && ctor->Validate())
+	if (ctor != nullptr && ctor->Validate(state))
 		result = true;
 
 	int64_t memory = g_fileManager->getVirtualAddress();

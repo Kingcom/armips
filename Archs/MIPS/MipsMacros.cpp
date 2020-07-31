@@ -17,11 +17,11 @@ MipsMacroCommand::MipsMacroCommand(std::unique_ptr<CAssemblerCommand> content, i
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
 }
 
-bool MipsMacroCommand::Validate()
+bool MipsMacroCommand::Validate(const ValidateState &state)
 {
 	int64_t memoryPos = g_fileManager->getVirtualAddress();
 	content->applyFileInfo();
-	bool result = content->Validate();
+	bool result = content->Validate(state);
 	int64_t newMemoryPos = g_fileManager->getVirtualAddress();
 
 	applyFileInfo();

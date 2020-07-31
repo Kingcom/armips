@@ -1,0 +1,2 @@
+﻿CloseFile.asm(6) error: Cannot close file within area
+CloseFile.asm(14) error: Cannot open new file within area

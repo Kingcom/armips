@@ -9,7 +9,7 @@ class ArmStateCommand: public CAssemblerCommand
 {
 public:
 	ArmStateCommand(bool state);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const { };
 	virtual void writeTempData(TempData& tempData) const { };
 	virtual void writeSymData(SymbolData& symData) const;
@@ -30,7 +30,7 @@ class ArmPoolCommand: public CAssemblerCommand
 {
 public:
 	ArmPoolCommand();
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

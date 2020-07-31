@@ -31,7 +31,7 @@ class ArchitectureCommand: public CAssemblerCommand
 {
 public:
 	ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

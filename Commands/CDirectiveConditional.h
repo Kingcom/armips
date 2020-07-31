@@ -19,7 +19,7 @@ public:
 	CDirectiveConditional(ConditionType type);
 	CDirectiveConditional(ConditionType type, const std::wstring& name);
 	CDirectiveConditional(ConditionType type, const Expression& exp);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void writeSymData(SymbolData& symData) const;

@@ -64,7 +64,7 @@ public:
 	CArmInstruction(const tArmOpcode& sourceOpcode, ArmOpcodeVariables& vars);
 //	~CArmInstruction();
 	bool Load(char* Name, char* Params);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	virtual void setPoolAddress(int64_t address);

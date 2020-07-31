@@ -3,12 +3,19 @@
 class TempData;
 class SymbolData;
 
+struct ValidateState
+{
+	bool noFileChange = false;
+	const wchar_t *noFileChangeDirective = nullptr;
+	int passes = 0;
+};
+
 class CAssemblerCommand
 {
 public:
 	CAssemblerCommand();
 	virtual ~CAssemblerCommand() { };
-	virtual bool Validate() = 0;
+	virtual bool Validate(const ValidateState &state) = 0;
 	virtual void Encode() const = 0;
 	virtual void writeTempData(TempData& tempData) const = 0;
 	virtual void writeSymData(SymbolData& symData) const { };
@@ -25,7 +32,7 @@ private:
 class DummyCommand: public CAssemblerCommand
 {
 public:
-	virtual bool Validate() { return false; };
+	bool Validate(const ValidateState &state) override { return false; }
 	virtual void Encode() const { };
 	virtual void writeTempData(TempData& tempData) const { };
 	virtual void writeSymData(SymbolData& symData) const { };
@@ -34,7 +41,7 @@ public:
 class InvalidCommand: public CAssemblerCommand
 {
 public:
-	virtual bool Validate() { return false; };
+	bool Validate(const ValidateState &state) override { return false; }
 	virtual void Encode() const { };
 	virtual void writeTempData(TempData& tempData) const { };
 	virtual void writeSymData(SymbolData& symData) const { };

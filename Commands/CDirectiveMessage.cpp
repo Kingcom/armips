@@ -10,7 +10,7 @@ CDirectiveMessage::CDirectiveMessage(Type type, Expression exp)
 	this->exp = exp;
 }
 
-bool CDirectiveMessage::Validate()
+bool CDirectiveMessage::Validate(const ValidateState &state)
 {
 	std::wstring text;
 	if (exp.evaluateString(text,true) == false)

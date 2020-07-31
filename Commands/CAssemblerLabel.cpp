@@ -40,7 +40,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 	labelValue = value;
 }
 
-bool CAssemblerLabel::Validate()
+bool CAssemblerLabel::Validate(const ValidateState &state)
 {
 	bool result = false;
 	if (defined == false)
@@ -120,15 +120,18 @@ CDirectiveFunction::CDirectiveFunction(const std::wstring& name, const std::wstr
 	this->start = this->end = 0;
 }
 
-bool CDirectiveFunction::Validate()
+bool CDirectiveFunction::Validate(const ValidateState &state)
 {
 	start = g_fileManager->getVirtualAddress();
 
 	label->applyFileInfo();
-	bool result = label->Validate();
+	bool result = label->Validate(state);
 
+	ValidateState contentValidation = state;
+	contentValidation.noFileChange = true;
+	contentValidation.noFileChangeDirective = L"function";
 	content->applyFileInfo();
-	if (content->Validate())
+	if (content->Validate(contentValidation))
 		result = true;
 
 	end = g_fileManager->getVirtualAddress();

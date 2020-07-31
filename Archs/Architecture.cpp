@@ -22,7 +22,7 @@ ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std
 	this->endianness = Arch->getEndianness();
 }
 
-bool ArchitectureCommand::Validate()
+bool ArchitectureCommand::Validate(const ValidateState &state)
 {
 	position = g_fileManager->getVirtualAddress();
 	g_fileManager->setEndianness(endianness);

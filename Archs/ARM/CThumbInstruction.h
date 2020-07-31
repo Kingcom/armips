@@ -23,7 +23,7 @@ public:
 	CThumbInstruction(const tThumbOpcode& sourceOpcode, ThumbOpcodeVariables& vars);
 //	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
-	virtual bool Validate();
+	bool Validate(const ValidateState &state) override;
 	virtual void Encode() const;
 	virtual void writeTempData(TempData& tempData) const;
 	size_t GetSize() { return OpcodeSize; };

@@ -82,7 +82,7 @@ int CMipsInstruction::floatToHalfFloat(int i)
 	return s | (e << 10) | (f >> 13);
 }
 
-bool CMipsInstruction::Validate()
+bool CMipsInstruction::Validate(const ValidateState &state)
 {
 	bool Result = false;
 

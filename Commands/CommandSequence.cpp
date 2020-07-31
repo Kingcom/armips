@@ -6,14 +6,14 @@ CommandSequence::CommandSequence()
 
 }
 
-bool CommandSequence::Validate()
+bool CommandSequence::Validate(const ValidateState &state)
 {
 	bool result = false;
 	
 	for (const std::unique_ptr<CAssemblerCommand>& cmd: commands)
 	{
 		cmd->applyFileInfo();
-		if (cmd->Validate())
+		if (cmd->Validate(state))
 			result = true;
 	}
 
