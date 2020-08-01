@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include <tinyformat.h>
+#include <fmt/format.h>
 
 class Logger
 {
@@ -18,7 +18,7 @@ public:
 	template <typename... Args>
 	static void printLine(const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::wstring message = fmt::format(text,args...);
 		printLine(message);
 	}
 
@@ -27,7 +27,7 @@ public:
 	template <typename... Args>
 	static void print(const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::wstring message = fmt::format(text,args...);
 		print(message);
 	}
 
@@ -39,14 +39,14 @@ public:
 	template <typename... Args>
 	static void printError(ErrorType type, const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::wstring message = fmt::format(text,args...);
 		printError(type,message);
 	}
 	
 	template <typename... Args>
 	static void queueError(ErrorType type, const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::wstring message = fmt::format(text,args...);
 		queueError(type,message);
 	}
 

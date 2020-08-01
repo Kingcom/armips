@@ -92,7 +92,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 		else if (num == 32 && mode == ARM_SHIFT_ASR) num = 0;
 		else if (num == 32 && mode == ARM_SHIFT_LSL)
 		{
-			Logger::queueError(Logger::Error,L"Shift amount 0x%02X out of range",num);
+			Logger::queueError(Logger::Error,L"Shift amount 0x{:02X} out of range",num);
 			return false;
 		} else if (mode == ARM_SHIFT_RRX)
 		{
@@ -107,7 +107,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 		if (num > 32 || num < 0)
 		{
-			Logger::queueError(Logger::Error,L"Shift amount 0x%02X out of range",num);
+			Logger::queueError(Logger::Error,L"Shift amount 0x{:02X} out of range",num);
 			return false;
 		}
 
@@ -126,7 +126,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 		if (Vars.CopData.Cpop > 15)
 		{
-			Logger::queueError(Logger::Error,L"CP Opc number %02X too big",Vars.CopData.Cpop);
+			Logger::queueError(Logger::Error,L"CP Opc number {:02X} too big",Vars.CopData.Cpop);
 			return false;
 		}
 	}
@@ -141,7 +141,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 		if (Vars.CopData.Cpinf > 7)
 		{
-			Logger::queueError(Logger::Error,L"CP Inf number %02X too big",Vars.CopData.Cpinf);
+			Logger::queueError(Logger::Error,L"CP Inf number {:02X} too big",Vars.CopData.Cpinf);
 			return false;
 		}
 	}
@@ -248,7 +248,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 					}
 					else
 					{
-						Logger::queueError(Logger::Error,L"Invalid shifted immediate %X",Vars.OriginalImmediate);
+						Logger::queueError(Logger::Error,L"Invalid shifted immediate {:X}",Vars.OriginalImmediate);
 						return false;
 					}
 				}
@@ -297,7 +297,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			Vars.Immediate = (int) (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= 0x2000000)
 			{
-				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Branch target {:08X} out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		} else if (Opcode.flags & ARM_ABSIMM)	// ldr r0,[I]
@@ -305,7 +305,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			Vars.Immediate = (int) (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= (1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error,L"Load target %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error,L"Load target {:08X} out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		} else if (Opcode.flags & ARM_SWI)	// it's an interrupt, may need to shift it
@@ -327,7 +327,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			unsigned int check = Opcode.flags & ARM_ABS ? abs(Vars.Immediate) : Vars.Immediate;
 			if (check >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Immediate value {:X} out of range",Vars.Immediate);
 				return false;
 			}
 		}
@@ -424,7 +424,7 @@ void CArmInstruction::FormatInstruction(const char* encoding, char* dest) const
 				{
 					dest += sprintf(dest,"%s",Vars.Shift.reg.Name);
 				} else {
-					dest += sprintf(dest,"0x%X",Vars.Shift.ShiftAmount);
+					dest += sprintf(dest,"0x{:X}",Vars.Shift.ShiftAmount);
 				}
 			}
 			encoding += 2;

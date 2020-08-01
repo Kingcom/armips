@@ -36,7 +36,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 
 	if (index >= parameters.size() || !parameters[index].isInt())
 	{
-		Logger::queueError(Logger::Error,L"Invalid parameter %d for %s: expecting integer",index+1,funcName);
+		Logger::queueError(Logger::Error,L"Invalid parameter {} for {}: expecting integer",index+1,funcName);
 		return false;
 	}
 
@@ -52,7 +52,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 
 	if (index >= parameters.size() || !parameters[index].isString())
 	{
-		Logger::queueError(Logger::Error,L"Invalid parameter %d for %s: expecting string",index+1,funcName);
+		Logger::queueError(Logger::Error,L"Invalid parameter {} for {}: expecting string",index+1,funcName);
 		return false;
 	}
 
@@ -134,10 +134,10 @@ ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<
 		result.strValue = parameters[0].strValue;
 		break;
 	case ExpressionValueType::Integer:
-		result.strValue = tfm::format(L"%d",parameters[0].intValue);
+		result.strValue = fmt::format(L"{}",parameters[0].intValue);
 		break;
 	case ExpressionValueType::Float:
-		result.strValue = tfm::format(L"%#.17g",parameters[0].floatValue);
+		result.strValue = fmt::format(L"{:#.17g}",parameters[0].floatValue);
 		break;
 	default:
 		return result;
@@ -153,7 +153,7 @@ ExpressionValue expFuncToHex(const std::wstring& funcName, const std::vector<Exp
 	GET_PARAM(parameters,0,value);
 	GET_OPTIONAL_PARAM(parameters,1,digits,8);
 
-	return ExpressionValue(tfm::format(L"%0*X",digits,value));
+	return ExpressionValue(fmt::format(L"{:0{}X}",uint64_t(value),digits));
 }
 
 ExpressionValue expFuncInt(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -436,7 +436,7 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 		bool found = std::regex_search(*source,result,regex);
 		if (!found || (size_t)matchIndex >= result.size())
 		{
-			Logger::queueError(Logger::Error,L"Capture group index %d does not exist",matchIndex);
+			Logger::queueError(Logger::Error,L"Capture group index {} does not exist",matchIndex);
 			return ExpressionValue();
 		}
 	
@@ -494,14 +494,14 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 	fs::ifstream file(fullName, fs::ifstream::in | fs::ifstream::binary);
 	if (!file.is_open())
 	{
-		Logger::queueError(Logger::Error, L"Could not open %s",*fileName);
+		Logger::queueError(Logger::Error, L"Could not open {}",*fileName);
 		return ExpressionValue();
 	}
 
 	file.seekg(pos);
 	if (file.eof() || file.fail())
 	{
-		Logger::queueError(Logger::Error, L"Invalid offset 0x%08X of %s", pos, *fileName);
+		Logger::queueError(Logger::Error, L"Invalid offset 0x{:08X} of {}", pos, *fileName);
 		return ExpressionValue();
 	}
 
@@ -510,7 +510,7 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 
 	if (file.fail())
 	{
-		Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", sizeof(T), pos, *fileName);
+		Logger::queueError(Logger::Error, L"Failed to read {} byte(s) from offset 0x{:08X} of {}", sizeof(T), pos, *fileName);
 		return ExpressionValue();
 	}
 
@@ -538,14 +538,14 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	fs::ifstream file(fullName, fs::ifstream::in | fs::ifstream::binary);
 	if (!file.is_open())
 	{
-		Logger::queueError(Logger::Error, L"Could not open %s",*fileName);
+		Logger::queueError(Logger::Error, L"Could not open {}",*fileName);
 		return ExpressionValue();
 	}
 
 	file.seekg(start);
 	if (file.eof() || file.fail())
 	{
-		Logger::queueError(Logger::Error, L"Invalid offset 0x%08X of %s", start, *fileName);
+		Logger::queueError(Logger::Error, L"Invalid offset 0x{:08X} of {}", start, *fileName);
 		return ExpressionValue();
 	}
 
@@ -560,7 +560,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 		file.read(buffer, bytesToRead);
 		if (file.fail())
 		{
-			Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", bytesToRead, *fileName);
+			Logger::queueError(Logger::Error, L"Failed to read {} byte(s) from offset 0x{:08X} of {}", bytesToRead, *fileName);
 			return ExpressionValue();
 		}
 
@@ -574,7 +574,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 
 			if (buffer[i] < 0x20)
 			{
-				Logger::printError(Logger::Warning, L"%s: Non-ASCII character", funcName);
+				Logger::printError(Logger::Warning, L"{}: Non-ASCII character", funcName);
 				return ExpressionValue();
 			}
 
@@ -589,7 +589,7 @@ ExpressionValue expLabelFuncDefined(const std::wstring &funcName, const std::vec
 {
 	if (parameters.empty() || !parameters.front())
 	{
-		Logger::queueError(Logger::Error,L"%s: Invalid parameters", funcName);
+		Logger::queueError(Logger::Error,L"{}: Invalid parameters", funcName);
 		return ExpressionValue();
 	}
 
@@ -610,7 +610,7 @@ ExpressionValue expLabelFuncOrg(const std::wstring& funcName, const std::vector<
 
 	if(!g_fileManager->hasOpenFile())
 	{
-		Logger::queueError(Logger::Error,L"%s: no file opened", funcName);
+		Logger::queueError(Logger::Error,L"{}: no file opened", funcName);
 		return ExpressionValue();
 	}
 	return ExpressionValue(g_fileManager->getVirtualAddress());
@@ -627,7 +627,7 @@ ExpressionValue expLabelFuncOrga(const std::wstring& funcName, const std::vector
 
 		if (!label->hasPhysicalValue())
 		{
-			Logger::queueError(Logger::Error,L"%s: parameter %s has no physical address", funcName, label->getName() );
+			Logger::queueError(Logger::Error,L"{}: parameter {} has no physical address", funcName, label->getName() );
 			return ExpressionValue();
 		}
 
@@ -637,7 +637,7 @@ ExpressionValue expLabelFuncOrga(const std::wstring& funcName, const std::vector
 	// return current physical address otherwise
 	if(!g_fileManager->hasOpenFile())
 	{
-		Logger::queueError(Logger::Error,L"%s: no file opened", funcName);
+		Logger::queueError(Logger::Error,L"{}: no file opened", funcName);
 		return ExpressionValue();
 	}
 	return ExpressionValue(g_fileManager->getPhysicalAddress());
@@ -654,7 +654,7 @@ ExpressionValue expLabelFuncHeaderSize(const std::wstring& funcName, const std::
 
 		if (!label->hasPhysicalValue())
 		{
-			Logger::queueError(Logger::Error,L"%s: parameter %s has no physical address", funcName, label->getName() );
+			Logger::queueError(Logger::Error,L"{}: parameter {} has no physical address", funcName, label->getName() );
 			return ExpressionValue();
 		}
 

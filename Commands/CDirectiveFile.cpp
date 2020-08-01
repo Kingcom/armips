@@ -66,9 +66,9 @@ bool CDirectiveFile::Validate(const ValidateState &state)
 	if (state.noFileChange)
 	{
 		if (type == Type::Close)
-			Logger::queueError(Logger::Error, L"Cannot close file within %S", state.noFileChangeDirective);
+			Logger::queueError(Logger::Error, L"Cannot close file within {}", state.noFileChangeDirective);
 		else
-			Logger::queueError(Logger::Error, L"Cannot open new file within %S", state.noFileChangeDirective);
+			Logger::queueError(Logger::Error, L"Cannot open new file within {}", state.noFileChangeDirective);
 		return false;
 	}
 
@@ -118,13 +118,13 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Type::Open:
-		str = tfm::format(L".open \"%s\",0x%08X",file->getFileName().wstring(),file->getOriginalHeaderSize());
+		str = fmt::format(L".open \"{}\",0x{:08X}",file->getFileName().wstring(),file->getOriginalHeaderSize());
 		break;
 	case Type::Create:
-		str = tfm::format(L".create \"%s\",0x%08X",file->getFileName().wstring(),file->getOriginalHeaderSize());
+		str = fmt::format(L".create \"{}\",0x{:08X}",file->getFileName().wstring(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = tfm::format(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName().wstring(),
+		str = fmt::format(L".open \"{}\",\"{}\",0x{:08X}",file->getOriginalFileName().wstring(),
 			file->getFileName().wstring(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
@@ -206,10 +206,10 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(virtualAddress,tfm::format(L".orga 0x%08X",position));
+		tempData.writeLine(virtualAddress,fmt::format(L".orga 0x{:08X}",position));
 		break;
 	case Virtual:
-		tempData.writeLine(virtualAddress,tfm::format(L".org 0x%08X",position));
+		tempData.writeLine(virtualAddress,fmt::format(L".org 0x{:08X}",position));
 		break;
 	}
 }
@@ -225,7 +225,7 @@ CDirectiveIncbin::CDirectiveIncbin(const fs::path& fileName)
 
 	if (!fs::exists(this->fileName))
 	{
-		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName.wstring());
+		Logger::printError(Logger::FatalError,L"File {} not found",this->fileName.wstring());
 	}
 
 	std::error_code error;
@@ -282,7 +282,7 @@ void CDirectiveIncbin::Encode() const
 		ByteArray data = ByteArray::fromFile(fileName,(long)start,size);
 		if ((int) data.size() != size)
 		{
-			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName.wstring());
+			Logger::printError(Logger::Error,L"Could not read file \"{}\"",fileName.wstring());
 			return;
 		}
 		g_fileManager->write(data.data(),data.size());
@@ -291,7 +291,7 @@ void CDirectiveIncbin::Encode() const
 
 void CDirectiveIncbin::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".incbin \"%s\"",fileName.wstring()));
+	tempData.writeLine(virtualAddress,fmt::format(L".incbin \"{}\"",fileName.wstring()));
 }
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData) const
@@ -332,14 +332,14 @@ bool CDirectiveAlignFill::Validate(const ValidateState &state)
 	{
 		if (!valueExpression.evaluateInteger(value))
 		{
-			Logger::queueError(Logger::FatalError,L"Invalid %s",mode == Fill ? L"size" : L"alignment");
+			Logger::queueError(Logger::FatalError,L"Invalid {}",mode == Fill ? L"size" : L"alignment");
 			return false;
 		}
 	}
 
 	if (mode != Fill && !isPowerOfTwo(value))
 	{
-		Logger::queueError(Logger::Error, L"Invalid alignment %d", value);
+		Logger::queueError(Logger::Error, L"Invalid alignment {}", value);
 		return false;
 	}
 
@@ -397,13 +397,13 @@ void CDirectiveAlignFill::writeTempData(TempData& tempData) const
 	switch (mode)
 	{
 	case AlignVirtual:
-		tempData.writeLine(virtualAddress,tfm::format(L".align 0x%08X",value));
+		tempData.writeLine(virtualAddress,fmt::format(L".align 0x{:08X}",value));
 		break;
 	case AlignPhysical:
-		tempData.writeLine(virtualAddress, tfm::format(L".aligna 0x%08X", value));
+		tempData.writeLine(virtualAddress, fmt::format(L".aligna 0x{:08X}", value));
 		break;
 	case Fill:
-		tempData.writeLine(virtualAddress,tfm::format(L".fill 0x%08X,0x%02X",value,fillByte));
+		tempData.writeLine(virtualAddress,fmt::format(L".fill 0x{:08X},0x{:02X}",value,fillByte));
 		break;
 	}
 }
@@ -455,7 +455,7 @@ void CDirectiveSkip::Encode() const
 
 void CDirectiveSkip::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".skip 0x%08X",value));
+	tempData.writeLine(virtualAddress,fmt::format(L".skip 0x{:08X}",value));
 }
 
 //
@@ -500,7 +500,7 @@ void CDirectiveHeaderSize::Encode() const
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".headersize %s0x%08X",
+	tempData.writeLine(virtualAddress,fmt::format(L".headersize {}0x{:08X}",
 		headerSize < 0 ? L"-" : L"", headerSize < 0 ? -headerSize : headerSize));
 }
 

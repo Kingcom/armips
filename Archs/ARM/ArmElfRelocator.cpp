@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-#include <tinyformat.h>
+#include <fmt/format.h>
 
 inline int signExtend(int value, int bitsLength)
 {
@@ -82,7 +82,7 @@ bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::
 
 			if (abs(value) >= 0x400000)
 			{
-				errors.emplace_back(tfm::format(L"Branch target %08X out of range",data.relocationBase));
+				errors.emplace_back(fmt::format(L"Branch target {:08X} out of range",data.relocationBase));
 				return false;
 			}
 
@@ -141,7 +141,7 @@ bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::
 			
 			if (abs(value) >= 0x2000000)
 			{
-				errors.emplace_back(tfm::format(L"Branch target %08X out of range",data.relocationBase));
+				errors.emplace_back(fmt::format(L"Branch target {:08X} out of range",data.relocationBase));
 				return false;
 			}
 
@@ -149,7 +149,7 @@ bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::
 		}
 		break;
 	default:
-		errors.emplace_back(tfm::format(L"Unknown ARM relocation type %d",type));
+		errors.emplace_back(fmt::format(L"Unknown ARM relocation type {}",type));
 		return false;
 	}
 
@@ -217,12 +217,12 @@ std::unique_ptr<CAssemblerCommand> ArmElfRelocator::generateCtorStub(std::vector
 		{
 			if (i != 0)
 				table += ',';
-			table += tfm::format(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+			table += fmt::format(L"{},{}+0x{:08X}",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
 		}
 
 		return parser.parseTemplate(ctorTemplate,{
 			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorTableSize%",	tfm::format(L"%d",ctors.size()*8) },
+			{ L"%ctorTableSize%",	fmt::format(L"{}",ctors.size()*8) },
 			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
 			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
 			{ L"%stubName%",		Global.symbolTable.getUniqueLabelName() },

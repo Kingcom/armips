@@ -9,9 +9,9 @@
 
 static void printUsage(std::wstring executableName)
 {
-	Logger::printLine(L"armips assembler v%d.%d.%d (%s %s) by Kingcom",
-		ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, __DATE__, __TIME__);
-	Logger::printLine(L"Usage: %s [optional parameters] <FILE>", executableName);
+	Logger::printLine(L"armips assembler v{}.{}.{} ({} {}) by Kingcom",
+		ARMIPS_VERSION_MAJOR, ARMIPS_VERSION_MINOR, ARMIPS_VERSION_REVISION, L"" __DATE__, L"" __TIME__);
+	Logger::printLine(L"Usage: {} [optional parameters] <FILE>", executableName);
 	Logger::printLine(L"");
 	Logger::printLine(L"Optional parameters:");
 	Logger::printLine(L" -temp <TEMP>              Output temporary assembly data to <TEMP> file");
@@ -77,7 +77,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 				if (!checkValidLabelName(def.name))
 				{
-					Logger::printError(Logger::Error, L"Invalid equation name \"%s\"", def.name);
+					Logger::printError(Logger::Error, L"Invalid equation name \"{}\"", def.name);
 					return false;
 				}
 
@@ -85,7 +85,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
 				if(it != settings.equList.end())
 				{
-					Logger::printError(Logger::Error, L"Equation name \"%s\" already defined", def.name);
+					Logger::printError(Logger::Error, L"Equation name \"{}\" already defined", def.name);
 					return false;
 				}
 
@@ -102,7 +102,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 				if (!checkValidLabelName(def.name))
 				{
-					Logger::printError(Logger::Error, L"Invalid equation name \"%s\"", def.name);
+					Logger::printError(Logger::Error, L"Invalid equation name \"{}\"", def.name);
 					return false;
 				}
 
@@ -110,11 +110,11 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 						[&def](EquationDefinition x) -> bool {return def.name == x.name;});
 				if(it != settings.equList.end())
 				{
-					Logger::printError(Logger::Error, L"Equation name \"%s\" already defined", def.name);
+					Logger::printError(Logger::Error, L"Equation name \"{}\" already defined", def.name);
 					return false;
 				}
 
-				def.value = tfm::format(L"\"%s\"", arguments[argpos + 2]);
+				def.value = fmt::format(L"\"{}\"", arguments[argpos + 2]);
 				settings.equList.push_back(def);
 				argpos += 3;
 			}
@@ -130,7 +130,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 				if (errorCode)
 				{
-					Logger::printError(Logger::Error, L"Could not open directory \"%s\"", arguments[argpos + 1]);
+					Logger::printError(Logger::Error, L"Could not open directory \"{}\"", arguments[argpos + 1]);
 					return false;
 				}
 				argpos += 2;
@@ -145,7 +145,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 				if (!checkValidLabelName(def.name))
 				{
-					Logger::printError(Logger::Error, L"Invalid label name \"%s\"", def.name);
+					Logger::printError(Logger::Error, L"Invalid label name \"{}\"", def.name);
 					return false;
 				}
 
@@ -153,14 +153,14 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 						[&def](LabelDefinition x) -> bool {return def.name == x.name;});
 				if(it != settings.labels.end())
 				{
-					Logger::printError(Logger::Error, L"Label name \"%s\" already defined", def.name);
+					Logger::printError(Logger::Error, L"Label name \"{}\" already defined", def.name);
 					return false;
 				}
 
 				int64_t value;
 				if (!stringToInt(arguments[argpos + 2], 0, arguments[argpos + 2].size(), value))
 				{
-					Logger::printError(Logger::Error, L"Invalid label value \"%s\"", arguments[argpos + 2]);
+					Logger::printError(Logger::Error, L"Invalid label value \"{}\"", arguments[argpos + 2]);
 					return false;
 				}
 				def.value = value;
@@ -169,7 +169,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 				argpos += 3;
 			}
 			else {
-				Logger::printError(Logger::Error, L"Invalid command line argument \"%s\"\n", arguments[argpos]);
+				Logger::printError(Logger::Error, L"Invalid command line argument \"{}\"\n", arguments[argpos]);
 				printUsage(arguments[0]);
 				return false;
 			}
@@ -205,7 +205,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 	if (!fs::exists(settings.inputFileName))
 	{
-		Logger::printError(Logger::Error, L"File \"%s\" not found", settings.inputFileName.wstring());
+		Logger::printError(Logger::Error, L"File \"{}\" not found", settings.inputFileName.wstring());
 		return false;
 	}
 	return true;

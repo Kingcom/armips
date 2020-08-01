@@ -17,7 +17,7 @@ bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16Reloc
 	{
 		if (hi16.relocationBase != lo16RelocationBase)
 		{
-			errors.push_back(tfm::format(L"Mismatched R_MIPS_HI16 with	R_MIPS_LO16 of a different symbol"));
+			errors.push_back(fmt::format(L"Mismatched R_MIPS_HI16 with	R_MIPS_LO16 of a different symbol"));
 			result = false;
 			continue;
 		}
@@ -54,7 +54,7 @@ bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std:
 		op = (op&0xffff0000) | (((op&0xffff)+data.relocationBase)&0xffff);
 		break;
 	default:
-		errors.emplace_back(tfm::format(L"Unknown MIPS relocation type %d",type));
+		errors.emplace_back(fmt::format(L"Unknown MIPS relocation type {}",type));
 		return false;
 	}
 
@@ -119,12 +119,12 @@ std::unique_ptr<CAssemblerCommand> MipsElfRelocator::generateCtorStub(std::vecto
 		{
 			if (i != 0)
 				table += ',';
-			table += tfm::format(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+			table += fmt::format(L"{},{}+0x{:08X}",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
 		}
 
 		return parser.parseTemplate(mipsCtorTemplate,{
 			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorTableSize%",	tfm::format(L"%d",ctors.size()*8) },
+			{ L"%ctorTableSize%",	fmt::format(L"{}",ctors.size()*8) },
 			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
 			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
 			{ L"%ctorContent%",		table },

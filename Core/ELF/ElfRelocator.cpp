@@ -119,31 +119,31 @@ bool ElfRelocator::init(const fs::path& inputName)
 		ElfFile* elf = new ElfFile();
 		if (!elf->load(entry.data,false))
 		{
-			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name);
+			Logger::printError(Logger::Error,L"Could not load object file {}",entry.name);
 			return false;
 		}
 
 		if (elf->getType() != ET_REL)
 		{
-			Logger::printError(Logger::Error,L"Unexpected ELF type %d in object file %s",elf->getType(),entry.name);
+			Logger::printError(Logger::Error,L"Unexpected ELF type {} in object file {}",elf->getType(),entry.name);
 			return false;
 		}
 
 		if (elf->getMachine() != relocator->expectedMachine())
 		{
-			Logger::printError(Logger::Error,L"Unexpected ELF machine %d in object file %s",elf->getMachine(),entry.name);
+			Logger::printError(Logger::Error,L"Unexpected ELF machine {} in object file {}",elf->getMachine(),entry.name);
 			return false;
 		}
 
 		if (elf->getEndianness() != Architecture::current().getEndianness())
 		{
-			Logger::printError(Logger::Error,L"Incorrect endianness in object file %s",entry.name);
+			Logger::printError(Logger::Error,L"Incorrect endianness in object file {}",entry.name);
 			return false;
 		}
 
 		if (elf->getSegmentCount() != 0)
 		{
-			Logger::printError(Logger::Error,L"Unexpected segment count %d in object file %s",elf->getSegmentCount(),entry.name);
+			Logger::printError(Logger::Error,L"Unexpected segment count {} in object file {}",elf->getSegmentCount(),entry.name);
 			return false;
 		}
 
@@ -239,14 +239,14 @@ bool ElfRelocator::exportSymbols()
 			sym.label = Global.symbolTable.getLabel(lowered,-1,-1);
 			if (sym.label == nullptr)
 			{
-				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
+				Logger::printError(Logger::Error,L"Invalid label name \"{}\"",sym.name);
 				error = true;
 				continue;
 			}
 
 			if (sym.label->isDefined())
 			{
-				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name);
+				Logger::printError(Logger::Error,L"Label \"{}\" already defined",sym.name);
 				error = true;
 				continue;
 			}
@@ -342,7 +342,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 				int symNum = rel.getSymbolNum();
 				if (symNum <= 0)
 				{
-					Logger::queueError(Logger::Warning,L"Invalid symbol num %06X",symNum);
+					Logger::queueError(Logger::Warning,L"Invalid symbol num {:06X}",symNum);
 					error = true;
 					continue;
 				}
@@ -371,13 +371,13 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 					std::shared_ptr<Label> label = Global.symbolTable.getLabel(symName,-1,-1);
 					if (label == nullptr)
 					{
-						Logger::queueError(Logger::Error,L"Invalid external symbol %s",symName);	
+						Logger::queueError(Logger::Error,L"Invalid external symbol {}",symName);	
 						error = true;
 						continue;
 					}
 					if (!label->isDefined())
 					{
-						Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",symName,file.name);
+						Logger::queueError(Logger::Error,L"Undefined external symbol {} in file {}",symName,file.name);
 						error = true;
 						continue;
 					}

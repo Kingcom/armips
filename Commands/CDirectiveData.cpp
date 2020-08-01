@@ -18,13 +18,13 @@ TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding enco
 
 	if (!fs::exists(fullName))
 	{
-		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
+		Logger::printError(Logger::Error,L"Table file \"{}\" does not exist",fileName);
 		return;
 	}
 
 	if (!table.load(fullName,encoding))
 	{
-		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
+		Logger::printError(Logger::Error,L"Invalid table file \"{}\"",fileName);
 		return;
 	}
 }
@@ -69,7 +69,7 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 		this->mode = EncodingMode::U64;
 		break;
 	default:
-		Logger::printError(Logger::Error,L"Invalid data unit size %d",unitSize);
+		Logger::printError(Logger::Error,L"Invalid data unit size {}",unitSize);
 		return;
 	}
 	
@@ -179,7 +179,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 			ByteArray encoded = table.encodeString(value.strValue,false);
 			if (encoded.size() == 0 && value.strValue.size() > 0)
 			{
-				Logger::queueError(Logger::Error,L"Failed to encode \"%s\"",value.strValue);
+				Logger::queueError(Logger::Error,L"Failed to encode \"{}\"",value.strValue);
 			}
 			customData.append(encoded);
 		} else {

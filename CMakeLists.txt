@@ -17,6 +17,8 @@ endmacro()
 check_compiler(CLANG "Clang")
 check_compiler(GCC "GNU")
 
+add_subdirectory(ext/fmt)
+
 # Helper function to set common parameters for a target
 function(init_target TARGET_NAME)
 	set_target_properties(${TARGET_NAME} PROPERTIES
@@ -44,6 +46,8 @@ function(init_target TARGET_NAME)
 		target_compile_definitions(${TARGET_NAME} PRIVATE ARMIPS_REGEXP=1)
 	endif()
 
+	target_compile_definitions(${TARGET_NAME} PRIVATE FMT_DEPRECATED_INCLUDE_XCHAR)
+
 	if (WIN32)
 		if (MSVC)
 			target_compile_options(${TARGET_NAME} PRIVATE /Zc:__cplusplus)
@@ -63,14 +67,9 @@ function(armips_target_sources TARGET SCOPE)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ARGN})
 endfunction()
 
-# tinyformat
-add_library(tinyformat INTERFACE)
-target_include_directories(tinyformat INTERFACE ext/tinyformat)
-
 # libarmips
 add_library(armips STATIC)
 init_target(armips)
-target_link_libraries(armips PUBLIC tinyformat)
 
 if (ARMIPS_USE_STD_FILESYSTEM)
 	target_compile_definitions(armips PUBLIC ARMIPS_USE_STD_FILESYSTEM)
@@ -78,6 +77,8 @@ else()
 	add_subdirectory(ext/filesystem)
 	target_link_libraries(armips PUBLIC ghc_filesystem)
 endif()
+
+target_link_libraries(armips PUBLIC fmt::fmt)
 
 if (WIN32)
 	target_link_libraries(armips PUBLIC shlwapi)
@@ -194,7 +195,7 @@ armips_target_sources(armips PRIVATE
 if (ARMIPS_PRECOMPILE_HEADERS)
 	target_precompile_headers(armips PRIVATE
 		[["Util/FileSystem.h"]]
-		<tinyformat.h>
+		<fmt/format.h>
 	)
 	set_source_files_properties(Util/FileSystem.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 

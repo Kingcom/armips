@@ -96,7 +96,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			
 			if (num >= (1 << Vars.ImmediateBitLen) || num < (0-(1 << Vars.ImmediateBitLen)))
 			{
-				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Branch target {:08X} out of range",Vars.Immediate);
 				return false;
 			}
 
@@ -146,7 +146,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			int max = (Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 32 : 31;
 			if (Vars.Immediate < 0 || Vars.Immediate > max)
 			{
-				Logger::queueError(Logger::Error, L"Shift amount 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, L"Shift amount 0x{:02X} out of range",Vars.Immediate);
 				return false;
 			}
 		} else if (Vars.ImmediateBitLen != 32)
@@ -154,7 +154,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			int max = (1 << Vars.ImmediateBitLen) - 1;
 			if (abs(Vars.Immediate) > max)
 			{
-				Logger::queueError(Logger::Error,L"Immediate value 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error,L"Immediate value 0x{:02X} out of range",Vars.Immediate);
 				return false;
 			}
 			Vars.Immediate &= max;

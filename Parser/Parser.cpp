@@ -85,13 +85,13 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 	if (list.size() < (size_t) min)
 	{
-		printError(start,L"Not enough parameters (min %d)",min);
+		printError(start,L"Not enough parameters (min {})",min);
 		return false;
 	}
 
 	if (max != -1 && (size_t) max < list.size())
 	{
-		printError(start,L"Too many parameters (max %d)",max);
+		printError(start,L"Too many parameters (max {})",max);
 		return false;
 	}
 
@@ -163,7 +163,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 			expected += terminator;
 		}
 
-		Logger::printError(Logger::Error, L"Unterminated command sequence, expected any of %s.", expected);
+		Logger::printError(Logger::Error, L"Unterminated command sequence, expected any of {}.", expected);
 	}
 
 	return sequence;
@@ -204,7 +204,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& tex
 		(void)count;
 #ifdef _DEBUG
 		if (count != 0 && arg.value.empty())
-			Logger::printError(Logger::Warning,L"Empty replacement for %s",arg.variableName);
+			Logger::printError(Logger::Warning,L"Empty replacement for {}",arg.variableName);
 #endif
 	}
 
@@ -314,7 +314,7 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 		const Token& token = tok.nextToken();
 		if (token.type == TokenType::Identifier && token.getStringValue() == name)
 		{
-			printError(startToken,L"Recursive equ definition for \"%s\" not allowed",name);
+			printError(startToken,L"Recursive equ definition for \"{}\" not allowed",name);
 			return;
 		}
 
@@ -376,13 +376,13 @@ bool Parser::checkEquLabel()
 
 			if (!Global.symbolTable.isValidSymbolName(name))
 			{
-				printError(start,L"Invalid equation name \"%s\"",name);
+				printError(start,L"Invalid equation name \"{}\"",name);
 				return true;
 			}
 
 			if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 			{
-				printError(start,L"Equation name \"%s\" already defined",name);
+				printError(start,L"Equation name \"{}\" already defined",name);
 				return true;
 			}
 
@@ -480,7 +480,7 @@ bool Parser::checkExpFuncDefinition()
 	// duplicate check
 	if (ExpressionFunctionHandler::instance().find(functionName))
 	{
-		printError(first, L"Expression function \"%s\" already declared", functionName);
+		printError(first, L"Expression function \"{}\" already declared", functionName);
 		return false;
 	}
 
@@ -570,14 +570,14 @@ bool Parser::checkMacroDefinition()
 	// duplicate check
 	if (macros.find(macro.name) != macros.end())
 	{
-		printError(first, L"Macro \"%s\" already defined", macro.name);
+		printError(first, L"Macro \"{}\" already defined", macro.name);
 		return false;
 	}
 
 	// no .endmacro, not valid
 	if (!valid)
 	{
-		printError(first, L"Macro \"%s\" not terminated", macro.name);
+		printError(first, L"Macro \"{}\" not terminated", macro.name);
 		return true;
 	}
 
@@ -679,7 +679,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 	{
 		if (peekToken().type == TokenType::Separator)
 		{
-			printError(start,L"Too few macro arguments (%d vs %d)",i,macro.parameters.size());
+			printError(start,L"Too few macro arguments ({} vs {})",i,macro.parameters.size());
 			return nullptr;
 		}
 
@@ -717,7 +717,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 			++count;
 		}
 
-		printError(start,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
+		printError(start,L"Too many macro arguments ({} vs {})",count,macro.parameters.size());		
 		return nullptr;
 	}
 
@@ -766,11 +766,11 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		// otherwise make sure the name is unique
 		std::wstring fullName;
 		if (Global.symbolTable.isLocalSymbol(label))
-			fullName = tfm::format(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
+			fullName = fmt::format(L"@@{}_{}_{:08X}",macro.name,label.substr(2),macro.counter);
 		else if (Global.symbolTable.isStaticSymbol(label))
-			fullName = tfm::format(L"@%s_%s_%08X",macro.name,label.substr(1),macro.counter);
+			fullName = fmt::format(L"@{}_{}_{:08X}",macro.name,label.substr(1),macro.counter);
 		else
-			fullName = tfm::format(L"%s_%s_%08X",macro.name,label,macro.counter);
+			fullName = fmt::format(L"{}_{}_{:08X}",macro.name,label,macro.counter);
 
 		macroTokenizer.registerReplacement(label,fullName);
 	}
@@ -799,7 +799,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 		
 		if (!Global.symbolTable.isValidSymbolName(name))
 		{
-			printError(start,L"Invalid label name \"%s\"",name);
+			printError(start,L"Invalid label name \"{}\"",name);
 			return nullptr;
 		}
 
@@ -885,7 +885,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 		return handleError();
 
 	const Token& token = peekToken();
-	printError(token,L"Parse error '%s'",token.getOriginalText());
+	printError(token,L"Parse error '{}'",token.getOriginalText());
 	return handleError();
 }
 

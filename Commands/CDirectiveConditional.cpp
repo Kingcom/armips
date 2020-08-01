@@ -21,7 +21,7 @@ CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstr
 {
 	label = Global.symbolTable.getLabel(name,Global.FileInfo.FileNum,Global.Section);
 	if (label == nullptr)
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name);
+		Logger::printError(Logger::Error,L"Invalid label name \"{}\"",name);
 }
 
 CDirectiveConditional::CDirectiveConditional(ConditionType type, const Expression& exp)

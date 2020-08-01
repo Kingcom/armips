@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-#include <tinyformat.h>
+#include <fmt/format.h>
 
 //
 // Tokenizer
@@ -193,7 +193,7 @@ void Tokenizer::registerReplacementInteger(const std::wstring& identifier, int64
 	Token tok;
 	tok.type = TokenType::Integer;
 	tok.intValue = newValue;
-	tok.setOriginalText(tfm::format(L"%d", newValue).c_str());
+	tok.setOriginalText(fmt::format(L"{}", newValue).c_str());
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -207,7 +207,7 @@ void Tokenizer::registerReplacementFloat(const std::wstring& identifier, double 
 	Token tok;
 	tok.type = TokenType::Float;
 	tok.floatValue = newValue;
-	tok.setOriginalText(tfm::format(L"%g", newValue).c_str());
+	tok.setOriginalText(fmt::format(L"{:g}", newValue).c_str());
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -657,7 +657,7 @@ Token FileTokenizer::loadToken()
 
 	if (pos == linePos)
 	{
-		std::wstring text = tfm::format(L"Invalid input '%c'",currentLine[pos]);
+		std::wstring text = fmt::format(L"Invalid input '{:c}'",currentLine[pos]);
 		createToken(TokenType::Invalid,1,text);
 		return std::move(token);
 	}

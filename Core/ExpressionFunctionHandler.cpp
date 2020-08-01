@@ -68,7 +68,7 @@ bool ExpressionFunctionHandler::addFunction(const std::wstring &name, Expression
 			ExpressionValue result = parameters[i]->evaluate();
 			if (!result.isValid())
 			{
-				Logger::queueError(Logger::Error, L"%s: Invalid parameter %d", name, i+1);
+				Logger::queueError(Logger::Error, L"{}: Invalid parameter {}", name, i+1);
 				return result;
 			}
 
@@ -95,7 +95,7 @@ bool ExpressionFunctionHandler::addLabelFunction(const std::wstring &name, Expre
 			ExpressionInternal *exp = parameters[i].get();
 			if (!exp || !exp->isIdentifier())
 			{
-				Logger::queueError(Logger::Error, L"%s: Invalid parameter %d, expecting identifier", name, i+1);
+				Logger::queueError(Logger::Error, L"{}: Invalid parameter {}, expecting identifier", name, i+1);
 				return {};
 			}
 
@@ -125,7 +125,7 @@ bool ExpressionFunctionHandler::addUserFunction(const std::wstring &name, const 
 			ExpressionValue result = parameters[i]->evaluate();
 			if (!result.isValid())
 			{
-				Logger::queueError(Logger::Error, L"%s: Invalid parameter %d", functionName, i+1);
+				Logger::queueError(Logger::Error, L"{}: Invalid parameter {}", functionName, i+1);
 				return result;
 			}
 
@@ -160,13 +160,13 @@ bool ExpressionFunctionHandler::addUserFunction(const std::wstring &name, const 
 		Expression result = parseExpression(tok, false);
 		if (!result.isLoaded())
 		{
-			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", functionName);
+			Logger::queueError(Logger::Error,L"{}: Failed to parse user function expression", functionName);
 			return {};
 		}
 
 		if (!tok.atEnd())
 		{
-			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", functionName);
+			Logger::queueError(Logger::Error,L"{}: Unconsumed tokens after parsing user function expresion", functionName);
 			return {};
 		}
 

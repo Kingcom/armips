@@ -18,7 +18,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 	label = Global.symbolTable.getLabel(name, FileNum, getSection());
 	if (label == nullptr)
 	{
-		Logger::printError(Logger::Error, L"Invalid label name \"%s\"", name);
+		Logger::printError(Logger::Error, L"Invalid label name \"{}\"", name);
 		return;
 	}
 
@@ -47,7 +47,7 @@ bool CAssemblerLabel::Validate(const ValidateState &state)
 	{
 		if (label->isDefined())
 		{
-			Logger::queueError(Logger::Error, L"Label \"%s\" already defined", label->getName());
+			Logger::queueError(Logger::Error, L"Label \"{}\" already defined", label->getName());
 			return false;
 		}
 		
@@ -98,7 +98,7 @@ void CAssemblerLabel::Encode() const
 void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
 	if (!Global.symbolTable.isGeneratedLabel(label->getName()))
-		tempData.writeLine(label->getValue(),tfm::format(L"%s:",label->getName()));
+		tempData.writeLine(label->getValue(),fmt::format(L"{}:",label->getName()));
 }
 
 void CAssemblerLabel::writeSymData(SymbolData& symData) const

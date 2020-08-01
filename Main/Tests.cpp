@@ -185,7 +185,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 
 	if (checkRetVal && retVal != expectedRetVal)
 	{
-		errorString += tfm::format(L"Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
+		errorString += fmt::format(L"Exit code did not match: expected {}, got {}\n",expectedRetVal,retVal);
 		result = false;
 	}
 
@@ -202,7 +202,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 			{
 				if (errors[i] != expectedErrors[i])
 				{
-					errorString += tfm::format(L"Unexpected error: %S\n",errors[i]);
+					errorString += fmt::format(L"Unexpected error: {}\n",errors[i]);
 					result = false;
 				}
 			}
@@ -213,7 +213,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		// if no errors are expected, there should be none
 		for (size_t i = 0; i < errors.size(); i++)
 		{
-			errorString += tfm::format(L"Unexpected error: %S\n",errors[i]);
+			errorString += fmt::format(L"Unexpected error: {}\n",errors[i]);
 			result = false;
 		}
 	}
@@ -233,11 +233,11 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		{
 			if (memcmp(expected.data(),actual.data(),actual.size()) != 0)
 			{
-				errorString += tfm::format(L"Output data does not match\n");
+				errorString += fmt::format(L"Output data does not match\n");
 				result = false;
 			}
 		} else {
-			errorString += tfm::format(L"Output data size does not match\n");
+			errorString += fmt::format(L"Output data size does not match\n");
 			result = false;
 		}
 	}
@@ -264,8 +264,8 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 	{
 		changeConsoleColor(ConsoleColors::White);
 
-		std::wstring line = tfm::format(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
-		Logger::print(L"%-60s",line);
+		std::wstring line = fmt::format(L"Test {} of {}, {}:",i+1,tests.size(),tests[i]);
+		Logger::print(L"{:<60}",line);
 
 		std::wstring path = dir + L"/" + tests[i];
 		std::wstring errors;
@@ -276,7 +276,7 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 		{
 			changeConsoleColor(ConsoleColors::Red);
 			Logger::printLine(L"FAILED");
-			Logger::print(L"%s",errors);
+			Logger::print(L"{}",errors);
 		} else {
 			changeConsoleColor(ConsoleColors::Green);
 			Logger::printLine(L"PASSED");
@@ -285,7 +285,7 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 	}
 	
 	changeConsoleColor(ConsoleColors::White);
-	Logger::printLine(L"\n%d out of %d tests passed.",successCount,tests.size());
+	Logger::printLine(L"\n{} out of {} tests passed.",successCount,tests.size());
 	
 	restoreConsole();
 	return successCount == tests.size();

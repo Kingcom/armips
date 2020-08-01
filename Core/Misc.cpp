@@ -25,19 +25,19 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 	if (!Global.memoryMode && Global.fileList.size() > 0)
 	{
 		const auto& fileName = Global.fileList.relativeWstring(Global.FileInfo.FileNum);
-		position = tfm::format(L"%s(%d) ", fileName, Global.FileInfo.LineNumber);
+		position = fmt::format(L"{}({}) ", fileName, Global.FileInfo.LineNumber);
 	}
 
 	switch (type)
 	{
 	case Warning:
-		return tfm::format(L"%swarning: %s",position,text);
+		return fmt::format(L"{}warning: {}",position,text);
 	case Error:
-		return tfm::format(L"%serror: %s",position,text);
+		return fmt::format(L"{}error: {}",position,text);
 	case FatalError:
-		return tfm::format(L"%sfatal error: %s",position,text);
+		return fmt::format(L"{}fatal error: {}",position,text);
 	case Notice:
-		return tfm::format(L"%snotice: %s",position,text);
+		return fmt::format(L"{}notice: {}",position,text);
 	}
 
 	return L"";
@@ -180,7 +180,7 @@ void TempData::start()
 	{
 		if (!file.open(TextFile::Write))
 		{
-			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName().wstring());
+			Logger::printError(Logger::Error,L"Could not open temp file {}.",file.getFileName().wstring());
 			return;
 		}
 
@@ -189,13 +189,13 @@ void TempData::start()
 		size_t labelCount = Global.symbolTable.getLabelCount();
 		size_t equCount = Global.symbolTable.getEquationCount();
 
-		file.writeFormat(L"; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
-		file.writeFormat(L"; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
-		file.writeFormat(L"; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
-		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
+		file.writeFormat(L"; {} {} included\n",fileCount,fileCount == 1 ? L"file" : L"files");
+		file.writeFormat(L"; {} {}\n",lineCount,lineCount == 1 ? L"line" : L"lines");
+		file.writeFormat(L"; {} {}\n",labelCount,labelCount == 1 ? L"label" : L"labels");
+		file.writeFormat(L"; {} {}\n\n",equCount,equCount == 1 ? L"equation" : L"equations");
 		for (size_t i = 0; i < fileCount; i++)
 		{
-			file.writeFormat(L"; %S\n",Global.fileList.wstring(i));
+			file.writeFormat(L"; {}\n",Global.fileList.wstring(i));
 		}
 		file.writeLine("");
 	}
@@ -217,7 +217,7 @@ void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
 		while (str.size() < 70)
 			str += ' ';
 
-		str += tfm::format(L"; %S line %d",
+		str += fmt::format(L"; {} line {}",
 			Global.fileList.wstring(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
 
 		file.writeLine(str);

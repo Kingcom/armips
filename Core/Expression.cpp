@@ -12,12 +12,12 @@ namespace
 {
 	std::wstring to_wstring(int64_t value)
 	{
-		return tfm::format(L"%d", value);
+		return fmt::format(L"{}", value);
 	}
 
 	std::wstring to_wstring(double value)
 	{
-		return tfm::format(L"%#.17g", value);
+		return fmt::format(L"{:#.17g}", value);
 	}
 }
 
@@ -516,19 +516,19 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	auto handle = ExpressionFunctionHandler::instance().find(functionName);
 	if (!handle)
 	{
-		Logger::queueError(Logger::Error, L"Unknown function \"%s\"", functionName);
+		Logger::queueError(Logger::Error, L"Unknown function \"{}\"", functionName);
 		return {};
 	}
 
 	if (handle->minParams() > children.size())
 	{
-		Logger::queueError(Logger::Error, L"Not enough parameters for \"%s\" (%d<%d)", functionName, children.size(), handle->minParams());
+		Logger::queueError(Logger::Error, L"Not enough parameters for \"{}\" ({}<{})", functionName, children.size(), handle->minParams());
 		return {};
 	}
 
 	if (handle->maxParams() < children.size())
 	{
-		Logger::queueError(Logger::Error, L"Too many parameters for \"%s\" (%d>%d)", functionName, children.size(), handle->maxParams());
+		Logger::queueError(Logger::Error, L"Too many parameters for \"{}\" ({}>{})", functionName, children.size(), handle->maxParams());
 		return {};
 	}
 
@@ -627,13 +627,13 @@ ExpressionValue ExpressionInternal::evaluate()
 		label = Global.symbolTable.getLabel(valueAs<std::wstring>(),fileNum,section);
 		if (label == nullptr)
 		{
-			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",valueAs<std::wstring>());
+			Logger::queueError(Logger::Error,L"Invalid label name \"{}\"",valueAs<std::wstring>());
 			return val;
 		}
 
 		if (!label->isDefined())
 		{
-			Logger::queueError(Logger::Error,L"Undefined label \"%s\"",label->getName());
+			Logger::queueError(Logger::Error,L"Undefined label \"{}\"",label->getName());
 			return val;
 		}
 
@@ -728,7 +728,7 @@ static std::wstring escapeString(const std::wstring& text)
 	replaceAll(result,LR"(\)",LR"(\\)");
 	replaceAll(result,LR"(")",LR"(\")");
 
-	return tfm::format(LR"("%s")",text);
+	return fmt::format(LR"("{}")",text);
 }
 
 std::wstring ExpressionInternal::formatFunctionCall()
@@ -750,9 +750,9 @@ std::wstring ExpressionInternal::toString()
 	switch (type)
 	{
 	case OperatorType::Integer:
-		return tfm::format(L"%d",valueAs<int64_t>());
+		return fmt::format(L"{}",valueAs<int64_t>());
 	case OperatorType::Float:
-		return tfm::format(L"%g",valueAs<double>());
+		return fmt::format(L"{:g}",valueAs<double>());
 	case OperatorType::Identifier:
 		return valueAs<std::wstring>();
 	case OperatorType::String:
@@ -760,51 +760,51 @@ std::wstring ExpressionInternal::toString()
 	case OperatorType::MemoryPos:
 		return L".";
 	case OperatorType::Add:
-		return tfm::format(L"(%s + %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} + {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Sub:
-		return tfm::format(L"(%s - %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} - {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Mult:
-		return tfm::format(L"(%s * %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} * {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Div:
-		return tfm::format(L"(%s / %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} / {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Mod:
-		return tfm::format(L"(%s %% %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} % {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Neg:
-		return tfm::format(L"(-%s)",children[0]->toString());
+		return fmt::format(L"(-{})",children[0]->toString());
 	case OperatorType::LogNot:
-		return tfm::format(L"(!%s)",children[0]->toString());
+		return fmt::format(L"(!{})",children[0]->toString());
 	case OperatorType::BitNot:
-		return tfm::format(L"(~%s)",children[0]->toString());
+		return fmt::format(L"(~{})",children[0]->toString());
 	case OperatorType::LeftShift:
-		return tfm::format(L"(%s << %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} << {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::RightShift:
-		return tfm::format(L"(%s >> %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} >> {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Less:
-		return tfm::format(L"(%s < %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} < {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Greater:
-		return tfm::format(L"(%s > %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} > {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::LessEqual:
-		return tfm::format(L"(%s <= %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} <= {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::GreaterEqual:
-		return tfm::format(L"(%s >= %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} >= {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Equal:
-		return tfm::format(L"(%s == %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} == {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::NotEqual:
-		return tfm::format(L"(%s != %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} != {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::BitAnd:
-		return tfm::format(L"(%s & %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} & {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::BitOr:
-		return tfm::format(L"(%s | %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} | {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::LogAnd:
-		return tfm::format(L"(%s && %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} && {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::LogOr:
-		return tfm::format(L"(%s || %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} || {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::Xor:
-		return tfm::format(L"(%s ^ %s)",children[0]->toString(),children[1]->toString());
+		return fmt::format(L"({} ^ {})",children[0]->toString(),children[1]->toString());
 	case OperatorType::TertiaryIf:
-		return tfm::format(L"(%s ? %s : %s)",children[0]->toString(),children[1]->toString(),children[2]->toString());
+		return fmt::format(L"({} ? {} : {})",children[0]->toString(),children[1]->toString(),children[2]->toString());
 	case OperatorType::ToString:
-		return tfm::format(L"(%c%s)",L'\U000000B0',children[0]->toString());
+		return fmt::format(L"({}{})",L'\U000000B0',children[0]->toString());
 	case OperatorType::FunctionCall:
 		return formatFunctionCall();
 	default:

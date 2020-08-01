@@ -59,7 +59,7 @@ std::wstring preprocessMacro(const wchar_t* text, MipsImmediateData& immediates)
 	immediates.primary.expression.replaceMemoryPos(labelName);
 	immediates.secondary.expression.replaceMemoryPos(labelName);
 
-	return tfm::format(L"%s: %s",labelName,text);
+	return fmt::format(L"{}: {}",labelName,text);
 }
 
 std::unique_ptr<CAssemblerCommand> createMacro(Parser& parser, const std::wstring& text, int flags, std::initializer_list<AssemblyTemplateArgument> variables)

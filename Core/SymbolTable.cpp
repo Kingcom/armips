@@ -5,7 +5,7 @@
 #include "Util/FileClasses.h"
 #include "Util/Util.h"
 
-#include <tinyformat.h>
+#include <fmt/format.h>
 
 const wchar_t validSymbolCharacters[] = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
 
@@ -169,7 +169,7 @@ bool SymbolTable::findEquation(const std::wstring& name, int file, int section, 
 // TODO: better
 std::wstring SymbolTable::getUniqueLabelName(bool local)
 {
-	std::wstring name = tfm::format(L"__armips_label_%08x__",uniqueCount++);
+	std::wstring name = fmt::format(L"__armips_label_{:08X}__",uniqueCount++);
 	if (local)
 		name = L"@@" + name;
 

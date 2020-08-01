@@ -138,10 +138,10 @@ void Allocations::validateOverlap()
 		if (it.first.fileID == lastKey.fileID && it.first.position > lastKey.position && it.first.position < lastEndPosition) {
 			// First, the obvious: does the content overlap?
 			if (it.first.position < lastKey.position + lastUsage.usage)
-				Logger::queueError(Logger::Warning, L"Content of areas %08llX and %08llx overlap", lastKey.position, it.first.position);
+				Logger::queueError(Logger::Warning, L"Content of areas {:08X} and {:08X} overlap", lastKey.position, it.first.position);
 			// Next question, does the earlier one fill?
 			else if (it.second.usesFill && lastUsage.usesFill)
-				Logger::queueError(Logger::Warning, L"Areas %08llX and %08llx overlap and both fill", lastKey.position, it.first.position);
+				Logger::queueError(Logger::Warning, L"Areas {:08X} and {:08X} overlap and both fill", lastKey.position, it.first.position);
 
 			// If the new area ends before the last, keep it as the last.
 			if (lastEndPosition > it.first.position + it.second.space) {

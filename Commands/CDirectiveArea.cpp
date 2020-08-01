@@ -88,7 +88,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 
 	if (areaSize < contentSize)
 	{
-		Logger::queueError(Logger::Error, L"Area at %08x overflowed by %d bytes", position, contentSize - areaSize);
+		Logger::queueError(Logger::Error, L"Area at {:08X} overflowed by {} bytes", position, contentSize - areaSize);
 	}
 
 	if (fillExpression.isLoaded() || shared)
@@ -144,11 +144,11 @@ void CDirectiveArea::writeTempData(TempData& tempData) const
 {
 	const wchar_t *directiveType = shared ? L"region" : L"area";
 	if (positionExpression.isLoaded())
-		tempData.writeLine(position, tfm::format(L".org 0x%08llX", position));
+		tempData.writeLine(position, fmt::format(L".org 0x{:08X}", position));
 	if (shared && fillExpression.isLoaded())
-		tempData.writeLine(position,tfm::format(L".%S 0x%08X,0x%02x",directiveType,areaSize,fillValue));
+		tempData.writeLine(position,fmt::format(L".{} 0x{:08X},0x{:02X}",directiveType,areaSize,fillValue));
 	else
-		tempData.writeLine(position,tfm::format(L".%S 0x%08X",directiveType,areaSize));
+		tempData.writeLine(position,fmt::format(L".{} 0x{:08X}",directiveType,areaSize));
 	if (content)
 	{
 		content->applyFileInfo();
@@ -159,13 +159,13 @@ void CDirectiveArea::writeTempData(TempData& tempData) const
 	{
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
 		if (subAreaUsage != 0)
-			tempData.writeLine(position+contentSize, tfm::format(L".skip 0x%08llX",subAreaUsage));
+			tempData.writeLine(position+contentSize, fmt::format(L".skip 0x{:08X}",subAreaUsage));
 
-		std::wstring fillString = tfm::format(L".fill 0x%08X,0x%02X",areaSize-contentSize-subAreaUsage,fillValue);
+		std::wstring fillString = fmt::format(L".fill 0x{:08X},0x{:02X}",areaSize-contentSize-subAreaUsage,fillValue);
 		tempData.writeLine(position+contentSize+subAreaUsage,fillString);
-		tempData.writeLine(position+areaSize,tfm::format(L".end%S",directiveType));
+		tempData.writeLine(position+areaSize,fmt::format(L".end{}",directiveType));
 	} else {
-		tempData.writeLine(position+contentSize,tfm::format(L".end%S",directiveType));
+		tempData.writeLine(position+contentSize,fmt::format(L".end{}",directiveType));
 	}
 }
 
@@ -247,7 +247,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	fileID = g_fileManager->getOpenFileID();
 	if (!Allocations::allocateSubArea(fileID, position, minRange, maxRange, contentSize))
 	{
-		Logger::queueError(Logger::Error, L"No space available for .autoregion of size %d", contentSize);
+		Logger::queueError(Logger::Error, L"No space available for .autoregion of size {}", contentSize);
 		// We might be able to do better next time.
 		return Allocations::canTrimSpace();
 	}
@@ -279,7 +279,7 @@ void CDirectiveAutoRegion::Encode() const
 
 void CDirectiveAutoRegion::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(position,tfm::format(L".autoregion 0x%08X",position));
+	tempData.writeLine(position,fmt::format(L".autoregion 0x{:08X}",position));
 	content->applyFileInfo();
 	content->writeTempData(tempData);
 	tempData.writeLine(position+contentSize,L".endautoregion");

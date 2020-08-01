@@ -7,6 +7,9 @@
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 
+#include <cassert>
+#include <sstream>
+
 CInvalidArchitecture InvalidArchitecture;
 
 Architecture *Architecture::currentArchitecture = &InvalidArchitecture;

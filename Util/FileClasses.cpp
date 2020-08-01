@@ -6,7 +6,7 @@
 #include <cassert>
 #include <cstring>
 
-#include <tinyformat.h>
+#include <fmt/format.h>
 
 const wchar_t SjisToUnicodeTable1[] =
 {
@@ -794,7 +794,7 @@ wchar_t TextFile::readCharacter()
 				value &= 0x0F;
 			} else if (value > 0x7F)
 			{
-				errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
+				errorText = fmt::format(L"One or more invalid UTF-8 characters in this file");
 			}
 
 			for (int i = 0; i < extraBytes; i++)
@@ -804,7 +804,7 @@ wchar_t TextFile::readCharacter()
 
 				if ((b & 0xC0) != 0x80)
 				{
-					errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
+					errorText = fmt::format(L"One or more invalid UTF-8 characters in this file");
 				}
 
 				value = (value << 6) | (b & 0x3F);
@@ -836,7 +836,7 @@ wchar_t TextFile::readCharacter()
 			value = sjisToUnicode(sjis);
 			if (value == (wchar_t)-1)
 			{
-				errorText = tfm::format(L"One or more invalid Shift-JIS characters in this file");
+				errorText = fmt::format(L"One or more invalid Shift-JIS characters in this file");
 			}
 		}
 		break;
@@ -846,7 +846,7 @@ wchar_t TextFile::readCharacter()
 		break;
 
 	case GUESS:
-		errorText = tfm::format(L"Cannot read from GUESS encoding");
+		errorText = fmt::format(L"Cannot read from GUESS encoding");
 		break;
 	}
 

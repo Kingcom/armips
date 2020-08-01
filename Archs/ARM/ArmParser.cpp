@@ -761,9 +761,9 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 	}
 
 	if (paramFail)
-		parser.printError(token,L"THUMB parameter failure in %S",stringValue);
+		parser.printError(token,L"THUMB parameter failure in {}",stringValue);
 	else
-		parser.printError(token,L"Invalid THUMB opcode: %S",stringValue);
+		parser.printError(token,L"Invalid THUMB opcode: {}",stringValue);
 	
 	return nullptr;
 }

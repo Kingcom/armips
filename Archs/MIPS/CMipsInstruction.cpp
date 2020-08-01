@@ -134,7 +134,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 			
 			if (num > 0x20000 || num < (-0x20000))
 			{
-				Logger::queueError(Logger::Error,L"Branch target %08X out of range",immediateData.primary.value);
+				Logger::queueError(Logger::Error,L"Branch target {:08X} out of range",immediateData.primary.value);
 				return false;
 			}
 			immediateData.primary.value = num >> 2;
@@ -149,7 +149,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 
 			if (immediateData.primary.value & ((1 << shift) - 1))
 			{
-				Logger::queueError(Logger::Error,L"Offset must be %d-byte aligned",1<<shift);
+				Logger::queueError(Logger::Error,L"Offset must be {}-byte aligned",1<<shift);
 				return false;
 			}
 			immediateData.primary.value = immediateData.primary.value >> shift;
@@ -161,7 +161,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 
 		if ((unsigned int)std::abs(immediateData.primary.value) > mask)
 		{
-			Logger::queueError(Logger::Error,L"Immediate value 0x%0*X out of range",digits,immediateData.primary.value);
+			Logger::queueError(Logger::Error,L"Immediate value 0x{:0{}X} out of range",immediateData.primary.value,digits);
 			return false;
 		}
 
@@ -186,7 +186,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		case MipsImmediateType::CacheOp:
 			if ((unsigned int)immediateData.secondary.value > 0x1f)
 			{
-				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",immediateData.secondary.value);
+				Logger::queueError(Logger::Error,L"Immediate value {:02X} out of range",immediateData.secondary.value);
 				return false;
 			}
 			break;
@@ -194,7 +194,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		case MipsImmediateType::Ins:
 			if (immediateData.secondary.value > 32 || immediateData.secondary.value == 0)
 			{
-				Logger::queueError(Logger::Error,L"Immediate value %02X out of range",immediateData.secondary.value);
+				Logger::queueError(Logger::Error,L"Immediate value {:02X} out of range",immediateData.secondary.value);
 				return false;
 			}
 		
@@ -215,16 +215,16 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 
 		if (registerData.grd.num != -1 && registerData.grd.num == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registerData.grd.name);
+			Logger::queueError(Logger::Warning,L"register {} may not be available due to load delay",registerData.grd.name);
 			fix = true;
 		} else if (registerData.grs.num != -1 && registerData.grs.num == Mips.GetLoadDelayRegister())
 		{
-			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registerData.grs.name);
+			Logger::queueError(Logger::Warning,L"register {} may not be available due to load delay",registerData.grs.name);
 			fix = true;
 		} else if (registerData.grt.num != -1 && registerData.grt.num == Mips.GetLoadDelayRegister()
 			&& !(opcodeData.opcode.flags & MO_IGNORERTD))
 		{
-			Logger::queueError(Logger::Warning,L"register %S may not be available due to load delay",registerData.grt.name);
+			Logger::queueError(Logger::Warning,L"register {} may not be available due to load delay",registerData.grt.name);
 			fix = true;
 		}
 

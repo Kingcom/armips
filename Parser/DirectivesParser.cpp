@@ -603,7 +603,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int
 	const std::wstring stringValue = tok.getStringValue();
 	if (!Global.symbolTable.isValidSymbolName(stringValue))
 	{
-		parser.printError(tok,L"Invalid label name \"%s\"",stringValue);
+		parser.printError(tok,L"Invalid label name \"{}\"",stringValue);
 		return nullptr;
 	}
 
@@ -689,14 +689,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 
 	if (!fs::exists(fileName))
 	{
-		parser.printError(start,L"Included file \"%s\" does not exist",fileName.wstring());
+		parser.printError(start,L"Included file \"{}\" does not exist",fileName.wstring());
 		return nullptr;
 	}
 
 	TextFile f;
 	if (!f.open(fileName,TextFile::Read,encoding))
 	{
-		parser.printError(start,L"Could not open included file \"%s\"",fileName.wstring());
+		parser.printError(start,L"Could not open included file \"{}\"",fileName.wstring());
 		return nullptr;
 	}
 

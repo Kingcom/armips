@@ -204,19 +204,19 @@ bool MipsElfFile::load(const fs::path& fileName, const fs::path& outputFileName)
 
 	if (!elf.load(fileName,true))
 	{
-		Logger::printError(Logger::FatalError,L"Failed to load %s",fileName.wstring());
+		Logger::printError(Logger::FatalError,L"Failed to load {}",fileName.wstring());
 		return false;
 	}
 
 	if (elf.getType() == 0xFFA0)
 	{
-		Logger::printError(Logger::FatalError,L"Relocatable ELF %s not supported yet",fileName.wstring());
+		Logger::printError(Logger::FatalError,L"Relocatable ELF {} not supported yet",fileName.wstring());
 		return false;
 	}
 
 	if (elf.getType() != 2)
 	{
-		Logger::printError(Logger::FatalError,L"Unknown ELF %s type %d",fileName,elf.getType());
+		Logger::printError(Logger::FatalError,L"Unknown ELF {} type {}",fileName.wstring(),elf.getType());
 		return false;
 	}
 
@@ -252,7 +252,7 @@ bool MipsElfFile::setSection(const std::wstring& name)
 		return true;
 	}
 
-	Logger::queueError(Logger::Warning,L"Section %s not found",name);
+	Logger::queueError(Logger::Warning,L"Section {} not found",name);
 	return false;
 }
 
@@ -310,9 +310,9 @@ void DirectiveLoadMipsElf::writeTempData(TempData& tempData) const
 {
 	if (outputName.empty())
 	{
-		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\"",inputName.wstring()));
+		tempData.writeLine(g_fileManager->getVirtualAddress(),fmt::format(L".loadelf \"{}\"",inputName.wstring()));
 	} else {
-		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\",\"%s\"",
+		tempData.writeLine(g_fileManager->getVirtualAddress(),fmt::format(L".loadelf \"{}\",\"{}\"",
 			inputName.wstring(),outputName.wstring()));
 	}
 }

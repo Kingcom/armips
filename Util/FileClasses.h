@@ -5,7 +5,7 @@
 #include <list>
 #include <vector>
 
-#include <tinyformat.h>
+#include <fmt/format.h>
 
 class TextFile
 {
@@ -47,7 +47,7 @@ public:
 	template <typename... Args>
 	void writeFormat(const wchar_t* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::wstring message = fmt::format(text,args...);
 		write(message);
 	}
 

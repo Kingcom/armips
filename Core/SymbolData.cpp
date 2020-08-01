@@ -65,7 +65,7 @@ void SymbolData::writeNocashSym()
 			entry.address = sym.address;
 
 			if (size != 0 && nocashSymVersion >= 2)
-				entry.text = tfm::format(L"%s,%08X",sym.name,size);
+				entry.text = fmt::format(L"{},{:08X}",sym.name,size);
 			else
 				entry.text = sym.name;
 
@@ -83,19 +83,19 @@ void SymbolData::writeNocashSym()
 			switch (data.type)
 			{
 			case Data8:
-				entry.text = tfm::format(L".byt:%04X",data.size);
+				entry.text = fmt::format(L".byt:{:04X}",data.size);
 				break;
 			case Data16:
-				entry.text = tfm::format(L".wrd:%04X",data.size);
+				entry.text = fmt::format(L".wrd:{:04X}",data.size);
 				break;
 			case Data32:
-				entry.text = tfm::format(L".dbl:%04X",data.size);
+				entry.text = fmt::format(L".dbl:{:04X}",data.size);
 				break;
 			case Data64:
-				entry.text = tfm::format(L".dbl:%04X",data.size);
+				entry.text = fmt::format(L".dbl:{:04X}",data.size);
 				break;
 			case DataAscii:
-				entry.text = tfm::format(L".asc:%04X",data.size);
+				entry.text = fmt::format(L".asc:{:04X}",data.size);
 				break;
 			}
 
@@ -108,14 +108,14 @@ void SymbolData::writeNocashSym()
 	TextFile file;
 	if (!file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII))
 	{
-		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName().wstring());
+		Logger::printError(Logger::Error,L"Could not open sym file {}.",file.getFileName().wstring());
 		return;
 	}
 	file.writeLine(L"00000000 0");
 
 	for (size_t i = 0; i < entries.size(); i++)
 	{
-		file.writeFormat(L"%08X %s\n",entries[i].address,entries[i].text);
+		file.writeFormat(L"{:08X} {}\n",entries[i].address,entries[i].text);
 	}
 
 	file.write("\x1A");
