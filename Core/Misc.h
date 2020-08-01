@@ -86,7 +86,7 @@ public:
 	void clear() { file.setFileName({}); }
 	void start();
 	void end();
-	void writeLine(int64_t memoryAddress, const std::wstring& text);
+	void writeLine(int64_t memoryAddress, const std::wstring_view& text);
 	bool isOpen() { return file.isOpen(); }
 private:
 	TextFile file;

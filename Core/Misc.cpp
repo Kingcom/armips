@@ -92,7 +92,7 @@ void Logger::printLine(const std::string& text)
 		return;
 
 	std::cout << text << std::endl;
-	
+
 #if defined(_MSC_VER) && defined(_DEBUG)
 	OutputDebugStringA(text.c_str());
 	OutputDebugStringA("\n");
@@ -105,7 +105,7 @@ void Logger::print(const std::wstring& text)
 		return;
 
 	std::wcout << text;
-	
+
 #if defined(_MSC_VER) && defined(_DEBUG)
 	OutputDebugStringW(text.c_str());
 #endif
@@ -207,19 +207,20 @@ void TempData::end()
 		file.close();
 }
 
-void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
+void TempData::writeLine(int64_t memoryAddress, const std::wstring_view& text)
 {
 	if (file.isOpen())
 	{
-		wchar_t hexbuf[10] = {0};
-		swprintf(hexbuf, 10, L"%08X ", (int32_t) memoryAddress);
-		std::wstring str = hexbuf + text;
-		while (str.size() < 70)
-			str += ' ';
+		fmt::wmemory_buffer data;
 
-		str += fmt::format(L"; {} line {}",
+		fmt::format_to(data, L"{:08X} {}", uint32_t(memoryAddress), text);
+
+		while (data.size() < 70)
+			data.push_back(L' ');
+
+		fmt::format_to(data, L"; {} line {}",
 			Global.fileList.wstring(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
 
-		file.writeLine(str);
+		file.writeLine(data.data());
 	}
 }

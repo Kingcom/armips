@@ -385,54 +385,52 @@ void CDirectiveData::Encode() const
 
 void CDirectiveData::writeTempData(TempData& tempData) const
 {
-	size_t size = (getUnitSize()*2+3)*getDataSize()+20;
-	wchar_t* str = new wchar_t[size];
-	wchar_t* start = str;
+	fmt::basic_memory_buffer<wchar_t, 1024> data;
 
 	switch (mode)
 	{
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		str += swprintf(str,20,L".byte ");
+		fmt::format_to(data, L".byte ");
 
 		for (size_t i = 0; i < customData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",(uint8_t)customData[i]);
+			fmt::format_to(data, L"0x{:02X}", uint8_t(customData[i]));
 		}
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Ascii:
-		str += swprintf(str,20,L".byte ");
-		
-		for (size_t i = 0; i < normalData.size(); i++)
-		{
-			str += swprintf(str,20,L"0x%02X,",(uint8_t)normalData[i]);
-		}
-		break;
-	case EncodingMode::U16:
-		str += swprintf(str,20,L".halfword ");
+		fmt::format_to(data, L".byte ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%04X,",(uint16_t)normalData[i]);
+			fmt::format_to(data, L"0x{:02X}", uint8_t(normalData[i]));
+		}
+		break;
+	case EncodingMode::U16:
+		fmt::format_to(data, L".halfword ");
+
+		for (size_t i = 0; i < normalData.size(); i++)
+		{
+			fmt::format_to(data, L"0x{:04X}", uint16_t(normalData[i]));
 		}
 		break;
 	case EncodingMode::U32:
 	case EncodingMode::Float:
-		str += swprintf(str,20,L".word ");
+		fmt::format_to(data, L".word ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%08X,",(uint32_t)normalData[i]);
+			fmt::format_to(data, L"0x{:08X}", uint32_t(normalData[i]));
 		}
 		break;
 	case EncodingMode::U64:
 	case EncodingMode::Double:
-		str += swprintf(str,20,L".doubleword ");
+		fmt::format_to(data, L".doubleword ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%16llX,",(uint64_t)normalData[i]);
+			fmt::format_to(data, L"0x{:016X}", uint64_t(normalData[i]));
 		}
 		break;
 	case EncodingMode::Invalid:
@@ -440,9 +438,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 		break;
 	}
 
-	*(str-1) = 0;
-	tempData.writeLine(position,start);
-	delete[] start;
+	tempData.writeLine(position,data.data());
 }
 
 void CDirectiveData::writeSymData(SymbolData& symData) const
