@@ -18,29 +18,51 @@ bool Logger::errorOnWarning = false;
 bool Logger::silent = false;
 int Logger::suppressLevel = 0;
 
-std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
+void Logger::formatPreamble(fmt::wmemory_buffer &buffer, ErrorType type)
 {
-	std::wstring position;
-
 	if (!Global.memoryMode && Global.fileList.size() > 0)
 	{
 		const auto& fileName = Global.fileList.relativeWstring(Global.FileInfo.FileNum);
-		position = fmt::format(L"{}({}) ", fileName, Global.FileInfo.LineNumber);
+		fmt::format_to(buffer, L"{}({}) ", fileName, Global.FileInfo.LineNumber);
 	}
 
 	switch (type)
 	{
 	case Warning:
-		return fmt::format(L"{}warning: {}",position,text);
+		fmt::format_to(buffer,L"warning: ");
+		break;
 	case Error:
-		return fmt::format(L"{}error: {}",position,text);
+		fmt::format_to(buffer,L"error: ");
+		break;
 	case FatalError:
-		return fmt::format(L"{}fatal error: {}",position,text);
+		fmt::format_to(buffer,L"fatal error: ");
+		break;
 	case Notice:
-		return fmt::format(L"{}notice: {}",position,text);
+		fmt::format_to(buffer,L"notice: ");
+		break;
 	}
+}
 
-	return L"";
+void Logger::doPrintError(ErrorType type,std::wstring text)
+{
+	if (suppressLevel)
+		return;
+
+	if (!silent)
+		printLine(text);
+
+	errors.emplace_back(std::move(text));
+
+	setFlags(type);
+}
+
+void Logger::doQueueError(ErrorType type, std::wstring text)
+{
+	if (suppressLevel)
+		return;
+
+	// save message
+	queue.emplace_back(QueueEntry{type, std::move(text)});
 }
 
 void Logger::setFlags(ErrorType type)
@@ -109,56 +131,6 @@ void Logger::print(const std::wstring& text)
 #if defined(_MSC_VER) && defined(_DEBUG)
 	OutputDebugStringW(text.c_str());
 #endif
-}
-
-void Logger::printError(ErrorType type, const std::wstring& text)
-{
-	if (suppressLevel)
-		return;
-
-	std::wstring errorText = formatError(type,text.c_str());
-	errors.push_back(errorText);
-
-	if (!silent)
-		printLine(errorText);
-
-	setFlags(type);
-}
-
-void Logger::printError(ErrorType type, const wchar_t* text)
-{
-	if (suppressLevel)
-		return;
-
-	std::wstring errorText = formatError(type,text);
-	errors.push_back(errorText);
-
-	if (!silent)
-		printLine(errorText);
-
-	setFlags(type);
-}
-
-void Logger::queueError(ErrorType type, const std::wstring& text)
-{
-	if (suppressLevel)
-		return;
-
-	QueueEntry entry;
-	entry.type = type;
-	entry.text = formatError(type,text.c_str());
-	queue.push_back(entry);
-}
-
-void Logger::queueError(ErrorType type, const wchar_t* text)
-{
-	if (suppressLevel)
-		return;
-
-	QueueEntry entry;
-	entry.type = type;
-	entry.text = formatError(type,text);
-	queue.push_back(entry);
 }
 
 void Logger::printQueue()

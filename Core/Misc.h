@@ -12,18 +12,10 @@ public:
 	enum ErrorType { Warning, Error, FatalError, Notice };
 
 	static void clear();
+	static void print(const std::wstring& text);
 	static void printLine(const std::wstring& text);
 	static void printLine(const std::string& text);
-	
-	template <typename... Args>
-	static void printLine(const wchar_t* text, const Args&... args)
-	{
-		std::wstring message = fmt::format(text,args...);
-		printLine(message);
-	}
 
-	static void print(const std::wstring& text);
-	
 	template <typename... Args>
 	static void print(const wchar_t* text, const Args&... args)
 	{
@@ -31,23 +23,35 @@ public:
 		print(message);
 	}
 
-	static void printError(ErrorType type, const std::wstring& text);
-	static void printError(ErrorType type, const wchar_t* text);
-	static void queueError(ErrorType type, const std::wstring& text);
-	static void queueError(ErrorType type, const wchar_t* text);
+	template <typename... Args>
+	static void printLine(const wchar_t* text, const Args&... args)
+	{
+		std::wstring message = fmt::format(text,args...);
+		printLine(message);
+	}
 
 	template <typename... Args>
-	static void printError(ErrorType type, const wchar_t* text, const Args&... args)
+	static void printError(ErrorType type, const std::wstring_view& text, const Args&... args)
 	{
-		std::wstring message = fmt::format(text,args...);
-		printError(type,message);
+		// Format message
+		fmt::wmemory_buffer buffer;
+
+		formatPreamble(buffer, type);
+		fmt::format_to(buffer, text, args...);
+
+		doPrintError(type, fmt::to_string(buffer));
 	}
-	
+
 	template <typename... Args>
-	static void queueError(ErrorType type, const wchar_t* text, const Args&... args)
+	static void queueError(ErrorType type, const std::wstring_view& text, const Args&... args)
 	{
-		std::wstring message = fmt::format(text,args...);
-		queueError(type,message);
+		// format message
+		fmt::wmemory_buffer buffer;
+
+		formatPreamble(buffer, type);
+		fmt::format_to(buffer, text, args...);
+
+		doQueueError(type, fmt::to_string(buffer));
 	}
 
 	static void printQueue();
@@ -60,8 +64,11 @@ public:
 	static bool isSilent() { return silent; }
 	static void suppressErrors() { ++suppressLevel; }
 	static void unsuppressErrors() { if (suppressLevel) --suppressLevel; }
+
 private:
-	static std::wstring formatError(ErrorType type, const wchar_t* text);
+	static void formatPreamble(fmt::wmemory_buffer &buffer, ErrorType type);
+	static void doPrintError(ErrorType type,std::wstring text);
+	static void doQueueError(ErrorType type, std::wstring text);
 	static void setFlags(ErrorType type);
 
 	struct QueueEntry
