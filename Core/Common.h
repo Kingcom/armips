@@ -10,15 +10,48 @@
 class AssemblerFile;
 class CArchitecture;
 
+class FileList
+{
+public:
+	void add(const fs::path& path);
+
+	const fs::path& path(int fileIndex) const;
+	const fs::path& relative_path(int fileIndex) const;
+	const std::wstring& wstring(int fileIndex) const;
+	const std::wstring& relativeWstring(int fileIndex) const;
+
+	size_t size() const;
+	void clear();
+
+private:
+	class Entry
+	{
+	public:
+		Entry(const fs::path& path);
+
+		const fs::path& path() const;
+		const fs::path& relativePath() const;
+		const std::wstring& wstring() const;
+		const std::wstring& relativeWstring() const;
+
+	private:
+		fs::path _path;
+		fs::path _relativePath;
+		std::wstring _string; // preconverted for performance
+		std::wstring _relativeString; // preconverted for performance
+	};
+
+	std::vector<Entry> _entries;
+};
+
 typedef struct {
-	std::vector<fs::path> FileList;
-	int FileCount;
 	int FileNum;
 	int LineNumber;
 	int TotalLineCount;
 } tFileInfo;
 
 typedef struct {
+	FileList fileList;
 	tFileInfo FileInfo;
 	SymbolTable symbolTable;
 	EncodingTable Table;

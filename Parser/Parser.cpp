@@ -284,8 +284,8 @@ std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virt
 
 	if (!virtualFile && !name.empty())
 	{
-		entry.fileNum = (int) Global.FileInfo.FileList.size();
-		Global.FileInfo.FileList.push_back(name);
+		entry.fileNum = (int) Global.fileList.size();
+		Global.fileList.add(name);
 	} else {
 		entry.fileNum = -1;
 	}
