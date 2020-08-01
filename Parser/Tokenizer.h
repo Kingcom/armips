@@ -56,17 +56,15 @@ struct Token
 {
 	friend class Tokenizer;
 
-	Token() : originalText(nullptr), stringValue(nullptr), checked(false)
+	Token()
 	{
 	}
 
 	Token(Token &&src)
 	{
 		// Move strings.
-		originalText = src.originalText;
-		src.originalText = nullptr;
-		stringValue = src.stringValue;
-		src.stringValue = nullptr;
+		originalText = std::move(src.originalText);
+		stringValue = std::move(src.stringValue);
 
 		// Just copy the rest.
 		type = src.type;
@@ -76,14 +74,11 @@ struct Token
 		checked = src.checked;
 	}
 
-	Token(const Token &src) {
+	Token(const Token &src)
+	{
 		// Copy strings.
-		originalText = nullptr;
-		if (src.originalText)
-			setOriginalText(src.originalText);
-		stringValue = nullptr;
-		if (src.stringValue)
-			setStringValue(src.stringValue);
+		setOriginalText(src.originalText);
+		setStringValue(src.stringValue);
 
 		// And copy the rest.
 		type = src.type;
@@ -95,19 +90,13 @@ struct Token
 
 	~Token()
 	{
-		clearOriginalText();
-		clearStringValue();
 	}
 
 	Token& operator=(const Token& src)
 	{
 		// Copy strings.
-		originalText = nullptr;
-		if (src.originalText)
-			setOriginalText(src.originalText);
-		stringValue = nullptr;
-		if (src.stringValue)
-			setStringValue(src.stringValue);
+		setOriginalText(src.originalText);
+		setStringValue(src.stringValue);
 
 		// And copy the rest.
 		type = src.type;
@@ -126,10 +115,7 @@ struct Token
 
 	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
 	{
-		clearOriginalText();
-		originalText = new wchar_t[len + 1];
-		wmemcpy(originalText, t.data() + pos, len);
-		originalText[len] = 0;
+		originalText = t.substr(pos, len);
 	}
 
 	std::wstring getOriginalText() const
@@ -144,10 +130,7 @@ struct Token
 
 	void setStringValue(const std::wstring& t, const size_t pos, const size_t len)
 	{
-		clearStringValue();
-		stringValue = new wchar_t[len + 1];
-		wmemcpy(stringValue, t.data() + pos, len);
-		stringValue[len] = 0;
+		stringValue = t.substr(pos, len);
 	}
 
 	void setStringAndOriginalValue(const std::wstring& t)
@@ -158,22 +141,17 @@ struct Token
 	void setStringAndOriginalValue(const std::wstring& t, const size_t pos, const size_t len)
 	{
 		setStringValue(t, pos, len);
-		clearOriginalText();
 		originalText = stringValue;
 	}
 
 	std::wstring getStringValue() const
 	{
-		if (stringValue)
-			return stringValue;
-		return L"";
+		return stringValue;
 	}
 
 	bool stringValueStartsWith(wchar_t c) const
 	{
-		if (stringValue)
-			return stringValue[0] == c;
-		return false;
+		return stringValue[0] == c;
 	}
 
 	TokenType type;
@@ -187,24 +165,10 @@ struct Token
 	};
 
 protected:
-	void clearOriginalText()
-	{
-		if (originalText != stringValue)
-			delete [] originalText;
-		originalText = nullptr;
-	}
+	std::wstring originalText;
+	std::wstring stringValue;
 
-	void clearStringValue()
-	{
-		if (stringValue != originalText)
-			delete [] stringValue;
-		stringValue = nullptr;
-	}
-
-	wchar_t* originalText;
-	wchar_t* stringValue;
-
-	bool checked;
+	bool checked = false;
 };
 
 typedef std::list<Token> TokenList;
