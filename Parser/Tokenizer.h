@@ -60,54 +60,6 @@ struct Token
 	{
 	}
 
-	Token(Token &&src)
-	{
-		// Move strings.
-		originalText = std::move(src.originalText);
-		stringValue = std::move(src.stringValue);
-
-		// Just copy the rest.
-		type = src.type;
-		line = src.line;
-		column = src.column;
-		floatValue = src.floatValue;
-		checked = src.checked;
-	}
-
-	Token(const Token &src)
-	{
-		// Copy strings.
-		setOriginalText(src.originalText);
-		setStringValue(src.stringValue);
-
-		// And copy the rest.
-		type = src.type;
-		line = src.line;
-		column = src.column;
-		floatValue = src.floatValue;
-		checked = src.checked;
-	}
-
-	~Token()
-	{
-	}
-
-	Token& operator=(const Token& src)
-	{
-		// Copy strings.
-		setOriginalText(src.originalText);
-		setStringValue(src.stringValue);
-
-		// And copy the rest.
-		type = src.type;
-		line = src.line;
-		column = src.column;
-		floatValue = src.floatValue;
-		checked = src.checked;
-
-		return *this;
-	}
-
 	void setOriginalText(const std::wstring& t)
 	{
 		setOriginalText(t, 0, t.length());
