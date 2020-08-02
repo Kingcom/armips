@@ -8,9 +8,9 @@ class CDirectiveArea: public CAssemblerCommand
 public:
 	CDirectiveArea(bool shared, Expression& size);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 	void setFillExpression(Expression& exp);
 	void setPositionExpression(Expression& exp);
 	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
@@ -31,9 +31,9 @@ class CDirectiveAutoRegion : public CAssemblerCommand
 public:
 	CDirectiveAutoRegion();
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 	void setMinRangeExpression(Expression& exp);
 	void setRangeExpressions(Expression& minExp, Expression& maxExp);
 	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }

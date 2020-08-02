@@ -10,8 +10,8 @@ public:
 	enum class Type { Warning, Error, Notice };
 	CDirectiveMessage(Type type, Expression exp);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const {};
-	virtual void writeTempData(TempData& tempData) const { };
+	void Encode() const override {};
+	void writeTempData(TempData& tempData) const override { };
 private:
 	Type errorType;
 	Expression exp;
@@ -22,9 +22,9 @@ class CDirectiveSym: public CAssemblerCommand
 public:
 	CDirectiveSym(bool enable) {enabled = enable; };
 	bool Validate(const ValidateState &state) override { return false; }
-	virtual void Encode() const { };
-	virtual void writeTempData(TempData& tempData) const { };
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override { };
+	void writeTempData(TempData& tempData) const override { };
+	void writeSymData(SymbolData& symData) const override;
 private:
 	bool enabled;
 };

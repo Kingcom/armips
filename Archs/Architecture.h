@@ -32,9 +32,9 @@ class ArchitectureCommand: public CAssemblerCommand
 public:
 	ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	int64_t position;
 	Endianness endianness;
@@ -45,11 +45,11 @@ private:
 class CInvalidArchitecture: public CArchitecture
 {
 public:
-	virtual void NextSection();
-	virtual void Pass2();
-	virtual void Revalidate();
-	virtual std::unique_ptr<IElfRelocator> getElfRelocator();
-	virtual Endianness getEndianness() { return Endianness::Little; }
+	void NextSection() override;
+	void Pass2() override;
+	void Revalidate() override;
+	std::unique_ptr<IElfRelocator> getElfRelocator() override;
+	Endianness getEndianness() override { return Endianness::Little; }
 };
 
 extern CInvalidArchitecture InvalidArchitecture;

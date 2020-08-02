@@ -11,9 +11,9 @@ class TableCommand: public CAssemblerCommand
 public:
 	TableCommand(const std::wstring& fileName, TextFile::Encoding encoding);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const { };
-	virtual void writeTempData(TempData& tempData) const { };
-	virtual void writeSymData(SymbolData& symData) const { };
+	void Encode() const override { };
+	void writeTempData(TempData& tempData) const override { };
+	void writeSymData(SymbolData& symData) const override { };
 private:
 	EncodingTable table;
 };
@@ -30,9 +30,9 @@ public:
 	void setSjis(std::vector<Expression>& entries, bool terminate);
 	void setCustom(std::vector<Expression>& entries, bool terminate);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	void encodeCustom(EncodingTable& table);
 	void encodeSjis();

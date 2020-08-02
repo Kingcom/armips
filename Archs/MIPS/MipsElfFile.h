@@ -44,9 +44,9 @@ public:
 	DirectiveLoadMipsElf(const std::wstring& fileName);
 	DirectiveLoadMipsElf(const std::wstring& inputName, const std::wstring& outputName);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	std::shared_ptr<MipsElfFile> file;
 	std::wstring inputName;

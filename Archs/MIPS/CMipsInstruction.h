@@ -131,8 +131,8 @@ public:
 	CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers);
 	~CMipsInstruction();
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
 private:
 	void encodeNormal() const;
 	void encodeVfpu() const;

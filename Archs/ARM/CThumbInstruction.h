@@ -24,10 +24,10 @@ public:
 //	~CThumbInstruction();
 	bool Load(char* Name, char* Params);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
 	size_t GetSize() { return OpcodeSize; };
-	virtual void setPoolAddress(int64_t address);
+	void setPoolAddress(int64_t address) override;
 private:
 	void FormatInstruction(const char* encoding, char* dest) const;
 	void WriteInstruction(unsigned short encoding) const;

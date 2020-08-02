@@ -19,9 +19,9 @@ public:
 	void initClose();
 
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	Type type;
 	int64_t virtualAddress;
@@ -35,9 +35,9 @@ public:
 	enum Type { Physical, Virtual };
 	CDirectivePosition(Expression value, Type type);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override { };
 private:
 	void exec() const;
 	Expression expression;
@@ -54,9 +54,9 @@ public:
 	void setSize(Expression& exp) { sizeExpression = exp; };
 
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	std::wstring fileName;
 	int64_t fileSize;
@@ -77,9 +77,9 @@ public:
 	CDirectiveAlignFill(Expression& value, Mode mode);
 	CDirectiveAlignFill(Expression& value, Expression& fillValue, Mode mode);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	Mode mode;
 	Expression valueExpression;
@@ -95,9 +95,9 @@ class CDirectiveSkip: public CAssemblerCommand
 public:
 	CDirectiveSkip(Expression& value);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override { };
 private:
 	Expression expression;
 	int64_t value;
@@ -109,9 +109,9 @@ class CDirectiveHeaderSize: public CAssemblerCommand
 public:
 	CDirectiveHeaderSize(Expression expression);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const { };
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override { };
 private:
 	void exec() const;
 	Expression expression;
@@ -126,9 +126,9 @@ public:
 	DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName);
 	~DirectiveObjImport() { };
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 private:
 	ElfRelocator rel;
 	std::unique_ptr<CAssemblerCommand> ctor;

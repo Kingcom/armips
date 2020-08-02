@@ -33,16 +33,16 @@ class DummyCommand: public CAssemblerCommand
 {
 public:
 	bool Validate(const ValidateState &state) override { return false; }
-	virtual void Encode() const { };
-	virtual void writeTempData(TempData& tempData) const { };
-	virtual void writeSymData(SymbolData& symData) const { };
+	void Encode() const override { };
+	void writeTempData(TempData& tempData) const override { };
+	void writeSymData(SymbolData& symData) const override { };
 };
 
 class InvalidCommand: public CAssemblerCommand
 {
 public:
 	bool Validate(const ValidateState &state) override { return false; }
-	virtual void Encode() const { };
-	virtual void writeTempData(TempData& tempData) const { };
-	virtual void writeSymData(SymbolData& symData) const { };
+	void Encode() const override { };
+	void writeTempData(TempData& tempData) const override { };
+	void writeSymData(SymbolData& symData) const override { };
 };

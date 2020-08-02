@@ -12,10 +12,11 @@ function(init_target TARGET_NAME)
 
 	target_include_directories(${TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-	if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
+	if (NOT MSVC AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
 		target_compile_options(${TARGET_NAME} PRIVATE -Wall)
 		target_compile_options(${TARGET_NAME} PRIVATE -Wno-uninitialized)
 		target_compile_options(${TARGET_NAME} PRIVATE -Wno-unused-parameter)
+		target_compile_options(${TARGET_NAME} PRIVATE -Werror=inconsistent-missing-override)
 
 		if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku" AND NOT WIIU)
 			find_package(Threads REQUIRED)

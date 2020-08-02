@@ -20,9 +20,9 @@ public:
 	CDirectiveConditional(ConditionType type, const std::wstring& name);
 	CDirectiveConditional(ConditionType type, const Expression& exp);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void writeSymData(SymbolData& symData) const;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
 	void setContent(std::unique_ptr<CAssemblerCommand> ifBlock, std::unique_ptr<CAssemblerCommand> elseBlock);
 private:
 	bool evaluate();

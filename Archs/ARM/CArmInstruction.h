@@ -65,9 +65,9 @@ public:
 //	~CArmInstruction();
 	bool Load(char* Name, char* Params);
 	bool Validate(const ValidateState &state) override;
-	virtual void Encode() const;
-	virtual void writeTempData(TempData& tempData) const;
-	virtual void setPoolAddress(int64_t address);
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void setPoolAddress(int64_t address) override;
 private:
 	void FormatOpcode(char* Dest, const char* Source) const;
 	void FormatInstruction(const char* encoding, char* dest) const;
