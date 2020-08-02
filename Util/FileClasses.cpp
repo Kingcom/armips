@@ -856,7 +856,7 @@ void TextFile::bufFillRead()
 
 wchar_t TextFile::readCharacter()
 {
-	wchar_t value;
+	wchar_t value = 0;
 
 	switch (encoding)
 	{
@@ -926,6 +926,7 @@ wchar_t TextFile::readCharacter()
 		value = bufGetChar();
 		contentPos++;
 		break;
+
 	case GUESS:
 		errorText = tfm::format(L"Cannot read from GUESS encoding");
 		break;

@@ -12,12 +12,15 @@ const char ArmConditions[16][3] = {
 	"eq","ne","cs","cc","mi","pl","vs","vc","hi","ls","ge","lt","gt","le","","nv"
 };
 const char ArmAddressingModes[4][3] = { "da","ia","db","ib"};
+
+/*
 const char ArmShiftModes[4][4] = { "lsl", "lsr", "asr", "ror" };
 
 const char ArmPsrModes[16][5] = {
 	"_???",	"_ctl",	"_x",	"_xc",	"_s",	"_sc",	"_sx",	"_sxc",
 	"_flg",	"_fc",	"_fx",	"_fxc",	"_fs",	"_fsc",	"_fsx",	""
 };
+*/
 
 bool CArmInstruction::Load(char *Name, char *Params)
 {
