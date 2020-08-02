@@ -3,8 +3,19 @@ project(armips)
 
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
 
+macro(check_compiler VARIABLE NAME)
+	if (${CMAKE_CXX_COMPILER_ID} MATCHES ${NAME})
+		set(${VARIABLE} TRUE)
+	else()
+		set(${VARIABLE} FALSE)
+	endif()
+endmacro()
+
 # Helper function to set common parameters for a target
 function(init_target TARGET_NAME)
+	check_compiler(CLANG "Clang")
+	check_compiler(GCC "GNU")
+
 	set_target_properties(${TARGET_NAME} PROPERTIES
 		CXX_STANDARD 17
 		CXX_STANDARD_REQUIRED TRUE
@@ -12,17 +23,19 @@ function(init_target TARGET_NAME)
 
 	target_include_directories(${TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-	if (NOT MSVC AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU|Clang")
-		target_compile_options(${TARGET_NAME} PRIVATE -Wall)
-		target_compile_options(${TARGET_NAME} PRIVATE -Wno-uninitialized)
-		target_compile_options(${TARGET_NAME} PRIVATE -Wno-unused-parameter)
-		target_compile_options(${TARGET_NAME} PRIVATE -Werror=inconsistent-missing-override)
+	if (GCC OR CLANG)
+		# clang-cl seems to treat -Wall as -Weverything
+		if (NOT MSVC)
+			target_compile_options(${TARGET_NAME} PRIVATE -Wall)
+		endif()
 
-		if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku" AND NOT WIIU)
+		target_compile_options(${TARGET_NAME} PRIVATE -Wno-unused-parameter)
+
+		if (NOT MSVC AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku" AND NOT WIIU)
 			find_package(Threads REQUIRED)
 			target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
 		endif()
-	endif()
+	endif ()
 
 	if (ARMIPS_REGEXP)
 		target_compile_definitions(${TARGET_NAME} PRIVATE ARMIPS_REGEXP=1)
