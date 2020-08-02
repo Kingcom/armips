@@ -13,7 +13,7 @@ CDirectiveMessage::CDirectiveMessage(Type type, Expression exp)
 bool CDirectiveMessage::Validate(const ValidateState &state)
 {
 	std::wstring text;
-	if (exp.evaluateString(text,true) == false)
+	if (!exp.evaluateString(text,true))
 	{
 		Logger::queueError(Logger::Error,L"Invalid expression");
 		return false;

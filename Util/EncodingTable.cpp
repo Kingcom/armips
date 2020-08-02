@@ -126,7 +126,7 @@ bool EncodingTable::load(const std::wstring& fileName, TextFile::Encoding encodi
 	unsigned char hexBuffer[MAXHEXLENGTH];
 
 	TextFile input;
-	if (input.open(fileName,TextFile::Read,encoding) == false)
+	if (!input.open(fileName,TextFile::Read,encoding))
 		return false;
 
 	hexData.clear();
@@ -232,7 +232,7 @@ ByteArray EncodingTable::encodeString(const std::wstring& str, bool writeTermina
 	while (pos < str.size())
 	{
 		size_t index;
-		if (lookup.findLongestPrefix(str.c_str()+pos,index) == false)
+		if (!lookup.findLongestPrefix(str.c_str()+pos,index))
 		{
 			// error
 			return ByteArray();

@@ -202,7 +202,7 @@ bool MipsElfFile::load(const std::wstring& fileName, const std::wstring& outputF
 {
 	this->outputFileName = outputFileName;
 
-	if (elf.load(fileName,true) == false)
+	if (!elf.load(fileName,true))
 	{
 		Logger::printError(Logger::FatalError,L"Failed to load %s",fileName);
 		return false;
@@ -270,7 +270,7 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& fileName)
 	file = std::make_shared<MipsElfFile>();
 
 	this->inputName = getFullPathName(fileName);
-	if (file->load(this->inputName,this->inputName) == false)
+	if (!file->load(this->inputName,this->inputName))
 	{
 		file = nullptr;
 		return;
@@ -285,7 +285,7 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const std::wstring& inputName, const 
 
 	this->inputName = getFullPathName(inputName);
 	this->outputName = getFullPathName(outputName);
-	if (file->load(this->inputName,this->outputName) == false)
+	if (!file->load(this->inputName,this->outputName))
 	{
 		file = nullptr;
 		return;

@@ -11,13 +11,13 @@
 
 ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	bool isArm = Arch == &Arm && Arm.GetThumbMode() == false;
+	bool isArm = Arch == &Arm && !Arm.GetThumbMode();
 	return ExpressionValue(isArm ? INT64_C(1) : INT64_C(0));
 }
 
 ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	bool isThumb = Arm.GetThumbMode() == true;
+	bool isThumb = Arm.GetThumbMode();
 	return ExpressionValue(isThumb ? INT64_C(1) : INT64_C(0));
 }
 

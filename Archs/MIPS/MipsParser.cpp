@@ -142,16 +142,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFixLoadDelay(Parser& parser, in
 std::unique_ptr<CAssemblerCommand> parseDirectiveLoadElf(Parser& parser, int flags)
 {
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (!parser.parseExpressionList(list,1,2))
 		return nullptr;
 
 	std::wstring inputName, outputName;
-	if (list[0].evaluateString(inputName,true) == false)
+	if (!list[0].evaluateString(inputName,true))
 		return nullptr;
 
 	if (list.size() == 2)
 	{
-		if (list[1].evaluateString(outputName,true) == false)
+		if (!list[1].evaluateString(outputName,true))
 			return nullptr;
 		return std::make_unique<DirectiveLoadMipsElf>(inputName,outputName);
 	} else {
@@ -164,17 +164,17 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 	const Token& start = parser.peekToken();
 
 	std::vector<Expression> list;
-	if (parser.parseExpressionList(list,1,2) == false)
+	if (!parser.parseExpressionList(list,1,2))
 		return nullptr;
 
 	std::wstring inputName;
-	if (list[0].evaluateString(inputName,true) == false)
+	if (!list[0].evaluateString(inputName,true))
 		return nullptr;
 	
 	if (list.size() == 2)
 	{
 		std::wstring ctorName;
-		if (list[1].evaluateIdentifier(ctorName) == false)
+		if (!list[1].evaluateIdentifier(ctorName))
 			return nullptr;
 		
 		if (Mips.GetVersion() == MARCH_PSX)
@@ -457,9 +457,9 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 		return false;
 
 	int mtx,col,row;
-	if (decodeDigit(stringValue[1],mtx) == false) return false;
-	if (decodeDigit(stringValue[2],col) == false) return false;
-	if (decodeDigit(stringValue[3],row) == false) return false;
+	if (!decodeDigit(stringValue[1],mtx)) return false;
+	if (!decodeDigit(stringValue[2],col)) return false;
+	if (!decodeDigit(stringValue[3],row)) return false;
 	wchar_t mode = towlower(stringValue[0]);
 
 	if (size < 0 || size > 3)
@@ -928,7 +928,7 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 		result |= 1 << (12+i);
 
 		int constNum = -1;
-		if (sequenceParser.parse(parser,constNum) == false)
+		if (!sequenceParser.parse(parser,constNum))
 			return false;
 		
 		result |= (constNum & 3) << (i*2);
@@ -991,7 +991,7 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 		parser.eatToken();
 		
 		int num = 0;
-		if (sequenceParser.parse(parser,num) == false)
+		if (!sequenceParser.parse(parser,num))
 			return false;
 
 		// m versions
@@ -1486,11 +1486,11 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 		if ((MipsOpcodes[z].flags & MO_DFPU) && !(arch.flags & MO_DFPU))
 			continue;
 
-		if (decodeOpcode(stringValue,MipsOpcodes[z]) == true)
+		if (decodeOpcode(stringValue,MipsOpcodes[z]))
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseParameters(parser,MipsOpcodes[z]) == true)
+			if (parseParameters(parser,MipsOpcodes[z]))
 			{
 				// success, return opcode
 				return std::make_unique<CMipsInstruction>(opcodeData,immediate,registers);
@@ -1501,7 +1501,7 @@ std::unique_ptr<CMipsInstruction> MipsParser::parseOpcode(Parser& parser)
 		}
 	}
 
-	if (paramFail == true)
+	if (paramFail)
 		parser.printError(token,L"MIPS parameter failure");
 	else
 		parser.printError(token,L"Invalid MIPS opcode '%s'",stringValue);
@@ -1571,7 +1571,7 @@ std::unique_ptr<CAssemblerCommand> MipsParser::parseMacro(Parser& parser)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseMacroParameters(parser,mipsMacros[z]) == true)
+			if (parseMacroParameters(parser,mipsMacros[z]))
 			{
 				return mipsMacros[z].function(parser,registers,immediate,mipsMacros[z].flags);
 			}

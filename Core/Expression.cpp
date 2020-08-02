@@ -701,7 +701,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 	case OperatorType::ToString:
 		return false;
 	case OperatorType::FunctionCall:
-		if (isExpressionFunctionSafe(strValue, inUnknownOrFalseBlock) == false)
+		if (!isExpressionFunctionSafe(strValue, inUnknownOrFalseBlock))
 			return false;
 		break;
 	default:
@@ -712,7 +712,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 	bool canSimplify = true;
 	for (size_t i = 0; i < childrenCount; i++)
 	{
-		if (children[i] != nullptr && children[i]->simplify(inUnknownOrFalseBlock) == false)
+		if (children[i] != nullptr && !children[i]->simplify(inUnknownOrFalseBlock))
 			canSimplify = false;
 	}
 
@@ -1000,7 +1000,7 @@ bool Expression::evaluateString(std::wstring &dest, bool convert)
 		return true;
 	}
 
-	if (value.isString() == false)
+	if (!value.isString())
 		return false;
 
 	dest = value.strValue;
@@ -1009,7 +1009,7 @@ bool Expression::evaluateString(std::wstring &dest, bool convert)
 
 bool Expression::evaluateIdentifier(std::wstring &dest)
 {
-	if (expression == nullptr || expression->isIdentifier() == false)
+	if (expression == nullptr || !expression->isIdentifier())
 		return false;
 
 	dest = expression->getStringValue();

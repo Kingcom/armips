@@ -196,10 +196,10 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 	}
 
 	// turn input filename into an absolute path
-	if (settings.useAbsoluteFileNames && isAbsolutePath(settings.inputFileName) == false)
+	if (settings.useAbsoluteFileNames && !isAbsolutePath(settings.inputFileName))
 		settings.inputFileName = tfm::format(L"%s/%s", getCurrentDirectory(), settings.inputFileName);
 
-	if (fileExists(settings.inputFileName) == false)
+	if (!fileExists(settings.inputFileName))
 	{
 		Logger::printError(Logger::Error, L"File \"%s\" not found", settings.inputFileName);
 		return false;
@@ -209,7 +209,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 int runFromCommandLine(const std::vector<std::wstring>& arguments, ArmipsArguments settings)
 {
-	if (parseArguments(arguments, settings) == false)
+	if (!parseArguments(arguments, settings))
 	{
 		if (arguments.size() > 1 && !settings.silent)
 			Logger::printLine(L"Cannot parse arguments; aborting.");
@@ -217,7 +217,7 @@ int runFromCommandLine(const std::vector<std::wstring>& arguments, ArmipsArgumen
 		return 1;
 	}
 
-	if (runArmips(settings) == false)
+	if (!runArmips(settings))
 	{
 		if (!settings.silent)
 			Logger::printLine(L"Aborting.");

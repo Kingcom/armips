@@ -271,7 +271,7 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 
 		size_t n = tests[i].find_last_of('/');
 		std::wstring testName = n == tests[i].npos ? tests[i] : tests[i].substr(n+1);
-		if (executeTest(path,testName,errors) == false)
+		if (!executeTest(path,testName,errors))
 		{
 			changeConsoleColor(ConsoleColors::Red);
 			Logger::printLine(L"FAILED");

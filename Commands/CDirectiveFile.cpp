@@ -183,7 +183,7 @@ bool CDirectivePosition::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
-	if (expression.evaluateInteger(position) == false)
+	if (!expression.evaluateInteger(position))
 	{
 		Logger::queueError(Logger::FatalError,L"Invalid position");
 		return false;
@@ -222,7 +222,7 @@ CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
 {
 	this->fileName = getFullPathName(fileName);
 	
-	if (fileExists(this->fileName) == false)
+	if (!fileExists(this->fileName))
 	{
 		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName);
 	}
@@ -236,7 +236,7 @@ bool CDirectiveIncbin::Validate(const ValidateState &state)
 
 	if (startExpression.isLoaded())
 	{
-		if (startExpression.evaluateInteger(start) == false)
+		if (!startExpression.evaluateInteger(start))
 		{
 			Logger::queueError(Logger::Error,L"Invalid position expression");
 			return false;
@@ -253,7 +253,7 @@ bool CDirectiveIncbin::Validate(const ValidateState &state)
 
 	if (sizeExpression.isLoaded())
 	{
-		if (sizeExpression.evaluateInteger(size) == false)
+		if (!sizeExpression.evaluateInteger(size))
 		{
 			Logger::queueError(Logger::Error,L"Invalid size expression");
 			return false;
@@ -328,14 +328,14 @@ bool CDirectiveAlignFill::Validate(const ValidateState &state)
 
 	if (valueExpression.isLoaded())
 	{
-		if (valueExpression.evaluateInteger(value) == false)
+		if (!valueExpression.evaluateInteger(value))
 		{
 			Logger::queueError(Logger::FatalError,L"Invalid %s",mode == Fill ? L"size" : L"alignment");
 			return false;
 		}
 	}
 
-	if (mode != Fill && isPowerOfTwo(value) == false)
+	if (mode != Fill && !isPowerOfTwo(value))
 	{
 		Logger::queueError(Logger::Error, L"Invalid alignment %d", value);
 		return false;
@@ -360,7 +360,7 @@ bool CDirectiveAlignFill::Validate(const ValidateState &state)
 
 	if (fillExpression.isLoaded())
 	{
-		if (fillExpression.evaluateInteger(fillByte) == false)
+		if (!fillExpression.evaluateInteger(fillByte))
 		{
 			Logger::printError(Logger::FatalError,L"Invalid fill value");
 			return false;
@@ -432,7 +432,7 @@ bool CDirectiveSkip::Validate(const ValidateState &state)
 
 	if (expression.isLoaded())
 	{
-		if (expression.evaluateInteger(value) == false)
+		if (!expression.evaluateInteger(value))
 		{
 			Logger::queueError(Logger::FatalError,L"Invalid skip length");
 			return false;
@@ -481,7 +481,7 @@ bool CDirectiveHeaderSize::Validate(const ValidateState &state)
 {
 	virtualAddress = g_fileManager->getVirtualAddress();
 
-	if (expression.evaluateInteger(headerSize) == false)
+	if (!expression.evaluateInteger(headerSize))
 	{
 		Logger::queueError(Logger::FatalError,L"Invalid header size");
 		return false;

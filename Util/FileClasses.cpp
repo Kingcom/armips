@@ -683,7 +683,7 @@ void BinaryFile::close()
 
 size_t BinaryFile::read(void* dest, size_t length)
 {
-	if (isOpen() == false || mode == Write)
+	if (!isOpen() || mode == Write)
 		return 0;
 
 	return fread(dest,1,length,handle);
@@ -691,7 +691,7 @@ size_t BinaryFile::read(void* dest, size_t length)
 
 size_t BinaryFile::write(void* source, size_t length)
 {
-	if (isOpen() == false || mode == Read)
+	if (!isOpen() || mode == Read)
 		return 0;
 
 	return fwrite(source,1,length,handle);
@@ -932,7 +932,7 @@ wchar_t TextFile::readCharacter()
 	}
 
 	// convert \r\n to \n
-	if (value == L'\r' && recursion == false && atEnd() == false)
+	if (value == L'\r' && !recursion && !atEnd())
 	{
 		recursion = true;
 		long pos = tell();

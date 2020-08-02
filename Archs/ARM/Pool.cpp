@@ -26,7 +26,7 @@ void ArmStateCommand::writeSymData(SymbolData& symData) const
 	if (RamPos == -1)
 		return;
 
-	if (armstate == true)
+	if (armstate)
 	{
 		symData.addLabel(RamPos,L".arm");
 	} else {

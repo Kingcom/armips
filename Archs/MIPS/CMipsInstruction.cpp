@@ -101,7 +101,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 	{
 		if (immediateData.primary.expression.isLoaded())
 		{
-			if (immediateData.primary.expression.evaluateInteger(immediateData.primary.value) == false)
+			if (!immediateData.primary.expression.evaluateInteger(immediateData.primary.value))
 			{
 				Logger::queueError(Logger::Error, L"Invalid immediate expression");
 				return false;
@@ -172,7 +172,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 	{
 		if (immediateData.secondary.expression.isLoaded())
 		{
-			if (immediateData.secondary.expression.evaluateInteger(immediateData.secondary.value) == false)
+			if (!immediateData.secondary.expression.evaluateInteger(immediateData.secondary.value))
 			{
 				Logger::queueError(Logger::Error, L"Invalid immediate expression");
 				return false;
@@ -209,7 +209,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 	}
 
 	// check load delay
-	if (Mips.hasLoadDelay() && Mips.GetLoadDelay() && IgnoreLoadDelay == false)
+	if (Mips.hasLoadDelay() && Mips.GetLoadDelay() && !IgnoreLoadDelay)
 	{
 		bool fix = false;
 
@@ -228,23 +228,23 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 			fix = true;
 		}
 
-		if (Mips.GetFixLoadDelay() == true && fix == true)
+		if (Mips.GetFixLoadDelay() && fix)
 		{
 			addNop = true;
 			Logger::queueError(Logger::Notice,L"added nop to ensure correct behavior");
 		}
 	}
 
-	if ((opcodeData.opcode.flags & MO_NODELAYSLOT) && Mips.GetDelaySlot() == true && IgnoreLoadDelay == false)
+	if ((opcodeData.opcode.flags & MO_NODELAYSLOT) && Mips.GetDelaySlot() && !IgnoreLoadDelay)
 	{
 		Logger::queueError(Logger::Error,L"This instruction can't be in a delay slot");
 	}
 
-	Mips.SetDelaySlot(opcodeData.opcode.flags & MO_DELAY ? true : false);
+	Mips.SetDelaySlot((opcodeData.opcode.flags & MO_DELAY) != 0);
 
 	// now check if this opcode causes a load delay
 	if (Mips.hasLoadDelay())
-		Mips.SetLoadDelay(opcodeData.opcode.flags & MO_DELAYRT ? true : false,registerData.grt.num);
+		Mips.SetLoadDelay((opcodeData.opcode.flags & MO_DELAYRT) != 0,registerData.grt.num);
 	
 	if (previousNop != addNop)
 		Result = true;

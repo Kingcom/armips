@@ -28,7 +28,7 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t
 	this->headerSize = headerSize;
 	this->originalHeaderSize = headerSize;
 	this->seekPhysical(0);
-	mode = overwrite == true ? Create : Open;
+	mode = overwrite ? Create : Open;
 }
 
 GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int64_t headerSize)
@@ -46,7 +46,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 	headerSize = originalHeaderSize;
 	virtualAddress = headerSize;
 
-	if (onlyCheck == false)
+	if (!onlyCheck)
 	{
 		// actually open the file
 		bool success;
@@ -54,7 +54,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		{
 		case Open:
 			success = handle.open(fileName,BinaryFile::ReadWrite);
-			if (success == false)
+			if (!success)
 			{
 				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName);
 				return false;
@@ -63,7 +63,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 
 		case Create:
 			success = handle.open(fileName,BinaryFile::Write);
-			if (success == false)
+			if (!success)
 			{
 				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
 				return false;
@@ -72,14 +72,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 
 		case Copy:
 			success = copyFile(originalName,fileName);
-			if (success == false)
+			if (!success)
 			{
 				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName);
 				return false;
 			}
 
 			success = handle.open(fileName,BinaryFile::ReadWrite);
-			if (success == false)
+			if (!success)
 			{
 				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
 				return false;
@@ -98,7 +98,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 	{
 	case Open:
 		success = temp.open(fileName,BinaryFile::ReadWrite);
-		if (success == false)
+		if (!success)
 		{
 			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName);
 			return false;
@@ -111,14 +111,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		// otherwise open it with write access and remove it afterwards
 		exists = fileExists(fileName);
 		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
-		if (success == false)
+		if (!success)
 		{
 			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
 			return false;
 		}
 		temp.close();
 
-		if (exists == false)
+		if (!exists)
 			deleteFile(fileName);
 
 		return true;
@@ -126,7 +126,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 	case Copy:
 		// check original file
 		success = temp.open(originalName,BinaryFile::ReadWrite);
-		if (success == false)
+		if (!success)
 		{
 			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName);
 			return false;
@@ -136,14 +136,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		// check new file, same as create
 		exists = fileExists(fileName);
 		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
-		if (success == false)
+		if (!success)
 		{
 			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
 			return false;
 		}
 		temp.close();
 		
-		if (exists == false)
+		if (!exists)
 			deleteFile(fileName);
 
 		return true;
@@ -157,7 +157,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 
 bool GenericAssemblerFile::write(void* data, size_t length)
 {
-	if (isOpen() == false)
+	if (!isOpen())
 		return false;
 
 	size_t len = handle.write(data,length);
@@ -279,10 +279,10 @@ void FileManager::closeFile()
 
 bool FileManager::write(void* data, size_t length)
 {
-	if (checkActiveFile() == false)
+	if (!checkActiveFile())
 		return false;
 
-	if (activeFile->isOpen() == false)
+	if (!activeFile->isOpen())
 	{
 		Logger::queueError(Logger::Error,L"No file opened");
 		return false;
@@ -343,7 +343,7 @@ int64_t FileManager::getHeaderSize()
 
 bool FileManager::seekVirtual(int64_t virtualAddress)
 {
-	if (checkActiveFile() == false)
+	if (!checkActiveFile())
 		return false;
 
 	bool result = activeFile->seekVirtual(virtualAddress);
@@ -359,14 +359,14 @@ bool FileManager::seekVirtual(int64_t virtualAddress)
 
 bool FileManager::seekPhysical(int64_t virtualAddress)
 {
-	if (checkActiveFile() == false)
+	if (!checkActiveFile())
 		return false;
 	return activeFile->seekPhysical(virtualAddress);
 }
 
 bool FileManager::advanceMemory(size_t bytes)
 {
-	if (checkActiveFile() == false)
+	if (!checkActiveFile())
 		return false;
 
 	int64_t pos = activeFile->getVirtualAddress();
@@ -375,7 +375,7 @@ bool FileManager::advanceMemory(size_t bytes)
 
 int64_t FileManager::getOpenFileID()
 {
-	if (checkActiveFile() == false)
+	if (!checkActiveFile())
 		return 0;
 
 	static_assert(sizeof(int64_t) >= sizeof(intptr_t), "Assumes pointers are <= 64 bit");

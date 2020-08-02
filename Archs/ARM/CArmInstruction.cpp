@@ -71,9 +71,9 @@ bool CArmInstruction::Validate(const ValidateState &state)
 		Logger::queueError(Logger::Warning,L"Opcode not word aligned");
 	}
 
-	if (Vars.Shift.UseShift == true && Vars.Shift.ShiftByRegister == false)
+	if (Vars.Shift.UseShift && !Vars.Shift.ShiftByRegister)
 	{
-		if (Vars.Shift.ShiftExpression.evaluateInteger(Vars.Shift.ShiftAmount) == false)
+		if (!Vars.Shift.ShiftExpression.evaluateInteger(Vars.Shift.ShiftAmount))
 		{
 			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
@@ -115,7 +115,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 	if (Opcode.flags & ARM_COPOP)
 	{
-		if (Vars.CopData.CpopExpression.evaluateInteger(Vars.CopData.Cpop) == false)
+		if (!Vars.CopData.CpopExpression.evaluateInteger(Vars.CopData.Cpop))
 		{
 			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
@@ -130,7 +130,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 	if (Opcode.flags & ARM_COPINF)
 	{
-		if (Vars.CopData.CpinfExpression.evaluateInteger(Vars.CopData.Cpinf) == false)
+		if (!Vars.CopData.CpinfExpression.evaluateInteger(Vars.CopData.Cpinf))
 		{
 			Logger::queueError(Logger::Error,L"Invalid expression");
 			return false;
@@ -324,7 +324,7 @@ void CArmInstruction::FormatOpcode(char* Dest, const char* Source) const
 			Source++;
 			break;
 		case 'S':	// set flag
-			if (Vars.Opcode.s == true) *Dest++ = 's';
+			if (Vars.Opcode.s) *Dest++ = 's';
 			Source++;
 			break;
 		case 'A':	// addressing mode
@@ -337,12 +337,12 @@ void CArmInstruction::FormatOpcode(char* Dest, const char* Source) const
 			Source++;
 			break;
 		case 'X':	// x flag
-			if (Vars.Opcode.x == false) *Dest++ = 'b';
+			if (!Vars.Opcode.x) *Dest++ = 'b';
 			else *Dest++ = 't';
 			Source++;
 			break;
 		case 'Y':	// y flag
-			if (Vars.Opcode.y == false) *Dest++ = 'b';
+			if (!Vars.Opcode.y) *Dest++ = 'b';
 			else *Dest++ = 't';
 			Source++;
 			break;
@@ -471,14 +471,14 @@ void CArmInstruction::writeTempData(TempData& tempData) const
 
 void CArmInstruction::Encode() const
 {
-	unsigned int encoding = Vars.Opcode.UseNewEncoding == true ? Vars.Opcode.NewEncoding : Opcode.encoding;
+	unsigned int encoding = Vars.Opcode.UseNewEncoding ? Vars.Opcode.NewEncoding : Opcode.encoding;
 
 	if ((Opcode.flags & ARM_UNCOND) == 0) encoding |= Vars.Opcode.c << 28;
-	if (Vars.Opcode.s == true) encoding |= (1 << 20);
+	if (Vars.Opcode.s) encoding |= (1 << 20);
 
 	unsigned char shiftType;
 	int shiftAmount;
-	if (Vars.Shift.UseFinal == true)
+	if (Vars.Shift.UseFinal)
 	{
 		shiftType = Vars.Shift.FinalType;
 		shiftAmount = Vars.Shift.FinalShiftAmount;
@@ -487,7 +487,7 @@ void CArmInstruction::Encode() const
 		shiftAmount = Vars.Shift.ShiftAmount;
 	}
 
-	switch (Vars.Opcode.UseNewType == true ? Vars.Opcode.NewType : Opcode.type)
+	switch (Vars.Opcode.UseNewType ? Vars.Opcode.NewType : Opcode.type)
 	{
 	case ARM_TYPE3:		// ARM.3: Branch and Exchange (BX, BLX)
 		encoding |= (Vars.rn.num << 0);
@@ -505,9 +505,9 @@ void CArmInstruction::Encode() const
 			encoding |= (shiftAmount << 7);
 			encoding |= Vars.Immediate;
 		} else if (Opcode.flags & ARM_REGISTER) {	// shifted register als op2
-			if (Vars.Shift.UseShift == true)
+			if (Vars.Shift.UseShift)
 			{
-				if (Vars.Shift.ShiftByRegister == true)
+				if (Vars.Shift.ShiftByRegister)
 				{
 					encoding |= (Vars.Shift.reg.num << 8);
 					encoding |= (1 << 4);
@@ -522,10 +522,10 @@ void CArmInstruction::Encode() const
 	case ARM_TYPE6:		// ARM.6: PSR Transfer (MRS, MSR)
 		if (Opcode.flags & ARM_MRS) //  MRS{cond} Rd,Psr          ;Rd = Psr
 		{
-			if (Vars.PsrData.spsr == true) encoding |= (1 << 22);
+			if (Vars.PsrData.spsr) encoding |= (1 << 22);
 			encoding |= (Vars.rd.num << 12);
 		} else {					//  MSR{cond} Psr{_field},Op  ;Psr[field] = Op
-			if (Vars.PsrData.spsr == true) encoding |= (1 << 22);
+			if (Vars.PsrData.spsr) encoding |= (1 << 22);
 			encoding |= (Vars.PsrData.field << 16);
 
 			if (Opcode.flags & ARM_REGISTER)
@@ -542,16 +542,16 @@ void CArmInstruction::Encode() const
 		encoding |= (Vars.rd.num << 16);
 		if (Opcode.flags & ARM_N) encoding |= (Vars.rn.num << 12);
 		encoding |= (Vars.rs.num << 8);
-		if ((Opcode.flags & ARM_Y) && Vars.Opcode.y == true) encoding |= (1 << 6);
-		if ((Opcode.flags & ARM_X) && Vars.Opcode.x == true) encoding |= (1 << 5);
+		if ((Opcode.flags & ARM_Y) && Vars.Opcode.y) encoding |= (1 << 6);
+		if ((Opcode.flags & ARM_X) && Vars.Opcode.x) encoding |= (1 << 5);
 		encoding |= (Vars.rm.num << 0);
 		break;
 	case ARM_TYPE9:		// ARM.9: Single Data Transfer (LDR, STR, PLD)
-		if (Vars.writeback == true) encoding |= (1 << 21);
+		if (Vars.writeback) encoding |= (1 << 21);
 		if (Opcode.flags & ARM_N) encoding |= (Vars.rn.num << 16);
 		if (Opcode.flags & ARM_D) encoding |= (Vars.rd.num << 12);
-		if ((Opcode.flags & ARM_SIGN) && Vars.SignPlus == false) encoding &= ~(1 << 23);
-		if ((Opcode.flags & ARM_ABS) && Vars.negative == true) encoding &= ~(1 << 23);
+		if ((Opcode.flags & ARM_SIGN) && !Vars.SignPlus) encoding &= ~(1 << 23);
+		if ((Opcode.flags & ARM_ABS) && Vars.negative) encoding &= ~(1 << 23);
 		if (Opcode.flags & ARM_IMMEDIATE)
 		{
 			int immediate = Vars.Immediate;
@@ -563,7 +563,7 @@ void CArmInstruction::Encode() const
 			encoding |= (immediate << 0);
 		} else if (Opcode.flags & ARM_REGISTER)	// ... means the opcocde uses shifts with immediates
 		{
-			if (Vars.Shift.UseShift == true)
+			if (Vars.Shift.UseShift)
 			{
 				encoding |= (shiftAmount << 7);
 				encoding |= (shiftType << 5);
@@ -572,11 +572,11 @@ void CArmInstruction::Encode() const
 		}
 		break;
 	case ARM_TYPE10:	// ARM.10: Halfword, Doubleword, and Signed Data Transfer
-		if (Vars.writeback == true) encoding |= (1 << 21);
+		if (Vars.writeback) encoding |= (1 << 21);
 		encoding |= (Vars.rn.num << 16);
 		encoding |= (Vars.rd.num << 12);
-		if ((Opcode.flags & ARM_SIGN) && Vars.SignPlus == false) encoding &= ~(1 << 23);
-		if ((Opcode.flags & ARM_ABS) && Vars.negative == true) encoding &= ~(1 << 23);
+		if ((Opcode.flags & ARM_SIGN) && !Vars.SignPlus) encoding &= ~(1 << 23);
+		if ((Opcode.flags & ARM_ABS) && Vars.negative) encoding &= ~(1 << 23);
 		if (Opcode.flags & ARM_IMMEDIATE)
 		{
 			int immediate = Vars.Immediate;
@@ -595,8 +595,8 @@ void CArmInstruction::Encode() const
 	case ARM_TYPE11:	// ARM.11: Block Data Transfer (LDM,STM)
 		if (Opcode.flags & ARM_LOAD) encoding |= (LdmModes[Vars.Opcode.a] << 23);
 		else if (Opcode.flags & ARM_STORE) encoding |= (StmModes[Vars.Opcode.a] << 23);
-		if (Vars.psr == true) encoding |= (1 << 22);
-		if (Vars.writeback == true) encoding |= (1 << 21);
+		if (Vars.psr) encoding |= (1 << 22);
+		if (Vars.writeback) encoding |= (1 << 21);
 		if (Opcode.flags & ARM_N) encoding |= (Vars.rn.num << 16);
 		encoding |= (Vars.rlist);
 		break;

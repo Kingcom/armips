@@ -33,7 +33,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 	if (optional && index >= parameters.size())
 		return true;
 
-	if (index >= parameters.size() || parameters[index].isInt() == false)
+	if (index >= parameters.size() || !parameters[index].isInt())
 	{
 		Logger::queueError(Logger::Error,L"Invalid parameter %d for %s: expecting integer",index+1,funcName);
 		return false;
@@ -49,7 +49,7 @@ bool getExpFuncParameter(const std::vector<ExpressionValue>& parameters, size_t 
 	if (optional && index >= parameters.size())
 		return true;
 
-	if (index >= parameters.size() || parameters[index].isString() == false)
+	if (index >= parameters.size() || !parameters[index].isString())
 	{
 		Logger::queueError(Logger::Error,L"Invalid parameter %d for %s: expecting string",index+1,funcName);
 		return false;
@@ -431,7 +431,7 @@ ExpressionValue expFuncRegExExtract(const std::wstring& funcName, const std::vec
 		std::wregex regex(*regexString);
 		std::wsmatch result;
 		bool found = std::regex_search(*source,result,regex);
-		if (found == false || (size_t)matchIndex >= result.size())
+		if (!found || (size_t)matchIndex >= result.size())
 		{
 			Logger::queueError(Logger::Error,L"Capture group index %d does not exist",matchIndex);
 			return ExpressionValue();
@@ -489,7 +489,7 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 	std::wstring fullName = getFullPathName(*fileName);
 
 	BinaryFile file;
-	if (file.open(fullName,BinaryFile::Read) == false)
+	if (!file.open(fullName,BinaryFile::Read))
 	{
 		Logger::queueError(Logger::Error,L"Could not open %s",*fileName);
 		return ExpressionValue();
@@ -524,7 +524,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 		length = totalSize-start;
 
 	BinaryFile file;
-	if (file.open(fullName,BinaryFile::Read) == false)
+	if (!file.open(fullName,BinaryFile::Read))
 	{
 		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
 		return ExpressionValue();

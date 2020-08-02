@@ -58,12 +58,12 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 			g_fileManager->closeFile();
 
 		validation.passes++;
-	} while (Revalidate == true);
+	} while (Revalidate);
 
 	Allocations::validateOverlap();
 
 	Logger::printQueue();
-	if (Logger::hasError() == true)
+	if (Logger::hasError())
 	{
 		return false;
 	}
@@ -196,7 +196,7 @@ bool runArmips(ArmipsArguments& settings)
 	{
 	case ArmipsMode::FILE:
 		Global.memoryMode = false;		
-		if (input.open(settings.inputFileName,TextFile::Read) == false)
+		if (!input.open(settings.inputFileName,TextFile::Read))
 		{
 			Logger::printError(Logger::Error,L"Could not open file");
 			return false;
@@ -213,7 +213,7 @@ bool runArmips(ArmipsArguments& settings)
 	Logger::printQueue();
 
 	bool result = !Logger::hasError();
-	if (result == true && content != nullptr)
+	if (result && content != nullptr)
 		result = encodeAssembly(std::move(content), symData, tempData);
 	
 	if (g_fileManager->hasOpenFile())

@@ -106,7 +106,7 @@ void SymbolData::writeNocashSym()
 	std::sort(entries.begin(),entries.end());
 	
 	TextFile file;
-	if (file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII) == false)
+	if (!file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII))
 	{
 		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName());
 		return;

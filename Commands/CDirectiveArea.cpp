@@ -40,7 +40,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 
 	if (positionExpression.isLoaded())
 	{
-		if (positionExpression.evaluateInteger(position) == false)
+		if (!positionExpression.evaluateInteger(position))
 		{
 			Logger::queueError(Logger::Error, L"Invalid position expression");
 			return false;
@@ -51,7 +51,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 	else
 		position = g_fileManager->getVirtualAddress();
 
-	if (sizeExpression.evaluateInteger(areaSize) == false)
+	if (!sizeExpression.evaluateInteger(areaSize))
 	{
 		Logger::queueError(Logger::Error,L"Invalid size expression");
 		return false;
@@ -65,7 +65,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 
 	if (fillExpression.isLoaded())
 	{
-		if (fillExpression.evaluateInteger(fillValue) == false)
+		if (!fillExpression.evaluateInteger(fillValue))
 		{
 			Logger::queueError(Logger::Error,L"Invalid fill expression");
 			return false;
@@ -230,7 +230,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	int64_t maxRange = -1;
 	if (minRangeExpression.isLoaded())
 	{
-		if (minRangeExpression.evaluateInteger(minRange) == false)
+		if (!minRangeExpression.evaluateInteger(minRange))
 		{
 			Logger::queueError(Logger::Error, L"Invalid range expression for .autoregion");
 			return false;
@@ -238,7 +238,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	}
 	if (maxRangeExpression.isLoaded())
 	{
-		if (maxRangeExpression.evaluateInteger(maxRange) == false)
+		if (!maxRangeExpression.evaluateInteger(maxRange))
 		{
 			Logger::queueError(Logger::Error, L"Invalid range expression for .autoregion");
 			return false;

@@ -68,13 +68,13 @@ const wchar_t* msgTemplate =
 std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 {
 	Expression text = parser.parseExpression();
-	if (text.isLoaded() == false)
+	if (!text.isLoaded())
 		return nullptr;
 
 	return parser.parseTemplate(msgTemplate, {
 		{ L"%after%", Global.symbolTable.getUniqueLabelName(true) },
 		{ L"%text%", text.toString() },
-		{ L"%alignment%", Arm.GetThumbMode() == true ? L"2" : L"4" }
+		{ L"%alignment%", Arm.GetThumbMode() ? L"2" : L"4" }
 	});
 }
 
@@ -113,7 +113,7 @@ bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const
 
 bool ArmParser::parseRegister(Parser& parser, ArmRegisterValue& dest, int max)
 {
-	if (parseRegisterTable(parser,dest,armRegisters,ARRAY_SIZE(armRegisters)) == false)
+	if (!parseRegisterTable(parser,dest,armRegisters,ARRAY_SIZE(armRegisters)))
 		return false;
 
 	return dest.num <= max;
@@ -136,14 +136,14 @@ bool ArmParser::parseRegisterList(Parser& parser, int& dest, int validMask)
 	dest = 0;
 	while (true)
 	{
-		if (parseRegister(parser,reg) == false)
+		if (!parseRegister(parser,reg))
 			return false;
 
 		if (parser.peekToken().type == TokenType::Minus)
 		{
 			parser.eatToken();
 
-			if (parseRegister(parser,reg2) == false || reg2.num < reg.num)
+			if (!parseRegister(parser,reg2) || reg2.num < reg.num)
 				return false;
 			
 			for (int i = reg.num; i <= reg2.num; i++)
@@ -270,7 +270,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	{
 		vars.Shift.ShiftExpression = createConstExpression(number);
 		vars.Shift.ShiftByRegister = false;
-	} else if (parseRegister(parser,vars.Shift.reg) == true)
+	} else if (parseRegister(parser,vars.Shift.reg))
 	{
 		if (immediateOnly)
 			return false;
@@ -280,7 +280,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 		if (parser.peekToken().type == TokenType::Hash)
 			parser.eatToken();
 		
-		if (parseImmediate(parser,vars.Shift.ShiftExpression) == false)
+		if (!parseImmediate(parser,vars.Shift.ShiftExpression))
 			return false;
 
 		vars.Shift.ShiftByRegister = false;
@@ -294,14 +294,14 @@ bool ArmParser::parsePseudoShift(Parser& parser, ArmOpcodeVariables& vars, int t
 {
 	vars.Shift.Type = type;
 
-	if (parseRegister(parser,vars.Shift.reg) == true)
+	if (parseRegister(parser,vars.Shift.reg))
 	{
 		vars.Shift.ShiftByRegister = true;
 	} else {
 		if (parser.peekToken().type == TokenType::Hash)
 			parser.eatToken();
 		
-		if (parseImmediate(parser,vars.Shift.ShiftExpression) == false)
+		if (!parseImmediate(parser,vars.Shift.ShiftExpression))
 			return false;
 
 		vars.Shift.ShiftByRegister = false;
@@ -649,11 +649,11 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 		if ((ArmOpcodes[z].flags & ARM_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
-		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars) == true)
+		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars))
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
-			if (parseArmParameters(parser,ArmOpcodes[z],vars) == true)
+			if (parseArmParameters(parser,ArmOpcodes[z],vars))
 			{
 				// success, return opcode
 				return std::make_unique<CArmInstruction>(ArmOpcodes[z],vars);
@@ -664,7 +664,7 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 		}
 	}
 
-	if (paramFail == true)
+	if (paramFail)
 		parser.printError(token,L"ARM parameter failure");
 	else
 		parser.printError(token,L"Invalid ARM opcode");
@@ -750,7 +750,7 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 			
-			if (parseThumbParameters(parser,ThumbOpcodes[z],vars) == true)
+			if (parseThumbParameters(parser,ThumbOpcodes[z],vars))
 			{
 				// success, return opcode
 				return std::make_unique<CThumbInstruction>(ThumbOpcodes[z],vars);
@@ -761,7 +761,7 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 		}
 	}
 
-	if (paramFail == true)
+	if (paramFail)
 		parser.printError(token,L"THUMB parameter failure in %S",stringValue);
 	else
 		parser.printError(token,L"Invalid THUMB opcode: %S",stringValue);

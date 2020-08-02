@@ -21,7 +21,7 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 {
 	std::wstring position;
 
-	if (Global.memoryMode == false && Global.FileInfo.FileList.size() > 0)
+	if (!Global.memoryMode && Global.FileInfo.FileList.size() > 0)
 	{
 		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
 		position = tfm::format(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
@@ -175,9 +175,9 @@ void Logger::printQueue()
 
 void TempData::start()
 {
-	if (file.getFileName().empty() == false)
+	if (!file.getFileName().empty())
 	{
-		if (file.open(TextFile::Write) == false)
+		if (!file.open(TextFile::Write))
 		{
 			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName());
 			return;

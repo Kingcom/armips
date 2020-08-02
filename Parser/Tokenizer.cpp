@@ -25,7 +25,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 	if (it == tokens.end())
 		return false;
 
-	while ((*it).checked == false)
+	while (!(*it).checked)
 	{
 		bool replaced = false;
 		if ((*it).type == TokenType::Identifier)
@@ -89,7 +89,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 			}
 		}
 
-		if (replaced == false)
+		if (!replaced)
 			(*it).checked = true;
 	}
 
@@ -98,7 +98,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 
 const Token& Tokenizer::nextToken()
 {
-	if (processElement(position.it) == false)
+	if (!processElement(position.it))
 		return invalidToken;
 
 	return *position.it++;
@@ -109,13 +109,13 @@ const Token& Tokenizer::peekToken(int ahead)
 	auto it = position.it;
 	for (int i = 0; i < ahead; i++)
 	{
-		if (processElement(it) == false)
+		if (!processElement(it))
 			return invalidToken;
 
 		it++;
 	}
 	
-	if (processElement(it) == false)
+	if (!processElement(it))
 		return invalidToken;
 
 	return *it;
@@ -125,7 +125,7 @@ void Tokenizer::eatTokens(int num)
 {
 	for (int i = 0; i < num; i++)
 	{
-		if (processElement(position.it) == false)
+		if (!processElement(position.it))
 			break;
 		position.it++;
 	}
@@ -228,17 +228,11 @@ inline bool isContinuation(const std::wstring& text, size_t pos)
 }
 
 inline bool isBlockComment(const std::wstring& text, size_t pos){
-	if (pos+1 < text.size() && text[pos+0] == '/' && text[pos+1] == '*')
-		return true;
-
-	return false;
+	return pos+1 < text.size() && text[pos+0] == '/' && text[pos+1] == '*';
 }
 
 inline bool isBlockCommentEnd(const std::wstring& text, size_t pos){
-	if (pos+1 < text.size() && text[pos+0] == '*' && text[pos+1] == '/')
-		return true;
-
-	return false;
+	return pos+1 < text.size() && text[pos+0] == '*' && text[pos+1] == '/';
 }
 
 void FileTokenizer::skipWhitespace()
@@ -584,7 +578,7 @@ Token FileTokenizer::loadToken()
 		if (!isFloat)
 		{
 			int64_t value;
-			if (convertInteger(start,end,value) == false)
+			if (!convertInteger(start,end,value))
 			{
 				createTokenCurrentString(TokenType::NumberString,end-start);
 				return std::move(token);
@@ -593,13 +587,13 @@ Token FileTokenizer::loadToken()
 			createToken(TokenType::Integer,end-start,value);
 		} else { // isFloat
 			double value;
-			if (isValid == false)
+			if (!isValid)
 			{
 				createToken(TokenType::Invalid,end-start,L"Invalid floating point number");
 				return std::move(token);
 			}
 
-			if (convertFloat(start,end,value) == false)
+			if (!convertFloat(start,end,value))
 			{
 				createTokenCurrentString(TokenType::NumberString,end-start);
 				return std::move(token);

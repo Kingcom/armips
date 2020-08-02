@@ -30,7 +30,7 @@ std::wstring getFolderNameFromPath(const std::wstring& src)
 
 std::wstring getFullPathName(const std::wstring& path)
 {
-	if (Global.relativeInclude == true)
+	if (Global.relativeInclude)
 	{
 		if (isAbsolutePath(path))
 		{

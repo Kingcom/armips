@@ -26,7 +26,7 @@ bool MipsMacroCommand::Validate(const ValidateState &state)
 
 	applyFileInfo();
 
-	if (IgnoreLoadDelay == false && Mips.GetDelaySlot() == true && (newMemoryPos-memoryPos) > 4
+	if (!IgnoreLoadDelay && Mips.GetDelaySlot() && (newMemoryPos-memoryPos) > 4
 		&& (macroFlags & MIPSM_DONTWARNDELAYSLOT) == 0)
 	{
 		Logger::queueError(Logger::Warning,L"Macro with multiple opcodes used inside a delay slot");

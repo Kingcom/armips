@@ -41,7 +41,7 @@ bool CDirectiveConditional::evaluate()
 	int64_t value;
 	if (expression.isLoaded())
 	{
-		if (expression.evaluateInteger(value) == false)
+		if (!expression.evaluateInteger(value))
 		{
 			Logger::queueError(Logger::Error,L"Invalid conditional expression");
 			return false;

@@ -56,7 +56,7 @@ void SymbolTable::setFileSectionValues(const std::wstring& symbol, int& file, in
 
 std::shared_ptr<Label> SymbolTable::getLabel(const std::wstring& symbol, int file, int section)
 {
-	if (isValidSymbolName(symbol) == false)
+	if (!isValidSymbolName(symbol))
 		return nullptr;
 
 	int actualSection = section;
@@ -88,7 +88,7 @@ std::shared_ptr<Label> SymbolTable::getLabel(const std::wstring& symbol, int fil
 
 bool SymbolTable::symbolExists(const std::wstring& symbol, int file, int section)
 {
-	if (isValidSymbolName(symbol) == false)
+	if (!isValidSymbolName(symbol))
 		return false;
 
 	setFileSectionValues(symbol,file,section);
@@ -137,7 +137,7 @@ bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
 
 bool SymbolTable::addEquation(const std::wstring& name, int file, int section, size_t referenceIndex)
 {
-	if (isValidSymbolName(name) == false)
+	if (!isValidSymbolName(name))
 		return false;
 
 	if (symbolExists(name,file,section))
@@ -190,7 +190,7 @@ void SymbolTable::addLabels(const std::vector<LabelDefinition>& labels)
 
 		label->setOriginalName(def.originalName);
 
-		if (isLocalSymbol(def.name) == false)
+		if (!isLocalSymbol(def.name))
 			Global.Section++;
 
 		label->setDefined(true);

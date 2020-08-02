@@ -60,7 +60,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 	Expression exp = parseExpression();
 	list.push_back(exp);
 
-	if (exp.isLoaded() == false)
+	if (!exp.isLoaded())
 	{
 		printError(start,L"Parameter failure");
 		getTokenizer()->skipLookahead();
@@ -74,7 +74,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 		exp = parseExpression();
 		list.push_back(exp);
 
-		if (exp.isLoaded() == false)
+		if (!exp.isLoaded())
 		{
 			printError(start,L"Parameter failure");
 			getTokenizer()->skipLookahead();
@@ -112,7 +112,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 	auto sequence = std::make_unique<CommandSequence>();
 
 	bool foundTermination = false;
-	while (atEnd() == false)
+	while (!atEnd())
 	{
 		const Token &next = peekToken();
 
@@ -144,7 +144,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 		std::unique_ptr<CAssemblerCommand> cmd = parseCommand();
 
 		// omit commands inside blocks that are trivially false
-		if (isInsideTrueBlock() == false)
+		if (!isInsideTrueBlock())
 		{
 			continue;
 		}
@@ -171,12 +171,12 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 std::unique_ptr<CAssemblerCommand> Parser::parseFile(TextFile& file, bool virtualFile)
 {
 	FileTokenizer tokenizer;
-	if (tokenizer.init(&file) == false)
+	if (!tokenizer.init(&file))
 		return nullptr;
 
 	std::unique_ptr<CAssemblerCommand> result = parse(&tokenizer,virtualFile,file.getFileName());
 
-	if (file.isFromMemory() == false)
+	if (!file.isFromMemory())
 		Global.FileInfo.TotalLineCount += file.getNumLines();
 
 	return result;
@@ -228,11 +228,11 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 
 		if (directive.flags & DIRECTIVE_DISABLED)
 			continue;
-		if ((directive.flags & DIRECTIVE_NOCASHOFF) && Global.nocash == true)
+		if ((directive.flags & DIRECTIVE_NOCASHOFF) && Global.nocash)
 			continue;
-		if ((directive.flags & DIRECTIVE_NOCASHON) && Global.nocash == false)
+		if ((directive.flags & DIRECTIVE_NOCASHON) && !Global.nocash)
 			continue;
-		if ((directive.flags & DIRECTIVE_NOTINMEMORY) && Global.memoryMode == true)
+		if ((directive.flags & DIRECTIVE_NOTINMEMORY) && Global.memoryMode)
 			continue;
 
 		if (directive.flags & DIRECTIVE_MIPSRESETDELAY)
@@ -242,7 +242,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 		std::unique_ptr<CAssemblerCommand> result = directive.function(*this,directive.flags);
 		if (result == nullptr)
 		{
-			if (hasError() == false)
+			if (!hasError())
 				printError(tok,L"Directive parameter failure");
 			return nullptr;
 		} else if (!(directive.flags & DIRECTIVE_MANUALSEPARATOR) && nextToken().type != TokenType::Separator)
@@ -282,7 +282,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virt
 	entry.tokenizer = tokenizer;
 	entry.virtualFile = virtualFile;
 
-	if (virtualFile == false && name.empty() == false)
+	if (!virtualFile && !name.empty())
 	{
 		entry.fileNum = (int) Global.FileInfo.FileList.size();
 		Global.FileInfo.FileList.push_back(name);
@@ -308,7 +308,7 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 	tok.init(&f);
 
 	TokenizerPosition start = tok.getPosition();
-	while (tok.atEnd() == false && tok.peekToken().type != TokenType::Separator)
+	while (!tok.atEnd() && tok.peekToken().type != TokenType::Separator)
 	{
 		const Token& token = tok.nextToken();
 		if (token.type == TokenType::Identifier && token.getStringValue() == name)
@@ -355,7 +355,7 @@ bool Parser::checkEquLabel()
 			eatTokens(pos+2);
 
 			// skip the equ if it's inside a false conditional block
-			if (isInsideTrueBlock() == false)
+			if (!isInsideTrueBlock())
 				return true;
 
 			// equs can't be inside blocks whose condition can only be
@@ -373,7 +373,7 @@ bool Parser::checkEquLabel()
 				return true;
 			}
 
-			if (Global.symbolTable.isValidSymbolName(name) == false)
+			if (!Global.symbolTable.isValidSymbolName(name))
 			{
 				printError(start,L"Invalid equation name \"%s\"",name);
 				return true;
@@ -419,21 +419,21 @@ bool Parser::checkMacroDefinition()
 	}
 
 	std::vector<Expression> parameters;
-	if (parseExpressionList(parameters,1,-1) == false)
+	if (!parseExpressionList(parameters,1,-1))
 		return false;
 
 	ParserMacro macro;
 	macro.counter = 0;
 
 	// load name
-	if (parameters[0].evaluateIdentifier(macro.name) == false)
+	if (!parameters[0].evaluateIdentifier(macro.name))
 		return false;
 
 	// load parameters
 	for (size_t i = 1; i < parameters.size(); i++)
 	{
 		std::wstring name;
-		if (parameters[i].evaluateIdentifier(name) == false)
+		if (!parameters[i].evaluateIdentifier(name))
 			return false;
 
 		macro.parameters.push_back(name);
@@ -449,7 +449,7 @@ bool Parser::checkMacroDefinition()
 
 	TokenizerPosition start = getTokenizer()->getPosition();
 	bool valid = false;
-	while (atEnd() == false)
+	while (!atEnd())
 	{
 		const Token& tok = nextToken();
 		if (tok.type == TokenType::Identifier && tok.getStringValue() == L".endmacro")
@@ -479,7 +479,7 @@ bool Parser::checkMacroDefinition()
 	}
 
 	// no .endmacro, not valid
-	if (valid == false)
+	if (!valid)
 	{
 		printError(first, L"Macro \"%s\" not terminated", macro.name);
 		return true;
@@ -536,7 +536,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 
 		TokenizerPosition startPos = getTokenizer()->getPosition();
 		Expression exp = parseExpression();
-		if (exp.isLoaded() == false)
+		if (!exp.isLoaded())
 		{
 			printError(start,L"Invalid macro argument expression");
 			return nullptr;
@@ -643,7 +643,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 		if (initializingMacro)
 			macroLabels.insert(name);
 		
-		if (Global.symbolTable.isValidSymbolName(name) == false)
+		if (!Global.symbolTable.isValidSymbolName(name))
 		{
 			printError(start,L"Invalid label name \"%s\"",name);
 			return nullptr;
@@ -678,7 +678,7 @@ void Parser::updateFileInfo()
 	{
 		size_t index = i-1;
 
-		if (entries[index].virtualFile == false && entries[index].fileNum != -1)
+		if (!entries[index].virtualFile && entries[index].fileNum != -1)
 		{
 			Global.FileInfo.FileNum = entries[index].fileNum;
 

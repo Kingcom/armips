@@ -15,13 +15,13 @@ TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding enco
 {
 	auto fullName = getFullPathName(fileName);
 
-	if (fileExists(fullName) == false)
+	if (!fileExists(fullName))
 	{
 		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
 		return;
 	}
 
-	if (table.load(fullName,encoding) == false)
+	if (!table.load(fullName,encoding))
 	{
 		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
 		return;
@@ -196,7 +196,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 void CDirectiveData::encodeSjis()
 {
 	static EncodingTable sjisTable;
-	if (sjisTable.isLoaded() == false)
+	if (!sjisTable.isLoaded())
 	{
 		unsigned char hexBuffer[2];
 		
@@ -280,7 +280,7 @@ void CDirectiveData::encodeNormal()
 				int64_t num = value.strValue[l];
 				normalData.push_back(num);
 
-				if (num >= 0x80 && hadNonAscii == false)
+				if (num >= 0x80 && !hadNonAscii)
 				{
 					Logger::printError(Logger::Warning,L"Non-ASCII character in data directive. Use .string instead");
 					hadNonAscii = true;

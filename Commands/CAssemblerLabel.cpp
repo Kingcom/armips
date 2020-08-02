@@ -12,7 +12,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 	this->defined = false;
 	this->label = nullptr;
 	
-	if (Global.symbolTable.isLocalSymbol(name) == false)	
+	if (!Global.symbolTable.isLocalSymbol(name))	
 		updateSection(++Global.Section);
 
 	label = Global.symbolTable.getLabel(name, FileNum, getSection());
@@ -43,7 +43,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 bool CAssemblerLabel::Validate(const ValidateState &state)
 {
 	bool result = false;
-	if (defined == false)
+	if (!defined)
 	{
 		if (label->isDefined())
 		{
@@ -63,7 +63,7 @@ bool CAssemblerLabel::Validate(const ValidateState &state)
 	if (labelValue.isLoaded())
 	{
 		// label value is given by expression
-		if (labelValue.evaluateInteger(virtualValue) == false)
+		if (!labelValue.evaluateInteger(virtualValue))
 		{
 			Logger::printError(Logger::Error, L"Invalid expression");
 			return result;
@@ -97,7 +97,7 @@ void CAssemblerLabel::Encode() const
 
 void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
-	if (Global.symbolTable.isGeneratedLabel(label->getName()) == false)
+	if (!Global.symbolTable.isGeneratedLabel(label->getName()))
 		tempData.writeLine(label->getValue(),tfm::format(L"%s:",label->getName()));
 }
 
