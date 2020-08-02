@@ -22,6 +22,7 @@ private:
 	int64_t contentSize;
 	Expression fillExpression;
 	int8_t fillValue;
+	int64_t fileID = 0;
 	Expression positionExpression;
 	std::unique_ptr<CAssemblerCommand> content;
 };
@@ -42,6 +43,7 @@ private:
 	int64_t resetPosition;
 	int64_t position;
 	int64_t contentSize;
+	int64_t fileID = 0;
 	Expression minRangeExpression;
 	Expression maxRangeExpression;
 	std::unique_ptr<CAssemblerCommand> content;

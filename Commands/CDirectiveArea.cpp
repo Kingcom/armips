@@ -97,9 +97,11 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 	if (areaSize != oldAreaSize || contentSize != oldContentSize)
 		result = true;
 
-	int64_t fileID = g_fileManager->getOpenFileID();
-	if ((oldPosition != position || areaSize == 0) && oldAreaSize != 0)
-		Allocations::forgetArea(fileID, oldPosition, oldAreaSize);
+	int64_t oldFileID = fileID;
+	fileID = g_fileManager->getOpenFileID();
+
+	if ((oldFileID != fileID || oldPosition != position || areaSize == 0) && oldAreaSize != 0)
+		Allocations::forgetArea(oldFileID, oldPosition, oldAreaSize);
 	if (areaSize != 0)
 		Allocations::setArea(fileID, position, areaSize, contentSize, fillExpression.isLoaded(), shared);
 
@@ -119,7 +121,6 @@ void CDirectiveArea::Encode() const
 
 	if (fillExpression.isLoaded())
 	{
-		int64_t fileID = g_fileManager->getOpenFileID();
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
 		if (subAreaUsage != 0)
 			g_fileManager->advanceMemory(subAreaUsage);
@@ -156,7 +157,6 @@ void CDirectiveArea::writeTempData(TempData& tempData) const
 
 	if (fillExpression.isLoaded() && !shared)
 	{
-		int64_t fileID = g_fileManager->getOpenFileID();
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
 		if (subAreaUsage != 0)
 			tempData.writeLine(position+contentSize, tfm::format(L".skip 0x%08llX",subAreaUsage));
@@ -176,7 +176,6 @@ void CDirectiveArea::writeSymData(SymbolData& symData) const
 
 	if (fillExpression.isLoaded())
 	{
-		int64_t fileID = g_fileManager->getOpenFileID();
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
 		symData.addData(position+contentSize+subAreaUsage,areaSize-contentSize-subAreaUsage,SymbolData::Data8);
 	}
@@ -245,7 +244,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 		}
 	}
 
-	int64_t fileID = g_fileManager->getOpenFileID();
+	fileID = g_fileManager->getOpenFileID();
 	if (!Allocations::allocateSubArea(fileID, position, minRange, maxRange, contentSize))
 	{
 		Logger::queueError(Logger::Error, L"No space available for .autoregion of size %d", contentSize);
