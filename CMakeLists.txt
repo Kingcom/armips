@@ -15,11 +15,11 @@ macro(check_compiler VARIABLE NAME)
 	endif()
 endmacro()
 
+check_compiler(CLANG "Clang")
+check_compiler(GCC "GNU")
+
 # Helper function to set common parameters for a target
 function(init_target TARGET_NAME)
-	check_compiler(CLANG "Clang")
-	check_compiler(GCC "GNU")
-
 	set_target_properties(${TARGET_NAME} PROPERTIES
 		CXX_STANDARD 17
 		CXX_STANDARD_REQUIRED TRUE
@@ -195,6 +195,20 @@ if (ARMIPS_PRECOMPILE_HEADERS)
 		<tinyformat.h>
 	)
 	set_source_files_properties(Util/FileSystem.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+
+	# Clang has an annoying bug when using precompiled headers where it outputs a reference to wmemchr when
+	# __builtin_wmemchr is used. wmemchr is an inline function, which usually gets optimized away. The only
+	# workaround seems to be to ensure that something generates a standalone wmemchr function... in other words,
+	# referencing it and preventing it to be optimized away. See also: https://bugs.llvm.org/show_bug.cgi?id=41226
+	if (CLANG AND MSVC)
+		set(CLANG_WMEMCHR_PATH ${CMAKE_CURRENT_BINARY_DIR}/clang_wmemchr.cpp)
+		file(GENERATE OUTPUT ${CLANG_WMEMCHR_PATH} CONTENT "#include <wchar.h>\nvoid armips_wmemchr_dummy() { wmemchr(L\"\", 0, 0); }")
+		set_source_files_properties(${CLANG_WMEMCHR_PATH} PROPERTIES
+			GENERATED TRUE
+			SKIP_PRECOMPILE_HEADERS ON
+			COMPILE_FLAGS "-Xclang -fno-inline-functions")
+		target_sources(armips PRIVATE ${CLANG_WMEMCHR_PATH})
+	endif()
 endif()
 
 # armips-bin
