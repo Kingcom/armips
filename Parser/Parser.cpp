@@ -270,7 +270,7 @@ bool Parser::matchToken(TokenType type, bool optional)
 	return nextToken().type == type;
 }
 
-std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name)
+std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virtualFile, const fs::path& name)
 {
 	if (entries.size() >= 150)
 	{
@@ -284,8 +284,8 @@ std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virt
 
 	if (!virtualFile && !name.empty())
 	{
-		entry.fileNum = (int) Global.FileInfo.FileList.size();
-		Global.FileInfo.FileList.push_back(name);
+		entry.fileNum = (int) Global.fileList.size();
+		Global.fileList.add(name);
 	} else {
 		entry.fileNum = -1;
 	}

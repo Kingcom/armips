@@ -56,7 +56,7 @@ struct PsxRelocatorFile
 class PsxRelocator
 {
 public:
-	bool init(const std::wstring& inputName);
+	bool init(const fs::path& inputName);
 	bool relocate(int& memoryAddress);
 	bool hasDataChanged() { return dataChanged; };
 	const ByteArray& getData() const { return outputData; };
@@ -75,7 +75,7 @@ private:
 class DirectivePsxObjImport: public CAssemblerCommand
 {
 public:
-	DirectivePsxObjImport(const std::wstring& fileName);
+	DirectivePsxObjImport(const fs::path& fileName);
 	~DirectivePsxObjImport() { };
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;

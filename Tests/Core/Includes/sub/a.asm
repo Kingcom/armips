@@ -1,0 +1,1 @@
+.notice "sub/a.asm"

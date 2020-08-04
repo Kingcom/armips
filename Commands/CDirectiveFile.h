@@ -3,6 +3,7 @@
 #include "Commands/CAssemblerCommand.h"
 #include "Core/ELF/ElfRelocator.h"
 #include "Core/Expression.h"
+#include "Util/FileSystem.h"
 
 class AssemblerFile;
 class GenericAssemblerFile;
@@ -13,9 +14,9 @@ public:
 	enum class Type { Invalid, Open, Create, Copy, Close };
 
 	CDirectiveFile();
-	void initOpen(const std::wstring& fileName, int64_t memory);
-	void initCreate(const std::wstring& fileName, int64_t memory);
-	void initCopy(const std::wstring& inputName, const std::wstring& outputName, int64_t memory);
+	void initOpen(const fs::path& fileName, int64_t memory);
+	void initCreate(const fs::path& fileName, int64_t memory);
+	void initCopy(const fs::path& inputName, const fs::path& outputName, int64_t memory);
 	void initClose();
 
 	bool Validate(const ValidateState &state) override;
@@ -49,7 +50,7 @@ private:
 class CDirectiveIncbin: public CAssemblerCommand
 {
 public:
-	CDirectiveIncbin(const std::wstring& fileName);
+	CDirectiveIncbin(const fs::path& fileName);
 	void setStart(Expression& exp) { startExpression = exp; };
 	void setSize(Expression& exp) { sizeExpression = exp; };
 
@@ -58,7 +59,7 @@ public:
 	void writeTempData(TempData& tempData) const override;
 	void writeSymData(SymbolData& symData) const override;
 private:
-	std::wstring fileName;
+	fs::path fileName;
 	int64_t fileSize;
 
 	Expression startExpression;
@@ -122,8 +123,8 @@ private:
 class DirectiveObjImport: public CAssemblerCommand
 {
 public:
-	DirectiveObjImport(const std::wstring& inputName);
-	DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName);
+	DirectiveObjImport(const fs::path& inputName);
+	DirectiveObjImport(const fs::path& inputName, const std::wstring& ctorName);
 	~DirectiveObjImport() { };
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;

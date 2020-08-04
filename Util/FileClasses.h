@@ -1,38 +1,11 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <list>
 #include <vector>
 
 #include <tinyformat.h>
-
-class BinaryFile
-{
-public:
-	enum Mode { Read, Write, ReadWrite };
-
-	BinaryFile();
-	~BinaryFile();
-
-	bool open(const std::wstring& fileName, Mode mode);
-	bool open(Mode mode);
-	bool isOpen() { return handle != nullptr; };
-	bool atEnd() { return isOpen() && mode != Write && ftell(handle) == size_; };
-	void setPos(long pos) { if (isOpen()) fseek(handle,pos,SEEK_SET); };
-	long pos() { return isOpen() ? ftell(handle) : -1; }
-	long size() { return size_; };
-	void close();
-	
-	void setFileName(const std::wstring& name) { fileName = name; };
-	const std::wstring& getFileName() { return fileName; };
-
-	size_t read(void* dest, size_t length);
-	size_t write(void* source, size_t length);
-private:
-	FILE* handle;
-	std::wstring fileName;
-	Mode mode;
-	long size_;
-};
 
 class TextFile
 {
@@ -43,9 +16,9 @@ public:
 	TextFile();
 	~TextFile();
 	void openMemory(const std::wstring& content);
-	bool open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding = GUESS);
+	bool open(const fs::path& fileName, Mode mode, Encoding defaultEncoding = GUESS);
 	bool open(Mode mode, Encoding defaultEncoding = GUESS);
-	bool isOpen() { return fromMemory || handle != nullptr; };
+	bool isOpen() { return fromMemory || stream.is_open(); };
 	bool atEnd() { return isOpen() && mode == Read && tell() >= size_; };
 	long size() { return size_; };
 	void close();
@@ -54,8 +27,8 @@ public:
 	bool isFromMemory() { return fromMemory; }
 	int getNumLines() { return lineCount; }
 
-	void setFileName(const std::wstring& name) { fileName = name; };
-	const std::wstring& getFileName() { return fileName; };
+	void setFileName(const fs::path& name) { fileName = name; };
+	const fs::path& getFileName() { return fileName; };
 
 	wchar_t readCharacter();
 	std::wstring readLine();
@@ -84,8 +57,8 @@ private:
 	long tell();
 	void seek(long pos);
 
-	FILE* handle;
-	std::wstring fileName;
+	fs::fstream stream;
+	fs::path fileName;
 	Encoding encoding;
 	Mode mode;
 	bool recursion;

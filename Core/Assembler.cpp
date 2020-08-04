@@ -14,8 +14,8 @@
 
 void AddFileName(const std::wstring& FileName)
 {
-	Global.FileInfo.FileNum = (int) Global.FileInfo.FileList.size();
-	Global.FileInfo.FileList.push_back(FileName);
+	Global.FileInfo.FileNum = (int) Global.fileList.size();
+	Global.fileList.add(FileName);
 	Global.FileInfo.LineNumber = 0;
 }
 
@@ -141,7 +141,6 @@ bool runArmips(ArmipsArguments& settings)
 	// initialize and reset global data
 	Global.Section = 0;
 	Global.nocash = false;
-	Global.FileInfo.FileCount = 0;
 	Global.FileInfo.TotalLineCount = 0;
 	Global.relativeInclude = false;
 	Global.multiThreading = true;
@@ -153,8 +152,7 @@ bool runArmips(ArmipsArguments& settings)
 	Global.Table.clear();
 	Global.symbolTable.clear();
 
-	Global.FileInfo.FileList.clear();
-	Global.FileInfo.FileCount = 0;
+	Global.fileList.clear();
 	Global.FileInfo.TotalLineCount = 0;
 	Global.FileInfo.LineNumber = 0;
 	Global.FileInfo.FileNum = 0;

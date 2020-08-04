@@ -28,18 +28,18 @@ public:
 	virtual bool hasFixedVirtualAddress() { return false; };
 	virtual void beginSymData(SymbolData& symData) { };
 	virtual void endSymData(SymbolData& symData) { };
-	virtual const std::wstring& getFileName() = 0;
+	virtual const fs::path& getFileName() = 0;
 };
 
 class GenericAssemblerFile: public AssemblerFile
 {
 public:
-	GenericAssemblerFile(const std::wstring& fileName, int64_t headerSize, bool overwrite);
-	GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int64_t headerSize);
+	GenericAssemblerFile(const fs::path& fileName, int64_t headerSize, bool overwrite);
+	GenericAssemblerFile(const fs::path& fileName, const fs::path& originalFileName, int64_t headerSize);
 
 	virtual bool open(bool onlyCheck);
-	virtual void close() { if (handle.isOpen()) handle.close(); };
-	virtual bool isOpen() { return handle.isOpen(); };
+	virtual void close() { if (stream.is_open()) stream.close(); };
+	virtual bool isOpen() { return stream.is_open(); };
 	virtual bool write(void* data, size_t length);
 	virtual int64_t getVirtualAddress() { return virtualAddress; };
 	virtual int64_t getPhysicalAddress() { return virtualAddress-headerSize; };
@@ -48,8 +48,8 @@ public:
 	virtual bool seekPhysical(int64_t physicalAddress);
 	virtual bool hasFixedVirtualAddress() { return true; };
 
-	virtual const std::wstring& getFileName() { return fileName; };
-	const std::wstring& getOriginalFileName() { return originalName; };
+	virtual const fs::path& getFileName() { return fileName; };
+	const fs::path& getOriginalFileName() { return originalName; };
 	int64_t getOriginalHeaderSize() { return originalHeaderSize; };
 	void setHeaderSize(int64_t size) { headerSize = size; };
 
@@ -60,9 +60,9 @@ private:
 	int64_t originalHeaderSize;
 	int64_t headerSize;
 	int64_t virtualAddress;
-	BinaryFile handle;
-	std::wstring fileName;
-	std::wstring originalName;
+	fs::ofstream stream;
+	fs::path fileName;
+	fs::path originalName;
 };
 
 

@@ -620,88 +620,10 @@ wchar_t sjisToUnicode(unsigned short SjisCharacter)
 	}
 }
 
-BinaryFile::BinaryFile()
-{
-	handle = nullptr;
-}
-
-BinaryFile::~BinaryFile()
-{
-	close();
-}
-
-bool BinaryFile::open(const std::wstring& fileName, Mode mode)
-{
-	setFileName(fileName);
-	return open(mode);
-}
-
-bool BinaryFile::open(Mode mode)
-{
-	if (isOpen())
-		close();
-
-	this->mode = mode;
-
-	// open all files as binary due to unicode
-	switch (mode)
-	{
-	case Read:
-		handle = openFile(fileName,OpenFileMode::ReadBinary);
-		break;
-	case Write:
-		handle = openFile(fileName,OpenFileMode::WriteBinary);
-		break;
-	case ReadWrite:
-		handle = openFile(fileName,OpenFileMode::ReadWriteBinary);
-		break;
-	default:
-		return false;
-	}
-
-	if (handle == nullptr)
-		return false;
-
-	if (mode != Write)
-	{
-		fseek(handle,0,SEEK_END);
-		size_ = ftell(handle);
-		fseek(handle,0,SEEK_SET);
-	}
-
-	return true;
-}
-
-void BinaryFile::close()
-{
-	if (isOpen())
-	{
-		fclose(handle);
-		handle = nullptr;
-	}
-}
-
-size_t BinaryFile::read(void* dest, size_t length)
-{
-	if (!isOpen() || mode == Write)
-		return 0;
-
-	return fread(dest,1,length,handle);
-}
-
-size_t BinaryFile::write(void* source, size_t length)
-{
-	if (!isOpen() || mode == Read)
-		return 0;
-
-	return fwrite(source,1,length,handle);
-}
-
 const size_t TEXTFILE_BUF_MAX_SIZE = 4096;
 
 TextFile::TextFile()
 {
-	handle = nullptr;
 	recursion = false;
 	errorRetrieved = false;
 	fromMemory = false;
@@ -725,7 +647,7 @@ void TextFile::openMemory(const std::wstring& content)
 	lineCount = 0;
 }
 
-bool TextFile::open(const std::wstring& fileName, Mode mode, Encoding defaultEncoding)
+bool TextFile::open(const fs::path& fileName, Mode mode, Encoding defaultEncoding)
 {
 	setFileName(fileName);
 	return open(mode,defaultEncoding);
@@ -748,11 +670,15 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 	switch (mode)
 	{
 	case Read:
-		handle = openFile(fileName,OpenFileMode::ReadBinary);
+		stream.open(fileName, fs::fstream::in | fs::fstream::binary);
+
+		if (!stream.is_open())
+			return false;
 		break;
 	case Write:
-		handle = openFile(fileName,OpenFileMode::WriteBinary);
-		if (handle == nullptr)
+		stream.open(fileName, fs::fstream::out | fs::fstream::binary | fs::fstream::trunc);
+
+		if (!stream.is_open())
 			return false;
 
 		buf.resize(TEXTFILE_BUF_MAX_SIZE);
@@ -762,57 +688,51 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 			writeCharacter(0xFEFF);
 		}
 		break;
-	default:
-		return false;
 	}
 
-	if (handle == nullptr)
-		return false;
-
 	// detect encoding
-	unsigned short num;
+	unsigned char numBuffer[3] = {0};
 	contentPos = 0;
 
 	if (mode == Read)
 	{
-		fseek(handle,0,SEEK_END);
-		size_ = ftell(handle);
-		fseek(handle,0,SEEK_SET);
+		size_ = fs::file_size(fileName);
 
-		if (fread(&num,2,1,handle) == 1)
+		stream.read(reinterpret_cast<char *>(numBuffer), 3);
+		switch (numBuffer[0] | (numBuffer[1] << 8))
 		{
-			switch (num)
+		case 0xFFFE:
+			encoding = UTF16BE;
+			stream.seekg(2);
+			contentPos = 2;
+			break;
+		case 0xFEFF:
+			encoding = UTF16LE;
+			stream.seekg(2);
+			contentPos = 2;
+			break;
+		case 0xBBEF:
+			if (numBuffer[2] == 0xBF)
 			{
-			case 0xFFFE:
-				encoding = UTF16BE;
-				contentPos += 2;
-				break;
-			case 0xFEFF:
-				encoding = UTF16LE;
-				contentPos += 2;
-				break;
-			case 0xBBEF:
-				if (fgetc(handle) == 0xBF)
-				{
-					encoding = UTF8;
-					contentPos += 3;
-					break;
-				} // fallthrough
-			default:
-				if (defaultEncoding == GUESS)
-				{
-					encoding = UTF8;
-					guessedEncoding = true;
-				}
-				fseek(handle,0,SEEK_SET);
+				encoding = UTF8;
+				contentPos = 3;
 				break;
 			}
-		} else {
+			[[fallthrough]];
+		default:
 			if (defaultEncoding == GUESS)
 			{
 				encoding = UTF8;
 				guessedEncoding = true;
 			}
+			stream.seekg(0);
+			break;
+		}
+	} else {
+		if (defaultEncoding == GUESS)
+		{
+			encoding = UTF8;
+			guessedEncoding = true;
 		}
 	}
 
@@ -824,8 +744,7 @@ void TextFile::close()
 	if (isOpen() && !fromMemory)
 	{
 		bufDrainWrite();
-		fclose(handle);
-		handle = nullptr;
+		stream.close();
 	}
 	bufPos = 0;
 }
@@ -840,7 +759,7 @@ void TextFile::seek(long pos)
 	if (fromMemory)
 		contentPos = pos;
 	else
-		fseek(handle,pos,SEEK_SET);
+		stream.seekg(pos);
 }
 
 void TextFile::bufFillRead()
@@ -848,9 +767,8 @@ void TextFile::bufFillRead()
 	assert(mode == Read);
 
 	buf.resize(TEXTFILE_BUF_MAX_SIZE);
-	size_t read = fread(&buf[0], 1, TEXTFILE_BUF_MAX_SIZE, handle);
-	buf.resize(read);
-
+	stream.read(&buf[0], TEXTFILE_BUF_MAX_SIZE);
+	buf.resize(stream.gcount());
 	bufPos = 0;
 }
 
@@ -984,7 +902,7 @@ void TextFile::bufPut(const void *p, const size_t len)
 	{
 		// Lots of data.  Let's write directly.
 		bufDrainWrite();
-		fwrite(p, 1, len, handle);
+		stream.write(reinterpret_cast<const char*>(p), len);
 	}
 	else
 	{
@@ -1008,7 +926,7 @@ void TextFile::bufPut(const char c)
 
 void TextFile::bufDrainWrite()
 {
-	fwrite(&buf[0], 1, bufPos, handle);
+	stream.write(buf.c_str(), bufPos);
 	bufPos = 0;
 }
 

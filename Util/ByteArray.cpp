@@ -138,40 +138,36 @@ ByteArray ByteArray::mid(size_t start, ssize_t length)
 	return ret;
 }
 
-ByteArray ByteArray::fromFile(const std::wstring& fileName, long start, size_t size)
+ByteArray ByteArray::fromFile(const fs::path& fileName, long start, size_t size)
 {
-	ByteArray ret;
-	
-	FILE* input = openFile(fileName,OpenFileMode::ReadBinary);
-	if (input == nullptr)
-		return ret;
+	fs::ifstream stream(fileName, fs::fstream::in | fs::fstream::binary);
+	if (!stream.is_open())
+		return {};
 
-	fseek(input,0,SEEK_END);
-	long fileSize = ftell(input);
-
+	auto fileSize = fs::file_size(fileName);
 	if (start >= fileSize)
-	{
-		fclose(input);
-		return ret;
-	}
+		return {};
 
 	if (size == 0 || start+(long)size > fileSize)
 		size = fileSize-start;
 
-	fseek(input,start,SEEK_SET);
+	stream.seekg(start);
 
+	ByteArray ret;
 	ret.grow(size);
-	ret.size_ = fread(ret.data(),1,size,input);
-	fclose(input);
+
+	stream.read(reinterpret_cast<char *>(ret.data()), size);
+	ret.size_ = stream.gcount();
 
 	return ret;
 }
 
-bool ByteArray::toFile(const std::wstring& fileName)
+bool ByteArray::toFile(const fs::path& fileName)
 {
-	FILE* output = openFile(fileName,OpenFileMode::WriteBinary);
-	if (output == nullptr) return false;
-	size_t length = fwrite(data_,1,size_,output);
-	fclose(output);
-	return length == size_;
+	fs::ofstream stream(fileName, fs::fstream::out | fs::fstream::binary | fs::fstream::trunc);
+	if (!stream.is_open())
+		return {};
+
+	stream.write(reinterpret_cast<const char *>(data_), size_);
+	return !stream.fail();
 }

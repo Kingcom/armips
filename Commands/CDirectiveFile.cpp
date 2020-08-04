@@ -6,6 +6,7 @@
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 #include "Util/FileClasses.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 #include <cstring>
@@ -20,10 +21,10 @@ CDirectiveFile::CDirectiveFile()
 	file = nullptr;
 }
 
-void CDirectiveFile::initOpen(const std::wstring& fileName, int64_t memory)
+void CDirectiveFile::initOpen(const fs::path& fileName, int64_t memory)
 {
 	type = Type::Open;
-	std::wstring fullName = getFullPathName(fileName);
+	fs::path fullName = getFullPathName(fileName);
 
 	file = std::make_shared<GenericAssemblerFile>(fullName,memory,false);
 	g_fileManager->addFile(file);
@@ -31,10 +32,10 @@ void CDirectiveFile::initOpen(const std::wstring& fileName, int64_t memory)
 	updateSection(++Global.Section);
 }
 
-void CDirectiveFile::initCreate(const std::wstring& fileName, int64_t memory)
+void CDirectiveFile::initCreate(const fs::path& fileName, int64_t memory)
 {
 	type = Type::Create;
-	std::wstring fullName = getFullPathName(fileName);
+	fs::path fullName = getFullPathName(fileName);
 
 	file = std::make_shared<GenericAssemblerFile>(fullName,memory,true);
 	g_fileManager->addFile(file);
@@ -42,11 +43,11 @@ void CDirectiveFile::initCreate(const std::wstring& fileName, int64_t memory)
 	updateSection(++Global.Section);
 }
 
-void CDirectiveFile::initCopy(const std::wstring& inputName, const std::wstring& outputName, int64_t memory)
+void CDirectiveFile::initCopy(const fs::path& inputName, const fs::path& outputName, int64_t memory)
 {
 	type = Type::Copy;
-	std::wstring fullInputName = getFullPathName(inputName);
-	std::wstring fullOutputName = getFullPathName(outputName);
+	fs::path fullInputName = getFullPathName(inputName);
+	fs::path fullOutputName = getFullPathName(outputName);
 	
 	file = std::make_shared<GenericAssemblerFile>(fullOutputName,fullInputName,memory);
 	g_fileManager->addFile(file);
@@ -217,17 +218,18 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 // CDirectiveIncbin
 //
 
-CDirectiveIncbin::CDirectiveIncbin(const std::wstring& fileName)
+CDirectiveIncbin::CDirectiveIncbin(const fs::path& fileName)
 	: size(0), start(0)
 {
 	this->fileName = getFullPathName(fileName);
-	
-	if (!fileExists(this->fileName))
+
+	if (!fs::exists(this->fileName))
 	{
 		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName);
 	}
 
-	this->fileSize = ::fileSize(this->fileName);
+	std::error_code error;
+	this->fileSize = static_cast<int64_t>(fs::file_size(fileName, error));
 }
 
 bool CDirectiveIncbin::Validate(const ValidateState &state)
@@ -280,7 +282,7 @@ void CDirectiveIncbin::Encode() const
 		ByteArray data = ByteArray::fromFile(fileName,(long)start,size);
 		if ((int) data.size() != size)
 		{
-			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName);
+			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName.wstring());
 			return;
 		}
 		g_fileManager->write(data.data(),data.size());
@@ -507,7 +509,7 @@ void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 // DirectiveObjImport
 //
 
-DirectiveObjImport::DirectiveObjImport(const std::wstring& inputName)
+DirectiveObjImport::DirectiveObjImport(const fs::path& inputName)
 {
 	ctor = nullptr;
 	if (rel.init(inputName))
@@ -516,7 +518,7 @@ DirectiveObjImport::DirectiveObjImport(const std::wstring& inputName)
 	}
 }
 
-DirectiveObjImport::DirectiveObjImport(const std::wstring& inputName, const std::wstring& ctorName)
+DirectiveObjImport::DirectiveObjImport(const fs::path& inputName, const std::wstring& ctorName)
 {
 	if (rel.init(inputName))
 	{

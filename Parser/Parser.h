@@ -81,7 +81,7 @@ protected:
 	void clearError() { error = false; }
 	std::unique_ptr<CAssemblerCommand> handleError();
 
-	std::unique_ptr<CAssemblerCommand> parse(Tokenizer* tokenizer, bool virtualFile, const std::wstring& name = L"");
+	std::unique_ptr<CAssemblerCommand> parse(Tokenizer* tokenizer, bool virtualFile, const fs::path& name = {});
 	std::unique_ptr<CAssemblerCommand> parseLabel();
 	bool checkEquLabel();
 	bool checkMacroDefinition();

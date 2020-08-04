@@ -349,7 +349,7 @@ void ElfFile::loadSectionHeader(Elf32_Shdr& header, ByteArray& data, size_t pos)
 	header.sh_entsize   = data.getDoubleWord(pos + 0x24, endianness);
 }
 
-bool ElfFile::load(const std::wstring& fileName, bool sort)
+bool ElfFile::load(const fs::path& fileName, bool sort)
 {
 	ByteArray data = ByteArray::fromFile(fileName);
 	if (data.size() == 0)
@@ -443,7 +443,7 @@ bool ElfFile::load(ByteArray& data, bool sort)
 	return true;
 }
 
-void ElfFile::save(const std::wstring&fileName)
+void ElfFile::save(const fs::path& fileName)
 {
 	fileData.clear();
 

@@ -15,6 +15,7 @@
 #include "Parser/ExpressionParser.h"
 #include "Parser/Parser.h"
 #include "Parser/Tokenizer.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 #include <algorithm>
@@ -665,11 +666,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 	if (!parser.parseExpressionList(parameters,1,2))
 		return nullptr;
 
-	std::wstring fileName;
-	if (!parameters[0].evaluateString(fileName,true))
+	std::wstring fileNameParameter;
+	if (!parameters[0].evaluateString(fileNameParameter,true))
 		return nullptr;
 
-	fileName = getFullPathName(fileName);
+	auto fileName = getFullPathName(fileNameParameter);
 
 	TextFile::Encoding encoding = TextFile::GUESS;
 	if (parameters.size() == 2)
@@ -686,7 +687,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 	if (!parser.isInsideTrueBlock())
 		return std::make_unique<DummyCommand>();
 
-	if (!fileExists(fileName))
+	if (!fs::exists(fileName))
 	{
 		parser.printError(start,L"Included file \"%s\" does not exist",fileName);
 		return nullptr;

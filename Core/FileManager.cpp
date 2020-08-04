@@ -2,6 +2,7 @@
 
 #include "Core/Common.h"
 #include "Core/Misc.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 inline uint64_t swapEndianness64(uint64_t value)
@@ -22,7 +23,7 @@ inline uint16_t swapEndianness16(uint16_t value)
 }
 
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t headerSize, bool overwrite)
+GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, int64_t headerSize, bool overwrite)
 {
 	this->fileName = fileName;
 	this->headerSize = headerSize;
@@ -31,7 +32,7 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, int64_t
 	mode = overwrite ? Create : Open;
 }
 
-GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const std::wstring& originalFileName, int64_t headerSize)
+GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, const fs::path& originalFileName, int64_t headerSize)
 {
 	this->fileName = fileName;
 	this->originalName = originalFileName;
@@ -43,18 +44,22 @@ GenericAssemblerFile::GenericAssemblerFile(const std::wstring& fileName, const s
 
 bool GenericAssemblerFile::open(bool onlyCheck)
 {
+	std::error_code errorCode;
+
 	headerSize = originalHeaderSize;
 	virtualAddress = headerSize;
+
+	auto flagsOpenExisting = fs::ofstream::in | fs::ofstream::out | fs::ofstream::binary;
+	auto flagsOverwrite = fs::ofstream::out | fs::ofstream::trunc | fs::ofstream::binary;
 
 	if (!onlyCheck)
 	{
 		// actually open the file
-		bool success;
 		switch (mode)
 		{
 		case Open:
-			success = handle.open(fileName,BinaryFile::ReadWrite);
-			if (!success)
+			stream.open(fileName, flagsOpenExisting);
+			if (!stream.is_open())
 			{
 				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName);
 				return false;
@@ -62,8 +67,8 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			return true;
 
 		case Create:
-			success = handle.open(fileName,BinaryFile::Write);
-			if (!success)
+			stream.open(fileName, flagsOverwrite);
+			if (!stream.is_open())
 			{
 				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
 				return false;
@@ -71,34 +76,30 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			return true;
 
 		case Copy:
-			success = copyFile(originalName,fileName);
-			if (!success)
+			if (!fs::copy_file(originalName, fileName, fs::copy_options::overwrite_existing, errorCode))
 			{
 				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName);
 				return false;
 			}
 
-			success = handle.open(fileName,BinaryFile::ReadWrite);
-			if (!success)
+			stream.open(fileName, flagsOpenExisting);
+			if (!stream.is_open())
 			{
 				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
 				return false;
 			}
 			return true;
-
-		default:
-			return false;
 		}
 	}
 
 	// else only check if it can be done, don't actually do it permanently
-	bool success, exists;
-	BinaryFile temp;
+	bool exists = false;
+	fs::ofstream temp;
 	switch (mode)
 	{
 	case Open:
-		success = temp.open(fileName,BinaryFile::ReadWrite);
-		if (!success)
+		temp.open(fileName, flagsOpenExisting);
+		if (!temp.is_open())
 		{
 			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName);
 			return false;
@@ -107,11 +108,11 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		return true;
 
 	case Create:
-		// if it exists, check if you can open it with read/write access
-		// otherwise open it with write access and remove it afterwards
-		exists = fileExists(fileName);
-		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
-		if (!success)
+		// open file with writee access. if it didn't exist before, remove it afterwards
+		exists = fs::exists(fileName);
+
+		temp.open(fileName, exists ? flagsOpenExisting : flagsOverwrite);
+		if (!temp.is_open())
 		{
 			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
 			return false;
@@ -119,14 +120,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.close();
 
 		if (!exists)
-			deleteFile(fileName);
+			fs::remove(fileName, errorCode);
 
 		return true;
 
 	case Copy:
 		// check original file
-		success = temp.open(originalName,BinaryFile::ReadWrite);
-		if (!success)
+		temp.open(originalName, flagsOpenExisting);
+		if (!temp.is_open())
 		{
 			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName);
 			return false;
@@ -134,23 +135,20 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.close();
 
 		// check new file, same as create
-		exists = fileExists(fileName);
-		success = temp.open(fileName,exists ? BinaryFile::ReadWrite : BinaryFile::Write);
-		if (!success)
+		exists = fs::exists(fileName);
+
+		temp.open(fileName, exists ? flagsOpenExisting : flagsOverwrite);
+		if (!temp.is_open())
 		{
 			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
 			return false;
 		}
 		temp.close();
-		
+
 		if (!exists)
-			deleteFile(fileName);
-
+			fs::remove(fileName, errorCode);
 		return true;
-
-	default:
-		return false;
-	};
+	}
 
 	return false;
 }
@@ -160,9 +158,9 @@ bool GenericAssemblerFile::write(void* data, size_t length)
 	if (!isOpen())
 		return false;
 
-	size_t len = handle.write(data,length);
-	virtualAddress += len;
-	return len == length;
+	stream.write(reinterpret_cast<const char *>( data ), length);
+	virtualAddress += length;
+	return !stream.fail();
 }
 
 bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
@@ -179,7 +177,7 @@ bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 	int64_t physicalAddress = virtualAddress-headerSize;
 
 	if (isOpen())
-		handle.setPos((long)physicalAddress);
+		stream.seekp(physicalAddress);
 
 	return true;
 }
@@ -197,7 +195,7 @@ bool GenericAssemblerFile::seekPhysical(int64_t physicalAddress)
 	virtualAddress = physicalAddress+headerSize;
 
 	if (isOpen())
-		handle.setPos((long)physicalAddress);
+		stream.seekp(physicalAddress);
 
 	return true;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <string>
 
 #include <sys/types.h>
@@ -109,8 +111,8 @@ public:
 	ByteArray left(size_t length) { return mid(0,length); };
 	ByteArray right(size_t length) { return mid(size_-length,length); };
 
-	static ByteArray fromFile(const std::wstring& fileName, long start = 0, size_t size = 0);
-	bool toFile(const std::wstring& fileName);
+	static ByteArray fromFile(const fs::path& fileName, long start = 0, size_t size = 0);
+	bool toFile(const fs::path& fileName);
 private:
 	void grow(size_t neededSize);
 	byte* data_;

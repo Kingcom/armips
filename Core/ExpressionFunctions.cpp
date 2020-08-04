@@ -5,6 +5,7 @@
 #include "Core/Expression.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 #include <cmath>
@@ -99,7 +100,7 @@ ExpressionValue expFuncOutputName(const std::wstring& funcName, const std::vecto
 		return ExpressionValue();
 	}
 
-	std::wstring value = file->getFileName();
+	std::wstring value = file->getFileName().wstring();
 	return ExpressionValue(value);
 }
 
@@ -108,8 +109,8 @@ ExpressionValue expFuncFileExists(const std::wstring& funcName, const std::vecto
 	const std::wstring* fileName;
 	GET_PARAM(parameters,0,fileName);
 
-	std::wstring fullName = getFullPathName(*fileName);
-	return ExpressionValue(fileExists(fullName) ? INT64_C(1) : INT64_C(0));
+	auto fullName = getFullPathName(*fileName);
+	return ExpressionValue(fs::exists(fullName) ? INT64_C(1) : INT64_C(0));
 }
 
 ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -117,8 +118,10 @@ ExpressionValue expFuncFileSize(const std::wstring& funcName, const std::vector<
 	const std::wstring* fileName;
 	GET_PARAM(parameters,0,fileName);
 
-	std::wstring fullName = getFullPathName(*fileName);
-	return ExpressionValue((int64_t) fileSize(fullName));
+	auto fullName = getFullPathName(*fileName);
+
+	std::error_code error;
+	return ExpressionValue(static_cast<int64_t>(fs::file_size(fullName, error)));
 }
 
 ExpressionValue expFuncToString(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
@@ -486,19 +489,26 @@ ExpressionValue expFuncRead(const std::wstring& funcName, const std::vector<Expr
 	GET_PARAM(parameters,0,fileName);
 	GET_OPTIONAL_PARAM(parameters,1,pos,0);
 
-	std::wstring fullName = getFullPathName(*fileName);
+	auto fullName = getFullPathName(*fileName);
 
-	BinaryFile file;
-	if (!file.open(fullName,BinaryFile::Read))
+	fs::ifstream file(fullName, fs::ifstream::in | fs::ifstream::binary);
+	if (!file.is_open())
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",*fileName);
+		Logger::queueError(Logger::Error, L"Could not open %s",*fileName);
 		return ExpressionValue();
 	}
 
-	file.setPos(pos);
+	file.seekg(pos);
+	if (file.eof() || file.fail())
+	{
+		Logger::queueError(Logger::Error, L"Invalid offset 0x%08X of %s", pos, *fileName);
+		return ExpressionValue();
+	}
 
 	T buffer;
-	if (file.read(&buffer, sizeof(T)) != sizeof(T))
+	file.read(reinterpret_cast<char*>(&buffer), sizeof(T));
+
+	if (file.fail())
 	{
 		Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", sizeof(T), pos, *fileName);
 		return ExpressionValue();
@@ -517,30 +527,44 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 	GET_OPTIONAL_PARAM(parameters,1,start,0);
 	GET_OPTIONAL_PARAM(parameters,2,length,0);
 
-	std::wstring fullName = getFullPathName(*fileName);
+	auto fullName = getFullPathName(*fileName);
 
-	int64_t totalSize = fileSize(fullName);
+	std::error_code error;
+	int64_t totalSize = static_cast<int64_t>(fs::file_size(fullName, error));
+
 	if (length == 0 || start+length > totalSize)
 		length = totalSize-start;
 
-	BinaryFile file;
-	if (!file.open(fullName,BinaryFile::Read))
+	fs::ifstream file(fullName, fs::ifstream::in | fs::ifstream::binary);
+	if (!file.is_open())
 	{
-		Logger::queueError(Logger::Error,L"Could not open %s",fileName);
+		Logger::queueError(Logger::Error, L"Could not open %s",*fileName);
 		return ExpressionValue();
 	}
 
-	file.setPos((long)start);
+	file.seekg(start);
+	if (file.eof() || file.fail())
+	{
+		Logger::queueError(Logger::Error, L"Invalid offset 0x%08X of %s", start, *fileName);
+		return ExpressionValue();
+	}
 
-	unsigned char buffer[1024];
+	char buffer[1024];
 	bool stringTerminated = false;
 	std::wstring result;
 
 	for (int64_t progress = 0; !stringTerminated && progress < length; progress += (int64_t) sizeof(buffer))
 	{
-		const size_t bytesRead = file.read(buffer, (size_t) std::min((int64_t) sizeof(buffer), length - progress));
+		auto bytesToRead = (size_t) std::min((int64_t) sizeof(buffer), length - progress);
 
-		for (size_t i = 0; i < bytesRead; i++)
+		file.read(buffer, bytesToRead);
+		if (file.fail())
+		{
+			Logger::queueError(Logger::Error, L"Failed to read %d byte(s) from offset 0x%08X of %s", bytesToRead, *fileName);
+			return ExpressionValue();
+		}
+
+		for (size_t i = 0; i < file.gcount(); i++)
 		{
 			if (buffer[i] == 0x00)
 			{
@@ -548,7 +572,7 @@ ExpressionValue expFuncReadAscii(const std::wstring& funcName, const std::vector
 				break;
 			}
 
-			if (buffer[i] < 0x20 || buffer[i] > 0x7F)
+			if (buffer[i] < 0x20)
 			{
 				Logger::printError(Logger::Warning, L"%s: Non-ASCII character", funcName);
 				return ExpressionValue();

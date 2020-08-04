@@ -4,6 +4,7 @@
 #include "Core/Assembler.h"
 #include "Core/Common.h"
 #include "Core/Misc.h"
+#include "Util/FileSystem.h"
 #include "Util/Util.h"
 
 static void printUsage(std::wstring executableName)
@@ -124,7 +125,10 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 			}
 			else if (arguments[argpos] == L"-root" && argpos + 1 < arguments.size())
 			{
-				if(!changeDirectory(arguments[argpos + 1]))
+				std::error_code errorCode;
+				fs::current_path(arguments[argpos + 1], errorCode);
+
+				if (errorCode)
 				{
 					Logger::printError(Logger::Error, L"Could not open directory \"%s\"", arguments[argpos + 1]);
 					return false;
@@ -172,7 +176,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 		}
 		else {
 			// only allow one input filename
-			if (settings.inputFileName == L"")
+			if (settings.inputFileName.empty())
 			{
 				settings.inputFileName = arguments[argpos];
 				argpos++;
@@ -186,7 +190,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 	}
 
 	// ensure input file was specified
-	if (settings.inputFileName == L"")
+	if (settings.inputFileName.empty())
 	{
 		if (arguments.size() > 1)
 			Logger::printError(Logger::Error, L"Missing input assembly file\n");
@@ -196,10 +200,10 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 	}
 
 	// turn input filename into an absolute path
-	if (settings.useAbsoluteFileNames && !isAbsolutePath(settings.inputFileName))
-		settings.inputFileName = tfm::format(L"%s/%s", getCurrentDirectory(), settings.inputFileName);
+	if (settings.useAbsoluteFileNames)
+		settings.inputFileName = fs::absolute(settings.inputFileName).lexically_normal();
 
-	if (!fileExists(settings.inputFileName))
+	if (!fs::exists(settings.inputFileName))
 	{
 		Logger::printError(Logger::Error, L"File \"%s\" not found", settings.inputFileName);
 		return false;

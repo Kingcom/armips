@@ -13,34 +13,79 @@ FileManager* g_fileManager = &fileManager;
 tGlobal Global;
 CArchitecture* Arch;
 
-std::wstring getFolderNameFromPath(const std::wstring& src)
+void FileList::add(const fs::path &path)
 {
-#ifdef _WIN32
-	size_t s = src.find_last_of(L"\\/");
-#else
-	size_t s = src.rfind(L"/");
-#endif
-	if (s == std::wstring::npos)
-	{
-		return L".";
-	}
-
-	return src.substr(0,s);
+	_entries.emplace_back(path);
 }
 
-std::wstring getFullPathName(const std::wstring& path)
+const fs::path &FileList::path(int fileIndex) const
 {
-	if (Global.relativeInclude)
+	return _entries[size_t(fileIndex)].path();
+}
+
+const fs::path &FileList::relative_path(int fileIndex) const
+{
+	return _entries[size_t(fileIndex)].relativePath();
+}
+
+const std::wstring &FileList::wstring(int fileIndex) const
+{
+	return _entries[size_t(fileIndex)].wstring();
+}
+
+const std::wstring &FileList::relativeWstring(int fileIndex) const
+{
+	return _entries[size_t(fileIndex)].relativeWstring();
+}
+
+size_t FileList::size() const
+{
+	return _entries.size();
+}
+
+void FileList::clear()
+{
+	_entries.clear();
+}
+
+FileList::Entry::Entry(const fs::path &path) :
+	_path(path),
+	_relativePath(path.lexically_proximate(fs::current_path())),
+	_string(_path.wstring()),
+	_relativeString(_relativePath.generic_wstring())
+{
+}
+
+const fs::path &FileList::Entry::path() const
+{
+	return _path;
+}
+
+const fs::path &FileList::Entry::relativePath() const
+{
+	return _relativePath;
+}
+
+const std::wstring &FileList::Entry::wstring() const
+{
+	return _string;
+}
+
+const std::wstring &FileList::Entry::relativeWstring() const
+{
+	return _relativeString;
+}
+
+fs::path getFullPathName(const fs::path& path)
+{
+	if (Global.relativeInclude && !path.is_absolute())
 	{
-		if (isAbsolutePath(path))
-		{
-			return path;
-		} else {
-			std::wstring source = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-			return getFolderNameFromPath(source) + L"/" + path;
-		}
-	} else {
-		return path;
+		const fs::path &source = Global.fileList.path(Global.FileInfo.FileNum);
+		return fs::absolute(source.parent_path() / path).lexically_normal();
+	}
+	else
+	{
+		return fs::absolute(path).lexically_normal();
 	}
 }
 

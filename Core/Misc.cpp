@@ -2,6 +2,7 @@
 
 #include "Core/Common.h"
 #include "Core/FileManager.h"
+#include "Util/FileSystem.h"
 
 #include <iostream>
 
@@ -21,10 +22,10 @@ std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
 {
 	std::wstring position;
 
-	if (!Global.memoryMode && Global.FileInfo.FileList.size() > 0)
+	if (!Global.memoryMode && Global.fileList.size() > 0)
 	{
-		std::wstring& fileName = Global.FileInfo.FileList[Global.FileInfo.FileNum];
-		position = tfm::format(L"%s(%d) ",fileName,Global.FileInfo.LineNumber);
+		const auto& fileName = Global.fileList.relativeWstring(Global.FileInfo.FileNum);
+		position = tfm::format(L"%s(%d) ", fileName, Global.FileInfo.LineNumber);
 	}
 
 	switch (type)
@@ -183,7 +184,7 @@ void TempData::start()
 			return;
 		}
 
-		size_t fileCount = Global.FileInfo.FileList.size();
+		size_t fileCount = Global.fileList.size();
 		size_t lineCount = Global.FileInfo.TotalLineCount;
 		size_t labelCount = Global.symbolTable.getLabelCount();
 		size_t equCount = Global.symbolTable.getEquationCount();
@@ -194,7 +195,7 @@ void TempData::start()
 		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
 		for (size_t i = 0; i < fileCount; i++)
 		{
-			file.writeFormat(L"; %S\n",Global.FileInfo.FileList[i]);
+			file.writeFormat(L"; %S\n",Global.fileList.wstring(i));
 		}
 		file.writeLine("");
 	}
@@ -217,7 +218,7 @@ void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
 			str += ' ';
 
 		str += tfm::format(L"; %S line %d",
-			Global.FileInfo.FileList[Global.FileInfo.FileNum],Global.FileInfo.LineNumber);
+			Global.fileList.wstring(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
 
 		file.writeLine(str);
 	}

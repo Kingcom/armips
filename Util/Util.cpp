@@ -2,19 +2,6 @@
 
 #include <sstream>
 
-#include <sys/stat.h>
-#ifdef _WIN32
-#include <shlwapi.h>
-#include <windows.h>
-#if defined(WINAPI_FAMILY) && defined(WINAPI_FAMILY_PARTITION)
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && WINAPI_FAMILY != WINAPI_FAMILY_DESKTOP_APP
-#define ARMIPS_WINDOWS_UWP
-#endif
-#endif
-#else
-#include <unistd.h>
-#endif
-
 std::wstring convertUtf8ToWString(const char* source)
 {
 	std::wstring result;
@@ -244,136 +231,6 @@ std::vector<std::wstring> splitString(const std::wstring& str, const wchar_t del
 	return result;
 }
 
-int64_t fileSize(const std::wstring& fileName)
-{
-#ifdef _WIN32
-	WIN32_FILE_ATTRIBUTE_DATA attr;
-	if (!GetFileAttributesEx(fileName.c_str(),GetFileExInfoStandard,&attr)
-		|| (attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-		return 0;
-	return ((int64_t) attr.nFileSizeHigh << 32) | (int64_t) attr.nFileSizeLow;
-#else	
-	std::string utf8 = convertWStringToUtf8(fileName);
-	struct stat fileStat;
-	int err = stat(utf8.c_str(),&fileStat);
-	if (0 != err)
-		return 0; 
-	return fileStat.st_size; 
-#endif
-}
-
-bool fileExists(const std::wstring& strFilename)
-{
-#ifdef _WIN32
-#ifdef ARMIPS_WINDOWS_UWP
-	return GetFileAttributes(strFilename.c_str()) != INVALID_FILE_ATTRIBUTES;
-#else
-	int OldMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-	bool success = GetFileAttributes(strFilename.c_str()) != INVALID_FILE_ATTRIBUTES;
-	SetErrorMode(OldMode);
-	return success;
-#endif
-#else
-	std::string utf8 = convertWStringToUtf8(strFilename);
-	struct stat stFileInfo;
-	int intStat = stat(utf8.c_str(),&stFileInfo);
-	return intStat == 0;
-#endif
-}
-
-bool copyFile(const std::wstring& existingFile, const std::wstring& newFile)
-{
-#ifdef _WIN32
-	return CopyFileW(existingFile.c_str(),newFile.c_str(),false) != FALSE;
-#else
-	unsigned char buffer[BUFSIZ];
-	bool error = false;
-
-	std::string existingUtf8 = convertWStringToUtf8(existingFile);
-	std::string newUtf8 = convertWStringToUtf8(newFile);
-
-	FILE* input = fopen(existingUtf8.c_str(),"rb");
-	FILE* output = fopen(newUtf8.c_str(),"wb");
-
-	if (input == nullptr || output == nullptr)
-		return false;
-
-	size_t n;
-	while ((n = fread(buffer,1,BUFSIZ,input)) > 0)
-	{
-		if (fwrite(buffer,1,n,output) != n)
-			error = true;
-	}
-
-	fclose(input);
-	fclose(output);
-	return !error;
-#endif
-}
-
-bool deleteFile(const std::wstring& fileName)
-{
-#ifdef _WIN32
-	return DeleteFileW(fileName.c_str()) != FALSE;
-#else
-	std::string utf8 = convertWStringToUtf8(fileName);
-	return unlink(utf8.c_str()) == 0;
-#endif
-}
-
-FILE* openFile(const std::wstring& fileName, OpenFileMode mode)
-{
-#ifdef _WIN32
-	switch (mode)
-	{
-	case OpenFileMode::ReadBinary:
-		return _wfopen(fileName.c_str(),L"rb");
-	case OpenFileMode::WriteBinary:
-		return _wfopen(fileName.c_str(),L"wb");
-	case OpenFileMode::ReadWriteBinary:
-		return _wfopen(fileName.c_str(),L"rb+");
-	}
-#else
-	std::string nameUtf8 = convertWStringToUtf8(fileName);
-	
-	switch (mode)
-	{
-	case OpenFileMode::ReadBinary:
-		return fopen(nameUtf8.c_str(),"rb");
-	case OpenFileMode::WriteBinary:
-		return fopen(nameUtf8.c_str(),"wb");
-	case OpenFileMode::ReadWriteBinary:
-		return fopen(nameUtf8.c_str(),"rb+");
-	}
-#endif
-
-	return nullptr;
-}
-
-std::wstring getCurrentDirectory()
-{
-#ifdef _WIN32
-	wchar_t dir[MAX_PATH];
-	_wgetcwd(dir,MAX_PATH-1);
-	return dir;
-#else
-	char* dir = getcwd(nullptr,0);
-	std::wstring result = convertUtf8ToWString(dir);
-	free(dir);
-	return result;
-#endif
-}
-
-bool changeDirectory(const std::wstring& dir)
-{
-#ifdef _WIN32
-	return _wchdir(dir.c_str()) == 0;
-#else
-	std::string utf8 = convertWStringToUtf8(dir);
-	return chdir(utf8.c_str()) == 0;
-#endif
-}
-
 std::wstring toWLowercase(const std::string& str)
 {
 	std::wstring result;
@@ -383,14 +240,6 @@ std::wstring toWLowercase(const std::string& str)
 	}
 
 	return result;
-}
-
-std::wstring getFileNameFromPath(const std::wstring& path)
-{
-	size_t n = path.find_last_of(L"/\\");
-	if (n == path.npos)
-		return path;
-	return path.substr(n);
 }
 
 size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue)
@@ -418,13 +267,4 @@ bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos)
 	}
 
 	return *value == 0;
-}
-
-bool isAbsolutePath(const std::wstring& path)
-{
-#ifdef _WIN32
-	return path.size() > 2 && (path[1] == ':' || (path[0] == '\\' && path[1] == '\\'));
-#else
-	return path.size() >= 1 && path[0] == '/';
-#endif
 }
