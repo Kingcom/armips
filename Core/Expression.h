@@ -52,6 +52,7 @@ struct ExpressionValue
 	ExpressionValue()
 	{
 		type = ExpressionValueType::Invalid;
+		intValue = 0;
 	}
 
 	ExpressionValue(int64_t value)
@@ -92,7 +93,7 @@ struct ExpressionValue
 		return type != ExpressionValueType::Invalid;
 	}
 
-	struct
+	union
 	{
 		int64_t intValue;
 		double floatValue;

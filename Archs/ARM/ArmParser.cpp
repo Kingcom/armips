@@ -238,12 +238,11 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	std::wstring stringValue = shiftMode.getStringValue();
 	
 	bool hasNumber = isNumber(stringValue.back());
-	int64_t number;
+	int64_t number = 0;
 
 	// handle modeXX syntax
 	if (hasNumber)
 	{
-		number = 0;
 		int64_t multiplier = 1;
 		while (isNumber(stringValue.back()))
 		{
