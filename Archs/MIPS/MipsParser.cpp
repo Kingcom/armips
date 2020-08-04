@@ -473,7 +473,8 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 	{
 	case 'r':					// transposed vector
 		reg.num |= (1 << 5);
-		std::swap(col,row);		// fallthrough
+		std::swap(col,row);
+		[[fallthrough]];
 	case 'c':					// vector	
 		reg.type = MipsRegisterType::VfpuVector;
 
@@ -500,7 +501,8 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 			return false;
 		break;
 	case 'e':					// transposed matrix
-		reg.num |= (1 << 5);	// fallthrough
+		reg.num |= (1 << 5);
+		[[fallthrough]];
 	case 'm':					// matrix
 		reg.type = MipsRegisterType::VfpuMatrix;
 
