@@ -5,8 +5,6 @@ option(ARMIPS_PRECOMPILE_HEADERS "Use precompiled headers" OFF)
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
 option(ARMIPS_USE_STD_FILESYSTEM "Use std::filesystem instead of third party implementation" OFF)
 
-add_subdirectory(ext/filesystem)
-
 macro(check_compiler VARIABLE NAME)
 	if (${CMAKE_CXX_COMPILER_ID} MATCHES ${NAME})
 		set(${VARIABLE} TRUE)
@@ -76,6 +74,7 @@ target_link_libraries(armips PUBLIC tinyformat)
 if (ARMIPS_USE_STD_FILESYSTEM)
 	target_compile_definitions(armips PUBLIC ARMIPS_USE_STD_FILESYSTEM)
 else()
+	add_subdirectory(ext/filesystem)
 	target_link_libraries(armips PUBLIC ghc_filesystem)
 endif()
 
