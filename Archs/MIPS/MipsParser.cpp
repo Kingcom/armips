@@ -258,7 +258,7 @@ bool MipsParser::parseRegister(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsRegisters,ARRAY_SIZE(mipsRegisters));
+	return parseRegisterTable(parser,dest,mipsRegisters, std::size(mipsRegisters));
 }
 
 bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
@@ -268,7 +268,7 @@ bool MipsParser::parseFpuRegister(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsFloatRegisters,ARRAY_SIZE(mipsFloatRegisters));
+	return parseRegisterTable(parser,dest,mipsFloatRegisters, std::size(mipsFloatRegisters));
 }
 
 bool MipsParser::parseFpuControlRegister(Parser& parser, MipsRegisterValue& dest)
@@ -278,7 +278,7 @@ bool MipsParser::parseFpuControlRegister(Parser& parser, MipsRegisterValue& dest
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsFpuControlRegisters,ARRAY_SIZE(mipsFpuControlRegisters));
+	return parseRegisterTable(parser,dest,mipsFpuControlRegisters, std::size(mipsFpuControlRegisters));
 }
 
 bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
@@ -288,13 +288,13 @@ bool MipsParser::parseCop0Register(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsCop0Registers,ARRAY_SIZE(mipsCop0Registers));
+	return parseRegisterTable(parser,dest,mipsCop0Registers, std::size(mipsCop0Registers));
 }
 
 bool MipsParser::parsePs2Cop2Register(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::Ps2Cop2;
-	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters,ARRAY_SIZE(mipsPs2Cop2FpRegisters));
+	return parseRegisterTable(parser,dest,mipsPs2Cop2FpRegisters, std::size(mipsPs2Cop2FpRegisters));
 }
 
 bool MipsParser::parsePsxCop2DataRegister(Parser& parser, MipsRegisterValue& dest)
@@ -304,7 +304,7 @@ bool MipsParser::parsePsxCop2DataRegister(Parser& parser, MipsRegisterValue& des
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsPsxCop2DataRegisters,ARRAY_SIZE(mipsPsxCop2DataRegisters));
+	return parseRegisterTable(parser,dest,mipsPsxCop2DataRegisters, std::size(mipsPsxCop2DataRegisters));
 }
 
 bool MipsParser::parsePsxCop2ControlRegister(Parser& parser, MipsRegisterValue& dest)
@@ -314,7 +314,7 @@ bool MipsParser::parsePsxCop2ControlRegister(Parser& parser, MipsRegisterValue& 
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsPsxCop2ControlRegisters,ARRAY_SIZE(mipsPsxCop2ControlRegisters));
+	return parseRegisterTable(parser,dest,mipsPsxCop2ControlRegisters, std::size(mipsPsxCop2ControlRegisters));
 }
 
 bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
@@ -324,7 +324,7 @@ bool MipsParser::parseRspCop0Register(Parser& parser, MipsRegisterValue& dest)
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsRspCop0Registers,ARRAY_SIZE(mipsRspCop0Registers));
+	return parseRegisterTable(parser,dest,mipsRspCop0Registers, std::size(mipsRspCop0Registers));
 }
 
 bool MipsParser::parseRspVectorControlRegister(Parser& parser, MipsRegisterValue& dest)
@@ -334,13 +334,13 @@ bool MipsParser::parseRspVectorControlRegister(Parser& parser, MipsRegisterValue
 	if (parseRegisterNumber(parser, dest, 32))
 		return true;
 
-	return parseRegisterTable(parser,dest,mipsRspVectorControlRegisters,ARRAY_SIZE(mipsRspVectorControlRegisters));
+	return parseRegisterTable(parser,dest,mipsRspVectorControlRegisters, std::size(mipsRspVectorControlRegisters));
 }
 
 bool MipsParser::parseRspVectorRegister(Parser& parser, MipsRegisterValue& dest)
 {
 	dest.type = MipsRegisterType::RspVector;
-	return parseRegisterTable(parser,dest,mipsRspVectorRegisters,ARRAY_SIZE(mipsRspVectorRegisters));
+	return parseRegisterTable(parser,dest,mipsRspVectorRegisters, std::size(mipsRspVectorRegisters));
 }
 
 bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
@@ -375,7 +375,7 @@ bool MipsParser::parseRspVectorElement(Parser& parser, MipsRegisterValue& dest)
 			std::transform(stringValue.begin(), stringValue.end(), stringValue.begin(), towlower);
 		}
 
-		for (size_t i = 0; i < ARRAY_SIZE(rspElementNames); i++)
+		for (size_t i = 0; i < std::size(rspElementNames); i++)
 		{
 			if (stringValue == rspElementNames[i].name)
 			{
@@ -839,7 +839,7 @@ bool MipsParser::parseVfpuCondition(Parser& parser, int& result)
 		return false;
 
 	const std::wstring stringValue = token.getStringValue();
-	for (size_t i = 0; i < ARRAY_SIZE(conditions); i++)
+	for (size_t i = 0; i <  std::size(conditions); i++)
 	{
 		if (stringValue == conditions[i])
 		{

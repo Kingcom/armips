@@ -22,7 +22,3 @@ std::vector<std::wstring> splitString(const std::wstring& str, const wchar_t del
 std::wstring toWLowercase(const std::string& str);
 size_t replaceAll(std::wstring& str, const wchar_t* oldValue,const std::wstring& newValue);
 bool startsWith(const std::wstring& str, const wchar_t* value, size_t stringPos = 0);
-
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof((x)) / sizeof((x)[0]))
-#endif

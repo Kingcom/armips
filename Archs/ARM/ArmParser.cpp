@@ -113,7 +113,7 @@ bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const
 
 bool ArmParser::parseRegister(Parser& parser, ArmRegisterValue& dest, int max)
 {
-	if (!parseRegisterTable(parser,dest,armRegisters,ARRAY_SIZE(armRegisters)))
+	if (!parseRegisterTable(parser,dest,armRegisters, std::size(armRegisters)))
 		return false;
 
 	return dest.num <= max;
@@ -121,12 +121,12 @@ bool ArmParser::parseRegister(Parser& parser, ArmRegisterValue& dest, int max)
 
 bool ArmParser::parseCopRegister(Parser& parser, ArmRegisterValue& dest)
 {
-	return parseRegisterTable(parser,dest,armCopRegisters,ARRAY_SIZE(armCopRegisters));
+	return parseRegisterTable(parser,dest,armCopRegisters, std::size(armCopRegisters));
 }
 
 bool ArmParser::parseCopNumber(Parser& parser, ArmRegisterValue& dest)
 {
-	return parseRegisterTable(parser,dest,armCopNumbers,ARRAY_SIZE(armCopNumbers));
+	return parseRegisterTable(parser,dest,armCopNumbers, std::size(armCopNumbers));
 }
 
 bool ArmParser::parseRegisterList(Parser& parser, int& dest, int validMask)
