@@ -23,7 +23,7 @@ function(init_target TARGET_NAME)
 		CXX_STANDARD_REQUIRED TRUE
 		CXX_EXTENSIONS FALSE)
 
-	target_include_directories(${TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+	target_include_directories(${TARGET_NAME} BEFORE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 	if (GCC OR CLANG)
 		# clang-cl seems to treat -Wall as -Weverything
