@@ -4,6 +4,7 @@ project(armips)
 option(ARMIPS_PRECOMPILE_HEADERS "Use precompiled headers" OFF)
 option(ARMIPS_REGEXP "Enable regexp expression functions" ON)
 option(ARMIPS_USE_STD_FILESYSTEM "Use std::filesystem instead of third party implementation" OFF)
+option(ARMIPS_LIBRARY_ONLY "Build libarmips, skip building armips and armipstests binaries" OFF)
 
 macro(check_compiler VARIABLE NAME)
 	if (${CMAKE_CXX_COMPILER_ID} MATCHES ${NAME})
@@ -210,37 +211,39 @@ if (ARMIPS_PRECOMPILE_HEADERS)
 	endif()
 endif()
 
-# armips-bin
-add_executable(armips-bin "")
-init_target(armips-bin)
-set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
-target_link_libraries(armips-bin PRIVATE armips)
+if(NOT ARMIPS_LIBRARY_ONLY)
+	# armips-bin
+	add_executable(armips-bin "")
+	init_target(armips-bin)
+	set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
+	target_link_libraries(armips-bin PRIVATE armips)
 
-armips_target_sources(armips-bin PRIVATE
-	Main/CommandLineInterface.cpp
-	Main/CommandLineInterface.h
-	Main/main.cpp
-	Main/Tests.cpp
-	Main/Tests.h
-)
+	armips_target_sources(armips-bin PRIVATE
+		Main/CommandLineInterface.cpp
+		Main/CommandLineInterface.h
+		Main/main.cpp
+		Main/Tests.cpp
+		Main/Tests.h
+	)
 
-# tests
-add_executable(armipstests "")
-init_target(armipstests)
-target_compile_definitions(armipstests PUBLIC ARMIPS_TESTS)
-target_link_libraries(armipstests PRIVATE armips)
+	# tests
+	add_executable(armipstests "")
+	init_target(armipstests)
+	target_compile_definitions(armipstests PUBLIC ARMIPS_TESTS)
+	target_link_libraries(armipstests PRIVATE armips)
 
-armips_target_sources(armipstests PRIVATE
-	Main/CommandLineInterface.cpp
-	Main/CommandLineInterface.h
-	Main/main.cpp
-	Main/Tests.cpp
-	Main/Tests.h
-)
+	armips_target_sources(armipstests PRIVATE
+		Main/CommandLineInterface.cpp
+		Main/CommandLineInterface.h
+		Main/main.cpp
+		Main/Tests.cpp
+		Main/Tests.h
+	)
 
-enable_testing()
-add_test(NAME armipstests COMMAND armipstests ${CMAKE_CURRENT_SOURCE_DIR}/Tests)
+	enable_testing()
+	add_test(NAME armipstests COMMAND armipstests ${CMAKE_CURRENT_SOURCE_DIR}/Tests)
 
-# install
-install(TARGETS armips-bin RUNTIME DESTINATION .)
-install(FILES Readme.md DESTINATION .)
+	# install
+	install(TARGETS armips-bin RUNTIME DESTINATION .)
+	install(FILES Readme.md DESTINATION .)
+endif()
