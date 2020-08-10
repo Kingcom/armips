@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 project(armips) 
 
 option(ARMIPS_PRECOMPILE_HEADERS "Use precompiled headers" OFF)
@@ -211,7 +211,7 @@ if (ARMIPS_PRECOMPILE_HEADERS)
 endif()
 
 # armips-bin
-add_executable(armips-bin)
+add_executable(armips-bin "")
 init_target(armips-bin)
 set_target_properties(armips-bin PROPERTIES OUTPUT_NAME armips)
 target_link_libraries(armips-bin PRIVATE armips)
@@ -225,7 +225,7 @@ armips_target_sources(armips-bin PRIVATE
 )
 
 # tests
-add_executable(armipstests)
+add_executable(armipstests "")
 init_target(armipstests)
 target_compile_definitions(armipstests PUBLIC ARMIPS_TESTS)
 target_link_libraries(armipstests PRIVATE armips)
