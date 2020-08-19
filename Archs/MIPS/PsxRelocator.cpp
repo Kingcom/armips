@@ -345,6 +345,27 @@ bool PsxRelocator::init(const fs::path& inputName)
 			return false;
 		}
 
+		// sort relocations
+		for (PsxSegment& seg: file.segments)
+		{
+			auto sortFunc = [](const PsxRelocation &a, const PsxRelocation &b)
+			{
+				// Sort in order of...
+				// - reference type - symbol or offset
+				// - reference id - this groups references to the same symbol/segment/?
+				// - referencePos - this ensure references to the same offset are grouped
+				// - type - this ensures that HI16 is before LO16
+				auto tie = [](const PsxRelocation &rel)
+				{
+					return std::tie(rel.refType, rel.referenceId, rel.referencePos, rel.type);
+				};
+
+				return tie(a) < tie(b);
+			};
+
+			std::stable_sort(seg.relocations.begin(), seg.relocations.end(), sortFunc);
+		}
+
 		// init symbols
 		for (PsxSymbol& sym: file.symbols)
 		{

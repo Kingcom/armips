@@ -17,11 +17,11 @@ struct PsxRelocation
 {
 	PsxRelocationType type;
 	PsxRelocationRefType refType;
-	int segmentOffset;
-	int referenceId;
-	int referencePos;
-	int relativeOffset;
-	int filePos;
+	int segmentOffset = 0;
+	int referenceId = 0;
+	int referencePos = 0;
+	int relativeOffset = 0;
+	int filePos = 0;
 };
 
 struct PsxSegment
