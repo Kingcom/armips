@@ -1,6 +1,7 @@
 #include "Parser/DirectivesParser.h"
 
 #include "Archs/ARM/Arm.h"
+#include "Archs/GB/Gameboy.h"
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CDirectiveArea.h"
@@ -445,6 +446,13 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int fla
 	return nullptr;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveGameboyArch(Parser& parser, int flags)
+{
+	Arch = &Gameboy;
+
+	return std::make_unique<ArchitectureCommand>(L".gb", L"");
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
@@ -775,7 +783,10 @@ const DirectiveMap directives = {
 	{ L".3ds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_3DS } },
 	{ L".arm.big",			{ &parseDirectiveArmArch,			DIRECTIVE_ARM_BIG } },
 	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
-	
+
+	{ L".gb",				{ &parseDirectiveGameboyArch,		0 } },
+	{ L".gbc",				{ &parseDirectiveGameboyArch,		0 } },
+
 	{ L".area",				{ &parseDirectiveArea,				0 } },
 	{ L".autoregion",		{ &parseDirectiveAutoRegion,		0 } },
 	{ L".region",			{ &parseDirectiveArea,				DIRECTIVE_AREA_SHARED } },

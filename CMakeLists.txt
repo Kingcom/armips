@@ -106,6 +106,15 @@ armips_target_sources(armips PRIVATE
 	Archs/ARM/ThumbOpcodes.cpp
 	Archs/ARM/ThumbOpcodes.h
 
+	Archs/GB/CGameboyInstruction.h
+	Archs/GB/CGameboyInstruction.cpp
+	Archs/GB/Gameboy.cpp
+	Archs/GB/Gameboy.h
+	Archs/GB/GameboyOpcodes.cpp
+	Archs/GB/GameboyOpcodes.h
+	Archs/GB/GameboyParser.cpp
+	Archs/GB/GameboyParser.h
+
 	Archs/MIPS/CMipsInstruction.cpp
 	Archs/MIPS/CMipsInstruction.h
 	Archs/MIPS/Mips.cpp
