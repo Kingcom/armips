@@ -10,6 +10,12 @@ struct GameboyOpcodeVariables
 	GameboyRegisterValue RightParam;
 	Expression ImmediateExpression;
 	int64_t Immediate;
+	unsigned char Length;
+	unsigned char Encoding;
+	bool IsNegative : 1;
+	bool WritePrefix : 1;
+	bool WriteImmediate8 : 1;
+	bool WriteImmediate16 : 1;
 };
 
 class CGameboyInstruction: public CAssemblerCommand

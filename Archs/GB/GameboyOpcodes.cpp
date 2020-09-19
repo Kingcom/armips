@@ -1,16 +1,31 @@
 #include "Archs/GB/GameboyOpcodes.h"
 
+// Order:
+// - Everything else
+// - SP_IMM
+// - MEMIMMEDIATE
+// - IMMEDIATE
 const tGameboyOpcode GameboyOpcodes[] = {
 	//	Name	Len	Encode	Left param				Right param				LShift	RShift	Flags
 	{ L"nop",	1,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
 	{ L"ld",	1,	0x40,	GB_PARAM_REG8_MEMHL,	GB_PARAM_REG8_MEMHL,	3,		0,		GB_LOAD_REG8_REG8 },
-	{ L"ld",	1,	0x0A,	GB_PARAM_A,				GB_PARAM_MEMBC_MEMDE,	-1,		4,		0 },
 	{ L"ld",	1,	0x02,	GB_PARAM_MEMBC_MEMDE,	GB_PARAM_A,				4,		-1,		0 },
+	{ L"ld",	1,	0x0A,	GB_PARAM_A,				GB_PARAM_MEMBC_MEMDE,	-1,		4,		0 },
+	{ L"ld",	1,	0x22,	GB_PARAM_HLI_HLD,		GB_PARAM_A,				4,		-1,		0 },
+	{ L"ld",	1,	0x2A,	GB_PARAM_A,				GB_PARAM_HLI_HLD,		-1,		4,		0 },
+	{ L"ld",	1,	0xE2,	GB_PARAM_FF00_C,		GB_PARAM_A,				-1,		-1,		0 },
+	{ L"ld",	1,	0xF2,	GB_PARAM_A,				GB_PARAM_FF00_C,		-1,		-1,		0 },
+	{ L"ld",	1,	0xF9,	GB_PARAM_SP,			GB_PARAM_HL,			-1,		-1,		0 },
+	{ L"ld",	2,	0xF8,	GB_PARAM_HL,			GB_PARAM_SP_IMM,		-1,		-1,		GB_IMMEDIATE_S8 },
+	{ L"ld",	3,	0xFA,	GB_PARAM_A,				GB_PARAM_MEMIMMEDIATE,	-1,		-1,		GB_IMMEDIATE_U16 },
 	{ L"ld",	2,	0x06,	GB_PARAM_REG8_MEMHL,	GB_PARAM_IMMEDIATE,		3,		-1,		GB_IMMEDIATE_U8 },
 	{ L"ld",	3,	0x01,	GB_PARAM_REG16,			GB_PARAM_IMMEDIATE,		4,		-1,		GB_IMMEDIATE_U16 },
 	{ L"ld",	3,	0x08,	GB_PARAM_MEMIMMEDIATE,	GB_PARAM_SP,			-1,		-1,		GB_IMMEDIATE_U16 },
-//	{ L"ldi",	1,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
-//	{ L"ldd",	1,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
+	{ L"ld",	3,	0xEA,	GB_PARAM_MEMIMMEDIATE,	GB_PARAM_A,				-1,		-1,		GB_IMMEDIATE_U16 },
+	{ L"ldi",	1,	0x22,	GB_PARAM_MEMHL,			GB_PARAM_A,				-1,		-1,		0 },
+	{ L"ldi",	1,	0x2A,	GB_PARAM_A,				GB_PARAM_MEMHL,			-1,		-1,		0 },
+	{ L"ldd",	1,	0x32,	GB_PARAM_MEMHL,			GB_PARAM_A,				-1,		-1,		0 },
+	{ L"ldd",	1,	0x3A,	GB_PARAM_A,				GB_PARAM_MEMHL,			-1,		-1,		0 },
 //	{ L"push",	1,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
 //	{ L"pop",	1,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
 //	{ L"add",	1,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },

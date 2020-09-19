@@ -13,6 +13,13 @@ CGameboyInstruction::CGameboyInstruction(const tGameboyOpcode& sourceOpcode, Gam
 
 bool CGameboyInstruction::Validate(const ValidateState& state)
 {
+	Vars.Length = Opcode.length;
+	Vars.Encoding = Opcode.encoding;
+	Vars.WritePrefix = Opcode.flags & GB_PREFIX;
+	Vars.WriteImmediate8 = Opcode.flags & (GB_IMMEDIATE_S8 | GB_IMMEDIATE_U8);
+	Vars.WriteImmediate16 = Opcode.flags & GB_IMMEDIATE_U16;
+
+	// ld (hl),(hl) equivalent to halt
 	if (Opcode.flags & GB_LOAD_REG8_REG8)
 	{
 		if (Vars.LeftParam.num == GB_REG8_MEMHL && Vars.RightParam.num == GB_REG8_MEMHL)
@@ -21,12 +28,18 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 			return false;
 		}
 	}
-	if (Opcode.flags & (GB_IMMEDIATE_S8 | GB_IMMEDIATE_U8 | GB_IMMEDIATE_U16))
+
+	// Evaluate immediate
+	if (Vars.WriteImmediate8 || Vars.WriteImmediate16)
 	{
-		ExpressionValue value = Vars.ImmediateExpression.evaluate();
-		if (value.isValid() && value.isInt())
+		if (!Vars.ImmediateExpression.evaluateInteger(Vars.Immediate))
 		{
-			Vars.Immediate = value.intValue;
+			Logger::queueError(Logger::Error, L"Invalid expression");
+			return false;
+		}
+		if (Vars.IsNegative)
+		{
+			Vars.Immediate = -Vars.Immediate;
 		}
 
 		int64_t min = 0;
@@ -35,16 +48,44 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		{
 			min = 0;
 			max = 255;
+			Vars.WriteImmediate8 = true;
+			Vars.WriteImmediate16 = false;
 		}
 		else if (Opcode.flags & GB_IMMEDIATE_S8)
 		{
 			min = -128;
 			max = 127;
+			Vars.WriteImmediate8 = true;
+			Vars.WriteImmediate16 = false;
 		}
 		else if (Opcode.flags & GB_IMMEDIATE_U16)
 		{
 			min = 0;
 			max = 65535;
+			Vars.WriteImmediate8 = false;
+			Vars.WriteImmediate16 = true;
+		}
+
+		// Special loads in range 0xFF00 - 0xFFFF
+		if (Vars.RightParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
+		{
+			// ld (0xFF00+u8),a can be encoded as E0 XX instead
+			Vars.Encoding = 0xE0;
+			Vars.Length = 2;
+			Vars.Immediate &= 0xFF;
+			Vars.RightParam.num = 0;
+			Vars.WriteImmediate8 = true;
+			Vars.WriteImmediate16 = false;
+		}
+		else if (Vars.LeftParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
+		{
+			// ld a,(0xFF00+u8) can be encoded as F0 XX instead
+			Vars.Encoding = 0xF0;
+			Vars.Length = 2;
+			Vars.Immediate &= 0xFF;
+			Vars.LeftParam.num = 0;
+			Vars.WriteImmediate8 = true;
+			Vars.WriteImmediate16 = false;
 		}
 
 		if (Vars.Immediate < min || Vars.Immediate > max)
@@ -54,16 +95,16 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		}
 	}
 
-	g_fileManager->advanceMemory(Opcode.length);
+	g_fileManager->advanceMemory(Vars.Length);
 
 	return false;
 }
 
 void CGameboyInstruction::Encode() const
 {
-	unsigned char encoding = Opcode.encoding;
+	unsigned char encoding = Vars.Encoding;
 
-	if (Opcode.flags & GB_PREFIX)
+	if (Vars.WritePrefix)
 	{
 		g_fileManager->writeU8(0xCB);
 	}
@@ -80,11 +121,11 @@ void CGameboyInstruction::Encode() const
 	g_fileManager->writeU8(encoding);
 
 
-	if (Opcode.flags & GB_IMMEDIATE_U16)
+	if (Vars.WriteImmediate16)
 	{
 		g_fileManager->writeU16((uint16_t)(Vars.Immediate & 0xFFFF));
 	}
-	else if (Opcode.flags & (GB_IMMEDIATE_U8 | GB_IMMEDIATE_S8))
+	else if (Vars.WriteImmediate8)
 	{
 		g_fileManager->writeU8((uint8_t)(Vars.Immediate & 0xFF));
 	}

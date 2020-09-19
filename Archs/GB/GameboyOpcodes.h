@@ -5,9 +5,14 @@
 #define GB_PARAM_MEMBC_MEMDE	0x02	// (bc), (de)
 #define GB_PARAM_REG8_MEMHL		0x03	// b, c, d, e, h, l, (hl), a
 #define GB_PARAM_REG16			0x04	// bc, de, hl, sp
-#define GB_PARAM_SP				0x05	// sp
-#define GB_PARAM_IMMEDIATE		0x06	// imm
-#define	GB_PARAM_MEMIMMEDIATE	0x07	// (imm)
+#define GB_PARAM_HL				0x05	// hl
+#define GB_PARAM_MEMHL			0x06	// (hl)
+#define GB_PARAM_HLI_HLD		0x07	// hli, hld, hl+, hl-
+#define GB_PARAM_SP				0x08	// sp
+#define GB_PARAM_IMMEDIATE		0x09	// imm
+#define	GB_PARAM_MEMIMMEDIATE	0x0A	// (imm)
+#define GB_PARAM_FF00_C			0x0B	// (0xFF00+c)
+#define GB_PARAM_SP_IMM			0x0C	// sp+s8
 
 #define GB_REG8_B				0x00	// b
 #define GB_REG8_C				0x01	// c
@@ -28,6 +33,8 @@
 #define GB_REG16_SP				0x03	// sp
 #define GB_REG16_BIT_ALL		( GB_REG_BIT(GB_REG16_BC) | GB_REG_BIT(GB_REG16_DE) \
 								| GB_REG_BIT(GB_REG16_HL) | GB_REG_BIT(GB_REG16_SP) )
+
+#define GB_REG_BIT_ALL			0xFFFFFFFF
 
 #define GB_PREFIX				0x00000001
 #define GB_IMMEDIATE_U8			0x00000002
