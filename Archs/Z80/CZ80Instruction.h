@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Archs/GB/Gameboy.h"
-#include "Archs/GB/GameboyOpcodes.h"
+#include "Archs/Z80/Z80.h"
+#include "Archs/Z80/Z80Opcodes.h"
 #include "Commands/CAssemblerCommand.h"
 
-struct GameboyOpcodeVariables
+struct Z80OpcodeVariables
 {
-	GameboyRegisterValue LeftParam;
-	GameboyRegisterValue RightParam;
+	Z80RegisterValue LeftParam;
+	Z80RegisterValue RightParam;
 	Expression ImmediateExpression;
 	int64_t Immediate;
 	unsigned char Length;
@@ -18,15 +18,15 @@ struct GameboyOpcodeVariables
 	bool WriteImmediate16 : 1;
 };
 
-class CGameboyInstruction: public CAssemblerCommand
+class CZ80Instruction: public CAssemblerCommand
 {
 public:
-	CGameboyInstruction(const tGameboyOpcode& sourceOpcode, GameboyOpcodeVariables& vars);
+	CZ80Instruction(const tZ80Opcode& sourceOpcode, Z80OpcodeVariables& vars);
 	bool Validate(const ValidateState& state) override;
 	void Encode() const override;
 	void writeTempData(TempData& tempData) const override;
 private:
-	GameboyOpcodeVariables Vars;
-	tGameboyOpcode Opcode;
+	Z80OpcodeVariables Vars;
+	tZ80Opcode Opcode;
 	int64_t RamPos;
 };

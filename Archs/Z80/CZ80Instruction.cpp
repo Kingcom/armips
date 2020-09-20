@@ -1,32 +1,32 @@
-#include "Archs/GB/CGameboyInstruction.h"
-#include "Archs/GB/GameboyOpcodes.h"
+#include "Archs/Z80/CZ80Instruction.h"
+#include "Archs/Z80/Z80Opcodes.h"
 #include "Core/Common.h"
 #include "Core/Expression.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Util/Util.h"
 
-CGameboyInstruction::CGameboyInstruction(const tGameboyOpcode& sourceOpcode, GameboyOpcodeVariables& vars)
+CZ80Instruction::CZ80Instruction(const tZ80Opcode& sourceOpcode, Z80OpcodeVariables& vars)
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
 	this->RamPos = 0;
 }
 
-bool CGameboyInstruction::Validate(const ValidateState& state)
+bool CZ80Instruction::Validate(const ValidateState& state)
 {
 	RamPos = g_fileManager->getVirtualAddress();
 
 	Vars.Length = Opcode.length;
 	Vars.Encoding = Opcode.encoding;
-	Vars.WritePrefix = Opcode.flags & GB_PREFIX;
+	Vars.WritePrefix = Opcode.flags & Z80_PREFIX_CB;
 	Vars.WriteImmediate8 = false;
 	Vars.WriteImmediate16 = false;
 
 	// ld (hl),(hl) equivalent to halt
-	if (Opcode.flags & GB_LOAD_REG8_REG8)
+	if (Opcode.flags & Z80_LOAD_REG8_REG8)
 	{
-		if (Vars.LeftParam.num == GB_REG8_MEMHL && Vars.RightParam.num == GB_REG8_MEMHL)
+		if (Vars.LeftParam.num == Z80_REG8_MEMHL && Vars.RightParam.num == Z80_REG8_MEMHL)
 		{
 			Logger::queueError(Logger::Error, L"ld (hl),(hl) not allowed");
 			return false;
@@ -34,7 +34,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 	}
 
 	// Evaluate immediate
-	if (Opcode.flags & GB_HAS_IMMEDIATE)
+	if (Opcode.flags & Z80_HAS_IMMEDIATE)
 	{
 		if (!Vars.ImmediateExpression.evaluateInteger(Vars.Immediate))
 		{
@@ -45,35 +45,35 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		{
 			Vars.Immediate = -Vars.Immediate;
 		}
-		if (Opcode.flags & GB_JUMP_RELATIVE)
+		if (Opcode.flags & Z80_JUMP_RELATIVE)
 		{
 			Vars.Immediate = (Vars.Immediate - RamPos - 2);
 		}
 
 		int64_t min = INT64_MIN;
 		int64_t max = INT64_MAX;
-		if (Opcode.flags & GB_IMMEDIATE_U3)
+		if (Opcode.flags & Z80_IMMEDIATE_U3)
 		{
 			min = 0;
 			max = 8;
 			Vars.WriteImmediate8 = false;
 			Vars.WriteImmediate16 = false;
 		}
-		if (Opcode.flags & GB_IMMEDIATE_U8)
+		if (Opcode.flags & Z80_IMMEDIATE_U8)
 		{
 			min = 0;
 			max = 255;
 			Vars.WriteImmediate8 = true;
 			Vars.WriteImmediate16 = false;
 		}
-		else if (Opcode.flags & GB_IMMEDIATE_S8)
+		else if (Opcode.flags & Z80_IMMEDIATE_S8)
 		{
 			min = -128;
 			max = 127;
 			Vars.WriteImmediate8 = true;
 			Vars.WriteImmediate16 = false;
 		}
-		else if (Opcode.flags & GB_IMMEDIATE_U16)
+		else if (Opcode.flags & Z80_IMMEDIATE_U16)
 		{
 			min = 0;
 			max = 65535;
@@ -82,19 +82,19 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		}
 
 		// add <-> sub
-		if ((Opcode.flags & GB_ADD_SUB_IMMEDIATE) && Vars.Immediate < 0)
+		if ((Opcode.flags & Z80_ADD_SUB_IMMEDIATE) && Vars.Immediate < 0)
 		{
 			// Change opcode
 			Vars.Encoding ^= 0x10;
 			Vars.Immediate = -Vars.Immediate;
 		}
-		if (Opcode.flags & GB_NEGATE_IMM)
+		if (Opcode.flags & Z80_NEGATE_IMM)
 		{
 			Vars.Immediate = -Vars.Immediate;
 		}
 
 		// Special loads in range 0xFF00 - 0xFFFF
-		if (!(Opcode.flags & GB_IMMEDIATE_U3) && Vars.RightParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
+		if (!(Opcode.flags & Z80_IMMEDIATE_U3) && Vars.RightParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00)
 		{
 			// ld (0xFF00+u8),a can be encoded as E0 XX instead
 			Vars.Encoding = 0xE0;
@@ -104,7 +104,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 			Vars.WriteImmediate8 = true;
 			Vars.WriteImmediate16 = false;
 		}
-		else if (Vars.LeftParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
+		else if (Vars.LeftParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00)
 		{
 			// ld a,(0xFF00+u8) can be encoded as F0 XX instead
 			Vars.Encoding = 0xF0;
@@ -117,7 +117,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 
 		if (Vars.Immediate < min || Vars.Immediate > max)
 		{
-			if (Opcode.flags & GB_JUMP_RELATIVE)
+			if (Opcode.flags & Z80_JUMP_RELATIVE)
 			{
 				Logger::queueError(Logger::Error, L"Jump target %04X out of range", Vars.Immediate);
 			}
@@ -127,7 +127,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 			}
 			return false;
 		}
-		if (Opcode.flags & GB_RST)
+		if (Opcode.flags & Z80_RST)
 		{
 			if (Vars.Immediate != 0x00 && Vars.Immediate != 0x08 && Vars.Immediate != 0x10 && Vars.Immediate != 0x18 &&
 				Vars.Immediate != 0x20 && Vars.Immediate != 0x28 && Vars.Immediate != 0x30 && Vars.Immediate != 0x38)
@@ -138,7 +138,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		}
 
 		// Move immediate to lhs
-		if (Opcode.flags & (GB_IMMEDIATE_U3 | GB_RST))
+		if (Opcode.flags & (Z80_IMMEDIATE_U3 | Z80_RST))
 		{
 			Vars.LeftParam.name = L"imm";
 			Vars.LeftParam.num = Vars.Immediate;
@@ -150,7 +150,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 	return false;
 }
 
-void CGameboyInstruction::Encode() const
+void CZ80Instruction::Encode() const
 {
 	unsigned char encoding = Vars.Encoding;
 
@@ -179,13 +179,13 @@ void CGameboyInstruction::Encode() const
 	{
 		g_fileManager->writeU8((uint8_t)(Vars.Immediate & 0xFF));
 	}
-	else if (Opcode.flags & GB_STOP)
+	else if (Opcode.flags & Z80_STOP)
 	{
 		g_fileManager->writeU8(0x00);
 	}
 }
 
-void CGameboyInstruction::writeTempData(TempData& tempData) const
+void CZ80Instruction::writeTempData(TempData& tempData) const
 {
 	char str[256];
 

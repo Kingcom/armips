@@ -4,16 +4,16 @@
 #include "Core/ELF/ElfRelocator.h"
 #include "Core/Expression.h"
 
-struct GameboyRegisterValue
+struct Z80RegisterValue
 {
 	std::wstring name;
 	int num;
 };
 
-class CGameboyArchitecture: public CArchitecture
+class CZ80Architecture: public CArchitecture
 {
 public:
-	CGameboyArchitecture();
+	CZ80Architecture();
 
 	virtual std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
 	virtual std::unique_ptr<CAssemblerCommand> parseOpcode(Parser& parser);
@@ -24,4 +24,4 @@ public:
 	virtual Endianness getEndianness() { return Endianness::Little; };
 };
 
-extern CGameboyArchitecture Gameboy;
+extern CZ80Architecture Z80;
