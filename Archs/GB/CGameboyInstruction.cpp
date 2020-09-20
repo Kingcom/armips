@@ -66,6 +66,38 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 			Vars.WriteImmediate16 = true;
 		}
 
+		// add <-> sub
+		if ((Opcode.flags & (GB_ADD_IMMEDIATE | GB_SUB_IMMEDIATE)) && Vars.Immediate < 0)
+		{
+			// Change opcode
+			Vars.Encoding ^= 0x10;
+			Vars.Immediate = -Vars.Immediate;
+		}
+		if (Opcode.flags & GB_NEGATE_IMM)
+		{
+			Vars.Immediate = -Vars.Immediate;
+		}
+		// add a,1 -> inc a
+		if ((Opcode.flags & GB_ADD_IMMEDIATE) && Vars.LeftParam.num == GB_REG8_A && Vars.Immediate == 1)
+		{
+			// Change opcode
+			Vars.Encoding = 0x3C;
+			Vars.Length = 1;
+			Vars.LeftParam.num = 0;
+			Vars.WriteImmediate8 = false;
+			Vars.WriteImmediate16 = false;
+		}
+		// sub a,1 -> dec a
+		if ((Opcode.flags & GB_SUB_IMMEDIATE) && Vars.LeftParam.num == GB_REG8_A && Vars.Immediate == 1)
+		{
+			// Change opcode
+			Vars.Encoding = 0x3D;
+			Vars.Length = 1;
+			Vars.LeftParam.num = 0;
+			Vars.WriteImmediate8 = false;
+			Vars.WriteImmediate16 = false;
+		}
+
 		// Special loads in range 0xFF00 - 0xFFFF
 		if (Vars.RightParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
 		{
