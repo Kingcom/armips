@@ -229,7 +229,7 @@
 	and	0x55
 	rst	4
 	add	sp, -0x56
-	jp	hl
+	jp	(hl)
 	ld	(0x1234), a
 	xor	0x55
 	rst	5
