@@ -30,8 +30,14 @@ const Z80RegisterDescriptor Z80HLIncDec16[] = {
 };
 
 const Z80RegisterDescriptor Z80Conds[] = {
-	{ L"nz", Z80_COND_NZ }, { L"z", Z80_COND_Z },
-	{ L"nc", Z80_COND_NC }, { L"c", Z80_COND_C },
+	{ L"nz", Z80_COND_NZ }, { L"z",  Z80_COND_Z },
+	{ L"nc", Z80_COND_NC }, { L"c",  Z80_COND_C },
+	{ L"po", Z80_COND_PO }, { L"pe", Z80_COND_PE },
+	{ L"p",  Z80_COND_P },  { L"m",  Z80_COND_M },
+};
+
+const Z80RegisterDescriptor Z80RegsIR[] = {
+	{ L"i", Z80_REG_I }, { L"r", Z80_REG_R },
 };
 
 const DirectiveMap Z80Directives = { };
@@ -76,9 +82,29 @@ bool Z80Parser::parseRegister16AF(Parser& parser, Z80RegisterValue& dest, int al
 	return parseRegisterTable(parser, dest, Z80Regs16AF, std::size(Z80Regs16AF), allowed);
 }
 
+bool Z80Parser::parseRegisterIR(Parser& parser, Z80RegisterValue& dest)
+{
+	return parseRegisterTable(parser, dest, Z80RegsIR, std::size(Z80RegsIR), Z80_REG_IR_ALL);
+}
+
+bool Z80Parser::parseAFPrime(Parser& parser)
+{
+	const Token &token = parser.nextToken();
+	CHECK(token.type == TokenType::Identifier);
+	CHECK(token.getStringValue() == L"af'");
+	
+	return true;
+}
+
 bool Z80Parser::parseCondition(Parser& parser, Z80RegisterValue& dest)
 {
-	return parseRegisterTable(parser, dest, Z80Conds, std::size(Z80Conds), Z80_REG_BIT_ALL);
+	int allowed = Z80_COND_BIT_ALL;
+	if (Z80.GetVersion() == Z80ArchType::Gameboy)
+	{
+		allowed = Z80_COND_BIT_GB;
+	}
+
+	return parseRegisterTable(parser, dest, Z80Conds, std::size(Z80Conds), allowed);
 }
 
 bool Z80Parser::parseHLIncDec(Parser& parser, Z80RegisterValue& dest)
@@ -109,6 +135,15 @@ bool Z80Parser::parseHLIncDec(Parser& parser, Z80RegisterValue& dest)
 
 	}
 
+	CHECK(parser.matchToken(TokenType::RParen));
+
+	return true;
+}
+
+bool Z80Parser::parseMemoryRegister8(Parser& parser, Z80RegisterValue& dest, int allowed)
+{
+	CHECK(parser.matchToken(TokenType::LParen));
+	CHECK(parseRegister8(parser, dest, allowed));
 	CHECK(parser.matchToken(TokenType::RParen));
 
 	return true;
@@ -193,22 +228,38 @@ bool Z80Parser::parseOpcodeParameter(Parser& parser, unsigned char paramType, Z8
 			return true;
 		}
 		return false;
+	case Z80_PARAM_REG8:
+		return parseRegister8(parser, destReg, Z80_REG8_BIT_ALL);
 	case Z80_PARAM_REG16_SP:
 		return parseRegister16SP(parser, destReg, Z80_REG16_BIT_ALL);
 	case Z80_PARAM_REG16_AF:
 		return parseRegister16AF(parser, destReg, Z80_REG16_BIT_ALL);
 	case Z80_PARAM_A:
 		return parseRegister8(parser, destReg, Z80_REG_BIT(Z80_REG8_A));
+	case Z80_PARAM_MEMC:
+		return parseMemoryRegister8(parser, destReg, Z80_REG_BIT(Z80_REG8_C));
 	case Z80_PARAM_MEMBC_MEMDE:
 		return parseMemoryRegister16(parser, destReg, Z80_REG_BIT(Z80_REG16_BC) | Z80_REG_BIT(Z80_REG16_DE));
 	case Z80_PARAM_HL:
 		return parseRegister16SP(parser, destReg, Z80_REG_BIT(Z80_REG16_HL));
 	case Z80_PARAM_MEMHL:
 		return parseMemoryRegister16(parser, destReg, Z80_REG_BIT(Z80_REG16_HL));
+	case Z80_PARAM_MEMSP:
+		return parseMemoryRegister16(parser, destReg, Z80_REG_BIT(Z80_REG16_SP));
 	case Z80_PARAM_HLI_HLD:
 		return parseHLIncDec(parser, destReg);
+	case Z80_PARAM_DE:
+		return parseRegister16AF(parser, destReg, Z80_REG_BIT(Z80_REG16_DE));
 	case Z80_PARAM_SP:
 		return parseRegister16SP(parser, destReg, Z80_REG_BIT(Z80_REG16_SP));
+	case Z80_PARAM_AF:
+		return parseRegister16AF(parser, destReg, Z80_REG_BIT(Z80_REG16_AF));
+	case Z80_PARAM_BC_DE_SP:
+		return parseRegister16SP(parser, destReg, Z80_REG_BIT(Z80_REG16_BC) | Z80_REG_BIT(Z80_REG16_DE) | Z80_REG_BIT(Z80_REG16_SP));
+	case Z80_PARAM_IR:
+		return parseRegisterIR(parser, destReg);
+	case Z80_PARAM_AF_PRIME:
+		return parseAFPrime(parser);
 	case Z80_PARAM_IMMEDIATE:
 		destImm = parser.parseExpression();
 		return destImm.isLoaded();
@@ -255,7 +306,9 @@ std::unique_ptr<CZ80Instruction> Z80Parser::parseOpcode(Parser& parser)
 	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; Z80Opcodes[z].name != nullptr; z++)
 	{
-		if ((Z80Opcodes[z].flags & Z80_GAMEBOY) && Z80.GetVersion() != ZARCH_GAMEBOY)
+		if ((Z80Opcodes[z].flags & Z80_Z80) && Z80.GetVersion() != Z80ArchType::Z80)
+			continue;
+		if ((Z80Opcodes[z].flags & Z80_GAMEBOY) && Z80.GetVersion() != Z80ArchType::Gameboy)
 			continue;
 
 		if (stringValue == Z80Opcodes[z].name)
@@ -274,9 +327,9 @@ std::unique_ptr<CZ80Instruction> Z80Parser::parseOpcode(Parser& parser)
 	}
 
 	if (paramFail)
-		parser.printError(token, L"Z80 parameter failure in %S", stringValue);
+		parser.printError(token, L"%s parameter failure in %S", Z80.GetName(), stringValue);
 	else
-		parser.printError(token, L"Invalid Z80 opcode: %S", stringValue);
+		parser.printError(token, L"Invalid %s opcode: %S", Z80.GetName(), stringValue);
 
 	return nullptr;
 }

@@ -126,15 +126,6 @@ bool SymbolTable::isValidSymbolName(const std::wstring& symbol)
 	return true;
 }
 
-bool SymbolTable::isValidSymbolCharacter(wchar_t character, bool first)
-{
-	if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) return true;
-	if (!first && (character >= '0' && character <= '9')) return true;
-	if (character == '_' || character == '.') return true;
-	if (character == '@') return true;
-	return false;
-}
-
 bool SymbolTable::addEquation(const std::wstring& name, int file, int section, size_t referenceIndex)
 {
 	if (!isValidSymbolName(name))

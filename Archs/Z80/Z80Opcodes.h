@@ -15,6 +15,14 @@
 #define Z80_PARAM_FF00_C		0x0C	// (0xFF00+c)
 #define Z80_PARAM_SP_IMM		0x0D	// sp+s8
 #define Z80_PARAM_CONDITION		0x0E	// nz, z, nc, c
+#define Z80_PARAM_AF			0x0F	// af
+#define Z80_PARAM_AF_PRIME		0x10	// af'
+#define Z80_PARAM_MEMSP			0x11	// (sp)
+#define Z80_PARAM_DE			0x12	// de
+#define Z80_PARAM_REG8			0x13	// b, c, d, e, h, l, a
+#define Z80_PARAM_MEMC			0x14	// (c)
+#define Z80_PARAM_BC_DE_SP		0x15	// bc, de, sp
+#define Z80_PARAM_IR			0x16	// i, r
 
 #define Z80_REG8_B				0x00	// b
 #define Z80_REG8_C				0x01	// c
@@ -42,6 +50,20 @@
 #define Z80_COND_Z				0x01	// z
 #define Z80_COND_NC				0x02	// nc
 #define Z80_COND_C				0x03	// c
+#define Z80_COND_PO				0x04	// po
+#define Z80_COND_PE				0x05	// pe
+#define Z80_COND_P				0x06	// p
+#define Z80_COND_M				0x07	// m
+#define Z80_COND_BIT_ALL		( Z80_REG_BIT(Z80_COND_NZ) | Z80_REG_BIT(Z80_COND_Z)  \
+								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  \
+								| Z80_REG_BIT(Z80_COND_PO) | Z80_REG_BIT(Z80_COND_PE) \
+								| Z80_REG_BIT(Z80_COND_P)  | Z80_REG_BIT(Z80_COND_M)  )
+#define Z80_COND_BIT_GB			( Z80_REG_BIT(Z80_COND_NZ) | Z80_REG_BIT(Z80_COND_Z)  \
+								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  )
+
+#define Z80_REG_I				0x00	// i
+#define Z80_REG_R				0x01	// r
+#define Z80_REG_IR_ALL			( Z80_REG_BIT(Z80_REG_I) | Z80_REG_BIT(Z80_REG_R) )
 
 #define Z80_REG_BIT_ALL			0xFFFFFFFF
 
@@ -57,9 +79,13 @@
 #define Z80_NEGATE_IMM			0x00000200
 #define Z80_JUMP_RELATIVE		0x00000400
 #define Z80_GAMEBOY				0x00000800
+#define Z80_Z80					0x00001000
+#define Z80_PREFIX_ED			0x00002000
+#define Z80_INTERRUPT_MODE		0x00004000
 
 #define Z80_HAS_IMMEDIATE		( Z80_IMMEDIATE_U3 | Z80_IMMEDIATE_U8 | Z80_IMMEDIATE_S8 \
-								| Z80_IMMEDIATE_U16 | Z80_RST | Z80_JUMP_RELATIVE )
+								| Z80_IMMEDIATE_U16 | Z80_RST | Z80_JUMP_RELATIVE \
+								| Z80_INTERRUPT_MODE )
 
 #define Z80_REG_BIT(reg) (1 << reg)
 
@@ -68,8 +94,8 @@ struct tZ80Opcode
 	const wchar_t* name;
 	unsigned char length;
 	unsigned char encoding;
-	unsigned char lhs : 4;
-	unsigned char rhs : 4;
+	unsigned char lhs;
+	unsigned char rhs;
 	char lhsShift : 4;
 	char rhsShift : 4;
 	int flags;

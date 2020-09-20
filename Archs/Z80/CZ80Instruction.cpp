@@ -19,7 +19,6 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 
 	Vars.Length = Opcode.length;
 	Vars.Encoding = Opcode.encoding;
-	Vars.WritePrefix = Opcode.flags & Z80_PREFIX_CB;
 	Vars.WriteImmediate8 = false;
 	Vars.WriteImmediate16 = false;
 
@@ -52,32 +51,34 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 
 		int64_t min = INT64_MIN;
 		int64_t max = INT64_MAX;
-		if (Opcode.flags & Z80_IMMEDIATE_U3)
+		Vars.WriteImmediate8 = false;
+		Vars.WriteImmediate16 = false;
+		if (Opcode.flags & Z80_INTERRUPT_MODE)
+		{
+			min = 0;
+			max = 2;
+		}
+		else if (Opcode.flags & Z80_IMMEDIATE_U3)
 		{
 			min = 0;
 			max = 8;
-			Vars.WriteImmediate8 = false;
-			Vars.WriteImmediate16 = false;
 		}
-		if (Opcode.flags & Z80_IMMEDIATE_U8)
+		else if (Opcode.flags & Z80_IMMEDIATE_U8)
 		{
 			min = 0;
 			max = 255;
 			Vars.WriteImmediate8 = true;
-			Vars.WriteImmediate16 = false;
 		}
 		else if (Opcode.flags & Z80_IMMEDIATE_S8)
 		{
 			min = -128;
 			max = 127;
 			Vars.WriteImmediate8 = true;
-			Vars.WriteImmediate16 = false;
 		}
 		else if (Opcode.flags & Z80_IMMEDIATE_U16)
 		{
 			min = 0;
 			max = 65535;
-			Vars.WriteImmediate8 = false;
 			Vars.WriteImmediate16 = true;
 		}
 
@@ -93,7 +94,7 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 			Vars.Immediate = -Vars.Immediate;
 		}
 
-		if (Z80.GetVersion() == ZARCH_GAMEBOY)
+		if (Z80.GetVersion() == Z80ArchType::Gameboy)
 		{
 			// Special loads in range 0xFF00 - 0xFFFF
 			if (Vars.RightParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00 && !(Opcode.flags & Z80_IMMEDIATE_U3))
@@ -124,15 +125,20 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 			{
 				Logger::queueError(Logger::Error, L"Jump target %04X out of range", Vars.Immediate);
 			}
+			else if (Opcode.flags & Z80_INTERRUPT_MODE)
+			{
+				Logger::queueError(Logger::Error, L"Interrupt mode %i out of range", Vars.Immediate);
+			}
 			else
 			{
 				Logger::queueError(Logger::Error, L"Immediate %i out of range", Vars.Immediate);
 			}
 			return false;
 		}
+
 		if (Opcode.flags & Z80_RST)
 		{
-			if (Vars.Immediate >= 0x00 && Vars.Immediate <= 0x7)
+			if (Z80.GetVersion() == Z80ArchType::Gameboy && Vars.Immediate >= 0x00 && Vars.Immediate <= 0x7)
 			{
 				// Nintendo syntax
 				// 1 -> 8, 2 -> 16, 3 -> 24, etc
@@ -152,6 +158,11 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 			Vars.LeftParam.name = L"imm";
 			Vars.LeftParam.num = Vars.Immediate;
 		}
+		else if (Opcode.flags & Z80_INTERRUPT_MODE)
+		{
+			Vars.LeftParam.name = L"imm";
+			Vars.LeftParam.num = Vars.Immediate + (Vars.Immediate != 0 ? 1 : 0);
+		}
 	}
 
 	g_fileManager->advanceMemory(Vars.Length);
@@ -163,9 +174,13 @@ void CZ80Instruction::Encode() const
 {
 	unsigned char encoding = Vars.Encoding;
 
-	if (Vars.WritePrefix)
+	if (Opcode.flags & Z80_PREFIX_CB)
 	{
 		g_fileManager->writeU8(0xCB);
+	}
+	if (Opcode.flags & Z80_PREFIX_ED)
+	{
+		g_fileManager->writeU8(0xED);
 	}
 
 	if (Opcode.lhs && Opcode.lhsShift >= 0)

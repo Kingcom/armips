@@ -453,13 +453,13 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveZ80Arch(Parser& parser, int fla
 	switch (flags)
 	{
 	case DIRECTIVE_Z80_Z80:
-		Z80.SetVersion(ZARCH_Z80);
+		Z80.SetVersion(Z80ArchType::Z80);
 		return std::make_unique<ArchitectureCommand>(L".z80", L"");
 	case DIRECTIVE_Z80_GB:
-		Z80.SetVersion(ZARCH_GAMEBOY);
+		Z80.SetVersion(Z80ArchType::Gameboy);
 		return std::make_unique<ArchitectureCommand>(L".gb", L"");
 	case DIRECTIVE_Z80_GBC:
-		Z80.SetVersion(ZARCH_GAMEBOY);
+		Z80.SetVersion(Z80ArchType::Gameboy);
 		return std::make_unique<ArchitectureCommand>(L".gbc", L"");
 	}
 

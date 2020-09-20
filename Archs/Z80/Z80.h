@@ -4,7 +4,7 @@
 #include "Core/ELF/ElfRelocator.h"
 #include "Core/Expression.h"
 
-enum Z80ArchType { ZARCH_Z80 = 0, ZARCH_GAMEBOY, ZARCH_INVALID };
+enum class Z80ArchType { Z80 = 0, Gameboy, Invalid };
 
 struct Z80RegisterValue
 {
@@ -26,6 +26,15 @@ public:
 	virtual Endianness getEndianness() { return Endianness::Little; };
 	void SetVersion(Z80ArchType v) { Version = v; };
 	Z80ArchType GetVersion() { return Version; };
+	const std::wstring GetName() {
+		switch (Version)
+		{
+		case Z80ArchType::Gameboy:
+			return L"Gameboy";
+		default:
+			return L"Z80";
+		}
+	}
 private:
 	Z80ArchType Version;
 };

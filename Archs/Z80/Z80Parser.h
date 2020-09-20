@@ -17,8 +17,11 @@ private:
 	bool parseRegister8(Parser& parser, Z80RegisterValue& dest, int allowed);
 	bool parseRegister16SP(Parser& parser, Z80RegisterValue& dest, int allowed);
 	bool parseRegister16AF(Parser& parser, Z80RegisterValue& dest, int allowed);
+	bool parseRegisterIR(Parser& parser, Z80RegisterValue& dest);
+	bool parseAFPrime(Parser& parser);
 	bool parseCondition(Parser& parser, Z80RegisterValue& dest);
 	bool parseHLIncDec(Parser& parser, Z80RegisterValue& dest);
+	bool parseMemoryRegister8(Parser& parser, Z80RegisterValue& dest, int allowed);
 	bool parseMemoryRegister16(Parser& parser, Z80RegisterValue& dest, int allowed);
 	bool parseMemoryImmediate(Parser& parser, Expression& dest);
 	bool parseFF00PlusC(Parser& parser);
