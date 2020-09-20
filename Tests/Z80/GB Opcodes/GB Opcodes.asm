@@ -146,14 +146,14 @@
 	adc	a, l
 	adc	a, (hl)
 	adc	a, a
-	sub	a, b
-	sub	a, c
-	sub	a, d
-	sub	a, e
-	sub	a, h
-	sub	a, l
-	sub	a, (hl)
-	sub	a, a
+	sub	b
+	sub	c
+	sub	d
+	sub	e
+	sub	h
+	sub	l
+	sub	(hl)
+	sub	a
 	sbc	a, b
 	sbc	a, c
 	sbc	a, d
@@ -162,38 +162,38 @@
 	sbc	a, l
 	sbc	a, (hl)
 	sbc	a, a
-	and	a, b
-	and	a, c
-	and	a, d
-	and	a, e
-	and	a, h
-	and	a, l
-	and	a, (hl)
-	and	a, a
-	xor	a, b
-	xor	a, c
-	xor	a, d
-	xor	a, e
-	xor	a, h
-	xor	a, l
-	xor	a, (hl)
-	xor	a, a
-	or	a, b
-	or	a, c
-	or	a, d
-	or	a, e
-	or	a, h
-	or	a, l
-	or	a, (hl)
-	or	a, a
-	cp	a, b
-	cp	a, c
-	cp	a, d
-	cp	a, e
-	cp	a, h
-	cp	a, l
-	cp	a, (hl)
-	cp	a, a
+	and	b
+	and	c
+	and	d
+	and	e
+	and	h
+	and	l
+	and	(hl)
+	and	a
+	xor	b
+	xor	c
+	xor	d
+	xor	e
+	xor	h
+	xor	l
+	xor	(hl)
+	xor	a
+	or	b
+	or	c
+	or	d
+	or	e
+	or	h
+	or	l
+	or	(hl)
+	or	a
+	cp	b
+	cp	c
+	cp	d
+	cp	e
+	cp	h
+	cp	l
+	cp	(hl)
+	cp	a
 	ret	nz
 	pop	bc
 	jp	nz, 0x1234
@@ -214,7 +214,7 @@
 	jp	nc, 0x1234
 	call	nc, 0x1234
 	push	de
-	sub	a, 0x55
+	sub	0x55
 	rst	2
 	ret	c
 	reti
@@ -226,25 +226,25 @@
 	pop	hl
 	ld	(0xFF00+c), a
 	push	hl
-	and	a, 0x55
+	and	0x55
 	rst	4
 	add	sp, -0x56
 	jp	hl
 	ld	(0x1234), a
-	xor	a, 0x55
+	xor	0x55
 	rst	5
 	ld	a, (0xFF00+0x55)
 	pop	af
 	ld	a, (0xFF00+c)
 	di
 	push	af
-	or	a, 0x55
+	or	0x55
 	rst	6
 	ldhl	sp, 0x55
 	ld	sp, hl
 	ld	a, (0x1234)
 	ei
-	cp	a, 0x55
+	cp	0x55
 	rst	7
 
 	// CB 00-FF
