@@ -94,7 +94,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		}
 
 		// Special loads in range 0xFF00 - 0xFFFF
-		if (Vars.RightParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
+		if (!(Opcode.flags & GB_IMMEDIATE_U3) && Vars.RightParam.num == GB_REG8_A && Vars.Immediate >= 0xFF00)
 		{
 			// ld (0xFF00+u8),a can be encoded as E0 XX instead
 			Vars.Encoding = 0xE0;

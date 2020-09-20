@@ -26,6 +26,8 @@ const tGameboyOpcode GameboyOpcodes[] = {
 	{ L"ldi",	1,	0x2A,	GB_PARAM_A,				GB_PARAM_MEMHL,			-1,		-1,		0 },
 	{ L"ldd",	1,	0x32,	GB_PARAM_MEMHL,			GB_PARAM_A,				-1,		-1,		0 },
 	{ L"ldd",	1,	0x3A,	GB_PARAM_A,				GB_PARAM_MEMHL,			-1,		-1,		0 },
+	{ L"ldh",	2,	0xE0,	GB_PARAM_MEMIMMEDIATE,	GB_PARAM_A,				-1,		-1,		GB_IMMEDIATE_U8 },
+	{ L"ldhl",	2,	0xF8,	GB_PARAM_SP,			GB_PARAM_IMMEDIATE,		-1,		-1,		GB_IMMEDIATE_S8 },
 	{ L"push",	1,	0xC5,	GB_PARAM_REG16_AF,		GB_PARAM_NONE,			4,		-1,		0 },
 	{ L"pop",	1,	0xC1,	GB_PARAM_REG16_AF,		GB_PARAM_NONE,			4,		-1,		0 },
 	{ L"add",	1,	0x09,	GB_PARAM_HL,			GB_PARAM_REG16_SP,		-1,		4,		0 },

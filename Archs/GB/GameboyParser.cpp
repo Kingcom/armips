@@ -137,11 +137,15 @@ bool GameboyParser::parseFF00PlusC(Parser& parser)
 {
 	CHECK(parser.matchToken(TokenType::LParen));
 
-	const Token& token = parser.nextToken();
-	CHECK(token.type == TokenType::Integer);
-	CHECK(token.intValue == 0xFF00);
+	// 0xFF00+ optional
+	const Token& token = parser.peekToken();
+	if (token.type == TokenType::Integer)
+	{
+		CHECK(token.intValue == 0xFF00);
+		parser.eatToken();
 
-	CHECK(parser.matchToken(TokenType::Plus));
+		CHECK(parser.matchToken(TokenType::Plus));
+	}
 
 	GameboyRegisterValue tempReg;
 	CHECK(parseRegister8(parser, tempReg, GB_REG_BIT(GB_REG8_C)));
