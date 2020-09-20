@@ -129,7 +129,13 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 		}
 		if (Opcode.flags & Z80_RST)
 		{
-			if (Vars.Immediate != 0x00 && Vars.Immediate != 0x08 && Vars.Immediate != 0x10 && Vars.Immediate != 0x18 &&
+			if (Vars.Immediate >= 0x00 && Vars.Immediate <= 0x7)
+			{
+				// Nintendo syntax
+				// 1 -> 8, 2 -> 16, 3 -> 24, etc
+				Vars.Immediate <<= 3;
+			}
+			else if (Vars.Immediate != 0x00 && Vars.Immediate != 0x08 && Vars.Immediate != 0x10 && Vars.Immediate != 0x18 &&
 				Vars.Immediate != 0x20 && Vars.Immediate != 0x28 && Vars.Immediate != 0x30 && Vars.Immediate != 0x38)
 			{
 				Logger::queueError(Logger::Error, L"Invalid RST target %i", Vars.Immediate);

@@ -27,6 +27,7 @@ const tZ80Opcode Z80Opcodes[] = {
 	{ L"ldd",	1,	0x32,	Z80_PARAM_MEMHL,		Z80_PARAM_A,			-1,		-1,		0 },
 	{ L"ldd",	1,	0x3A,	Z80_PARAM_A,			Z80_PARAM_MEMHL,		-1,		-1,		0 },
 	{ L"ldh",	2,	0xE0,	Z80_PARAM_MEMIMMEDIATE,	Z80_PARAM_A,			-1,		-1,		Z80_IMMEDIATE_U8 },
+	{ L"ldh",	2,	0xF0,	Z80_PARAM_A,			Z80_PARAM_MEMIMMEDIATE,	-1,		-1,		Z80_IMMEDIATE_U8 },
 	{ L"ldhl",	2,	0xF8,	Z80_PARAM_SP,			Z80_PARAM_IMMEDIATE,	-1,		-1,		Z80_IMMEDIATE_S8 },
 	{ L"push",	1,	0xC5,	Z80_PARAM_REG16_AF,		Z80_PARAM_NONE,			4,		-1,		0 },
 	{ L"pop",	1,	0xC1,	Z80_PARAM_REG16_AF,		Z80_PARAM_NONE,			4,		-1,		0 },
