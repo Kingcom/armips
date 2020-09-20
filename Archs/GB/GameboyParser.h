@@ -17,6 +17,7 @@ private:
 	bool parseRegister8(Parser& parser, GameboyRegisterValue& dest, int allowed);
 	bool parseRegister16SP(Parser& parser, GameboyRegisterValue& dest, int allowed);
 	bool parseRegister16AF(Parser& parser, GameboyRegisterValue& dest, int allowed);
+	bool parseCondition(Parser& parser, GameboyRegisterValue& dest);
 	bool parseHLIncDec(Parser& parser, GameboyRegisterValue& dest);
 	bool parseMemoryRegister16(Parser& parser, GameboyRegisterValue& dest, int allowed);
 	bool parseMemoryImmediate(Parser& parser, Expression& dest);

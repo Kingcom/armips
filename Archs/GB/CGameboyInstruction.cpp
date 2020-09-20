@@ -9,10 +9,13 @@ CGameboyInstruction::CGameboyInstruction(const tGameboyOpcode& sourceOpcode, Gam
 {
 	this->Opcode = sourceOpcode;
 	this->Vars = vars;
+	this->RamPos = 0;
 }
 
 bool CGameboyInstruction::Validate(const ValidateState& state)
 {
+	RamPos = g_fileManager->getVirtualAddress();
+
 	Vars.Length = Opcode.length;
 	Vars.Encoding = Opcode.encoding;
 	Vars.WritePrefix = Opcode.flags & GB_PREFIX;
@@ -30,7 +33,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 	}
 
 	// Evaluate immediate
-	if (Opcode.flags & (GB_IMMEDIATE_U3 | GB_IMMEDIATE_U8 | GB_IMMEDIATE_S8 | GB_IMMEDIATE_U16))
+	if (Opcode.flags & GB_HAS_IMMEDIATE)
 	{
 		if (!Vars.ImmediateExpression.evaluateInteger(Vars.Immediate))
 		{
@@ -40,6 +43,10 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		if (Vars.IsNegative)
 		{
 			Vars.Immediate = -Vars.Immediate;
+		}
+		if (Opcode.flags & GB_JUMP_RELATIVE)
+		{
+			Vars.Immediate = (Vars.Immediate - RamPos - 2);
 		}
 
 		int64_t min = 0;
@@ -109,7 +116,14 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 
 		if (Vars.Immediate < min || Vars.Immediate > max)
 		{
-			Logger::queueError(Logger::Error, L"Immediate %i out of range", Vars.Immediate);
+			if (Opcode.flags & GB_JUMP_RELATIVE)
+			{
+				Logger::queueError(Logger::Error, L"Jump target %04X out of range", Vars.Immediate);
+			}
+			else
+			{
+				Logger::queueError(Logger::Error, L"Immediate %i out of range", Vars.Immediate);
+			}
 			return false;
 		}
 

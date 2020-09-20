@@ -29,6 +29,11 @@ const GameboyRegisterDescriptor gameboyHLIncDec16[] = {
 	{ L"hli", 0 }, { L"hld", 1 },
 };
 
+const GameboyRegisterDescriptor gameboyConds[] = {
+	{ L"nz", GB_COND_NZ }, { L"z", GB_COND_Z },
+	{ L"nc", GB_COND_NC }, { L"c", GB_COND_C },
+};
+
 const DirectiveMap gameboyDirectives = { };
 
 std::unique_ptr<CAssemblerCommand> GameboyParser::parseDirective(Parser& parser)
@@ -69,6 +74,11 @@ bool GameboyParser::parseRegister16SP(Parser& parser, GameboyRegisterValue& dest
 bool GameboyParser::parseRegister16AF(Parser& parser, GameboyRegisterValue& dest, int allowed)
 {
 	return parseRegisterTable(parser, dest, gameboyRegs16AF, std::size(gameboyRegs16AF), allowed);
+}
+
+bool GameboyParser::parseCondition(Parser& parser, GameboyRegisterValue& dest)
+{
+	return parseRegisterTable(parser, dest, gameboyConds, std::size(gameboyConds), GB_REG_BIT_ALL);
 }
 
 bool GameboyParser::parseHLIncDec(Parser& parser, GameboyRegisterValue& dest)
@@ -204,6 +214,8 @@ bool GameboyParser::parseOpcodeParameter(Parser& parser, unsigned char paramType
 		return parseFF00PlusC(parser);
 	case GB_PARAM_SP_IMM:
 		return parseSPImmediate(parser, destImm, isNegative);
+	case GB_PARAM_CONDITION:
+		return parseCondition(parser, destReg);
 	default:
 		return false;
 	}

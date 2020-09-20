@@ -28,6 +28,5 @@ public:
 private:
 	GameboyOpcodeVariables Vars;
 	tGameboyOpcode Opcode;
-
-	// Inherited via CAssemblerCommand
+	int64_t RamPos;
 };

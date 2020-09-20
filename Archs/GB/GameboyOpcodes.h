@@ -14,6 +14,7 @@
 #define	GB_PARAM_MEMIMMEDIATE	0x0B	// (imm)
 #define GB_PARAM_FF00_C			0x0C	// (0xFF00+c)
 #define GB_PARAM_SP_IMM			0x0D	// sp+s8
+#define GB_PARAM_CONDITION		0x0E	// nz, z, nc, c
 
 #define GB_REG8_B				0x00	// b
 #define GB_REG8_C				0x01	// c
@@ -37,6 +38,11 @@
 								| GB_REG_BIT(GB_REG16_HL) | GB_REG_BIT(GB_REG16_SP) \
 								| GB_REG_BIT(GB_REG16_AF) )
 
+#define GB_COND_NZ				0x00	// nz
+#define GB_COND_Z				0x01	// z
+#define GB_COND_NC				0x02	// nc
+#define GB_COND_C				0x03	// c
+
 #define GB_REG_BIT_ALL			0xFFFFFFFF
 
 #define GB_PREFIX				0x00000001
@@ -48,6 +54,10 @@
 #define GB_LOAD_REG8_REG8		0x00000040
 #define GB_ADD_SUB_IMMEDIATE	0x00000080
 #define GB_NEGATE_IMM			0x00000100
+#define GB_JUMP_RELATIVE		0x00000200
+
+#define GB_HAS_IMMEDIATE		( GB_IMMEDIATE_U3 | GB_IMMEDIATE_U8 | GB_IMMEDIATE_S8 \
+								| GB_IMMEDIATE_U16 | GB_JUMP_RELATIVE )
 
 #define GB_REG_BIT(reg) (1 << reg)
 
