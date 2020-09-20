@@ -25,6 +25,12 @@ const Z80RegisterDescriptor Z80Regs16AF[] = { // kinda hacky
 	{ L"hl", Z80_REG16_HL }, { L"af", Z80_REG16_AF },
 };
 
+const Z80RegisterDescriptor Z80Regs16IXIY[] = { // kinda hacky
+	{ L"bc", Z80_REG16_BC }, { L"de", Z80_REG16_DE },
+	{ L"ix", Z80_REG16_IX }, { L"iy", Z80_REG16_IY },
+	{ L"sp", Z80_REG16_SP },
+};
+
 const Z80RegisterDescriptor Z80HLIncDec16[] = {
 	{ L"hli", 0 }, { L"hld", 1 },
 };
@@ -87,13 +93,18 @@ bool Z80Parser::parseRegisterIR(Parser& parser, Z80RegisterValue& dest)
 	return parseRegisterTable(parser, dest, Z80RegsIR, std::size(Z80RegsIR), Z80_REG_IR_ALL);
 }
 
-bool Z80Parser::parseAFPrime(Parser& parser)
+bool Z80Parser::parseRegisterAFShadow(Parser& parser)
 {
 	const Token &token = parser.nextToken();
 	CHECK(token.type == TokenType::Identifier);
 	CHECK(token.getStringValue() == L"af'");
 	
 	return true;
+}
+
+bool Z80Parser::parseRegisterIXIY(Parser& parser, Z80RegisterValue& dest, int allowed)
+{
+	return parseRegisterTable(parser, dest, Z80Regs16IXIY, std::size(Z80Regs16IXIY), allowed);
 }
 
 bool Z80Parser::parseCondition(Parser& parser, Z80RegisterValue& dest)
@@ -168,7 +179,7 @@ bool Z80Parser::parseMemoryImmediate(Parser& parser, Expression& dest)
 	return true;
 }
 
-bool Z80Parser::parseFF00PlusC(Parser& parser)
+bool Z80Parser::parseFF00PlusC(Parser& parser, Z80RegisterValue& destReg)
 {
 	CHECK(parser.matchToken(TokenType::LParen));
 
@@ -182,33 +193,57 @@ bool Z80Parser::parseFF00PlusC(Parser& parser)
 		CHECK(parser.matchToken(TokenType::Plus));
 	}
 
-	Z80RegisterValue tempReg;
-	CHECK(parseRegister8(parser, tempReg, Z80_REG_BIT(Z80_REG8_C)));
+	CHECK(parseRegister8(parser, destReg, Z80_REG_BIT(Z80_REG8_C)));
 
 	CHECK(parser.matchToken(TokenType::RParen));
 
 	return true;
 }
 
-bool Z80Parser::parseSPImmediate(Parser& parser, Expression& dest, bool& isNegative)
+bool Z80Parser::parseMemoryIXIY(Parser& parser, Z80RegisterValue& destReg, Expression& destImm)
+{
+	CHECK(parser.matchToken(TokenType::LParen));
+
+	CHECK(parseRegisterIXIY(parser, destReg, Z80_REG_BIT(Z80_REG16_IX) | Z80_REG_BIT(Z80_REG16_IY)));
+
+	// + optional
+	const Token& token = parser.peekToken();
+	if (token.type == TokenType::Plus)
+	{
+		parser.eatToken();
+
+		destImm = parser.parseExpression();
+		CHECK(destImm.isLoaded());
+	}
+	else
+	{
+		// Treat as +0
+		destImm = createConstExpression(0);
+	}
+
+	CHECK(parser.matchToken(TokenType::RParen));
+
+	return true;
+}
+
+bool Z80Parser::parseSPImmediate(Parser& parser, Z80RegisterValue& destReg, Expression& destImm, bool& isNegative)
 {
 	isNegative = false;
 
-	Z80RegisterValue tempReg;
-	CHECK(parseRegister16SP(parser, tempReg, Z80_REG_BIT(Z80_REG16_SP)));
+	CHECK(parseRegister16SP(parser, destReg, Z80_REG_BIT(Z80_REG16_SP)));
 
 	const Token& token = parser.peekToken();
 	if (token.type != TokenType::Plus && token.type != TokenType::Minus)
 	{
 		// Treat as +0
-		dest = createConstExpression(0);
+		destImm = createConstExpression(0);
 		return true;
 	}
 	parser.eatToken();
 	isNegative = token.type == TokenType::Minus;
 
-	dest = parser.parseExpression();
-	CHECK(dest.isLoaded());
+	destImm = parser.parseExpression();
+	CHECK(destImm.isLoaded());
 
 	return true;
 }
@@ -259,16 +294,22 @@ bool Z80Parser::parseOpcodeParameter(Parser& parser, unsigned char paramType, Z8
 	case Z80_PARAM_IR:
 		return parseRegisterIR(parser, destReg);
 	case Z80_PARAM_AF_PRIME:
-		return parseAFPrime(parser);
+		return parseRegisterAFShadow(parser);
+	case Z80_PARAM_IX_IY:
+		return parseRegisterIXIY(parser, destReg, Z80_REG_BIT(Z80_REG16_IX) | Z80_REG_BIT(Z80_REG16_IY));
+	case Z80_PARAM_REG16_IX_IY:
+		return parseRegisterIXIY(parser, destReg, Z80_REG16_BIT_ALL);
+	case Z80_PARAM_MEMIX_MEMIY:
+		return parseMemoryIXIY(parser, destReg, destImm);
 	case Z80_PARAM_IMMEDIATE:
 		destImm = parser.parseExpression();
 		return destImm.isLoaded();
 	case Z80_PARAM_MEMIMMEDIATE:
 		return parseMemoryImmediate(parser, destImm);
 	case Z80_PARAM_FF00_C:
-		return parseFF00PlusC(parser);
+		return parseFF00PlusC(parser, destReg);
 	case Z80_PARAM_SP_IMM:
-		return parseSPImmediate(parser, destImm, isNegative);
+		return parseSPImmediate(parser, destReg, destImm, isNegative);
 	case Z80_PARAM_CONDITION:
 		return parseCondition(parser, destReg);
 	default:
@@ -286,9 +327,32 @@ bool Z80Parser::parseOpcodeParameterList(Parser& parser, const tZ80Opcode opcode
 	if (opcode.rhs)
 	{
 		CHECK(parser.matchToken(TokenType::Comma));
-		CHECK(parseOpcodeParameter(parser, opcode.rhs, vars.RightParam, vars.ImmediateExpression, isNegative));
+
+		if (opcode.flags & Z80_HAS_2_IMMEDIATES)
+		{
+			CHECK(parseOpcodeParameter(parser, opcode.rhs, vars.RightParam, vars.ImmediateExpression2, isNegative));
+		}
+		else
+		{
+			CHECK(parseOpcodeParameter(parser, opcode.rhs, vars.RightParam, vars.ImmediateExpression, isNegative));
+		}
 	}
 	vars.IsNegative = isNegative;
+	
+	// ld (hl),(hl) equivalent to halt
+	if ((opcode.flags & Z80_LOAD_REG8_REG8) &&
+		vars.LeftParam.num == Z80_REG8_MEMHL && vars.RightParam.num == Z80_REG8_MEMHL)
+	{
+		return false;
+	}
+
+	// Mixing ix and iy not allowed
+	if (Z80_IS_PARAM_IX_IY(opcode.lhs) && Z80_IS_PARAM_IX_IY(opcode.rhs))
+	{
+		if (vars.LeftParam.num == Z80_REG16_IX && vars.RightParam.num == Z80_REG16_IY ||
+			vars.LeftParam.num == Z80_REG16_IY && vars.RightParam.num == Z80_REG16_IX)
+		return false;
+	}
 
 	return true;
 }

@@ -9,7 +9,9 @@ struct Z80OpcodeVariables
 	Z80RegisterValue LeftParam;
 	Z80RegisterValue RightParam;
 	Expression ImmediateExpression;
+	Expression ImmediateExpression2;
 	int64_t Immediate;
+	int64_t Immediate2;
 	unsigned char Length;
 	unsigned char Encoding;
 	bool IsNegative : 1;

@@ -23,6 +23,9 @@
 #define Z80_PARAM_MEMC			0x14	// (c)
 #define Z80_PARAM_BC_DE_SP		0x15	// bc, de, sp
 #define Z80_PARAM_IR			0x16	// i, r
+#define Z80_PARAM_IX_IY			0x17	// ix, iy
+#define Z80_PARAM_MEMIX_MEMIY	0x18	// (ix+imm), (iy+imm)
+#define	Z80_PARAM_REG16_IX_IY	0x19	// bc, de, ix, iy, sp
 
 #define Z80_REG8_B				0x00	// b
 #define Z80_REG8_C				0x01	// c
@@ -42,9 +45,12 @@
 #define Z80_REG16_HL			0x02	// hl
 #define Z80_REG16_SP			0x03	// sp
 #define Z80_REG16_AF			0x03	// af (yes, same as sp)
+#define Z80_REG16_IX			0x02	// ix (yes, same as hl)
+#define Z80_REG16_IY			0x82	// iy
 #define Z80_REG16_BIT_ALL		( Z80_REG_BIT(Z80_REG16_BC) | Z80_REG_BIT(Z80_REG16_DE) \
 								| Z80_REG_BIT(Z80_REG16_HL) | Z80_REG_BIT(Z80_REG16_SP) \
-								| Z80_REG_BIT(Z80_REG16_AF) )
+								| Z80_REG_BIT(Z80_REG16_AF) | Z80_REG_BIT(Z80_REG16_IX) \
+								| Z80_REG_BIT(Z80_REG16_IY) )
 
 #define Z80_COND_NZ				0x00	// nz
 #define Z80_COND_Z				0x01	// z
@@ -82,12 +88,17 @@
 #define Z80_Z80					0x00001000
 #define Z80_PREFIX_ED			0x00002000
 #define Z80_INTERRUPT_MODE		0x00004000
+#define Z80_PREFIX_IX_IY		0x00008000
+#define Z80_IMMEDIATE2_U8		0x00010000
 
 #define Z80_HAS_IMMEDIATE		( Z80_IMMEDIATE_U3 | Z80_IMMEDIATE_U8 | Z80_IMMEDIATE_S8 \
 								| Z80_IMMEDIATE_U16 | Z80_RST | Z80_JUMP_RELATIVE \
-								| Z80_INTERRUPT_MODE )
+								| Z80_INTERRUPT_MODE | Z80_IMMEDIATE2_U8 )
+#define Z80_HAS_2_IMMEDIATES	( Z80_IMMEDIATE2_U8 )
+#define Z80_IS_PARAM_IX_IY(x)	( x == Z80_PARAM_IX_IY || x == Z80_PARAM_REG16_IX_IY \
+								|| x == Z80_PARAM_MEMIX_MEMIY )
 
-#define Z80_REG_BIT(reg) (1 << reg)
+#define Z80_REG_BIT(reg) (1 << (reg & 0xF))
 
 struct tZ80Opcode
 {

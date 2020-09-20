@@ -22,20 +22,15 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 	Vars.WriteImmediate8 = false;
 	Vars.WriteImmediate16 = false;
 
-	// ld (hl),(hl) equivalent to halt
-	if (Opcode.flags & Z80_LOAD_REG8_REG8)
-	{
-		if (Vars.LeftParam.num == Z80_REG8_MEMHL && Vars.RightParam.num == Z80_REG8_MEMHL)
-		{
-			Logger::queueError(Logger::Error, L"ld (hl),(hl) not allowed");
-			return false;
-		}
-	}
-
 	// Evaluate immediate
 	if (Opcode.flags & Z80_HAS_IMMEDIATE)
 	{
 		if (!Vars.ImmediateExpression.evaluateInteger(Vars.Immediate))
+		{
+			Logger::queueError(Logger::Error, L"Invalid expression");
+			return false;
+		}
+		if ((Opcode.flags & Z80_HAS_2_IMMEDIATES) && !Vars.ImmediateExpression2.evaluateInteger(Vars.Immediate2))
 		{
 			Logger::queueError(Logger::Error, L"Invalid expression");
 			return false;
@@ -51,6 +46,8 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 
 		int64_t min = INT64_MIN;
 		int64_t max = INT64_MAX;
+		int64_t min2 = INT64_MIN;
+		int64_t max2 = INT64_MAX;
 		Vars.WriteImmediate8 = false;
 		Vars.WriteImmediate16 = false;
 		if (Opcode.flags & Z80_INTERRUPT_MODE)
@@ -61,7 +58,7 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 		else if (Opcode.flags & Z80_IMMEDIATE_U3)
 		{
 			min = 0;
-			max = 8;
+			max = 7;
 		}
 		else if (Opcode.flags & Z80_IMMEDIATE_U8)
 		{
@@ -80,6 +77,11 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 			min = 0;
 			max = 65535;
 			Vars.WriteImmediate16 = true;
+		}
+		if (Opcode.flags & Z80_IMMEDIATE2_U8)
+		{
+			min2 = 0;
+			max2 = 255;
 		}
 
 		// add <-> sub
@@ -135,6 +137,11 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 			}
 			return false;
 		}
+		if ((Opcode.flags & Z80_HAS_2_IMMEDIATES) && (Vars.Immediate2 < min2 || Vars.Immediate2 > max2))
+		{
+			Logger::queueError(Logger::Error, L"Immediate %i out of range", Vars.Immediate2);
+			return false;
+		}
 
 		if (Opcode.flags & Z80_RST)
 		{
@@ -173,28 +180,48 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 void CZ80Instruction::Encode() const
 {
 	unsigned char encoding = Vars.Encoding;
+	int prefixes = 0;
+
+	if (Z80_IS_PARAM_IX_IY(Opcode.lhs) && Vars.LeftParam.num == Z80_REG16_IX ||
+		Z80_IS_PARAM_IX_IY(Opcode.rhs) && Vars.RightParam.num == Z80_REG16_IX)
+	{
+		g_fileManager->writeU8(0xDD);
+		prefixes++;
+	}
+	else if (Z80_IS_PARAM_IX_IY(Opcode.lhs) && Vars.LeftParam.num == Z80_REG16_IY ||
+		Z80_IS_PARAM_IX_IY(Opcode.rhs) && Vars.RightParam.num == Z80_REG16_IY)
+	{
+		g_fileManager->writeU8(0xFD);
+		prefixes++;
+	}
 
 	if (Opcode.flags & Z80_PREFIX_CB)
 	{
 		g_fileManager->writeU8(0xCB);
+		prefixes++;
 	}
-	if (Opcode.flags & Z80_PREFIX_ED)
+	else if (Opcode.flags & Z80_PREFIX_ED)
 	{
 		g_fileManager->writeU8(0xED);
+		prefixes++;
 	}
 
 	if (Opcode.lhs && Opcode.lhsShift >= 0)
 	{
-		encoding |= Vars.LeftParam.num << Opcode.lhsShift;
+		encoding |= (Vars.LeftParam.num & 0x7F) << Opcode.lhsShift;
 	}
 	if (Opcode.rhs && Opcode.rhsShift >= 0)
 	{
-		encoding |= Vars.RightParam.num << Opcode.rhsShift;
+		encoding |= (Vars.RightParam.num & 0x7F) << Opcode.rhsShift;
 	}
 
-	g_fileManager->writeU8(encoding);
+	// If there are 2 prefixes, opcode follows immediate
+	if (prefixes < 2)
+	{
+		g_fileManager->writeU8(encoding);
+	}
 
-
+	// Write immediates
 	if (Vars.WriteImmediate16)
 	{
 		g_fileManager->writeU16((uint16_t)(Vars.Immediate & 0xFFFF));
@@ -203,7 +230,18 @@ void CZ80Instruction::Encode() const
 	{
 		g_fileManager->writeU8((uint8_t)(Vars.Immediate & 0xFF));
 	}
-	else if (Opcode.flags & Z80_STOP)
+	if (Opcode.flags & Z80_IMMEDIATE2_U8)
+	{
+		g_fileManager->writeU8((uint8_t)(Vars.Immediate2 & 0xFF));
+	}
+
+	// If there are 2 prefixes, opcode follows immediate
+	if (prefixes >= 2)
+	{
+		g_fileManager->writeU8(encoding);
+	}
+
+	if (Opcode.flags & Z80_STOP)
 	{
 		g_fileManager->writeU8(0x00);
 	}
