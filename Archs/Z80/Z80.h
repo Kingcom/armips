@@ -9,7 +9,7 @@ enum class Z80ArchType { Z80 = 0, Gameboy, Ereader, Invalid };
 struct Z80RegisterValue
 {
 	std::wstring name;
-	int num;
+	int64_t num;
 };
 
 class CZ80Architecture: public CArchitecture

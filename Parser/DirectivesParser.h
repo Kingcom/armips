@@ -71,8 +71,7 @@ using DirectiveMap = std::unordered_multimap<std::wstring, const DirectiveEntry>
 // Z80 directive flags
 #define DIRECTIVE_Z80_Z80			0x00000001
 #define DIRECTIVE_Z80_GB			0x00000002
-#define DIRECTIVE_Z80_GBC			0x00000003
-#define DIRECTIVE_Z80_EREADER		0x00000004
+#define DIRECTIVE_Z80_EREADER		0x00000003
 
 // Area directive flags
 #define DIRECTIVE_AREA_SHARED		0x00000001

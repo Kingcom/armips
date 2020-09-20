@@ -458,9 +458,6 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveZ80Arch(Parser& parser, int fla
 	case DIRECTIVE_Z80_GB:
 		Z80.SetVersion(Z80ArchType::Gameboy);
 		return std::make_unique<ArchitectureCommand>(L".gb", L"");
-	case DIRECTIVE_Z80_GBC:
-		Z80.SetVersion(Z80ArchType::Gameboy);
-		return std::make_unique<ArchitectureCommand>(L".gbc", L"");
 	case DIRECTIVE_Z80_EREADER:
 		Z80.SetVersion(Z80ArchType::Ereader);
 		return std::make_unique<ArchitectureCommand>(L".ereader", L"");
@@ -802,7 +799,6 @@ const DirectiveMap directives = {
 
 	{ L".z80",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_Z80 } },
 	{ L".gb",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_GB } },
-	{ L".gbc",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_GBC } },
 	{ L".ereader",			{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_EREADER } },
 
 	{ L".area",				{ &parseDirectiveArea,				0 } },
