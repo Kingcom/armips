@@ -16,8 +16,8 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 	Vars.Length = Opcode.length;
 	Vars.Encoding = Opcode.encoding;
 	Vars.WritePrefix = Opcode.flags & GB_PREFIX;
-	Vars.WriteImmediate8 = Opcode.flags & (GB_IMMEDIATE_S8 | GB_IMMEDIATE_U8);
-	Vars.WriteImmediate16 = Opcode.flags & GB_IMMEDIATE_U16;
+	Vars.WriteImmediate8 = false;
+	Vars.WriteImmediate16 = false;
 
 	// ld (hl),(hl) equivalent to halt
 	if (Opcode.flags & GB_LOAD_REG8_REG8)
@@ -30,7 +30,7 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 	}
 
 	// Evaluate immediate
-	if (Vars.WriteImmediate8 || Vars.WriteImmediate16)
+	if (Opcode.flags & (GB_IMMEDIATE_U3 | GB_IMMEDIATE_U8 | GB_IMMEDIATE_S8 | GB_IMMEDIATE_U16))
 	{
 		if (!Vars.ImmediateExpression.evaluateInteger(Vars.Immediate))
 		{
@@ -44,6 +44,13 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 
 		int64_t min = 0;
 		int64_t max = 0;
+		if (Opcode.flags & GB_IMMEDIATE_U3)
+		{
+			min = 0;
+			max = 8;
+			Vars.WriteImmediate8 = false;
+			Vars.WriteImmediate16 = false;
+		}
 		if (Opcode.flags & GB_IMMEDIATE_U8)
 		{
 			min = 0;
@@ -104,6 +111,12 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 		{
 			Logger::queueError(Logger::Error, L"Immediate %i out of range", Vars.Immediate);
 			return false;
+		}
+
+		// Move small immediate to lhs
+		if (Opcode.flags & GB_IMMEDIATE_U3)
+		{
+			Vars.LeftParam.num = Vars.Immediate;
 		}
 	}
 
