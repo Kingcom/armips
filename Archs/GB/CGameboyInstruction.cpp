@@ -4,6 +4,7 @@
 #include "Core/Expression.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
+#include "Util/Util.h"
 
 CGameboyInstruction::CGameboyInstruction(const tGameboyOpcode& sourceOpcode, GameboyOpcodeVariables& vars)
 {
@@ -186,4 +187,11 @@ void CGameboyInstruction::Encode() const
 
 void CGameboyInstruction::writeTempData(TempData& tempData) const
 {
+	char str[256];
+
+	int pos = sprintf(str, "   %S", Opcode.name);
+	while (pos < 11) str[pos++] = ' ';
+	str[pos] = 0;
+
+	tempData.writeLine(RamPos, convertUtf8ToWString(str));
 }
