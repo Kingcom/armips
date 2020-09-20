@@ -93,26 +93,29 @@ bool CZ80Instruction::Validate(const ValidateState& state)
 			Vars.Immediate = -Vars.Immediate;
 		}
 
-		// Special loads in range 0xFF00 - 0xFFFF
-		if (!(Opcode.flags & Z80_IMMEDIATE_U3) && Vars.RightParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00)
+		if (Z80.GetVersion() == ZARCH_GAMEBOY)
 		{
-			// ld (0xFF00+u8),a can be encoded as E0 XX instead
-			Vars.Encoding = 0xE0;
-			Vars.Length = 2;
-			Vars.Immediate &= 0xFF;
-			Vars.RightParam.num = 0;
-			Vars.WriteImmediate8 = true;
-			Vars.WriteImmediate16 = false;
-		}
-		else if (Vars.LeftParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00)
-		{
-			// ld a,(0xFF00+u8) can be encoded as F0 XX instead
-			Vars.Encoding = 0xF0;
-			Vars.Length = 2;
-			Vars.Immediate &= 0xFF;
-			Vars.LeftParam.num = 0;
-			Vars.WriteImmediate8 = true;
-			Vars.WriteImmediate16 = false;
+			// Special loads in range 0xFF00 - 0xFFFF
+			if (Vars.RightParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00 && !(Opcode.flags & Z80_IMMEDIATE_U3))
+			{
+				// ld (0xFF00+u8),a can be encoded as E0 XX instead
+				Vars.Encoding = 0xE0;
+				Vars.Length = 2;
+				Vars.Immediate &= 0xFF;
+				Vars.RightParam.num = 0;
+				Vars.WriteImmediate8 = true;
+				Vars.WriteImmediate16 = false;
+			}
+			else if (Vars.LeftParam.num == Z80_REG8_A && Vars.Immediate >= 0xFF00)
+			{
+				// ld a,(0xFF00+u8) can be encoded as F0 XX instead
+				Vars.Encoding = 0xF0;
+				Vars.Length = 2;
+				Vars.Immediate &= 0xFF;
+				Vars.LeftParam.num = 0;
+				Vars.WriteImmediate8 = true;
+				Vars.WriteImmediate16 = false;
+			}
 		}
 
 		if (Vars.Immediate < min || Vars.Immediate > max)

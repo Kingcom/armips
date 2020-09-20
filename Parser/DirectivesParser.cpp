@@ -450,7 +450,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveZ80Arch(Parser& parser, int fla
 {
 	Arch = &Z80;
 
-	return std::make_unique<ArchitectureCommand>(L".gb", L"");
+	switch (flags)
+	{
+	case DIRECTIVE_Z80_Z80:
+		Z80.SetVersion(ZARCH_Z80);
+		return std::make_unique<ArchitectureCommand>(L".z80", L"");
+	case DIRECTIVE_Z80_GB:
+		Z80.SetVersion(ZARCH_GAMEBOY);
+		return std::make_unique<ArchitectureCommand>(L".gb", L"");
+	case DIRECTIVE_Z80_GBC:
+		Z80.SetVersion(ZARCH_GAMEBOY);
+		return std::make_unique<ArchitectureCommand>(L".gbc", L"");
+	}
+
+	return nullptr;
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
@@ -784,8 +797,9 @@ const DirectiveMap directives = {
 	{ L".arm.big",			{ &parseDirectiveArmArch,			DIRECTIVE_ARM_BIG } },
 	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
 
-	{ L".gb",				{ &parseDirectiveZ80Arch,			0 } },
-	{ L".gbc",				{ &parseDirectiveZ80Arch,			0 } },
+	{ L".z80",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_Z80 } },
+	{ L".gb",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_GB } },
+	{ L".gbc",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_GBC } },
 
 	{ L".area",				{ &parseDirectiveArea,				0 } },
 	{ L".autoregion",		{ &parseDirectiveAutoRegion,		0 } },

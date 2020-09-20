@@ -255,6 +255,9 @@ std::unique_ptr<CZ80Instruction> Z80Parser::parseOpcode(Parser& parser)
 	const std::wstring stringValue = token.getStringValue();
 	for (int z = 0; Z80Opcodes[z].name != nullptr; z++)
 	{
+		if ((Z80Opcodes[z].flags & Z80_GAMEBOY) && Z80.GetVersion() != ZARCH_GAMEBOY)
+			continue;
+
 		if (stringValue == Z80Opcodes[z].name)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
