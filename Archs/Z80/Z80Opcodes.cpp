@@ -5,6 +5,7 @@
 // - SP_IMM and MEMIX_MEMIY
 // - MEMIMMEDIATE
 // - IMMEDIATE
+// - NONE
 const tZ80Opcode Z80Opcodes[] = {
 	//	Name	Len	Encode	Left param				Right param				LShift	RShift	Flags
 	{ L"nop",	1,	0x00,	Z80_PARAM_NONE,			Z80_PARAM_NONE,			-1,		-1,		Z80_COMPAT(1, 1, 1) },
@@ -149,6 +150,7 @@ const tZ80Opcode Z80Opcodes[] = {
 	{ L"ret",	1,	0xC9,	Z80_PARAM_NONE,			Z80_PARAM_NONE,			-1,		-1,		Z80_COMPAT(1, 1, 1) },
 	{ L"reti",	1,	0xD9,	Z80_PARAM_NONE,			Z80_PARAM_NONE,			-1,		-1,		Z80_COMPAT(0, 1, 0) },
 	{ L"reti",	2,	0x4D,	Z80_PARAM_NONE,			Z80_PARAM_NONE,			-1,		-1,		Z80_COMPAT(1, 0, 0) | Z80_PREFIX_ED },
+	{ L"rst",	2,	0xC7,	Z80_PARAM_IMMEDIATE,	Z80_PARAM_IMMEDIATE,	0,		-1,		Z80_COMPAT(0, 0, 1) | Z80_RST | Z80_IMMEDIATE2_U8 },
 	{ L"rst",	1,	0xC7,	Z80_PARAM_IMMEDIATE,	Z80_PARAM_NONE,			0,		-1,		Z80_COMPAT(1, 1, 1) | Z80_RST },
 	{ L"ex",	1,	0x08,	Z80_PARAM_AF,			Z80_PARAM_AF_SHADOW,	-1,		-1,		Z80_COMPAT(1, 0, 0) },
 	{ L"ex",	1,	0xE3,	Z80_PARAM_MEMSP,		Z80_PARAM_HL,			-1,		-1,		Z80_COMPAT(1, 0, 1) },
