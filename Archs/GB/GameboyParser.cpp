@@ -15,9 +15,14 @@ const GameboyRegisterDescriptor gameboyRegs8[] = {
 	{ L"a", GB_REG8_A },
 };
 
-const GameboyRegisterDescriptor gameboyRegs16[] = {
+const GameboyRegisterDescriptor gameboyRegs16SP[] = {
 	{ L"bc", GB_REG16_BC }, { L"de", GB_REG16_DE },
 	{ L"hl", GB_REG16_HL }, { L"sp", GB_REG16_SP },
+};
+
+const GameboyRegisterDescriptor gameboyRegs16AF[] = { // kinda hacky
+	{ L"bc", GB_REG16_BC }, { L"de", GB_REG16_DE },
+	{ L"hl", GB_REG16_HL }, { L"af", GB_REG16_AF },
 };
 
 const GameboyRegisterDescriptor gameboyHLIncDec16[] = {
@@ -56,9 +61,14 @@ bool GameboyParser::parseRegister8(Parser& parser, GameboyRegisterValue& dest, i
 	return parseRegisterTable(parser, dest, gameboyRegs8, std::size(gameboyRegs8), allowed);
 }
 
-bool GameboyParser::parseRegister16(Parser& parser, GameboyRegisterValue& dest, int allowed)
+bool GameboyParser::parseRegister16SP(Parser& parser, GameboyRegisterValue& dest, int allowed)
 {
-	return parseRegisterTable(parser, dest, gameboyRegs16, std::size(gameboyRegs16), allowed);
+	return parseRegisterTable(parser, dest, gameboyRegs16SP, std::size(gameboyRegs16SP), allowed);
+}
+
+bool GameboyParser::parseRegister16AF(Parser& parser, GameboyRegisterValue& dest, int allowed)
+{
+	return parseRegisterTable(parser, dest, gameboyRegs16AF, std::size(gameboyRegs16AF), allowed);
 }
 
 bool GameboyParser::parseHLIncDec(Parser& parser, GameboyRegisterValue& dest)
@@ -69,7 +79,7 @@ bool GameboyParser::parseHLIncDec(Parser& parser, GameboyRegisterValue& dest)
 	if (!parseRegisterTable(parser, dest, gameboyHLIncDec16, std::size(gameboyHLIncDec16), GB_REG_BIT_ALL))
 	{
 		// hl+ / hl-
-		CHECK(parseRegister16(parser, dest, GB_REG_BIT(GB_REG16_HL)));
+		CHECK(parseRegister16SP(parser, dest, GB_REG_BIT(GB_REG16_HL)));
 
 		const Token& token = parser.nextToken();
 		if (token.type == TokenType::Plus)
@@ -90,12 +100,14 @@ bool GameboyParser::parseHLIncDec(Parser& parser, GameboyRegisterValue& dest)
 	}
 
 	CHECK(parser.matchToken(TokenType::RParen));
+
+	return true;
 }
 
 bool GameboyParser::parseMemoryRegister16(Parser& parser, GameboyRegisterValue& dest, int allowed)
 {
 	CHECK(parser.matchToken(TokenType::LParen));
-	CHECK(parseRegister16(parser, dest, allowed));
+	CHECK(parseRegister16SP(parser, dest, allowed));
 	CHECK(parser.matchToken(TokenType::RParen));
 
 	return true;
@@ -134,7 +146,7 @@ bool GameboyParser::parseSPImmediate(Parser& parser, Expression& dest, bool& isN
 	isNegative = false;
 
 	GameboyRegisterValue tempReg;
-	CHECK(parseRegister16(parser, tempReg, GB_REG_BIT(GB_REG16_SP)));
+	CHECK(parseRegister16SP(parser, tempReg, GB_REG_BIT(GB_REG16_SP)));
 
 	const Token& token = parser.peekToken();
 	if (token.type != TokenType::Plus && token.type != TokenType::Minus)
@@ -167,20 +179,22 @@ bool GameboyParser::parseOpcodeParameter(Parser& parser, unsigned char paramType
 			return true;
 		}
 		return false;
-	case GB_PARAM_REG16:
-		return parseRegister16(parser, destReg, GB_REG16_BIT_ALL);
+	case GB_PARAM_REG16_SP:
+		return parseRegister16SP(parser, destReg, GB_REG16_BIT_ALL);
+	case GB_PARAM_REG16_AF:
+		return parseRegister16AF(parser, destReg, GB_REG16_BIT_ALL);
 	case GB_PARAM_A:
 		return parseRegister8(parser, destReg, GB_REG_BIT(GB_REG8_A));
 	case GB_PARAM_MEMBC_MEMDE:
 		return parseMemoryRegister16(parser, destReg, GB_REG_BIT(GB_REG16_BC) | GB_REG_BIT(GB_REG16_DE));
 	case GB_PARAM_HL:
-		return parseRegister16(parser, destReg, GB_REG_BIT(GB_REG16_HL));
+		return parseRegister16SP(parser, destReg, GB_REG_BIT(GB_REG16_HL));
 	case GB_PARAM_MEMHL:
 		return parseMemoryRegister16(parser, destReg, GB_REG_BIT(GB_REG16_HL));
 	case GB_PARAM_HLI_HLD:
 		return parseHLIncDec(parser, destReg);
 	case GB_PARAM_SP:
-		return parseRegister16(parser, destReg, GB_REG_BIT(GB_REG16_SP));
+		return parseRegister16SP(parser, destReg, GB_REG_BIT(GB_REG16_SP));
 	case GB_PARAM_IMMEDIATE:
 		destImm = parser.parseExpression();
 		return destImm.isLoaded();
