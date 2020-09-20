@@ -84,5 +84,6 @@ const tGameboyOpcode GameboyOpcodes[] = {
 	{ L"ret",	1,	0xC0,	GB_PARAM_CONDITION,		GB_PARAM_NONE,			3,		-1,		0 },
 	{ L"ret",	1,	0xC9,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
 	{ L"reti",	1,	0xD9,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
+	{ L"rst",	1,	0xC7,	GB_PARAM_IMMEDIATE,		GB_PARAM_NONE,			0,		-1,		GB_RST },
 	{ nullptr,	0,	0x00,	GB_PARAM_NONE,			GB_PARAM_NONE,			-1,		-1,		0 },
 };

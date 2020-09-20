@@ -49,8 +49,8 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 			Vars.Immediate = (Vars.Immediate - RamPos - 2);
 		}
 
-		int64_t min = 0;
-		int64_t max = 0;
+		int64_t min = INT64_MIN;
+		int64_t max = INT64_MAX;
 		if (Opcode.flags & GB_IMMEDIATE_U3)
 		{
 			min = 0;
@@ -126,10 +126,20 @@ bool CGameboyInstruction::Validate(const ValidateState& state)
 			}
 			return false;
 		}
-
-		// Move small immediate to lhs
-		if (Opcode.flags & GB_IMMEDIATE_U3)
+		if (Opcode.flags & GB_RST)
 		{
+			if (Vars.Immediate != 0x00 && Vars.Immediate != 0x08 && Vars.Immediate != 0x10 && Vars.Immediate != 0x18 &&
+				Vars.Immediate != 0x20 && Vars.Immediate != 0x28 && Vars.Immediate != 0x30 && Vars.Immediate != 0x38)
+			{
+				Logger::queueError(Logger::Error, L"Invalid RST target %i", Vars.Immediate);
+				return false;
+			}
+		}
+
+		// Move immediate to lhs
+		if (Opcode.flags & (GB_IMMEDIATE_U3 | GB_RST))
+		{
+			Vars.LeftParam.name = L"imm";
 			Vars.LeftParam.num = Vars.Immediate;
 		}
 	}
