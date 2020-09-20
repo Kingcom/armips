@@ -7,6 +7,7 @@ CZ80Architecture Z80;
 
 CZ80Architecture::CZ80Architecture()
 {
+	this->Version = Z80ArchType::Invalid;
 }
 
 std::unique_ptr<CAssemblerCommand> CZ80Architecture::parseDirective(Parser& parser)

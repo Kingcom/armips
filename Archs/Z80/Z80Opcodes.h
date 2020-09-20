@@ -14,9 +14,9 @@
 #define	Z80_PARAM_MEMIMMEDIATE	0x0B	// (imm)
 #define Z80_PARAM_FF00_C		0x0C	// (0xFF00+c)
 #define Z80_PARAM_SP_IMM		0x0D	// sp+s8
-#define Z80_PARAM_CONDITION		0x0E	// nz, z, nc, c
+#define Z80_PARAM_CONDITION		0x0E	// nz, z, nc, c, po, pe, p, m
 #define Z80_PARAM_AF			0x0F	// af
-#define Z80_PARAM_AF_PRIME		0x10	// af'
+#define Z80_PARAM_AF_SHADOW		0x10	// af'
 #define Z80_PARAM_MEMSP			0x11	// (sp)
 #define Z80_PARAM_DE			0x12	// de
 #define Z80_PARAM_REG8			0x13	// b, c, d, e, h, l, a
@@ -64,7 +64,14 @@
 								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  \
 								| Z80_REG_BIT(Z80_COND_PO) | Z80_REG_BIT(Z80_COND_PE) \
 								| Z80_REG_BIT(Z80_COND_P)  | Z80_REG_BIT(Z80_COND_M)  )
+#define Z80_COND_BIT_JR			( Z80_REG_BIT(Z80_COND_NZ) | Z80_REG_BIT(Z80_COND_Z)  \
+								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  )
 #define Z80_COND_BIT_GB			( Z80_REG_BIT(Z80_COND_NZ) | Z80_REG_BIT(Z80_COND_Z)  \
+								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  )
+#define Z80_COND_BIT_ER			( Z80_REG_BIT(Z80_COND_NZ) | Z80_REG_BIT(Z80_COND_Z)  \
+								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  \
+								| Z80_REG_BIT(Z80_COND_P)  | Z80_REG_BIT(Z80_COND_M)  )
+#define Z80_COND_BIT_ER_CALL	( Z80_REG_BIT(Z80_COND_NZ) | Z80_REG_BIT(Z80_COND_Z)  \
 								| Z80_REG_BIT(Z80_COND_NC) | Z80_REG_BIT(Z80_COND_C)  )
 
 #define Z80_REG_I				0x00	// i
@@ -90,6 +97,13 @@
 #define Z80_INTERRUPT_MODE		0x00004000
 #define Z80_PREFIX_IX_IY		0x00008000
 #define Z80_IMMEDIATE2_U8		0x00010000
+#define Z80_EREADER				0x00020000
+#define Z80_CALL				0x00040000
+
+#define Z80_COMPAT(z80, gameboy, ereader) \
+	( (z80		? Z80_Z80		: 0) \
+	| (gameboy	? Z80_GAMEBOY	: 0) \
+	| (ereader	? Z80_EREADER	: 0) )
 
 #define Z80_HAS_IMMEDIATE		( Z80_IMMEDIATE_U3 | Z80_IMMEDIATE_U8 | Z80_IMMEDIATE_S8 \
 								| Z80_IMMEDIATE_U16 | Z80_RST | Z80_JUMP_RELATIVE \

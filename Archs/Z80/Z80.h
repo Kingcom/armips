@@ -4,7 +4,7 @@
 #include "Core/ELF/ElfRelocator.h"
 #include "Core/Expression.h"
 
-enum class Z80ArchType { Z80 = 0, Gameboy, Invalid };
+enum class Z80ArchType { Z80 = 0, Gameboy, Ereader, Invalid };
 
 struct Z80RegisterValue
 {
@@ -31,6 +31,8 @@ public:
 		{
 		case Z80ArchType::Gameboy:
 			return L"Gameboy";
+		case Z80ArchType::Ereader:
+			return L"e-Reader";
 		default:
 			return L"Z80";
 		}
