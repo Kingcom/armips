@@ -208,6 +208,25 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		}
 	}
 
+	if (registerData.rspvealt.num != -1)
+	{
+		if (opcodeData.opcode.flags & (MO_RSP_INDEX_HWALIGNED | MO_RSP_INDEX_WALIGNED | MO_RSP_INDEX_DWALIGNED | MO_RSP_INDEX_QWALIGNED))
+		{
+			int shift = 0;
+
+			if (opcodeData.opcode.flags & MO_RSP_INDEX_HWALIGNED) shift = 1;
+			else if (opcodeData.opcode.flags & MO_RSP_INDEX_WALIGNED) shift = 2;
+			else if (opcodeData.opcode.flags & MO_RSP_INDEX_DWALIGNED) shift = 3;
+			else if (opcodeData.opcode.flags & MO_RSP_INDEX_QWALIGNED) shift = 4;
+
+			if (registerData.rspvealt.num & ((1 << shift) - 1))
+			{
+				Logger::queueError(Logger::Error,L"Vector element index must be %d-byte aligned",1<<shift);
+				return false;
+			}
+		}
+	}
+
 	// check load delay
 	if (Mips.hasLoadDelay() && Mips.GetLoadDelay() && !IgnoreLoadDelay)
 	{
