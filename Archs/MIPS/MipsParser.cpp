@@ -1205,7 +1205,7 @@ void MipsParser::setOmittedRegisters(const tMipsOpcode& opcode)
 	if (opcode.flags & MO_FRSD)
 		registers.frd = registers.frs;
 
-	if (opcode.flags & MO_RSPVRSD)
+	if (opcode.flags & MO_RSP_VRSD)
 		registers.rspvrd = registers.rspvrs;
 }
 
@@ -1299,7 +1299,7 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			case 's':
 				CHECK(parseVfpuRegister(parser,registers.vrs,opcodeData.vfpuSize));
 				CHECK(registers.vrs.type == MipsRegisterType::VfpuMatrix);
-				if (opcode.flags & MO_TRANSPOSE_VS)
+				if (opcode.flags & MO_VFPU_TRANSPOSE_VS)
 					registers.vrs.num ^= 0x20;
 				break;
 			case 't':
