@@ -208,25 +208,6 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		}
 	}
 
-	if (registerData.rspvealt.num != -1)
-	{
-		if (opcodeData.opcode.flags & (MO_RSP_INDEX_HWALIGNED | MO_RSP_INDEX_WALIGNED | MO_RSP_INDEX_DWALIGNED | MO_RSP_INDEX_QWALIGNED))
-		{
-			int shift = 0;
-
-			if (opcodeData.opcode.flags & MO_RSP_INDEX_HWALIGNED) shift = 1;
-			else if (opcodeData.opcode.flags & MO_RSP_INDEX_WALIGNED) shift = 2;
-			else if (opcodeData.opcode.flags & MO_RSP_INDEX_DWALIGNED) shift = 3;
-			else if (opcodeData.opcode.flags & MO_RSP_INDEX_QWALIGNED) shift = 4;
-
-			if (registerData.rspvealt.num & ((1 << shift) - 1))
-			{
-				Logger::queueError(Logger::Error,L"Vector element index must be %d-byte aligned",1<<shift);
-				return false;
-			}
-		}
-	}
-
 	// check load delay
 	if (Mips.hasLoadDelay() && Mips.GetLoadDelay() && !IgnoreLoadDelay)
 	{
@@ -274,7 +255,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 
 void CMipsInstruction::encodeNormal() const
 {
-	int encoding = opcodeData.opcode.destencoding;
+	int32_t encoding = opcodeData.opcode.destencoding;
 
 	if (registerData.grs.num != -1) encoding |= MIPS_RS(registerData.grs.num);	// source reg
 	if (registerData.grt.num != -1) encoding |= MIPS_RT(registerData.grt.num);	// target reg
