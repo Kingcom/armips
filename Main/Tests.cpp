@@ -265,7 +265,7 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 		changeConsoleColor(ConsoleColors::White);
 
 		std::wstring line = tfm::format(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
-		Logger::print(L"%-50s",line);
+		Logger::print(L"%-60s",line);
 
 		std::wstring path = dir + L"/" + tests[i];
 		std::wstring errors;
