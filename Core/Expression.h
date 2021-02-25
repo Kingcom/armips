@@ -191,7 +191,7 @@ public:
 
 	bool evaluateString(std::wstring& dest, bool convert);
 	bool evaluateIdentifier(std::wstring& dest);
-	std::wstring toString();;
+	std::wstring toString();
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	std::wstring originalText;
