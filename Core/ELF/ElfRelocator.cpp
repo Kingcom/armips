@@ -76,7 +76,7 @@ std::vector<ArFileEntry> loadArArchive(const fs::path& inputName)
 					if (i > 0 && fileName[i-1] == '/')
 						i--;
 					fileName[i] = 0;
-					break;;
+					break;
 				}
 
 				fileName[i] = header->fileName[i];

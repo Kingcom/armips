@@ -184,7 +184,7 @@ public:
 	bool init(TextFile* input);
 protected:
 	Token loadToken();
-	bool isInputAtEnd();;
+	bool isInputAtEnd();
 
 	void skipWhitespace();
 	void createToken(TokenType type, size_t length);

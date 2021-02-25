@@ -174,7 +174,7 @@ void CThumbInstruction::WriteInstruction(unsigned short encoding) const
 
 void CThumbInstruction::Encode() const
 {
-	unsigned int encoding = Opcode.encoding;;
+	unsigned int encoding = Opcode.encoding;
 	int immediate;
 
 	if (Opcode.type == THUMB_TYPE19)	// THUMB.19: long branch with link
