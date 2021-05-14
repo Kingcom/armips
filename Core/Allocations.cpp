@@ -7,14 +7,19 @@ std::map<Allocations::Key, Allocations::Usage> Allocations::allocations;
 std::map<Allocations::Key, int64_t> Allocations::pools;
 std::multimap<Allocations::Key, Allocations::SubArea> Allocations::subAreas;
 
+// Are we keeping existing positions this round?  Start with no, since we have none.
 bool Allocations::keepPositions = false;
+// Should we keep positions next time?  This is set to false on allocation failure.
 bool Allocations::nextKeepPositions = true;
+// Did we adjust any positions to keep the old?
+bool Allocations::keptPositions = false;
 
 void Allocations::clear()
 {
 	allocations.clear();
 	keepPositions = false;
 	nextKeepPositions = true;
+	keptPositions = false;
 }
 
 void Allocations::setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill, bool shared)
@@ -69,9 +74,10 @@ bool Allocations::allocateSubArea(int64_t fileID, int64_t& position, int64_t min
 		if (keepPositions && position != -1 && position > possiblePosition)
 		{
 			int64_t offset = position - it.first.position;
-			if (it.second.space >= offset + size)
+			if (it.second.space >= offset + size && offset != actualUsage)
 			{
 				size += offset - actualUsage;
+				keptPositions = true;
 				// Fall through to reuse the emplace.
 				possiblePosition = position;
 			}
@@ -94,6 +100,12 @@ void Allocations::clearSubAreas()
 	subAreas.clear();
 	keepPositions = nextKeepPositions;
 	nextKeepPositions = true;
+	keptPositions = false;
+}
+
+bool Allocations::canTrimSpace()
+{
+	return keptPositions;
 }
 
 int64_t Allocations::getSubAreaUsage(int64_t fileID, int64_t position)

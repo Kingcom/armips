@@ -41,6 +41,8 @@ public:
 	static bool allocateSubArea(int64_t fileID, int64_t& position, int64_t minRange, int64_t maxRange, int64_t size);
 	static int64_t getSubAreaUsage(int64_t fileID, int64_t position);
 
+	static bool canTrimSpace();
+
 	static void validateOverlap();
 	static AllocationStats collectStats();
 
@@ -82,4 +84,5 @@ private:
 	static std::multimap<Key, SubArea> subAreas;
 	static bool keepPositions;
 	static bool nextKeepPositions;
+	static bool keptPositions;
 };
