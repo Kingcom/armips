@@ -80,4 +80,6 @@ private:
 	static std::map<Key, Usage> allocations;
 	static std::map<Key, int64_t> pools;
 	static std::multimap<Key, SubArea> subAreas;
+	static bool keepPositions;
+	static bool nextKeepPositions;
 };

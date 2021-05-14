@@ -7,9 +7,14 @@ std::map<Allocations::Key, Allocations::Usage> Allocations::allocations;
 std::map<Allocations::Key, int64_t> Allocations::pools;
 std::multimap<Allocations::Key, Allocations::SubArea> Allocations::subAreas;
 
+bool Allocations::keepPositions = false;
+bool Allocations::nextKeepPositions = true;
+
 void Allocations::clear()
 {
 	allocations.clear();
+	keepPositions = false;
+	nextKeepPositions = true;
 }
 
 void Allocations::setArea(int64_t fileID, int64_t position, int64_t space, int64_t usage, bool usesFill, bool shared)
@@ -60,6 +65,18 @@ bool Allocations::allocateSubArea(int64_t fileID, int64_t& position, int64_t min
 		if (maxRange != -1 && possiblePosition > maxRange)
 			continue;
 
+		// Can we use the position it had before?  Nudge up size if so.
+		if (keepPositions && position != -1 && position > possiblePosition)
+		{
+			int64_t offset = position - it.first.position;
+			if (it.second.space >= offset + size)
+			{
+				size += offset - actualUsage;
+				// Fall through to reuse the emplace.
+				possiblePosition = position;
+			}
+		}
+
 		if (it.second.space >= actualUsage + size)
 		{
 			position = possiblePosition;
@@ -68,12 +85,15 @@ bool Allocations::allocateSubArea(int64_t fileID, int64_t& position, int64_t min
 		}
 	}
 
+	nextKeepPositions = false;
 	return false;
 }
 
 void Allocations::clearSubAreas()
 {
 	subAreas.clear();
+	keepPositions = nextKeepPositions;
+	nextKeepPositions = true;
 }
 
 int64_t Allocations::getSubAreaUsage(int64_t fileID, int64_t position)
