@@ -248,7 +248,8 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	if (!Allocations::allocateSubArea(fileID, position, minRange, maxRange, contentSize))
 	{
 		Logger::queueError(Logger::Error, L"No space available for .autoregion of size %d", contentSize);
-		return false;
+		// We might be able to do better next time.
+		return Allocations::canTrimSpace();
 	}
 
 	Arch->NextSection();
