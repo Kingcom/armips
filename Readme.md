@@ -105,7 +105,13 @@ Please refer to the CMake documentation for further information.
 
 # 3. Overview
 
-The assembler includes full support for the MIPS R3000, MIPS R4000, Allegrex and RSP instruction sets, partial support for the EmotionEngine instruction set, as well as complete support for the ARM7 and ARM9 instruction sets, both THUMB and ARM mode. Among the other features of the assembler are:
+The assembler supports the following architectures:
+
+* The full MIPS R3000, MIPS R4000, Allegrex and RSP instruction sets, with partial support for the EmotionEngine instruction set.
+* The full ARM7 and ARM9 instruction sets, both THUMB and ARM mode.
+* The full Z80 and LR35902 instruction sets, as well as Nintendo e-Reader instructions.
+
+Among the other features of the assembler are:
 
 * a full fledged C-like expression parser. It should behave exactly like in any C/C++ code, including all the weirdness. All immediate values can be specified by an expression, though some directives can't use variable addresses including labels
 * you can open several files in a row, but only one output file can be open at any time. You can specify its address in memory to allow overlay support. Any file can cross-reference any other included file
@@ -458,8 +464,11 @@ These directives can be used to set the architecture that the following assembly
 | `.gba` | Game Boy Advance | ARM7 | Defaults to THUMB mode |
 | `.nds` | Nintendo DS | ARM9 | Defaults to ARM mode |
 | `.3ds` | Nintendo 3DS | ARM11 | Defaults to ARM mode, incomplete |
+| `.gb` | Game Boy (Color) | LR35902 | - |
+| `.ereader` | Nintendo e-Reader | e-Reader Z80 | - |
 | `.arm.big` | - | ARM | Output in big endian |
 | `.arm.little` | - | ARM | Output in little endian |
+| `.z80` | - | Z80 | - |
 
 ### Open a generic file
 
@@ -1115,6 +1124,7 @@ will align the memory address to a multiple of 4, then create a label named `Mai
 ## 7.1 Change log
 
 * Version 0.11
+    * added support for Z80, LR35902 (Game Boy) and Nintendo e-Reader Z80
     * new `.aligna` directive for absolute address alignment
     * new expression functions: `org(label)`, `orga(label)`, `headersize(label)`
     * new expression functions: `min` and `max`

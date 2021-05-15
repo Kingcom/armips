@@ -235,6 +235,16 @@ inline bool isBlockCommentEnd(const std::wstring& text, size_t pos){
 	return pos+1 < text.size() && text[pos+0] == '*' && text[pos+1] == '/';
 }
 
+inline bool isValidIdentifierCharacter(wchar_t character, bool first)
+{
+	if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z')) return true;
+	if (!first && (character >= '0' && character <= '9')) return true;
+	if (!first && character == '\'') return true;
+	if (character == '_' || character == '.') return true;
+	if (character == '@') return true;
+	return false;
+}
+
 void FileTokenizer::skipWhitespace()
 {
 	while (true)
@@ -607,7 +617,7 @@ Token FileTokenizer::loadToken()
 
 	// identifiers
 	bool isFirst = true;
-	while (pos < currentLine.size() && Global.symbolTable.isValidSymbolCharacter(currentLine[pos],isFirst))
+	while (pos < currentLine.size() && isValidIdentifierCharacter(currentLine[pos],isFirst))
 	{
 		pos++;
 		isFirst = false;
