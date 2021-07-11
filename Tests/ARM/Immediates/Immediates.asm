@@ -13,7 +13,7 @@
 	and	r6,~0FFh	; test and conversion to bic
 	bic	r6,0FFFFFFh	; test bic conversion to and
 
-	cmp	r6,~1h		; test cmp conversion to cmn
+	cmp	r6,-1h		; test cmp conversion to cmn
 
 				; test shifted immediates
 .macro simm,reg,imm,rot

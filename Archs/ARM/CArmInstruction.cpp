@@ -219,15 +219,38 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			if ((temp = getShiftedImmediate(Vars.Immediate,Vars.Shift.ShiftAmount)) == -1)
 			{
 				// mov/mvn -> mvn/mov
-				if ((Opcode.flags & ARM_OPTIMIZE) && (temp = getShiftedImmediate(~Vars.Immediate,Vars.Shift.ShiftAmount)) != -1)
+				if ((Opcode.flags & ARM_OPTIMIZE))
 				{
-					if (Opcode.flags & ARM_OPMOVMVN) Vars.Opcode.NewEncoding = Opcode.encoding ^ 0x0400000;
-					if (Opcode.flags & ARM_OPANDBIC) Vars.Opcode.NewEncoding = Opcode.encoding ^ 0x1C00000;
-					if (Opcode.flags & ARM_OPCMPCMN) Vars.Opcode.NewEncoding = Opcode.encoding ^ 0x0200000;
-					Vars.Opcode.UseNewEncoding = true;
-				} else {
-					Logger::queueError(Logger::Error,L"Invalid shifted immediate %X",Vars.OriginalImmediate);
-					return false;
+					auto encoding = Opcode.encoding;
+					auto immediate = Vars.Immediate;
+
+					if (Opcode.flags & ARM_OPMOVMVN)
+					{
+						encoding ^= 0x0400000;
+						immediate = ~immediate;
+					}
+					else if (Opcode.flags & ARM_OPANDBIC)
+					{
+						encoding ^= 0x1C00000;
+						immediate = ~immediate;
+					}
+					else if (Opcode.flags & ARM_OPCMPCMN)
+					{
+						encoding ^= 0x0200000;
+						immediate = 0-immediate;
+					}
+
+					temp = getShiftedImmediate(immediate, Vars.Shift.ShiftAmount);
+					if (temp != -1)
+					{
+						Vars.Opcode.NewEncoding = encoding;
+						Vars.Opcode.UseNewEncoding = true;
+					}
+					else
+					{
+						Logger::queueError(Logger::Error,L"Invalid shifted immediate %X",Vars.OriginalImmediate);
+						return false;
+					}
 				}
 			}
 			Vars.Immediate = temp;
