@@ -245,5 +245,5 @@ if(NOT ARMIPS_LIBRARY_ONLY)
 
 	# install
 	install(TARGETS armips-bin RUNTIME DESTINATION bin)
-	install(FILES Readme.md DESTINATION share/doc/armips)
+	install(FILES Readme.md DESTINATION share/doc/${PROJECT_NAME})
 endif()
