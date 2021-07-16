@@ -244,6 +244,6 @@ if(NOT ARMIPS_LIBRARY_ONLY)
 	add_test(NAME armipstests COMMAND armipstests ${CMAKE_CURRENT_SOURCE_DIR}/Tests)
 
 	# install
-	install(TARGETS armips-bin RUNTIME DESTINATION .)
-	install(FILES Readme.md DESTINATION .)
+	install(TARGETS armips-bin RUNTIME DESTINATION bin)
+	install(FILES Readme.md DESTINATION share/doc/armips)
 endif()
