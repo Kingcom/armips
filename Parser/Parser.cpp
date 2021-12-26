@@ -535,15 +535,17 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		}
 
 		TokenizerPosition startPos = getTokenizer()->getPosition();
-		Expression exp = parseExpression();
-		if (!exp.isLoaded())
-		{
-			printError(start,L"Invalid macro argument expression");
-			return nullptr;
-		}
+
+		while (peekToken().type != TokenType::Comma && peekToken().type != TokenType::Separator)
+			nextToken();
 
 		TokenizerPosition endPos = getTokenizer()->getPosition();
 		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
+		if (tokens.size() == 0)
+		{
+			printError(start,L"Empty macro argument");
+			return nullptr;
+		}
 
 		// remember any single identifier parameters for the label replacement
 		if (tokens.size() == 1 && tokens[0].type == TokenType::Identifier)
@@ -559,7 +561,8 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		while (peekToken().type == TokenType::Comma)
 		{
 			eatToken();
-			parseExpression();
+			while (peekToken().type != TokenType::Comma && peekToken().type != TokenType::Separator)
+				nextToken();
 			count++;
 		}
 
