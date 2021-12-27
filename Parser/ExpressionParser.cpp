@@ -2,7 +2,7 @@
 #include "Core/Expression.h"
 #include "Parser/Tokenizer.h"
 
-static ExpressionInternal* expression(Tokenizer& tokenizer);
+static std::unique_ptr<ExpressionInternal> expression(Tokenizer& tokenizer);
 
 static bool allowFunctionCall = true;
 
@@ -11,7 +11,7 @@ void allowFunctionCallExpression(bool allow)
 	allowFunctionCall = allow;
 }
 
-static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> primaryExpression(Tokenizer& tokenizer)
 {
 	const Token &tok = tokenizer.peekToken();
 
@@ -19,32 +19,29 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 	{
 	case TokenType::Float:
 		tokenizer.eatToken();
-		return new ExpressionInternal(tok.floatValue);
+		return std::make_unique<ExpressionInternal>(tok.floatValue);
 	case TokenType::Identifier:
 		{
 			const std::wstring stringValue = tok.getStringValue();
 			tokenizer.eatToken();
 			if (stringValue == L".")
-				return new ExpressionInternal(OperatorType::MemoryPos);
+				return std::make_unique<ExpressionInternal>(OperatorType::MemoryPos);
 			else
-				return new ExpressionInternal(stringValue,OperatorType::Identifier);
+				return std::make_unique<ExpressionInternal>(stringValue,OperatorType::Identifier);
 		}
 	case TokenType::String:
 		tokenizer.eatToken();
-		return new ExpressionInternal(tok.getStringValue(),OperatorType::String);
+		return std::make_unique<ExpressionInternal>(tok.getStringValue(),OperatorType::String);
 	case TokenType::Integer:
 		tokenizer.eatToken();
-		return new ExpressionInternal(tok.intValue);
+		return std::make_unique<ExpressionInternal>(tok.intValue);
 	case TokenType::LParen:
 		{
 			tokenizer.eatToken();
-			ExpressionInternal* exp = expression(tokenizer);
+			std::unique_ptr<ExpressionInternal> exp = expression(tokenizer);
 
 			if (tokenizer.nextToken().type != TokenType::RParen)
-			{
-				delete exp;
 				return nullptr;
-			}
 
 			return exp;
 		}
@@ -56,7 +53,7 @@ static ExpressionInternal* primaryExpression(Tokenizer& tokenizer)
 	return nullptr;
 }
 
-static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> postfixExpression(Tokenizer& tokenizer)
 {
 	if (allowFunctionCall &&
 		tokenizer.peekToken(0).type == TokenType::Identifier &&
@@ -65,38 +62,30 @@ static ExpressionInternal* postfixExpression(Tokenizer& tokenizer)
 		const std::wstring functionName = tokenizer.nextToken().getStringValue();
 		tokenizer.eatToken();
 
-		std::vector<ExpressionInternal*> parameters;
+		std::vector<std::unique_ptr<ExpressionInternal>> parameters;
 		while (tokenizer.peekToken().type != TokenType::RParen)
 		{
 			if (parameters.size() != 0 && tokenizer.nextToken().type != TokenType::Comma)
-			{
-				for (ExpressionInternal* exp: parameters)
-					delete exp;
 				return nullptr;
-			}
 
-			ExpressionInternal* exp = expression(tokenizer);
+			std::unique_ptr<ExpressionInternal> exp = expression(tokenizer);
 			if (exp == nullptr)
-			{
-				for (ExpressionInternal* exp: parameters)
-					delete exp;
 				return nullptr;
-			}
 
-			parameters.push_back(exp);
+			parameters.push_back(std::move(exp));
 		}
 
 		tokenizer.eatToken();
 
-		return new ExpressionInternal(functionName,parameters);
+		return std::make_unique<ExpressionInternal>(functionName, std::move(parameters));
 	}
 
 	return primaryExpression(tokenizer);
 }
 
-static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> unaryExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = postfixExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = postfixExpression(tokenizer);
 	if (exp != nullptr)
 		return exp;
 
@@ -110,22 +99,21 @@ static ExpressionInternal* unaryExpression(Tokenizer& tokenizer)
 	case TokenType::Plus:
 		return exp;
 	case TokenType::Minus:
-		return new ExpressionInternal(OperatorType::Neg,exp);
+		return std::make_unique<ExpressionInternal>(OperatorType::Neg, std::move(exp));
 	case TokenType::Tilde:
-		return new ExpressionInternal(OperatorType::BitNot,exp);
+		return std::make_unique<ExpressionInternal>(OperatorType::BitNot, std::move(exp));
 	case TokenType::Exclamation:
-		return new ExpressionInternal(OperatorType::LogNot,exp);
+		return std::make_unique<ExpressionInternal>(OperatorType::LogNot, std::move(exp));
 	case TokenType::Degree:
-		return new ExpressionInternal(OperatorType::ToString,exp);
+		return std::make_unique<ExpressionInternal>(OperatorType::ToString, std::move(exp));
 	default:
-		delete exp;
 		return nullptr;
 	}
 }
 
-static ExpressionInternal* multiplicativeExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> multiplicativeExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = unaryExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = unaryExpression(tokenizer);
 	if (exp ==  nullptr)
 		return nullptr;
 
@@ -152,22 +140,19 @@ static ExpressionInternal* multiplicativeExpression(Tokenizer& tokenizer)
 
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = unaryExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = unaryExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(op, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* additiveExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> additiveExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = multiplicativeExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = multiplicativeExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -191,22 +176,19 @@ static ExpressionInternal* additiveExpression(Tokenizer& tokenizer)
 
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = multiplicativeExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = multiplicativeExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(op, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* shiftExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> shiftExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = additiveExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = additiveExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -230,22 +212,19 @@ static ExpressionInternal* shiftExpression(Tokenizer& tokenizer)
 
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = additiveExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = additiveExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(op, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* relationalExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> relationalExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = shiftExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = shiftExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -275,22 +254,18 @@ static ExpressionInternal* relationalExpression(Tokenizer& tokenizer)
 
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = shiftExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = shiftExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
-
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(op, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* equalityExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> equalityExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = relationalExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = relationalExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -314,22 +289,19 @@ static ExpressionInternal* equalityExpression(Tokenizer& tokenizer)
 
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = relationalExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = relationalExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(op,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(op, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* andExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> andExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = equalityExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = equalityExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -337,22 +309,19 @@ static ExpressionInternal* andExpression(Tokenizer& tokenizer)
 	{
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = equalityExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = equalityExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(OperatorType::BitAnd,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(OperatorType::BitAnd, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* exclusiveOrExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> exclusiveOrExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = andExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = andExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -360,22 +329,19 @@ static ExpressionInternal* exclusiveOrExpression(Tokenizer& tokenizer)
 	{
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = andExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = andExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(OperatorType::Xor,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(OperatorType::Xor, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* inclusiveOrExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> inclusiveOrExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = exclusiveOrExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = exclusiveOrExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -383,22 +349,19 @@ static ExpressionInternal* inclusiveOrExpression(Tokenizer& tokenizer)
 	{
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = exclusiveOrExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = exclusiveOrExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(OperatorType::BitOr,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(OperatorType::BitOr, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* logicalAndExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> logicalAndExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = inclusiveOrExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = inclusiveOrExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -406,22 +369,19 @@ static ExpressionInternal* logicalAndExpression(Tokenizer& tokenizer)
 	{
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = inclusiveOrExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = inclusiveOrExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(OperatorType::LogAnd,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(OperatorType::LogAnd, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* logicalOrExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> logicalOrExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = logicalAndExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = logicalAndExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -429,22 +389,19 @@ static ExpressionInternal* logicalOrExpression(Tokenizer& tokenizer)
 	{
 		tokenizer.eatToken();
 
-		ExpressionInternal* exp2 = logicalAndExpression(tokenizer);
+		std::unique_ptr<ExpressionInternal> exp2 = logicalAndExpression(tokenizer);
 		if (exp2 == nullptr)
-		{
-			delete exp;
 			return nullptr;
-		}
 
-		exp = new ExpressionInternal(OperatorType::LogOr,exp,exp2);
+		exp = std::make_unique<ExpressionInternal>(OperatorType::LogOr, std::move(exp), std::move(exp2));
 	}
 
 	return exp;
 }
 
-static ExpressionInternal* conditionalExpression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> conditionalExpression(Tokenizer& tokenizer)
 {
-	ExpressionInternal* exp = logicalOrExpression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = logicalOrExpression(tokenizer);
 	if (exp == nullptr)
 		return nullptr;
 
@@ -453,23 +410,19 @@ static ExpressionInternal* conditionalExpression(Tokenizer& tokenizer)
 		return exp;
 
 	tokenizer.eatToken();
-	ExpressionInternal* second = expression(tokenizer);
+	std::unique_ptr<ExpressionInternal> second = expression(tokenizer);
 
 	if (second != nullptr && tokenizer.nextToken().type == TokenType::Colon)
 	{
-		ExpressionInternal* third = expression(tokenizer);
+		std::unique_ptr<ExpressionInternal> third = expression(tokenizer);
 		if (third != nullptr)
-			return new ExpressionInternal(OperatorType::TertiaryIf,exp,second,third);
-
-		delete third;
+			return std::make_unique<ExpressionInternal>(OperatorType::TertiaryIf, std::move(exp), std::move(second), std::move(third));
 	}
 
-	delete second;
-	delete exp;
 	return nullptr;
 }
 
-static ExpressionInternal* expression(Tokenizer& tokenizer)
+static std::unique_ptr<ExpressionInternal> expression(Tokenizer& tokenizer)
 {
 	return conditionalExpression(tokenizer);
 }
@@ -480,11 +433,9 @@ Expression parseExpression(Tokenizer& tokenizer, bool inUnknownOrFalseBlock)
 
 	// parse expression, revert tokenizer to previous position
 	// if it failed
-	ExpressionInternal* exp = expression(tokenizer);
+	std::unique_ptr<ExpressionInternal> exp = expression(tokenizer);
 	if (exp == nullptr)
 		tokenizer.setPosition(pos);
 
-	Expression result;
-	result.setExpression(exp, inUnknownOrFalseBlock);
-	return result;
+	return Expression(std::move(exp), inUnknownOrFalseBlock);
 }

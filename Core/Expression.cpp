@@ -449,17 +449,6 @@ ExpressionValue ExpressionValue::operator||(const ExpressionValue& other) const
 	return result;
 }
 
-ExpressionInternal::ExpressionInternal()
-{
-	children = nullptr;
-	childrenCount = 0;
-}
-
-ExpressionInternal::~ExpressionInternal()
-{
-	deallocate();
-}
-
 ExpressionInternal::ExpressionInternal(int64_t value)
 	: ExpressionInternal()
 {
@@ -493,56 +482,19 @@ ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType t
 	}
 }
 
-ExpressionInternal::ExpressionInternal(OperatorType op, ExpressionInternal* a,
-	ExpressionInternal* b, ExpressionInternal* c)
-	: ExpressionInternal()
-{
-	type = op;
-	allocate(3);
-
-	children[0] = a;
-	children[1] = b;
-	children[2] = c;
-}
-
-ExpressionInternal::ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters)
+ExpressionInternal::ExpressionInternal(const std::wstring& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters)
 	: ExpressionInternal()
 {
 	type = OperatorType::FunctionCall;
-	allocate(parameters.size());
-
 	strValue = name;
-	for (size_t i = 0; i < parameters.size(); i++)
-	{
-		children[i] = parameters[i];
-	}
-}
-
-void ExpressionInternal::allocate(size_t count)
-{
-	deallocate();
-
-	children = new ExpressionInternal*[count];
-	childrenCount = count;
-}
-
-void ExpressionInternal::deallocate()
-{
-	for (size_t i = 0; i < childrenCount; i++)
-	{
-		delete children[i];
-	}
-
-	delete[] children;
-	children = nullptr;
-	childrenCount = 0;
+	children = std::move(parameters);
 }
 
 void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 {
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
-		if (children[i] != nullptr)
+		if (children[i])
 		{
 			children[i]->replaceMemoryPos(identifierName);
 		}
@@ -559,13 +511,13 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 
 bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
 {
-	if (minParams > childrenCount)
+	if (minParams > children.size())
 	{
 		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",strValue,minParams);
 		return false;
 	}
 
-	if (maxParams < childrenCount)
+	if (maxParams < children.size())
 	{
 		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",strValue,maxParams);
 		return false;
@@ -582,9 +534,9 @@ ExpressionValue ExpressionInternal::executeExpressionFunctionCall(const Expressi
 
 	// evaluate parameters
 	std::vector<ExpressionValue> params;
-	params.reserve(childrenCount);
+	params.reserve(children.size());
 
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
 		ExpressionValue result = children[i]->evaluate();
 		if (!result.isValid())
@@ -608,11 +560,11 @@ ExpressionValue ExpressionInternal::executeExpressionLabelFunctionCall(const Exp
 
 	// evaluate parameters
 	std::vector<std::shared_ptr<Label>> params;
-	params.reserve(childrenCount);
+	params.reserve(children.size());
 
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
-		ExpressionInternal *exp = children[i];
+		ExpressionInternal *exp = children[i].get();
 		if (!exp || !exp->isIdentifier())
 		{
 			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d, expecting identifier", strValue, i+1);
@@ -655,9 +607,9 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 
 		// evaluate parameters
 		std::vector<ExpressionValue> params;
-		params.reserve(childrenCount);
+		params.reserve(children.size());
 
-		for (size_t i = 0; i < childrenCount; i++)
+		for (size_t i = 0; i < children.size(); i++)
 		{
 			ExpressionValue result = children[i]->evaluate();
 			if (!result.isValid())
@@ -673,7 +625,7 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 		TokenStreamTokenizer tok;
 		tok.init(userFunc->content);
 
-		for (size_t i = 0; i < childrenCount; ++i)
+		for (size_t i = 0; i < children.size(); ++i)
 		{
 			const auto &paramName = userFunc->parameters[i];
 			const auto &paramValue = params[i];
@@ -776,7 +728,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 
 	// check if the same applies to all children
 	bool canSimplify = true;
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
 		if (children[i] != nullptr && !children[i]->simplify(inUnknownOrFalseBlock))
 			canSimplify = false;
@@ -806,7 +758,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 			break;
 		}
 
-		deallocate();
+		children.clear();
 	}
 
 	return canSimplify;
@@ -939,7 +891,7 @@ std::wstring ExpressionInternal::formatFunctionCall()
 {
 	std::wstring text = strValue + L"(";
 
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
 		if (i != 0)
 			text += L",";
@@ -1016,19 +968,11 @@ std::wstring ExpressionInternal::toString()
 	}
 }
 
-Expression::Expression()
+Expression::Expression(std::unique_ptr<ExpressionInternal> exp, bool inUnknownOrFalseBlock) :
+	expression(std::move(exp))
 {
-	expression = nullptr;
-	constExpression = true;
-}
-
-void Expression::setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock)
-{
-	expression = std::shared_ptr<ExpressionInternal>(exp);
-	if (exp != nullptr)
+	if (expression)
 		constExpression = expression->simplify(inUnknownOrFalseBlock);
-	else
-		constExpression = true;
 }
 
 ExpressionValue Expression::evaluate()
@@ -1089,8 +1033,5 @@ std::wstring Expression::toString()
 
 Expression createConstExpression(int64_t value)
 {
-	Expression exp;
-	ExpressionInternal* num = new ExpressionInternal(value);
-	exp.setExpression(num,false);
-	return exp;
+	return Expression(std::make_unique<ExpressionInternal>(value), false);
 }
