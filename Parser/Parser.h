@@ -5,6 +5,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -85,6 +86,8 @@ protected:
 	std::unique_ptr<CAssemblerCommand> parseLabel();
 	bool checkEquLabel();
 	bool checkMacroDefinition();
+
+	std::optional<std::vector<Token>> extractMacroParameter(const Token &macroStart);
 	std::unique_ptr<CAssemblerCommand> parseMacroCall();
 
 	struct FileEntry

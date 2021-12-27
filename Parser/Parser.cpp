@@ -499,6 +499,68 @@ bool Parser::checkMacroDefinition()
 	return true;
 }
 
+std::optional<std::vector<Token>> Parser::extractMacroParameter(const Token &macroStart)
+{
+	TokenizerPosition startPos = getTokenizer()->getPosition();
+
+	// Find the end of the parameter. The parameter may contain expressions with function calls,
+	// so keep track of the current parenthesis depth level
+	int parenCount = 0;
+	int braceCount = 0;
+	int bracketCount = 0;
+
+	while (peekToken().type != TokenType::Separator)
+	{
+		// if the next token is a comma, only exit the loop if parentheses are balanced
+		auto type = peekToken().type;
+		if (type == TokenType::Comma && parenCount == 0 && braceCount == 0 && bracketCount == 0)
+			break;
+
+		// keep track of parenthesis depth
+		switch (type)
+		{
+		case TokenType::LParen:
+			++parenCount;
+			break;
+		case TokenType::RParen:
+			--parenCount;
+			break;
+		case TokenType::LBrace:
+			++braceCount;
+			break;
+		case TokenType::RBrace:
+			--braceCount;
+			break;
+		case TokenType::LBrack:
+			++bracketCount;
+			break;
+		case TokenType::RBrack:
+			--bracketCount;
+			break;
+		default:
+			break;
+		}
+
+		eatToken();
+	}
+
+	if (parenCount != 0)
+	{
+		printError(macroStart, L"Unbalanced parentheses in macro parameter");
+		return std::nullopt;
+	}
+
+	TokenizerPosition endPos = getTokenizer()->getPosition();
+	std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
+	if (tokens.size() == 0)
+	{
+		printError(macroStart, L"Empty macro argument");
+		return std::nullopt;
+	}
+
+	return tokens;
+}
+
 std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 {
 	const Token& start = peekToken();
@@ -534,25 +596,16 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 			}
 		}
 
-		TokenizerPosition startPos = getTokenizer()->getPosition();
-
-		while (peekToken().type != TokenType::Comma && peekToken().type != TokenType::Separator)
-			nextToken();
-
-		TokenizerPosition endPos = getTokenizer()->getPosition();
-		std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
-		if (tokens.size() == 0)
-		{
-			printError(start,L"Empty macro argument");
+		auto tokens = extractMacroParameter(start);
+		if (!tokens)
 			return nullptr;
-		}
 
 		// remember any single identifier parameters for the label replacement
-		if (tokens.size() == 1 && tokens[0].type == TokenType::Identifier)
-			identifierParameters.insert(tokens[0].getStringValue());
+		if (tokens->size() == 1 && tokens->front().type == TokenType::Identifier)
+			identifierParameters.insert(tokens->front().getStringValue());
 
 		// give them as a replacement to new tokenizer
-		macroTokenizer.registerReplacement(macro.parameters[i],tokens);
+		macroTokenizer.registerReplacement(macro.parameters[i], *tokens);
 	}
 
 	if (peekToken().type == TokenType::Comma)
@@ -560,10 +613,12 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		size_t count = macro.parameters.size();
 		while (peekToken().type == TokenType::Comma)
 		{
+			// skip comma
 			eatToken();
-			while (peekToken().type != TokenType::Comma && peekToken().type != TokenType::Separator)
-				nextToken();
-			count++;
+
+			// skip parameter value
+			extractMacroParameter(start);
+			++count;
 		}
 
 		printError(start,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
