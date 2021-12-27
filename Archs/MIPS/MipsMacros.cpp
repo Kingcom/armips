@@ -410,7 +410,7 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroBranch(Parser& parser, MipsR
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
 	return createMacro(parser,macroText,flags, {
 			{ L"%op%",		op },
-			{ L"%u%",		unsigned_ ? L"u" : L""},
+			{ L"%u%",		unsigned_ ? L"u" : L" "},
 			{ L"%revcmp%",	revcmp ? L"1" : L"0"},
 			{ L"%rs%",		registers.grs.name },
 			{ L"%rt%",		registers.grt.name },
@@ -501,7 +501,7 @@ std::unique_ptr<CAssemblerCommand> generateMipsMacroSet(Parser& parser, MipsRegi
 
 	std::wstring macroText = preprocessMacro(selectedTemplate,immediates);
 	return createMacro(parser,macroText,flags, {
-			{ L"%u%",		unsigned_ ? L"u" : L""},
+			{ L"%u%",		unsigned_ ? L"u" : L" "},
 			{ L"%eq%",		eq ? L"1" : L"0" },
 			{ L"%ge%",		ge ? L"1" : L"0" },
 			{ L"%revcmp%",	revcmp ? L"1" : L"0" },
