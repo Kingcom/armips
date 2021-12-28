@@ -453,21 +453,21 @@ ExpressionInternal::ExpressionInternal(int64_t value)
 	: ExpressionInternal()
 {
 	type = OperatorType::Integer;
-	intValue = value;
+	this->value = value;
 }
 
 ExpressionInternal::ExpressionInternal(double value)
 	: ExpressionInternal()
 {
 	type = OperatorType::Float;
-	floatValue = value;
+	this->value = value;
 }
 
 ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
 	: ExpressionInternal()
 {
 	this->type = type;
-	strValue = value;
+	this->value = value;
 
 	switch (type)
 	{
@@ -486,7 +486,7 @@ ExpressionInternal::ExpressionInternal(const std::wstring& name, std::vector<std
 	: ExpressionInternal()
 {
 	type = OperatorType::FunctionCall;
-	strValue = name;
+	this->value = name;
 	children = std::move(parameters);
 }
 
@@ -503,7 +503,7 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 	if (type == OperatorType::MemoryPos)
 	{
 		type = OperatorType::Identifier;
-		strValue = identifierName;
+		value = identifierName;
 		fileNum = Global.FileInfo.FileNum;
 		section = Global.Section;
 	}
@@ -511,15 +511,17 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 
 bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
 {
+	auto functionName = valueAs<std::wstring>();
+
 	if (minParams > children.size())
 	{
-		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",strValue,minParams);
+		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",functionName,minParams);
 		return false;
 	}
 
 	if (maxParams < children.size())
 	{
-		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",strValue,maxParams);
+		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",functionName,maxParams);
 		return false;
 	}
 
@@ -536,12 +538,13 @@ ExpressionValue ExpressionInternal::executeExpressionFunctionCall(const Expressi
 	std::vector<ExpressionValue> params;
 	params.reserve(children.size());
 
+	auto functionName = valueAs<std::wstring>();
 	for (size_t i = 0; i < children.size(); i++)
 	{
 		ExpressionValue result = children[i]->evaluate();
 		if (!result.isValid())
 		{
-			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", strValue, i+1);
+			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", functionName, i+1);
 			return result;
 		}
 
@@ -549,7 +552,7 @@ ExpressionValue ExpressionInternal::executeExpressionFunctionCall(const Expressi
 	}
 
 	// execute
-	return entry.function(strValue, params);
+	return entry.function(functionName, params);
 }
 
 ExpressionValue ExpressionInternal::executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry)
@@ -562,44 +565,47 @@ ExpressionValue ExpressionInternal::executeExpressionLabelFunctionCall(const Exp
 	std::vector<std::shared_ptr<Label>> params;
 	params.reserve(children.size());
 
+	auto functionName = valueAs<std::wstring>();
 	for (size_t i = 0; i < children.size(); i++)
 	{
 		ExpressionInternal *exp = children[i].get();
 		if (!exp || !exp->isIdentifier())
 		{
-			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d, expecting identifier", strValue, i+1);
+			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d, expecting identifier", functionName, i+1);
 			return {};
 		}
 
-		const std::wstring& name = exp->getStringValue();
+		const std::wstring& name = exp->valueAs<std::wstring>();
 		std::shared_ptr<Label> label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
 		params.push_back(label);
 	}
 
 	// execute
-	return entry.function(strValue, params);
+	return entry.function(functionName, params);
 }
 
 ExpressionValue ExpressionInternal::executeFunctionCall()
 {
+	auto functionName = valueAs<std::wstring>();
+
 	// try expression functions
-	auto expFuncIt = expressionFunctions.find(strValue);
+	auto expFuncIt = expressionFunctions.find(functionName);
 	if (expFuncIt != expressionFunctions.end())
 		return executeExpressionFunctionCall(expFuncIt->second);
 
 	// try expression label functions
-	auto expLabelFuncIt = expressionLabelFunctions.find(strValue);
+	auto expLabelFuncIt = expressionLabelFunctions.find(functionName);
 	if (expLabelFuncIt != expressionLabelFunctions.end())
 		return executeExpressionLabelFunctionCall(expLabelFuncIt->second);
 
 	// try architecture specific expression functions
 	auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
-	expFuncIt = archExpressionFunctions.find(strValue);
+	expFuncIt = archExpressionFunctions.find(functionName);
 	if (expFuncIt != archExpressionFunctions.end())
 		return executeExpressionFunctionCall(expFuncIt->second);
 
 	// try user defined expression functions
-	auto *userFunc = UserFunctions::instance().findFunction(strValue);
+	auto *userFunc = UserFunctions::instance().findFunction(functionName);
 	if (userFunc)
 	{
 		if (!checkParameterCount(userFunc->parameters.size(), userFunc->parameters.size()))
@@ -614,7 +620,7 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 			ExpressionValue result = children[i]->evaluate();
 			if (!result.isValid())
 			{
-				Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", strValue, i+1);
+				Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", functionName, i+1);
 				return result;
 			}
 
@@ -649,13 +655,13 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 		Expression result = parseExpression(tok, false);
 		if (!result.isLoaded())
 		{
-			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", strValue);
+			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", functionName);
 			return {};
 		}
 
 		if (!tok.atEnd())
 		{
-			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", strValue);
+			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", functionName);
 			return {};
 		}
 
@@ -664,7 +670,7 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 	}
 
 	// error
-	Logger::queueError(Logger::Error, L"Unknown function \"%s\"", strValue);
+	Logger::queueError(Logger::Error, L"Unknown function \"%s\"", functionName);
 	return {};
 }
 
@@ -719,7 +725,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 	case OperatorType::ToString:
 		return false;
 	case OperatorType::FunctionCall:
-		if (!isExpressionFunctionSafe(strValue, inUnknownOrFalseBlock))
+		if (!isExpressionFunctionSafe(valueAs<std::wstring>(), inUnknownOrFalseBlock))
 			return false;
 		break;
 	default:
@@ -743,15 +749,15 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 		{
 		case ExpressionValueType::Integer:
 			type = OperatorType::Integer;
-			intValue = value.intValue;
+			this->value = value.intValue;
 			break;
 		case ExpressionValueType::Float:
 			type = OperatorType::Float;
-			floatValue = value.floatValue;
+			this->value = value.floatValue;
 			break;
 		case ExpressionValueType::String:
 			type = OperatorType::String;
-			strValue = value.strValue;
+			this->value = value.strValue;
 			break;
 		default:
 			type = OperatorType::Invalid;
@@ -773,17 +779,17 @@ ExpressionValue ExpressionInternal::evaluate()
 	{
 	case OperatorType::Integer:
 		val.type = ExpressionValueType::Integer;
-		val.intValue = intValue;
+		val.intValue = valueAs<int64_t>();
 		return val;
 	case OperatorType::Float:
 		val.type = ExpressionValueType::Float;
-		val.floatValue = floatValue;
+		val.floatValue = valueAs<double>();
 		return val;
 	case OperatorType::Identifier:
-		label = Global.symbolTable.getLabel(strValue,fileNum,section);
+		label = Global.symbolTable.getLabel(valueAs<std::wstring>(),fileNum,section);
 		if (label == nullptr)
 		{
-			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",strValue);
+			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",valueAs<std::wstring>());
 			return val;
 		}
 
@@ -798,7 +804,7 @@ ExpressionValue ExpressionInternal::evaluate()
 		return val;
 	case OperatorType::String:
 		val.type = ExpressionValueType::String;
-		val.strValue = strValue;
+		val.strValue = valueAs<std::wstring>();
 		return val;
 	case OperatorType::MemoryPos:
 		val.type = ExpressionValueType::Integer;
@@ -889,7 +895,7 @@ static std::wstring escapeString(const std::wstring& text)
 
 std::wstring ExpressionInternal::formatFunctionCall()
 {
-	std::wstring text = strValue + L"(";
+	std::wstring text = valueAs<std::wstring>() + L"(";
 
 	for (size_t i = 0; i < children.size(); i++)
 	{
@@ -906,13 +912,13 @@ std::wstring ExpressionInternal::toString()
 	switch (type)
 	{
 	case OperatorType::Integer:
-		return tfm::format(L"%d",intValue);
+		return tfm::format(L"%d",valueAs<int64_t>());
 	case OperatorType::Float:
-		return tfm::format(L"%g",floatValue);
+		return tfm::format(L"%g",valueAs<double>());
 	case OperatorType::Identifier:
-		return strValue;
+		return valueAs<std::wstring>();
 	case OperatorType::String:
-		return escapeString(strValue);
+		return escapeString(valueAs<std::wstring>());
 	case OperatorType::MemoryPos:
 		return L".";
 	case OperatorType::Add:
