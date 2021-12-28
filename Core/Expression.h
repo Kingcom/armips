@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
 #include <string>
+#include <variant>
 #include <vector>
 
 class Label;
@@ -143,27 +145,31 @@ public:
 	ExpressionValue evaluate();
 	std::wstring toString();
 	bool isIdentifier() { return type == OperatorType::Identifier; }
-	std::wstring getStringValue() { return strValue; }
+	std::wstring getStringValue() { return valueAs<std::wstring>(); }
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool simplify(bool inUnknownOrFalseBlock);
 	unsigned int getFileNum() { return fileNum; }
 	unsigned int getSection() { return section; }
 private:
+	using ValueTypes = std::variant<std::monostate, int64_t, double, std::wstring>;
+
+	template<typename T>
+	const T &valueAs() const
+	{
+		assert(std::holds_alternative<T>(value));
+		return std::get<T>(value);
+	}
+
 	std::wstring formatFunctionCall();
 	ExpressionValue executeExpressionFunctionCall(const ExpressionFunctionEntry& entry);
 	ExpressionValue executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry);
 	ExpressionValue executeFunctionCall();
 	bool checkParameterCount(size_t min, size_t max);
 
-	OperatorType type;
+	OperatorType type = OperatorType::Invalid;
 	std::vector<std::unique_ptr<ExpressionInternal>> children;
 
-	union
-	{
-		int64_t intValue;
-		double floatValue;
-	};
-	std::wstring strValue;
+	ValueTypes value;
 
 	unsigned int fileNum, section;
 };
