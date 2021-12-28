@@ -2,7 +2,7 @@
 
 #include "Archs/Architecture.h"
 #include "Core/Common.h"
-#include "Core/ExpressionFunctions.h"
+#include "Core/ExpressionFunctionHandler.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Parser/ExpressionParser.h"
@@ -509,204 +509,42 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 	}
 }
 
-bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
-{
-	auto functionName = valueAs<std::wstring>();
-
-	if (minParams > children.size())
-	{
-		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",functionName,minParams);
-		return false;
-	}
-
-	if (maxParams < children.size())
-	{
-		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",functionName,maxParams);
-		return false;
-	}
-
-	return true;
-}
-
-ExpressionValue ExpressionInternal::executeExpressionFunctionCall(const ExpressionFunctionEntry& entry)
-{
-	// check parameters
-	if (!checkParameterCount(entry.minParams, entry.maxParams))
-		return {};
-
-	// evaluate parameters
-	std::vector<ExpressionValue> params;
-	params.reserve(children.size());
-
-	auto functionName = valueAs<std::wstring>();
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		ExpressionValue result = children[i]->evaluate();
-		if (!result.isValid())
-		{
-			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", functionName, i+1);
-			return result;
-		}
-
-		params.push_back(result);
-	}
-
-	// execute
-	return entry.function(functionName, params);
-}
-
-ExpressionValue ExpressionInternal::executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry)
-{
-	// check parameters
-	if (!checkParameterCount(entry.minParams, entry.maxParams))
-		return {};
-
-	// evaluate parameters
-	std::vector<std::shared_ptr<Label>> params;
-	params.reserve(children.size());
-
-	auto functionName = valueAs<std::wstring>();
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		ExpressionInternal *exp = children[i].get();
-		if (!exp || !exp->isIdentifier())
-		{
-			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d, expecting identifier", functionName, i+1);
-			return {};
-		}
-
-		const std::wstring& name = exp->valueAs<std::wstring>();
-		std::shared_ptr<Label> label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
-		params.push_back(label);
-	}
-
-	// execute
-	return entry.function(functionName, params);
-}
-
 ExpressionValue ExpressionInternal::executeFunctionCall()
 {
 	auto functionName = valueAs<std::wstring>();
 
-	// try expression functions
-	auto expFuncIt = expressionFunctions.find(functionName);
-	if (expFuncIt != expressionFunctions.end())
-		return executeExpressionFunctionCall(expFuncIt->second);
-
-	// try expression label functions
-	auto expLabelFuncIt = expressionLabelFunctions.find(functionName);
-	if (expLabelFuncIt != expressionLabelFunctions.end())
-		return executeExpressionLabelFunctionCall(expLabelFuncIt->second);
-
-	// try architecture specific expression functions
-	auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
-	expFuncIt = archExpressionFunctions.find(functionName);
-	if (expFuncIt != archExpressionFunctions.end())
-		return executeExpressionFunctionCall(expFuncIt->second);
-
-	// try user defined expression functions
-	auto *userFunc = UserFunctions::instance().findFunction(functionName);
-	if (userFunc)
+	auto handle = ExpressionFunctionHandler::instance().find(functionName);
+	if (!handle)
 	{
-		if (!checkParameterCount(userFunc->parameters.size(), userFunc->parameters.size()))
-			return {};
-
-		// evaluate parameters
-		std::vector<ExpressionValue> params;
-		params.reserve(children.size());
-
-		for (size_t i = 0; i < children.size(); i++)
-		{
-			ExpressionValue result = children[i]->evaluate();
-			if (!result.isValid())
-			{
-				Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", functionName, i+1);
-				return result;
-			}
-
-			params.push_back(result);
-		}
-
-		// instantiate
-		TokenStreamTokenizer tok;
-		tok.init(userFunc->content);
-
-		for (size_t i = 0; i < children.size(); ++i)
-		{
-			const auto &paramName = userFunc->parameters[i];
-			const auto &paramValue = params[i];
-
-			switch (paramValue.type)
-			{
-			case ExpressionValueType::Float:
-				tok.registerReplacementFloat(paramName, paramValue.floatValue);
-				break;
-			case ExpressionValueType::String:
-				tok.registerReplacementString(paramName, paramValue.strValue);
-				break;
-			case ExpressionValueType::Integer:
-				tok.registerReplacementInteger(paramName, paramValue.intValue);
-				break;
-			case ExpressionValueType::Invalid: // will not occur, invalid results are caught above
-				break;
-			}
-		}
-
-		Expression result = parseExpression(tok, false);
-		if (!result.isLoaded())
-		{
-			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", functionName);
-			return {};
-		}
-
-		if (!tok.atEnd())
-		{
-			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", functionName);
-			return {};
-		}
-
-		// evaluate expression
-		return result.evaluate();
+		Logger::queueError(Logger::Error, L"Unknown function \"%s\"", functionName);
+		return {};
 	}
 
-	// error
-	Logger::queueError(Logger::Error, L"Unknown function \"%s\"", functionName);
-	return {};
+	if (handle->minParams() > children.size())
+	{
+		Logger::queueError(Logger::Error, L"Not enough parameters for \"%s\" (%d<%d)", functionName, children.size(), handle->minParams());
+		return {};
+	}
+
+	if (handle->maxParams() < children.size())
+	{
+		Logger::queueError(Logger::Error, L"Too many parameters for \"%s\" (%d>%d)", functionName, children.size(), handle->maxParams());
+		return {};
+	}
+
+	return handle->execute(children);
 }
 
 bool isExpressionFunctionSafe(const std::wstring& name, bool inUnknownOrFalseBlock)
 {
-	// expression functions may be unsafe, others are safe
-	ExpFuncSafety safety = ExpFuncSafety::Unsafe;
-	bool found = false;
-
-	auto it = expressionFunctions.find(name);
-	if (it != expressionFunctions.end())
+	auto handle = ExpressionFunctionHandler::instance().find(name);
+	if (!handle)
 	{
-		safety = it->second.safety;
-		found = true;
+		// well, a function that doesn't exist at least won't change its behavior...
+		return true;
 	}
 
-	if (!found)
-	{
-		auto labelIt = expressionLabelFunctions.find(name);
-		if (labelIt != expressionLabelFunctions.end())
-		{
-			safety = labelIt->second.safety;
-			found = true;
-		}
-	}
-
-	if (!found)
-	{
-		auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
-		it = archExpressionFunctions.find(name);
-		if (it != archExpressionFunctions.end())
-		{
-			safety = it->second.safety;
-			found = true;
-		}
-	}
+	ExpFuncSafety safety = handle->safety();
 
 	if (inUnknownOrFalseBlock && safety == ExpFuncSafety::ConditionalUnsafe)
 		return false;

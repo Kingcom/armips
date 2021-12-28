@@ -1,10 +1,13 @@
 #include "Core/Assembler.h"
 
 #include "Archs/ARM/Arm.h"
+#include "Archs/ARM/ArmExpressionFunctions.h"
 #include "Archs/MIPS/Mips.h"
+#include "Archs/MIPS/MipsExpressionFunctions.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Allocations.h"
 #include "Core/Common.h"
+#include "Core/ExpressionFunctions.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
@@ -158,6 +161,9 @@ bool runArmips(ArmipsArguments& settings)
 	Global.FileInfo.FileNum = 0;
 
 	Arm.clear();
+
+	ExpressionFunctionHandler::instance().reset();
+	registerExpressionFunctions(ExpressionFunctionHandler::instance());
 
 	// process settings
 	Parser parser;

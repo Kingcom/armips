@@ -12,7 +12,7 @@ public:
 	CMipsArchitecture();
 	virtual std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser);
 	virtual std::unique_ptr<CAssemblerCommand> parseOpcode(Parser& parser);
-	virtual const ExpressionFunctionMap& getExpressionFunctions();
+	virtual void registerExpressionFunctions(ExpressionFunctionHandler &handler);
 	virtual void NextSection();
 	virtual void Pass2() { return; };
 	virtual void Revalidate();

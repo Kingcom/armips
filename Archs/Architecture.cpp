@@ -2,7 +2,7 @@
 
 #include "Core/Common.h"
 #include "Core/ELF/ElfRelocator.h"
-#include "Core/ExpressionFunctions.h"
+#include "Core/ExpressionFunctionHandler.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
@@ -20,12 +20,11 @@ Architecture &Architecture::current()
 void Architecture::setCurrent(Architecture &arch)
 {
 	currentArchitecture = &arch;
+	ExpressionFunctionHandler::instance().updateArchitecture();
 }
 
-const ExpressionFunctionMap &Architecture::getExpressionFunctions()
+void Architecture::registerExpressionFunctions([[maybe_unused]] ExpressionFunctionHandler &handler)
 {
-	const static ExpressionFunctionMap emptyMap = {};
-	return emptyMap;
 }
 
 ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText)
