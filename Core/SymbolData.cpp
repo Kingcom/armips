@@ -108,7 +108,7 @@ void SymbolData::writeNocashSym()
 	TextFile file;
 	if (!file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII))
 	{
-		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName());
+		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName().wstring());
 		return;
 	}
 	file.writeLine(L"00000000 0");

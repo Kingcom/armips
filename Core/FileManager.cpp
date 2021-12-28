@@ -61,7 +61,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			stream.open(fileName, flagsOpenExisting);
 			if (!stream.is_open())
 			{
-				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName);
+				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName.wstring());
 				return false;
 			}
 			return true;
@@ -70,7 +70,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			stream.open(fileName, flagsOverwrite);
 			if (!stream.is_open())
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
+				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
 				return false;
 			}
 			return true;
@@ -78,14 +78,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		case Copy:
 			if (!fs::copy_file(originalName, fileName, fs::copy_options::overwrite_existing, errorCode))
 			{
-				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName);
+				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName.wstring());
 				return false;
 			}
 
 			stream.open(fileName, flagsOpenExisting);
 			if (!stream.is_open())
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName);
+				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
 				return false;
 			}
 			return true;
@@ -101,7 +101,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(fileName, flagsOpenExisting);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName);
+			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName.wstring());
 			return false;
 		}
 		temp.close();
@@ -114,7 +114,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(fileName, exists ? flagsOpenExisting : flagsOverwrite);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
+			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
 			return false;
 		}
 		temp.close();
@@ -129,7 +129,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(originalName, flagsOpenExisting);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName);
+			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName.wstring());
 			return false;
 		}
 		temp.close();
@@ -140,7 +140,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(fileName, exists ? flagsOpenExisting : flagsOverwrite);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName);
+			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
 			return false;
 		}
 		temp.close();

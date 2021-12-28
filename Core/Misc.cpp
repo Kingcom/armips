@@ -180,7 +180,7 @@ void TempData::start()
 	{
 		if (!file.open(TextFile::Write))
 		{
-			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName());
+			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName().wstring());
 			return;
 		}
 

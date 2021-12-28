@@ -204,13 +204,13 @@ bool MipsElfFile::load(const fs::path& fileName, const fs::path& outputFileName)
 
 	if (!elf.load(fileName,true))
 	{
-		Logger::printError(Logger::FatalError,L"Failed to load %s",fileName);
+		Logger::printError(Logger::FatalError,L"Failed to load %s",fileName.wstring());
 		return false;
 	}
 
 	if (elf.getType() == 0xFFA0)
 	{
-		Logger::printError(Logger::FatalError,L"Relocatable ELF %s not supported yet",fileName);
+		Logger::printError(Logger::FatalError,L"Relocatable ELF %s not supported yet",fileName.wstring());
 		return false;
 	}
 
@@ -310,10 +310,10 @@ void DirectiveLoadMipsElf::writeTempData(TempData& tempData) const
 {
 	if (outputName.empty())
 	{
-		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\"",inputName));
+		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\"",inputName.wstring()));
 	} else {
 		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\",\"%s\"",
-			inputName,outputName));
+			inputName.wstring(),outputName.wstring()));
 	}
 }
 

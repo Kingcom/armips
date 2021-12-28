@@ -689,14 +689,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 
 	if (!fs::exists(fileName))
 	{
-		parser.printError(start,L"Included file \"%s\" does not exist",fileName);
+		parser.printError(start,L"Included file \"%s\" does not exist",fileName.wstring());
 		return nullptr;
 	}
 
 	TextFile f;
 	if (!f.open(fileName,TextFile::Read,encoding))
 	{
-		parser.printError(start,L"Could not open included file \"%s\"",fileName);
+		parser.printError(start,L"Could not open included file \"%s\"",fileName.wstring());
 		return nullptr;
 	}
 

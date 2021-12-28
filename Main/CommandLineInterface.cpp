@@ -205,7 +205,7 @@ static bool parseArguments(const std::vector<std::wstring>& arguments, ArmipsArg
 
 	if (!fs::exists(settings.inputFileName))
 	{
-		Logger::printError(Logger::Error, L"File \"%s\" not found", settings.inputFileName);
+		Logger::printError(Logger::Error, L"File \"%s\" not found", settings.inputFileName.wstring());
 		return false;
 	}
 	return true;

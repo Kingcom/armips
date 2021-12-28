@@ -118,14 +118,14 @@ void CDirectiveFile::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Type::Open:
-		str = tfm::format(L".open \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
+		str = tfm::format(L".open \"%s\",0x%08X",file->getFileName().wstring(),file->getOriginalHeaderSize());
 		break;
 	case Type::Create:
-		str = tfm::format(L".create \"%s\",0x%08X",file->getFileName(),file->getOriginalHeaderSize());
+		str = tfm::format(L".create \"%s\",0x%08X",file->getFileName().wstring(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = tfm::format(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName(),
-			file->getFileName(),file->getOriginalHeaderSize());
+		str = tfm::format(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName().wstring(),
+			file->getFileName().wstring(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
 		str = L".close";
@@ -225,7 +225,7 @@ CDirectiveIncbin::CDirectiveIncbin(const fs::path& fileName)
 
 	if (!fs::exists(this->fileName))
 	{
-		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName);
+		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName.wstring());
 	}
 
 	std::error_code error;
@@ -291,7 +291,7 @@ void CDirectiveIncbin::Encode() const
 
 void CDirectiveIncbin::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".incbin \"%s\"",fileName));
+	tempData.writeLine(virtualAddress,tfm::format(L".incbin \"%s\"",fileName.wstring()));
 }
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData) const
