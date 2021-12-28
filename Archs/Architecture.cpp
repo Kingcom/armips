@@ -2,17 +2,14 @@
 
 #include "Core/Common.h"
 #include "Core/ELF/ElfRelocator.h"
-#include "Core/ExpressionFunctions.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Core/SymbolData.h"
 
 CInvalidArchitecture InvalidArchitecture;
 
-const ExpressionFunctionMap &CArchitecture::getExpressionFunctions()
+void CArchitecture::registerExpressionFunctions([[maybe_unused]] ExpressionFunctionHandler &handler)
 {
-	const static ExpressionFunctionMap emptyMap = {};
-	return emptyMap;
 }
 
 ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText)

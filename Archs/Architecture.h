@@ -6,20 +6,17 @@
 #include <map>
 #include <memory>
 
+class ExpressionFunctionHandler;
 class IElfRelocator;
 class Tokenizer;
 class Parser;
-
-struct ExpressionFunctionEntry;
-
-using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;
 
 class CArchitecture
 {
 public:
 	virtual std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser) { return nullptr; }
 	virtual std::unique_ptr<CAssemblerCommand> parseOpcode(Parser& parser) { return nullptr; }
-	virtual const ExpressionFunctionMap& getExpressionFunctions();
+	virtual void registerExpressionFunctions(ExpressionFunctionHandler &handler);
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;

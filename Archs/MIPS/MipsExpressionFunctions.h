@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Core/ExpressionFunctions.h"
+class ExpressionFunctionHandler;
 
-extern const ExpressionFunctionMap mipsExpressionFunctions;
+void registerMipsExpressionFunctions(ExpressionFunctionHandler &handler);

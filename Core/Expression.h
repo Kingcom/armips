@@ -161,10 +161,7 @@ private:
 	}
 
 	std::wstring formatFunctionCall();
-	ExpressionValue executeExpressionFunctionCall(const ExpressionFunctionEntry& entry);
-	ExpressionValue executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry);
 	ExpressionValue executeFunctionCall();
-	bool checkParameterCount(size_t min, size_t max);
 
 	OperatorType type = OperatorType::Invalid;
 	std::vector<std::unique_ptr<ExpressionInternal>> children;

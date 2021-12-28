@@ -4,7 +4,7 @@
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CommandSequence.h"
 #include "Core/Common.h"
-#include "Core/ExpressionFunctions.h"
+#include "Core/ExpressionFunctionHandler.h"
 #include "Core/Misc.h"
 #include "Parser/DirectivesParser.h"
 #include "Parser/ExpressionParser.h"
@@ -432,10 +432,11 @@ bool Parser::checkExpFuncDefinition()
 
 	eatToken();
 
-	UserExpressionFunction func;
+	std::wstring functionName;
+	std::vector<std::wstring> functionParameters;
 
 	// load declarationn
-	if (!parseFunctionDeclaration(func.name, func.parameters))
+	if (!parseFunctionDeclaration(functionName, functionParameters))
 	{
 		printError(first, L"Invalid expression function declaration");
 		return false;
@@ -458,7 +459,7 @@ bool Parser::checkExpFuncDefinition()
 	}
 
 	TokenizerPosition end = getTokenizer()->getPosition();
-	func.content = getTokenizer()->getTokens(start,end);
+	auto functionContent = getTokenizer()->getTokens(start,end);
 
 	// checks
 
@@ -481,14 +482,14 @@ bool Parser::checkExpFuncDefinition()
 	}
 
 	// duplicate check
-	if (UserFunctions::instance().findFunction(func.name))
+	if (ExpressionFunctionHandler::instance().find(functionName))
 	{
-		printError(first, L"Expression function \"%s\" already declared", func.name);
+		printError(first, L"Expression function \"%s\" already declared", functionName);
 		return false;
 	}
 
 	// register function
-	UserFunctions::instance().addFunction(func);
+	ExpressionFunctionHandler::instance().addUserFunction(functionName, functionParameters, functionContent);
 	return true;
 }
 

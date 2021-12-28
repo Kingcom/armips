@@ -21,7 +21,17 @@ ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<E
 	return ExpressionValue(isThumb ? INT64_C(1) : INT64_C(0));
 }
 
-const ExpressionFunctionMap armExpressionFunctions = {
-	{ L"isarm",			{ &expFuncIsArm,			0,	0,	ExpFuncSafety::Safe } },
-	{ L"isthumb",		{ &expFuncIsThumb,			0,	0,	ExpFuncSafety::Safe } },
+const ExpressionFunctionEntry armExpressionFunctions[] = {
+	{ L"isarm",			&expFuncIsArm,			0,	0,	ExpFuncSafety::Safe },
+	{ L"isthumb",		&expFuncIsThumb,			0,	0,	ExpFuncSafety::Safe },
 };
+
+#include "Core/ExpressionFunctionHandler.h"
+
+void registerArmExpressionFunctions(ExpressionFunctionHandler &handler)
+{
+	for (const auto &func : armExpressionFunctions)
+	{
+		handler.addFunction(func.name, func.function, func.minParams, func.maxParams, func.safety);
+	}
+}
