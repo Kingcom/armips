@@ -36,6 +36,7 @@ public:
 	void writeTempData(TempData& tempData) const override;
 	void writeSymData(SymbolData& symData) const override;
 private:
+	CArchitecture *architecture = nullptr;
 	int64_t position;
 	Endianness endianness;
 	std::wstring tempText;

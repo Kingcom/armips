@@ -17,6 +17,7 @@ const ExpressionFunctionMap &CArchitecture::getExpressionFunctions()
 
 ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText)
 {
+	this->architecture = Arch;
 	this->tempText = tempText;
 	this->symText = symText;
 	this->endianness = Arch->getEndianness();
@@ -24,6 +25,7 @@ ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std
 
 bool ArchitectureCommand::Validate(const ValidateState &state)
 {
+	Arch = architecture;
 	position = g_fileManager->getVirtualAddress();
 	g_fileManager->setEndianness(endianness);
 	return false;
