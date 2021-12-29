@@ -1,1 +1,2 @@
-﻿
+﻿Macros.asm(30) notice: <test1>
+Macros.asm(31) notice: <test2>

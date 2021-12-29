@@ -367,10 +367,10 @@ bool Parser::checkEquLabel()
 				return true;
 			}
 
-			// equs are not allowed in macros
+			// when parsing a macro, just remember the equ name
 			if (initializingMacro)
 			{
-				printError(start,L"equ not allowed in macro");
+				macroLabels.insert(name);
 				return true;
 			}
 

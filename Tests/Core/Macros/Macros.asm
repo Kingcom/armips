@@ -21,4 +21,13 @@ ldrWrapper r2,[r4, r5]
 
 cat toHex(255, 4), toHex(256, 3)
 
+; check equ usage in macros
+.macro print, a
+  value equ "<" + a + ">"
+  .notice value
+.endmacro
+
+print "test1"
+print "test2"
+
 .close
