@@ -451,12 +451,8 @@ bool Parser::checkExpFuncDefinition()
 	// load definition
 	TokenizerPosition start = getTokenizer()->getPosition();
 
-	Expression exp = parseExpression();
-	if (!exp.isLoaded())
-	{
-		printError(first, L"Invalid expression function declaration");
-		return false;
-	}
+	while (!atEnd() && peekToken().type != TokenType::Separator)
+		eatToken();
 
 	TokenizerPosition end = getTokenizer()->getPosition();
 	auto functionContent = getTokenizer()->getTokens(start,end);

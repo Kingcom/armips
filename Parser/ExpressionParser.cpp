@@ -1,15 +1,9 @@
 #include "Parser/ExpressionParser.h"
 #include "Core/Expression.h"
+#include "Core/ExpressionFunctionHandler.h"
 #include "Parser/Tokenizer.h"
 
 static std::unique_ptr<ExpressionInternal> expression(Tokenizer& tokenizer);
-
-static bool allowFunctionCall = true;
-
-void allowFunctionCallExpression(bool allow)
-{
-	allowFunctionCall = allow;
-}
 
 static std::unique_ptr<ExpressionInternal> primaryExpression(Tokenizer& tokenizer)
 {
@@ -55,9 +49,9 @@ static std::unique_ptr<ExpressionInternal> primaryExpression(Tokenizer& tokenize
 
 static std::unique_ptr<ExpressionInternal> postfixExpression(Tokenizer& tokenizer)
 {
-	if (allowFunctionCall &&
-		tokenizer.peekToken(0).type == TokenType::Identifier &&
-		tokenizer.peekToken(1).type == TokenType::LParen)
+	if (tokenizer.peekToken(0).type == TokenType::Identifier &&
+		tokenizer.peekToken(1).type == TokenType::LParen &&
+		ExpressionFunctionHandler::instance().find(tokenizer.peekToken(0).getStringValue()))
 	{
 		const std::wstring functionName = tokenizer.nextToken().getStringValue();
 		tokenizer.eatToken();
