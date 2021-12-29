@@ -64,7 +64,6 @@ typedef struct {
 } tGlobal;
 
 extern tGlobal Global;
-extern CArchitecture* Arch;
 
 class FileManager;
 extern FileManager* g_fileManager;

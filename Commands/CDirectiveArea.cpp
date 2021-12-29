@@ -45,7 +45,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 			Logger::queueError(Logger::Error, L"Invalid position expression");
 			return false;
 		}
-		Arch->NextSection();
+		Architecture::current().NextSection();
 		g_fileManager->seekVirtual(position);
 	}
 	else
@@ -112,7 +112,7 @@ void CDirectiveArea::Encode() const
 {
 	if (positionExpression.isLoaded())
 	{
-		Arch->NextSection();
+		Architecture::current().NextSection();
 		g_fileManager->seekVirtual(position);
 	}
 
@@ -252,7 +252,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 		return Allocations::canTrimSpace();
 	}
 
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->seekVirtual(position);
 
 	content->applyFileInfo();
@@ -271,7 +271,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 
 void CDirectiveAutoRegion::Encode() const
 {
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->seekVirtual(position);
 	content->Encode();
 	g_fileManager->seekVirtual(resetPosition);

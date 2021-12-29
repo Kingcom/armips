@@ -641,7 +641,7 @@ ExpressionValue ExpressionInternal::executeFunctionCall()
 		return executeExpressionLabelFunctionCall(expLabelFuncIt->second);
 
 	// try architecture specific expression functions
-	auto& archExpressionFunctions = Arch->getExpressionFunctions();
+	auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
 	expFuncIt = archExpressionFunctions.find(strValue);
 	if (expFuncIt != archExpressionFunctions.end())
 		return executeExpressionFunctionCall(expFuncIt->second);
@@ -741,7 +741,7 @@ bool isExpressionFunctionSafe(const std::wstring& name, bool inUnknownOrFalseBlo
 
 	if (!found)
 	{
-		auto& archExpressionFunctions = Arch->getExpressionFunctions();
+		auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
 		it = archExpressionFunctions.find(name);
 		if (it != archExpressionFunctions.end())
 		{

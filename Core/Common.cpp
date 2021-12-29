@@ -11,7 +11,6 @@ FileManager fileManager;
 FileManager* g_fileManager = &fileManager;
 
 tGlobal Global;
-CArchitecture* Arch;
 
 void FileList::add(const fs::path &path)
 {

@@ -296,7 +296,7 @@ DirectiveLoadMipsElf::DirectiveLoadMipsElf(const fs::path& inputName, const fs::
 
 bool DirectiveLoadMipsElf::Validate(const ValidateState &state)
 {
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->openFile(file,true);
 	return false;
 }

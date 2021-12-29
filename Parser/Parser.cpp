@@ -237,7 +237,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 			continue;
 
 		if (directive.flags & DIRECTIVE_MIPSRESETDELAY)
-			Arch->NextSection();
+			Architecture::current().NextSection();
 
 		eatToken();
 		std::unique_ptr<CAssemblerCommand> result = directive.function(*this,directive.flags);
@@ -872,7 +872,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 	if (hasError())
 		return handleError();
 
-	if ((command = Arch->parseDirective(*this)) != nullptr)
+	if ((command = Architecture::current().parseDirective(*this)) != nullptr)
 		return command;
 	if (hasError())
 		return handleError();
@@ -882,7 +882,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 	if (hasError())
 		return handleError();
 
-	if ((command = Arch->parseOpcode(*this)) != nullptr)
+	if ((command = Architecture::current().parseOpcode(*this)) != nullptr)
 		return command;
 	if (hasError())
 		return handleError();

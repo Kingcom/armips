@@ -389,7 +389,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMipsArch(Parser& parser, int flags)
 {
-	Arch = &Mips;
+	Architecture::setCurrent(Mips);
 	Mips.SetLoadDelay(false, 0);
 
 	switch (flags)
@@ -416,7 +416,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMipsArch(Parser& parser, int fl
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int flags)
 {
-	Arch = &Arm;
+	Architecture::setCurrent(Arm);
 
 	switch (flags)
 	{

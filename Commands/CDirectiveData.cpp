@@ -44,7 +44,7 @@ CDirectiveData::CDirectiveData()
 {
 	mode = EncodingMode::Invalid;
 	writeTermination = false;
-	endianness = Arch->getEndianness();
+	endianness = Architecture::current().getEndianness();
 }
 
 CDirectiveData::~CDirectiveData()

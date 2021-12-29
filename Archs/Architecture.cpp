@@ -9,7 +9,20 @@
 
 CInvalidArchitecture InvalidArchitecture;
 
-const ExpressionFunctionMap &CArchitecture::getExpressionFunctions()
+Architecture *Architecture::currentArchitecture = &InvalidArchitecture;
+
+Architecture &Architecture::current()
+{
+	assert(currentArchitecture);
+	return *currentArchitecture;
+}
+
+void Architecture::setCurrent(Architecture &arch)
+{
+	currentArchitecture = &arch;
+}
+
+const ExpressionFunctionMap &Architecture::getExpressionFunctions()
 {
 	const static ExpressionFunctionMap emptyMap = {};
 	return emptyMap;
@@ -17,15 +30,15 @@ const ExpressionFunctionMap &CArchitecture::getExpressionFunctions()
 
 ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText)
 {
-	this->architecture = Arch;
+	this->architecture = &Architecture::current();
 	this->tempText = tempText;
 	this->symText = symText;
-	this->endianness = Arch->getEndianness();
+	this->endianness = Architecture::current().getEndianness();
 }
 
 bool ArchitectureCommand::Validate(const ValidateState &state)
 {
-	Arch = architecture;
+	Architecture::setCurrent(*architecture);
 	position = g_fileManager->getVirtualAddress();
 	g_fileManager->setEndianness(endianness);
 	return false;

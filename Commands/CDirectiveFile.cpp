@@ -73,7 +73,7 @@ bool CDirectiveFile::Validate(const ValidateState &state)
 	}
 
 	virtualAddress = g_fileManager->getVirtualAddress();
-	Arch->NextSection();
+	Architecture::current().NextSection();
 
 	switch (type)
 	{
@@ -190,14 +190,14 @@ bool CDirectivePosition::Validate(const ValidateState &state)
 		return false;
 	}
 
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	exec();
 	return false;
 }
 
 void CDirectivePosition::Encode() const
 {
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	exec();
 }
 
@@ -270,7 +270,7 @@ bool CDirectiveIncbin::Validate(const ValidateState &state)
 		size = fileSize-start;
 	}
 
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->advanceMemory(size);
 	return false;
 }
@@ -369,7 +369,7 @@ bool CDirectiveAlignFill::Validate(const ValidateState &state)
 		}
 	}
 
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->advanceMemory(finalSize);
 
 	bool result = oldSize != finalSize;
@@ -441,7 +441,7 @@ bool CDirectiveSkip::Validate(const ValidateState &state)
 		}
 	}
 
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->advanceMemory(value);
 
 	return false;
@@ -449,7 +449,7 @@ bool CDirectiveSkip::Validate(const ValidateState &state)
 
 void CDirectiveSkip::Encode() const
 {
-	Arch->NextSection();
+	Architecture::current().NextSection();
 	g_fileManager->advanceMemory(value);
 }
 

@@ -14,9 +14,12 @@ struct ExpressionFunctionEntry;
 
 using ExpressionFunctionMap =  std::map<std::wstring, const ExpressionFunctionEntry>;
 
-class CArchitecture
+class Architecture
 {
 public:
+	static Architecture &current();
+	static void setCurrent(Architecture &arch);
+
 	virtual std::unique_ptr<CAssemblerCommand> parseDirective(Parser& parser) { return nullptr; }
 	virtual std::unique_ptr<CAssemblerCommand> parseOpcode(Parser& parser) { return nullptr; }
 	virtual const ExpressionFunctionMap& getExpressionFunctions();
@@ -25,6 +28,8 @@ public:
 	virtual void Revalidate() = 0;
 	virtual std::unique_ptr<IElfRelocator> getElfRelocator() = 0;
 	virtual Endianness getEndianness() = 0;
+private:
+	static Architecture *currentArchitecture;
 };
 
 class ArchitectureCommand: public CAssemblerCommand
@@ -36,14 +41,14 @@ public:
 	void writeTempData(TempData& tempData) const override;
 	void writeSymData(SymbolData& symData) const override;
 private:
-	CArchitecture *architecture = nullptr;
+	Architecture *architecture = nullptr;
 	int64_t position;
 	Endianness endianness;
 	std::wstring tempText;
 	std::wstring symText;
 };
 
-class CInvalidArchitecture: public CArchitecture
+class CInvalidArchitecture: public Architecture
 {
 public:
 	void NextSection() override;

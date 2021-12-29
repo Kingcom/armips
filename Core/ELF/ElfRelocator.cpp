@@ -98,7 +98,7 @@ std::vector<ArFileEntry> loadArArchive(const fs::path& inputName)
 
 bool ElfRelocator::init(const fs::path& inputName)
 {
-	relocator = Arch->getElfRelocator();
+	relocator = Architecture::current().getElfRelocator();
 	if (relocator == nullptr)
 	{
 		Logger::printError(Logger::Error,L"Object importing not supported for this architecture");
@@ -135,7 +135,7 @@ bool ElfRelocator::init(const fs::path& inputName)
 			return false;
 		}
 
-		if (elf->getEndianness() != Arch->getEndianness())
+		if (elf->getEndianness() != Architecture::current().getEndianness())
 		{
 			Logger::printError(Logger::Error,L"Incorrect endianness in object file %s",entry.name);
 			return false;

@@ -144,7 +144,7 @@ bool runArmips(ArmipsArguments& settings)
 	Global.FileInfo.TotalLineCount = 0;
 	Global.relativeInclude = false;
 	Global.multiThreading = true;
-	Arch = &InvalidArchitecture;
+	Architecture::setCurrent(InvalidArchitecture);
 
 	Tokenizer::clearEquValues();
 	Logger::clear();

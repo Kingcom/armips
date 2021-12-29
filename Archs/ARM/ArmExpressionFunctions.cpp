@@ -11,7 +11,7 @@
 
 ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
 {
-	bool isArm = Arch == &Arm && !Arm.GetThumbMode();
+	bool isArm = &Architecture::current() == &Arm && !Arm.GetThumbMode();
 	return ExpressionValue(isArm ? INT64_C(1) : INT64_C(0));
 }
 

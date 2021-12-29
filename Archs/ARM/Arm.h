@@ -30,7 +30,7 @@ struct ArmRegisterValue
 
 extern const tArmRegister ArmRegister[];
 
-class CArmArchitecture: public CArchitecture
+class CArmArchitecture: public Architecture
 {
 public:
 	CArmArchitecture();

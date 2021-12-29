@@ -27,7 +27,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 	// does this need to be in validate?
 	if (label->getUpdateInfo())
 	{
-		if (Arch == &Arm && Arm.GetThumbMode())
+		if (&Architecture::current() == &Arm && Arm.GetThumbMode())
 			label->setInfo(1);
 		else
 			label->setInfo(0);
