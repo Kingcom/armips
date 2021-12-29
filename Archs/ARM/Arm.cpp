@@ -37,9 +37,9 @@ std::unique_ptr<CAssemblerCommand> CArmArchitecture::parseOpcode(Parser& parser)
 		return armParser.parseArmOpcode(parser);
 }
 
-const ExpressionFunctionMap& CArmArchitecture::getExpressionFunctions()
+void CArmArchitecture::registerExpressionFunctions(ExpressionFunctionHandler &handler)
 {
-	return armExpressionFunctions;
+	registerArmExpressionFunctions(handler);
 }
 
 void CArmArchitecture::clear()

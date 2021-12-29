@@ -155,6 +155,8 @@ armips_target_sources(armips PRIVATE
 	Core/Common.h
 	Core/Expression.cpp
 	Core/Expression.h
+	Core/ExpressionFunctionHandler.cpp
+	Core/ExpressionFunctionHandler.h
 	Core/ExpressionFunctions.cpp
 	Core/ExpressionFunctions.h
 	Core/FileManager.cpp

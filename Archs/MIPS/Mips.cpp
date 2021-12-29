@@ -33,9 +33,9 @@ std::unique_ptr<CAssemblerCommand> CMipsArchitecture::parseOpcode(Parser& parser
 	return mipsParser.parseOpcode(parser);
 }
 
-const ExpressionFunctionMap& CMipsArchitecture::getExpressionFunctions()
+void CMipsArchitecture::registerExpressionFunctions(ExpressionFunctionHandler &handler)
 {
-	return mipsExpressionFunctions;
+	registerMipsExpressionFunctions(handler);
 }
 
 void CMipsArchitecture::NextSection()

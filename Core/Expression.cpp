@@ -2,7 +2,7 @@
 
 #include "Archs/Architecture.h"
 #include "Core/Common.h"
-#include "Core/ExpressionFunctions.h"
+#include "Core/ExpressionFunctionHandler.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
 #include "Parser/ExpressionParser.h"
@@ -449,36 +449,25 @@ ExpressionValue ExpressionValue::operator||(const ExpressionValue& other) const
 	return result;
 }
 
-ExpressionInternal::ExpressionInternal()
-{
-	children = nullptr;
-	childrenCount = 0;
-}
-
-ExpressionInternal::~ExpressionInternal()
-{
-	deallocate();
-}
-
 ExpressionInternal::ExpressionInternal(int64_t value)
 	: ExpressionInternal()
 {
 	type = OperatorType::Integer;
-	intValue = value;
+	this->value = value;
 }
 
 ExpressionInternal::ExpressionInternal(double value)
 	: ExpressionInternal()
 {
 	type = OperatorType::Float;
-	floatValue = value;
+	this->value = value;
 }
 
 ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
 	: ExpressionInternal()
 {
 	this->type = type;
-	strValue = value;
+	this->value = value;
 
 	switch (type)
 	{
@@ -493,56 +482,19 @@ ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType t
 	}
 }
 
-ExpressionInternal::ExpressionInternal(OperatorType op, ExpressionInternal* a,
-	ExpressionInternal* b, ExpressionInternal* c)
-	: ExpressionInternal()
-{
-	type = op;
-	allocate(3);
-
-	children[0] = a;
-	children[1] = b;
-	children[2] = c;
-}
-
-ExpressionInternal::ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters)
+ExpressionInternal::ExpressionInternal(const std::wstring& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters)
 	: ExpressionInternal()
 {
 	type = OperatorType::FunctionCall;
-	allocate(parameters.size());
-
-	strValue = name;
-	for (size_t i = 0; i < parameters.size(); i++)
-	{
-		children[i] = parameters[i];
-	}
-}
-
-void ExpressionInternal::allocate(size_t count)
-{
-	deallocate();
-
-	children = new ExpressionInternal*[count];
-	childrenCount = count;
-}
-
-void ExpressionInternal::deallocate()
-{
-	for (size_t i = 0; i < childrenCount; i++)
-	{
-		delete children[i];
-	}
-
-	delete[] children;
-	children = nullptr;
-	childrenCount = 0;
+	this->value = name;
+	children = std::move(parameters);
 }
 
 void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 {
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
-		if (children[i] != nullptr)
+		if (children[i])
 		{
 			children[i]->replaceMemoryPos(identifierName);
 		}
@@ -551,204 +503,48 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 	if (type == OperatorType::MemoryPos)
 	{
 		type = OperatorType::Identifier;
-		strValue = identifierName;
+		value = identifierName;
 		fileNum = Global.FileInfo.FileNum;
 		section = Global.Section;
 	}
 }
 
-bool ExpressionInternal::checkParameterCount(size_t minParams, size_t maxParams)
-{
-	if (minParams > childrenCount)
-	{
-		Logger::queueError(Logger::Error,L"Not enough parameters for \"%s\" (min %d)",strValue,minParams);
-		return false;
-	}
-
-	if (maxParams < childrenCount)
-	{
-		Logger::queueError(Logger::Error,L"Too many parameters for \"%s\" (min %d)",strValue,maxParams);
-		return false;
-	}
-
-	return true;
-}
-
-ExpressionValue ExpressionInternal::executeExpressionFunctionCall(const ExpressionFunctionEntry& entry)
-{
-	// check parameters
-	if (!checkParameterCount(entry.minParams, entry.maxParams))
-		return {};
-
-	// evaluate parameters
-	std::vector<ExpressionValue> params;
-	params.reserve(childrenCount);
-
-	for (size_t i = 0; i < childrenCount; i++)
-	{
-		ExpressionValue result = children[i]->evaluate();
-		if (!result.isValid())
-		{
-			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", strValue, i+1);
-			return result;
-		}
-
-		params.push_back(result);
-	}
-
-	// execute
-	return entry.function(strValue, params);
-}
-
-ExpressionValue ExpressionInternal::executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry)
-{
-	// check parameters
-	if (!checkParameterCount(entry.minParams, entry.maxParams))
-		return {};
-
-	// evaluate parameters
-	std::vector<std::shared_ptr<Label>> params;
-	params.reserve(childrenCount);
-
-	for (size_t i = 0; i < childrenCount; i++)
-	{
-		ExpressionInternal *exp = children[i];
-		if (!exp || !exp->isIdentifier())
-		{
-			Logger::queueError(Logger::Error,L"%s: Invalid parameter %d, expecting identifier", strValue, i+1);
-			return {};
-		}
-
-		const std::wstring& name = exp->getStringValue();
-		std::shared_ptr<Label> label = Global.symbolTable.getLabel(name,exp->getFileNum(),exp->getSection());
-		params.push_back(label);
-	}
-
-	// execute
-	return entry.function(strValue, params);
-}
-
 ExpressionValue ExpressionInternal::executeFunctionCall()
 {
-	// try expression functions
-	auto expFuncIt = expressionFunctions.find(strValue);
-	if (expFuncIt != expressionFunctions.end())
-		return executeExpressionFunctionCall(expFuncIt->second);
+	auto functionName = valueAs<std::wstring>();
 
-	// try expression label functions
-	auto expLabelFuncIt = expressionLabelFunctions.find(strValue);
-	if (expLabelFuncIt != expressionLabelFunctions.end())
-		return executeExpressionLabelFunctionCall(expLabelFuncIt->second);
-
-	// try architecture specific expression functions
-	auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
-	expFuncIt = archExpressionFunctions.find(strValue);
-	if (expFuncIt != archExpressionFunctions.end())
-		return executeExpressionFunctionCall(expFuncIt->second);
-
-	// try user defined expression functions
-	auto *userFunc = UserFunctions::instance().findFunction(strValue);
-	if (userFunc)
+	auto handle = ExpressionFunctionHandler::instance().find(functionName);
+	if (!handle)
 	{
-		if (!checkParameterCount(userFunc->parameters.size(), userFunc->parameters.size()))
-			return {};
-
-		// evaluate parameters
-		std::vector<ExpressionValue> params;
-		params.reserve(childrenCount);
-
-		for (size_t i = 0; i < childrenCount; i++)
-		{
-			ExpressionValue result = children[i]->evaluate();
-			if (!result.isValid())
-			{
-				Logger::queueError(Logger::Error,L"%s: Invalid parameter %d", strValue, i+1);
-				return result;
-			}
-
-			params.push_back(result);
-		}
-
-		// instantiate
-		TokenStreamTokenizer tok;
-		tok.init(userFunc->content);
-
-		for (size_t i = 0; i < childrenCount; ++i)
-		{
-			const auto &paramName = userFunc->parameters[i];
-			const auto &paramValue = params[i];
-
-			switch (paramValue.type)
-			{
-			case ExpressionValueType::Float:
-				tok.registerReplacementFloat(paramName, paramValue.floatValue);
-				break;
-			case ExpressionValueType::String:
-				tok.registerReplacementString(paramName, paramValue.strValue);
-				break;
-			case ExpressionValueType::Integer:
-				tok.registerReplacementInteger(paramName, paramValue.intValue);
-				break;
-			case ExpressionValueType::Invalid: // will not occur, invalid results are caught above
-				break;
-			}
-		}
-
-		Expression result = parseExpression(tok, false);
-		if (!result.isLoaded())
-		{
-			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", strValue);
-			return {};
-		}
-
-		if (!tok.atEnd())
-		{
-			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", strValue);
-			return {};
-		}
-
-		// evaluate expression
-		return result.evaluate();
+		Logger::queueError(Logger::Error, L"Unknown function \"%s\"", functionName);
+		return {};
 	}
 
-	// error
-	Logger::queueError(Logger::Error, L"Unknown function \"%s\"", strValue);
-	return {};
+	if (handle->minParams() > children.size())
+	{
+		Logger::queueError(Logger::Error, L"Not enough parameters for \"%s\" (%d<%d)", functionName, children.size(), handle->minParams());
+		return {};
+	}
+
+	if (handle->maxParams() < children.size())
+	{
+		Logger::queueError(Logger::Error, L"Too many parameters for \"%s\" (%d>%d)", functionName, children.size(), handle->maxParams());
+		return {};
+	}
+
+	return handle->execute(children);
 }
 
 bool isExpressionFunctionSafe(const std::wstring& name, bool inUnknownOrFalseBlock)
 {
-	// expression functions may be unsafe, others are safe
-	ExpFuncSafety safety = ExpFuncSafety::Unsafe;
-	bool found = false;
-
-	auto it = expressionFunctions.find(name);
-	if (it != expressionFunctions.end())
+	auto handle = ExpressionFunctionHandler::instance().find(name);
+	if (!handle)
 	{
-		safety = it->second.safety;
-		found = true;
+		// well, a function that doesn't exist at least won't change its behavior...
+		return true;
 	}
 
-	if (!found)
-	{
-		auto labelIt = expressionLabelFunctions.find(name);
-		if (labelIt != expressionLabelFunctions.end())
-		{
-			safety = labelIt->second.safety;
-			found = true;
-		}
-	}
-
-	if (!found)
-	{
-		auto& archExpressionFunctions = Architecture::current().getExpressionFunctions();
-		it = archExpressionFunctions.find(name);
-		if (it != archExpressionFunctions.end())
-		{
-			safety = it->second.safety;
-			found = true;
-		}
-	}
+	ExpFuncSafety safety = handle->safety();
 
 	if (inUnknownOrFalseBlock && safety == ExpFuncSafety::ConditionalUnsafe)
 		return false;
@@ -767,7 +563,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 	case OperatorType::ToString:
 		return false;
 	case OperatorType::FunctionCall:
-		if (!isExpressionFunctionSafe(strValue, inUnknownOrFalseBlock))
+		if (!isExpressionFunctionSafe(valueAs<std::wstring>(), inUnknownOrFalseBlock))
 			return false;
 		break;
 	default:
@@ -776,7 +572,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 
 	// check if the same applies to all children
 	bool canSimplify = true;
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
 		if (children[i] != nullptr && !children[i]->simplify(inUnknownOrFalseBlock))
 			canSimplify = false;
@@ -791,22 +587,22 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 		{
 		case ExpressionValueType::Integer:
 			type = OperatorType::Integer;
-			intValue = value.intValue;
+			this->value = value.intValue;
 			break;
 		case ExpressionValueType::Float:
 			type = OperatorType::Float;
-			floatValue = value.floatValue;
+			this->value = value.floatValue;
 			break;
 		case ExpressionValueType::String:
 			type = OperatorType::String;
-			strValue = value.strValue;
+			this->value = value.strValue;
 			break;
 		default:
 			type = OperatorType::Invalid;
 			break;
 		}
 
-		deallocate();
+		children.clear();
 	}
 
 	return canSimplify;
@@ -821,17 +617,17 @@ ExpressionValue ExpressionInternal::evaluate()
 	{
 	case OperatorType::Integer:
 		val.type = ExpressionValueType::Integer;
-		val.intValue = intValue;
+		val.intValue = valueAs<int64_t>();
 		return val;
 	case OperatorType::Float:
 		val.type = ExpressionValueType::Float;
-		val.floatValue = floatValue;
+		val.floatValue = valueAs<double>();
 		return val;
 	case OperatorType::Identifier:
-		label = Global.symbolTable.getLabel(strValue,fileNum,section);
+		label = Global.symbolTable.getLabel(valueAs<std::wstring>(),fileNum,section);
 		if (label == nullptr)
 		{
-			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",strValue);
+			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",valueAs<std::wstring>());
 			return val;
 		}
 
@@ -846,7 +642,7 @@ ExpressionValue ExpressionInternal::evaluate()
 		return val;
 	case OperatorType::String:
 		val.type = ExpressionValueType::String;
-		val.strValue = strValue;
+		val.strValue = valueAs<std::wstring>();
 		return val;
 	case OperatorType::MemoryPos:
 		val.type = ExpressionValueType::Integer;
@@ -937,9 +733,9 @@ static std::wstring escapeString(const std::wstring& text)
 
 std::wstring ExpressionInternal::formatFunctionCall()
 {
-	std::wstring text = strValue + L"(";
+	std::wstring text = valueAs<std::wstring>() + L"(";
 
-	for (size_t i = 0; i < childrenCount; i++)
+	for (size_t i = 0; i < children.size(); i++)
 	{
 		if (i != 0)
 			text += L",";
@@ -954,13 +750,13 @@ std::wstring ExpressionInternal::toString()
 	switch (type)
 	{
 	case OperatorType::Integer:
-		return tfm::format(L"%d",intValue);
+		return tfm::format(L"%d",valueAs<int64_t>());
 	case OperatorType::Float:
-		return tfm::format(L"%g",floatValue);
+		return tfm::format(L"%g",valueAs<double>());
 	case OperatorType::Identifier:
-		return strValue;
+		return valueAs<std::wstring>();
 	case OperatorType::String:
-		return escapeString(strValue);
+		return escapeString(valueAs<std::wstring>());
 	case OperatorType::MemoryPos:
 		return L".";
 	case OperatorType::Add:
@@ -1016,19 +812,11 @@ std::wstring ExpressionInternal::toString()
 	}
 }
 
-Expression::Expression()
+Expression::Expression(std::unique_ptr<ExpressionInternal> exp, bool inUnknownOrFalseBlock) :
+	expression(std::move(exp))
 {
-	expression = nullptr;
-	constExpression = true;
-}
-
-void Expression::setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock)
-{
-	expression = std::shared_ptr<ExpressionInternal>(exp);
-	if (exp != nullptr)
+	if (expression)
 		constExpression = expression->simplify(inUnknownOrFalseBlock);
-	else
-		constExpression = true;
 }
 
 ExpressionValue Expression::evaluate()
@@ -1089,8 +877,5 @@ std::wstring Expression::toString()
 
 Expression createConstExpression(int64_t value)
 {
-	Expression exp;
-	ExpressionInternal* num = new ExpressionInternal(value);
-	exp.setExpression(num,false);
-	return exp;
+	return Expression(std::make_unique<ExpressionInternal>(value), false);
 }

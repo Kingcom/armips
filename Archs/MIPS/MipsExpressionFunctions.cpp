@@ -25,7 +25,15 @@ ExpressionValue expFuncLo(const std::wstring& funcName, const std::vector<Expres
 	return ExpressionValue((int64_t)(int16_t)(value & 0xFFFF));
 }
 
-const ExpressionFunctionMap mipsExpressionFunctions = {
-	{ L"lo",			{ &expFuncLo,				1,	1,	ExpFuncSafety::Safe } },
-	{ L"hi",			{ &expFuncHi,				1,	1,	ExpFuncSafety::Safe } },
+const ExpressionFunctionEntry mipsExpressionFunctions[] = {
+	{ L"lo",			&expFuncLo,				1,	1,	ExpFuncSafety::Safe },
+	{ L"hi",			&expFuncHi,				1,	1,	ExpFuncSafety::Safe },
 };
+
+void registerMipsExpressionFunctions(ExpressionFunctionHandler &handler)
+{
+	for (const auto &func : mipsExpressionFunctions)
+	{
+		handler.addFunction(func.name, func.function, func.minParams, func.maxParams, func.safety);
+	}
+}

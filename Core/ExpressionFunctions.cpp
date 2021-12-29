@@ -669,49 +669,62 @@ ExpressionValue expLabelFuncHeaderSize(const std::wstring& funcName, const std::
 	return ExpressionValue(g_fileManager->getHeaderSize());
 }
 
-const ExpressionFunctionMap expressionFunctions = {
-	{ L"version",		{ &expFuncVersion,			0,	0,	ExpFuncSafety::Safe } },
-	{ L"endianness",	{ &expFuncEndianness,		0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"outputname",	{ &expFuncOutputName,		0,	0,	ExpFuncSafety::Unsafe } },
-	{ L"fileexists",	{ &expFuncFileExists,		1,	1,	ExpFuncSafety::Safe } },
-	{ L"filesize",		{ &expFuncFileSize,			1,	1,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"tostring",		{ &expFuncToString,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"tohex",			{ &expFuncToHex,			1,	2,	ExpFuncSafety::Safe } },
+const ExpressionFunctionEntry expressionFunctions[] = {
+	{ L"version",		&expFuncVersion,			0,	0,	ExpFuncSafety::Safe},
+	{ L"endianness",	&expFuncEndianness,		0,	0,	ExpFuncSafety::Unsafe},
+	{ L"outputname",	&expFuncOutputName,		0,	0,	ExpFuncSafety::Unsafe},
+	{ L"fileexists",	&expFuncFileExists,		1,	1,	ExpFuncSafety::Safe},
+	{ L"filesize",		&expFuncFileSize,			1,	1,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"tostring",		&expFuncToString,			1,	1,	ExpFuncSafety::Safe},
+	{ L"tohex",			&expFuncToHex,			1,	2,	ExpFuncSafety::Safe},
 
-	{ L"int",			{ &expFuncInt,				1,	1,	ExpFuncSafety::Safe } },
-	{ L"float",			{ &expFuncFloat,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"frac",			{ &expFuncFrac,				1,	1,	ExpFuncSafety::Safe } },
-	{ L"abs",			{ &expFuncAbs,				1,	1,	ExpFuncSafety::Safe } },
-	{ L"round",			{ &expFuncRound,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"min",			{ &expFuncMin,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe } },
-	{ L"max",			{ &expFuncMax,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe } },
+	{ L"int",			&expFuncInt,				1,	1,	ExpFuncSafety::Safe},
+	{ L"float",			&expFuncFloat,			1,	1,	ExpFuncSafety::Safe},
+	{ L"frac",			&expFuncFrac,				1,	1,	ExpFuncSafety::Safe},
+	{ L"abs",			&expFuncAbs,				1,	1,	ExpFuncSafety::Safe},
+	{ L"round",			&expFuncRound,			1,	1,	ExpFuncSafety::Safe},
+	{ L"min",			&expFuncMin,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe},
+	{ L"max",			&expFuncMax,				1,	std::numeric_limits<size_t>::max(),	ExpFuncSafety::Safe},
 
-	{ L"strlen",		{ &expFuncStrlen,			1,	1,	ExpFuncSafety::Safe } },
-	{ L"substr",		{ &expFuncSubstr,			3,	3,	ExpFuncSafety::Safe } },
+	{ L"strlen",		&expFuncStrlen,			1,	1,	ExpFuncSafety::Safe},
+	{ L"substr",		&expFuncSubstr,			3,	3,	ExpFuncSafety::Safe},
 #if ARMIPS_REGEXP
-	{ L"regex_match",	{ &expFuncRegExMatch,		2,	2,	ExpFuncSafety::Safe } },
-	{ L"regex_search",	{ &expFuncRegExSearch,		2,	2,	ExpFuncSafety::Safe } },
-	{ L"regex_extract",	{ &expFuncRegExExtract,		2,	3,	ExpFuncSafety::Safe } },
+	{ L"regex_match",	&expFuncRegExMatch,		2,	2,	ExpFuncSafety::Safe},
+	{ L"regex_search",	&expFuncRegExSearch,		2,	2,	ExpFuncSafety::Safe},
+	{ L"regex_extract",	&expFuncRegExExtract,		2,	3,	ExpFuncSafety::Safe},
 #endif
-	{ L"find",			{ &expFuncFind,				2,	3,	ExpFuncSafety::Safe } },
-	{ L"rfind",			{ &expFuncRFind,			2,	3,	ExpFuncSafety::Safe } },
+	{ L"find",			&expFuncFind,				2,	3,	ExpFuncSafety::Safe},
+	{ L"rfind",			&expFuncRFind,			2,	3,	ExpFuncSafety::Safe},
 
-	{ L"readbyte",		{ &expFuncRead<uint8_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu8",		{ &expFuncRead<uint8_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu16",		{ &expFuncRead<uint16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu32",		{ &expFuncRead<uint32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readu64",		{ &expFuncRead<uint64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"reads8",		{ &expFuncRead<int8_t>,		1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"reads16",		{ &expFuncRead<int16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"reads32",		{ &expFuncRead<int32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"reads64",		{ &expFuncRead<int64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe } },
-	{ L"readascii",		{ &expFuncReadAscii,		1,	3,	ExpFuncSafety::ConditionalUnsafe } },
+	{ L"readbyte",		&expFuncRead<uint8_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"readu8",		&expFuncRead<uint8_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"readu16",		&expFuncRead<uint16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"readu32",		&expFuncRead<uint32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"readu64",		&expFuncRead<uint64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"reads8",		&expFuncRead<int8_t>,		1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"reads16",		&expFuncRead<int16_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"reads32",		&expFuncRead<int32_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"reads64",		&expFuncRead<int64_t>,	1,	2,	ExpFuncSafety::ConditionalUnsafe},
+	{ L"readascii",		&expFuncReadAscii,		1,	3,	ExpFuncSafety::ConditionalUnsafe},
 };
 
-extern const ExpressionLabelFunctionMap expressionLabelFunctions =
+const ExpressionLabelFunctionEntry expressionLabelFunctions[] =
 {
-	{ L"defined",    { &expLabelFuncDefined,      1, 1, ExpFuncSafety::Unsafe } },
-	{ L"org",        { &expLabelFuncOrg,          0, 1, ExpFuncSafety::Unsafe } },
-	{ L"orga",       { &expLabelFuncOrga,         0, 1, ExpFuncSafety::Unsafe } },
-	{ L"headersize", { &expLabelFuncHeaderSize,   0, 1, ExpFuncSafety::Unsafe } },
+	{ L"defined",    &expLabelFuncDefined,      1, 1, ExpFuncSafety::Unsafe},
+	{ L"org",        &expLabelFuncOrg,          0, 1, ExpFuncSafety::Unsafe},
+	{ L"orga",       &expLabelFuncOrga,         0, 1, ExpFuncSafety::Unsafe},
+	{ L"headersize", &expLabelFuncHeaderSize,   0, 1, ExpFuncSafety::Unsafe},
 };
+
+void registerExpressionFunctions(ExpressionFunctionHandler &handler)
+{
+	for (const auto &func : expressionFunctions)
+	{
+		handler.addFunction(func.name, func.function, func.minParams, func.maxParams, func.safety);
+	}
+
+	for (const auto &func : expressionLabelFunctions)
+	{
+		handler.addLabelFunction(func.name, func.function, func.minParams, func.maxParams, func.safety);
+	}
+}

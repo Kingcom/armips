@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
 #include <string>
+#include <variant>
 #include <vector>
 
 class Label;
@@ -126,41 +128,45 @@ struct ExpressionValue
 class ExpressionInternal
 {
 public:
-	ExpressionInternal();
-	~ExpressionInternal();
+	ExpressionInternal() = default;
+	~ExpressionInternal() = default;
 	ExpressionInternal(int64_t value);
 	ExpressionInternal(double value);
 	ExpressionInternal(const std::wstring& value, OperatorType type);
-	ExpressionInternal(OperatorType op, ExpressionInternal* a = nullptr,
-		ExpressionInternal* b = nullptr, ExpressionInternal* c = nullptr);
-	ExpressionInternal(const std::wstring& name, const std::vector<ExpressionInternal*>& parameters);
+
+	template<typename... ARGS>
+	ExpressionInternal(OperatorType op, ARGS... parameters) :
+		type(op)
+	{
+		( children.push_back(std::move(parameters)), ... );
+	}
+
+	ExpressionInternal(const std::wstring& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters);
 	ExpressionValue evaluate();
 	std::wstring toString();
 	bool isIdentifier() { return type == OperatorType::Identifier; }
-	std::wstring getStringValue() { return strValue; }
+	std::wstring getStringValue() { return valueAs<std::wstring>(); }
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool simplify(bool inUnknownOrFalseBlock);
 	unsigned int getFileNum() { return fileNum; }
 	unsigned int getSection() { return section; }
 private:
-	void allocate(size_t count);
-	void deallocate();
-	std::wstring formatFunctionCall();
-	ExpressionValue executeExpressionFunctionCall(const ExpressionFunctionEntry& entry);
-	ExpressionValue executeExpressionLabelFunctionCall(const ExpressionLabelFunctionEntry& entry);
-	ExpressionValue executeFunctionCall();
-	bool checkParameterCount(size_t min, size_t max);
+	using ValueTypes = std::variant<std::monostate, int64_t, double, std::wstring>;
 
-	OperatorType type;
-	ExpressionInternal** children;
-	size_t childrenCount;
-
-	union
+	template<typename T>
+	const T &valueAs() const
 	{
-		int64_t intValue;
-		double floatValue;
-	};
-	std::wstring strValue;
+		assert(std::holds_alternative<T>(value));
+		return std::get<T>(value);
+	}
+
+	std::wstring formatFunctionCall();
+	ExpressionValue executeFunctionCall();
+
+	OperatorType type = OperatorType::Invalid;
+	std::vector<std::unique_ptr<ExpressionInternal>> children;
+
+	ValueTypes value;
 
 	unsigned int fileNum, section;
 };
@@ -168,10 +174,11 @@ private:
 class Expression
 {
 public:
-	Expression();
+	Expression() = default;
+	Expression(std::unique_ptr<ExpressionInternal> exp, bool inUnknownOrFalseBlock);
+
 	ExpressionValue evaluate();
 	bool isLoaded() const { return expression != nullptr; }
-	void setExpression(ExpressionInternal* exp, bool inUnknownOrFalseBlock);
 	void replaceMemoryPos(const std::wstring& identifierName);
 	bool isConstExpression() { return constExpression; }
 
@@ -194,8 +201,7 @@ public:
 	std::wstring toString();
 private:
 	std::shared_ptr<ExpressionInternal> expression;
-	std::wstring originalText;
-	bool constExpression;
+	bool constExpression = true;
 };
 
 Expression createConstExpression(int64_t value);
