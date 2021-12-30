@@ -1,6 +1,7 @@
 #include "Parser/DirectivesParser.h"
 
 #include "Archs/ARM/Arm.h"
+#include "Archs/Z80/Z80.h"
 #include "Archs/MIPS/Mips.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CDirectiveArea.h"
@@ -445,6 +446,26 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int fla
 	return nullptr;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveZ80Arch(Parser& parser, int flags)
+{
+	Arch = &Z80;
+
+	switch (flags)
+	{
+	case DIRECTIVE_Z80_Z80:
+		Z80.SetVersion(Z80ArchType::Z80);
+		return std::make_unique<ArchitectureCommand>(L".z80", L"");
+	case DIRECTIVE_Z80_GB:
+		Z80.SetVersion(Z80ArchType::Gameboy);
+		return std::make_unique<ArchitectureCommand>(L".gb", L"");
+	case DIRECTIVE_Z80_EREADER:
+		Z80.SetVersion(Z80ArchType::Ereader);
+		return std::make_unique<ArchitectureCommand>(L".ereader", L"");
+	}
+
+	return nullptr;
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
@@ -775,7 +796,11 @@ const DirectiveMap directives = {
 	{ L".3ds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_3DS } },
 	{ L".arm.big",			{ &parseDirectiveArmArch,			DIRECTIVE_ARM_BIG } },
 	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
-	
+
+	{ L".z80",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_Z80 } },
+	{ L".gb",				{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_GB } },
+	{ L".ereader",			{ &parseDirectiveZ80Arch,			DIRECTIVE_Z80_EREADER } },
+
 	{ L".area",				{ &parseDirectiveArea,				0 } },
 	{ L".autoregion",		{ &parseDirectiveAutoRegion,		0 } },
 	{ L".region",			{ &parseDirectiveArea,				DIRECTIVE_AREA_SHARED } },
