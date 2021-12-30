@@ -3,6 +3,8 @@
 #include <optional>
 #include <functional>
 #include <map>
+#include <memory>
+#include <string>
 
 class ExpressionFunctionHandle;
 class ExpressionInternal;
