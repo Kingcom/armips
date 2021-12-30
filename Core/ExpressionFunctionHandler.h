@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 class ExpressionFunctionHandle;
 class ExpressionInternal;
