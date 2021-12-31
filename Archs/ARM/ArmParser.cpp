@@ -96,7 +96,7 @@ bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const
 	if (token.type != TokenType::Identifier)
 		return false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const std::wstring &stringValue = token.identifierValue();
 	for (size_t i = 0; i < count; i++)
 	{
 		if (stringValue == table[i].name)
@@ -235,7 +235,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	if (shiftMode.type != TokenType::Identifier)
 		return false;
 
-	std::wstring stringValue = shiftMode.getStringValue();
+	std::wstring stringValue = shiftMode.identifierValue();
 	
 	bool hasNumber = isNumber(stringValue.back());
 	int64_t number = 0;
@@ -463,7 +463,7 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 	if (token.type != TokenType::Identifier)
 		return false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const std::wstring &stringValue = token.identifierValue();
 	size_t pos = 0;
 	if (startsWith(stringValue,L"cpsr"))
 	{
@@ -642,7 +642,7 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 	ArmOpcodeVariables vars;
 	bool paramFail = false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const std::wstring &stringValue = token.identifierValue();
 	for (int z = 0; ArmOpcodes[z].name != nullptr; z++)
 	{
 		if ((ArmOpcodes[z].flags & ARM_ARM9) && Arm.getVersion() == AARCH_GBA)
@@ -739,7 +739,7 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 	ThumbOpcodeVariables vars;
 	bool paramFail = false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const std::wstring &stringValue = token.identifierValue();
 	for (int z = 0; ThumbOpcodes[z].name != nullptr; z++)
 	{
 		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && Arm.getVersion() == AARCH_GBA)

@@ -104,7 +104,7 @@ bool Parser::parseIdentifier(std::wstring& dest)
 	if (tok.type != TokenType::Identifier)
 		return false;
 
-	dest = tok.getStringValue();
+	dest = tok.identifierValue();
 	return true;
 }
 
@@ -123,10 +123,14 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 			continue;
 		}
 
-		if (next.stringValueStartsWith(indicator) && isPartOfList(next.getStringValue(), terminators))
+		if (next.type == TokenType::Identifier)
 		{
-			foundTermination = true;
-			break;
+			const auto &identifier = next.identifierValue();
+			if (!identifier.empty() && identifier.front() == indicator && isPartOfList(next.identifierValue(), terminators))
+			{
+				foundTermination = true;
+				break;
+			}
 		}
 
 		bool foundSomething = false;
@@ -220,7 +224,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
-	const std::wstring stringValue = tok.getStringValue();
+	const std::wstring &stringValue = tok.identifierValue();
 
 	auto matchRange = directiveSet.equal_range(stringValue);
 	for (auto it = matchRange.first; it != matchRange.second; ++it)
@@ -312,7 +316,7 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 	while (!tok.atEnd() && tok.peekToken().type != TokenType::Separator)
 	{
 		const Token& token = tok.nextToken();
-		if (token.type == TokenType::Identifier && token.getStringValue() == name)
+		if (token.type == TokenType::Identifier && token.identifierValue() == name)
 		{
 			printError(startToken,L"Recursive equ definition for \"%s\" not allowed",name);
 			return;
@@ -351,8 +355,8 @@ bool Parser::checkEquLabel()
 		if (peekToken(pos).type == TokenType::Equ &&
 			peekToken(pos+1).type == TokenType::EquValue)
 		{
-			std::wstring name = peekToken(0).getStringValue();
-			std::wstring value = peekToken(pos+1).getStringValue();
+			const std::wstring &name = peekToken(0).identifierValue();
+			const std::wstring &value = peekToken(pos+1).stringValue();
 			eatTokens(pos+2);
 
 			// skip the equ if it's inside a false conditional block
@@ -400,7 +404,7 @@ bool Parser::parseFunctionDeclaration(std::wstring& name, std::vector<std::wstri
 	if (first.type != TokenType::Identifier)
 		return false;
 
-	name = nextToken().getStringValue();
+	name = nextToken().identifierValue();
 
 	if (nextToken().type != TokenType::LParen)
 		return false;
@@ -415,7 +419,7 @@ bool Parser::parseFunctionDeclaration(std::wstring& name, std::vector<std::wstri
 		if (token.type != TokenType::Identifier)
 			return false;
 
-		parameters.emplace_back(token.getStringValue());
+		parameters.emplace_back(token.identifierValue());
 	}
 
 	return !atEnd() && nextToken().type == TokenType::RParen;
@@ -427,7 +431,8 @@ bool Parser::checkExpFuncDefinition()
 	if (first.type != TokenType::Identifier)
 		return false;
 
-	if (!first.stringValueStartsWith(L'.') || first.getStringValue() != L".expfunc")
+	const auto &identifier = first.identifierValue();
+	if (identifier.front() != L'.' || first.identifierValue() != L".expfunc")
 		return false;
 
 	eatToken();
@@ -495,7 +500,8 @@ bool Parser::checkMacroDefinition()
 	if (first.type != TokenType::Identifier)
 		return false;
 
-	if (!first.stringValueStartsWith(L'.') || first.getStringValue() != L".macro")
+	const auto &identifier = first.identifierValue();
+	if (identifier.front() != L'.' || first.identifierValue() != L".macro")
 		return false;
 
 	eatToken();
@@ -507,7 +513,7 @@ bool Parser::checkMacroDefinition()
 		while (!atEnd())
 		{
 			const Token& token = nextToken();
-			if (token.type == TokenType::Identifier && token.getStringValue() == L".endmacro")
+			if (token.type == TokenType::Identifier && token.identifierValue() == L".endmacro")
 				break;
 		}
 
@@ -548,7 +554,7 @@ bool Parser::checkMacroDefinition()
 	while (!atEnd())
 	{
 		const Token& tok = nextToken();
-		if (tok.type == TokenType::Identifier && tok.getStringValue() == L".endmacro")
+		if (tok.type == TokenType::Identifier && tok.identifierValue() == L".endmacro")
 		{
 			valid = true;
 			break;
@@ -663,7 +669,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 	if (start.type != TokenType::Identifier)
 		return nullptr;
 
-	auto it = macros.find(start.getStringValue());
+	auto it = macros.find(start.identifierValue());
 	if (it == macros.end())
 		return nullptr;
 
@@ -698,7 +704,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 
 		// remember any single identifier parameters for the label replacement
 		if (tokens->size() == 1 && tokens->front().type == TokenType::Identifier)
-			identifierParameters.insert(tokens->front().getStringValue());
+			identifierParameters.insert(tokens->front().identifierValue());
 
 		// give them as a replacement to new tokenizer
 		macroTokenizer.registerReplacement(macro.parameters[i], *tokens);
@@ -791,7 +797,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 	if (peekToken(0).type == TokenType::Identifier &&
 		peekToken(1).type == TokenType::Colon)
 	{
-		const std::wstring name = start.getStringValue();
+		const std::wstring &name = start.identifierValue();
 		eatTokens(2);
 		
 		if (initializingMacro)
@@ -916,7 +922,7 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 			// if necessary, check if the value of the token also matches
 			if (type == TokenType::Identifier)
 			{
-				if (values == entry.values.end() || values->textValue != token.getStringValue())
+				if (values == entry.values.end() || values->textValue != token.identifierValue())
 				{
 					valid = false;
 					break;
@@ -925,7 +931,7 @@ bool TokenSequenceParser::parse(Parser& parser, int& result)
 				values++;
 			} else if (type == TokenType::Integer)
 			{
-				if (values == entry.values.end() || values->intValue != token.intValue)
+				if (values == entry.values.end() || values->intValue != token.intValue())
 				{
 					valid = false;
 					break;

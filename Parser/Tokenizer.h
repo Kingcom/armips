@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <list>
 #include <string>
+#include <variant>
 #include <vector>
 
 class TextFile;
@@ -56,71 +58,52 @@ struct Token
 {
 	friend class Tokenizer;
 
-	Token()
-	{
-	}
-
-	void setOriginalText(const std::wstring& t)
-	{
-		setOriginalText(t, 0, t.length());
-	}
-
-	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
-	{
-		originalText = t.substr(pos, len);
-	}
-
 	std::wstring getOriginalText() const
 	{
 		return originalText;
 	}
 
-	void setStringValue(const std::wstring& t)
+	template<typename T>
+	void setValue(T value, std::wstring originalText)
 	{
-		setStringValue(t, 0, t.length());
+		this->value = std::move(value);
+		this->originalText = std::move(originalText);
 	}
 
-	void setStringValue(const std::wstring& t, const size_t pos, const size_t len)
+	const std::wstring &identifierValue() const
 	{
-		stringValue = t.substr(pos, len);
+		assert(std::holds_alternative<std::wstring>(value));
+		return std::get<std::wstring>(value);
 	}
 
-	void setStringAndOriginalValue(const std::wstring& t)
+	const std::wstring &stringValue() const
 	{
-		setStringAndOriginalValue(t, 0, t.length());
+		assert(std::holds_alternative<std::wstring>(value));
+		return std::get<std::wstring>(value);
 	}
 
-	void setStringAndOriginalValue(const std::wstring& t, const size_t pos, const size_t len)
+	int64_t intValue() const
 	{
-		setStringValue(t, pos, len);
-		originalText = stringValue;
+		assert(std::holds_alternative<int64_t>(value));
+		return std::get<int64_t>(value);
 	}
 
-	std::wstring getStringValue() const
+	double floatValue() const
 	{
-		return stringValue;
+		assert(std::holds_alternative<double>(value));
+		return std::get<double>(value);
 	}
 
-	bool stringValueStartsWith(wchar_t c) const
-	{
-		return stringValue[0] == c;
-	}
-
-	TokenType type;
-	size_t line;
-	size_t column;
-
-	union
-	{
-		int64_t intValue;
-		double floatValue;
-	};
+	size_t line = 0;
+	size_t column = 0;
+	TokenType type = TokenType::Invalid;
 
 protected:
-	std::wstring originalText;
-	std::wstring stringValue;
-
 	bool checked = false;
+
+	using ValueType = std::variant<std::monostate, int64_t, double, std::wstring>;
+	ValueType value;
+	std::wstring originalText;
 };
 
 typedef std::list<Token> TokenList;

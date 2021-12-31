@@ -243,7 +243,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 
 	std::unique_ptr<CAssemblerCommand> elseBlock = nullptr;
 	const Token &next = parser.nextToken();
-	const std::wstring stringValue = next.getStringValue();
+
+	if (next.type != TokenType::Identifier)
+	{
+		parser.printError(start, L"Expected identifier after if block");
+		return nullptr;
+	}
+
+	const std::wstring &stringValue = next.identifierValue();
 
 	ConditionalResult elseResult;
 	switch (condResult)
@@ -500,15 +507,27 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveAutoRegion(Parser& parser, int 
 	return area;
 }
 
-std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, int flags)
+std::optional<std::wstring> getStringOrIdentifier(Parser& parser)
 {
 	const Token &tok = parser.nextToken();
+	if (tok.type == TokenType::Identifier)
+		return tok.identifierValue();
 
-	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+	if (tok.type == TokenType::String)
+	{
+		auto stringValue = tok.stringValue();
+		std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
+		return stringValue;
+	}
+
+	return std::nullopt;
+}
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, int flags)
+{
+	auto stringValue = getStringOrIdentifier(parser);
+	if (!stringValue)
 		return nullptr;
-
-	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
 	if (stringValue == L"on")
 	{	
@@ -525,13 +544,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, in
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveRelativeInclude(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
-
-	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+	auto stringValue = getStringOrIdentifier(parser);
+	if (!stringValue)
 		return nullptr;
-
-	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
 	if (stringValue == L"on")
 	{	
@@ -548,13 +563,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveRelativeInclude(Parser& parser,
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveNocash(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
-
-	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+	auto stringValue = getStringOrIdentifier(parser);
+	if (!stringValue)
 		return nullptr;
-
-	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
 	if (stringValue == L"on")
 	{	
@@ -571,13 +582,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveNocash(Parser& parser, int flag
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveSym(Parser& parser, int flags)
 {
-	const Token &tok = parser.nextToken();
-
-	if (tok.type != TokenType::Identifier && tok.type != TokenType::String)
+	auto stringValue = getStringOrIdentifier(parser);
+	if (!stringValue)
 		return nullptr;
-
-	std::wstring stringValue = tok.getStringValue();
-	std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
 
 	if (stringValue == L"on")
 		return std::make_unique<CDirectiveSym>(true);
@@ -600,7 +607,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int
 	if (!value.isLoaded())
 		return nullptr;
 
-	const std::wstring stringValue = tok.getStringValue();
+	const std::wstring &stringValue = tok.identifierValue();
 	if (!Global.symbolTable.isValidSymbolName(stringValue))
 	{
 		parser.printError(tok,L"Invalid label name \"%s\"",stringValue);
@@ -622,18 +629,21 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int fl
 		return nullptr;
 	}
 
-	auto func = std::make_unique<CDirectiveFunction>(tok.getStringValue(),tok.getOriginalText());
+	auto func = std::make_unique<CDirectiveFunction>(tok.identifierValue(),tok.getOriginalText());
 	std::unique_ptr<CAssemblerCommand> seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
 
-	const std::wstring stringValue = parser.peekToken().getStringValue();
-	if (stringValue == L".endfunc" ||
-		stringValue == L".endfunction")
+	const Token &next = parser.peekToken();
+	if (next.type == TokenType::Identifier)
 	{
-		parser.eatToken();
-		if(parser.nextToken().type != TokenType::Separator)
+		const std::wstring &stringValue = next.identifierValue();
+		if (stringValue == L".endfunc" || stringValue == L".endfunction")
 		{
-			parser.printError(tok,L"Directive not terminated");
-			return nullptr;
+			parser.eatToken();
+			if(parser.nextToken().type != TokenType::Separator)
+			{
+				parser.printError(tok,L"Directive not terminated");
+				return nullptr;
+			}
 		}
 	}
 

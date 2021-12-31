@@ -17,7 +17,7 @@ Tokenizer::Tokenizer()
 {
 	position.it = tokens.begin();
 	invalidToken.type = TokenType::Invalid;
-	invalidToken.setOriginalText(L"Unexpected end of token stream");
+	invalidToken.setValue(std::monostate{}, L"Unexpected end of token stream");
 }
 
 bool Tokenizer::processElement(TokenList::iterator& it)
@@ -30,7 +30,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 		bool replaced = false;
 		if ((*it).type == TokenType::Identifier)
 		{
-			const std::wstring stringValue = (*it).getStringValue();
+			const std::wstring &stringValue = (*it).identifierValue();
 			for (const Replacement& replacement: replacements)
 			{
 				// if the identifier matches, add all of its tokens
@@ -47,7 +47,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 
 					// If the value at this position didn't change, then just keep going.
 					// Otherwise we'd be stuck in an endless replace loop
-					if (stringValue != (*it).getStringValue())
+					if ((*it).type != TokenType::Identifier || stringValue != (*it).identifierValue())
 						replaced = true;
 					break;
 				}
@@ -164,8 +164,7 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, const std::w
 
 	Token tok;
 	tok.type = TokenType::Identifier;
-	tok.setStringValue(lowerCase);
-	tok.setOriginalText(newValue);
+	tok.setValue(lowerCase, newValue);
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -178,8 +177,7 @@ void Tokenizer::registerReplacementString(const std::wstring& identifier, const 
 {
 	Token tok;
 	tok.type = TokenType::String;
-	tok.setStringValue(newValue);
-	tok.setOriginalText(newValue);
+	tok.setValue(newValue, newValue);
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -192,8 +190,7 @@ void Tokenizer::registerReplacementInteger(const std::wstring& identifier, int64
 {
 	Token tok;
 	tok.type = TokenType::Integer;
-	tok.intValue = newValue;
-	tok.setOriginalText(tfm::format(L"%d", newValue).c_str());
+	tok.setValue(newValue, tfm::format(L"%d", newValue));
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -206,8 +203,7 @@ void Tokenizer::registerReplacementFloat(const std::wstring& identifier, double 
 {
 	Token tok;
 	tok.type = TokenType::Float;
-	tok.floatValue = newValue;
-	tok.setOriginalText(tfm::format(L"%g", newValue).c_str());
+	tok.setValue(newValue, tfm::format(L"%g", newValue));
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -319,7 +315,7 @@ void FileTokenizer::createToken(TokenType type, size_t length)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setOriginalText(currentLine,linePos,length);
+	token.setValue(std::monostate{}, currentLine.substr(linePos, length));
 
 	linePos += length;
 }
@@ -329,8 +325,7 @@ void FileTokenizer::createToken(TokenType type, size_t length, int64_t value)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setOriginalText(currentLine,linePos,length);
-	token.intValue = value;
+	token.setValue(value, currentLine.substr(linePos, length));
 
 	linePos += length;
 }
@@ -340,8 +335,7 @@ void FileTokenizer::createToken(TokenType type, size_t length, double value)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setOriginalText(currentLine,linePos,length);
-	token.floatValue = value;
+	token.setValue(value, currentLine.substr(linePos, length));
 
 	linePos += length;
 }
@@ -356,8 +350,7 @@ void FileTokenizer::createToken(TokenType type, size_t length, const std::wstrin
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setOriginalText(currentLine,linePos,length);
-	token.setStringValue(value,valuePos,valueLength);
+	token.setValue(value.substr(valuePos, valueLength), currentLine.substr(linePos, length));
 
 	linePos += length;
 }
@@ -367,7 +360,7 @@ void FileTokenizer::createTokenCurrentString(TokenType type, size_t length)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setStringAndOriginalValue(currentLine,linePos,length);
+	token.setValue(currentLine.substr(linePos, length), currentLine.substr(linePos, length));
 
 	linePos += length;
 }
