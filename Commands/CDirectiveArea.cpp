@@ -42,7 +42,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 	{
 		if (!positionExpression.evaluateInteger(position))
 		{
-			Logger::queueError(Logger::Error, L"Invalid position expression");
+			Logger::queueError(Logger::Error, "Invalid position expression");
 			return false;
 		}
 		Architecture::current().NextSection();
@@ -53,13 +53,13 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 
 	if (!sizeExpression.evaluateInteger(areaSize))
 	{
-		Logger::queueError(Logger::Error,L"Invalid size expression");
+		Logger::queueError(Logger::Error, "Invalid size expression");
 		return false;
 	}
 
 	if (areaSize < 0)
 	{
-		Logger::queueError(Logger::Error, L"Negative area size");
+		Logger::queueError(Logger::Error, "Negative area size");
 		return false;
 	}
 
@@ -67,7 +67,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 	{
 		if (!fillExpression.evaluateInteger(fillValue))
 		{
-			Logger::queueError(Logger::Error,L"Invalid fill expression");
+			Logger::queueError(Logger::Error, "Invalid fill expression");
 			return false;
 		}
 	}
@@ -77,7 +77,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 	{
 		ValidateState contentValidation = state;
 		contentValidation.noFileChange = true;
-		contentValidation.noFileChangeDirective = L"area";
+		contentValidation.noFileChangeDirective = "area";
 		content->applyFileInfo();
 		result = content->Validate(contentValidation);
 	}
@@ -88,7 +88,7 @@ bool CDirectiveArea::Validate(const ValidateState &state)
 
 	if (areaSize < contentSize)
 	{
-		Logger::queueError(Logger::Error, L"Area at %08x overflowed by %d bytes", position, contentSize - areaSize);
+		Logger::queueError(Logger::Error, "Area at %08x overflowed by %d bytes", position, contentSize - areaSize);
 	}
 
 	if (fillExpression.isLoaded() || shared)
@@ -142,13 +142,13 @@ void CDirectiveArea::Encode() const
 
 void CDirectiveArea::writeTempData(TempData& tempData) const
 {
-	const wchar_t *directiveType = shared ? L"region" : L"area";
+	const char *directiveType = shared ? "region" : "area";
 	if (positionExpression.isLoaded())
-		tempData.writeLine(position, tfm::format(L".org 0x%08llX", position));
+		tempData.writeLine(position, tfm::format(".org 0x%08llX", position));
 	if (shared && fillExpression.isLoaded())
-		tempData.writeLine(position,tfm::format(L".%S 0x%08X,0x%02x",directiveType,areaSize,fillValue));
+		tempData.writeLine(position,tfm::format(".%S 0x%08X,0x%02x",directiveType,areaSize,fillValue));
 	else
-		tempData.writeLine(position,tfm::format(L".%S 0x%08X",directiveType,areaSize));
+		tempData.writeLine(position,tfm::format(".%S 0x%08X",directiveType,areaSize));
 	if (content)
 	{
 		content->applyFileInfo();
@@ -159,13 +159,13 @@ void CDirectiveArea::writeTempData(TempData& tempData) const
 	{
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
 		if (subAreaUsage != 0)
-			tempData.writeLine(position+contentSize, tfm::format(L".skip 0x%08llX",subAreaUsage));
+			tempData.writeLine(position+contentSize, tfm::format(".skip 0x%08llX",subAreaUsage));
 
-		std::wstring fillString = tfm::format(L".fill 0x%08X,0x%02X",areaSize-contentSize-subAreaUsage,fillValue);
+		std::string fillString = tfm::format(".fill 0x%08X,0x%02X",areaSize-contentSize-subAreaUsage,fillValue);
 		tempData.writeLine(position+contentSize+subAreaUsage,fillString);
-		tempData.writeLine(position+areaSize,tfm::format(L".end%S",directiveType));
+		tempData.writeLine(position+areaSize,tfm::format(".end%S",directiveType));
 	} else {
-		tempData.writeLine(position+contentSize,tfm::format(L".end%S",directiveType));
+		tempData.writeLine(position+contentSize,tfm::format(".end%S",directiveType));
 	}
 }
 
@@ -207,7 +207,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 
 	ValidateState contentValidation = state;
 	contentValidation.noFileChange = true;
-	contentValidation.noFileChangeDirective = L"region";
+	contentValidation.noFileChangeDirective = "region";
 
 	// We need at least one full pass run before we can get an address.
 	if (state.passes < 1)
@@ -231,7 +231,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	{
 		if (!minRangeExpression.evaluateInteger(minRange))
 		{
-			Logger::queueError(Logger::Error, L"Invalid range expression for .autoregion");
+			Logger::queueError(Logger::Error, "Invalid range expression for .autoregion");
 			return false;
 		}
 	}
@@ -239,7 +239,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	{
 		if (!maxRangeExpression.evaluateInteger(maxRange))
 		{
-			Logger::queueError(Logger::Error, L"Invalid range expression for .autoregion");
+			Logger::queueError(Logger::Error, "Invalid range expression for .autoregion");
 			return false;
 		}
 	}
@@ -247,7 +247,7 @@ bool CDirectiveAutoRegion::Validate(const ValidateState &state)
 	fileID = g_fileManager->getOpenFileID();
 	if (!Allocations::allocateSubArea(fileID, position, minRange, maxRange, contentSize))
 	{
-		Logger::queueError(Logger::Error, L"No space available for .autoregion of size %d", contentSize);
+		Logger::queueError(Logger::Error, "No space available for .autoregion of size %d", contentSize);
 		// We might be able to do better next time.
 		return Allocations::canTrimSpace();
 	}
@@ -279,10 +279,10 @@ void CDirectiveAutoRegion::Encode() const
 
 void CDirectiveAutoRegion::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(position,tfm::format(L".autoregion 0x%08X",position));
+	tempData.writeLine(position,tfm::format(".autoregion 0x%08X",position));
 	content->applyFileInfo();
 	content->writeTempData(tempData);
-	tempData.writeLine(position+contentSize,L".endautoregion");
+	tempData.writeLine(position+contentSize,".endautoregion");
 }
 
 void CDirectiveAutoRegion::writeSymData(SymbolData& symData) const

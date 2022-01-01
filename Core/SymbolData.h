@@ -11,7 +11,7 @@ class AssemblerFile;
 
 struct SymDataSymbol
 {
-	std::wstring name;
+	std::string name;
 	int64_t address;
 	
 	bool operator<(const SymDataSymbol& other) const
@@ -85,7 +85,7 @@ public:
 	void write();
 	void setEnabled(bool b) { enabled = b; };
 
-	void addLabel(int64_t address, const std::wstring& name);
+	void addLabel(int64_t address, const std::string& name);
 	void addData(int64_t address, size_t size, DataType type);
 	void startModule(AssemblerFile* file);
 	void endModule(AssemblerFile* file);
@@ -93,7 +93,7 @@ public:
 	void endFunction(int64_t address);
 private:
 	void writeNocashSym();
-	size_t addFileName(const std::wstring& fileName);
+	size_t addFileName(const std::string& fileName);
 
 	fs::path nocashSymFileName;
 	bool enabled;
@@ -101,7 +101,7 @@ private:
 
 	// entry 0 is for data without parent modules
 	std::vector<SymDataModule> modules;
-	std::vector<std::wstring> files;
+	std::vector<std::string> files;
 	int currentModule;
 	int currentFunction;
 };

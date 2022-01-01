@@ -2,6 +2,7 @@
 
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
+#include "Core/Types.h"
 
 enum class ConditionType
 {
@@ -17,7 +18,7 @@ class CDirectiveConditional: public CAssemblerCommand
 {
 public:
 	CDirectiveConditional(ConditionType type);
-	CDirectiveConditional(ConditionType type, const std::wstring& name);
+	CDirectiveConditional(ConditionType type, const Identifier& name);
 	CDirectiveConditional(ConditionType type, const Expression& exp);
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;

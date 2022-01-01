@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Types.h"
+
 #include <cassert>
 #include <memory>
 #include <string>
@@ -69,7 +71,7 @@ struct ExpressionValue
 		floatValue = value;
 	}
 
-	ExpressionValue(const std::wstring& value)
+	ExpressionValue(const StringLiteral& value)
 	{
 		type = ExpressionValueType::String;
 		strValue = value;
@@ -101,7 +103,7 @@ struct ExpressionValue
 		double floatValue;
 	};
 
-	std::wstring strValue;
+	StringLiteral strValue;
 	
 	ExpressionValue operator!() const;
 	ExpressionValue operator~() const;
@@ -132,7 +134,8 @@ public:
 	~ExpressionInternal() = default;
 	ExpressionInternal(int64_t value);
 	ExpressionInternal(double value);
-	ExpressionInternal(const std::wstring& value, OperatorType type);
+	ExpressionInternal(Identifier value);
+	ExpressionInternal(StringLiteral value);
 
 	template<typename... ARGS>
 	ExpressionInternal(OperatorType op, ARGS... parameters) :
@@ -141,17 +144,17 @@ public:
 		( children.push_back(std::move(parameters)), ... );
 	}
 
-	ExpressionInternal(const std::wstring& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters);
+	ExpressionInternal(const Identifier& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters);
 	ExpressionValue evaluate();
-	std::wstring toString();
+	std::string toString();
 	bool isIdentifier() { return type == OperatorType::Identifier; }
-	std::wstring getStringValue() { return valueAs<std::wstring>(); }
-	void replaceMemoryPos(const std::wstring& identifierName);
+	const Identifier &getIdentifier() { return valueAs<Identifier>(); }
+	void replaceMemoryPos(const Identifier& identifierName);
 	bool simplify(bool inUnknownOrFalseBlock);
 	unsigned int getFileNum() { return fileNum; }
 	unsigned int getSection() { return section; }
 private:
-	using ValueTypes = std::variant<std::monostate, int64_t, double, std::wstring>;
+	using ValueTypes = std::variant<std::monostate, int64_t, double, StringLiteral, Identifier>;
 
 	template<typename T>
 	const T &valueAs() const
@@ -160,7 +163,7 @@ private:
 		return std::get<T>(value);
 	}
 
-	std::wstring formatFunctionCall();
+	std::string formatFunctionCall();
 	ExpressionValue executeFunctionCall();
 
 	OperatorType type = OperatorType::Invalid;
@@ -179,7 +182,7 @@ public:
 
 	ExpressionValue evaluate();
 	bool isLoaded() const { return expression != nullptr; }
-	void replaceMemoryPos(const std::wstring& identifierName);
+	void replaceMemoryPos(const Identifier& identifierName);
 	bool isConstExpression() { return constExpression; }
 
 	template<typename T>
@@ -196,9 +199,9 @@ public:
 		return true;
 	}
 
-	bool evaluateString(std::wstring& dest, bool convert);
-	bool evaluateIdentifier(std::wstring& dest);
-	std::wstring toString();
+	bool evaluateString(StringLiteral& dest, bool convert);
+	bool evaluateIdentifier(Identifier& dest);
+	std::string toString();
 private:
 	std::shared_ptr<ExpressionInternal> expression;
 	bool constExpression = true;

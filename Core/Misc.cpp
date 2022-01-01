@@ -3,44 +3,45 @@
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 #include "Util/FileSystem.h"
+#include "Util/Util.h"
 
 #include <iostream>
 
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif
 
 std::vector<Logger::QueueEntry> Logger::queue;
-std::vector<std::wstring> Logger::errors;
+std::vector<std::string> Logger::errors;
 bool Logger::error = false;
 bool Logger::fatalError = false;
 bool Logger::errorOnWarning = false;
 bool Logger::silent = false;
 int Logger::suppressLevel = 0;
 
-std::wstring Logger::formatError(ErrorType type, const wchar_t* text)
+std::string Logger::formatError(ErrorType type, const char* text)
 {
-	std::wstring position;
+	std::string position;
 
 	if (!Global.memoryMode && Global.fileList.size() > 0)
 	{
-		const auto& fileName = Global.fileList.relativeWstring(Global.FileInfo.FileNum);
-		position = tfm::format(L"%s(%d) ", fileName, Global.FileInfo.LineNumber);
+		const auto& fileName = Global.fileList.relativeString(Global.FileInfo.FileNum);
+		position = tfm::format("%s(%d) ", fileName, Global.FileInfo.LineNumber);
 	}
 
 	switch (type)
 	{
 	case Warning:
-		return tfm::format(L"%swarning: %s",position,text);
+		return tfm::format("%swarning: %s",position,text);
 	case Error:
-		return tfm::format(L"%serror: %s",position,text);
+		return tfm::format("%serror: %s",position,text);
 	case FatalError:
-		return tfm::format(L"%sfatal error: %s",position,text);
+		return tfm::format("%sfatal error: %s",position,text);
 	case Notice:
-		return tfm::format(L"%snotice: %s",position,text);
+		return tfm::format("%snotice: %s",position,text);
 	}
 
-	return L"";
+	return "";
 }
 
 void Logger::setFlags(ErrorType type)
@@ -73,20 +74,7 @@ void Logger::clear()
 	silent = false;
 }
 
-void Logger::printLine(const std::wstring& text)
-{
-	if (suppressLevel)
-		return;
-
-	std::wcout << text << std::endl;
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-	OutputDebugStringW(text.c_str());
-	OutputDebugStringW(L"\n");
-#endif
-}
-
-void Logger::printLine(const std::string& text)
+void Logger::printLine(std::string_view text)
 {
 	if (suppressLevel)
 		return;
@@ -94,29 +82,29 @@ void Logger::printLine(const std::string& text)
 	std::cout << text << std::endl;
 	
 #if defined(_MSC_VER) && defined(_DEBUG)
-	OutputDebugStringA(text.c_str());
+	OutputDebugStringA(text.data());
 	OutputDebugStringA("\n");
 #endif
 }
 
-void Logger::print(const std::wstring& text)
+void Logger::print(std::string_view text)
 {
 	if (suppressLevel)
 		return;
 
-	std::wcout << text;
+	std::cout << text;
 	
 #if defined(_MSC_VER) && defined(_DEBUG)
-	OutputDebugStringW(text.c_str());
+	OutputDebugStringA(text.data());
 #endif
 }
 
-void Logger::printError(ErrorType type, const std::wstring& text)
+void Logger::printError(ErrorType type, const std::string_view text)
 {
 	if (suppressLevel)
 		return;
 
-	std::wstring errorText = formatError(type,text.c_str());
+	std::string errorText = formatError(type,text.data());
 	errors.push_back(errorText);
 
 	if (!silent)
@@ -125,39 +113,14 @@ void Logger::printError(ErrorType type, const std::wstring& text)
 	setFlags(type);
 }
 
-void Logger::printError(ErrorType type, const wchar_t* text)
-{
-	if (suppressLevel)
-		return;
-
-	std::wstring errorText = formatError(type,text);
-	errors.push_back(errorText);
-
-	if (!silent)
-		printLine(errorText);
-
-	setFlags(type);
-}
-
-void Logger::queueError(ErrorType type, const std::wstring& text)
+void Logger::queueError(ErrorType type, const std::string_view text)
 {
 	if (suppressLevel)
 		return;
 
 	QueueEntry entry;
 	entry.type = type;
-	entry.text = formatError(type,text.c_str());
-	queue.push_back(entry);
-}
-
-void Logger::queueError(ErrorType type, const wchar_t* text)
-{
-	if (suppressLevel)
-		return;
-
-	QueueEntry entry;
-	entry.type = type;
-	entry.text = formatError(type,text);
+	entry.text = formatError(type,text.data());
 	queue.push_back(entry);
 }
 
@@ -180,7 +143,7 @@ void TempData::start()
 	{
 		if (!file.open(TextFile::Write))
 		{
-			Logger::printError(Logger::Error,L"Could not open temp file %s.",file.getFileName().wstring());
+			Logger::printError(Logger::Error,"Could not open temp file %s.",file.getFileName().u8string());
 			return;
 		}
 
@@ -189,13 +152,13 @@ void TempData::start()
 		size_t labelCount = Global.symbolTable.getLabelCount();
 		size_t equCount = Global.symbolTable.getEquationCount();
 
-		file.writeFormat(L"; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
-		file.writeFormat(L"; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
-		file.writeFormat(L"; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
-		file.writeFormat(L"; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
+		file.writeFormat("; %d %S included\n",fileCount,fileCount == 1 ? "file" : "files");
+		file.writeFormat("; %d %S\n",lineCount,lineCount == 1 ? "line" : "lines");
+		file.writeFormat("; %d %S\n",labelCount,labelCount == 1 ? "label" : "labels");
+		file.writeFormat("; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
 		for (size_t i = 0; i < fileCount; i++)
 		{
-			file.writeFormat(L"; %S\n",Global.fileList.wstring(i));
+			file.writeFormat("; %S\n",Global.fileList.string(i));
 		}
 		file.writeLine("");
 	}
@@ -207,18 +170,18 @@ void TempData::end()
 		file.close();
 }
 
-void TempData::writeLine(int64_t memoryAddress, const std::wstring& text)
+void TempData::writeLine(int64_t memoryAddress, const std::string& text)
 {
 	if (file.isOpen())
 	{
-		wchar_t hexbuf[10] = {0};
-		swprintf(hexbuf, 10, L"%08X ", (int32_t) memoryAddress);
-		std::wstring str = hexbuf + text;
+		char hexbuf[10] = {0};
+		snprintf(hexbuf, 10, "%08X ", (int32_t) memoryAddress);
+		std::string str = hexbuf + text;
 		while (str.size() < 70)
 			str += ' ';
 
-		str += tfm::format(L"; %S line %d",
-			Global.fileList.wstring(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
+		str += tfm::format("; %S line %d",
+			Global.fileList.string(Global.FileInfo.FileNum),Global.FileInfo.LineNumber);
 
 		file.writeLine(str);
 	}

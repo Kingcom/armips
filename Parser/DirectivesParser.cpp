@@ -28,7 +28,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 		return nullptr;
 
 	int64_t memoryAddress;
-	std::wstring inputName, outputName;
+	StringLiteral inputName, outputName;
 
 	if (!list[0].evaluateString(inputName,false))
 		return nullptr;
@@ -42,10 +42,10 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 		if (!list[1].evaluateString(outputName,false))
 			return nullptr;
 		
-		file->initCopy(inputName,outputName,memoryAddress);
+		file->initCopy(inputName.path(),outputName.path(),memoryAddress);
 		return file;
 	} else {
-		file->initOpen(inputName,memoryAddress);
+		file->initOpen(inputName.path(),memoryAddress);
 		return file;
 	}
 }
@@ -57,7 +57,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flag
 		return nullptr;
 
 	int64_t memoryAddress;
-	std::wstring inputName, outputName;
+	StringLiteral inputName, outputName;
 
 	if (!list[0].evaluateString(inputName,false))
 		return nullptr;
@@ -66,7 +66,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flag
 		return nullptr;
 
 	auto file = std::make_unique<CDirectiveFile>();
-	file->initCreate(inputName,memoryAddress);
+	file->initCreate(inputName.path(),memoryAddress);
 	return file;
 }
 
@@ -83,11 +83,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveIncbin(Parser& parser, int flag
 	if (!parser.parseExpressionList(list,1,3))
 		return nullptr;
 	
-	std::wstring fileName;
+	StringLiteral fileName;
 	if (!list[0].evaluateString(fileName,false))
 		return nullptr;
 
-	auto incbin = std::make_unique<CDirectiveIncbin>(fileName);
+	auto incbin = std::make_unique<CDirectiveIncbin>(fileName.path());
 	if (list.size() >= 2)
 		incbin->setStart(list[1]);
 
@@ -174,26 +174,26 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveObjImport(Parser& parser, int f
 	if (!parser.parseExpressionList(list,1,2))
 		return nullptr;
 
-	std::wstring fileName;
+	StringLiteral fileName;
 	if (!list[0].evaluateString(fileName,true))
 		return nullptr;
 
 	if (list.size() == 2)
 	{
-		std::wstring ctorName;
+		Identifier ctorName;
 		if (!list[1].evaluateIdentifier(ctorName))
 			return nullptr;
 
-		return std::make_unique<DirectiveObjImport>(fileName,ctorName);
+		return std::make_unique<DirectiveObjImport>(fileName.path(),ctorName);
 	}
 	
-	return std::make_unique<DirectiveObjImport>(fileName);
+	return std::make_unique<DirectiveObjImport>(fileName.path());
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int flags)
 {
 	ConditionType type;
-	std::wstring name;
+	Identifier name;
 	Expression exp;
 
 	const Token& start = parser.peekToken();
@@ -205,7 +205,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 		exp = parser.parseExpression();
 		if (!exp.isLoaded())
 		{
-			parser.printError(start,L"Invalid condition");
+			parser.printError(start, "Invalid condition");
 			return std::make_unique<DummyCommand>();
 		}
 
@@ -230,12 +230,12 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 
 	if(parser.nextToken().type != TokenType::Separator)
 	{
-		parser.printError(start,L"Directive not terminated");
+		parser.printError(start, "Directive not terminated");
 		return nullptr;
 	}
 
 	parser.pushConditionalResult(condResult);
-	std::unique_ptr<CAssemblerCommand> ifBlock = parser.parseCommandSequence(L'.', {L".else", L".elseif", L".elseifdef", L".elseifndef", L".endif"});
+	std::unique_ptr<CAssemblerCommand> ifBlock = parser.parseCommandSequence('.', {".else", ".elseif", ".elseifdef", ".elseifndef", ".endif"});
 	parser.popConditionalResult();
 
 	// update the file info so that else commands get the right line number
@@ -246,11 +246,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 
 	if (next.type != TokenType::Identifier)
 	{
-		parser.printError(start, L"Expected identifier after if block");
+		parser.printError(start, "Expected identifier after if block");
 		return nullptr;
 	}
 
-	const std::wstring &stringValue = next.identifierValue();
+	const Identifier &identifier = next.identifierValue();
 
 	ConditionalResult elseResult;
 	switch (condResult)
@@ -267,21 +267,21 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	}
 
 	parser.pushConditionalResult(elseResult);
-	if (stringValue == L".else")
+	if (identifier == ".else")
 	{
-		elseBlock = parser.parseCommandSequence(L'.', {L".endif"});
+		elseBlock = parser.parseCommandSequence('.', {".endif"});
 
 		parser.eatToken();	// eat .endif
-	} else if (stringValue == L".elseif")
+	} else if (identifier == ".elseif")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IF);
-	} else if (stringValue == L".elseifdef")
+	} else if (identifier == ".elseifdef")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFDEF);
-	} else if (stringValue == L".elseifndef")
+	} else if (identifier == ".elseifndef")
 	{
 		elseBlock = parseDirectiveConditional(parser,DIRECTIVE_COND_IFNDEF);
-	} else if (stringValue != L".endif")
+	} else if (identifier != ".endif")
 	{
 		parser.popConditionalResult();
 		return nullptr;
@@ -307,7 +307,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int
 	if (exp.isLoaded())
 		cond = std::make_unique<CDirectiveConditional>(type,exp);
 	else if (name.size() != 0)
-		cond = std::make_unique<CDirectiveConditional>(type,name);
+		cond = std::make_unique<CDirectiveConditional>(type, name);
 	else
 		cond = std::make_unique<CDirectiveConditional>(type);
 
@@ -323,27 +323,27 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveTable(Parser& parser, int flags
 	if (!parser.parseExpressionList(list,1,2))
 		return nullptr;
 
-	std::wstring fileName;
+	StringLiteral fileName;
 	if (!list[0].evaluateString(fileName,true))
 	{
-		parser.printError(start,L"Invalid file name");
+		parser.printError(start, "Invalid file name");
 		return nullptr;
 	}
 
 	TextFile::Encoding encoding = TextFile::GUESS;
 	if (list.size() == 2)
 	{
-		std::wstring encodingName;
+		StringLiteral encodingName;
 		if (!list[1].evaluateString(encodingName,true))
 		{
-			parser.printError(start,L"Invalid encoding name");
+			parser.printError(start, "Invalid encoding name");
 			return nullptr;
 		}
 
-		encoding = getEncodingFromString(encodingName);
+		encoding = getEncodingFromString(encodingName.string());
 	}
 
-	return std::make_unique<TableCommand>(fileName,encoding);
+	return std::make_unique<TableCommand>(fileName.path(),encoding);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
@@ -403,19 +403,19 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMipsArch(Parser& parser, int fl
 	{
 	case DIRECTIVE_MIPS_PSX:
 		Mips.SetVersion(MARCH_PSX);
-		return std::make_unique<ArchitectureCommand>(L".psx", L"");
+		return std::make_unique<ArchitectureCommand>(".psx", "");
 	case DIRECTIVE_MIPS_PS2:
 		Mips.SetVersion(MARCH_PS2);
-		return std::make_unique<ArchitectureCommand>(L".ps2", L"");
+		return std::make_unique<ArchitectureCommand>(".ps2", "");
 	case DIRECTIVE_MIPS_PSP:
 		Mips.SetVersion(MARCH_PSP);
-		return std::make_unique<ArchitectureCommand>(L".psp", L"");
+		return std::make_unique<ArchitectureCommand>(".psp", "");
 	case DIRECTIVE_MIPS_N64:
 		Mips.SetVersion(MARCH_N64);
-		return std::make_unique<ArchitectureCommand>(L".n64", L"");
+		return std::make_unique<ArchitectureCommand>(".n64", "");
 	case DIRECTIVE_MIPS_RSP:
 		Mips.SetVersion(MARCH_RSP);
-		return std::make_unique<ArchitectureCommand>(L".rsp", L"");
+		return std::make_unique<ArchitectureCommand>(".rsp", "");
 	}
 
 	return nullptr;
@@ -430,23 +430,23 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int fla
 	case DIRECTIVE_ARM_GBA:
 		Arm.SetThumbMode(true);
 		Arm.setVersion(AARCH_GBA);
-		return std::make_unique<ArchitectureCommand>(L".gba\n.thumb", L".thumb");
+		return std::make_unique<ArchitectureCommand>(".gba\n.thumb", ".thumb");
 	case DIRECTIVE_ARM_NDS:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_NDS);
-		return std::make_unique<ArchitectureCommand>(L".nds\n.arm", L".arm");
+		return std::make_unique<ArchitectureCommand>(".nds\n.arm", ".arm");
 	case DIRECTIVE_ARM_3DS:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_3DS);
-		return std::make_unique<ArchitectureCommand>(L".3ds\n.arm", L".arm");
+		return std::make_unique<ArchitectureCommand>(".3ds\n.arm", ".arm");
 	case DIRECTIVE_ARM_BIG:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_BIG);
-		return std::make_unique<ArchitectureCommand>(L".arm.big\n.arm", L".arm");
+		return std::make_unique<ArchitectureCommand>(".arm.big\n.arm", ".arm");
 	case DIRECTIVE_ARM_LITTLE:
 		Arm.SetThumbMode(false);
 		Arm.setVersion(AARCH_LITTLE);
-		return std::make_unique<ArchitectureCommand>(L".arm.little\n.arm", L".arm");
+		return std::make_unique<ArchitectureCommand>(".arm.little\n.arm", ".arm");
 	}
 
 	return nullptr;
@@ -463,7 +463,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 	if (parameters.size() == 2)
 		area->setFillExpression(parameters[1]);
 
-	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence(L'.', { L".endarea", L".endregion" });
+	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence('.', { ".endarea", ".endregion" });
 	parser.eatToken();
 
 	area->setContent(std::move(content));
@@ -500,23 +500,23 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveAutoRegion(Parser& parser, int 
 	else if (parameters.size() == 2)
 		area->setRangeExpressions(parameters[0], parameters[1]);
 
-	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence(L'.', {L".endautoregion"});
+	std::unique_ptr<CAssemblerCommand> content = parser.parseCommandSequence('.', {".endautoregion"});
 	parser.eatToken();
 
 	area->setContent(std::move(content));
 	return area;
 }
 
-std::optional<std::wstring> getStringOrIdentifier(Parser& parser)
+std::optional<std::string> getStringOrIdentifier(Parser& parser)
 {
 	const Token &tok = parser.nextToken();
 	if (tok.type == TokenType::Identifier)
-		return tok.identifierValue();
+		return tok.identifierValue().string();
 
 	if (tok.type == TokenType::String)
 	{
-		auto stringValue = tok.stringValue();
-		std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::towlower);
+		auto stringValue = tok.stringValue().string();
+		std::transform(stringValue.begin(),stringValue.end(),stringValue.begin(),::tolower);
 		return stringValue;
 	}
 
@@ -529,11 +529,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveErrorWarning(Parser& parser, in
 	if (!stringValue)
 		return nullptr;
 
-	if (stringValue == L"on")
+	if (stringValue == "on")
 	{	
 		Logger::setErrorOnWarning(true);
 		return std::make_unique<DummyCommand>();
-	} else if (stringValue == L"off")
+	} else if (stringValue == "off")
 	{
 		Logger::setErrorOnWarning(false);
 		return std::make_unique<DummyCommand>();
@@ -548,11 +548,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveRelativeInclude(Parser& parser,
 	if (!stringValue)
 		return nullptr;
 
-	if (stringValue == L"on")
+	if (stringValue == "on")
 	{	
 		Global.relativeInclude = true;
 		return std::make_unique<DummyCommand>();
-	} else if (stringValue == L"off")
+	} else if (stringValue == "off")
 	{
 		Global.relativeInclude = false;
 		return std::make_unique<DummyCommand>();
@@ -567,11 +567,11 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveNocash(Parser& parser, int flag
 	if (!stringValue)
 		return nullptr;
 
-	if (stringValue == L"on")
+	if (stringValue == "on")
 	{	
 		Global.nocash = true;
 		return std::make_unique<DummyCommand>();
-	} else if (stringValue == L"off")
+	} else if (stringValue == "off")
 	{
 		Global.nocash = false;
 		return std::make_unique<DummyCommand>();
@@ -586,9 +586,9 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveSym(Parser& parser, int flags)
 	if (!stringValue)
 		return nullptr;
 
-	if (stringValue == L"on")
+	if (stringValue == "on")
 		return std::make_unique<CDirectiveSym>(true);
-	else if (stringValue == L"off")
+	else if (stringValue == "off")
 		return std::make_unique<CDirectiveSym>(false);
 	else
 		return nullptr;
@@ -607,14 +607,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int
 	if (!value.isLoaded())
 		return nullptr;
 
-	const std::wstring &stringValue = tok.identifierValue();
-	if (!Global.symbolTable.isValidSymbolName(stringValue))
+	const Identifier &identifier = tok.identifierValue();
+	if (!Global.symbolTable.isValidSymbolName(identifier))
 	{
-		parser.printError(tok,L"Invalid label name \"%s\"",stringValue);
+		parser.printError(tok, "Invalid label name \"%s\"",identifier);
 		return nullptr;
 	}
 
-	return std::make_unique<CAssemblerLabel>(stringValue,tok.getOriginalText(),value);
+	return std::make_unique<CAssemblerLabel>(identifier,Identifier(tok.getOriginalText()),value);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int flags)
@@ -625,23 +625,23 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int fl
 
 	if (parser.nextToken().type != TokenType::Separator)
 	{
-		parser.printError(tok,L"Directive not terminated");
+		parser.printError(tok, "Directive not terminated");
 		return nullptr;
 	}
 
-	auto func = std::make_unique<CDirectiveFunction>(tok.identifierValue(),tok.getOriginalText());
-	std::unique_ptr<CAssemblerCommand> seq = parser.parseCommandSequence(L'.', {L".endfunc",L".endfunction",L".func",L".function"});
+	auto func = std::make_unique<CDirectiveFunction>(Identifier(tok.identifierValue()), Identifier(tok.getOriginalText()));
+	std::unique_ptr<CAssemblerCommand> seq = parser.parseCommandSequence('.', {".endfunc",".endfunction",".func",".function"});
 
 	const Token &next = parser.peekToken();
 	if (next.type == TokenType::Identifier)
 	{
-		const std::wstring &stringValue = next.identifierValue();
-		if (stringValue == L".endfunc" || stringValue == L".endfunction")
+		const Identifier &identifier = next.identifierValue();
+		if (identifier == ".endfunc" || identifier == ".endfunction")
 		{
 			parser.eatToken();
 			if(parser.nextToken().type != TokenType::Separator)
 			{
-				parser.printError(tok,L"Directive not terminated");
+				parser.printError(tok, "Directive not terminated");
 				return nullptr;
 			}
 		}
@@ -676,21 +676,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 	if (!parser.parseExpressionList(parameters,1,2))
 		return nullptr;
 
-	std::wstring fileNameParameter;
+	StringLiteral fileNameParameter;
 	if (!parameters[0].evaluateString(fileNameParameter,true))
 		return nullptr;
 
-	auto fileName = getFullPathName(fileNameParameter);
+	auto fileName = getFullPathName(fileNameParameter.path());
 
 	TextFile::Encoding encoding = TextFile::GUESS;
 	if (parameters.size() == 2)
 	{
-		std::wstring encodingName;
-		if (!parameters[1].evaluateString(encodingName,true)
-			&& !parameters[1].evaluateIdentifier(encodingName))
+		StringLiteral encodingName;
+		if (!parameters[1].evaluateString(encodingName,true))
 			return nullptr;
 		
-		encoding = getEncodingFromString(encodingName);
+		encoding = getEncodingFromString(encodingName.string());
 	}
 
 	// don't include the file if it's inside a false block
@@ -699,14 +698,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 
 	if (!fs::exists(fileName))
 	{
-		parser.printError(start,L"Included file \"%s\" does not exist",fileName.wstring());
+		parser.printError(start, "Included file \"%s\" does not exist",fileName.u8string());
 		return nullptr;
 	}
 
 	TextFile f;
 	if (!f.open(fileName,TextFile::Read,encoding))
 	{
-		parser.printError(start,L"Could not open included file \"%s\"",fileName.wstring());
+		parser.printError(start, "Could not open included file \"%s\"",fileName.u8string());
 		return nullptr;
 	}
 
@@ -714,98 +713,99 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveInclude(Parser& parser, int fla
 }
 
 const DirectiveMap directives = {
-	{ L".open",				{ &parseDirectiveOpen,				DIRECTIVE_NOTINMEMORY } },
-	{ L".openfile",			{ &parseDirectiveOpen,				DIRECTIVE_NOTINMEMORY } },
-	{ L".create",			{ &parseDirectiveCreate,			DIRECTIVE_NOTINMEMORY } },
-	{ L".createfile",		{ &parseDirectiveCreate,			DIRECTIVE_NOTINMEMORY } },
-	{ L".close",			{ &parseDirectiveClose,				DIRECTIVE_NOTINMEMORY } },
-	{ L".closefile",		{ &parseDirectiveClose,				DIRECTIVE_NOTINMEMORY } },
-	{ L".incbin",			{ &parseDirectiveIncbin,			0 } },
-	{ L".import",			{ &parseDirectiveIncbin,			0 } },
-	{ L".org",				{ &parseDirectivePosition,			DIRECTIVE_POS_VIRTUAL } },
-	{ L"org",				{ &parseDirectivePosition,			DIRECTIVE_POS_VIRTUAL } },
-	{ L".orga",				{ &parseDirectivePosition,			DIRECTIVE_POS_PHYSICAL } },
-	{ L"orga",				{ &parseDirectivePosition,			DIRECTIVE_POS_PHYSICAL } },
-	{ L".headersize",		{ &parseDirectiveHeaderSize,		0 } },
-	{ L".align",			{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_VIRTUAL } },
-	{ L".aligna",			{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_PHYSICAL } },
-	{ L".fill",				{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_FILL } },
-	{ L"defs",				{ &parseDirectiveAlignFill,			DIRECTIVE_ALIGN_FILL } },
-	{ L".skip",				{ &parseDirectiveSkip,				0 } },
+	{ ".open",            { &parseDirectiveOpen,            DIRECTIVE_NOTINMEMORY } },
+	{ ".openfile",        { &parseDirectiveOpen,            DIRECTIVE_NOTINMEMORY } },
+	{ ".create",          { &parseDirectiveCreate,          DIRECTIVE_NOTINMEMORY } },
+	{ ".createfile",      { &parseDirectiveCreate,          DIRECTIVE_NOTINMEMORY } },
+	{ ".close",           { &parseDirectiveClose,           DIRECTIVE_NOTINMEMORY } },
+	{ ".closefile",       { &parseDirectiveClose,           DIRECTIVE_NOTINMEMORY } },
+	{ ".incbin",          { &parseDirectiveIncbin,          0 } },
+	{ ".import",          { &parseDirectiveIncbin,          0 } },
+	{ ".org",             { &parseDirectivePosition,        DIRECTIVE_POS_VIRTUAL } },
+	{ "org",              { &parseDirectivePosition,        DIRECTIVE_POS_VIRTUAL } },
+	{ ".orga",            { &parseDirectivePosition,        DIRECTIVE_POS_PHYSICAL } },
+	{ "orga",             { &parseDirectivePosition,        DIRECTIVE_POS_PHYSICAL } },
+	{ ".headersize",      { &parseDirectiveHeaderSize,      0 } },
+	{ ".align",           { &parseDirectiveAlignFill,       DIRECTIVE_ALIGN_VIRTUAL } },
+	{ ".aligna",          { &parseDirectiveAlignFill,       DIRECTIVE_ALIGN_PHYSICAL } },
+	{ ".fill",            { &parseDirectiveAlignFill,       DIRECTIVE_ALIGN_FILL } },
+	{ "defs",             { &parseDirectiveAlignFill,       DIRECTIVE_ALIGN_FILL } },
+	{ ".skip",            { &parseDirectiveSkip,            0 } },
 
-	{ L".if",				{ &parseDirectiveConditional,		DIRECTIVE_COND_IF } },
-	{ L".ifdef",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFDEF } },
-	{ L".ifndef",			{ &parseDirectiveConditional,		DIRECTIVE_COND_IFNDEF } },
+	{ ".if",              { &parseDirectiveConditional,     DIRECTIVE_COND_IF } },
+	{ ".ifdef",           { &parseDirectiveConditional,     DIRECTIVE_COND_IFDEF } },
+	{ ".ifndef",          { &parseDirectiveConditional,     DIRECTIVE_COND_IFNDEF } },
 
-	{ L".loadtable",		{ &parseDirectiveTable,				0 } },
-	{ L".table",			{ &parseDirectiveTable,				0 } },
-	{ L".byte",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
-	{ L".halfword",			{ &parseDirectiveData,				DIRECTIVE_DATA_16 } },
-	{ L".word",				{ &parseDirectiveData,				DIRECTIVE_DATA_32 } },
-	{ L".doubleword",		{ &parseDirectiveData,				DIRECTIVE_DATA_64 } },
-	{ L".db",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
-	{ L".dh",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
-	{ L".dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
-	{ L".dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
-	{ L".dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
-	{ L".dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
-	{ L".dcb",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
-	{ L".dcw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16 } },
-	{ L".dcd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32 } },
-	{ L".dcq",				{ &parseDirectiveData,				DIRECTIVE_DATA_64 } },
-	{ L"db",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
-	{ L"dh",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
-	{ L"dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
-	{ L"dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
-	{ L"dw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
-	{ L"dd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
-	{ L"dcb",				{ &parseDirectiveData,				DIRECTIVE_DATA_8 } },
-	{ L"dcw",				{ &parseDirectiveData,				DIRECTIVE_DATA_16 } },
-	{ L"dcd",				{ &parseDirectiveData,				DIRECTIVE_DATA_32 } },
-	{ L"dcq",				{ &parseDirectiveData,				DIRECTIVE_DATA_64 } },
-	{ L".float",			{ &parseDirectiveData,				DIRECTIVE_DATA_FLOAT } },
-	{ L".double",			{ &parseDirectiveData,				DIRECTIVE_DATA_DOUBLE } },
-	{ L".ascii",			{ &parseDirectiveData,				DIRECTIVE_DATA_ASCII } },
-	{ L".asciiz",			{ &parseDirectiveData,				DIRECTIVE_DATA_ASCII|DIRECTIVE_DATA_TERMINATION } },
-	{ L".string",			{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
-	{ L".str",				{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
-	{ L".stringn",			{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM } },
-	{ L".strn",				{ &parseDirectiveData,				DIRECTIVE_DATA_CUSTOM } },
-	{ L".sjis",				{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS|DIRECTIVE_DATA_TERMINATION } },
-	{ L".sjisn",			{ &parseDirectiveData,				DIRECTIVE_DATA_SJIS } },
+	{ ".loadtable",       { &parseDirectiveTable,           0 } },
+	{ ".table",           { &parseDirectiveTable,           0 } },
+	{ ".byte",            { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
+	{ ".halfword",        { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
+	{ ".word",            { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
+	{ ".doubleword",      { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
+	{ ".db",              { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
+	{ ".dh",              { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
+	{ ".dw",              { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
+	{ ".dd",              { &parseDirectiveData,            DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
+	{ ".dw",              { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
+	{ ".dd",              { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
+	{ ".dcb",             { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
+	{ ".dcw",             { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
+	{ ".dcd",             { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
+	{ ".dcq",             { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
+	{ "db",               { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
+	{ "dh",               { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
+	{ "dw",               { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
+	{ "dd",               { &parseDirectiveData,            DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
+	{ "dw",               { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
+	{ "dd",               { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
+	{ "dcb",              { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
+	{ "dcw",              { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
+	{ "dcd",              { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
+	{ "dcq",              { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
+	{ ".float",           { &parseDirectiveData,            DIRECTIVE_DATA_FLOAT } },
+	{ ".double",          { &parseDirectiveData,            DIRECTIVE_DATA_DOUBLE } },
+	{ ".ascii",           { &parseDirectiveData,            DIRECTIVE_DATA_ASCII } },
+	{ ".asciiz",          { &parseDirectiveData,            DIRECTIVE_DATA_ASCII|DIRECTIVE_DATA_TERMINATION } },
+	{ ".string",          { &parseDirectiveData,            DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
+	{ ".str",             { &parseDirectiveData,            DIRECTIVE_DATA_CUSTOM|DIRECTIVE_DATA_TERMINATION } },
+	{ ".stringn",         { &parseDirectiveData,            DIRECTIVE_DATA_CUSTOM } },
+	{ ".strn",            { &parseDirectiveData,            DIRECTIVE_DATA_CUSTOM } },
+	{ ".sjis",            { &parseDirectiveData,            DIRECTIVE_DATA_SJIS|DIRECTIVE_DATA_TERMINATION } },
+	{ ".sjisn",           { &parseDirectiveData,            DIRECTIVE_DATA_SJIS } },
 
-	{ L".psx",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PSX } },
-	{ L".ps2",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PS2 } },
-	{ L".psp",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_PSP } },
-	{ L".n64",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_N64 } },
-	{ L".rsp",				{ &parseDirectiveMipsArch,			DIRECTIVE_MIPS_RSP } },
+	{ ".psx",             { &parseDirectiveMipsArch,        DIRECTIVE_MIPS_PSX } },
+	{ ".ps2",             { &parseDirectiveMipsArch,        DIRECTIVE_MIPS_PS2 } },
+	{ ".psp",             { &parseDirectiveMipsArch,        DIRECTIVE_MIPS_PSP } },
+	{ ".n64",             { &parseDirectiveMipsArch,        DIRECTIVE_MIPS_N64 } },
+	{ ".rsp",             { &parseDirectiveMipsArch,        DIRECTIVE_MIPS_RSP } },
 
-	{ L".gba",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_GBA } },
-	{ L".nds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_NDS } },
-	{ L".3ds",				{ &parseDirectiveArmArch,			DIRECTIVE_ARM_3DS } },
-	{ L".arm.big",			{ &parseDirectiveArmArch,			DIRECTIVE_ARM_BIG } },
-	{ L".arm.little",		{ &parseDirectiveArmArch,			DIRECTIVE_ARM_LITTLE } },
-	
-	{ L".area",				{ &parseDirectiveArea,				0 } },
-	{ L".autoregion",		{ &parseDirectiveAutoRegion,		0 } },
-	{ L".region",			{ &parseDirectiveArea,				DIRECTIVE_AREA_SHARED } },
-	{ L".defineregion",		{ &parseDirectiveDefineArea,		DIRECTIVE_AREA_SHARED } },
+	{ ".gba",             { &parseDirectiveArmArch,         DIRECTIVE_ARM_GBA } },
+	{ ".nds",             { &parseDirectiveArmArch,         DIRECTIVE_ARM_NDS } },
+	{ ".3ds",             { &parseDirectiveArmArch,         DIRECTIVE_ARM_3DS } },
+	{ ".arm.big",         { &parseDirectiveArmArch,         DIRECTIVE_ARM_BIG } },
+	{ ".arm.little",      { &parseDirectiveArmArch,         DIRECTIVE_ARM_LITTLE } },
 
-	{ L".importobj",		{ &parseDirectiveObjImport,			0 } },
-	{ L".importlib",		{ &parseDirectiveObjImport,			0 } },
+	{ ".area",            { &parseDirectiveArea,            0 } },
+	{ ".autoregion",      { &parseDirectiveAutoRegion,      0 } },
+	{ ".region",          { &parseDirectiveArea,            DIRECTIVE_AREA_SHARED } },
+	{ ".defineregion",    { &parseDirectiveDefineArea,      DIRECTIVE_AREA_SHARED } },
 
-	{ L".erroronwarning",	{ &parseDirectiveErrorWarning,		0 } },
-	{ L".relativeinclude",	{ &parseDirectiveRelativeInclude,	0 } },
-	{ L".nocash",			{ &parseDirectiveNocash,			0 } },
-	{ L".sym",				{ &parseDirectiveSym,				0 } },
-	
-	{ L".definelabel",		{ &parseDirectiveDefineLabel,		0 } },
-	{ L".function",			{ &parseDirectiveFunction,			DIRECTIVE_MANUALSEPARATOR } },
-	{ L".func",				{ &parseDirectiveFunction,			DIRECTIVE_MANUALSEPARATOR } },
-	
-	{ L".warning",			{ &parseDirectiveMessage,			DIRECTIVE_MSG_WARNING } },
-	{ L".error",			{ &parseDirectiveMessage,			DIRECTIVE_MSG_ERROR } },
-	{ L".notice",			{ &parseDirectiveMessage,			DIRECTIVE_MSG_NOTICE } },
+	{ ".importobj",       { &parseDirectiveObjImport,       0 } },
+	{ ".importlib",       { &parseDirectiveObjImport,       0 } },
 
-	{ L".include",			{ &parseDirectiveInclude,			0 } },
+	{ ".erroronwarning",  { &parseDirectiveErrorWarning,    0 } },
+	{ ".relativeinclude", { &parseDirectiveRelativeInclude, 0 } },
+	{ ".nocash",          { &parseDirectiveNocash,          0 } },
+	{ ".sym",             { &parseDirectiveSym,             0 } },
+
+	{ ".definelabel",     { &parseDirectiveDefineLabel,     0 } },
+	{ ".function",        { &parseDirectiveFunction,        DIRECTIVE_MANUALSEPARATOR } },
+	{ ".func",            { &parseDirectiveFunction,        DIRECTIVE_MANUALSEPARATOR } },
+
+	{ ".warning",         { &parseDirectiveMessage,         DIRECTIVE_MSG_WARNING } },
+	{ ".error",           { &parseDirectiveMessage,         DIRECTIVE_MSG_ERROR } },
+	{ ".notice",          { &parseDirectiveMessage,         DIRECTIVE_MSG_NOTICE } },
+
+	{ ".include",         { &parseDirectiveInclude,         0 } },
+
 };

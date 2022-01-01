@@ -41,7 +41,7 @@
 
 struct tThumbOpcode
 {
-	const wchar_t* name;
+	const char* name;
 	const char* mask;
 	unsigned short encoding;
 	unsigned char type:5;

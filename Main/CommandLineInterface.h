@@ -2,4 +2,4 @@
 
 #include "Core/Assembler.h"
 
-int runFromCommandLine(const std::vector<std::wstring>& arguments, ArmipsArguments settings = {});
+int runFromCommandLine(const std::vector<std::string>& arguments, ArmipsArguments settings = {});

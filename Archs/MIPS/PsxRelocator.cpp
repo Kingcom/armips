@@ -14,7 +14,7 @@
 
 struct PsxLibEntry
 {
-	std::wstring name;
+	std::string name;
 	ByteArray data;
 };
 
@@ -31,7 +31,7 @@ std::vector<PsxLibEntry> loadPsxLibrary(const fs::path& inputName)
 	if (memcmp(input.data(),psxObjectFileMagicNum,sizeof(psxObjectFileMagicNum)) == 0)
 	{
 		PsxLibEntry entry;
-		entry.name = inputName.filename().wstring();
+		entry.name = inputName.filename().u8string();
 		entry.data = input;
 		result.push_back(entry);
 		return result;
@@ -69,9 +69,9 @@ std::vector<PsxLibEntry> loadPsxLibrary(const fs::path& inputName)
 	return result;
 }
 
-size_t PsxRelocator::loadString(ByteArray& data, size_t pos, std::wstring& dest)
+size_t PsxRelocator::loadString(ByteArray& data, size_t pos, std::string& dest)
 {
-	dest = L"";
+	dest = "";
 	int len = data[pos++];
 
 	for (int i = 0; i < len; i++)
@@ -108,7 +108,7 @@ bool PsxRelocator::parseObject(ByteArray data, PsxRelocatorFile& dest)
 				if (data[pos] != 8)
 					return false;
 
-				std::wstring& name = segments[segments.size()-1].name;
+				std::string& name = segments[segments.size()-1].name;
 				pos += 1 + loadString(data,pos+1,name);
 			}
 			break;
@@ -328,7 +328,7 @@ bool PsxRelocator::init(const fs::path& inputName)
 	auto inputFiles = loadPsxLibrary(inputName);
 	if (inputFiles.size() == 0)
 	{
-		Logger::printError(Logger::Error,L"Could not load library");
+		Logger::printError(Logger::Error, "Could not load library");
 		return false;
 	}
 
@@ -341,7 +341,7 @@ bool PsxRelocator::init(const fs::path& inputName)
 
 		if (!parseObject(entry.data,file))
 		{
-			Logger::printError(Logger::Error,L"Could not load object file %s",entry.name);
+			Logger::printError(Logger::Error, "Could not load object file %s",entry.name);
 			return false;
 		}
 
@@ -369,23 +369,23 @@ bool PsxRelocator::init(const fs::path& inputName)
 		// init symbols
 		for (PsxSymbol& sym: file.symbols)
 		{
-			std::wstring lowered = sym.name;
-			std::transform(lowered.begin(), lowered.end(), lowered.begin(), ::towlower);
+			std::string lowered = sym.name;
+			std::transform(lowered.begin(), lowered.end(), lowered.begin(), ::tolower);
 
-			sym.label = Global.symbolTable.getLabel(lowered,-1,-1);
+			sym.label = Global.symbolTable.getLabel(Identifier(lowered),-1,-1);
 			if (sym.label == nullptr)
 			{
-				Logger::printError(Logger::Error,L"Invalid label name \"%s\"",sym.name);
+				Logger::printError(Logger::Error, "Invalid label name \"%s\"",sym.name);
 				continue;
 			}
 
 			if (sym.label->isDefined() && sym.type != PsxSymbolType::External)
 			{
-				Logger::printError(Logger::Error,L"Label \"%s\" already defined",sym.name);
+				Logger::printError(Logger::Error, "Label \"%s\" already defined",sym.name);
 				continue;
 			}
 
-			sym.label->setOriginalName(sym.name);
+			sym.label->setOriginalName(Identifier(sym.name));
 		}
 
 		files.push_back(file);
@@ -443,7 +443,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 		case PsxSymbolType::External:
 			if (!sym.label->isDefined())
 			{
-				Logger::queueError(Logger::Error,L"Undefined external symbol %s in file %s",sym.name,file.name);
+				Logger::queueError(Logger::Error, "Undefined external symbol %s in file %s",sym.name,file.name);
 				error = true;
 				continue;
 			}
@@ -483,7 +483,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 				break;
 			}
 
-			std::vector<std::wstring> errors;
+			std::vector<std::string> errors;
 			bool result = false;
 
 			switch (rel.type)
@@ -504,7 +504,7 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 
 			if (!result)
 			{
-				for (const std::wstring& error : errors)
+				for (const std::string& error : errors)
 				{
 					Logger::queueError(Logger::Error, error);
 				}
@@ -513,10 +513,10 @@ bool PsxRelocator::relocateFile(PsxRelocatorFile& file, int& relocationAddress)
 		}
 
 		// finish any dangling relocations
-		std::vector<std::wstring> errors;
+		std::vector<std::string> errors;
 		if (!reloc->finish(relocationActions, errors))
 		{
-			for (const std::wstring& error : errors)
+			for (const std::string& error : errors)
 			{
 				Logger::queueError(Logger::Error, error);
 			}
@@ -567,7 +567,7 @@ void PsxRelocator::writeSymbols(SymbolData& symData) const
 		for (const PsxSymbol& sym: file.symbols)
 		{
 			if (sym.type != PsxSymbolType::External)
-				symData.addLabel(sym.label->getValue(),sym.name.c_str());
+				symData.addLabel(sym.label->getValue(), sym.name);
 		}
 	}
 }

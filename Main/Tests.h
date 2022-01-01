@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Util/FileSystem.h"
+
 #include <string>
 #include <vector>
 
@@ -14,15 +16,15 @@
 class TestRunner
 {
 public:
-	bool runTests(const std::wstring& dir, const std::wstring& executableName);
+	bool runTests(const fs::path& dir, const std::string& executableName);
 private:
 	enum class ConsoleColors { White, Red, Green };
 
-	std::wstring executableName;
+	std::string executableName;
 	
-	std::vector<std::wstring> getTestsList(const std::wstring& dir, const std::wstring& prefix = L"/");
-	bool executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString);
-	std::vector<std::wstring> listSubfolders(const std::wstring& dir);
+	std::vector<fs::path> getTestsList(const fs::path& dir);
+	bool executeTest(const fs::path& dir, const std::string& testName, std::string& errorString);
+	std::vector<std::string> listSubfolders(const fs::path& dir);
 	void initConsole();
 	void changeConsoleColor(ConsoleColors color);
 	void restoreConsole();
@@ -35,4 +37,4 @@ private:
 
 };
 
-bool runTests(const std::wstring& dir, const std::wstring& executableName);
+bool runTests(const fs::path& dir, const std::string& executableName);

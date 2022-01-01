@@ -9,27 +9,27 @@
 	if (getExpFuncParameter(params,index,dest,funcName,false) == false) \
 		return ExpressionValue();
 
-ExpressionValue expFuncIsArm(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+ExpressionValue expFuncIsArm(const Identifier &funcName, const std::vector<ExpressionValue>& parameters)
 {
 	bool isArm = &Architecture::current() == &Arm && !Arm.GetThumbMode();
 	return ExpressionValue(isArm ? INT64_C(1) : INT64_C(0));
 }
 
-ExpressionValue expFuncIsThumb(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+ExpressionValue expFuncIsThumb(const Identifier &funcName, const std::vector<ExpressionValue>& parameters)
 {
 	bool isThumb = Arm.GetThumbMode();
 	return ExpressionValue(isThumb ? INT64_C(1) : INT64_C(0));
 }
 
 const ExpressionFunctionEntry armExpressionFunctions[] = {
-	{ L"isarm",			&expFuncIsArm,			0,	0,	ExpFuncSafety::Safe },
-	{ L"isthumb",		&expFuncIsThumb,			0,	0,	ExpFuncSafety::Safe },
+	{ "isarm",   &expFuncIsArm,   0, 0, ExpFuncSafety::Safe },
+	{ "isthumb", &expFuncIsThumb, 0, 0, ExpFuncSafety::Safe },
 };
 
 void registerArmExpressionFunctions(ExpressionFunctionHandler &handler)
 {
 	for (const auto &func : armExpressionFunctions)
 	{
-		handler.addFunction(func.name, func.function, func.minParams, func.maxParams, func.safety);
+		handler.addFunction(Identifier(func.name), func.function, func.minParams, func.maxParams, func.safety);
 	}
 }

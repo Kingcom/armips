@@ -27,7 +27,7 @@ void Architecture::registerExpressionFunctions([[maybe_unused]] ExpressionFuncti
 {
 }
 
-ArchitectureCommand::ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText)
+ArchitectureCommand::ArchitectureCommand(const std::string& tempText, const std::string& symText)
 {
 	this->architecture = &Architecture::current();
 	this->tempText = tempText;
@@ -52,10 +52,10 @@ void ArchitectureCommand::writeTempData(TempData& tempData) const
 {
 	if (tempText.size() != 0)
 	{
-		std::wstringstream stream(tempText);
+		std::stringstream stream(tempText);
 
-		std::wstring line;
-		while (std::getline(stream,line,L'\n'))
+		std::string line;
+		while (std::getline(stream,line,'\n'))
 		{
 			if (line.size() != 0)
 				tempData.writeLine(position,line);
@@ -76,21 +76,21 @@ void ArchitectureCommand::writeSymData(SymbolData& symData) const
 
 void CInvalidArchitecture::NextSection()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, "No architecture specified");
 }
 
 void CInvalidArchitecture::Pass2()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, "No architecture specified");
 }
 
 void CInvalidArchitecture::Revalidate()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, "No architecture specified");
 }
 
 std::unique_ptr<IElfRelocator> CInvalidArchitecture::getElfRelocator()
 {
-	Logger::printError(Logger::FatalError,L"No architecture specified");
+	Logger::printError(Logger::FatalError, "No architecture specified");
 	return nullptr;
 }

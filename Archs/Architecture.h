@@ -32,7 +32,7 @@ private:
 class ArchitectureCommand: public CAssemblerCommand
 {
 public:
-	ArchitectureCommand(const std::wstring& tempText, const std::wstring& symText);
+	ArchitectureCommand(const std::string& tempText, const std::string& symText);
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;
 	void writeTempData(TempData& tempData) const override;
@@ -41,8 +41,8 @@ private:
 	Architecture *architecture = nullptr;
 	int64_t position;
 	Endianness endianness;
-	std::wstring tempText;
-	std::wstring symText;
+	std::string tempText;
+	std::string symText;
 };
 
 class CInvalidArchitecture: public Architecture

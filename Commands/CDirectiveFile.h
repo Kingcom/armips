@@ -124,7 +124,7 @@ class DirectiveObjImport: public CAssemblerCommand
 {
 public:
 	DirectiveObjImport(const fs::path& inputName);
-	DirectiveObjImport(const fs::path& inputName, const std::wstring& ctorName);
+	DirectiveObjImport(const fs::path& inputName, const Identifier& ctorName);
 	~DirectiveObjImport() { };
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;

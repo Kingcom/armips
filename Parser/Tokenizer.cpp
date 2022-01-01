@@ -11,13 +11,41 @@
 // Tokenizer
 //
 
+namespace
+{
+	// Assumes that there is a valid character at index
+	char32_t decodeUtf8Character(const std::string &source, size_t &index)
+	{
+		size_t extraBytes = 0;
+		int value = source[index++];
+
+		if ((value & 0xE0) == 0xC0)
+		{
+			extraBytes = 1;
+			value &= 0x1F;
+		} else if ((value & 0xF0) == 0xE0)
+		{
+			extraBytes = 2;
+			value &= 0x0F;
+		}
+
+		for (size_t i = 0; i < extraBytes; i++)
+		{
+			int b = source[index++];
+			value = (value << 6) | (b & 0x3F);
+		}
+
+		return char32_t(value);
+	}
+}
+
 std::vector<std::vector<Token>> Tokenizer::equValues;
 
 Tokenizer::Tokenizer()
 {
 	position.it = tokens.begin();
 	invalidToken.type = TokenType::Invalid;
-	invalidToken.setValue(std::monostate{}, L"Unexpected end of token stream");
+	invalidToken.setValue(std::monostate{}, "Unexpected end of token stream");
 }
 
 bool Tokenizer::processElement(TokenList::iterator& it)
@@ -30,11 +58,11 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 		bool replaced = false;
 		if ((*it).type == TokenType::Identifier)
 		{
-			const std::wstring &stringValue = (*it).identifierValue();
+			const Identifier &identifier = (*it).identifierValue();
 			for (const Replacement& replacement: replacements)
 			{
 				// if the identifier matches, add all of its tokens
-				if (replacement.identifier == stringValue)
+				if (replacement.identifier == identifier)
 				{
 					TokenList::iterator insertIt = it;
 					insertIt++;
@@ -47,7 +75,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 
 					// If the value at this position didn't change, then just keep going.
 					// Otherwise we'd be stuck in an endless replace loop
-					if ((*it).type != TokenType::Identifier || stringValue != (*it).identifierValue())
+					if ((*it).type != TokenType::Identifier || identifier != (*it).identifierValue())
 						replaced = true;
 					break;
 				}
@@ -58,7 +86,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 
 			// check for equs
 			size_t index;
-			if (Global.symbolTable.findEquation(stringValue,Global.FileInfo.FileNum,Global.Section,index))
+			if (Global.symbolTable.findEquation(identifier,Global.FileInfo.FileNum,Global.Section,index))
 			{
 				TokenList::iterator nextIt = it;
 				std::advance(nextIt, 1);
@@ -150,21 +178,21 @@ std::vector<Token> Tokenizer::getTokens(TokenizerPosition start, TokenizerPositi
 	return result;
 }
 
-void Tokenizer::registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens)
+void Tokenizer::registerReplacement(const Identifier& identifier, std::vector<Token>& tokens)
 {
 	Replacement replacement { identifier, tokens };
 	replacements.push_back(replacement);
 }
 
-void Tokenizer::registerReplacement(const std::wstring& identifier, const std::wstring& newValue)
+void Tokenizer::registerReplacement(const Identifier& identifier, const std::string& newValue)
 {
 	// Ensure the new identifier is lower case as it would be as a normally parsed string
-	std::wstring lowerCase = newValue;
-	std::transform(lowerCase.begin(), lowerCase.end(), lowerCase.begin(), ::towlower);
+	std::string lowerCase = newValue;
+	std::transform(lowerCase.begin(), lowerCase.end(), lowerCase.begin(), ::tolower);
 
 	Token tok;
 	tok.type = TokenType::Identifier;
-	tok.setValue(lowerCase, newValue);
+	tok.setValue(Identifier(lowerCase), newValue);
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -173,11 +201,11 @@ void Tokenizer::registerReplacement(const std::wstring& identifier, const std::w
 	replacements.push_back(replacement);
 }
 
-void Tokenizer::registerReplacementString(const std::wstring& identifier, const std::wstring& newValue)
+void Tokenizer::registerReplacementString(const Identifier& identifier, const StringLiteral& newValue)
 {
 	Token tok;
 	tok.type = TokenType::String;
-	tok.setValue(newValue, newValue);
+	tok.setValue(newValue, newValue.string());
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -186,11 +214,11 @@ void Tokenizer::registerReplacementString(const std::wstring& identifier, const 
 	replacements.push_back(replacement);
 }
 
-void Tokenizer::registerReplacementInteger(const std::wstring& identifier, int64_t newValue)
+void Tokenizer::registerReplacementInteger(const Identifier& identifier, int64_t newValue)
 {
 	Token tok;
 	tok.type = TokenType::Integer;
-	tok.setValue(newValue, tfm::format(L"%d", newValue));
+	tok.setValue(newValue, tfm::format("%d", newValue));
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -199,11 +227,11 @@ void Tokenizer::registerReplacementInteger(const std::wstring& identifier, int64
 	replacements.push_back(replacement);
 }
 
-void Tokenizer::registerReplacementFloat(const std::wstring& identifier, double newValue)
+void Tokenizer::registerReplacementFloat(const Identifier& identifier, double newValue)
 {
 	Token tok;
 	tok.type = TokenType::Float;
-	tok.setValue(newValue, tfm::format(L"%g", newValue));
+	tok.setValue(newValue, tfm::format("%g", newValue));
 
 	Replacement replacement;
 	replacement.identifier = identifier;
@@ -238,7 +266,7 @@ void Tokenizer::resetLookaheadCheckMarks()
 // FileTokenizer
 //
 
-inline bool isWhitespace(const std::wstring& text, size_t pos)
+inline bool isWhitespace(const std::string& text, size_t pos)
 {
 	if (pos >= text.size())
 		return false;
@@ -246,7 +274,7 @@ inline bool isWhitespace(const std::wstring& text, size_t pos)
 	return text[pos] == ' ' || text[pos] == '\t';
 }
 
-inline bool isComment(const std::wstring& text, size_t pos)
+inline bool isComment(const std::string& text, size_t pos)
 {
 	if (pos < text.size() && text[pos] == ';')
 		return true;
@@ -257,7 +285,7 @@ inline bool isComment(const std::wstring& text, size_t pos)
 	return false;
 }
 
-inline bool isContinuation(const std::wstring& text, size_t pos)
+inline bool isContinuation(const std::string& text, size_t pos)
 {
 	if (pos >= text.size())
 		return false;
@@ -265,11 +293,11 @@ inline bool isContinuation(const std::wstring& text, size_t pos)
 	return text[pos] == '\\';
 }
 
-inline bool isBlockComment(const std::wstring& text, size_t pos){
+inline bool isBlockComment(const std::string& text, size_t pos){
 	return pos+1 < text.size() && text[pos+0] == '/' && text[pos+1] == '*';
 }
 
-inline bool isBlockCommentEnd(const std::wstring& text, size_t pos){
+inline bool isBlockCommentEnd(const std::string& text, size_t pos){
 	return pos+1 < text.size() && text[pos+0] == '*' && text[pos+1] == '/';
 }
 
@@ -293,7 +321,7 @@ void FileTokenizer::skipWhitespace()
 				{
 					if (isInputAtEnd())
 					{
-						createToken(TokenType::Invalid,linePos,L"Unexpected end of file in block comment");
+						createToken(TokenType::Invalid,linePos, "Unexpected end of file in block comment");
 						addToken(token);
 						return;
 					}
@@ -340,17 +368,23 @@ void FileTokenizer::createToken(TokenType type, size_t length, double value)
 	linePos += length;
 }
 
-void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value)
+void FileTokenizer::createToken(TokenType type, size_t length, const std::string& value)
 {
 	createToken(type, length, value, 0, value.length());
 }
 
-void FileTokenizer::createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength)
+void FileTokenizer::createToken(TokenType type, size_t length, const std::string& value, size_t valuePos, size_t valueLength)
 {
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setValue(value.substr(valuePos, valueLength), currentLine.substr(linePos, length));
+
+	std::string valueStr = value.substr(valuePos, valueLength);
+	std::string originalStr = currentLine.substr(linePos, length);
+	if (type == TokenType::Identifier || type == TokenType::Equ)
+		token.setValue(Identifier(std::move(valueStr)), std::move(originalStr));
+	else
+		token.setValue(std::move(valueStr), std::move(originalStr));
 
 	linePos += length;
 }
@@ -360,15 +394,21 @@ void FileTokenizer::createTokenCurrentString(TokenType type, size_t length)
 	token.type = type;
 	token.line = lineNumber;
 	token.column = linePos+1;
-	token.setValue(currentLine.substr(linePos, length), currentLine.substr(linePos, length));
+
+	std::string valueStr = currentLine.substr(linePos, length);
+	std::string originalStr = currentLine.substr(linePos, length);
+	if (type == TokenType::Identifier || type == TokenType::Equ)
+		token.setValue(Identifier(std::move(valueStr)), std::move(originalStr));
+	else
+		token.setValue(std::move(valueStr), std::move(originalStr));
 
 	linePos += length;
 }
 
 bool FileTokenizer::parseOperator()
 {
-	wchar_t first = currentLine[linePos];
-	wchar_t second = linePos+1 >= currentLine.size() ? '\0' : currentLine[linePos+1];
+	char first = currentLine[linePos];
+	char second = linePos+1 >= currentLine.size() ? '\0' : currentLine[linePos+1];
 
 	switch (first)
 	{
@@ -469,9 +509,13 @@ bool FileTokenizer::parseOperator()
 	case '$':
 		createToken(TokenType::Dollar,1);
 		return true;
-	case L'\U000000B0':	// degree sign
-		createToken(TokenType::Degree,1);
-		return true;
+	case char(0xC2):	// degree sign
+		if (second == char(0xB0))
+		{
+			createToken(TokenType::Degree,2);
+			return true;
+		}
+		break;
 	}
 
 	return false;
@@ -484,10 +528,10 @@ bool FileTokenizer::convertInteger(size_t start, size_t end, int64_t& result)
 
 bool FileTokenizer::convertFloat(size_t start, size_t end, double& result)
 {
-	std::wstring str = currentLine.substr(start, end - start);
-	wchar_t* end_ptr;
+	std::string str = currentLine.substr(start, end - start);
+	char* end_ptr;
 
-	result = wcstod(str.c_str(), &end_ptr);
+	result = strtod(str.c_str(), &end_ptr);
 	return str.c_str() + str.size() == end_ptr;
 }
 
@@ -515,19 +559,25 @@ Token FileTokenizer::loadToken()
 	if (parseOperator())
 		return std::move(token);
 
-	wchar_t first = currentLine[pos];
+	char first = currentLine[pos];
 
 	// character constants
-	if (first == '\'' && pos+2 < currentLine.size() && currentLine[pos+2] == '\'')
+	if (first == '\'')
 	{
-		createToken(TokenType::Integer,3,(int64_t)currentLine[pos+1]);
-		return std::move(token);
+		size_t decodePos = pos+1;
+
+		auto value = int64_t(decodeUtf8Character(currentLine, decodePos));
+		if (currentLine[decodePos] == '\'')
+		{
+			createToken(TokenType::Integer,decodePos+1-pos,value);
+			return std::move(token);
+		}
 	}
 
 	// strings
 	if (first == '"')
 	{
-		std::wstring text;
+		std::string text;
 		pos++;
 
 		bool valid = false;
@@ -562,7 +612,7 @@ Token FileTokenizer::loadToken()
 
 		if (!valid)
 		{
-			createToken(TokenType::Invalid,pos-linePos,L"Unexpected end of line in string constant");
+			createToken(TokenType::Invalid,pos-linePos, "Unexpected end of line in string constant");
 			return std::move(token);
 		}
 		
@@ -580,25 +630,25 @@ Token FileTokenizer::loadToken()
 		bool foundPoint = false;
 		bool foundExp = false;
 		bool foundExpSign = false;
-		bool isHex = start+1 < currentLine.size() && currentLine[start] == '0' && towlower(currentLine[start+1]) == 'x';
+		bool isHex = start+1 < currentLine.size() && currentLine[start] == '0' && tolower(currentLine[start+1]) == 'x';
 
-		while (end < currentLine.size() && (iswalnum(currentLine[end]) || currentLine[end] == '.'))
+		while (end < currentLine.size() && (isalnum(currentLine[end]) || currentLine[end] == '.'))
 		{
 			if (currentLine[end] == '.')
 			{
 				if (foundExp || foundPoint)
 					isValid = false;
 				foundPoint = true;
-			} else if (towlower(currentLine[end]) == 'h' && !foundExpSign) {
+			} else if (tolower(currentLine[end]) == 'h' && !foundExpSign) {
 				isHex = true;
-			} else if (towlower(currentLine[end]) == 'e' && !isHex)
+			} else if (tolower(currentLine[end]) == 'e' && !isHex)
 			{
 				if (foundExp)
 				{
 					isValid = false;
 				} else if (end+1 < currentLine.size() && (currentLine[end+1] == '+' || currentLine[end+1] == '-')){
 					end++;
-					if (end+1 >= currentLine.size() || !iswalnum(currentLine[end+1]))
+					if (end+1 >= currentLine.size() || !isalnum(currentLine[end+1]))
 						isValid = false;
 					foundExpSign = true;
 				}
@@ -624,7 +674,7 @@ Token FileTokenizer::loadToken()
 			double value;
 			if (!isValid)
 			{
-				createToken(TokenType::Invalid,end-start,L"Invalid floating point number");
+				createToken(TokenType::Invalid,end-start, "Invalid floating point number");
 				return std::move(token);
 			}
 
@@ -650,21 +700,23 @@ Token FileTokenizer::loadToken()
 
 	if (pos == linePos)
 	{
-		std::wstring text = tfm::format(L"Invalid input '%c'",currentLine[pos]);
-		createToken(TokenType::Invalid,1,text);
+		auto characterStart = pos;
+		auto value = decodeUtf8Character(currentLine, pos);
+		std::string text = tfm::format("Invalid input '%s'",convertUnicodeCharToUtf8(value));
+		createToken(TokenType::Invalid,pos-characterStart,text);
 		return std::move(token);
 	}
 
-	std::wstring text = currentLine.substr(linePos,pos-linePos);
+	std::string text = currentLine.substr(linePos,pos-linePos);
 	bool textLowered = false;
 	// Lowercase is common, let's try to avoid a copy.
 	if (std::any_of(text.begin(), text.end(), ::iswupper))
 	{
-		std::transform(text.begin(), text.end(), text.begin(), ::towlower);
+		std::transform(text.begin(), text.end(), text.begin(), ::tolower);
 		textLowered = true;
 	}
 
-	if (text == L"equ")
+	if (text == "equ")
 	{
 		createToken(TokenType::Equ,pos-linePos);
 		equActive = true;
@@ -706,7 +758,7 @@ bool FileTokenizer::init(TextFile* input)
 				if (linePos < currentLine.size())
 				{
 					createToken(TokenType::Invalid,0,
-						L"Unexpected character after line continuation character");
+						"Unexpected character after line continuation character");
 					addToken(token);
 				}
 

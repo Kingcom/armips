@@ -16,12 +16,12 @@ CDirectiveConditional::CDirectiveConditional(ConditionType type)
 	previousResult = false;
 }
 
-CDirectiveConditional::CDirectiveConditional(ConditionType type, const std::wstring& name)
+CDirectiveConditional::CDirectiveConditional(ConditionType type, const Identifier& name)
 	: CDirectiveConditional(type)
 {
 	label = Global.symbolTable.getLabel(name,Global.FileInfo.FileNum,Global.Section);
 	if (label == nullptr)
-		Logger::printError(Logger::Error,L"Invalid label name \"%s\"",name);
+		Logger::printError(Logger::Error, "Invalid label name \"%s\"",name);
 }
 
 CDirectiveConditional::CDirectiveConditional(ConditionType type, const Expression& exp)
@@ -43,7 +43,7 @@ bool CDirectiveConditional::evaluate()
 	{
 		if (!expression.evaluateInteger(value))
 		{
-			Logger::queueError(Logger::Error,L"Invalid conditional expression");
+			Logger::queueError(Logger::Error, "Invalid conditional expression");
 			return false;
 		}
 	}
@@ -60,7 +60,7 @@ bool CDirectiveConditional::evaluate()
 		break;
 	}
 			
-	Logger::queueError(Logger::Error,L"Invalid conditional type");
+	Logger::queueError(Logger::Error, "Invalid conditional type");
 	return false;
 }
 

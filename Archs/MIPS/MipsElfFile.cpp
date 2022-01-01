@@ -47,7 +47,7 @@ int64_t MipsElfFile::getVirtualAddress()
 	}
 	
 	// segmentless sections don't have a virtual address
-	Logger::queueError(Logger::Error,L"Not inside a mapped section");
+	Logger::queueError(Logger::Error, "Not inside a mapped section");
 	return -1;
 }
 
@@ -67,14 +67,14 @@ int64_t MipsElfFile::getPhysicalAddress()
 		return sect->getOffset();
 	}
 	
-	Logger::queueError(Logger::Error,L"Not inside a section");
+	Logger::queueError(Logger::Error, "Not inside a section");
 	return -1;
 }
 
 int64_t MipsElfFile::getHeaderSize()
 {
 	// this method is not used
-	Logger::queueError(Logger::Error,L"Unimplemented method");
+	Logger::queueError(Logger::Error, "Unimplemented method");
 	return -1;
 }
 
@@ -105,13 +105,13 @@ bool MipsElfFile::seekVirtual(int64_t virtualAddress)
 				}
 			}
 
-			Logger::queueError(Logger::Error,L"Found segment, but no containing section");
+			Logger::queueError(Logger::Error, "Found segment, but no containing section");
 			return false;
 		}
 	}
 
 	// segmentless sections don't have a virtual address
-	Logger::printError(Logger::Error,L"Couldn't find a mapped section");
+	Logger::printError(Logger::Error, "Couldn't find a mapped section");
 	return false;
 }
 
@@ -142,7 +142,7 @@ bool MipsElfFile::seekPhysical(int64_t physicalAddress)
 				}
 			}
 
-			Logger::queueError(Logger::Error,L"Found segment, but no containing section");
+			Logger::queueError(Logger::Error, "Found segment, but no containing section");
 			return false;
 		}
 	}
@@ -165,7 +165,7 @@ bool MipsElfFile::seekPhysical(int64_t physicalAddress)
 
 	segment = -1;
 	section = -1;
-	Logger::queueError(Logger::Error,L"Couldn't find a section");
+	Logger::queueError(Logger::Error, "Couldn't find a section");
 	return false;
 }
 
@@ -194,7 +194,7 @@ bool MipsElfFile::write(void* data, size_t length)
 		return false;
 	}
 
-	Logger::printError(Logger::Error,L"Not inside a section");
+	Logger::printError(Logger::Error, "Not inside a section");
 	return false;
 }
 
@@ -204,19 +204,19 @@ bool MipsElfFile::load(const fs::path& fileName, const fs::path& outputFileName)
 
 	if (!elf.load(fileName,true))
 	{
-		Logger::printError(Logger::FatalError,L"Failed to load %s",fileName.wstring());
+		Logger::printError(Logger::FatalError, "Failed to load %s",fileName.u8string());
 		return false;
 	}
 
 	if (elf.getType() == 0xFFA0)
 	{
-		Logger::printError(Logger::FatalError,L"Relocatable ELF %s not supported yet",fileName.wstring());
+		Logger::printError(Logger::FatalError, "Relocatable ELF %s not supported yet",fileName.u8string());
 		return false;
 	}
 
 	if (elf.getType() != 2)
 	{
-		Logger::printError(Logger::FatalError,L"Unknown ELF %s type %d",fileName,elf.getType());
+		Logger::printError(Logger::FatalError, "Unknown ELF %s type %d",fileName,elf.getType());
 		return false;
 	}
 
@@ -226,15 +226,13 @@ bool MipsElfFile::load(const fs::path& fileName, const fs::path& outputFileName)
 	return true;
 }
 
-bool MipsElfFile::setSection(const std::wstring& name)
+bool MipsElfFile::setSection(const std::string& name)
 {
-	std::string utf8Name = convertWStringToUtf8(name);
-
 	// look in segments
 	for (size_t i = 0; i < elf.getSegmentCount(); i++)
 	{
 		ElfSegment* seg = elf.getSegment(i);
-		int n = seg->findSection(utf8Name);
+		int n = seg->findSection(name);
 		if (n != -1)
 		{
 			segment = (int) i;
@@ -244,7 +242,7 @@ bool MipsElfFile::setSection(const std::wstring& name)
 	}
 
 	// look in stray sections
-	int n = elf.findSegmentlessSection(utf8Name);
+	int n = elf.findSegmentlessSection(name);
 	if (n != -1)
 	{
 		segment = -1;
@@ -252,7 +250,7 @@ bool MipsElfFile::setSection(const std::wstring& name)
 		return true;
 	}
 
-	Logger::queueError(Logger::Warning,L"Section %s not found",name);
+	Logger::queueError(Logger::Warning, "Section %s not found",name);
 	return false;
 }
 
@@ -310,10 +308,10 @@ void DirectiveLoadMipsElf::writeTempData(TempData& tempData) const
 {
 	if (outputName.empty())
 	{
-		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\"",inputName.wstring()));
+		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(".loadelf \"%s\"",inputName.u8string()));
 	} else {
-		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(L".loadelf \"%s\",\"%s\"",
-			inputName.wstring(),outputName.wstring()));
+		tempData.writeLine(g_fileManager->getVirtualAddress(),tfm::format(".loadelf \"%s\",\"%s\"",
+			inputName.u8string(),outputName.u8string()));
 	}
 }
 

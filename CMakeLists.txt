@@ -167,6 +167,8 @@ armips_target_sources(armips PRIVATE
 	Core/SymbolData.h
 	Core/SymbolTable.cpp
 	Core/SymbolTable.h
+	Core/Types.cpp
+	Core/Types.h
 
 	Parser/DirectivesParser.cpp
 	Parser/DirectivesParser.h

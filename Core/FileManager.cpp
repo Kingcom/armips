@@ -61,7 +61,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			stream.open(fileName, flagsOpenExisting);
 			if (!stream.is_open())
 			{
-				Logger::printError(Logger::FatalError,L"Could not open file %s",fileName.wstring());
+				Logger::printError(Logger::FatalError, "Could not open file %s",fileName.u8string());
 				return false;
 			}
 			return true;
@@ -70,7 +70,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 			stream.open(fileName, flagsOverwrite);
 			if (!stream.is_open())
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
+				Logger::printError(Logger::FatalError, "Could not create file %s",fileName.u8string());
 				return false;
 			}
 			return true;
@@ -78,14 +78,14 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		case Copy:
 			if (!fs::copy_file(originalName, fileName, fs::copy_options::overwrite_existing, errorCode))
 			{
-				Logger::printError(Logger::FatalError,L"Could not copy file %s",originalName.wstring());
+				Logger::printError(Logger::FatalError, "Could not copy file %s",originalName.u8string());
 				return false;
 			}
 
 			stream.open(fileName, flagsOpenExisting);
 			if (!stream.is_open())
 			{
-				Logger::printError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
+				Logger::printError(Logger::FatalError, "Could not create file %s",fileName.u8string());
 				return false;
 			}
 			return true;
@@ -101,7 +101,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(fileName, flagsOpenExisting);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",fileName.wstring());
+			Logger::queueError(Logger::FatalError, "Could not open file %s",fileName.u8string());
 			return false;
 		}
 		temp.close();
@@ -114,7 +114,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(fileName, exists ? flagsOpenExisting : flagsOverwrite);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
+			Logger::queueError(Logger::FatalError, "Could not create file %s",fileName.u8string());
 			return false;
 		}
 		temp.close();
@@ -129,7 +129,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(originalName, flagsOpenExisting);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not open file %s",originalName.wstring());
+			Logger::queueError(Logger::FatalError, "Could not open file %s",originalName.u8string());
 			return false;
 		}
 		temp.close();
@@ -140,7 +140,7 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(fileName, exists ? flagsOpenExisting : flagsOverwrite);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError,L"Could not create file %s",fileName.wstring());
+			Logger::queueError(Logger::FatalError, "Could not create file %s",fileName.u8string());
 			return false;
 		}
 		temp.close();
@@ -167,11 +167,11 @@ bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 {
 	if (virtualAddress - headerSize < 0)
 	{
-		Logger::queueError(Logger::Error,L"Seeking to virtual address with negative physical address");
+		Logger::queueError(Logger::Error, "Seeking to virtual address with negative physical address");
 		return false;
 	}
 	if (virtualAddress < 0)
-		Logger::queueError(Logger::Warning,L"Seeking to negative virtual address");
+		Logger::queueError(Logger::Warning, "Seeking to negative virtual address");
 
 	this->virtualAddress = virtualAddress;
 	int64_t physicalAddress = virtualAddress-headerSize;
@@ -186,11 +186,11 @@ bool GenericAssemblerFile::seekPhysical(int64_t physicalAddress)
 {
 	if (physicalAddress < 0)
 	{
-		Logger::queueError(Logger::Error,L"Seeking to negative physical address");
+		Logger::queueError(Logger::Error, "Seeking to negative physical address");
 		return false;
 	}
 	if (physicalAddress + headerSize < 0)
-		Logger::queueError(Logger::Warning,L"Seeking to physical address with negative virtual address");
+		Logger::queueError(Logger::Warning, "Seeking to physical address with negative virtual address");
 
 	virtualAddress = physicalAddress+headerSize;
 
@@ -220,7 +220,7 @@ FileManager::FileManager()
 	else if (u.i == 0xAABBCCDD)
 		ownEndianness = Endianness::Little;
 	else
-		Logger::printError(Logger::Error,L"Running on unknown endianness");
+		Logger::printError(Logger::Error, "Running on unknown endianness");
 
 	reset();
 }
@@ -240,7 +240,7 @@ bool FileManager::checkActiveFile()
 {
 	if (activeFile == nullptr)
 	{
-		Logger::queueError(Logger::Error,L"No file opened");
+		Logger::queueError(Logger::Error, "No file opened");
 		return false;
 	}
 	return true;
@@ -250,7 +250,7 @@ bool FileManager::openFile(std::shared_ptr<AssemblerFile> file, bool onlyCheck)
 {
 	if (activeFile != nullptr)
 	{
-		Logger::queueError(Logger::Warning,L"File not closed before opening a new one");
+		Logger::queueError(Logger::Warning, "File not closed before opening a new one");
 		activeFile->close();
 	}
 
@@ -267,7 +267,7 @@ void FileManager::closeFile()
 {
 	if (activeFile == nullptr)
 	{
-		Logger::queueError(Logger::Warning,L"No file opened");
+		Logger::queueError(Logger::Warning, "No file opened");
 		return;
 	}
 
@@ -282,7 +282,7 @@ bool FileManager::write(void* data, size_t length)
 
 	if (!activeFile->isOpen())
 	{
-		Logger::queueError(Logger::Error,L"No file opened");
+		Logger::queueError(Logger::Error, "No file opened");
 		return false;
 	}
 

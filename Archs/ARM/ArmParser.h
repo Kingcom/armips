@@ -16,7 +16,7 @@ struct tArmOpcode;
 struct tThumbOpcode;
 
 struct ArmRegisterDescriptor {
-	const wchar_t* name;
+	const char* name;
 	int num;
 };
 
@@ -40,13 +40,13 @@ private:
 	void parseSign(Parser& parser, bool& dest);
 	bool parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool shortVersion);
 	
-	bool matchSymbol(Parser& parser, wchar_t symbol, bool optional);
+	bool matchSymbol(Parser& parser, char symbol, bool optional);
 	
-	int decodeCondition(const std::wstring& text, size_t& pos);
-	bool decodeAddressingMode(const std::wstring& text, size_t& pos, unsigned char& dest);
-	bool decodeXY(const std::wstring& text, size_t& pos, bool& dest);
-	void decodeS(const std::wstring& text, size_t& pos, bool& dest);
-	bool decodeArmOpcode(const std::wstring& name, const tArmOpcode& opcode, ArmOpcodeVariables& vars);
+	int decodeCondition(const std::string& text, size_t& pos);
+	bool decodeAddressingMode(const std::string& text, size_t& pos, unsigned char& dest);
+	bool decodeXY(const std::string& text, size_t& pos, bool& dest);
+	void decodeS(const std::string& text, size_t& pos, bool& dest);
+	bool decodeArmOpcode(const std::string& name, const tArmOpcode& opcode, ArmOpcodeVariables& vars);
 	
 	bool parseArmParameters(Parser& parser, const tArmOpcode& opcode, ArmOpcodeVariables& vars);
 	bool parseThumbParameters(Parser& parser, const tThumbOpcode& opcode, ThumbOpcodeVariables& vars);

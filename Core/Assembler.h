@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Types.h"
 #include "Util/FileSystem.h"
 
 #include <memory>
@@ -16,15 +17,14 @@ enum class ArmipsMode { FILE, MEMORY };
 
 struct LabelDefinition
 {
-	std::wstring originalName;
-	std::wstring name;
+	Identifier name;
 	int64_t value;
 };
 
 struct EquationDefinition
 {
-	std::wstring name;
-	std::wstring value;
+	Identifier name;
+	std::string value;
 };
 
 struct ArmipsArguments
@@ -35,7 +35,7 @@ struct ArmipsArguments
 	bool errorOnWarning;
 	bool silent;
 	bool showStats;
-	std::vector<std::wstring>* errorsResult;
+	std::vector<std::string>* errorsResult;
 	std::vector<EquationDefinition> equList;
 	std::vector<LabelDefinition> labels;
 
@@ -47,7 +47,7 @@ struct ArmipsArguments
 
 	// memory mode
 	std::shared_ptr<AssemblerFile> memoryFile;
-	std::wstring content;
+	std::string content;
 
 	ArmipsArguments()
 	{

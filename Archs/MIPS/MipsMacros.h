@@ -47,8 +47,8 @@ class Parser;
 using MipsMacroFunc = std::unique_ptr<CAssemblerCommand> (*)(Parser&,MipsRegisterData&,MipsImmediateData&,int);
 
 struct MipsMacroDefinition {
-	const wchar_t* name;
-	const wchar_t* args;
+	const char* name;
+	const char* args;
 	MipsMacroFunc function;
 	int flags;
 };

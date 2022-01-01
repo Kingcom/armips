@@ -58,7 +58,7 @@ void CArmArchitecture::Revalidate()
 	for (ArmPoolEntry& entry: currentPoolContent)
 	{
 		entry.command->applyFileInfo();
-		Logger::queueError(Logger::Error,L"Unable to find literal pool");
+		Logger::queueError(Logger::Error, "Unable to find literal pool");
 	}
 
 	currentPoolContent.clear();

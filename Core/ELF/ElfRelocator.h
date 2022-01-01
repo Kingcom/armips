@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Core/ELF/ElfFile.h"
+#include "Core/Types.h"
 
 #include <memory>
 
 struct ElfRelocatorCtor
 {
-	std::wstring symbolName;
+	Identifier symbolName;
 	size_t size;
 };
 
@@ -18,6 +19,7 @@ struct RelocationAction
 };
 
 class CAssemblerCommand;
+class Identifier;
 class Parser;
 
 class IElfRelocator
@@ -26,8 +28,8 @@ public:
 	virtual ~IElfRelocator() {};
 	virtual int expectedMachine() const = 0;
 	virtual bool isDummyRelocationType(int type) const { return false; }
-	virtual bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) = 0;
-	virtual bool finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors) { return true; }
+	virtual bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::string>& errors) = 0;
+	virtual bool finish(std::vector<RelocationAction>& actions, std::vector<std::string>& errors) { return true; }
 	virtual void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) = 0;
 
 	virtual std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors);
@@ -48,7 +50,7 @@ struct ElfRelocatorSection
 struct ElfRelocatorSymbol
 {
 	std::shared_ptr<Label> label;
-	std::wstring name;
+	std::string name;
 	int64_t relativeAddress;
 	int64_t relocatedAddress;
 	size_t section;
@@ -61,7 +63,7 @@ struct ElfRelocatorFile
 	ElfFile* elf;
 	std::vector<ElfRelocatorSection> sections;
 	std::vector<ElfRelocatorSymbol> symbols;
-	std::wstring name;
+	std::string name;
 };
 
 class ElfRelocator
@@ -70,7 +72,7 @@ public:
 	bool init(const fs::path& inputName);
 	bool exportSymbols();
 	void writeSymbols(SymbolData& symData) const;
-	std::unique_ptr<CAssemblerCommand> generateCtor(const std::wstring& ctorName);
+	std::unique_ptr<CAssemblerCommand> generateCtor(const Identifier& ctorName);
 	bool relocate(int64_t& memoryAddress);
 	bool hasDataChanged() { return dataChanged; };
 	const ByteArray& getData() const { return outputData; };

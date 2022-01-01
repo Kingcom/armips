@@ -26,7 +26,7 @@ struct PsxRelocation
 
 struct PsxSegment
 {
-	std::wstring name;
+	std::string name;
 	int id;
 	ByteArray data;
 	std::vector<PsxRelocation> relocations;
@@ -38,7 +38,7 @@ enum class PsxSymbolType { Internal, InternalID, External, BSS, Function };
 struct PsxSymbol
 {
 	PsxSymbolType type;
-	std::wstring name;
+	std::string name;
 	int segment;
 	int offset;
 	int id;
@@ -48,7 +48,7 @@ struct PsxSymbol
 
 struct PsxRelocatorFile
 {
-	std::wstring name;
+	std::string name;
 	std::vector<PsxSegment> segments;
 	std::vector<PsxSymbol> symbols;
 };
@@ -62,7 +62,7 @@ public:
 	const ByteArray& getData() const { return outputData; };
 	void writeSymbols(SymbolData& symData) const;
 private:
-	size_t loadString(ByteArray& data, size_t pos, std::wstring& dest);
+	size_t loadString(ByteArray& data, size_t pos, std::string& dest);
 	bool parseObject(ByteArray data, PsxRelocatorFile& dest);
 	bool relocateFile(PsxRelocatorFile& file, int& relocationAddress);
 	

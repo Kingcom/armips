@@ -54,7 +54,7 @@ void CArmInstruction::setPoolAddress(int64_t address)
 	int pos = (int) (address-((RamPos+8) & 0xFFFFFFFD));
 	if (abs(pos) > 4095)
 	{
-		Logger::queueError(Logger::Error,L"Literal pool out of range");
+		Logger::queueError(Logger::Error, "Literal pool out of range");
 		return;
 	}
 
@@ -71,14 +71,14 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 	if (RamPos & 3)
 	{
-		Logger::queueError(Logger::Warning,L"Opcode not word aligned");
+		Logger::queueError(Logger::Warning, "Opcode not word aligned");
 	}
 
 	if (Vars.Shift.UseShift && !Vars.Shift.ShiftByRegister)
 	{
 		if (!Vars.Shift.ShiftExpression.evaluateInteger(Vars.Shift.ShiftAmount))
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, "Invalid expression");
 			return false;
 		}
 
@@ -92,13 +92,13 @@ bool CArmInstruction::Validate(const ValidateState &state)
 		else if (num == 32 && mode == ARM_SHIFT_ASR) num = 0;
 		else if (num == 32 && mode == ARM_SHIFT_LSL)
 		{
-			Logger::queueError(Logger::Error,L"Shift amount 0x%02X out of range",num);
+			Logger::queueError(Logger::Error, "Shift amount 0x%02X out of range",num);
 			return false;
 		} else if (mode == ARM_SHIFT_RRX)
 		{
 			if (num != 1)
 			{
-				Logger::queueError(Logger::Error,L"Invalid shift mode");
+				Logger::queueError(Logger::Error, "Invalid shift mode");
 				return false;
 			}
 			mode = ARM_SHIFT_ROR;
@@ -107,7 +107,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 
 		if (num > 32 || num < 0)
 		{
-			Logger::queueError(Logger::Error,L"Shift amount 0x%02X out of range",num);
+			Logger::queueError(Logger::Error, "Shift amount 0x%02X out of range",num);
 			return false;
 		}
 
@@ -120,13 +120,13 @@ bool CArmInstruction::Validate(const ValidateState &state)
 	{
 		if (!Vars.CopData.CpopExpression.evaluateInteger(Vars.CopData.Cpop))
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, "Invalid expression");
 			return false;
 		}
 
 		if (Vars.CopData.Cpop > 15)
 		{
-			Logger::queueError(Logger::Error,L"CP Opc number %02X too big",Vars.CopData.Cpop);
+			Logger::queueError(Logger::Error, "CP Opc number %02X too big",Vars.CopData.Cpop);
 			return false;
 		}
 	}
@@ -135,13 +135,13 @@ bool CArmInstruction::Validate(const ValidateState &state)
 	{
 		if (!Vars.CopData.CpinfExpression.evaluateInteger(Vars.CopData.Cpinf))
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, "Invalid expression");
 			return false;
 		}
 
 		if (Vars.CopData.Cpinf > 7)
 		{
-			Logger::queueError(Logger::Error,L"CP Inf number %02X too big",Vars.CopData.Cpinf);
+			Logger::queueError(Logger::Error, "CP Inf number %02X too big",Vars.CopData.Cpinf);
 			return false;
 		}
 	}
@@ -160,7 +160,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 	{
 		if (Vars.rd.num & 1)
 		{
-			Logger::queueError(Logger::Error,L"rd must be even");
+			Logger::queueError(Logger::Error, "rd must be even");
 			return false;
 		}
 	}
@@ -178,14 +178,14 @@ bool CArmInstruction::Validate(const ValidateState &state)
 		case ExpressionValueType::Float:
 			if (!(Opcode.flags & ARM_SHIFT) && !(Opcode.flags & ARM_POOL))
 			{
-				Logger::queueError(Logger::Error,L"Invalid expression type");
+				Logger::queueError(Logger::Error, "Invalid expression type");
 				return false;
 			}
 
 			Vars.Immediate = (int) getFloatBits((float)value.floatValue);
 			break;
 		default:
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+			Logger::queueError(Logger::Error, "Invalid expression type");
 			return false;
 		}
 
@@ -248,7 +248,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 					}
 					else
 					{
-						Logger::queueError(Logger::Error,L"Invalid shifted immediate %X",Vars.OriginalImmediate);
+						Logger::queueError(Logger::Error, "Invalid shifted immediate %X",Vars.OriginalImmediate);
 						return false;
 					}
 				}
@@ -283,13 +283,13 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			{
 				if (Vars.Immediate & 1)
 				{
-					Logger::queueError(Logger::Error,L"Branch target must be halfword aligned");
+					Logger::queueError(Logger::Error, "Branch target must be halfword aligned");
 					return false;
 				}
 			} else {
 				if (Vars.Immediate & 3)
 				{
-					Logger::queueError(Logger::Error,L"Branch target must be word aligned");
+					Logger::queueError(Logger::Error, "Branch target must be word aligned");
 					return false;
 				}
 			}
@@ -297,7 +297,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			Vars.Immediate = (int) (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= 0x2000000)
 			{
-				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error, "Branch target %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		} else if (Opcode.flags & ARM_ABSIMM)	// ldr r0,[I]
@@ -305,7 +305,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			Vars.Immediate = (int) (Vars.Immediate-RamPos-8);
 			if (abs(Vars.Immediate) >= (1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error,L"Load target %08X out of range",Vars.OriginalImmediate);
+				Logger::queueError(Logger::Error, "Load target %08X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		} else if (Opcode.flags & ARM_SWI)	// it's an interrupt, may need to shift it
@@ -327,7 +327,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			unsigned int check = Opcode.flags & ARM_ABS ? abs(Vars.Immediate) : Vars.Immediate;
 			if (check >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error,L"Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Immediate value %X out of range",Vars.Immediate);
 				return false;
 			}
 		}
@@ -492,7 +492,7 @@ void CArmInstruction::writeTempData(TempData& tempData) const
 	str[pos] = 0;
 	FormatInstruction(Opcode.mask,&str[pos]);
 
-	tempData.writeLine(RamPos,convertUtf8ToWString(str));
+	tempData.writeLine(RamPos,str);
 }
 
 void CArmInstruction::Encode() const

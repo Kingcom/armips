@@ -7,7 +7,7 @@
 	if (getExpFuncParameter(params,index,dest,funcName,false) == false) \
 		return ExpressionValue();
 
-ExpressionValue expFuncHi(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+ExpressionValue expFuncHi(const Identifier &funcName, const std::vector<ExpressionValue>& parameters)
 {
 	int64_t value;
 
@@ -16,7 +16,7 @@ ExpressionValue expFuncHi(const std::wstring& funcName, const std::vector<Expres
 	return ExpressionValue((int64_t)((value >> 16) + ((value & 0x8000) != 0)) & 0xFFFF);
 }
 
-ExpressionValue expFuncLo(const std::wstring& funcName, const std::vector<ExpressionValue>& parameters)
+ExpressionValue expFuncLo(const Identifier &funcName, const std::vector<ExpressionValue>& parameters)
 {
 	int64_t value;
 
@@ -26,14 +26,14 @@ ExpressionValue expFuncLo(const std::wstring& funcName, const std::vector<Expres
 }
 
 const ExpressionFunctionEntry mipsExpressionFunctions[] = {
-	{ L"lo",			&expFuncLo,				1,	1,	ExpFuncSafety::Safe },
-	{ L"hi",			&expFuncHi,				1,	1,	ExpFuncSafety::Safe },
+	{ "lo", &expFuncLo, 1, 1, ExpFuncSafety::Safe },
+	{ "hi", &expFuncHi, 1, 1, ExpFuncSafety::Safe },
 };
 
 void registerMipsExpressionFunctions(ExpressionFunctionHandler &handler)
 {
 	for (const auto &func : mipsExpressionFunctions)
 	{
-		handler.addFunction(func.name, func.function, func.minParams, func.maxParams, func.safety);
+		handler.addFunction(Identifier(func.name), func.function, func.minParams, func.maxParams, func.safety);
 	}
 }

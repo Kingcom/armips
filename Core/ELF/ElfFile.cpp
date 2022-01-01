@@ -96,7 +96,7 @@ bool ElfSegment::isSectionPartOf(ElfSection* section)
 	// the start is inside the section and the size is not 0, so the end should be in here too
 	if (sectionEnd > segmentEnd)
 	{
-		Logger::printError(Logger::Error,L"Section partially contained in segment");
+		Logger::printError(Logger::Error, "Section partially contained in segment");
 		return false;
 	}
 

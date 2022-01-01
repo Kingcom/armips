@@ -27,14 +27,14 @@ const fs::path &FileList::relative_path(int fileIndex) const
 	return _entries[size_t(fileIndex)].relativePath();
 }
 
-const std::wstring &FileList::wstring(int fileIndex) const
+const std::string &FileList::string(int fileIndex) const
 {
-	return _entries[size_t(fileIndex)].wstring();
+	return _entries[size_t(fileIndex)].string();
 }
 
-const std::wstring &FileList::relativeWstring(int fileIndex) const
+const std::string &FileList::relativeString(int fileIndex) const
 {
-	return _entries[size_t(fileIndex)].relativeWstring();
+	return _entries[size_t(fileIndex)].relativeString();
 }
 
 size_t FileList::size() const
@@ -50,8 +50,8 @@ void FileList::clear()
 FileList::Entry::Entry(const fs::path &path) :
 	_path(path),
 	_relativePath(path.lexically_proximate(fs::current_path())),
-	_string(_path.wstring()),
-	_relativeString(_relativePath.generic_wstring())
+	_string(_path.u8string()),
+	_relativeString(_relativePath.generic_u8string())
 {
 }
 
@@ -65,12 +65,12 @@ const fs::path &FileList::Entry::relativePath() const
 	return _relativePath;
 }
 
-const std::wstring &FileList::Entry::wstring() const
+const std::string &FileList::Entry::string() const
 {
 	return _string;
 }
 
-const std::wstring &FileList::Entry::relativeWstring() const
+const std::string &FileList::Entry::relativeString() const
 {
 	return _relativeString;
 }
@@ -88,13 +88,13 @@ fs::path getFullPathName(const fs::path& path)
 	}
 }
 
-bool checkLabelDefined(const std::wstring& labelName, int section)
+bool checkLabelDefined(const Identifier& labelName, int section)
 {
 	std::shared_ptr<Label> label = Global.symbolTable.getLabel(labelName,Global.FileInfo.FileNum,section);
 	return label->isDefined();
 }
 
-bool checkValidLabelName(const std::wstring& labelName)
+bool checkValidLabelName(const Identifier& labelName)
 {
 	return Global.symbolTable.isValidSymbolName(labelName);
 }

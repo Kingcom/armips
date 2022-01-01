@@ -10,9 +10,9 @@
 #include "Parser/ExpressionParser.h"
 #include "Util/Util.h"
 
-inline bool isPartOfList(const std::wstring& value, const std::initializer_list<const wchar_t*>& terminators)
+inline bool isPartOfList(const Identifier& value, const std::initializer_list<const char*>& terminators)
 {
-	for (const wchar_t* term: terminators)
+	for (const char* term: terminators)
 	{
 		if (value == term)
 			return true;
@@ -37,7 +37,7 @@ void Parser::pushConditionalResult(ConditionalResult cond)
 	conditionStack.push_back(info);
 }
 
-void Parser::printError(const Token &token, const std::wstring &text)
+void Parser::printError(const Token &token, const std::string &text)
 {
 	errorLine = token.line;
 	Global.FileInfo.LineNumber = (int) token.line;
@@ -63,7 +63,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 	if (!exp.isLoaded())
 	{
-		printError(start,L"Parameter failure");
+		printError(start, "Parameter failure");
 		getTokenizer()->skipLookahead();
 		valid = false;
 	}
@@ -77,7 +77,7 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 		if (!exp.isLoaded())
 		{
-			printError(start,L"Parameter failure");
+			printError(start, "Parameter failure");
 			getTokenizer()->skipLookahead();
 			valid = false;
 		}
@@ -85,20 +85,20 @@ bool Parser::parseExpressionList(std::vector<Expression>& list, int min, int max
 
 	if (list.size() < (size_t) min)
 	{
-		printError(start,L"Not enough parameters (min %d)",min);
+		printError(start, "Not enough parameters (min %d)",min);
 		return false;
 	}
 
 	if (max != -1 && (size_t) max < list.size())
 	{
-		printError(start,L"Too many parameters (max %d)",max);
+		printError(start, "Too many parameters (max %d)",max);
 		return false;
 	}
 
 	return valid;
 }
 
-bool Parser::parseIdentifier(std::wstring& dest)
+bool Parser::parseIdentifier(Identifier& dest)
 {
 	const Token& tok = nextToken();
 	if (tok.type != TokenType::Identifier)
@@ -108,7 +108,7 @@ bool Parser::parseIdentifier(std::wstring& dest)
 	return true;
 }
 
-std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicator, const std::initializer_list<const wchar_t*> terminators)
+std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(char indicator, const std::initializer_list<const char*> terminators)
 {
 	auto sequence = std::make_unique<CommandSequence>();
 
@@ -126,7 +126,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 		if (next.type == TokenType::Identifier)
 		{
 			const auto &identifier = next.identifierValue();
-			if (!identifier.empty() && identifier.front() == indicator && isPartOfList(next.identifierValue(), terminators))
+			if (identifier.startsWith(indicator) && isPartOfList(identifier, terminators))
 			{
 				foundTermination = true;
 				break;
@@ -159,15 +159,15 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommandSequence(wchar_t indicato
 
 	if (!foundTermination && terminators.size())
 	{
-		std::wstring expected;
-		for (const wchar_t* terminator : terminators)
+		std::string expected;
+		for (const char* terminator : terminators)
 		{
 			if (!expected.empty())
-				expected += L", ";
+				expected += ", ";
 			expected += terminator;
 		}
 
-		Logger::printError(Logger::Error, L"Unterminated command sequence, expected any of %s.", expected);
+		Logger::printError(Logger::Error, "Unterminated command sequence, expected any of %s.", expected);
 	}
 
 	return sequence;
@@ -187,16 +187,16 @@ std::unique_ptr<CAssemblerCommand> Parser::parseFile(TextFile& file, bool virtua
 	return result;
 }
 
-std::unique_ptr<CAssemblerCommand> Parser::parseString(const std::wstring& text)
+std::unique_ptr<CAssemblerCommand> Parser::parseString(const std::string& text)
 {
 	TextFile file;
 	file.openMemory(text);
 	return parseFile(file,true);
 }
 
-std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& text, std::initializer_list<AssemblyTemplateArgument> variables)
+std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::string& text, std::initializer_list<AssemblyTemplateArgument> variables)
 {
-	std::wstring fullText = text;
+	std::string fullText = text;
 
 	overrideFileInfo = true;
 	overrideFileNum = Global.FileInfo.FileNum;
@@ -208,7 +208,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseTemplate(const std::wstring& tex
 		(void)count;
 #ifdef _DEBUG
 		if (count != 0 && arg.value.empty())
-			Logger::printError(Logger::Warning,L"Empty replacement for %s",arg.variableName);
+			Logger::printError(Logger::Warning, "Empty replacement for %s",arg.variableName);
 #endif
 	}
 
@@ -224,7 +224,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 	if (tok.type != TokenType::Identifier)
 		return nullptr;
 
-	const std::wstring &stringValue = tok.identifierValue();
+	const std::string &stringValue = tok.identifierValue().string();
 
 	auto matchRange = directiveSet.equal_range(stringValue);
 	for (auto it = matchRange.first; it != matchRange.second; ++it)
@@ -248,11 +248,11 @@ std::unique_ptr<CAssemblerCommand> Parser::parseDirective(const DirectiveMap &di
 		if (result == nullptr)
 		{
 			if (!hasError())
-				printError(tok,L"Directive parameter failure");
+				printError(tok, "Directive parameter failure");
 			return nullptr;
 		} else if (!(directive.flags & DIRECTIVE_MANUALSEPARATOR) && nextToken().type != TokenType::Separator)
 		{
-			printError(tok,L"Directive not terminated");
+			printError(tok, "Directive not terminated");
 			return nullptr;
 		}
 
@@ -279,7 +279,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virt
 {
 	if (entries.size() >= 150)
 	{
-		Logger::queueError(Logger::Error, L"Max include/recursion depth reached");
+		Logger::queueError(Logger::Error, "Max include/recursion depth reached");
 		return nullptr;
 	}
 
@@ -303,7 +303,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parse(Tokenizer* tokenizer, bool virt
 	return sequence;
 }
 
-void Parser::addEquation(const Token& startToken, const std::wstring& name, const std::wstring& value)
+void Parser::addEquation(const Token& startToken, const Identifier& name, const std::string& value)
 {
 	// parse value string
 	TextFile f;
@@ -318,13 +318,13 @@ void Parser::addEquation(const Token& startToken, const std::wstring& name, cons
 		const Token& token = tok.nextToken();
 		if (token.type == TokenType::Identifier && token.identifierValue() == name)
 		{
-			printError(startToken,L"Recursive equ definition for \"%s\" not allowed",name);
+			printError(startToken, "Recursive equ definition for \"%s\" not allowed",name);
 			return;
 		}
 
 		if (token.type == TokenType::Equ)
 		{
-			printError(startToken,L"equ value must not contain another equ instance");
+			printError(startToken, "equ value must not contain another equ instance");
 			return;
 		}
 	}
@@ -355,8 +355,8 @@ bool Parser::checkEquLabel()
 		if (peekToken(pos).type == TokenType::Equ &&
 			peekToken(pos+1).type == TokenType::EquValue)
 		{
-			const std::wstring &name = peekToken(0).identifierValue();
-			const std::wstring &value = peekToken(pos+1).stringValue();
+			const Identifier &name = peekToken(0).identifierValue();
+			const StringLiteral &value = peekToken(pos+1).stringValue();
 			eatTokens(pos+2);
 
 			// skip the equ if it's inside a false conditional block
@@ -367,7 +367,7 @@ bool Parser::checkEquLabel()
 			// evaluated during validation
 			if (isInsideUnknownBlock())
 			{
-				printError(start,L"equ not allowed inside of block with non-trivial condition");
+				printError(start, "equ not allowed inside of block with non-trivial condition");
 				return true;
 			}
 
@@ -380,17 +380,17 @@ bool Parser::checkEquLabel()
 
 			if (!Global.symbolTable.isValidSymbolName(name))
 			{
-				printError(start,L"Invalid equation name \"%s\"",name);
+				printError(start, "Invalid equation name \"%s\"",name);
 				return true;
 			}
 
 			if (Global.symbolTable.symbolExists(name,Global.FileInfo.FileNum,Global.Section))
 			{
-				printError(start,L"Equation name \"%s\" already defined",name);
+				printError(start, "Equation name \"%s\" already defined",name);
 				return true;
 			}
 
-			addEquation(start,name,value);
+			addEquation(start,name,value.string());
 			return true;
 		}
 	}
@@ -398,7 +398,7 @@ bool Parser::checkEquLabel()
 	return false;
 }
 
-bool Parser::parseFunctionDeclaration(std::wstring& name, std::vector<std::wstring>& parameters)
+bool Parser::parseFunctionDeclaration(Identifier& name, std::vector<Identifier> &parameters)
 {
 	const Token& first = peekToken();
 	if (first.type != TokenType::Identifier)
@@ -432,24 +432,24 @@ bool Parser::checkExpFuncDefinition()
 		return false;
 
 	const auto &identifier = first.identifierValue();
-	if (identifier.front() != L'.' || first.identifierValue() != L".expfunc")
+	if (!identifier.startsWith('.') || first.identifierValue() != ".expfunc")
 		return false;
 
 	eatToken();
 
-	std::wstring functionName;
-	std::vector<std::wstring> functionParameters;
+	Identifier functionName;
+	std::vector<Identifier> functionParameters;
 
 	// load declarationn
 	if (!parseFunctionDeclaration(functionName, functionParameters))
 	{
-		printError(first, L"Invalid expression function declaration");
+		printError(first, "Invalid expression function declaration");
 		return false;
 	}
 
 	if (nextToken().type != TokenType::Comma)
 	{
-		printError(first, L"Invalid expression function declaration");
+		printError(first, "Invalid expression function declaration");
 		return false;
 	}
 
@@ -468,7 +468,7 @@ bool Parser::checkExpFuncDefinition()
 	// with non-trivial conditions
 	if (isInsideUnknownBlock())
 	{
-		printError(first, L"Expression function definition not allowed inside of block with non-trivial condition");
+		printError(first, "Expression function definition not allowed inside of block with non-trivial condition");
 		return false;
 	}
 
@@ -478,14 +478,14 @@ bool Parser::checkExpFuncDefinition()
 
 	if(nextToken().type != TokenType::Separator)
 	{
-		printError(first, L".expfunc directive not terminated");
+		printError(first, ".expfunc directive not terminated");
 		return false;
 	}
 
 	// duplicate check
 	if (ExpressionFunctionHandler::instance().find(functionName))
 	{
-		printError(first, L"Expression function \"%s\" already declared", functionName);
+		printError(first, "Expression function \"%s\" already declared", functionName);
 		return false;
 	}
 
@@ -501,7 +501,7 @@ bool Parser::checkMacroDefinition()
 		return false;
 
 	const auto &identifier = first.identifierValue();
-	if (identifier.front() != L'.' || first.identifierValue() != L".macro")
+	if (!identifier.startsWith('.') || first.identifierValue() != ".macro")
 		return false;
 
 	eatToken();
@@ -509,11 +509,11 @@ bool Parser::checkMacroDefinition()
 	// nested macro definitions are not allowed
 	if (initializingMacro)
 	{
-		printError(first,L"Nested macro definitions not allowed");
+		printError(first, "Nested macro definitions not allowed");
 		while (!atEnd())
 		{
 			const Token& token = nextToken();
-			if (token.type == TokenType::Identifier && token.identifierValue() == L".endmacro")
+			if (token.type == TokenType::Identifier && token.identifierValue() == ".endmacro")
 				break;
 		}
 
@@ -534,7 +534,7 @@ bool Parser::checkMacroDefinition()
 	// load parameters
 	for (size_t i = 1; i < parameters.size(); i++)
 	{
-		std::wstring name;
+		Identifier name;
 		if (!parameters[i].evaluateIdentifier(name))
 			return false;
 
@@ -543,7 +543,7 @@ bool Parser::checkMacroDefinition()
 
 	if(nextToken().type != TokenType::Separator)
 	{
-		printError(first,L"Macro directive not terminated");
+		printError(first, "Macro directive not terminated");
 		return false;
 	}
 
@@ -554,7 +554,7 @@ bool Parser::checkMacroDefinition()
 	while (!atEnd())
 	{
 		const Token& tok = nextToken();
-		if (tok.type == TokenType::Identifier && tok.identifierValue() == L".endmacro")
+		if (tok.type == TokenType::Identifier && tok.identifierValue() == ".endmacro")
 		{
 			valid = true;
 			break;
@@ -565,7 +565,7 @@ bool Parser::checkMacroDefinition()
 	// with non-trivial conditions
 	if (isInsideUnknownBlock())
 	{
-		printError(first, L"Macro definition not allowed inside of block with non-trivial condition");
+		printError(first, "Macro definition not allowed inside of block with non-trivial condition");
 		return false;
 	}
 
@@ -576,14 +576,14 @@ bool Parser::checkMacroDefinition()
 	// duplicate check
 	if (macros.find(macro.name) != macros.end())
 	{
-		printError(first, L"Macro \"%s\" already defined", macro.name);
+		printError(first, "Macro \"%s\" already defined", macro.name);
 		return false;
 	}
 
 	// no .endmacro, not valid
 	if (!valid)
 	{
-		printError(first, L"Macro \"%s\" not terminated", macro.name);
+		printError(first, "Macro \"%s\" not terminated", macro.name);
 		return true;
 	}
 
@@ -593,7 +593,7 @@ bool Parser::checkMacroDefinition()
 
 	if(nextToken().type != TokenType::Separator)
 	{
-		printError(first,L"Endmacro directive not terminated");
+		printError(first, "Endmacro directive not terminated");
 		return false;
 	}
 
@@ -648,7 +648,7 @@ std::optional<std::vector<Token>> Parser::extractMacroParameter(const Token &mac
 
 	if (parenCount != 0)
 	{
-		printError(macroStart, L"Unbalanced parentheses in macro parameter");
+		printError(macroStart, "Unbalanced parentheses in macro parameter");
 		return std::nullopt;
 	}
 
@@ -656,7 +656,7 @@ std::optional<std::vector<Token>> Parser::extractMacroParameter(const Token &mac
 	std::vector<Token> tokens = getTokenizer()->getTokens(startPos,endPos);
 	if (tokens.size() == 0)
 	{
-		printError(macroStart, L"Empty macro argument");
+		printError(macroStart, "Empty macro argument");
 		return std::nullopt;
 	}
 
@@ -680,12 +680,12 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 	// registering replacements for parameter values
 	TokenStreamTokenizer macroTokenizer;
 
-	std::set<std::wstring> identifierParameters;
+	std::set<Identifier> identifierParameters;
 	for (size_t i = 0; i < macro.parameters.size(); i++)
 	{
 		if (peekToken().type == TokenType::Separator)
 		{
-			printError(start,L"Too few macro arguments (%d vs %d)",i,macro.parameters.size());
+			printError(start, "Too few macro arguments (%d vs %d)",i,macro.parameters.size());
 			return nullptr;
 		}
 
@@ -693,7 +693,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 		{
 			if (nextToken().type != TokenType::Comma)
 			{
-				printError(start,L"Macro arguments not comma-separated");
+				printError(start, "Macro arguments not comma-separated");
 				return nullptr;
 			}
 		}
@@ -723,13 +723,13 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 			++count;
 		}
 
-		printError(start,L"Too many macro arguments (%d vs %d)",count,macro.parameters.size());		
+		printError(start, "Too many macro arguments (%d vs %d)",count,macro.parameters.size());
 		return nullptr;
 	}
 
 	if(nextToken().type != TokenType::Separator)
 	{
-		printError(start,L"Macro call not terminated");
+		printError(start, "Macro call not terminated");
 		return nullptr;
 	}
 
@@ -762,7 +762,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 	}
 
 	// register labels and replacements
-	for (const std::wstring& label: macro.labels)
+	for (const Identifier& label: macro.labels)
 	{
 		// check if the label is using the name of a parameter
 		// in that case, don't register a unique replacement
@@ -770,13 +770,13 @@ std::unique_ptr<CAssemblerCommand> Parser::parseMacroCall()
 			continue;
 
 		// otherwise make sure the name is unique
-		std::wstring fullName;
-		if (Global.symbolTable.isLocalSymbol(label))
-			fullName = tfm::format(L"@@%s_%s_%08X",macro.name,label.substr(2),macro.counter);
-		else if (Global.symbolTable.isStaticSymbol(label))
-			fullName = tfm::format(L"@%s_%s_%08X",macro.name,label.substr(1),macro.counter);
+		std::string fullName;
+		if (Global.symbolTable.isLocalSymbol(Identifier(label)))
+			fullName = tfm::format("@@%s_%s_%08X",macro.name,label.string().substr(2),macro.counter);
+		else if (Global.symbolTable.isStaticSymbol(Identifier(label)))
+			fullName = tfm::format("@%s_%s_%08X",macro.name,label.string().substr(1),macro.counter);
 		else
-			fullName = tfm::format(L"%s_%s_%08X",macro.name,label,macro.counter);
+			fullName = tfm::format("%s_%s_%08X",macro.name,label,macro.counter);
 
 		macroTokenizer.registerReplacement(label,fullName);
 	}
@@ -797,7 +797,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 	if (peekToken(0).type == TokenType::Identifier &&
 		peekToken(1).type == TokenType::Colon)
 	{
-		const std::wstring &name = start.identifierValue();
+		const Identifier &name = start.identifierValue();
 		eatTokens(2);
 		
 		if (initializingMacro)
@@ -805,11 +805,11 @@ std::unique_ptr<CAssemblerCommand> Parser::parseLabel()
 		
 		if (!Global.symbolTable.isValidSymbolName(name))
 		{
-			printError(start,L"Invalid label name \"%s\"",name);
+			printError(start, "Invalid label name \"%s\"",name);
 			return nullptr;
 		}
 
-		return std::make_unique<CAssemblerLabel>(name,start.getOriginalText());
+		return std::make_unique<CAssemblerLabel>(name,Identifier(start.getOriginalText()));
 	}
 
 	return nullptr;
@@ -891,7 +891,7 @@ std::unique_ptr<CAssemblerCommand> Parser::parseCommand()
 		return handleError();
 
 	const Token& token = peekToken();
-	printError(token,L"Parse error '%s'",token.getOriginalText());
+	printError(token,"Parse error '%s'", token.getOriginalText());
 	return handleError();
 }
 

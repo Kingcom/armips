@@ -66,9 +66,9 @@ bool CDirectiveFile::Validate(const ValidateState &state)
 	if (state.noFileChange)
 	{
 		if (type == Type::Close)
-			Logger::queueError(Logger::Error, L"Cannot close file within %S", state.noFileChangeDirective);
+			Logger::queueError(Logger::Error, "Cannot close file within %S", state.noFileChangeDirective);
 		else
-			Logger::queueError(Logger::Error, L"Cannot open new file within %S", state.noFileChangeDirective);
+			Logger::queueError(Logger::Error, "Cannot open new file within %S", state.noFileChangeDirective);
 		return false;
 	}
 
@@ -113,22 +113,22 @@ void CDirectiveFile::Encode() const
 
 void CDirectiveFile::writeTempData(TempData& tempData) const
 {
-	std::wstring str;
+	std::string str;
 
 	switch (type)
 	{
 	case Type::Open:
-		str = tfm::format(L".open \"%s\",0x%08X",file->getFileName().wstring(),file->getOriginalHeaderSize());
+		str = tfm::format(".open \"%s\",0x%08X",file->getFileName().u8string(),file->getOriginalHeaderSize());
 		break;
 	case Type::Create:
-		str = tfm::format(L".create \"%s\",0x%08X",file->getFileName().wstring(),file->getOriginalHeaderSize());
+		str = tfm::format(".create \"%s\",0x%08X",file->getFileName().u8string(),file->getOriginalHeaderSize());
 		break;
 	case Type::Copy:
-		str = tfm::format(L".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName().wstring(),
-			file->getFileName().wstring(),file->getOriginalHeaderSize());
+		str = tfm::format(".open \"%s\",\"%s\",0x%08X",file->getOriginalFileName().u8string(),
+			file->getFileName().u8string(),file->getOriginalHeaderSize());
 		break;
 	case Type::Close:
-		str = L".close";
+		str = ".close";
 		break;
 	case Type::Invalid:
 		// TODO: Assert?
@@ -186,7 +186,7 @@ bool CDirectivePosition::Validate(const ValidateState &state)
 
 	if (!expression.evaluateInteger(position))
 	{
-		Logger::queueError(Logger::FatalError,L"Invalid position");
+		Logger::queueError(Logger::FatalError, "Invalid position");
 		return false;
 	}
 
@@ -206,10 +206,10 @@ void CDirectivePosition::writeTempData(TempData& tempData) const
 	switch (type)
 	{
 	case Physical:
-		tempData.writeLine(virtualAddress,tfm::format(L".orga 0x%08X",position));
+		tempData.writeLine(virtualAddress,tfm::format(".orga 0x%08X",position));
 		break;
 	case Virtual:
-		tempData.writeLine(virtualAddress,tfm::format(L".org 0x%08X",position));
+		tempData.writeLine(virtualAddress,tfm::format(".org 0x%08X",position));
 		break;
 	}
 }
@@ -225,7 +225,7 @@ CDirectiveIncbin::CDirectiveIncbin(const fs::path& fileName)
 
 	if (!fs::exists(this->fileName))
 	{
-		Logger::printError(Logger::FatalError,L"File %s not found",this->fileName.wstring());
+		Logger::printError(Logger::FatalError, "File %s not found",this->fileName.u8string());
 	}
 
 	std::error_code error;
@@ -240,13 +240,13 @@ bool CDirectiveIncbin::Validate(const ValidateState &state)
 	{
 		if (!startExpression.evaluateInteger(start))
 		{
-			Logger::queueError(Logger::Error,L"Invalid position expression");
+			Logger::queueError(Logger::Error, "Invalid position expression");
 			return false;
 		}
 
 		if (start > fileSize)
 		{
-			Logger::queueError(Logger::Error,L"Start position past end of file");
+			Logger::queueError(Logger::Error, "Start position past end of file");
 			return false;
 		}
 	} else {
@@ -257,7 +257,7 @@ bool CDirectiveIncbin::Validate(const ValidateState &state)
 	{
 		if (!sizeExpression.evaluateInteger(size))
 		{
-			Logger::queueError(Logger::Error,L"Invalid size expression");
+			Logger::queueError(Logger::Error, "Invalid size expression");
 			return false;
 		}
 	} else {
@@ -266,7 +266,7 @@ bool CDirectiveIncbin::Validate(const ValidateState &state)
 
 	if (start+size > fileSize)
 	{
-		Logger::queueError(Logger::Warning,L"Read size truncated due to file size");
+		Logger::queueError(Logger::Warning, "Read size truncated due to file size");
 		size = fileSize-start;
 	}
 
@@ -282,7 +282,7 @@ void CDirectiveIncbin::Encode() const
 		ByteArray data = ByteArray::fromFile(fileName,(long)start,size);
 		if ((int) data.size() != size)
 		{
-			Logger::printError(Logger::Error,L"Could not read file \"%s\"",fileName.wstring());
+			Logger::printError(Logger::Error, "Could not read file \"%s\"",fileName.u8string());
 			return;
 		}
 		g_fileManager->write(data.data(),data.size());
@@ -291,7 +291,7 @@ void CDirectiveIncbin::Encode() const
 
 void CDirectiveIncbin::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".incbin \"%s\"",fileName.wstring()));
+	tempData.writeLine(virtualAddress,tfm::format(".incbin \"%s\"",fileName.u8string()));
 }
 
 void CDirectiveIncbin::writeSymData(SymbolData& symData) const
@@ -332,14 +332,14 @@ bool CDirectiveAlignFill::Validate(const ValidateState &state)
 	{
 		if (!valueExpression.evaluateInteger(value))
 		{
-			Logger::queueError(Logger::FatalError,L"Invalid %s",mode == Fill ? L"size" : L"alignment");
+			Logger::queueError(Logger::FatalError, "Invalid %s",mode == Fill ? "size" : "alignment");
 			return false;
 		}
 	}
 
 	if (mode != Fill && !isPowerOfTwo(value))
 	{
-		Logger::queueError(Logger::Error, L"Invalid alignment %d", value);
+		Logger::queueError(Logger::Error, "Invalid alignment %d", value);
 		return false;
 	}
 
@@ -364,7 +364,7 @@ bool CDirectiveAlignFill::Validate(const ValidateState &state)
 	{
 		if (!fillExpression.evaluateInteger(fillByte))
 		{
-			Logger::printError(Logger::FatalError,L"Invalid fill value");
+			Logger::printError(Logger::FatalError, "Invalid fill value");
 			return false;
 		}
 	}
@@ -397,13 +397,13 @@ void CDirectiveAlignFill::writeTempData(TempData& tempData) const
 	switch (mode)
 	{
 	case AlignVirtual:
-		tempData.writeLine(virtualAddress,tfm::format(L".align 0x%08X",value));
+		tempData.writeLine(virtualAddress,tfm::format(".align 0x%08X",value));
 		break;
 	case AlignPhysical:
-		tempData.writeLine(virtualAddress, tfm::format(L".aligna 0x%08X", value));
+		tempData.writeLine(virtualAddress, tfm::format(".aligna 0x%08X", value));
 		break;
 	case Fill:
-		tempData.writeLine(virtualAddress,tfm::format(L".fill 0x%08X,0x%02X",value,fillByte));
+		tempData.writeLine(virtualAddress,tfm::format(".fill 0x%08X,0x%02X",value,fillByte));
 		break;
 	}
 }
@@ -436,7 +436,7 @@ bool CDirectiveSkip::Validate(const ValidateState &state)
 	{
 		if (!expression.evaluateInteger(value))
 		{
-			Logger::queueError(Logger::FatalError,L"Invalid skip length");
+			Logger::queueError(Logger::FatalError, "Invalid skip length");
 			return false;
 		}
 	}
@@ -455,7 +455,7 @@ void CDirectiveSkip::Encode() const
 
 void CDirectiveSkip::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".skip 0x%08X",value));
+	tempData.writeLine(virtualAddress,tfm::format(".skip 0x%08X",value));
 }
 
 //
@@ -470,7 +470,7 @@ void CDirectiveHeaderSize::exec() const
 	std::shared_ptr<AssemblerFile> openFile = g_fileManager->getOpenFile();
 	if (!openFile->hasFixedVirtualAddress())
 	{
-		Logger::printError(Logger::Error,L"Header size not applicable for this file");
+		Logger::printError(Logger::Error, "Header size not applicable for this file");
 		return;
 	}
 	std::shared_ptr<GenericAssemblerFile> file = std::static_pointer_cast<GenericAssemblerFile>(openFile);
@@ -485,7 +485,7 @@ bool CDirectiveHeaderSize::Validate(const ValidateState &state)
 
 	if (!expression.evaluateInteger(headerSize))
 	{
-		Logger::queueError(Logger::FatalError,L"Invalid header size");
+		Logger::queueError(Logger::FatalError, "Invalid header size");
 		return false;
 	}
 
@@ -500,8 +500,8 @@ void CDirectiveHeaderSize::Encode() const
 
 void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 {
-	tempData.writeLine(virtualAddress,tfm::format(L".headersize %s0x%08X",
-		headerSize < 0 ? L"-" : L"", headerSize < 0 ? -headerSize : headerSize));
+	tempData.writeLine(virtualAddress,tfm::format(".headersize %s0x%08X",
+		headerSize < 0 ? "-" : "", headerSize < 0 ? -headerSize : headerSize));
 }
 
 
@@ -518,7 +518,7 @@ DirectiveObjImport::DirectiveObjImport(const fs::path& inputName)
 	}
 }
 
-DirectiveObjImport::DirectiveObjImport(const fs::path& inputName, const std::wstring& ctorName)
+DirectiveObjImport::DirectiveObjImport(const fs::path& inputName, const Identifier& ctorName)
 {
 	if (rel.init(inputName))
 	{

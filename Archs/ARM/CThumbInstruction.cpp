@@ -25,7 +25,7 @@ void CThumbInstruction::setPoolAddress(int64_t address)
 	int pos = (int) address-((RamPos+4) & 0xFFFFFFFD);
 	if (pos < 0 || pos > 1020)
 	{
-		Logger::queueError(Logger::Error,L"Literal pool out of range");
+		Logger::queueError(Logger::Error, "Literal pool out of range");
 		return;
 	}
 
@@ -38,7 +38,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 
 	if (RamPos & 1)
 	{
-		Logger::queueError(Logger::Warning,L"Opcode not halfword aligned");
+		Logger::queueError(Logger::Warning, "Opcode not halfword aligned");
 	}
 
 	if (Opcode.flags & THUMB_DS)
@@ -59,14 +59,14 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 		case ExpressionValueType::Float:
 			if (!(Opcode.flags & THUMB_POOL))
 			{
-				Logger::queueError(Logger::Error,L"Invalid expression type");
+				Logger::queueError(Logger::Error, "Invalid expression type");
 				return false;
 			}
 
 			Vars.Immediate = (int) getFloatBits((float)value.floatValue);
 			break;
 		default:
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+			Logger::queueError(Logger::Error, "Invalid expression type");
 			return false;
 		}
 
@@ -81,13 +81,13 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			{
 				if (Vars.Immediate & 3)
 				{
-					Logger::queueError(Logger::Error,L"Branch target must be word aligned");
+					Logger::queueError(Logger::Error, "Branch target must be word aligned");
 					return false;
 				}
 			} else {
 				if (Vars.Immediate & 1)
 				{
-					Logger::queueError(Logger::Error,L"Branch target must be halfword aligned");
+					Logger::queueError(Logger::Error, "Branch target must be halfword aligned");
 					return false;
 				}
 			}
@@ -96,7 +96,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			
 			if (num >= (1 << Vars.ImmediateBitLen) || num < (0-(1 << Vars.ImmediateBitLen)))
 			{
-				Logger::queueError(Logger::Error,L"Branch target %08X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Branch target %08X out of range",Vars.Immediate);
 				return false;
 			}
 
@@ -109,7 +109,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 		{
 			if (Vars.Immediate & 3)	// not allowed
 			{
-				Logger::queueError(Logger::Error,L"Immediate value must be a multiple of 4");
+				Logger::queueError(Logger::Error, "Immediate value must be a multiple of 4");
 				return false;
 			}
 			Vars.Immediate >>= 2;
@@ -117,7 +117,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 		{
 			if (Vars.Immediate & 1)	// not allowed
 			{
-				Logger::queueError(Logger::Error,L"Immediate value must be a multiple of 2");
+				Logger::queueError(Logger::Error, "Immediate value must be a multiple of 2");
 				return false;
 			}
 			Vars.Immediate >>= 1;
@@ -128,14 +128,14 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 		{
 			if (Vars.Immediate & 3)
 			{
-				Logger::queueError(Logger::Error,L"PC relative address must be word aligned");
+				Logger::queueError(Logger::Error, "PC relative address must be word aligned");
 				return false;
 			}
 
 			int pos = Vars.Immediate-((RamPos+4) & 0xFFFFFFFD);
 			if (pos < 0 || pos > 1020)
 			{
-				Logger::queueError(Logger::Error,L"PC relative address out of range");
+				Logger::queueError(Logger::Error, "PC relative address out of range");
 				return false;
 			}
 			Vars.Immediate = pos >> 2;
@@ -146,7 +146,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			int max = (Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 32 : 31;
 			if (Vars.Immediate < 0 || Vars.Immediate > max)
 			{
-				Logger::queueError(Logger::Error, L"Shift amount 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Shift amount 0x%02X out of range",Vars.Immediate);
 				return false;
 			}
 		} else if (Vars.ImmediateBitLen != 32)
@@ -154,7 +154,7 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			int max = (1 << Vars.ImmediateBitLen) - 1;
 			if (abs(Vars.Immediate) > max)
 			{
-				Logger::queueError(Logger::Error,L"Immediate value 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Immediate value 0x%02X out of range",Vars.Immediate);
 				return false;
 			}
 			Vars.Immediate &= max;
@@ -346,10 +346,10 @@ void CThumbInstruction::writeTempData(TempData& tempData) const
 {
 	char str[256];
 
-	int pos = sprintf(str,"   %S",Opcode.name);
+	int pos = sprintf(str,"   %s",Opcode.name);
 	while (pos < 11) str[pos++] = ' ';
 	str[pos] = 0;
 	FormatInstruction(Opcode.mask,&str[pos]);
 
-	tempData.writeLine(RamPos,convertUtf8ToWString(str));
+	tempData.writeLine(RamPos,str);
 }
