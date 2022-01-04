@@ -26,6 +26,11 @@ label:
 	.endif
 .endmacro
 
+; character constant - these are processed into integers by the tokenizer already
+checksn 'a', "97"
+checksn '█', "9608"
+
+; arithmetic
 checksn	1, "1"
 checksn	1.5, "1.5"
 checksn	label, "label"
@@ -62,6 +67,10 @@ checks	°(1+2),"°(1 + 2)"
 		.error "Error: " + °(exp) + " = " + (exp) + " != " + value 
 	.endif
 .endmacro
+
+; character constant
+check 'a', 0x61
+check '█', 0x2588
 
 ; addition
 check	3 + 2, 5

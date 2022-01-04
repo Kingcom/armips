@@ -12,4 +12,6 @@
 
 .include "sub/sub.asm"
 
+.include "█.asm"
+
 .close
