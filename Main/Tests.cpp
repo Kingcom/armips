@@ -1,101 +1,33 @@
 #include "Main/Tests.h"
 
 #include "Core/Assembler.h"
-#include "Core/Common.h"
 #include "Core/Misc.h"
 #include "Main/CommandLineInterface.h"
-#include "Util/FileSystem.h"
-#include "Util/Util.h"
+#include "Util/ByteArray.h"
 
 #include <cstring>
 
-#ifndef _WIN32
-#include <dirent.h>
-#endif
-
-std::vector<std::string> TestRunner::listSubfolders(const fs::path& dir)
+namespace
 {
-	std::vector<std::string> result;
-	
-#ifdef _WIN32
-	WIN32_FIND_DATAW findFileData;
-	HANDLE hFind;
-
-	std::wstring m = dir.wstring() + L"/*";
-	hFind = FindFirstFileW(m.c_str(),&findFileData);
-	
-	if (hFind != INVALID_HANDLE_VALUE) 
+	std::vector<std::string> splitString(const std::string& str, const char delim, bool skipEmpty)
 	{
-		do
-		{
-			if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-				std::wstring dirName = findFileData.cFileName;
-				if (dirName != L"." && dirName != L"..")
-					result.push_back(convertWStringToUtf8(dirName));
-			}
-			
-		} while (FindNextFileW(hFind,&findFileData));
-	}
-#else
-	std::string utf8 = dir.string();
-	auto directory = opendir(utf8.c_str());
+		std::vector<std::string> result;
+		std::stringstream stream(str);
+		std::string arg;
 
-	if (directory != nullptr)
-	{
-		auto elem = readdir(directory);
-		while (elem != nullptr)
+		while (std::getline(stream,arg,delim))
 		{
-#if defined(__HAIKU__)
-			// dirent in Posix does not have a d_type
-			struct stat s;
-			stat(elem->d_name, &s);
-			if (s.st_mode & S_IFDIR)
-#else
-			if (elem->d_type == DT_DIR)
-#endif
-			{
-				std::string dirName = elem->d_name;
-				if (dirName != "." && dirName != "..")
-					result.push_back(dirName);
-			}
-
-			elem = readdir(directory);
+			if (arg.empty() && skipEmpty)
+				continue;
+			result.push_back(arg);
 		}
+
+		return result;
 	}
-#endif
-
-	return result;
-}
-
-void TestRunner::initConsole()
-{
-#ifdef _WIN32
-	// initialize console
-	hstdin = GetStdHandle(STD_INPUT_HANDLE);
-	hstdout = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	// Remember how things were when we started
-	GetConsoleScreenBufferInfo(hstdout,&csbi);
-#endif
 }
 
 void TestRunner::changeConsoleColor(ConsoleColors color)
 {
-#ifdef _WIN32
-	switch (color)
-	{
-	case ConsoleColors::White:
-		SetConsoleTextAttribute(hstdout,0x7);
-		break;
-	case ConsoleColors::Red:
-		SetConsoleTextAttribute(hstdout,(1 << 2) | (1 << 3));
-		break;
-	case ConsoleColors::Green:
-		SetConsoleTextAttribute(hstdout,(1 << 1) | (1 << 3));
-		break;
-	}
-#else
 	switch (color)
 	{
 	case ConsoleColors::White:
@@ -108,51 +40,34 @@ void TestRunner::changeConsoleColor(ConsoleColors color)
 		Logger::print("\033[1;32m");
 		break;
 	}
-#endif
-}
-
-void TestRunner::restoreConsole()
-{
-#ifdef _WIN32
-	FlushConsoleInputBuffer(hstdin);
-	SetConsoleTextAttribute(hstdout,csbi.wAttributes);
-#endif
 }
 
 std::vector<fs::path> TestRunner::getTestsList(const fs::path& dir)
 {
 	std::vector<fs::path> tests;
 
-	std::vector<std::string> dirs = listSubfolders(dir);
-	for (std::string& dirName: dirs)
+	for(auto &entry : fs::directory_iterator(dir))
 	{
-		fs::path testDir = dir / dirName;
-		fs::path fileName = testDir / (dirName + ".asm");
+		if (!entry.is_directory())
+			continue;
+
+		const auto &path = entry.path();
+		fs::path fileName = path / (path.filename().u8string() + ".asm");
 
 		if (fs::exists(fileName))
 		{
-			tests.push_back(testDir);
-		} else {
-			std::vector<fs::path> subTests = getTestsList(testDir);
-			tests.insert(tests.end(),subTests.begin(),subTests.end());
+			tests.push_back(path);
+		}
+		else
+		{
+			for (auto &&test : getTestsList(path))
+			{
+				tests.emplace_back(std::move(test));
+			}
 		}
 	}
 
 	return tests;
-}
-
-std::vector<std::string> splitString(const std::string& str, const char delim, bool skipEmpty)
-{
-	std::vector<std::string> result;
-	std::stringstream stream(str);
-	std::string arg;
-	while (std::getline(stream,arg,delim))
-	{
-		if (arg.empty() && skipEmpty) continue;
-		result.push_back(arg);
-	}
-
-	return result;
 }
 
 bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, std::string& errorString)
@@ -269,8 +184,6 @@ bool TestRunner::runTests(const fs::path& dir, const std::string& executableName
 		return true;
 	}
 
-	initConsole();
-
 	unsigned int successCount = 0;
 	for (size_t i = 0; i < tests.size(); i++)
 	{
@@ -296,8 +209,7 @@ bool TestRunner::runTests(const fs::path& dir, const std::string& executableName
 	
 	changeConsoleColor(ConsoleColors::White);
 	Logger::printLine("\n%d out of %d tests passed.",successCount,tests.size());
-	
-	restoreConsole();
+
 	return successCount == tests.size();
 }
 

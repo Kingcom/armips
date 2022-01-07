@@ -4,6 +4,10 @@
 
 #include <clocale>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 namespace
 {
 	int run(const std::vector<std::string> &arguments)
@@ -23,6 +27,14 @@ int wmain(int argc, wchar_t* argv[])
 {
 	std::setlocale(LC_CTYPE, "");
 
+	// enable ANSI escape code processing
+	HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD consoleMode = 0;
+	GetConsoleMode(stdoutHandle , &consoleMode);
+	consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(stdoutHandle, consoleMode);
+
+	// process parameters
 	std::vector<std::string> arguments;
 	for (int i = 0; i < argc; ++i)
 	{
