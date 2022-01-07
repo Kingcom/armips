@@ -7,10 +7,6 @@
 
 #include <iostream>
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
 std::vector<Logger::QueueEntry> Logger::queue;
 std::vector<std::string> Logger::errors;
 bool Logger::error = false;
@@ -80,11 +76,6 @@ void Logger::printLine(std::string_view text)
 		return;
 
 	std::cout << text << std::endl;
-	
-#if defined(_MSC_VER) && defined(_DEBUG)
-	OutputDebugStringA(text.data());
-	OutputDebugStringA("\n");
-#endif
 }
 
 void Logger::print(std::string_view text)
@@ -93,10 +84,6 @@ void Logger::print(std::string_view text)
 		return;
 
 	std::cout << text;
-	
-#if defined(_MSC_VER) && defined(_DEBUG)
-	OutputDebugStringA(text.data());
-#endif
 }
 
 void Logger::printError(ErrorType type, const std::string_view text)
