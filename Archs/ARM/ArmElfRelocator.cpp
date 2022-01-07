@@ -92,8 +92,8 @@ bool ArmElfRelocator::relocateOpcode(int type, const RelocationData& data, std::
 			opcode = first | (second << 16);
 		}
 		break;
-	case R_ARM_CALL:		// ((S + A) | T) – P
-	case R_ARM_JUMP24:		// ((S + A) | T) – P
+	case R_ARM_CALL:		// ((S + A) | T) - P
+	case R_ARM_JUMP24:		// ((S + A) | T) - P
 		{
 			int condField = (opcode >> 28) & 0xF;
 			int opField = (opcode & 0xFFFFFF) << 2;
