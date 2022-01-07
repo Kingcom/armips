@@ -3,6 +3,7 @@
 #include "Util/FileSystem.h"
 
 #include <list>
+#include <optional>
 #include <vector>
 
 #include <tinyformat.h>
@@ -15,7 +16,7 @@ public:
 	
 	TextFile();
 	~TextFile();
-	void openMemory(const std::wstring& content);
+	void openMemory(const std::string& content);
 	bool open(const fs::path& fileName, Mode mode, Encoding defaultEncoding = GUESS);
 	bool open(Mode mode, Encoding defaultEncoding = GUESS);
 	bool isOpen() { return fromMemory || stream.is_open(); };
@@ -30,30 +31,28 @@ public:
 	void setFileName(const fs::path& name) { fileName = name; };
 	const fs::path& getFileName() { return fileName; };
 
-	wchar_t readCharacter();
-	std::wstring readLine();
-	std::vector<std::wstring> readAll();
-	void writeCharacter(wchar_t character);
-	void write(const wchar_t* line);
-	void write(const std::wstring& line);
+	std::string readLine();
+	std::vector<std::string> readAll();
 	void write(const char* value);
 	void write(const std::string& value);
-	void writeLine(const wchar_t* line);
-	void writeLine(const std::wstring& line);
 	void writeLine(const char* line);
 	void writeLine(const std::string& line);
-	void writeLines(std::vector<std::wstring>& list);
+	void writeLines(std::vector<std::string>& list);
 	
 	template <typename... Args>
-	void writeFormat(const wchar_t* text, const Args&... args)
+	void writeFormat(const char* text, const Args&... args)
 	{
-		std::wstring message = tfm::format(text,args...);
+		std::string message = tfm::format(text,args...);
 		write(message);
 	}
 
 	bool hasError() { return errorText.size() != 0 && !errorRetrieved; };
-	const std::wstring& getErrorText() { errorRetrieved = true; return errorText; };
+	const std::string& getErrorText() { errorRetrieved = true; return errorText; };
 private:
+	char32_t readCharacter();
+
+	std::string readLineUtf8();
+	std::string readLineSJIS();
 	long tell();
 	void seek(long pos);
 
@@ -64,10 +63,10 @@ private:
 	bool recursion;
 	bool guessedEncoding;
 	long size_;
-	std::wstring errorText;
+	std::string errorText;
 	bool errorRetrieved;
 	bool fromMemory;
-	std::wstring content;
+	std::string content;
 	size_t contentPos;
 	int lineCount;
 
@@ -76,12 +75,16 @@ private:
 
 	inline unsigned char bufGetChar()
 	{
+		if (fromMemory)
+			return content[contentPos++];
+
 		if (buf.size() <= bufPos)
 		{
 			bufFillRead();
 			if (buf.size() == 0)
 				return 0;
 		}
+		++contentPos;
 		return buf[bufPos++];
 	}
 	inline unsigned short bufGet16LE()
@@ -104,5 +107,5 @@ private:
 	void bufDrainWrite();
 };
 
-wchar_t sjisToUnicode(unsigned short);
-TextFile::Encoding getEncodingFromString(const std::wstring& str);
+std::optional<char16_t> sjisToUnicode(unsigned short);
+TextFile::Encoding getEncodingFromString(const std::string& str);

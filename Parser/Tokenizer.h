@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Core/Types.h"
+
+#include <cassert>
 #include <list>
 #include <string>
+#include <variant>
 #include <vector>
 
 class TextFile;
@@ -56,71 +60,52 @@ struct Token
 {
 	friend class Tokenizer;
 
-	Token()
-	{
-	}
-
-	void setOriginalText(const std::wstring& t)
-	{
-		setOriginalText(t, 0, t.length());
-	}
-
-	void setOriginalText(const std::wstring& t, const size_t pos, const size_t len)
-	{
-		originalText = t.substr(pos, len);
-	}
-
-	std::wstring getOriginalText() const
+	const std::string &getOriginalText() const
 	{
 		return originalText;
 	}
 
-	void setStringValue(const std::wstring& t)
+	template<typename T>
+	void setValue(T value, std::string originalText)
 	{
-		setStringValue(t, 0, t.length());
+		this->value = std::move(value);
+		this->originalText = std::move(originalText);
 	}
 
-	void setStringValue(const std::wstring& t, const size_t pos, const size_t len)
+	const Identifier &identifierValue() const
 	{
-		stringValue = t.substr(pos, len);
+		assert(std::holds_alternative<Identifier>(value));
+		return std::get<Identifier>(value);
 	}
 
-	void setStringAndOriginalValue(const std::wstring& t)
+	const StringLiteral &stringValue() const
 	{
-		setStringAndOriginalValue(t, 0, t.length());
+		assert(std::holds_alternative<StringLiteral>(value));
+		return std::get<StringLiteral>(value);
 	}
 
-	void setStringAndOriginalValue(const std::wstring& t, const size_t pos, const size_t len)
+	int64_t intValue() const
 	{
-		setStringValue(t, pos, len);
-		originalText = stringValue;
+		assert(std::holds_alternative<int64_t>(value));
+		return std::get<int64_t>(value);
 	}
 
-	std::wstring getStringValue() const
+	double floatValue() const
 	{
-		return stringValue;
+		assert(std::holds_alternative<double>(value));
+		return std::get<double>(value);
 	}
 
-	bool stringValueStartsWith(wchar_t c) const
-	{
-		return stringValue[0] == c;
-	}
-
-	TokenType type;
-	size_t line;
-	size_t column;
-
-	union
-	{
-		int64_t intValue;
-		double floatValue;
-	};
+	size_t line = 0;
+	size_t column = 0;
+	TokenType type = TokenType::Invalid;
 
 protected:
-	std::wstring originalText;
-	std::wstring stringValue;
-
 	bool checked = false;
+
+	using ValueType = std::variant<std::monostate, int64_t, double, StringLiteral, Identifier>;
+	ValueType value;
+	std::string originalText;
 };
 
 typedef std::list<Token> TokenList;
@@ -152,11 +137,11 @@ public:
 	void setPosition(TokenizerPosition pos) { position = pos; }
 	void skipLookahead();
 	std::vector<Token> getTokens(TokenizerPosition start, TokenizerPosition end) const;
-	void registerReplacement(const std::wstring& identifier, std::vector<Token>& tokens);
-	void registerReplacement(const std::wstring& identifier, const std::wstring& newValue);
-	void registerReplacementString(const std::wstring& identifier, const std::wstring& newValue);
-	void registerReplacementInteger(const std::wstring& identifier, int64_t newValue);
-	void registerReplacementFloat(const std::wstring& identifier, double newValue);
+	void registerReplacement(const Identifier& identifier, std::vector<Token>& tokens);
+	void registerReplacement(const Identifier& identifier, const std::string& newValue);
+	void registerReplacementString(const Identifier& identifier, const StringLiteral& newValue);
+	void registerReplacementInteger(const Identifier& identifier, int64_t newValue);
+	void registerReplacementFloat(const Identifier& identifier, double newValue);
 	static size_t addEquValue(const std::vector<Token>& tokens);
 	static void clearEquValues() { equValues.clear(); }
 	void resetLookaheadCheckMarks();
@@ -172,7 +157,7 @@ private:
 
 	struct Replacement
 	{
-		std::wstring identifier;
+		Identifier identifier;
 		std::vector<Token> value;
 	};
 
@@ -193,8 +178,8 @@ protected:
 	void createToken(TokenType type, size_t length);
 	void createToken(TokenType type, size_t length, int64_t value);
 	void createToken(TokenType type, size_t length, double value);
-	void createToken(TokenType type, size_t length, const std::wstring& value);
-	void createToken(TokenType type, size_t length, const std::wstring& value, size_t valuePos, size_t valueLength);
+	void createToken(TokenType type, size_t length, const std::string& value);
+	void createToken(TokenType type, size_t length, const std::string& value, size_t valuePos, size_t valueLength);
 	void createTokenCurrentString(TokenType type, size_t length);
 
 	bool convertInteger(size_t start, size_t end, int64_t& result);
@@ -202,7 +187,7 @@ protected:
 	bool parseOperator();
 
 	TextFile* input;
-	std::wstring currentLine;
+	std::string currentLine;
 	size_t lineNumber;
 	size_t linePos;
 	

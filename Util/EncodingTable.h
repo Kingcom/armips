@@ -10,14 +10,13 @@ class Trie
 {
 public:
 	Trie();
-	void insert(const wchar_t* text, size_t value);
-	void insert(wchar_t character, size_t value);
-	bool findLongestPrefix(const wchar_t* text, size_t& result);
+	void insert(const char* text, size_t value);
+	bool findLongestPrefix(const char* text, size_t& result);
 private:
 	struct LookupEntry
 	{
 		size_t node;
-		wchar_t input;
+		char input;
 
 		bool operator<(const LookupEntry& other) const
 		{
@@ -46,10 +45,9 @@ public:
 	void clear();
 	bool load(const fs::path& fileName, TextFile::Encoding encoding = TextFile::GUESS);
 	bool isLoaded() { return entries.size() != 0; };
-	void addEntry(unsigned char* hex, size_t hexLength, const std::wstring& value);
-	void addEntry(unsigned char* hex, size_t hexLength, wchar_t value);
+	void addEntry(unsigned char* hex, size_t hexLength, const std::string& value);
 	void setTerminationEntry(unsigned char* hex, size_t hexLength);
-	ByteArray encodeString(const std::wstring& str, bool writeTermination = true);
+	ByteArray encodeString(const std::string& str, bool writeTermination = true);
 	ByteArray encodeTermination();
 private:
 	struct TableEntry

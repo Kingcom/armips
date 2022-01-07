@@ -17,7 +17,7 @@ ExpressionFunctionHandler::ExpressionFunctionHandler()
 {
 }
 
-std::optional<ExpressionFunctionHandle> ExpressionFunctionHandler::find(const std::wstring &name) const
+std::optional<ExpressionFunctionHandle> ExpressionFunctionHandler::find(const Identifier &name) const
 {
 	auto it = entries.find(name);
 	return it != entries.end() ? std::make_optional(ExpressionFunctionHandle(it->second)) : std::nullopt;
@@ -45,7 +45,7 @@ void ExpressionFunctionHandler::updateArchitecture()
 	registeringArchitecture = false;
 }
 
-bool ExpressionFunctionHandler::registerEntry(const std::wstring &name, Entry entry)
+bool ExpressionFunctionHandler::registerEntry(const Identifier &name, Entry entry)
 {
 	bool result = entries.emplace(name, std::move(entry)).second;
 
@@ -55,7 +55,7 @@ bool ExpressionFunctionHandler::registerEntry(const std::wstring &name, Entry en
 	return result;
 }
 
-bool ExpressionFunctionHandler::addFunction(const std::wstring &name, ExpressionFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety)
+bool ExpressionFunctionHandler::addFunction(const Identifier &name, ExpressionFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety)
 {
 	auto executor = [name, functor](const std::vector<std::unique_ptr<ExpressionInternal>> &parameters) -> ExpressionValue
 	{
@@ -68,7 +68,7 @@ bool ExpressionFunctionHandler::addFunction(const std::wstring &name, Expression
 			ExpressionValue result = parameters[i]->evaluate();
 			if (!result.isValid())
 			{
-				Logger::queueError(Logger::Error, L"%s: Invalid parameter %d", name, i+1);
+				Logger::queueError(Logger::Error, "%s: Invalid parameter %d", name, i+1);
 				return result;
 			}
 
@@ -82,7 +82,7 @@ bool ExpressionFunctionHandler::addFunction(const std::wstring &name, Expression
 	return registerEntry(name, Entry{std::move(executor), minParams, maxParams, safety});
 };
 
-bool ExpressionFunctionHandler::addLabelFunction(const std::wstring &name, ExpressionLabelFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety)
+bool ExpressionFunctionHandler::addLabelFunction(const Identifier &name, ExpressionLabelFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety)
 {
 	auto executor = [name, functor](const std::vector<std::unique_ptr<ExpressionInternal>> &parameters) -> ExpressionValue
 	{
@@ -95,11 +95,11 @@ bool ExpressionFunctionHandler::addLabelFunction(const std::wstring &name, Expre
 			ExpressionInternal *exp = parameters[i].get();
 			if (!exp || !exp->isIdentifier())
 			{
-				Logger::queueError(Logger::Error, L"%s: Invalid parameter %d, expecting identifier", name, i+1);
+				Logger::queueError(Logger::Error, "%s: Invalid parameter %d, expecting identifier", name, i+1);
 				return {};
 			}
 
-			const std::wstring& name = exp->getStringValue();
+			const Identifier& name = exp->getIdentifier();
 			std::shared_ptr<Label> label = Global.symbolTable.getLabel(name, exp->getFileNum(), exp->getSection());
 			params.push_back(label);
 		}
@@ -111,7 +111,7 @@ bool ExpressionFunctionHandler::addLabelFunction(const std::wstring &name, Expre
 	return registerEntry(name, Entry{std::move(executor), minParams, maxParams, safety});
 };
 
-bool ExpressionFunctionHandler::addUserFunction(const std::wstring &name, const std::vector<std::wstring> &parameters, const std::vector<Token> &content)
+bool ExpressionFunctionHandler::addUserFunction(const Identifier &name, const std::vector<Identifier> &parameters, const std::vector<Token> &content)
 {
 	// Executor: Evaluate parameters and instantiate function content with parameter substitutions
 	auto executor = [functionName=name, parameterNames=parameters, content](const std::vector<std::unique_ptr<ExpressionInternal>> &parameters) -> ExpressionValue
@@ -125,7 +125,7 @@ bool ExpressionFunctionHandler::addUserFunction(const std::wstring &name, const 
 			ExpressionValue result = parameters[i]->evaluate();
 			if (!result.isValid())
 			{
-				Logger::queueError(Logger::Error, L"%s: Invalid parameter %d", functionName, i+1);
+				Logger::queueError(Logger::Error, "%s: Invalid parameter %d", functionName, i+1);
 				return result;
 			}
 
@@ -147,7 +147,7 @@ bool ExpressionFunctionHandler::addUserFunction(const std::wstring &name, const 
 				tok.registerReplacementFloat(paramName, paramValue.floatValue);
 				break;
 			case ExpressionValueType::String:
-				tok.registerReplacementString(paramName, paramValue.strValue);
+				tok.registerReplacementString(paramName, paramValue.strValue.string());
 				break;
 			case ExpressionValueType::Integer:
 				tok.registerReplacementInteger(paramName, paramValue.intValue);
@@ -160,13 +160,13 @@ bool ExpressionFunctionHandler::addUserFunction(const std::wstring &name, const 
 		Expression result = parseExpression(tok, false);
 		if (!result.isLoaded())
 		{
-			Logger::queueError(Logger::Error,L"%s: Failed to parse user function expression", functionName);
+			Logger::queueError(Logger::Error, "%s: Failed to parse user function expression", functionName);
 			return {};
 		}
 
 		if (!tok.atEnd())
 		{
-			Logger::queueError(Logger::Error,L"%s: Unconsumed tokens after parsing user function expresion", functionName);
+			Logger::queueError(Logger::Error, "%s: Unconsumed tokens after parsing user function expresion", functionName);
 			return {};
 		}
 

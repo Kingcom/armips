@@ -17,8 +17,8 @@ public:
 
 	const fs::path& path(int fileIndex) const;
 	const fs::path& relative_path(int fileIndex) const;
-	const std::wstring& wstring(int fileIndex) const;
-	const std::wstring& relativeWstring(int fileIndex) const;
+	const std::string& string(int fileIndex) const;
+	const std::string& relativeString(int fileIndex) const;
 
 	size_t size() const;
 	void clear();
@@ -31,14 +31,14 @@ private:
 
 		const fs::path& path() const;
 		const fs::path& relativePath() const;
-		const std::wstring& wstring() const;
-		const std::wstring& relativeWstring() const;
+		const std::string& string() const;
+		const std::string& relativeString() const;
 
 	private:
 		fs::path _path;
 		fs::path _relativePath;
-		std::wstring _string; // preconverted for performance
-		std::wstring _relativeString; // preconverted for performance
+		std::string _string; // preconverted for performance
+		std::string _relativeString; // preconverted for performance
 	};
 
 	std::vector<Entry> _entries;
@@ -70,7 +70,7 @@ extern FileManager* g_fileManager;
 
 fs::path getFullPathName(const fs::path& path);
 
-bool checkLabelDefined(const std::wstring& labelName, int section);
-bool checkValidLabelName(const std::wstring& labelName);
+bool checkLabelDefined(const Identifier& labelName, int section);
+bool checkValidLabelName(const Identifier& labelName);
 
 bool isPowerOfTwo(int64_t n);

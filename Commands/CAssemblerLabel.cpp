@@ -7,7 +7,7 @@
 #include "Core/SymbolData.h"
 #include "Util/Util.h"
 
-CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName)
+CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& originalName)
 {
 	this->defined = false;
 	this->label = nullptr;
@@ -18,7 +18,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 	label = Global.symbolTable.getLabel(name, FileNum, getSection());
 	if (label == nullptr)
 	{
-		Logger::printError(Logger::Error, L"Invalid label name \"%s\"", name);
+		Logger::printError(Logger::Error, "Invalid label name \"%s\"", name);
 		return;
 	}
 
@@ -34,7 +34,7 @@ CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& o
 	}
 }
 
-CAssemblerLabel::CAssemblerLabel(const std::wstring& name, const std::wstring& originalName, Expression& value)
+CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& originalName, Expression& value)
 	: CAssemblerLabel(name,originalName)
 {
 	labelValue = value;
@@ -47,7 +47,7 @@ bool CAssemblerLabel::Validate(const ValidateState &state)
 	{
 		if (label->isDefined())
 		{
-			Logger::queueError(Logger::Error, L"Label \"%s\" already defined", label->getName());
+			Logger::queueError(Logger::Error, "Label \"%s\" already defined", label->getName());
 			return false;
 		}
 		
@@ -65,7 +65,7 @@ bool CAssemblerLabel::Validate(const ValidateState &state)
 		// label value is given by expression
 		if (!labelValue.evaluateInteger(virtualValue))
 		{
-			Logger::printError(Logger::Error, L"Invalid expression");
+			Logger::printError(Logger::Error, "Invalid expression");
 			return result;
 		}
 	} else {
@@ -98,7 +98,7 @@ void CAssemblerLabel::Encode() const
 void CAssemblerLabel::writeTempData(TempData& tempData) const
 {
 	if (!Global.symbolTable.isGeneratedLabel(label->getName()))
-		tempData.writeLine(label->getValue(),tfm::format(L"%s:",label->getName()));
+		tempData.writeLine(label->getValue(),tfm::format("%s:",label->getName()));
 }
 
 void CAssemblerLabel::writeSymData(SymbolData& symData) const
@@ -107,13 +107,13 @@ void CAssemblerLabel::writeSymData(SymbolData& symData) const
 	if (label->getValue() == -1 || Global.symbolTable.isGeneratedLabel(label->getName()))
 		return;
 
-	symData.addLabel(label->getValue(),label->getOriginalName());
+	symData.addLabel(label->getValue(),label->getOriginalName().string());
 }
 
 
 
 
-CDirectiveFunction::CDirectiveFunction(const std::wstring& name, const std::wstring& originalName)
+CDirectiveFunction::CDirectiveFunction(const Identifier& name, const Identifier& originalName)
 {
 	this->label = std::make_unique<CAssemblerLabel>(name,originalName);
 	this->content = nullptr;
@@ -129,7 +129,7 @@ bool CDirectiveFunction::Validate(const ValidateState &state)
 
 	ValidateState contentValidation = state;
 	contentValidation.noFileChange = true;
-	contentValidation.noFileChangeDirective = L"function";
+	contentValidation.noFileChangeDirective = "function";
 	content->applyFileInfo();
 	if (content->Validate(contentValidation))
 		result = true;

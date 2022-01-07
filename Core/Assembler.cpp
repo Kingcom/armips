@@ -15,13 +15,6 @@
 
 #include <thread>
 
-void AddFileName(const std::wstring& FileName)
-{
-	Global.FileInfo.FileNum = (int) Global.fileList.size();
-	Global.fileList.add(FileName);
-	Global.FileInfo.LineNumber = 0;
-}
-
 bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symData, TempData& tempData)
 {
 	bool Revalidate;
@@ -37,7 +30,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 		if (validation.passes >= 100)
 		{
-			Logger::queueError(Logger::Error,L"Stuck in infinite validation loop");
+			Logger::queueError(Logger::Error, "Stuck in infinite validation loop");
 			break;
 		}
 
@@ -114,7 +107,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	if (g_fileManager->hasOpenFile())
 	{
 		if (!Global.memoryMode)
-			Logger::printError(Logger::Warning,L"File not closed");
+			Logger::printError(Logger::Warning, "File not closed");
 		g_fileManager->closeFile();
 	}
 
@@ -123,19 +116,19 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 static void printStats(const AllocationStats &stats)
 {
-	Logger::printLine(L"Total areas and regions: %lld / %lld", stats.totalUsage, stats.totalSize);
-	Logger::printLine(L"Total regions: %lld / %lld", stats.sharedUsage, stats.sharedSize);
-	Logger::printLine(L"Largest area or region: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
+	Logger::printLine("Total areas and regions: %lld / %lld", stats.totalUsage, stats.totalSize);
+	Logger::printLine("Total regions: %lld / %lld", stats.sharedUsage, stats.sharedSize);
+	Logger::printLine("Largest area or region: 0x%08llX, %lld / %lld", stats.largestPosition, stats.largestUsage, stats.largestSize);
 
 	int64_t startFreePosition = stats.largestFreePosition + stats.largestFreeUsage;
-	Logger::printLine(L"Most free area or region: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
+	Logger::printLine("Most free area or region: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.largestFreePosition, stats.largestFreeUsage, stats.largestFreeSize, startFreePosition);
 	int64_t startSharedFreePosition = stats.sharedFreePosition + stats.sharedFreeUsage;
-	Logger::printLine(L"Most free region: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.sharedFreePosition, stats.sharedFreeUsage, stats.sharedFreeSize, startSharedFreePosition);
+	Logger::printLine("Most free region: 0x%08llX, %lld / %lld (free at 0x%08llX)", stats.sharedFreePosition, stats.sharedFreeUsage, stats.sharedFreeSize, startSharedFreePosition);
 
 	if (stats.totalPoolSize != 0)
 	{
-		Logger::printLine(L"Total pool size: %lld", stats.totalPoolSize);
-		Logger::printLine(L"Largest pool: 0x%08llX, %lld", stats.largestPoolPosition, stats.largestPoolSize);
+		Logger::printLine("Total pool size: %lld", stats.totalPoolSize);
+		Logger::printLine("Largest pool: 0x%08llX, %lld", stats.largestPoolPosition, stats.largestPoolSize);
 	}
 }
 
@@ -188,7 +181,7 @@ bool runArmips(ArmipsArguments& settings)
 	Global.symbolTable.addLabels(settings.labels);
 	for (const LabelDefinition& label : settings.labels)
 	{
-		symData.addLabel(label.value, label.originalName);
+		symData.addLabel(label.value, label.name.string());
 	}
 
 	if (Logger::hasError())
@@ -202,7 +195,7 @@ bool runArmips(ArmipsArguments& settings)
 		Global.memoryMode = false;		
 		if (!input.open(settings.inputFileName,TextFile::Read))
 		{
-			Logger::printError(Logger::Error,L"Could not open file");
+			Logger::printError(Logger::Error, "Could not open file");
 			return false;
 		}
 		break;
@@ -223,14 +216,14 @@ bool runArmips(ArmipsArguments& settings)
 	if (g_fileManager->hasOpenFile())
 	{
 		if (!Global.memoryMode)
-			Logger::printError(Logger::Warning,L"File not closed");
+			Logger::printError(Logger::Warning, "File not closed");
 		g_fileManager->closeFile();
 	}
 
 	// return errors
 	if (settings.errorsResult != nullptr)
 	{
-		std::vector<std::wstring> errors = Logger::getErrors();
+		std::vector<std::string> errors = Logger::getErrors();
 		for (size_t i = 0; i < errors.size(); i++)
 			settings.errorsResult->push_back(errors[i]);
 	}

@@ -9,7 +9,7 @@ enum class EncodingMode { Invalid, U8, U16, U32, U64, Ascii, Float, Double, Sjis
 class TableCommand: public CAssemblerCommand
 {
 public:
-	TableCommand(const std::wstring& fileName, TextFile::Encoding encoding);
+	TableCommand(const fs::path& fileName, TextFile::Encoding encoding);
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override { };
 	void writeTempData(TempData& tempData) const override { };

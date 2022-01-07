@@ -2,6 +2,7 @@
 
 #include "Archs/ARM/Pool.h"
 #include "Archs/Architecture.h"
+#include "Core/Types.h"
 
 #define ARM_SHIFT_LSL		0x00
 #define ARM_SHIFT_LSR		0x01
@@ -24,7 +25,7 @@ typedef struct {
 
 struct ArmRegisterValue
 {
-	std::wstring name;
+	Identifier name{};
 	int num;
 };
 

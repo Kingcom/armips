@@ -9,13 +9,14 @@
 
 class ExpressionFunctionHandle;
 class ExpressionInternal;
+class Identifier;
 class Label;
 
 struct ExpressionValue;
 struct Token;
 
-using ExpressionFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<ExpressionValue>&);
-using ExpressionLabelFunction = ExpressionValue (*)(const std::wstring& funcName, const std::vector<std::shared_ptr<Label>> &);
+using ExpressionFunction = ExpressionValue (*)(const Identifier& funcName, const std::vector<ExpressionValue>&);
+using ExpressionLabelFunction = ExpressionValue (*)(const Identifier& funcName, const std::vector<std::shared_ptr<Label>> &);
 
 enum class ExpFuncSafety
 {
@@ -34,14 +35,14 @@ class ExpressionFunctionHandler
 public:
 	static ExpressionFunctionHandler &instance();
 
-	std::optional<ExpressionFunctionHandle> find(const std::wstring &name) const;
+	std::optional<ExpressionFunctionHandle> find(const Identifier &name) const;
 
 	void reset();
 	void updateArchitecture();
 
-	bool addFunction(const std::wstring &name, ExpressionFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety);
-	bool addLabelFunction(const std::wstring &name, ExpressionLabelFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety);
-	bool addUserFunction(const std::wstring &name, const std::vector<std::wstring> &parameters, const std::vector<Token> &content);
+	bool addFunction(const Identifier &name, ExpressionFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety);
+	bool addLabelFunction(const Identifier &name, ExpressionLabelFunction functor, size_t minParams, size_t maxParams, ExpFuncSafety safety);
+	bool addUserFunction(const Identifier &name, const std::vector<Identifier> &parameters, const std::vector<Token> &content);
 private:
 	struct Entry
 	{
@@ -52,10 +53,10 @@ private:
 	};
 
 	ExpressionFunctionHandler();
-	bool registerEntry(const std::wstring &name, Entry entry);
+	bool registerEntry(const Identifier &name, Entry entry);
 
-	std::map<std::wstring,Entry> entries;
-	std::vector<std::wstring> architectureFunctions;
+	std::map<Identifier,Entry> entries;
+	std::vector<Identifier> architectureFunctions;
 	bool registeringArchitecture = false;
 };
 

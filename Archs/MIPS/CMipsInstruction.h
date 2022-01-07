@@ -3,6 +3,7 @@
 #include "Archs/MIPS/MipsOpcodes.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Expression.h"
+#include "Core/Types.h"
 
 enum class MipsRegisterType
 {
@@ -44,7 +45,7 @@ enum class MipsImmediateType
 struct MipsRegisterValue
 {
 	MipsRegisterType type;
-	std::wstring name;
+	Identifier name{};
 	int num;
 };
 

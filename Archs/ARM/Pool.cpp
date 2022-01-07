@@ -28,9 +28,9 @@ void ArmStateCommand::writeSymData(SymbolData& symData) const
 
 	if (armstate)
 	{
-		symData.addLabel(RamPos,L".arm");
+		symData.addLabel(RamPos, ".arm");
 	} else {
-		symData.addLabel(RamPos,L".thumb");
+		symData.addLabel(RamPos, ".thumb");
 	}
 }
 
@@ -95,7 +95,7 @@ void ArmPoolCommand::writeTempData(TempData& tempData) const
 	for (size_t i = 0; i < values.size(); i++)
 	{
 		int32_t value = values[i];
-		tempData.writeLine(position+i*4,tfm::format(L".word 0x%08X",value));
+		tempData.writeLine(position+i*4,tfm::format(".word 0x%08X",value));
 	}
 }
 
@@ -103,7 +103,7 @@ void ArmPoolCommand::writeSymData(SymbolData& symData) const
 {
 	if (values.size() != 0)
 	{
-		symData.addLabel(position,L".pool");
+		symData.addLabel(position, ".pool");
 		symData.addData(position,values.size()*4,SymbolData::Data32);
 	}
 }

@@ -8,7 +8,30 @@
 
 #include <tinyformat.h>
 
-const wchar_t SjisToUnicodeTable1[] =
+namespace
+{
+	void encodeUtf8(std::string &dest, char32_t character)
+	{
+		if (character < 0x80)
+		{
+			dest += character & 0x7F;
+		}
+		else if (character < 0x800)
+		{
+			dest += 0xC0 | ((character >> 6) & 0x1F);
+			dest += (0x80 | (character & 0x3F));
+		}
+		else
+		{
+			dest += 0xE0 | ((character >> 12) & 0xF);
+			dest += 0x80 | ((character >> 6) & 0x3F);
+			dest += 0x80 | (character & 0x3F);
+		}
+	}
+}
+
+
+const char16_t SjisToUnicodeTable1[] =
 {
 	// 0X0080 to 0X00FF
 	0x0080, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -21,7 +44,7 @@ const wchar_t SjisToUnicodeTable1[] =
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-const wchar_t SjisToUnicodeTable2[] =
+const char16_t SjisToUnicodeTable2[] =
 {
 	// 0X8100 to 0X81FF
 	0x3000, 0x3001, 0x3002, 0xFF0C, 0xFF0E, 0x30FB, 0xFF1A, 0xFF1B, 0xFF1F, 0xFF01, 0x309B, 0x309C, 0x00B4, 0xFF40, 0x00A8, 0xFF3E,
@@ -77,7 +100,7 @@ const wchar_t SjisToUnicodeTable2[] =
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-const wchar_t SjisToUnicodeTable3[] =
+const char16_t SjisToUnicodeTable3[] =
 {
 	// 0X8700 to 0X87FF
 	0x2460, 0x2461, 0x2462, 0x2463, 0x2464, 0x2465, 0x2466, 0x2467, 0x2468, 0x2469, 0x246A, 0x246B, 0x246C, 0x246D, 0x246E, 0x246F,
@@ -406,7 +429,7 @@ const wchar_t SjisToUnicodeTable3[] =
 	0x6E9F, 0x6F41, 0x6F11, 0x704C, 0x6EEC, 0x6EF8, 0x6EFE, 0x6F3F, 0x6EF2, 0x6F31, 0x6EEF, 0x6F32, 0x6ECC, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-const wchar_t SjisToUnicodeTable4[] =
+const char16_t SjisToUnicodeTable4[] =
 {
 	// 0XE000 to 0XE0FF
 	0x6F3E, 0x6F13, 0x6EF7, 0x6F86, 0x6F7A, 0x6F78, 0x6F81, 0x6F80, 0x6F6F, 0x6F5B, 0x6FF3, 0x6F6D, 0x6F82, 0x6F7C, 0x6F58, 0x6F8E,
@@ -553,7 +576,7 @@ const wchar_t SjisToUnicodeTable4[] =
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-const wchar_t SjisToUnicodeTable5[] =
+const char16_t SjisToUnicodeTable5[] =
 {
 	// 0XED00 to 0XEDFF
 	0x7E8A, 0x891C, 0x9348, 0x9288, 0x84DC, 0x4FC9, 0x70BB, 0x6631, 0x68C8, 0x92F9, 0x66FB, 0x5F45, 0x4E28, 0x4EE1, 0x4EFC, 0x4F00,
@@ -583,7 +606,7 @@ const wchar_t SjisToUnicodeTable5[] =
 	0x2171, 0x2172, 0x2173, 0x2174, 0x2175, 0x2176, 0x2177, 0x2178, 0x2179, 0xFFE2, 0xFFE4, 0xFF07, 0xFF02, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
-wchar_t sjisToUnicode(unsigned short SjisCharacter)
+std::optional<char16_t> sjisToUnicode(unsigned short SjisCharacter)
 {
 	if (SjisCharacter < 0x80)
 	{
@@ -593,7 +616,8 @@ wchar_t sjisToUnicode(unsigned short SjisCharacter)
 		return SjisToUnicodeTable1[SjisCharacter-0x80];
 	}
 
-	if ((SjisCharacter & 0xFF) < 0x40) return 0xFFFF;
+	if ((SjisCharacter & 0xFF) < 0x40)
+		return std::nullopt;
 
 	if (SjisCharacter >= 0x8100 && SjisCharacter < 0x8500)
 	{
@@ -616,7 +640,7 @@ wchar_t sjisToUnicode(unsigned short SjisCharacter)
 		SjisCharacter -= (SjisCharacter >> 8) * 0x40;
 		return SjisToUnicodeTable5[SjisCharacter];
 	} else {
-		return 0xFFFF;
+		return std::nullopt;
 	}
 }
 
@@ -636,13 +660,13 @@ TextFile::~TextFile()
 	close();
 }
 
-void TextFile::openMemory(const std::wstring& content)
+void TextFile::openMemory(const std::string& content)
 {
 	fromMemory = true;
 	this->content = content;
 	contentPos = 0;
 	size_ = (long) content.size();
-	encoding = UTF16LE;
+	encoding = UTF8;
 	mode = Read;
 	lineCount = 0;
 }
@@ -685,7 +709,9 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 		if (encoding != ASCII)
 		{
 			encoding = UTF8;
-			writeCharacter(0xFEFF);
+			bufPut(char(0xEF));
+			bufPut(char(0xBB));
+			bufPut(char(0xBF));
 		}
 		break;
 	}
@@ -772,16 +798,15 @@ void TextFile::bufFillRead()
 	bufPos = 0;
 }
 
-wchar_t TextFile::readCharacter()
+char32_t TextFile::readCharacter()
 {
-	wchar_t value = 0;
+	char32_t value = 0;
 
 	switch (encoding)
 	{
 	case UTF8:
 		{
 			value = bufGetChar();
-			contentPos++;
 			
 			int extraBytes = 0;
 			if ((value & 0xE0) == 0xC0)
@@ -794,17 +819,15 @@ wchar_t TextFile::readCharacter()
 				value &= 0x0F;
 			} else if (value > 0x7F)
 			{
-				errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
+				errorText = tfm::format("One or more invalid UTF-8 characters in this file");
 			}
 
 			for (int i = 0; i < extraBytes; i++)
 			{
 				int b = bufGetChar();
-				contentPos++;
-
 				if ((b & 0xC0) != 0x80)
 				{
-					errorText = tfm::format(L"One or more invalid UTF-8 characters in this file");
+					errorText = tfm::format("One or more invalid UTF-8 characters in this file");
 				}
 
 				value = (value << 6) | (b & 0x3F);
@@ -812,32 +835,21 @@ wchar_t TextFile::readCharacter()
 		}
 		break;
 	case UTF16LE:
-		if (fromMemory)
-		{
-			value = content[contentPos++];
-		} else {
-			value = bufGet16LE();
-			contentPos += 2;
-		}
+		value = bufGet16LE();
 		break;
 	case UTF16BE:
 		value = bufGet16BE();
-		contentPos += 2;
 		break;
 	case SJIS:
 		{
 			unsigned short sjis = bufGetChar();
-			contentPos++;
 			if (sjis >= 0x80)
-			{
 				sjis = (sjis << 8) | bufGetChar();
-				contentPos++;
-			}
-			value = sjisToUnicode(sjis);
-			if (value == (wchar_t)-1)
-			{
-				errorText = tfm::format(L"One or more invalid Shift-JIS characters in this file");
-			}
+
+			if (auto unicode = sjisToUnicode(sjis))
+				value = unicode.value();
+			else
+				errorText = tfm::format("One or more invalid Shift-JIS characters in this file");
 		}
 		break;
 	case ASCII:
@@ -846,7 +858,7 @@ wchar_t TextFile::readCharacter()
 		break;
 
 	case GUESS:
-		errorText = tfm::format(L"Cannot read from GUESS encoding");
+		errorText = tfm::format("Cannot read from GUESS encoding");
 		break;
 	}
 
@@ -855,7 +867,7 @@ wchar_t TextFile::readCharacter()
 	{
 		recursion = true;
 		long pos = tell();
-		wchar_t nextValue = readCharacter();
+		char32_t nextValue = readCharacter();
 		recursion = false;
 
 		if (nextValue == L'\n')
@@ -866,16 +878,16 @@ wchar_t TextFile::readCharacter()
 	return value;
 }
 
-std::wstring TextFile::readLine()
+std::string TextFile::readLine()
 {
-	std::wstring result;
-	wchar_t value;
+	std::string result;
+	char32_t value;
 
 	if (isOpen())
 	{
 		while (tell() < size() && (value = readCharacter()) != L'\n')
 		{
-			result += value;
+			encodeUtf8(result, value);
 		}
 	}
 
@@ -883,9 +895,9 @@ std::wstring TextFile::readLine()
 	return result;
 }
 
-std::vector<std::wstring> TextFile::readAll()
+std::vector<std::string> TextFile::readAll()
 {
-	std::vector<std::wstring> result;
+	std::vector<std::string> result;
 	while (!atEnd())
 	{
 		result.push_back(readLine());
@@ -930,55 +942,17 @@ void TextFile::bufDrainWrite()
 	bufPos = 0;
 }
 
-void TextFile::writeCharacter(wchar_t character)
-{
-	if (mode != Write) return;
-
-	// only support utf8 for now
-	if (character < 0x80)
-	{
-#ifdef _WIN32
-		if (character == L'\n')
-		{
-			bufPut('\r');
-		}
-#endif
-		bufPut(character & 0x7F);
-	} else if (encoding != ASCII)
-	{
-		if (character < 0x800)
-		{
-			bufPut(0xC0 | ((character >> 6) & 0x1F));
-			bufPut(0x80 | (character & 0x3F));
-		} else {
-			bufPut(0xE0 | ((character >> 12) & 0xF));
-			bufPut(0x80 | ((character >> 6) & 0x3F));
-			bufPut(0x80 | (character & 0x3F));
-		}
-	}
-}
-
-void TextFile::write(const wchar_t* line)
-{
-	if (mode != Write) return;
-	while (*line != 0)
-	{
-		writeCharacter(*line);
-		line++;
-	}
-}
-
-void TextFile::write(const std::wstring& line)
-{
-	write(line.c_str());
-}
-
 void TextFile::write(const char* line)
 {
 	if (mode != Write) return;
+
 	while (*line != 0)
 	{
-		writeCharacter(*line);
+#ifdef _WIN32
+		if (*line == '\n')
+			bufPut('\r');
+#endif
+		bufPut(*line);
 		line++;
 	}
 }
@@ -988,23 +962,11 @@ void TextFile::write(const std::string& line)
 	write(line.c_str());
 }
 
-void TextFile::writeLine(const wchar_t* line)
-{
-	if (mode != Write) return;
-	write(line);
-	writeCharacter(L'\n');
-}
-
-void TextFile::writeLine(const std::wstring& line)
-{
-	writeLine(line.c_str());
-}
-
 void TextFile::writeLine(const char* line)
 {
 	if (mode != Write) return;
 	write(line);
-	writeCharacter(L'\n');
+	bufPut('\n');
 }
 
 void TextFile::writeLine(const std::string& line)
@@ -1012,7 +974,7 @@ void TextFile::writeLine(const std::string& line)
 	writeLine(line.c_str());
 }
 
-void TextFile::writeLines(std::vector<std::wstring>& list)
+void TextFile::writeLines(std::vector<std::string>& list)
 {
 	for (size_t i = 0; i < list.size(); i++)
 	{
@@ -1022,26 +984,26 @@ void TextFile::writeLines(std::vector<std::wstring>& list)
 
 struct EncodingValue
 {
-	const wchar_t* name;
+	const char* name;
 	TextFile::Encoding value;
 };
 
 const EncodingValue encodingValues[] = {
-	{ L"sjis",			TextFile::SJIS },
-	{ L"shift-jis",		TextFile::SJIS },
-	{ L"utf8",			TextFile::UTF8 },
-	{ L"utf-8",			TextFile::UTF8 },
-	{ L"utf16",			TextFile::UTF16LE },
-	{ L"utf-16",		TextFile::UTF16LE },
-	{ L"utf16-be",		TextFile::UTF16BE },
-	{ L"utf-16-be",		TextFile::UTF16BE },
-	{ L"ascii",			TextFile::ASCII },
+	{ "sjis",			TextFile::SJIS },
+	{ "shift-jis",		TextFile::SJIS },
+	{ "utf8",			TextFile::UTF8 },
+	{ "utf-8",			TextFile::UTF8 },
+	{ "utf16",			TextFile::UTF16LE },
+	{ "utf-16",		TextFile::UTF16LE },
+	{ "utf16-be",		TextFile::UTF16BE },
+	{ "utf-16-be",		TextFile::UTF16BE },
+	{ "ascii",			TextFile::ASCII },
 };
 
-TextFile::Encoding getEncodingFromString(const std::wstring& str)
+TextFile::Encoding getEncodingFromString(const std::string& str)
 {
 	auto lowerCase = str;
-	std::transform(lowerCase.begin(), lowerCase.end(), lowerCase.begin(), &::towlower);
+	std::transform(lowerCase.begin(), lowerCase.end(), lowerCase.begin(), &::tolower);
 
 	for (size_t i = 0; i < sizeof(encodingValues)/sizeof(EncodingValue); i++)
 	{

@@ -6,7 +6,7 @@ class SymbolData;
 struct ValidateState
 {
 	bool noFileChange = false;
-	const wchar_t *noFileChangeDirective = nullptr;
+	const char *noFileChangeDirective = nullptr;
 	int passes = 0;
 };
 

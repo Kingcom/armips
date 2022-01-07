@@ -19,19 +19,19 @@ class TextFile;
 
 struct DirectiveEntry;
 
-using DirectiveMap = std::unordered_multimap<std::wstring, const DirectiveEntry>;
+using DirectiveMap = std::unordered_multimap<std::string, const DirectiveEntry>;
 
 struct AssemblyTemplateArgument
 {
-	const wchar_t* variableName;
-	std::wstring value;
+	const char* variableName;
+	std::string value;
 };
 
 struct ParserMacro
 {
-	std::wstring name;
-	std::vector<std::wstring> parameters;
-	std::set<std::wstring> labels;
+	Identifier name;
+	std::vector<Identifier> parameters;
+	std::set<Identifier> labels;
 	std::vector<Token> content;
 	size_t counter;
 };
@@ -44,16 +44,16 @@ public:
 	Parser();
 	bool atEnd() { return entries.back().tokenizer->atEnd(); }
 
-	void addEquation(const Token& start, const std::wstring& name, const std::wstring& value);
+	void addEquation(const Token& start, const Identifier& name, const std::string& value);
 
 	Expression parseExpression();
 	bool parseExpressionList(std::vector<Expression>& list, int min = -1, int max = -1);
-	bool parseIdentifier(std::wstring& dest);
+	bool parseIdentifier(Identifier& dest);
 	std::unique_ptr<CAssemblerCommand> parseCommand();
-	std::unique_ptr<CAssemblerCommand> parseCommandSequence(wchar_t indicator = 0, const std::initializer_list<const wchar_t*> terminators = {});
+	std::unique_ptr<CAssemblerCommand> parseCommandSequence(char indicator = 0, const std::initializer_list<const char*> terminators = {});
 	std::unique_ptr<CAssemblerCommand> parseFile(TextFile& file, bool virtualFile = false);
-	std::unique_ptr<CAssemblerCommand> parseString(const std::wstring& text);
-	std::unique_ptr<CAssemblerCommand> parseTemplate(const std::wstring& text, const std::initializer_list<AssemblyTemplateArgument> variables = {});
+	std::unique_ptr<CAssemblerCommand> parseString(const std::string& text);
+	std::unique_ptr<CAssemblerCommand> parseTemplate(const std::string& text, const std::initializer_list<AssemblyTemplateArgument> variables = {});
 	std::unique_ptr<CAssemblerCommand> parseDirective(const DirectiveMap &directiveSet);
 	bool matchToken(TokenType type, bool optional = false);
 
@@ -68,10 +68,10 @@ public:
 	bool isInsideTrueBlock() { return conditionStack.back().inTrueBlock; }
 	bool isInsideUnknownBlock() { return conditionStack.back().inUnknownBlock; }
 
-	void printError(const Token &token, const std::wstring &text);
+	void printError(const Token &token, const std::string &text);
 
 	template <typename... Args>
-	void printError(const Token& token, const wchar_t* text, const Args&... args)
+	void printError(const Token& token, const char* text, const Args&... args)
 	{
 		printError(token, tfm::format(text,args...));
 	}
@@ -85,7 +85,7 @@ protected:
 	std::unique_ptr<CAssemblerCommand> parse(Tokenizer* tokenizer, bool virtualFile, const fs::path& name = {});
 	std::unique_ptr<CAssemblerCommand> parseLabel();
 	bool checkEquLabel();
-	bool parseFunctionDeclaration(std::wstring& name, std::vector<std::wstring>& parameters);
+	bool parseFunctionDeclaration(Identifier& name, std::vector<Identifier>& parameters);
 	bool checkExpFuncDefinition();
 	bool checkMacroDefinition();
 
@@ -101,8 +101,8 @@ protected:
 	};
 
 	std::vector<FileEntry> entries;
-	std::map<std::wstring,ParserMacro> macros;
-	std::set<std::wstring> macroLabels;
+	std::map<Identifier, ParserMacro> macros;
+	std::set<Identifier> macroLabels;
 	bool initializingMacro;
 	bool error;
 	size_t errorLine;
@@ -122,7 +122,7 @@ protected:
 
 struct TokenSequenceValue
 {
-	TokenSequenceValue(const wchar_t* text)
+	TokenSequenceValue(const char* text)
 	{
 		type = TokenType::Identifier;
 		textValue = text;
@@ -144,7 +144,7 @@ struct TokenSequenceValue
 	TokenType type;
 	union
 	{
-		const wchar_t* textValue;
+		const char* textValue;
 		int64_t intValue;
 		double floatValue;
 	};

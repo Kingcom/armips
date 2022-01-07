@@ -13,7 +13,7 @@ struct DirectiveEntry {
 	int flags;
 };
 
-using DirectiveMap = std::unordered_multimap<std::wstring, const DirectiveEntry>;
+using DirectiveMap = std::unordered_multimap<std::string, const DirectiveEntry>;
 
 #define DIRECTIVE_USERMASK			0x0000FFFF
 

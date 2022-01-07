@@ -13,15 +13,15 @@
 #include <dirent.h>
 #endif
 
-std::vector<std::wstring> TestRunner::listSubfolders(const std::wstring& dir)
+std::vector<std::string> TestRunner::listSubfolders(const fs::path& dir)
 {
-	std::vector<std::wstring> result;
+	std::vector<std::string> result;
 	
 #ifdef _WIN32
 	WIN32_FIND_DATAW findFileData;
 	HANDLE hFind;
 
-	std::wstring m = dir + L"*";
+	std::wstring m = dir.wstring() + L"/*";
 	hFind = FindFirstFileW(m.c_str(),&findFileData);
 	
 	if (hFind != INVALID_HANDLE_VALUE) 
@@ -32,13 +32,13 @@ std::vector<std::wstring> TestRunner::listSubfolders(const std::wstring& dir)
 			{
 				std::wstring dirName = findFileData.cFileName;
 				if (dirName != L"." && dirName != L"..")
-					result.push_back(dirName);
+					result.push_back(convertWStringToUtf8(dirName));
 			}
 			
 		} while (FindNextFileW(hFind,&findFileData));
 	}
 #else
-	std::string utf8 = convertWStringToUtf8(dir);
+	std::string utf8 = dir.string();
 	auto directory = opendir(utf8.c_str());
 
 	if (directory != nullptr)
@@ -55,8 +55,8 @@ std::vector<std::wstring> TestRunner::listSubfolders(const std::wstring& dir)
 			if (elem->d_type == DT_DIR)
 #endif
 			{
-				std::wstring dirName = convertUtf8ToWString(elem->d_name);
-				if (dirName != L"." && dirName != L"..")
+				std::string dirName = elem->d_name;
+				if (dirName != "." && dirName != "..")
 					result.push_back(dirName);
 			}
 
@@ -99,13 +99,13 @@ void TestRunner::changeConsoleColor(ConsoleColors color)
 	switch (color)
 	{
 	case ConsoleColors::White:
-		Logger::print(L"\033[1;0m");
+		Logger::print("\033[1;0m");
 		break;
 	case ConsoleColors::Red:
-		Logger::print(L"\033[1;31m");
+		Logger::print("\033[1;31m");
 		break;
 	case ConsoleColors::Green:
-		Logger::print(L"\033[1;32m");
+		Logger::print("\033[1;32m");
 		break;
 	}
 #endif
@@ -119,23 +119,21 @@ void TestRunner::restoreConsole()
 #endif
 }
 
-std::vector<std::wstring> TestRunner::getTestsList(const std::wstring& dir, const std::wstring& prefix)
+std::vector<fs::path> TestRunner::getTestsList(const fs::path& dir)
 {
-	std::vector<std::wstring> tests;
+	std::vector<fs::path> tests;
 
-	std::vector<std::wstring> dirs = listSubfolders(dir+prefix);
-	for (std::wstring& dirName: dirs)
+	std::vector<std::string> dirs = listSubfolders(dir);
+	for (std::string& dirName: dirs)
 	{
-		std::wstring testName = prefix + dirName;
-		std::wstring fileName = dir + testName + L"/" + dirName + L".asm";
+		fs::path testDir = dir / dirName;
+		fs::path fileName = testDir / (dirName + ".asm");
 
 		if (fs::exists(fileName))
 		{
-			if (testName[0] == L'/')
-				testName.erase(0,1);
-			tests.push_back(testName);
+			tests.push_back(testDir);
 		} else {
-			std::vector<std::wstring> subTests = getTestsList(dir,testName+L"/");
+			std::vector<fs::path> subTests = getTestsList(testDir);
 			tests.insert(tests.end(),subTests.begin(),subTests.end());
 		}
 	}
@@ -143,24 +141,38 @@ std::vector<std::wstring> TestRunner::getTestsList(const std::wstring& dir, cons
 	return tests;
 }
 
-bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testName, std::wstring& errorString)
+std::vector<std::string> splitString(const std::string& str, const char delim, bool skipEmpty)
+{
+	std::vector<std::string> result;
+	std::stringstream stream(str);
+	std::string arg;
+	while (std::getline(stream,arg,delim))
+	{
+		if (arg.empty() && skipEmpty) continue;
+		result.push_back(arg);
+	}
+
+	return result;
+}
+
+bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, std::string& errorString)
 {
 	fs::path oldDir = fs::current_path();
 	fs::current_path(dir);
 
 	ArmipsArguments settings;
-	std::vector<std::wstring> errors;
+	std::vector<std::string> errors;
 	int expectedRetVal = 0;
 	int retVal = 0;
 	bool checkRetVal = false;
 	bool result = true;
-	std::vector<std::wstring> args;
+	std::vector<std::string> args;
 
 	if (fs::exists("commandLine.txt"))
 	{
 		TextFile f;
 		f.open("commandLine.txt", TextFile::Read);
-		std::wstring command = f.readLine();
+		std::string command = f.readLine();
 		f.close();
 		
 		args = splitString(command,L' ',true);
@@ -172,8 +184,8 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	}
 	else
 	{
-		settings.inputFileName = testName + L".asm";
-		settings.tempFileName = testName + L".temp.txt";
+		settings.inputFileName = testName + ".asm";
+		settings.tempFileName = testName + ".temp.txt";
 	}
 
 	settings.errorsResult = &errors;
@@ -185,7 +197,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 
 	if (checkRetVal && retVal != expectedRetVal)
 	{
-		errorString += tfm::format(L"Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
+		errorString += tfm::format("Exit code did not match: expected %S, got %S\n",expectedRetVal,retVal);
 		result = false;
 	}
 
@@ -194,7 +206,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	{
 		TextFile f;
 		f.open("expected.txt", TextFile::Read);
-		std::vector<std::wstring> expectedErrors = f.readAll();
+		std::vector<std::string> expectedErrors = f.readAll();
 
 		if (errors.size() == expectedErrors.size())
 		{
@@ -202,7 +214,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 			{
 				if (errors[i] != expectedErrors[i])
 				{
-					errorString += tfm::format(L"Unexpected error: %S\n",errors[i]);
+					errorString += tfm::format("Unexpected error: %S\n",errors[i].data());
 					result = false;
 				}
 			}
@@ -213,7 +225,7 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		// if no errors are expected, there should be none
 		for (size_t i = 0; i < errors.size(); i++)
 		{
-			errorString += tfm::format(L"Unexpected error: %S\n",errors[i]);
+			errorString += tfm::format("Unexpected error: %S\n",errors[i].data());
 			result = false;
 		}
 	}
@@ -233,11 +245,11 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 		{
 			if (memcmp(expected.data(),actual.data(),actual.size()) != 0)
 			{
-				errorString += tfm::format(L"Output data does not match\n");
+				errorString += tfm::format("Output data does not match\n");
 				result = false;
 			}
 		} else {
-			errorString += tfm::format(L"Output data size does not match\n");
+			errorString += tfm::format("Output data size does not match\n");
 			result = false;
 		}
 	}
@@ -246,14 +258,14 @@ bool TestRunner::executeTest(const std::wstring& dir, const std::wstring& testNa
 	return result;
 }
 
-bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executableName)
+bool TestRunner::runTests(const fs::path& dir, const std::string& executableName)
 {
 	this->executableName = executableName;
 
-	std::vector<std::wstring> tests = getTestsList(dir);
+	std::vector<fs::path> tests = getTestsList(dir);
 	if (tests.empty())
 	{
-		Logger::printLine(L"No tests to run");
+		Logger::printLine("No tests to run");
 		return true;
 	}
 
@@ -264,34 +276,32 @@ bool TestRunner::runTests(const std::wstring& dir, const std::wstring& executabl
 	{
 		changeConsoleColor(ConsoleColors::White);
 
-		std::wstring line = tfm::format(L"Test %d of %d, %s:",i+1,tests.size(),tests[i]);
-		Logger::print(L"%-60s",line);
+		std::string line = tfm::format("Test %d of %d, %s:",i+1,tests.size(),tests[i].u8string());
+		Logger::print("%-60s",line);
 
-		std::wstring path = dir + L"/" + tests[i];
-		std::wstring errors;
+		std::string errors;
 
-		size_t n = tests[i].find_last_of('/');
-		std::wstring testName = n == tests[i].npos ? tests[i] : tests[i].substr(n+1);
-		if (!executeTest(path,testName,errors))
+		std::string testName = tests[i].filename().u8string();
+		if (!executeTest(tests[i],testName,errors))
 		{
 			changeConsoleColor(ConsoleColors::Red);
-			Logger::printLine(L"FAILED");
-			Logger::print(L"%s",errors);
+			Logger::printLine("FAILED");
+			Logger::printLine(errors);
 		} else {
 			changeConsoleColor(ConsoleColors::Green);
-			Logger::printLine(L"PASSED");
+			Logger::printLine("PASSED");
 			successCount++;
 		}
 	}
 	
 	changeConsoleColor(ConsoleColors::White);
-	Logger::printLine(L"\n%d out of %d tests passed.",successCount,tests.size());
+	Logger::printLine("\n%d out of %d tests passed.",successCount,tests.size());
 	
 	restoreConsole();
 	return successCount == tests.size();
 }
 
-bool runTests(const std::wstring& dir, const std::wstring& executableName)
+bool runTests(const fs::path& dir, const std::string& executableName)
 {
 	TestRunner runner;
 	return runner.runTests(dir, executableName);

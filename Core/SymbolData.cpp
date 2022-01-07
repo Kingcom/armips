@@ -28,7 +28,7 @@ void SymbolData::clear()
 struct NocashSymEntry
 {
 	int64_t address;
-	std::wstring text;
+	std::string text;
 
 	bool operator<(const NocashSymEntry& other) const
 	{
@@ -65,12 +65,12 @@ void SymbolData::writeNocashSym()
 			entry.address = sym.address;
 
 			if (size != 0 && nocashSymVersion >= 2)
-				entry.text = tfm::format(L"%s,%08X",sym.name,size);
+				entry.text = tfm::format("%s,%08X",sym.name,size);
 			else
 				entry.text = sym.name;
 
 			if (nocashSymVersion == 1)
-				std::transform(entry.text.begin(), entry.text.end(), entry.text.begin(), ::towlower);
+				std::transform(entry.text.begin(), entry.text.end(), entry.text.begin(), ::tolower);
 
 			entries.push_back(entry);
 		}
@@ -83,19 +83,19 @@ void SymbolData::writeNocashSym()
 			switch (data.type)
 			{
 			case Data8:
-				entry.text = tfm::format(L".byt:%04X",data.size);
+				entry.text = tfm::format(".byt:%04X",data.size);
 				break;
 			case Data16:
-				entry.text = tfm::format(L".wrd:%04X",data.size);
+				entry.text = tfm::format(".wrd:%04X",data.size);
 				break;
 			case Data32:
-				entry.text = tfm::format(L".dbl:%04X",data.size);
+				entry.text = tfm::format(".dbl:%04X",data.size);
 				break;
 			case Data64:
-				entry.text = tfm::format(L".dbl:%04X",data.size);
+				entry.text = tfm::format(".dbl:%04X",data.size);
 				break;
 			case DataAscii:
-				entry.text = tfm::format(L".asc:%04X",data.size);
+				entry.text = tfm::format(".asc:%04X",data.size);
 				break;
 			}
 
@@ -108,14 +108,14 @@ void SymbolData::writeNocashSym()
 	TextFile file;
 	if (!file.open(nocashSymFileName,TextFile::Write,TextFile::ASCII))
 	{
-		Logger::printError(Logger::Error,L"Could not open sym file %s.",file.getFileName().wstring());
+		Logger::printError(Logger::Error, "Could not open sym file %s.",file.getFileName().u8string());
 		return;
 	}
-	file.writeLine(L"00000000 0");
+	file.writeLine("00000000 0");
 
 	for (size_t i = 0; i < entries.size(); i++)
 	{
-		file.writeFormat(L"%08X %s\n",entries[i].address,entries[i].text);
+		file.writeFormat("%08X %s\n",entries[i].address,entries[i].text);
 	}
 
 	file.write("\x1A");
@@ -127,7 +127,7 @@ void SymbolData::write()
 	writeNocashSym();
 }
 
-void SymbolData::addLabel(int64_t memoryAddress, const std::wstring& name)
+void SymbolData::addLabel(int64_t memoryAddress, const std::string& name)
 {
 	if (!enabled)
 		return;
@@ -157,7 +157,7 @@ void SymbolData::addData(int64_t address, size_t size, DataType type)
 	modules[currentModule].data.insert(data);
 }
 
-size_t SymbolData::addFileName(const std::wstring& fileName)
+size_t SymbolData::addFileName(const std::string& fileName)
 {
 	for (size_t i = 0; i < files.size(); i++)
 	{
@@ -193,13 +193,13 @@ void SymbolData::endModule(AssemblerFile* file)
 
 	if (currentModule == 0)
 	{
-		Logger::printError(Logger::Error,L"No module opened");
+		Logger::printError(Logger::Error, "No module opened");
 		return;
 	}
 
 	if (currentFunction != -1)
 	{
-		Logger::printError(Logger::Error,L"Module closed before function end");
+		Logger::printError(Logger::Error, "Module closed before function end");
 		currentFunction = -1;
 	}
 
@@ -225,7 +225,7 @@ void SymbolData::endFunction(int64_t address)
 {
 	if (currentFunction == -1)
 	{
-		Logger::printError(Logger::Error,L"Not inside a function");
+		Logger::printError(Logger::Error, "Not inside a function");
 		return;
 	}
 

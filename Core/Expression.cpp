@@ -10,14 +10,14 @@
 
 namespace
 {
-	std::wstring to_wstring(int64_t value)
+	std::string to_string(int64_t value)
 	{
-		return tfm::format(L"%d", value);
+		return tfm::format("%d", value);
 	}
 
-	std::wstring to_wstring(double value)
+	std::string to_string(double value)
 	{
-		return tfm::format(L"%#.17g", value);
+		return tfm::format("%#.17g", value);
 	}
 }
 
@@ -62,19 +62,19 @@ ExpressionValue ExpressionValue::operator+(const ExpressionValue& other) const
 		break;
 	case ExpressionValueCombination::IS:
 		result.type = ExpressionValueType::String;
-		result.strValue = to_wstring(intValue) + other.strValue;
+		result.strValue = StringLiteral(to_string(intValue)) + other.strValue;
 		break;
 	case ExpressionValueCombination::FS:
 		result.type = ExpressionValueType::String;
-		result.strValue = to_wstring(floatValue) + other.strValue;
+		result.strValue = StringLiteral(to_string(floatValue)) + other.strValue;
 		break;
 	case ExpressionValueCombination::SI:
 		result.type = ExpressionValueType::String;
-		result.strValue = strValue + to_wstring(other.intValue);
+		result.strValue = strValue + to_string(other.intValue);
 		break;
 	case ExpressionValueCombination::SF:
 		result.type = ExpressionValueType::String;
-		result.strValue = strValue + to_wstring(other.floatValue);
+		result.strValue = strValue + to_string(other.floatValue);
 		break;
 	case ExpressionValueCombination::SS:
 		result.type = ExpressionValueType::String;
@@ -150,13 +150,13 @@ ExpressionValue ExpressionValue::operator/(const ExpressionValue& other) const
 		result.type = ExpressionValueType::Integer;
 		if (intValue == INT64_MIN && other.intValue == -1){
 			result.intValue = INT64_MIN;
-			Logger::queueError(Logger::Warning,L"Division overflow in expression");
+			Logger::queueError(Logger::Warning, "Division overflow in expression");
 			return result;
 		}
 		if (other.intValue == 0)
 		{
 			result.intValue = ~0;
-			Logger::queueError(Logger::Warning,L"Integer division by zero in expression");
+			Logger::queueError(Logger::Warning, "Integer division by zero in expression");
 			return result;
 		}
 		result.intValue = intValue / other.intValue;
@@ -189,13 +189,13 @@ ExpressionValue ExpressionValue::operator%(const ExpressionValue& other) const
 		result.type = ExpressionValueType::Integer;
 		if (intValue == INT64_MIN && other.intValue == -1){
 			result.intValue = 0;
-			Logger::queueError(Logger::Warning,L"Division overflow in expression");
+			Logger::queueError(Logger::Warning, "Division overflow in expression");
 			return result;
 		}
 		if (other.intValue == 0)
 		{
 			result.intValue = intValue;
-			Logger::queueError(Logger::Warning,L"Integer division by zero in expression");
+			Logger::queueError(Logger::Warning, "Integer division by zero in expression");
 			return result;
 		}
 		result.intValue = intValue % other.intValue;
@@ -330,13 +330,13 @@ bool ExpressionValue::operator==(const ExpressionValue& other) const
 	case ExpressionValueCombination::FF:
 		return floatValue == other.floatValue;
 	case ExpressionValueCombination::IS:
-		return to_wstring(intValue) == other.strValue;
+		return StringLiteral(to_string(intValue)) == other.strValue;
 	case ExpressionValueCombination::FS:
-		return to_wstring(floatValue) == other.strValue;
+		return StringLiteral(to_string(floatValue)) == other.strValue;
 	case ExpressionValueCombination::SI:
-		return strValue == to_wstring(other.intValue);
+		return strValue == to_string(other.intValue);
 	case ExpressionValueCombination::SF:
-		return strValue == to_wstring(other.floatValue);
+		return strValue == to_string(other.floatValue);
 	case ExpressionValueCombination::SS:
 		return strValue == other.strValue;
 	}
@@ -463,26 +463,23 @@ ExpressionInternal::ExpressionInternal(double value)
 	this->value = value;
 }
 
-ExpressionInternal::ExpressionInternal(const std::wstring& value, OperatorType type)
+ExpressionInternal::ExpressionInternal(Identifier value)
 	: ExpressionInternal()
 {
-	this->type = type;
-	this->value = value;
-
-	switch (type)
-	{
-	case OperatorType::Identifier:
-		fileNum = Global.FileInfo.FileNum;
-		section = Global.Section;
-		break;
-	case OperatorType::String:
-		break;
-	default:
-		break;
-	}
+	this->type = OperatorType::Identifier;
+	this->value = std::move(value);
+	fileNum = Global.FileInfo.FileNum;
+	section = Global.Section;
 }
 
-ExpressionInternal::ExpressionInternal(const std::wstring& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters)
+ExpressionInternal::ExpressionInternal(StringLiteral value)
+	: ExpressionInternal()
+{
+	this->type = OperatorType::String;
+	this->value = std::move(value);
+}
+
+ExpressionInternal::ExpressionInternal(const Identifier& name, std::vector<std::unique_ptr<ExpressionInternal>> parameters)
 	: ExpressionInternal()
 {
 	type = OperatorType::FunctionCall;
@@ -490,7 +487,7 @@ ExpressionInternal::ExpressionInternal(const std::wstring& name, std::vector<std
 	children = std::move(parameters);
 }
 
-void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
+void ExpressionInternal::replaceMemoryPos(const Identifier& identifierName)
 {
 	for (size_t i = 0; i < children.size(); i++)
 	{
@@ -511,31 +508,31 @@ void ExpressionInternal::replaceMemoryPos(const std::wstring& identifierName)
 
 ExpressionValue ExpressionInternal::executeFunctionCall()
 {
-	auto functionName = valueAs<std::wstring>();
+	const auto &functionName = valueAs<Identifier>();
 
 	auto handle = ExpressionFunctionHandler::instance().find(functionName);
 	if (!handle)
 	{
-		Logger::queueError(Logger::Error, L"Unknown function \"%s\"", functionName);
+		Logger::queueError(Logger::Error, "Unknown function \"%s\"", functionName);
 		return {};
 	}
 
 	if (handle->minParams() > children.size())
 	{
-		Logger::queueError(Logger::Error, L"Not enough parameters for \"%s\" (%d<%d)", functionName, children.size(), handle->minParams());
+		Logger::queueError(Logger::Error, "Not enough parameters for \"%s\" (%d<%d)", functionName, children.size(), handle->minParams());
 		return {};
 	}
 
 	if (handle->maxParams() < children.size())
 	{
-		Logger::queueError(Logger::Error, L"Too many parameters for \"%s\" (%d>%d)", functionName, children.size(), handle->maxParams());
+		Logger::queueError(Logger::Error, "Too many parameters for \"%s\" (%d>%d)", functionName, children.size(), handle->maxParams());
 		return {};
 	}
 
 	return handle->execute(children);
 }
 
-bool isExpressionFunctionSafe(const std::wstring& name, bool inUnknownOrFalseBlock)
+bool isExpressionFunctionSafe(const Identifier& name, bool inUnknownOrFalseBlock)
 {
 	auto handle = ExpressionFunctionHandler::instance().find(name);
 	if (!handle)
@@ -563,7 +560,7 @@ bool ExpressionInternal::simplify(bool inUnknownOrFalseBlock)
 	case OperatorType::ToString:
 		return false;
 	case OperatorType::FunctionCall:
-		if (!isExpressionFunctionSafe(valueAs<std::wstring>(), inUnknownOrFalseBlock))
+		if (!isExpressionFunctionSafe(valueAs<Identifier>(), inUnknownOrFalseBlock))
 			return false;
 		break;
 	default:
@@ -624,16 +621,16 @@ ExpressionValue ExpressionInternal::evaluate()
 		val.floatValue = valueAs<double>();
 		return val;
 	case OperatorType::Identifier:
-		label = Global.symbolTable.getLabel(valueAs<std::wstring>(),fileNum,section);
+		label = Global.symbolTable.getLabel(valueAs<Identifier>(),fileNum,section);
 		if (label == nullptr)
 		{
-			Logger::queueError(Logger::Error,L"Invalid label name \"%s\"",valueAs<std::wstring>());
+			Logger::queueError(Logger::Error, "Invalid label name \"%s\"", valueAs<Identifier>());
 			return val;
 		}
 
 		if (!label->isDefined())
 		{
-			Logger::queueError(Logger::Error,L"Undefined label \"%s\"",label->getName());
+			Logger::queueError(Logger::Error, "Undefined label \"%s\"",label->getName());
 			return val;
 		}
 
@@ -642,7 +639,7 @@ ExpressionValue ExpressionInternal::evaluate()
 		return val;
 	case OperatorType::String:
 		val.type = ExpressionValueType::String;
-		val.strValue = valueAs<std::wstring>();
+		val.strValue = valueAs<StringLiteral>();
 		return val;
 	case OperatorType::MemoryPos:
 		val.type = ExpressionValueType::Integer;
@@ -722,93 +719,93 @@ ExpressionValue ExpressionInternal::evaluate()
 	}
 }
 
-static std::wstring escapeString(const std::wstring& text)
+static std::string escapeString(const std::string& text)
 {
-	std::wstring result = text;
-	replaceAll(result,LR"(\)",LR"(\\)");
-	replaceAll(result,LR"(")",LR"(\")");
+	std::string result = text;
+	replaceAll(result,R"(\)",R"(\\)");
+	replaceAll(result,R"(")",R"(\")");
 
-	return tfm::format(LR"("%s")",text);
+	return tfm::format(R"("%s")",text);
 }
 
-std::wstring ExpressionInternal::formatFunctionCall()
+std::string ExpressionInternal::formatFunctionCall()
 {
-	std::wstring text = valueAs<std::wstring>() + L"(";
+	std::string text = valueAs<StringLiteral>().string() + "(";
 
 	for (size_t i = 0; i < children.size(); i++)
 	{
 		if (i != 0)
-			text += L",";
+			text += ",";
 		text += children[i]->toString();
 	}
 
-	return text + L")";
+	return text + ")";
 }
 
-std::wstring ExpressionInternal::toString()
+std::string ExpressionInternal::toString()
 {
 	switch (type)
 	{
 	case OperatorType::Integer:
-		return tfm::format(L"%d",valueAs<int64_t>());
+		return tfm::format("%d",valueAs<int64_t>());
 	case OperatorType::Float:
-		return tfm::format(L"%g",valueAs<double>());
+		return tfm::format("%g",valueAs<double>());
 	case OperatorType::Identifier:
-		return valueAs<std::wstring>();
+		return valueAs<Identifier>().string();
 	case OperatorType::String:
-		return escapeString(valueAs<std::wstring>());
+		return escapeString(valueAs<StringLiteral>().string());
 	case OperatorType::MemoryPos:
-		return L".";
+		return ".";
 	case OperatorType::Add:
-		return tfm::format(L"(%s + %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s + %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Sub:
-		return tfm::format(L"(%s - %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s - %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Mult:
-		return tfm::format(L"(%s * %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s * %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Div:
-		return tfm::format(L"(%s / %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s / %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Mod:
-		return tfm::format(L"(%s %% %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s %% %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Neg:
-		return tfm::format(L"(-%s)",children[0]->toString());
+		return tfm::format("(-%s)",children[0]->toString());
 	case OperatorType::LogNot:
-		return tfm::format(L"(!%s)",children[0]->toString());
+		return tfm::format("(!%s)",children[0]->toString());
 	case OperatorType::BitNot:
-		return tfm::format(L"(~%s)",children[0]->toString());
+		return tfm::format("(~%s)",children[0]->toString());
 	case OperatorType::LeftShift:
-		return tfm::format(L"(%s << %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s << %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::RightShift:
-		return tfm::format(L"(%s >> %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s >> %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Less:
-		return tfm::format(L"(%s < %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s < %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Greater:
-		return tfm::format(L"(%s > %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s > %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::LessEqual:
-		return tfm::format(L"(%s <= %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s <= %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::GreaterEqual:
-		return tfm::format(L"(%s >= %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s >= %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Equal:
-		return tfm::format(L"(%s == %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s == %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::NotEqual:
-		return tfm::format(L"(%s != %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s != %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::BitAnd:
-		return tfm::format(L"(%s & %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s & %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::BitOr:
-		return tfm::format(L"(%s | %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s | %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::LogAnd:
-		return tfm::format(L"(%s && %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s && %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::LogOr:
-		return tfm::format(L"(%s || %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s || %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::Xor:
-		return tfm::format(L"(%s ^ %s)",children[0]->toString(),children[1]->toString());
+		return tfm::format("(%s ^ %s)",children[0]->toString(),children[1]->toString());
 	case OperatorType::TertiaryIf:
-		return tfm::format(L"(%s ? %s : %s)",children[0]->toString(),children[1]->toString(),children[2]->toString());
+		return tfm::format("(%s ? %s : %s)",children[0]->toString(),children[1]->toString(),children[2]->toString());
 	case OperatorType::ToString:
-		return tfm::format(L"(%c%s)",L'\U000000B0',children[0]->toString());
+		return tfm::format("(%s%s)",convertUnicodeCharToUtf8(u'\u00B0'),children[0]->toString());
 	case OperatorType::FunctionCall:
 		return formatFunctionCall();
 	default:
-		return L"";
+		return "";
 	}
 }
 
@@ -830,13 +827,13 @@ ExpressionValue Expression::evaluate()
 	return expression->evaluate();
 }
 
-void Expression::replaceMemoryPos(const std::wstring& identifierName)
+void Expression::replaceMemoryPos(const Identifier& identifierName)
 {
 	if (expression != nullptr)
 		expression->replaceMemoryPos(identifierName);
 }
 
-bool Expression::evaluateString(std::wstring &dest, bool convert)
+bool Expression::evaluateString(StringLiteral &dest, bool convert)
 {
 	if (expression == nullptr)
 		return false;
@@ -844,13 +841,13 @@ bool Expression::evaluateString(std::wstring &dest, bool convert)
 	ExpressionValue value = expression->evaluate();
 	if (convert && value.isInt())
 	{
-		dest = to_wstring(value.intValue);
+		dest = to_string(value.intValue);
 		return true;
 	}
 
 	if (convert && value.isFloat())
 	{
-		dest = to_wstring(value.floatValue);
+		dest = to_string(value.floatValue);
 		return true;
 	}
 
@@ -861,18 +858,18 @@ bool Expression::evaluateString(std::wstring &dest, bool convert)
 	return true;
 }
 
-bool Expression::evaluateIdentifier(std::wstring &dest)
+bool Expression::evaluateIdentifier(Identifier &dest)
 {
 	if (expression == nullptr || !expression->isIdentifier())
 		return false;
 
-	dest = expression->getStringValue();
+	dest = expression->getIdentifier();
 	return true;
 }
 
-std::wstring Expression::toString()
+std::string Expression::toString()
 {
-	return expression != nullptr ? expression->toString() : L"";
+	return expression != nullptr ? expression->toString() : "";
 }
 
 Expression createConstExpression(int64_t value)

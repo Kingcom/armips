@@ -9,7 +9,7 @@ int MipsElfRelocator::expectedMachine() const
 	return EM_MIPS;
 }
 
-bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16RelocationBase, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16RelocationBase, std::vector<RelocationAction>& actions, std::vector<std::string>& errors)
 {
 	bool result = true;
 
@@ -17,7 +17,7 @@ bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16Reloc
 	{
 		if (hi16.relocationBase != lo16RelocationBase)
 		{
-			errors.push_back(tfm::format(L"Mismatched R_MIPS_HI16 with	R_MIPS_LO16 of a different symbol"));
+			errors.push_back(tfm::format("Mismatched R_MIPS_HI16 with R_MIPS_LO16 of a different symbol"));
 			result = false;
 			continue;
 		}
@@ -32,7 +32,7 @@ bool MipsElfRelocator::processHi16Entries(uint32_t lo16Opcode, int64_t lo16Reloc
 	return result;
 }
 
-bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::string>& errors)
 {
 	unsigned int op = data.opcode;
 	bool result = true;
@@ -54,7 +54,7 @@ bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std:
 		op = (op&0xffff0000) | (((op&0xffff)+data.relocationBase)&0xffff);
 		break;
 	default:
-		errors.emplace_back(tfm::format(L"Unknown MIPS relocation type %d",type));
+		errors.emplace_back(tfm::format("Unknown MIPS relocation type %d",type));
 		return false;
 	}
 
@@ -62,7 +62,7 @@ bool MipsElfRelocator::relocateOpcode(int type, const RelocationData& data, std:
 	return result;
 }
 
-bool MipsElfRelocator::finish(std::vector<RelocationAction>& actions, std::vector<std::wstring>& errors)
+bool MipsElfRelocator::finish(std::vector<RelocationAction>& actions, std::vector<std::string>& errors)
 {
 	// This shouldn't happen. If it does, relocate as if there was no lo16 opcode
 	if (!hi16Entries.empty())
@@ -76,7 +76,7 @@ void MipsElfRelocator::setSymbolAddress(RelocationData& data, int64_t symbolAddr
 	data.targetSymbolType = symbolType;
 }
 
-const wchar_t* mipsCtorTemplate = LR"(
+const char* mipsCtorTemplate = R"(
 	addiu	sp,-32
 	sw		ra,0(sp)
 	sw		s0,4(sp)
@@ -114,22 +114,22 @@ std::unique_ptr<CAssemblerCommand> MipsElfRelocator::generateCtorStub(std::vecto
 	if (ctors.size() != 0)
 	{
 		// create constructor table
-		std::wstring table;
+		std::string table;
 		for (size_t i = 0; i < ctors.size(); i++)
 		{
 			if (i != 0)
 				table += ',';
-			table += tfm::format(L"%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
+			table += tfm::format("%s,%s+0x%08X",ctors[i].symbolName,ctors[i].symbolName,ctors[i].size);
 		}
 
 		return parser.parseTemplate(mipsCtorTemplate,{
-			{ L"%ctorTable%",		Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorTableSize%",	tfm::format(L"%d",ctors.size()*8) },
-			{ L"%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
-			{ L"%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName() },
-			{ L"%ctorContent%",		table },
+			{ "%ctorTable%",		Global.symbolTable.getUniqueLabelName().string() },
+			{ "%ctorTableSize%",	tfm::format("%d",ctors.size()*8) },
+			{ "%outerLoopLabel%",	Global.symbolTable.getUniqueLabelName().string() },
+			{ "%innerLoopLabel%",	Global.symbolTable.getUniqueLabelName().string() },
+			{ "%ctorContent%",		table },
 		});
 	} else {
-		return parser.parseTemplate(L"jr ra :: nop");
+		return parser.parseTemplate("jr ra :: nop");
 	}
 }

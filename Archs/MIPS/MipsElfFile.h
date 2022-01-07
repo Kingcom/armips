@@ -24,7 +24,7 @@ public:
 
 	bool load(const fs::path& fileName, const fs::path& outputFileName);
 	void save();
-	bool setSection(const std::wstring& name);
+	bool setSection(const std::string& name);
 private:
 	ElfFile elf;
 	fs::path fileName;

@@ -13,7 +13,7 @@ struct MipsMacroDefinition;
 struct tMipsOpcode;
 
 struct MipsRegisterDescriptor {
-	const wchar_t* name;
+	const char* name;
 	int num;
 };
 
@@ -50,12 +50,12 @@ private:
 	bool parseCop2BranchCondition(Parser& parser, int& result);
 	bool parseWb(Parser& parser);
 
-	bool decodeCop2BranchCondition(const std::wstring& text, size_t& pos, int& result);
-	bool decodeVfpuType(const std::wstring& name, size_t& pos, int& dest);
-	bool decodeOpcode(const std::wstring& name, const tMipsOpcode& opcode);
+	bool decodeCop2BranchCondition(const std::string& text, size_t& pos, int& result);
+	bool decodeVfpuType(const std::string& name, size_t& pos, int& dest);
+	bool decodeOpcode(const std::string& name, const tMipsOpcode& opcode);
 
 	void setOmittedRegisters(const tMipsOpcode& opcode);
-	bool matchSymbol(Parser& parser, wchar_t symbol);
+	bool matchSymbol(Parser& parser, char symbol);
 	bool parseParameters(Parser& parser, const tMipsOpcode& opcode);
 	bool parseMacroParameters(Parser& parser, const MipsMacroDefinition& macro);
 
@@ -68,7 +68,7 @@ private:
 class MipsOpcodeFormatter
 {
 public:
-	const std::wstring& formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData,
+	const std::string& formatOpcode(const MipsOpcodeData& opData, const MipsRegisterData& regData,
 		const MipsImmediateData& immData);
 private:
 	void handleOpcodeName(const MipsOpcodeData& opData);	
@@ -76,5 +76,5 @@ private:
 		const MipsImmediateData& immData);
 	void handleImmediate(MipsImmediateType type, unsigned int originalValue, unsigned int opcodeFlags);
 
-	std::wstring buffer;
+	std::string buffer;
 };

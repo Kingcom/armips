@@ -12,19 +12,19 @@
 // TableCommand
 //
 
-TableCommand::TableCommand(const std::wstring& fileName, TextFile::Encoding encoding)
+TableCommand::TableCommand(const fs::path& fileName, TextFile::Encoding encoding)
 {
 	auto fullName = getFullPathName(fileName);
 
 	if (!fs::exists(fullName))
 	{
-		Logger::printError(Logger::Error,L"Table file \"%s\" does not exist",fileName);
+		Logger::printError(Logger::Error, "Table file \"%s\" does not exist", fileName.u8string());
 		return;
 	}
 
 	if (!table.load(fullName,encoding))
 	{
-		Logger::printError(Logger::Error,L"Invalid table file \"%s\"",fileName);
+		Logger::printError(Logger::Error, "Invalid table file \"%s\"",fileName.u8string());
 		return;
 	}
 }
@@ -69,7 +69,7 @@ void CDirectiveData::setNormal(std::vector<Expression>& entries, size_t unitSize
 		this->mode = EncodingMode::U64;
 		break;
 	default:
-		Logger::printError(Logger::Error,L"Invalid data unit size %d",unitSize);
+		Logger::printError(Logger::Error, "Invalid data unit size %d",unitSize);
 		return;
 	}
 	
@@ -167,7 +167,7 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, "Invalid expression");
 			continue;
 		}
 		
@@ -176,14 +176,14 @@ void CDirectiveData::encodeCustom(EncodingTable& table)
 			customData.appendByte((byte)value.intValue);
 		} else if (value.isString())
 		{
-			ByteArray encoded = table.encodeString(value.strValue,false);
+			ByteArray encoded = table.encodeString(value.strValue.string(),false);
 			if (encoded.size() == 0 && value.strValue.size() > 0)
 			{
-				Logger::queueError(Logger::Error,L"Failed to encode \"%s\"",value.strValue);
+				Logger::queueError(Logger::Error, "Failed to encode \"%s\"",value.strValue);
 			}
 			customData.append(encoded);
 		} else {
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+			Logger::queueError(Logger::Error, "Invalid expression type");
 		}
 	}
 
@@ -205,21 +205,19 @@ void CDirectiveData::encodeSjis()
 
 		for (unsigned short SJISValue = 0x0001; SJISValue < 0x0100; SJISValue++)
 		{
-			wchar_t unicodeValue = sjisToUnicode(SJISValue);
-			if (unicodeValue != 0xFFFF)
+			if (auto unicodeValue = sjisToUnicode(SJISValue))
 			{
 				hexBuffer[0] = SJISValue & 0xFF;
-				sjisTable.addEntry(hexBuffer, 1, unicodeValue);
+				sjisTable.addEntry(hexBuffer, 1, convertUnicodeCharToUtf8(unicodeValue.value()));
 			}
 		}
 		for (unsigned short SJISValue = 0x8100; SJISValue < 0xEF00; SJISValue++)
 		{
-			wchar_t unicodeValue = sjisToUnicode(SJISValue);
-			if (unicodeValue != 0xFFFF)
+			if (auto unicodeValue = sjisToUnicode(SJISValue))
 			{
 				hexBuffer[0] = (SJISValue >> 8) & 0xFF;
 				hexBuffer[1] = SJISValue & 0xFF;
-				sjisTable.addEntry(hexBuffer, 2, unicodeValue);
+				sjisTable.addEntry(hexBuffer, 2, convertUnicodeCharToUtf8(unicodeValue.value()));
 			}
 		}
 	}
@@ -235,7 +233,7 @@ void CDirectiveData::encodeFloat()
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, "Invalid expression");
 			continue;
 		}
 
@@ -256,7 +254,7 @@ void CDirectiveData::encodeFloat()
 			int64_t num = getDoubleBits((double)value.floatValue);
 			normalData.push_back(num);
 		} else {
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+			Logger::queueError(Logger::Error, "Invalid expression type");
 		}
 	}
 }
@@ -269,7 +267,7 @@ void CDirectiveData::encodeNormal()
 		ExpressionValue value = entries[i].evaluate();
 		if (!value.isValid())
 		{
-			Logger::queueError(Logger::Error,L"Invalid expression");
+			Logger::queueError(Logger::Error, "Invalid expression");
 			continue;
 		}
 
@@ -278,12 +276,12 @@ void CDirectiveData::encodeNormal()
 			bool hadNonAscii = false;
 			for (size_t l = 0; l < value.strValue.size(); l++)
 			{
-				int64_t num = value.strValue[l];
+				int64_t num = value.strValue.string()[l];
 				normalData.push_back(num);
 
 				if (num >= 0x80 && !hadNonAscii)
 				{
-					Logger::printError(Logger::Warning,L"Non-ASCII character in data directive. Use .string instead");
+					Logger::printError(Logger::Warning, "Non-ASCII character in data directive. Use .string instead");
 					hadNonAscii = true;
 				}
 			}
@@ -299,7 +297,7 @@ void CDirectiveData::encodeNormal()
 			int64_t num = getDoubleBits((double)value.floatValue);
 			normalData.push_back(num);
 		} else {
-			Logger::queueError(Logger::Error,L"Invalid expression type");
+			Logger::queueError(Logger::Error, "Invalid expression type");
 		}
 	}
 
@@ -334,7 +332,7 @@ bool CDirectiveData::Validate(const ValidateState &state)
 		encodeCustom(Global.Table);
 		break;
 	default:
-		Logger::queueError(Logger::Error,L"Invalid encoding type");
+		Logger::queueError(Logger::Error, "Invalid encoding type");
 		break;
 	}
 
@@ -386,53 +384,53 @@ void CDirectiveData::Encode() const
 void CDirectiveData::writeTempData(TempData& tempData) const
 {
 	size_t size = (getUnitSize()*2+3)*getDataSize()+20;
-	wchar_t* str = new wchar_t[size];
-	wchar_t* start = str;
+	char* str = new char[size];
+	char* start = str;
 
 	switch (mode)
 	{
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		str += swprintf(str,20,L".byte ");
+		str += snprintf(str,20,".byte ");
 
 		for (size_t i = 0; i < customData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",(uint8_t)customData[i]);
+			str += snprintf(str,20,"0x%02X,",(uint8_t)customData[i]);
 		}
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Ascii:
-		str += swprintf(str,20,L".byte ");
+		str += snprintf(str,20,".byte ");
 		
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%02X,",(uint8_t)normalData[i]);
+			str += snprintf(str,20,"0x%02X,",(uint8_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U16:
-		str += swprintf(str,20,L".halfword ");
+		str += snprintf(str,20,".halfword ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%04X,",(uint16_t)normalData[i]);
+			str += snprintf(str,20,"0x%04X,",(uint16_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U32:
 	case EncodingMode::Float:
-		str += swprintf(str,20,L".word ");
+		str += snprintf(str,20, ".word ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%08X,",(uint32_t)normalData[i]);
+			str += snprintf(str,20,"0x%08X,",(uint32_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U64:
 	case EncodingMode::Double:
-		str += swprintf(str,20,L".doubleword ");
+		str += snprintf(str,20,".doubleword ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += swprintf(str,20,L"0x%16llX,",(uint64_t)normalData[i]);
+			str += snprintf(str,20,"0x%16llX,",(uint64_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::Invalid:

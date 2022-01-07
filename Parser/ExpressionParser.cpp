@@ -13,22 +13,22 @@ static std::unique_ptr<ExpressionInternal> primaryExpression(Tokenizer& tokenize
 	{
 	case TokenType::Float:
 		tokenizer.eatToken();
-		return std::make_unique<ExpressionInternal>(tok.floatValue);
+		return std::make_unique<ExpressionInternal>(tok.floatValue());
 	case TokenType::Identifier:
 		{
-			const std::wstring stringValue = tok.getStringValue();
+			const Identifier &identifier = tok.identifierValue();
 			tokenizer.eatToken();
-			if (stringValue == L".")
+			if (identifier == ".")
 				return std::make_unique<ExpressionInternal>(OperatorType::MemoryPos);
 			else
-				return std::make_unique<ExpressionInternal>(stringValue,OperatorType::Identifier);
+				return std::make_unique<ExpressionInternal>(identifier);
 		}
 	case TokenType::String:
 		tokenizer.eatToken();
-		return std::make_unique<ExpressionInternal>(tok.getStringValue(),OperatorType::String);
+		return std::make_unique<ExpressionInternal>(tok.stringValue());
 	case TokenType::Integer:
 		tokenizer.eatToken();
-		return std::make_unique<ExpressionInternal>(tok.intValue);
+		return std::make_unique<ExpressionInternal>(tok.intValue());
 	case TokenType::LParen:
 		{
 			tokenizer.eatToken();
@@ -51,9 +51,9 @@ static std::unique_ptr<ExpressionInternal> postfixExpression(Tokenizer& tokenize
 {
 	if (tokenizer.peekToken(0).type == TokenType::Identifier &&
 		tokenizer.peekToken(1).type == TokenType::LParen &&
-		ExpressionFunctionHandler::instance().find(tokenizer.peekToken(0).getStringValue()))
+		ExpressionFunctionHandler::instance().find(tokenizer.peekToken(0).identifierValue()))
 	{
-		const std::wstring functionName = tokenizer.nextToken().getStringValue();
+		const Identifier &functionName = tokenizer.nextToken().identifierValue();
 		tokenizer.eatToken();
 
 		std::vector<std::unique_ptr<ExpressionInternal>> parameters;

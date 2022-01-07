@@ -14,25 +14,25 @@
 #define CHECK(exp) if (!(exp)) return false;
 
 const ArmRegisterDescriptor armRegisters[] = {
-	{ L"r0", 0 },	{ L"r1", 1 },	{ L"r2", 2 },	{ L"r3", 3 },
-	{ L"r4", 4 },	{ L"r5", 5 },	{ L"r6", 6 },	{ L"r7", 7 },
-	{ L"r8", 8 },	{ L"r9", 9 },	{ L"r10", 10 },	{ L"r11", 11 },
-	{ L"r12", 12 },	{ L"r13", 13 },	{ L"sp", 13 },	{ L"r14", 14 },
-	{ L"lr", 14 },	{ L"r15", 15 }, { L"pc", 15 },
+	{ "r0",  0 },  { "r1",  1 },  { "r2",  2 },  { "r3",  3 },
+	{ "r4",  4 },  { "r5",  5 },  { "r6",  6 },  { "r7",  7 },
+	{ "r8",  8 },  { "r9",  9 },  { "r10", 10 }, { "r11", 11 },
+	{ "r12", 12 }, { "r13", 13 }, { "sp",  13 }, { "r14", 14 },
+	{ "lr",  14 }, { "r15", 15 }, { "pc",  15 },
 };
 
 const ArmRegisterDescriptor armCopRegisters[] = {
-	{ L"c0", 0 },	{ L"c1", 1 },	{ L"c2", 2 },	{ L"c3", 3 },
-	{ L"c4", 4 },	{ L"c5", 5 },	{ L"c6", 6 },	{ L"c7", 7 },
-	{ L"c8", 8 },	{ L"c9", 9 },	{ L"c10", 10 },	{ L"c11", 11 },
-	{ L"c12", 12 },	{ L"c13", 13 },	{ L"c14", 14 },	{ L"c15", 15 },
+	{ "c0",  0 },  { "c1",  1 },  { "c2",  2 },  { "c3",  3 },
+	{ "c4",  4 },  { "c5",  5 },  { "c6",  6 },  { "c7",  7 },
+	{ "c8",  8 },  { "c9",  9 },  { "c10", 10 }, { "c11", 11 },
+	{ "c12", 12 }, { "c13", 13 }, { "c14", 14 }, { "c15", 15 },
 };
 
 const ArmRegisterDescriptor armCopNumbers[] = {
-	{ L"p0", 0 },	{ L"p1", 1 },	{ L"p2", 2 },	{ L"p3", 3 },
-	{ L"p4", 4 },	{ L"p5", 5 },	{ L"p6", 6 },	{ L"p7", 7 },
-	{ L"p8", 8 },	{ L"p9", 9 },	{ L"p10", 10 },	{ L"p11", 11 },
-	{ L"p12", 12 },	{ L"p13", 13 },	{ L"p14", 14 },	{ L"p15", 15 },
+	{ "p0",  0 },  { "p1",  1 },  { "p2",  2 },  { "p3",  3 },
+	{ "p4",  4 },  { "p5",  5 },  { "p6",  6 },  { "p7",  7 },
+	{ "p8",  8 },  { "p9",  9 },  { "p10", 10 }, { "p11", 11 },
+	{ "p12", 12 }, { "p13", 13 }, { "p14", 14 }, { "p15", 15 },
 };
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveThumb(Parser& parser, int flags)
@@ -56,13 +56,14 @@ std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 	return seq;
 }
 
-const wchar_t* msgTemplate =
-	L"mov    r12,r12\n"
-	L"b      %after%\n"
-	L".byte  0x64,0x64,0x00,0x00\n"
-	L".ascii %text%\n"
-	L".align %alignment%\n"
-	L"%after%:"
+const char* msgTemplate = R"(
+	mov    r12,r12
+	"b      %after%
+	".byte  0x64,0x64,0x00,0x00
+	".ascii %text%
+	".align %alignment%
+	"%after%:"
+)"
 ;
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
@@ -72,17 +73,17 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 		return nullptr;
 
 	return parser.parseTemplate(msgTemplate, {
-		{ L"%after%", Global.symbolTable.getUniqueLabelName(true) },
-		{ L"%text%", text.toString() },
-		{ L"%alignment%", Arm.GetThumbMode() ? L"2" : L"4" }
+		{ "%after%", Global.symbolTable.getUniqueLabelName(true).string() },
+		{ "%text%", text.toString() },
+		{ "%alignment%", Arm.GetThumbMode() ? "2" : "4" }
 	});
 }
 
 const DirectiveMap armDirectives = {
-	{ L".thumb",	{ &parseDirectiveThumb,	0 } },
-	{ L".arm",		{ &parseDirectiveArm,	0 } },
-	{ L".pool",		{ &parseDirectivePool,	0 } },
-	{ L".msg",		{ &parseDirectiveMsg,	0 } },
+	{ ".thumb",	{ &parseDirectiveThumb,	0 } },
+	{ ".arm",		{ &parseDirectiveArm,	0 } },
+	{ ".pool",		{ &parseDirectivePool,	0 } },
+	{ ".msg",		{ &parseDirectiveMsg,	0 } },
 };
 
 std::unique_ptr<CAssemblerCommand> ArmParser::parseDirective(Parser& parser)
@@ -96,12 +97,12 @@ bool ArmParser::parseRegisterTable(Parser& parser, ArmRegisterValue& dest, const
 	if (token.type != TokenType::Identifier)
 		return false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const Identifier &identifier = token.identifierValue();
 	for (size_t i = 0; i < count; i++)
 	{
-		if (stringValue == table[i].name)
+		if (identifier == table[i].name)
 		{
-			dest.name = stringValue;
+			dest.name = identifier;
 			dest.num = table[i].num;
 			parser.eatToken();
 			return true;
@@ -189,7 +190,7 @@ bool ArmParser::parseImmediate(Parser& parser, Expression& dest)
 	return dest.isLoaded();
 }
 
-bool ArmParser::matchSymbol(Parser& parser, wchar_t symbol, bool optional)
+bool ArmParser::matchSymbol(Parser& parser, char symbol, bool optional)
 {
 	switch (symbol)
 	{
@@ -216,7 +217,7 @@ bool ArmParser::matchSymbol(Parser& parser, wchar_t symbol, bool optional)
 	return false;
 }
 
-inline bool isNumber(wchar_t value)
+inline bool isNumber(char value)
 {
 	return (value >= '0' && value <= '9');
 }
@@ -235,7 +236,7 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 	if (shiftMode.type != TokenType::Identifier)
 		return false;
 
-	std::wstring stringValue = shiftMode.getStringValue();
+	std::string stringValue = shiftMode.identifierValue().string();
 	
 	bool hasNumber = isNumber(stringValue.back());
 	int64_t number = 0;
@@ -252,15 +253,15 @@ bool ArmParser::parseShift(Parser& parser, ArmOpcodeVariables& vars, bool immedi
 		}
 	}
 
-	if (stringValue == L"lsl" || stringValue == L"asl")
+	if (stringValue == "lsl" || stringValue == "asl")
 		vars.Shift.Type = 0;
-	else if (stringValue == L"lsr")
+	else if (stringValue == "lsr")
 		vars.Shift.Type = 1;
-	else if (stringValue == L"asr")
+	else if (stringValue == "asr")
 		vars.Shift.Type = 2;
-	else if (stringValue == L"ror")
+	else if (stringValue == "ror")
 		vars.Shift.Type = 3;
-	else if (stringValue == L"rrx")
+	else if (stringValue == "rrx")
 		vars.Shift.Type = 4;
 	else 
 		return false;
@@ -310,12 +311,12 @@ bool ArmParser::parsePseudoShift(Parser& parser, ArmOpcodeVariables& vars, int t
 	return true;
 }
 
-int ArmParser::decodeCondition(const std::wstring& text, size_t& pos)
+int ArmParser::decodeCondition(const std::string& text, size_t& pos)
 {
 	if (pos+2 <= text.size())
 	{
-		wchar_t c1 = text[pos+0];
-		wchar_t c2 = text[pos+1];
+		char c1 = text[pos+0];
+		char c2 = text[pos+1];
 		pos += 2;
 
 		if (c1 == 'e' && c2 == 'q') return 0;
@@ -342,13 +343,13 @@ int ArmParser::decodeCondition(const std::wstring& text, size_t& pos)
 	return 14;
 }
 
-bool ArmParser::decodeAddressingMode(const std::wstring& text, size_t& pos, unsigned char& dest)
+bool ArmParser::decodeAddressingMode(const std::string& text, size_t& pos, unsigned char& dest)
 {
 	if (pos+2 > text.size())
 		return false;
 
-	wchar_t c1 = text[pos+0];	
-	wchar_t c2 = text[pos+1];
+	char c1 = text[pos+0];
+	char c2 = text[pos+1];
 
 	if      (c1 == 'i' && c2 == 'b') dest = ARM_AMODE_IB;
 	else if (c1 == 'i' && c2 == 'a') dest = ARM_AMODE_IA;
@@ -365,7 +366,7 @@ bool ArmParser::decodeAddressingMode(const std::wstring& text, size_t& pos, unsi
 	return true;
 }
 
-bool ArmParser::decodeXY(const std::wstring& text, size_t& pos, bool& dest)
+bool ArmParser::decodeXY(const std::string& text, size_t& pos, bool& dest)
 {
 	if (pos >= text.size())
 		return false;
@@ -381,14 +382,14 @@ bool ArmParser::decodeXY(const std::wstring& text, size_t& pos, bool& dest)
 	return true;
 }
 
-void ArmParser::decodeS(const std::wstring& text, size_t& pos, bool& dest)
+void ArmParser::decodeS(const std::string& text, size_t& pos, bool& dest)
 {
 	dest = pos < text.size() && text[pos] == 's';
 	if (dest)
 		pos++;
 }
 
-bool ArmParser::decodeArmOpcode(const std::wstring& name, const tArmOpcode& opcode, ArmOpcodeVariables& vars)
+bool ArmParser::decodeArmOpcode(const std::string& name, const tArmOpcode& opcode, ArmOpcodeVariables& vars)
 {
 	vars.Opcode.c = vars.Opcode.a = 0;
 	vars.Opcode.s = false;
@@ -463,13 +464,13 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 	if (token.type != TokenType::Identifier)
 		return false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const std::string &stringValue = token.identifierValue().string();
 	size_t pos = 0;
-	if (startsWith(stringValue,L"cpsr"))
+	if (startsWith(stringValue,"cpsr"))
 	{
 		vars.PsrData.spsr = false;
 		pos = 4;
-	} else if (startsWith(stringValue,L"spsr"))
+	} else if (startsWith(stringValue,"spsr"))
 	{
 		vars.PsrData.spsr = true;
 		pos = 4;
@@ -489,13 +490,13 @@ bool ArmParser::parsePsrTransfer(Parser& parser, ArmOpcodeVariables& vars, bool 
 	if (stringValue[pos++] != '_')
 		return false;
 
-	if (startsWith(stringValue,L"ctl",pos))
+	if (startsWith(stringValue,"ctl",pos))
 	{
 		vars.PsrData.field = 1;
 		return pos+3 == stringValue.size();
 	} 
 	
-	if (startsWith(stringValue,L"flg",pos))
+	if (startsWith(stringValue,"flg",pos))
 	{
 		vars.PsrData.field = 8;
 		return pos+3 == stringValue.size();
@@ -642,13 +643,13 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 	ArmOpcodeVariables vars;
 	bool paramFail = false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const Identifier &identifier = token.identifierValue();
 	for (int z = 0; ArmOpcodes[z].name != nullptr; z++)
 	{
 		if ((ArmOpcodes[z].flags & ARM_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
-		if (decodeArmOpcode(stringValue,ArmOpcodes[z],vars))
+		if (decodeArmOpcode(identifier.string(),ArmOpcodes[z],vars))
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
@@ -664,9 +665,9 @@ std::unique_ptr<CArmInstruction> ArmParser::parseArmOpcode(Parser& parser)
 	}
 
 	if (paramFail)
-		parser.printError(token,L"ARM parameter failure");
+		parser.printError(token, "ARM parameter failure");
 	else
-		parser.printError(token,L"Invalid ARM opcode");
+		parser.printError(token, "Invalid ARM opcode");
 
 	return nullptr;
 }
@@ -739,13 +740,13 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 	ThumbOpcodeVariables vars;
 	bool paramFail = false;
 
-	const std::wstring stringValue = token.getStringValue();
+	const Identifier &identifier = token.identifierValue();
 	for (int z = 0; ThumbOpcodes[z].name != nullptr; z++)
 	{
 		if ((ThumbOpcodes[z].flags & THUMB_ARM9) && Arm.getVersion() == AARCH_GBA)
 			continue;
 
-		if (stringValue == ThumbOpcodes[z].name)
+		if (identifier == ThumbOpcodes[z].name)
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 			
@@ -761,9 +762,9 @@ std::unique_ptr<CThumbInstruction> ArmParser::parseThumbOpcode(Parser& parser)
 	}
 
 	if (paramFail)
-		parser.printError(token,L"THUMB parameter failure in %S",stringValue);
+		parser.printError(token, "THUMB parameter failure in %S",identifier);
 	else
-		parser.printError(token,L"Invalid THUMB opcode: %S",stringValue);
+		parser.printError(token, "Invalid THUMB opcode: %S",identifier);
 	
 	return nullptr;
 }
