@@ -102,7 +102,7 @@ const MipsRegisterDescriptor mipsPsxCop2ControlRegisters[] = {
 
 const MipsRegisterDescriptor mipsRspCop0Registers[] = {
 	{ "sp_mem_addr", 0 }, { "sp_dram_addr", 1 }, { "sp_rd_len", 2 },
-	{ "sp_wr_len", 3 },   { "sp_status", 4 },    { "sp_dma_ful", 5 },
+	{ "sp_wr_len", 3 },   { "sp_status", 4 },    { "sp_dma_full", 5 },
 	{ "sp_dma_busy", 6 }, { "sp_semaphore", 7 }, { "dpc_start", 8 },
 	{ "dpc_end", 9 },     { "dpc_current", 10 }, { "dpc_status", 11 },
 	{ "dpc_clock", 12 },  { "dpc_bufbusy", 13 }, { "dpc_pipebusy", 14 },
