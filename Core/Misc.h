@@ -3,6 +3,7 @@
 #include "Util/FileClasses.h"
 #include "Util/Util.h"
 
+#include <string_view>
 #include <vector>
 
 #include <tinyformat.h>
