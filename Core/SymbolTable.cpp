@@ -221,5 +221,5 @@ int SymbolTable::findSection(int64_t address)
 		}
 	}
 
-	return smallestBefore;
+	return int(smallestBefore);
 }

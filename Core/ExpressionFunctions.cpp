@@ -564,7 +564,7 @@ ExpressionValue expFuncReadAscii(const Identifier &funcName, const std::vector<E
 			return ExpressionValue();
 		}
 
-		for (size_t i = 0; i < file.gcount(); i++)
+		for (std::streamsize i = 0; i < file.gcount(); i++)
 		{
 			if (buffer[i] == 0x00)
 			{

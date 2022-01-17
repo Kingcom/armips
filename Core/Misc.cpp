@@ -145,7 +145,7 @@ void TempData::start()
 		file.writeFormat("; %d %S\n\n",equCount,equCount == 1 ? "equation" : "equations");
 		for (size_t i = 0; i < fileCount; i++)
 		{
-			file.writeFormat("; %S\n",Global.fileList.string(i));
+			file.writeFormat("; %S\n",Global.fileList.string(int(i)));
 		}
 		file.writeLine("");
 	}

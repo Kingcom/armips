@@ -722,7 +722,7 @@ bool TextFile::open(Mode mode, Encoding defaultEncoding)
 
 	if (mode == Read)
 	{
-		size_ = fs::file_size(fileName);
+		size_ = long(fs::file_size(fileName));
 
 		stream.read(reinterpret_cast<char *>(numBuffer), 3);
 		switch (numBuffer[0] | (numBuffer[1] << 8))
