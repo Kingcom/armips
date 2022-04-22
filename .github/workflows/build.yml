@@ -24,7 +24,7 @@ jobs:
           - { name: "Ubuntu clang", os: "ubuntu-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
           - { name: "macOS clang", os: "macos-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
           - { name: "Windows clang", os: "windows-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
-          - { name: "Windows MSVC", os: "windows-latest", generator: "Visual Studio 16 2019"}
+          - { name: "Windows MSVC", os: "windows-2022", generator: "Visual Studio 17 2022"}
 
     steps:
     - uses: actions/checkout@v2
