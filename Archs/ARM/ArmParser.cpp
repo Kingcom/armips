@@ -58,13 +58,18 @@ std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 
 const char* msgTemplate = R"(
 	mov    r12,r12
-	"b      %after%
-	".byte  0x64,0x64,0x00,0x00
-	".ascii %text%
-	".align %alignment%
-	"%after%:"
-)"
-;
+	b      %after%
+	.byte  0x64,0x64,0x00,0x00
+	.if strlen(%text%) > 120
+		.error "Maximum length of No$gba debug message is 120 bytes"
+	.elseif strlen(%text%) > 0
+		.ascii %text%
+	.else
+		.byte  0x00
+	.endif
+	.align %alignment%,0x00
+	%after%:
+)";
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveMsg(Parser& parser, int flags)
 {
