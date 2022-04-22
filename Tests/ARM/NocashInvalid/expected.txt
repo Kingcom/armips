@@ -1,0 +1,4 @@
+﻿NocashInvalid.asm(7) error: Maximum length of No$gba debug message is 120 bytes
+NocashInvalid.asm(10) error: Non-ASCII character in data directive. Use .string instead
+NocashInvalid.asm(15) error: Maximum length of No$gba debug message is 120 bytes
+NocashInvalid.asm(18) error: Non-ASCII character in data directive. Use .string instead
