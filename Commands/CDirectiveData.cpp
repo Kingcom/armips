@@ -276,12 +276,12 @@ void CDirectiveData::encodeNormal()
 			bool hadNonAscii = false;
 			for (size_t l = 0; l < value.strValue.size(); l++)
 			{
-				int64_t num = value.strValue.string()[l];
+				uint64_t num = value.strValue.string()[l];
 				normalData.push_back(num);
 
 				if (num >= 0x80 && !hadNonAscii)
 				{
-					Logger::printError(Logger::Warning, "Non-ASCII character in data directive. Use .string instead");
+					Logger::queueError(Logger::Error, "Non-ASCII character in data directive. Use .string instead");
 					hadNonAscii = true;
 				}
 			}
