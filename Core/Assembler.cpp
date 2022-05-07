@@ -111,6 +111,11 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		g_fileManager->closeFile();
 	}
 
+	if (Logger::hasError())
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -230,6 +235,11 @@ bool runArmips(ArmipsArguments& settings)
 
 	if (settings.showStats)
 		printStats(Allocations::collectStats());
+
+	if (Logger::hasError())
+	{
+		return false;
+	}
 
 	return result;
 }
