@@ -256,7 +256,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 				{
 					// If we get here then the instruction did not contain a shifted immediate
 					// and we failed to optimize into another instruction
-					Logger::queueError(Logger::Error, "Invalid shifted immediate %X", Vars.OriginalImmediate);
+					Logger::queueError(Logger::Error, "Invalid shifted immediate 0x%X", Vars.OriginalImmediate);
 					return false;
 				}
 			}
@@ -334,7 +334,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			unsigned int check = Opcode.flags & ARM_ABS ? abs(Vars.Immediate) : Vars.Immediate;
 			if (check >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error, "Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Immediate value %X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		}
