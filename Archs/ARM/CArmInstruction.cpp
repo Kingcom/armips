@@ -246,11 +246,13 @@ bool CArmInstruction::Validate(const ValidateState &state)
 						Vars.Opcode.NewEncoding = encoding;
 						Vars.Opcode.UseNewEncoding = true;
 					}
-					else
-					{
-						Logger::queueError(Logger::Error, "Invalid shifted immediate %X",Vars.OriginalImmediate);
-						return false;
-					}
+				}
+				if (temp == -1)
+				{
+					// If we get here then the instruction did not contain a shifted immediate
+					// and we failed to optimize into another instruction
+					Logger::queueError(Logger::Error, "Invalid shifted immediate %X", Vars.OriginalImmediate);
+					return false;
 				}
 			}
 			Vars.Immediate = temp;
