@@ -129,10 +129,18 @@ bool GenericAssemblerFile::open(bool onlyCheck)
 		temp.open(originalName, flagsOpenExisting);
 		if (!temp.is_open())
 		{
-			Logger::queueError(Logger::FatalError, "Could not open file %s",originalName.u8string());
+			Logger::queueError(Logger::FatalError, "Could not copy file %s",originalName.u8string());
 			return false;
 		}
 		temp.close();
+
+		// Check input and output are not the same
+		std::error_code ec;
+		if (fs::equivalent(originalName, fileName, ec))
+		{
+			Logger::queueError(Logger::FatalError, "Could not copy file %s", originalName.u8string());
+			return false;
+		}
 
 		// check new file, same as create
 		exists = fs::exists(fileName);
