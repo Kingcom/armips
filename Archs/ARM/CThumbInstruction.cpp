@@ -36,6 +36,8 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 {
 	RamPos = g_fileManager->getVirtualAddress();
 
+	Vars.UseNewEncoding = false;
+
 	if (RamPos & 1)
 	{
 		Logger::queueError(Logger::Warning, "Opcode not halfword aligned");
@@ -141,6 +143,34 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 			Vars.Immediate = pos >> 2;
 		}
 		
+		if (Opcode.flags & THUMB_ADDSUB_IMMEDIATE)
+		{
+			int max = (1 << Vars.ImmediateBitLen) - 1;
+			if (-max <= Vars.Immediate && Vars.Immediate < 0)
+			{
+				Vars.UseNewEncoding = true;
+				switch (Opcode.type)
+				{
+				case THUMB_TYPE2: // add rX,rY,imm
+					Vars.NewEncoding = Opcode.encoding ^ 0x0200;
+					break;
+				case THUMB_TYPE3: // add rX,imm
+					Vars.NewEncoding = Opcode.encoding ^ 0x0800;
+					break;
+				case THUMB_TYPE13: // add sp,imm
+					Vars.NewEncoding = Opcode.encoding ^ 0x0080;
+					break;
+				default:
+					Vars.UseNewEncoding = false;
+					break;
+				}
+				if (Vars.UseNewEncoding)
+				{
+					Vars.Immediate = -Vars.Immediate;
+				}
+			}
+		}
+		
 		if (Opcode.type == THUMB_TYPE1)
 		{
 			int max = (Opcode.flags & THUMB_RIGHTSHIFT_IMMEDIATE) ? 32 : 31;
@@ -177,8 +207,7 @@ void CThumbInstruction::WriteInstruction(unsigned short encoding) const
 
 void CThumbInstruction::Encode() const
 {
-	unsigned int encoding = Opcode.encoding;
-	int immediate;
+	unsigned int encoding = Vars.UseNewEncoding ? Vars.NewEncoding : Opcode.encoding;
 
 	if (Opcode.type == THUMB_TYPE19)	// THUMB.19: long branch with link
 	{
@@ -265,16 +294,8 @@ void CThumbInstruction::Encode() const
 			encoding |= (Vars.rd.num << 8);
 			encoding |= (Vars.Immediate << 0);
 			break;
-		case THUMB_TYPE13:	// THUMB.13: add offset to stack pointer
-			immediate = Vars.Immediate;
-			if (Opcode.flags & THUMB_NEGATIVE_IMMEDIATE) 
-				immediate = (unsigned char)(0-immediate);
-			if (immediate & 0x80)	// sub
-			{
-				encoding |= 1 << 7;
-				immediate = 0x100-immediate;
-			}
-			encoding |= (immediate << 0);
+		case THUMB_TYPE13:	// THUMB.13: add/subtract offset to/from stack pointer
+			encoding |= (Vars.Immediate << 0);
 			break;
 		case THUMB_TYPE14:	// THUMB.14: push/pop registers
 			if (Vars.rlist & 0xC000) encoding |= (1 << 8); // r14 oder r15
