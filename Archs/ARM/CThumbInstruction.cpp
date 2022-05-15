@@ -149,15 +149,18 @@ bool CThumbInstruction::Validate(const ValidateState &state)
 				Logger::queueError(Logger::Error, "Shift amount 0x%02X out of range",Vars.Immediate);
 				return false;
 			}
-		} else if (Vars.ImmediateBitLen != 32)
+		} else if (Opcode.flags & THUMB_BRANCH)
 		{
 			int max = (1 << Vars.ImmediateBitLen) - 1;
-			if (abs(Vars.Immediate) > max)
+			Vars.Immediate &= max;
+		} else if (!(Opcode.flags & (THUMB_POOL | THUMB_PCR)))
+		{
+			int max = (1 << Vars.ImmediateBitLen) - 1;
+			if (Vars.Immediate < 0 || Vars.Immediate > max)
 			{
-				Logger::queueError(Logger::Error, "Immediate value 0x%02X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Immediate value 0x%02X out of range", Vars.Immediate);
 				return false;
 			}
-			Vars.Immediate &= max;
 		}
 	}
 	
