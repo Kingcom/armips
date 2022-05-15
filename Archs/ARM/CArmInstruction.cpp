@@ -239,6 +239,11 @@ bool CArmInstruction::Validate(const ValidateState &state)
 						encoding ^= 0x0200000;
 						immediate = 0-immediate;
 					}
+					else if (Opcode.flags & ARM_OPADDSUB)
+					{
+						encoding ^= 0x0C00000;
+						immediate = 0-immediate;
+					}
 
 					temp = getShiftedImmediate(immediate, Vars.Shift.ShiftAmount);
 					if (temp != -1)
