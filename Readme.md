@@ -483,32 +483,41 @@ These directives can be used to set the architecture that the following assembly
 ### Open a generic file
 
 ```
-.open     FileName,Offset
-.openfile FileName,Offset
-.open     OldFileName,NewFileName,Offset
-.openfile OldFileName,NewFileName,Offset
+.open     FileName,HeaderSize
+.openfile FileName,HeaderSize
+.open     OldFileName,NewFileName,HeaderSize
+.openfile OldFileName,NewFileName,HeaderSize
 ```
 
-Opens the specified file for output. If two file names are specified, then the assembler will copy the file specified by the file name to the second path. If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. `Offset` specifies the header size, which is the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
+Opens the specified file `FileName` for output. This directive terminates the scope for local labels and `equ`s. If two file names are specified, the assembler will first copy the file from `OldFileName` to `NewFileName`, then open `NewFileName`. In this case, if the copy operation fails, e.g. because the two paths point to the same file, an error is thrown.
+
+`HeaderSize` specifies the header size, which is the difference between the first byte of the file and its position in memory. So if file position 0x800 is loaded at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
+
+If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file.
+
 Only the changes specified by the assembly code will be inserted, the rest of the file remains untouched.
 
-This directive terminates the scope for local labels and `equ`s.
-
-The following reads the file `input.bin`, modifies it in memory, and writes the result to `output.bin`.
+The following copies the file `input.bin` to `output.bin`, then opens `output.bin` with a header size of `0x8000000`.
 ```
-.open "input.bin","output.bin",0
+.open "input.bin","output.bin",0x8000000
 ```
 
 ### Create a new file
 
 ```
-.create     FileName,Offset
-.createfile FileName,Offset
+.create     FileName,HeaderSize
+.createfile FileName,HeaderSize
 ```
 
 Creates the specified file for output. If the file already exists, it will be overwritten. This directive terminates the scope for local labels and `equ`s.
 
-If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file. `Offset` specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
+If relative include is off, all paths are relative to the current working directory. Otherwise the path is relative to the including assembly file.
+`HeaderSize` specifies the difference between the first byte of the file and its position in memory. So if file position 0x800 is loaded at position 0x80010000 in memory, the header size is 0x80010000-0x800=0x8000F800. It can be changed later with the [`.headersize`](#changing-the-header-size) directive.
+
+The following creates and opens the file `output.bin` with a header size of `0x8000000`.
+```
+.create "output.bin",0x8000000
+```
 
 ### Close a file
 
@@ -533,7 +542,7 @@ Sets the output pointer to the specified address. `.org`/`org` specifies a memor
 ### Change the header size
 
 ```
-.headersize Offset
+.headersize HeaderSize
 ```
 
 Sets the header size to the given value which is the difference between the file position of a byte and its address in memory. This is used to calculate all addresses up until the next `.headersize` or `.open`/`.create` directive. The current memory address will be updated, but the absolute file offset will remain the same. The header size can be negative so long as the resulting memory address remains positive.
