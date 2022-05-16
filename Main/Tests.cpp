@@ -136,7 +136,7 @@ bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, s
 		} else {
 			result = false;
 		}
-	} else {
+	} else if (expectedRetVal == 0) {
 		// if no errors are expected, there should be none
 		for (size_t i = 0; i < errors.size(); i++)
 		{
