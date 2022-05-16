@@ -33,14 +33,14 @@ const tThumbOpcode ThumbOpcodes[] = {
 	{ "add",   "d,n",              0x1800, THUMB_TYPE2,    2,  THUMB_REGISTER|THUMB_DS },
 	{ "sub",   "d,s,n",            0x1A00, THUMB_TYPE2,    2,  THUMB_REGISTER },
 	{ "sub",   "d,n",              0x1A00, THUMB_TYPE2,    2,  THUMB_REGISTER|THUMB_DS },
-	{ "add",   "d,s,/#i\x03",      0x1C00, THUMB_TYPE2,    2,  THUMB_IMMEDIATE },
-	{ "sub",   "d,s,/#i\x03",      0x1E00, THUMB_TYPE2,    2,  THUMB_IMMEDIATE },
+	{ "add",   "d,s,/#i\x03",      0x1C00, THUMB_TYPE2,    2,  THUMB_IMMEDIATE|THUMB_ADDSUB_IMMEDIATE },
+	{ "sub",   "d,s,/#i\x03",      0x1E00, THUMB_TYPE2,    2,  THUMB_IMMEDIATE|THUMB_ADDSUB_IMMEDIATE },
 	{ "mov",   "d,s",              0x1C00, THUMB_TYPE2,    2,  0 },
 
 	{ "mov",   "d,/#i\x08",        0x2000, THUMB_TYPE3,    2,  THUMB_IMMEDIATE },
 	{ "cmp",   "d,/#i\x08",        0x2800, THUMB_TYPE3,    2,  THUMB_IMMEDIATE },
-	{ "add",   "d,/#i\x08",        0x3000, THUMB_TYPE3,    2,  THUMB_IMMEDIATE },
-	{ "sub",   "d,/#i\x08",        0x3800, THUMB_TYPE3,    2,  THUMB_IMMEDIATE },
+	{ "add",   "d,/#i\x08",        0x3000, THUMB_TYPE3,    2,  THUMB_IMMEDIATE|THUMB_ADDSUB_IMMEDIATE },
+	{ "sub",   "d,/#i\x08",        0x3800, THUMB_TYPE3,    2,  THUMB_IMMEDIATE|THUMB_ADDSUB_IMMEDIATE },
 
 	{ "and",   "d,s",              0x4000, THUMB_TYPE4,    2,  THUMB_REGISTER },
 	{ "eor",   "d,s",              0x4040, THUMB_TYPE4,    2,  THUMB_REGISTER },
@@ -107,11 +107,11 @@ const tThumbOpcode ThumbOpcodes[] = {
 	{ "add",   "d,=/#i\x20",       0xA000, THUMB_TYPE12,   2,  THUMB_D|THUMB_IMMEDIATE|THUMB_PCR },
 	{ "add",   "d,r\xD,/#i\x08",   0xA800, THUMB_TYPE12,   2,  THUMB_D|THUMB_IMMEDIATE|THUMB_WORD },
 
-	{ "add",   "r\xD,/#i\x08",     0xB000, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD },
-	{ "sub",   "r\xD,/#i\x08",     0xB000, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD|THUMB_NEGATIVE_IMMEDIATE },
+	{ "add",   "r\xD,/#i\x07",     0xB000, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD|THUMB_ADDSUB_IMMEDIATE },
+	{ "sub",   "r\xD,/#i\x07",     0xB080, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD|THUMB_ADDSUB_IMMEDIATE },
 
-	{ "add",   "r\xD,r\xD,/#i\x08",0xB000, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD },
-	{ "sub",   "r\xD,r\xD,/#i\x08",0xB000, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD|THUMB_NEGATIVE_IMMEDIATE },
+	{ "add",   "r\xD,r\xD,/#i\x07",0xB000, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD|THUMB_ADDSUB_IMMEDIATE },
+	{ "sub",   "r\xD,r\xD,/#i\x07",0xB080, THUMB_TYPE13,   2,  THUMB_IMMEDIATE|THUMB_WORD|THUMB_ADDSUB_IMMEDIATE },
 
 	{ "push",  "/{R\xFF\x40/}",    0xB400, THUMB_TYPE14,   2,  THUMB_RLIST },
 	{ "pop",   "/{R\xFF\x80/}",    0xBC00, THUMB_TYPE14,   2,  THUMB_RLIST },

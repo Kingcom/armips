@@ -54,6 +54,7 @@
 #define ARM_OPANDBIC		0x40000000	// ... of and/bic
 #define ARM_OPCMPCMN		0x80000000	// ... of cmp/cmn
 #define ARM_PCR			   0x100000000	// pc relative
+#define ARM_OPADDSUB	   0x200000000	// ... of add/sub
 
 struct tArmOpcode
 {

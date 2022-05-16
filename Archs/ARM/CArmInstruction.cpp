@@ -239,6 +239,11 @@ bool CArmInstruction::Validate(const ValidateState &state)
 						encoding ^= 0x0200000;
 						immediate = 0-immediate;
 					}
+					else if (Opcode.flags & ARM_OPADDSUB)
+					{
+						encoding ^= 0x0C00000;
+						immediate = 0-immediate;
+					}
 
 					temp = getShiftedImmediate(immediate, Vars.Shift.ShiftAmount);
 					if (temp != -1)
@@ -246,11 +251,13 @@ bool CArmInstruction::Validate(const ValidateState &state)
 						Vars.Opcode.NewEncoding = encoding;
 						Vars.Opcode.UseNewEncoding = true;
 					}
-					else
-					{
-						Logger::queueError(Logger::Error, "Invalid shifted immediate %X",Vars.OriginalImmediate);
-						return false;
-					}
+				}
+				if (temp == -1)
+				{
+					// If we get here then the instruction did not contain a shifted immediate
+					// and we failed to optimize into another instruction
+					Logger::queueError(Logger::Error, "Invalid shifted immediate 0x%X", Vars.OriginalImmediate);
+					return false;
 				}
 			}
 			Vars.Immediate = temp;
@@ -327,7 +334,7 @@ bool CArmInstruction::Validate(const ValidateState &state)
 			unsigned int check = Opcode.flags & ARM_ABS ? abs(Vars.Immediate) : Vars.Immediate;
 			if (check >= (unsigned int)(1 << Vars.ImmediateBitLen))
 			{
-				Logger::queueError(Logger::Error, "Immediate value %X out of range",Vars.Immediate);
+				Logger::queueError(Logger::Error, "Immediate value %X out of range",Vars.OriginalImmediate);
 				return false;
 			}
 		}

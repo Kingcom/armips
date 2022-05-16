@@ -14,6 +14,8 @@ struct ThumbOpcodeVariables {
 	int ImmediateBitLen;
 	int OriginalImmediate;
 	int rlist;
+	unsigned int NewEncoding;
+	bool UseNewEncoding;
 	char RlistStr[32];
 } ;
 

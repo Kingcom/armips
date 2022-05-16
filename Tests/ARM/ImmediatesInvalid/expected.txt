@@ -1,0 +1,65 @@
+﻿ImmediatesInvalid.asm(9) error: Immediate value 0xFFFFFFFF out of range
+ImmediatesInvalid.asm(10) error: Immediate value 0x100 out of range
+ImmediatesInvalid.asm(14) error: Immediate value 0xFFFFFFFF out of range
+ImmediatesInvalid.asm(15) error: Immediate value 0x100 out of range
+ImmediatesInvalid.asm(21) error: Immediate value 0x100 out of range
+ImmediatesInvalid.asm(22) error: Immediate value 0xFFFFFF00 out of range
+ImmediatesInvalid.asm(28) error: Immediate value 0x100 out of range
+ImmediatesInvalid.asm(29) error: Immediate value 0xFFFFFF00 out of range
+ImmediatesInvalid.asm(35) error: Immediate value 0x8 out of range
+ImmediatesInvalid.asm(36) error: Immediate value 0xFFFFFFF8 out of range
+ImmediatesInvalid.asm(42) error: Immediate value 0x8 out of range
+ImmediatesInvalid.asm(43) error: Immediate value 0xFFFFFFF8 out of range
+ImmediatesInvalid.asm(49) error: Immediate value 0x200 out of range
+ImmediatesInvalid.asm(50) error: Immediate value 0xFFFFFE00 out of range
+ImmediatesInvalid.asm(56) error: Immediate value 0x200 out of range
+ImmediatesInvalid.asm(57) error: Immediate value 0xFFFFFE00 out of range
+ImmediatesInvalid.asm(67) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(68) error: Invalid shifted immediate 0xFFFFFE00
+ImmediatesInvalid.asm(72) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(73) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(79) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(80) error: Invalid shifted immediate 0xFFFFFE01
+ImmediatesInvalid.asm(84) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(85) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(91) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(92) error: Invalid shifted immediate 0xFFFFFE01
+ImmediatesInvalid.asm(96) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(97) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(101) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(102) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(106) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(107) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(111) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(112) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(116) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(117) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(123) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(124) error: Invalid shifted immediate 0xFFFFFE01
+ImmediatesInvalid.asm(130) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(131) error: Invalid shifted immediate 0xFFFFFE01
+ImmediatesInvalid.asm(135) error: Invalid shifted immediate 0xFFFFFFFF
+ImmediatesInvalid.asm(136) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(142) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(143) error: Invalid shifted immediate 0xFFFFFE01
+ImmediatesInvalid.asm(149) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(150) error: Invalid shifted immediate 0xFFFFFE00
+ImmediatesInvalid.asm(156) error: Invalid shifted immediate 0x1FF
+ImmediatesInvalid.asm(157) error: Invalid shifted immediate 0xFFFFFE01
+ImmediatesInvalid.asm(166) error: Invalid shifted immediate 0x8000007F
+ImmediatesInvalid.asm(167) error: Invalid shifted immediate 0xE000001F
+ImmediatesInvalid.asm(168) error: Invalid shifted immediate 0xF8000007
+ImmediatesInvalid.asm(169) error: Invalid shifted immediate 0xFE000001
+ImmediatesInvalid.asm(170) error: Invalid shifted immediate 0x7F800000
+ImmediatesInvalid.asm(171) error: Invalid shifted immediate 0x1FE00000
+ImmediatesInvalid.asm(172) error: Invalid shifted immediate 0x7F80000
+ImmediatesInvalid.asm(173) error: Invalid shifted immediate 0x1FE0000
+ImmediatesInvalid.asm(174) error: Invalid shifted immediate 0x7F8000
+ImmediatesInvalid.asm(175) error: Invalid shifted immediate 0x1FE000
+ImmediatesInvalid.asm(176) error: Invalid shifted immediate 0x7F800
+ImmediatesInvalid.asm(177) error: Invalid shifted immediate 0x1FE00
+ImmediatesInvalid.asm(178) error: Invalid shifted immediate 0x7F80
+ImmediatesInvalid.asm(179) error: Invalid shifted immediate 0x1FE0
+ImmediatesInvalid.asm(180) error: Invalid shifted immediate 0x7F8
+ImmediatesInvalid.asm(181) error: Invalid shifted immediate 0x1FE
+ImmediatesInvalid.asm(159) error: Unable to find literal pool
