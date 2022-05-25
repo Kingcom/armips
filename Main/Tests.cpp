@@ -169,6 +169,28 @@ bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, s
 		}
 	}
 
+	if (fs::exists("expected.sym"))
+	{
+		TextFile expectedFile;
+		TextFile actualFile;
+		expectedFile.open("expected.sym",TextFile::Read);
+		actualFile.open("output.sym",TextFile::Read);
+		if (actualFile.isOpen())
+		{
+			std::vector<std::string> expected = expectedFile.readAll();
+			std::vector<std::string> actual = actualFile.readAll();
+
+			if (expected != actual)
+			{
+				errorString += tfm::format("Symbols file does not match\n");
+				result = false;
+			}
+		} else {
+			errorString += tfm::format("Symbols file not produced\n");
+			result = false;
+		}
+	}
+
 	fs::current_path(oldDir);
 	return result;
 }
