@@ -75,6 +75,17 @@ bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, s
 	fs::path oldDir = fs::current_path();
 	fs::current_path(dir);
 
+	// Remove previous output files
+	for (const auto& file : fs::directory_iterator(fs::current_path()))
+	{
+		std::string fileName = file.path().filename().u8string();
+		if (fileName.rfind("output",0) == 0)
+		{
+			// If filename starts with output, delete the file
+			fs::remove(file.path());
+		}
+	}
+
 	ArmipsArguments settings;
 	std::vector<std::string> errors;
 	int expectedRetVal = 0;
