@@ -591,12 +591,11 @@ CDirectiveSymImport::CDirectiveSymImport(const fs::path& fileName)
 	{
 		// End line at comment (starting with ;)
 		// \x1A included here as well since No$gba .sym file ends with it
-		size_t lineEnd = line.find_first_of(";\r\x1A");
+		size_t lineEnd = line.length();
+		lineEnd = std::min(line.find_first_of(";\r\x1A"),lineEnd);
 		if (lineEnd != std::string::npos && lineEnd > 0)
 		{
-			lineEnd = line.find_last_not_of(" \t",lineEnd-1);
-			if (lineEnd != std::string::npos)
-				lineEnd += 1;
+			lineEnd = std::max(line.find_last_not_of(" \t",lineEnd-1)+1,(size_t)0);
 		}
 
 		// Skip empty line
