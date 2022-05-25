@@ -562,3 +562,125 @@ void DirectiveObjImport::writeSymData(SymbolData& symData) const
 
 	rel.writeSymbols(symData);
 }
+
+//
+// CDirectiveSymImport
+//
+CDirectiveSymImport::CDirectiveSymImport(const fs::path& fileName)
+{
+	// We may be adding global labels, so start a new section
+	updateSection(++Global.Section);
+
+	this->fileName = getFullPathName(fileName);
+	if (!fs::exists(this->fileName))
+	{
+		Logger::printError(Logger::FatalError,"File %s not found",this->fileName.u8string());
+		return;
+	}
+
+	fs::ifstream file(this->fileName,fs::ifstream::in|fs::ifstream::binary);
+	if (!file.is_open())
+	{
+		Logger::printError(Logger::FatalError,"Could not open file %s",this->fileName.u8string());
+		return;
+	}
+
+	std::string line;
+	size_t l = 0;
+	while (l++, std::getline(file,line,'\n'))
+	{
+		// End line at comment (starting with ;)
+		// \x1A included here as well since No$gba .sym file ends with it
+		size_t lineEnd = line.find_first_of(";\r\x1A");
+		if (lineEnd != std::string::npos && lineEnd > 0)
+		{
+			lineEnd = line.find_last_not_of(" \t",lineEnd-1);
+			if (lineEnd != std::string::npos)
+				lineEnd += 1;
+		}
+
+		// Skip empty line
+		if (lineEnd <= 0)
+			continue;
+		line = line.substr(0,lineEnd);
+
+		// Parse address of exactly 8 chars
+		const char* addressStart = line.c_str();
+		char* addressEnd;
+		uint32_t address = strtoul(addressStart,&addressEnd,16);
+		if (addressEnd != addressStart+8)
+		{
+			Logger::printError(Logger::Warning,"Invalid symbol address on line %i of symbols file %s",l,this->fileName);
+			continue;
+		}
+
+		// Skip one or more space or tabs
+		size_t startOfName = line.find_first_not_of(" \t",8);
+		if (startOfName == std::string::npos || startOfName < (8+1))
+		{
+			Logger::printError(Logger::Warning,"Invalid symbol address on line %i of symbols file %s",l,this->fileName);
+			continue;
+		}
+
+		// Rest of the line is the symbol name
+		std::string name = line.substr(startOfName);
+
+		// Create label for this symbol, if it's not a directive and it would be a global label
+		const Identifier identifier = Identifier(name);
+		if (name.find('.') != 0 && Global.symbolTable.isGlobalSymbol(identifier))
+		{
+			std::shared_ptr<Label> label = Global.symbolTable.getLabel(identifier,-1,-1);
+			if (label == nullptr)
+			{
+				// No$gba (supposedly...) allows pretty much any character, but armips doesn't
+				// We can't import this label, but if the user never references it, it's fine
+				// (If it IS referenced, that will eventually yield an error anyway)
+				Logger::printError(Logger::Warning, "Invalid label name \"%s\" on line %i of symbols file %s",name,l,this->fileName);
+				continue;
+			}
+			if (label->isDefined())
+			{
+				Logger::printError(Logger::Error, "Label \"%s\" already defined on line %i of symbols file %s",name,l,this->fileName);
+				continue;
+			}
+			// If already defined and not a global symbol, that's fine, we are in a dedicated section anyway
+			label->setOriginalName(identifier);
+			label->setValue(address);
+			label->setUpdateInfo(false);
+			label->setDefined(true);
+
+			// Store for later
+			labels.push_back(label);
+		}
+
+		// Store the symbol either way since we want to merge everything into the output symfile
+		symbols.push_back(std::pair(address, name));
+	}
+}
+
+bool CDirectiveSymImport::Validate(const ValidateState& state)
+{
+	return false;
+}
+
+void CDirectiveSymImport::Encode() const
+{
+
+}
+
+void CDirectiveSymImport::writeTempData(TempData& tempData) const
+{
+	tempData.writeLine(-1,tfm::format(".importsym \"%s\"",fileName.u8string()));
+	for (const auto& label: labels)
+	{
+		tempData.writeLine(label->getValue(),tfm::format("%s",label->getName()));
+	}
+}
+
+void CDirectiveSymImport::writeSymData(SymbolData& symData) const
+{
+	for (const auto& symbol: symbols)
+	{
+		symData.addLabel(symbol.first,symbol.second);
+	}
+}
