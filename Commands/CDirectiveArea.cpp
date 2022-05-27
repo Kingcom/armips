@@ -177,7 +177,10 @@ void CDirectiveArea::writeSymData(SymbolData& symData) const
 	if (fillExpression.isLoaded())
 	{
 		int64_t subAreaUsage = Allocations::getSubAreaUsage(fileID, position);
-		symData.addData(position+contentSize+subAreaUsage,areaSize-contentSize-subAreaUsage,SymbolData::Data8);
+		int64_t address = position+(contentSize+subAreaUsage);
+		size_t fillSize = areaSize-(contentSize+subAreaUsage);
+		if (fillSize != 0)
+			symData.addData(address,fillSize,SymbolData::Data8);
 	}
 }
 
