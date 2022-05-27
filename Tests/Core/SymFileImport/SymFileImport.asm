@@ -1,6 +1,9 @@
 ﻿.nds
 .create "output.bin",0
 
+.if defined(.pool)
+	.error ".pool should not be accessible here"
+.endif
 .if defined(@@LocalLabel)
 	.error "@@LocalLabel should not be accessible here"
 .endif
@@ -10,6 +13,9 @@
 
 .importsym "input.sym"
 
+.if defined(.pool)
+	.error ".pool should not be accessible here"
+.endif
 .if defined(@@LocalLabel)
 	.error "@@LocalLabel should not be accessible here"
 .endif
@@ -22,6 +28,7 @@
 .dd	ValidLabelWithTabs
 .dd	ValidLabelWithSpacesAndTabs
 .dd	ValidLabelWithComment
+.dd	Function
 
 ldr	r0,=0xABCDABCD
 .pool

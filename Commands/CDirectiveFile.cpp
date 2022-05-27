@@ -566,6 +566,24 @@ void DirectiveObjImport::writeSymData(SymbolData& symData) const
 //
 // CDirectiveSymImport
 //
+std::string trimSymFileLine(std::string line)
+{
+	// Trim start of line
+	size_t lineStart = line.find_first_not_of(" \t");
+
+	// End line at comment (starting with ;)
+	// \x1A included here as well since No$gba .sym file ends with it
+	size_t lineEnd = line.find_first_of(";\x1A");
+
+	if (lineStart >= lineEnd)
+		return std::string(); // line consists of only whitespace
+
+	// Trim end of line
+	lineEnd = line.find_last_not_of(" \t",lineEnd-1);
+	// lineEnd now points to position of last char
+	return line.substr(lineStart,lineEnd-lineStart+1);
+}
+
 CDirectiveSymImport::CDirectiveSymImport(const fs::path& fileName)
 {
 	// We may be adding global labels, so start a new section
@@ -578,51 +596,61 @@ CDirectiveSymImport::CDirectiveSymImport(const fs::path& fileName)
 		return;
 	}
 
-	fs::ifstream file(this->fileName,fs::ifstream::in|fs::ifstream::binary);
-	if (!file.is_open())
+	TextFile file;
+	file.open(this->fileName,TextFile::Read);
+	if (!file.isOpen())
 	{
 		Logger::printError(Logger::FatalError,"Could not open file %s",this->fileName.u8string());
 		return;
 	}
 
-	std::string line;
+	std::vector<std::string> lines = file.readAll();
 	size_t l = 0;
-	while (l++, std::getline(file,line,'\n'))
+	for (std::string line: lines)
 	{
-		// End line at comment (starting with ;)
-		// \x1A included here as well since No$gba .sym file ends with it
-		size_t lineEnd = line.length();
-		lineEnd = std::min(line.find_first_of(";\r\x1A"),lineEnd);
-		if (lineEnd != std::string::npos && lineEnd > 0)
-		{
-			lineEnd = std::max(line.find_last_not_of(" \t",lineEnd-1)+1,(size_t)0);
-		}
-
-		// Skip empty line
-		if (lineEnd <= 0)
+		l++;
+		line = trimSymFileLine(line);
+		if (line.empty())
 			continue;
-		line = line.substr(0,lineEnd);
 
-		// Parse address of exactly 8 chars
-		const char* addressStart = line.c_str();
-		char* addressEnd;
-		uint32_t address = strtoul(addressStart,&addressEnd,16);
-		if (addressEnd != addressStart+8)
+		// Parse symbol address
+		const char* addrStart = (char*)line.c_str();
+		char* addrEnd;
+		uint32_t symAddr = strtoul(addrStart,&addrEnd,16);
+		// Check: not 8 chars, not followed by space/tab
+		if (addrStart+8 != addrEnd || !strchr(" \t",*addrEnd))
 		{
 			Logger::printError(Logger::Warning,"Invalid symbol address on line %i of symbols file %s",l,this->fileName);
 			continue;
 		}
 
-		// Skip one or more space or tabs
-		size_t startOfName = line.find_first_not_of(" \t",8);
-		if (startOfName == std::string::npos || startOfName < (8+1))
-		{
-			Logger::printError(Logger::Warning,"Invalid symbol address on line %i of symbols file %s",l,this->fileName);
-			continue;
-		}
+		// Rest of the line is the symbol value
+		std::string symVal = std::string(addrEnd);
+		symVal = symVal.substr(symVal.find_first_not_of(" \t"));
 
-		// Rest of the line is the symbol name
-		std::string name = line.substr(startOfName);
+		std::string name = symVal;
+
+		// Get optional label size
+		size_t commaPos = symVal.find(',');
+		uint32_t funcSize = 0;
+		if (commaPos != std::string::npos)
+		{
+			// Parse size
+			const char* sizeStart = symVal.c_str()+commaPos+1;
+			char* sizeEnd;
+			funcSize = strtoul(sizeStart,&sizeEnd,16);
+			// Check: empty size, not in range, not followed by eol/space/tab/comma
+			if (sizeStart == sizeEnd || errno == ERANGE || !strchr("\0 \t,",*sizeEnd))
+			{
+				Logger::printError(Logger::Warning,"Invalid function size on line %i of symbols file %s",l,this->fileName);
+				funcSize = 0;
+				// We can still salvage this I guess
+			}
+			else {
+				// Got valid label size, so remove it from identifier (trim end in the process)
+				name = symVal.substr(0,symVal.find_first_of(" \t"));
+			}
+		}
 
 		// Create label for this symbol, if it's not a directive and it would be a global label
 		const Identifier identifier = Identifier(name);
@@ -634,26 +662,26 @@ CDirectiveSymImport::CDirectiveSymImport(const fs::path& fileName)
 				// No$gba (supposedly...) allows pretty much any character, but armips doesn't
 				// We can't import this label, but if the user never references it, it's fine
 				// (If it IS referenced, that will eventually yield an error anyway)
-				Logger::printError(Logger::Warning, "Invalid label name \"%s\" on line %i of symbols file %s",name,l,this->fileName);
+				Logger::printError(Logger::Warning,"Invalid label name \"%s\" on line %i of symbols file %s",name,l,this->fileName);
 				continue;
 			}
 			if (label->isDefined())
 			{
-				Logger::printError(Logger::Error, "Label \"%s\" already defined on line %i of symbols file %s",name,l,this->fileName);
+				Logger::printError(Logger::Error,"Label \"%s\" already defined on line %i of symbols file %s",name,l,this->fileName);
 				continue;
 			}
 			// If already defined and not a global symbol, that's fine, we are in a dedicated section anyway
 			label->setOriginalName(identifier);
-			label->setValue(address);
+			label->setValue(symAddr);
+			label->setInfo(funcSize);
 			label->setUpdateInfo(false);
 			label->setDefined(true);
 
-			// Store for later
 			labels.push_back(label);
+		} else {
+			// Store the symbol anyway since we want to merge everything into the output symfile
+			otherSymbols.push_back(std::pair(symAddr,symVal));
 		}
-
-		// Store the symbol either way since we want to merge everything into the output symfile
-		symbols.push_back(std::pair(address, name));
 	}
 }
 
@@ -678,7 +706,17 @@ void CDirectiveSymImport::writeTempData(TempData& tempData) const
 
 void CDirectiveSymImport::writeSymData(SymbolData& symData) const
 {
-	for (const auto& symbol: symbols)
+	for (const auto& label: labels)
+	{
+		if (label->getInfo())
+			symData.startFunction(label->getValue());
+
+		symData.addLabel(label->getValue(),label->getName().string());
+
+		if (label->getInfo())
+			symData.endFunction(label->getValue()+label->getInfo());
+	}
+	for (const auto& symbol: otherSymbols)
 	{
 		symData.addLabel(symbol.first,symbol.second);
 	}
