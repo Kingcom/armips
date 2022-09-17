@@ -512,15 +512,18 @@ void CDirectiveHeaderSize::writeTempData(TempData& tempData) const
 DirectiveObjImport::DirectiveObjImport(const fs::path& inputName)
 {
 	ctor = nullptr;
-	if (rel.init(inputName))
+	success = rel.init(inputName);
+	if (success)
 	{
+		success = true;
 		rel.exportSymbols();
 	}
 }
 
 DirectiveObjImport::DirectiveObjImport(const fs::path& inputName, const Identifier& ctorName)
 {
-	if (rel.init(inputName))
+	success = rel.init(inputName);
+	if (success)
 	{
 		rel.exportSymbols();
 		ctor = rel.generateCtor(ctorName);

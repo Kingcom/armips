@@ -59,8 +59,8 @@ std::unique_ptr<IElfRelocator> CMipsArchitecture::getElfRelocator()
 	case MARCH_PS2:
 	case MARCH_PSP:
 	case MARCH_N64:
-		return std::make_unique<MipsElfRelocator>();
 	case MARCH_PSX:
+		return std::make_unique<MipsElfRelocator>();
 	case MARCH_RSP:
 	default:
 		return nullptr;

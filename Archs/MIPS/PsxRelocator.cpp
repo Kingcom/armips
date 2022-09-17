@@ -328,7 +328,9 @@ bool PsxRelocator::init(const fs::path& inputName)
 	auto inputFiles = loadPsxLibrary(inputName);
 	if (inputFiles.size() == 0)
 	{
-		Logger::printError(Logger::Error, "Could not load library");
+		// The ELF loader will report those messages, if needed.
+		// Logger::printError(Logger::Error, "Could not load library");
+
 		return false;
 	}
 
@@ -341,7 +343,7 @@ bool PsxRelocator::init(const fs::path& inputName)
 
 		if (!parseObject(entry.data,file))
 		{
-			Logger::printError(Logger::Error, "Could not load object file %s",entry.name);
+			// Logger::printError(Logger::Error, "Could not load object file %s",entry.name);
 			return false;
 		}
 
@@ -578,9 +580,7 @@ void PsxRelocator::writeSymbols(SymbolData& symData) const
 
 DirectivePsxObjImport::DirectivePsxObjImport(const fs::path& fileName)
 {
-	if (rel.init(fileName))
-	{
-	}
+	success = rel.init(fileName);
 }
 
 bool DirectivePsxObjImport::Validate(const ValidateState &state)
