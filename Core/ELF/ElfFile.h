@@ -115,6 +115,7 @@ struct RelocationData
 	int64_t opcodeOffset;
 	int64_t relocationBase;
 	uint32_t opcode;
+	int32_t addend;
 
 	int64_t symbolAddress;
 	int targetSymbolType;

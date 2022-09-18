@@ -68,6 +68,8 @@ using DirectiveMap = std::unordered_multimap<std::string, const DirectiveEntry>;
 #define DIRECTIVE_ARM_BIG			0x00000004
 #define DIRECTIVE_ARM_LITTLE		0x00000005
 
+#define DIRECTIVE_SH_SATURN			0x00000001
+
 // Area directive flags
 #define DIRECTIVE_AREA_SHARED		0x00000001
 

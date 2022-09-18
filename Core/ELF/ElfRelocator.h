@@ -78,7 +78,7 @@ public:
 	const ByteArray& getData() const { return outputData; };
 private:
 	bool relocateFile(ElfRelocatorFile& file, int64_t& relocationAddress);
-	void loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, Endianness endianness);
+	void loadRelocation(Elf32_Rela& rela, bool addend, ByteArray& data, int offset, Endianness endianness);
 
 	ByteArray outputData;
 	std::unique_ptr<IElfRelocator> relocator;

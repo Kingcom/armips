@@ -2,6 +2,7 @@
 
 #include "Archs/ARM/Arm.h"
 #include "Archs/MIPS/Mips.h"
+#include "Archs/SuperH/SuperH.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CDirectiveArea.h"
 #include "Commands/CDirectiveConditional.h"
@@ -452,6 +453,20 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveArmArch(Parser& parser, int fla
 	return nullptr;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveShArch(Parser& parser, int flags)
+{
+	Architecture::setCurrent(SuperH);
+
+	switch (flags)
+	{
+	case DIRECTIVE_SH_SATURN:
+		SuperH.setVersion(SHARCH_SATURN);
+		return std::make_unique<ArchitectureCommand>(".saturn", "");
+	}
+
+	return nullptr;
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
@@ -784,6 +799,8 @@ const DirectiveMap directives = {
 	{ ".3ds",             { &parseDirectiveArmArch,         DIRECTIVE_ARM_3DS } },
 	{ ".arm.big",         { &parseDirectiveArmArch,         DIRECTIVE_ARM_BIG } },
 	{ ".arm.little",      { &parseDirectiveArmArch,         DIRECTIVE_ARM_LITTLE } },
+
+	{ ".saturn",          { &parseDirectiveShArch,          DIRECTIVE_SH_SATURN } },
 
 	{ ".area",            { &parseDirectiveArea,            0 } },
 	{ ".autoregion",      { &parseDirectiveAutoRegion,      0 } },

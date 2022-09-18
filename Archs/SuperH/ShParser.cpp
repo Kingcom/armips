@@ -1,0 +1,396 @@
+#include "Archs/SuperH/ShParser.h"
+#include "Archs/SuperH/SuperH.h"
+#include "Commands/CDirectiveFile.h"
+#include "Core/Common.h"
+#include "Parser/DirectivesParser.h"
+#include "Parser/ExpressionParser.h"
+#include "Parser/Parser.h"
+#include "Util/Util.h"
+
+#define CHECK(exp) if (!(exp)) return false;
+
+static const char* shSpecialForcedRegisters[] =
+{
+	"r0", "sr", "gbr", "vbr", "mach", "macl", "pr", nullptr
+};
+
+const ShRegisterDescriptor shRegisters[] = {
+	{ "r0",  0 },   { "r1",  1},   { "r2",  2 },  { "r3",  3 },
+	{ "r4",  4 },   { "r5",  5},   { "r6",  6 },  { "r7",  7 },
+	{ "r8",  8 },   { "r9",  9},   { "r10", 10 }, { "r11", 11 },
+	{ "r12", 12 },  { "r13", 13},  { "r14", 14 }, { "r15", 15 },
+	{ "@r0",  0 },   { "@r1",  1},   { "@r2",  2 },  { "@r3",  3 },
+	{ "@r4",  4 },   { "@r5",  5},   { "@r6",  6 },  { "@r7",  7 },
+	{ "@r8",  8 },   { "@r9",  9},   { "@r10", 10 }, { "@r11", 11 },
+	{ "@r12", 12 },  { "@r13", 13},  { "@r14", 14 }, { "@r15", 15 },
+};
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveShImportObj(Parser& parser, int flags)
+{
+	std::vector<Expression> list;
+	if (!parser.parseExpressionList(list,1,2))
+		return nullptr;
+
+	StringLiteral inputName;
+	if (!list[0].evaluateString(inputName,true))
+		return nullptr;
+	
+	if (list.size() == 2)
+	{
+		Identifier ctorName;
+		if (!list[1].evaluateIdentifier(ctorName))
+			return nullptr;
+		
+		return std::make_unique<DirectiveObjImport>(inputName.path(),ctorName);
+	}
+
+	return std::make_unique<DirectiveObjImport>(inputName.path());
+}
+
+const DirectiveMap shDirectives = {
+	{ ".importobj",		{ &parseDirectiveShImportObj,		0 } },
+	{ ".importlib",		{ &parseDirectiveShImportObj,		0 } },
+};
+
+std::unique_ptr<CAssemblerCommand> ShParser::parseDirective(Parser& parser)
+{
+	return parser.parseDirective(shDirectives);
+}
+
+bool ShParser::parseRegisterTable(Parser& parser, ShRegisterValue& dest, const ShRegisterDescriptor* table, size_t count)
+{
+	const Token &token = parser.peekToken(0);
+
+	if (token.type != TokenType::Identifier)
+		return false;
+
+	const auto &identifier = token.identifierValue();
+	for (size_t i = 0; i < count; i++)
+	{
+		if (identifier == table[i].name)
+		{
+			dest.name = identifier;
+			dest.num = table[i].num;
+			parser.eatToken();
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool ShParser::parseRegister(Parser& parser, ShRegisterValue& dest)
+{
+	dest.type = ShRegisterType::Normal;
+	return parseRegisterTable(parser, dest, shRegisters, 32);
+}
+
+bool ShParser::parseImmediate(Parser& parser, Expression& dest)
+{
+	// check for (reg) or reg sequence
+	TokenizerPosition pos = parser.getTokenizer()->getPosition();
+
+	bool hasParen = parser.peekToken().type == TokenType::LParen;
+	if (hasParen)
+		parser.eatToken();
+
+	ShRegisterValue tempValue;
+	bool isRegister = parseRegister(parser,tempValue);
+	parser.getTokenizer()->setPosition(pos);
+
+	if (isRegister)
+		return false;
+
+	dest = parser.parseExpression();
+	return dest.isLoaded();
+}
+
+bool ShParser::matchSymbol(Parser& parser, char symbol)
+{
+	switch (symbol)
+	{
+	case '(':
+		return parser.matchToken(TokenType::LParen);
+	case ')':
+		return parser.matchToken(TokenType::RParen);
+	case ',':
+		return parser.matchToken(TokenType::Comma);
+	case '#':
+		return parser.matchToken(TokenType::Hash);
+	case '-':
+		return parser.matchToken(TokenType::Minus);
+	case '+':
+		return parser.matchToken(TokenType::Plus);
+	}
+
+	return false;
+}
+
+static bool decodeImmediateSize(const char*& encoding, ShImmediateType& dest)
+{
+	int num = 0;
+	while (*encoding >= '0' && *encoding <= '9')
+	{
+		num = num*10 + *encoding-'0';
+		encoding++;
+	}
+
+	switch (num)
+	{
+	case 4:
+		dest = ShImmediateType::Immediate4;
+		break;
+	case 8:
+		dest = ShImmediateType::Immediate8;
+		break;
+	case 12:
+		dest = ShImmediateType::Immediate12;
+		break;
+	default:
+		return false;
+	}
+
+	return true;
+}
+
+bool ShParser::decodeOpcode(const std::string& name, const tShOpcode& opcode)
+{
+	const char* encoding = opcode.name;
+	size_t pos = 0;
+
+	registers.reset();
+	immediate.reset();
+	opcodeData.reset();
+
+	while (*encoding != 0)
+	{
+		switch (*encoding++)
+		{
+		default:
+			CHECK(pos < name.size());
+			CHECK(*(encoding-1) == name[pos++]);
+			break;
+		}
+	}
+
+	return pos >= name.size();
+}
+
+bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
+{
+	const char* encoding = opcode.encoding;
+
+	// initialize opcode variables
+	immediate.primary.type = ShImmediateType::None;
+
+	bool match = false;
+	while (*encoding != 0)
+	{
+		if (opcode.flags & SH_FREG && !match)
+		{
+			const char** fReg = shSpecialForcedRegisters;
+			bool skip = false;
+			const Token &token = parser.peekToken();
+			while (*fReg)
+			{
+				int length = strlen(*fReg);
+				if (memcmp(*fReg, encoding, length) == 0)
+				{
+					if (token.type != TokenType::Identifier)
+						break;
+
+					const auto &identifier = token.identifierValue();
+					if (identifier.string() == std::string(*fReg))
+					{
+						match = true;
+						skip = true;
+						encoding += length;
+						parser.eatToken();
+						break;
+					}
+
+					break;
+				}
+				fReg += 1;
+			}
+			if (skip)
+				continue;
+		}
+
+		switch (*encoding++)
+		{
+		case 't':	// register
+			CHECK(parseRegister(parser,registers.grt));
+			break;
+		case 's':	// register
+			CHECK(parseRegister(parser,registers.grs));
+			break;
+		case 'i':	// primary immediate
+			CHECK(parseImmediate(parser,immediate.primary.expression));
+			CHECK(decodeImmediateSize(encoding,immediate.primary.type));
+			break;
+		case '@':
+			if (parser.peekToken().type != TokenType::Identifier)
+				return false;
+			if (parser.peekToken().identifierValue().string()[0] != '@')
+				return false;
+			if (*encoding == 't')
+			{
+				CHECK(parseRegister(parser,registers.grt));
+			}
+			else if (*encoding == 's')
+			{
+				CHECK(parseRegister(parser,registers.grs));
+			}
+			else if (*encoding == '(' || *encoding == '-')
+			{
+				parser.eatToken();
+				CHECK(matchSymbol(parser, *encoding));
+			}
+			else
+			{
+				return false;
+			}
+			encoding++;
+			break;
+		default:
+			CHECK(matchSymbol(parser,*(encoding-1)));
+			break;
+		}
+	}
+
+	opcodeData.opcode = opcode;
+
+	// the next token has to be a separator, else the parameters aren't
+	// completely parsed
+
+	return parser.nextToken().type == TokenType::Separator;
+
+}
+
+std::unique_ptr<CShInstruction> ShParser::parseOpcode(Parser& parser)
+{
+	if (parser.peekToken().type != TokenType::Identifier)
+		return nullptr;
+
+	const Token &token = parser.nextToken();
+
+	bool paramFail = false;
+	const ShArchDefinition& arch = shArchs[SuperH.getVersion()];
+	const Identifier &identifier = token.identifierValue();
+
+	std::string opcodeIdentifier = identifier.string();
+	if (opcodeIdentifier == "cmp" ||
+		opcodeIdentifier == "bf" ||
+		opcodeIdentifier == "bt")
+	{
+		if (parser.peekToken().type == TokenType::Div)
+		{
+			parser.eatToken();
+			if (parser.peekToken().type != TokenType::Identifier)
+				goto _exit;
+			opcodeIdentifier = identifier.string() + "/" + parser.nextToken().identifierValue().string();
+		}
+	}
+
+	for (int z = 0; shOpcodes[z].name != nullptr; z++)
+	{
+		if ((shOpcodes[z].archs & arch.supportSets) == 0)
+			continue;
+		if ((shOpcodes[z].archs & arch.excludeMask) != 0)
+			continue;
+
+		if (decodeOpcode(opcodeIdentifier,shOpcodes[z]))
+		{
+			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
+
+			if (parseParameters(parser,shOpcodes[z]))
+			{
+				// success, return opcode
+				return std::make_unique<CShInstruction>(opcodeData,immediate,registers);
+			}
+
+			parser.getTokenizer()->setPosition(tokenPos);
+			paramFail = true;
+		}
+	}
+
+_exit:
+	if (paramFail)
+		parser.printError(token, "SuperH parameter failure");
+	else
+		parser.printError(token, "Invalid SuperH opcode '%s'",opcodeIdentifier);
+
+	return nullptr;
+}
+
+void ShOpcodeFormatter::handleOpcodeName(const ShOpcodeData& opData)
+{
+	const char* encoding = opData.opcode.name;
+
+	while (*encoding != 0)
+	{
+		switch (*encoding++)
+		{
+		default:
+			buffer += *(encoding-1);
+			break;
+		}
+	}
+}
+
+void ShOpcodeFormatter::handleImmediate(ShImmediateType type, unsigned int originalValue, unsigned int opcodeFlags)
+{
+	switch (type)
+	{
+	default:
+		buffer += tfm::format("0x%X", originalValue);
+		break;
+	}
+}
+
+void ShOpcodeFormatter::handleOpcodeParameters(const ShOpcodeData& opData, const ShRegisterData& regData,
+	const ShImmediateData& immData)
+{
+	const char* encoding = opData.opcode.encoding;
+
+	ShImmediateType type;
+	while (*encoding != 0)
+	{
+		switch (*encoding++)
+		{
+		case 's':	// register
+			if (*encoding == 'r')
+			{
+				buffer += "sr";
+				encoding += 1;
+				break;
+			}
+			buffer += regData.grs.name.string();
+			break;
+		case 't':	// register
+			buffer += regData.grt.name.string();
+			break;
+		case 'i':	// primary immediate
+			decodeImmediateSize(encoding,type);
+			handleImmediate(immData.primary.type,immData.primary.originalValue,opData.opcode.flags);
+			break;
+		default:
+			buffer += *(encoding-1);
+			break;
+		}
+	}
+}
+
+const std::string& ShOpcodeFormatter::formatOpcode(const ShOpcodeData& opData, const ShRegisterData& regData,
+	const ShImmediateData& immData)
+{
+	buffer = "   ";
+	handleOpcodeName(opData);
+
+	while (buffer.size() < 11)
+		buffer += ' ';
+
+	handleOpcodeParameters(opData,regData,immData);
+	return buffer;
+}
