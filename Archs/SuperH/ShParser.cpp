@@ -11,7 +11,7 @@
 
 static const char* shSpecialForcedRegisters[] =
 {
-	"r0", "sr", "gbr", "vbr", "mach", "macl", "pr", nullptr
+	"r0", "sr", "gbr", "vbr", "mach", "macl", "pr", "pc", nullptr
 };
 
 const ShRegisterDescriptor shRegisters[] = {
@@ -183,10 +183,9 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 	// initialize opcode variables
 	immediate.primary.type = ShImmediateType::None;
 
-	bool match = false;
 	while (*encoding != 0)
 	{
-		if (opcode.flags & SH_FREG && !match)
+		if (opcode.flags & SH_FREG)
 		{
 			const char** fReg = shSpecialForcedRegisters;
 			bool skip = false;
@@ -202,7 +201,6 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 					const auto &identifier = token.identifierValue();
 					if (identifier.string() == std::string(*fReg))
 					{
-						match = true;
 						skip = true;
 						encoding += length;
 						parser.eatToken();

@@ -4,13 +4,13 @@
 
 #define SH_SUPERH1 (1 << 0)
 #define SH_SUPERH2 (1 << 1)
-#define SH_ALL (SH_SUPERH1 | SH_SUPERH2)
 
 #define SH_IMM16 	 (1 << 0)
 #define SH_IMM32 	 (1 << 1)
 #define SH_IMMREL    (1 << 2)
 #define SH_FREG		 (1 << 3)
 #define SH_IMMSIGNED (1 << 4)
+#define SH_DELAYED	 (1 << 5)
 
 #define SH_MUSTBEALIGNED (SH_IMM16 | SH_IMM32)
 

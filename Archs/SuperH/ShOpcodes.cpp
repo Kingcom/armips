@@ -1,19 +1,24 @@
 #include "Archs/SuperH/ShOpcodes.h"
 
 const tShOpcode shOpcodes[] = {
-	// MOVE IMMEDIATE
 	/*
 		I'm not entirely sure whether having a hash before an immediate
 		byte value in an instruction should be a requirement. As far as examples go,
 		it seems like Ghidra uses a hash for the immediate mov instruction, but doesn't
 		use it for the add instruction.
+
+		I think I'll have all immediate byte values require a hash before it, just for
+		consistency.
 	 */
+	// MOVE IMMEDIATE
 	{ "mov",	"#i8,t",		0b1110000000000000, SHFMT_NI,	SH_SUPERH1, 0 },
-	{ "mov",	"i8,t",			0b1110000000000000, SHFMT_NI,	SH_SUPERH1, 0 }, // Same as the previous one, just without the hash.
 	{ "mov.w",	"i8,t",			0b1001000000000000, SHFMT_ND8,	SH_SUPERH1, SH_IMM16|SH_IMMREL },
 	{ "mov.l",	"i8,t",			0b1101000000000000, SHFMT_ND8,	SH_SUPERH1, SH_IMM32|SH_IMMREL },
-	//{ "mov.w",	"@(i8,pc),t",	0b1001000000000000, SHFMT_ND8,	SH_SUPERH1, SH_IMM16 },
-	//{ "mov.l",	"@(i8,pc),t",	0b1101000000000000, SHFMT_ND8,	SH_SUPERH1, SH_IMM32 },
+
+	// Additional variations of the same instructions
+	// for specifying relative offset manually.
+	{ "mov.w",	"@(i8,pc),t",	0b1001000000000000, SHFMT_ND8,	SH_SUPERH1, SH_FREG|SH_IMM32 },
+	{ "mov.l",	"@(i8,pc),t",	0b1101000000000000, SHFMT_ND8,	SH_SUPERH1, SH_FREG|SH_IMM32 },
 
 	// MOVE Data
 	{ "mov",	"s,t",			0b0110000000000011, SHFMT_NM,	SH_SUPERH1, 0 },
@@ -58,7 +63,9 @@ const tShOpcode shOpcodes[] = {
 	{ "mov.w",	"@(i8,gbr),r0",	0b1100010100000000, SHFMT_D,	SH_SUPERH1, SH_IMM16|SH_FREG },
 	{ "mov.l",	"@(i8,gbr),r0",	0b1100011000000000, SHFMT_D,	SH_SUPERH1, SH_IMM32|SH_FREG },
 
-	{ "mova",	"i8,r0",		0b1100011000000000, SHFMT_D,	SH_SUPERH1, SH_IMM32|SH_FREG|SH_IMMREL },
+	{ "mova",	"i8,r0",		0b1100011100000000, SHFMT_D,	SH_SUPERH1, SH_IMM32|SH_FREG|SH_IMMREL },
+	{ "mova",	"@(i8,pc),r0",	0b1100011100000000, SHFMT_D,	SH_SUPERH1, SH_IMM32|SH_FREG },
+
 	{ "movt",	"t",			0b0000000000101001, SHFMT_N,	SH_SUPERH1, 0 },
 	{ "swap.b",	"s,t",			0b0110000000001000, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "swap.w",	"s,t",			0b0110000000001001, SHFMT_NM,	SH_SUPERH1, 0 },
@@ -130,17 +137,17 @@ const tShOpcode shOpcodes[] = {
 	{ "shll16",	"t",			0b0100000000101000, SHFMT_N,	SH_SUPERH1, 0 },
 	{ "shlr16",	"t",			0b0100000000101001, SHFMT_N,	SH_SUPERH1, 0 },
 
-	{ "bf",		"i8",			0b1000101100000000, SHFMT_D,	SH_SUPERH1, 	SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
-	{ "bf/s",	"i8",			0b1000111100000000, SHFMT_D,	SH_SUPERH2, SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
-	{ "bt",		"i8",			0b1000100100000000, SHFMT_D,	SH_SUPERH1, 	SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
-	{ "bt/s",	"i8",			0b1000110100000000, SHFMT_D,	SH_SUPERH2, SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
-	{ "bra",	"i12",			0b1010000000000000, SHFMT_D12,	SH_SUPERH1, 	SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
-	{ "braf",	"s",			0b0000000000100011, SHFMT_M,	SH_SUPERH2,	0 },
-	{ "bsr",	"i12",			0b1011000000000000, SHFMT_D12,	SH_SUPERH1, 	SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
-	{ "bsrf",	"s",			0b0000000000000011, SHFMT_M,	SH_SUPERH2,	0 },
-	{ "jmp",	"s",			0b0100000000101011, SHFMT_M,	SH_SUPERH1, 0 },
-	{ "jsr",	"s",			0b0100000000001011, SHFMT_M,	SH_SUPERH1, 0 },
-	{ "rts",	"",				0b0000000000001011, SHFMT_0,	SH_SUPERH1, 0 },
+	{ "bf",		"i8",			0b1000101100000000, SHFMT_D,	SH_SUPERH1, SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
+	{ "bf/s",	"i8",			0b1000111100000000, SHFMT_D,	SH_SUPERH2, SH_IMM16|SH_IMMREL|SH_IMMSIGNED|SH_DELAYED },
+	{ "bt",		"i8",			0b1000100100000000, SHFMT_D,	SH_SUPERH1, SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
+	{ "bt/s",	"i8",			0b1000110100000000, SHFMT_D,	SH_SUPERH2, SH_IMM16|SH_IMMREL|SH_IMMSIGNED|SH_DELAYED },
+	{ "bra",	"i12",			0b1010000000000000, SHFMT_D12,	SH_SUPERH1, SH_IMM16|SH_IMMREL|SH_IMMSIGNED|SH_DELAYED },
+	{ "braf",	"s",			0b0000000000100011, SHFMT_M,	SH_SUPERH2,	SH_DELAYED },
+	{ "bsr",	"i12",			0b1011000000000000, SHFMT_D12,	SH_SUPERH1, SH_IMM16|SH_IMMREL|SH_IMMSIGNED },
+	{ "bsrf",	"s",			0b0000000000000011, SHFMT_M,	SH_SUPERH2,	SH_DELAYED },
+	{ "jmp",	"s",			0b0100000000101011, SHFMT_M,	SH_SUPERH1, SH_DELAYED },
+	{ "jsr",	"s",			0b0100000000001011, SHFMT_M,	SH_SUPERH1, SH_DELAYED },
+	{ "rts",	"",				0b0000000000001011, SHFMT_0,	SH_SUPERH1, SH_DELAYED },
 
 	{ "clrt",	"",				0b0000000000001000, SHFMT_0,	SH_SUPERH1, 0 },
 	{ "clrmac",	"",				0b0000000000101000, SHFMT_0,	SH_SUPERH1, 0 },
@@ -159,7 +166,7 @@ const tShOpcode shOpcodes[] = {
 	{ "lds.l",	"@s+,pr",		0b0100000000100110, SHFMT_M,	SH_SUPERH1, SH_FREG },
 
 	{ "nop",	"",				0b0000000000001001, SHFMT_0,	SH_SUPERH1, 0 },
-	{ "rte",	"",				0b0000000000101011, SHFMT_0,	SH_SUPERH1, 0 },
+	{ "rte",	"",				0b0000000000101011, SHFMT_0,	SH_SUPERH1, SH_DELAYED },
 	{ "sett",	"",				0b0000000000011000, SHFMT_0,	SH_SUPERH1, 0 },
 	{ "sleep",	"",				0b0000000000011011, SHFMT_0,	SH_SUPERH1, 0 },
 
@@ -176,7 +183,7 @@ const tShOpcode shOpcodes[] = {
 	{ "sts.l",	"macl,@-t",		0b0100000000010010, SHFMT_N,	SH_SUPERH1, SH_FREG },
 	{ "sts.l",	"pr,@-t",		0b0100000000100010, SHFMT_N,	SH_SUPERH1, SH_FREG },
 
-	{ "trapa",	"#i8",			0b1100001100000000, SHFMT_I,	SH_SUPERH1, SH_IMM32 },
+	{ "trapa",	"#i8",			0b1100001100000000, SHFMT_I,	SH_SUPERH1, 0 },
 	// END
     { nullptr, nullptr, 0, 0, 0, 0 },
 };
