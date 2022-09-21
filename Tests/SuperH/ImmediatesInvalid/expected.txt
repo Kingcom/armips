@@ -1,0 +1,2 @@
+﻿ImmediatesInvalid.asm(4) error: Branch/move target 00000404 out of range
+ImmediatesInvalid.asm(5) error: Branch/move target 00000206 out of range
