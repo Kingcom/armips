@@ -479,6 +479,7 @@ These directives can be used to set the architecture that the following assembly
 | `.3ds` | Nintendo 3DS | ARM11 | Defaults to ARM mode, incomplete |
 | `.arm.big` | - | ARM | Output in big endian |
 | `.arm.little` | - | ARM | Output in little endian |
+| `.saturn` | SEGA Saturn | SuperH | - |
 
 ### Open a generic file
 
