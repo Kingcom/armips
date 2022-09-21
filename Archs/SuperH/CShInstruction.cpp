@@ -83,12 +83,12 @@ bool CShInstruction::Validate(const ValidateState &state)
 		if (opcodeData.opcode.flags & SH_IMMREL)	// relative
 		{
 			int ldSize = (opcodeData.opcode.flags & SH_IMM32) ? 4 : 2;
-			int rPos = (opcodeData.opcode.flags & SH_IMM32) ? (RamPos & 0xFFFFFFFFFFFFFFFC) : RamPos;
+			int rPos = (opcodeData.opcode.flags & SH_IMM32) ? ((RamPos+4) & 0xFFFFFFFFFFFFFFFC) : (RamPos+4);
 			int range = maxImmediate*ldSize;
 			int hiRange = (opcodeData.opcode.flags & SH_IMMSIGNED) ? (range/2) : range;
 			int lowRange = (opcodeData.opcode.flags & SH_IMMSIGNED) ? -(range/2) : 0;
 
-			int num = (int) (immediateData.primary.value-rPos-4);
+			int num = (int) (immediateData.primary.value-rPos);
 
 			if (num > hiRange || num < lowRange)
 			{
