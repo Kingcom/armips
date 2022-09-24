@@ -229,7 +229,7 @@ CDirectiveIncbin::CDirectiveIncbin(const fs::path& fileName)
 	}
 
 	std::error_code error;
-	this->fileSize = static_cast<int64_t>(fs::file_size(fileName, error));
+	this->fileSize = static_cast<int64_t>(fs::file_size(this->fileName, error));
 }
 
 bool CDirectiveIncbin::Validate(const ValidateState &state)
