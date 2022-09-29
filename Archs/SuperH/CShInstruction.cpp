@@ -115,6 +115,12 @@ bool CShInstruction::Validate(const ValidateState &state)
 		immediateData.primary.value &= mask;
 	}
 
+    //
+    // NOTE: SuperH *does* have delayed instructions, but
+    //       I'm not entirely sure how they work exactly yet,
+    //       so leaving this functionality off.
+    //
+
 #if 0
 	// check load delay
 	if (Sh.hasLoadDelay() && Sh.GetLoadDelay() && !IgnoreLoadDelay)
