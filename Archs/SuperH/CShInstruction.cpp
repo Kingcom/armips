@@ -118,7 +118,10 @@ bool CShInstruction::Validate(const ValidateState &state)
     //
     // NOTE: SuperH *does* have delayed instructions, but
     //       I'm not entirely sure how they work exactly yet,
-    //       so leaving this functionality off.
+    //       so leaving this functionality off (it was originally
+    //       taken from the MIPS parser.)
+    //       Delayed opcodes are currently marked with the
+    //       SH_DELAYED flag.
     //
 
 #if 0
