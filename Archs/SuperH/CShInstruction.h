@@ -72,7 +72,7 @@ public:
 	void writeTempData(TempData& tempData) const override;
 private:
 	int64_t RamPos;
-	bool addNop;
+	//bool addNop;
 
 	// opcode variables
 	ShOpcodeData opcodeData;

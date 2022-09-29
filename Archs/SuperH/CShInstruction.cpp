@@ -36,7 +36,7 @@ int getImmediateBits(ShImmediateType type)
 
 bool CShInstruction::Validate(const ValidateState &state)
 {
-	bool Result = false;
+	//bool Result = false;
 
 	//bool previousNop = addNop;
 	//addNop = false;
@@ -159,7 +159,7 @@ bool CShInstruction::Validate(const ValidateState &state)
 #endif
 
 	g_fileManager->advanceMemory(2); //addNop ? 4 : 2
-	return Result;
+	return false;
 }
 
 void CShInstruction::Encode() const

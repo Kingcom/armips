@@ -37,6 +37,11 @@ void ShElfRelocator::setSymbolAddress(RelocationData& data, int64_t symbolAddres
 	data.targetSymbolType = symbolType;
 }
 
+bool ShElfRelocator::finish(std::vector<RelocationAction>& actions, std::vector<std::string>& errors)
+{
+	return true;
+}
+
 /*const char* shCtorTemplate = R"(
 	addiu	sp,-32
 	sw		ra,0(sp)
@@ -128,6 +133,6 @@ std::unique_ptr<CAssemblerCommand> ShElfRelocator::generateCtorStub(std::vector<
 			{ "%ctorContent%",		table },
 		});
 	} else {
-		return parser.parseTemplate("jr ra :: nop");
+		return parser.parseTemplate("rts :: nop");
 	}
 }

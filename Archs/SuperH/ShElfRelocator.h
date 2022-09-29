@@ -19,6 +19,7 @@ class ShElfRelocator: public IElfRelocator
 public:
 	int expectedMachine() const override;
 	bool relocateOpcode(int type, const RelocationData& data, std::vector<RelocationAction>& actions, std::vector<std::string>& errors) override;
+	bool finish(std::vector<RelocationAction>& actions, std::vector<std::string>& errors) override;
 	void setSymbolAddress(RelocationData& data, int64_t symbolAddress, int symbolType) override;
 	std::unique_ptr<CAssemblerCommand> generateCtorStub(std::vector<ElfRelocatorCtor>& ctors) override;
 private:

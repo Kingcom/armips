@@ -20,7 +20,6 @@ std::unique_ptr<CAssemblerCommand> CShArchitecture::parseDirective(Parser& parse
 std::unique_ptr<CAssemblerCommand> CShArchitecture::parseOpcode(Parser& parser)
 {
 	ShParser shParser;
-
 	return shParser.parseOpcode(parser);
 }
 
