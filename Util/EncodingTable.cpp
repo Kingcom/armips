@@ -70,15 +70,9 @@ bool Trie::findLongestPrefix(const char* text, size_t& result)
 	return nodes[valueNode].hasValue;
 }
 
-EncodingTable::EncodingTable()
-{
+EncodingTable::EncodingTable() = default;
 
-}
-
-EncodingTable::~EncodingTable()
-{
-
-}
+EncodingTable::~EncodingTable() = default;
 
 void EncodingTable::clear()
 {

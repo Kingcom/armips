@@ -71,7 +71,7 @@ std::vector<PsxLibEntry> loadPsxLibrary(const fs::path& inputName)
 
 size_t PsxRelocator::loadString(ByteArray& data, size_t pos, std::string& dest)
 {
-	dest = "";
+	dest.clear();
 	int len = data[pos++];
 
 	for (int i = 0; i < len; i++)

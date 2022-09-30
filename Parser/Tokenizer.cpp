@@ -65,7 +65,7 @@ bool Tokenizer::processElement(TokenList::iterator& it)
 				if (replacement.identifier == identifier)
 				{
 					TokenList::iterator insertIt = it;
-					insertIt++;
+					++insertIt;
 				
 					// replace old token with the new tokens
 					// replace the first token manually so that any iterators
@@ -140,7 +140,7 @@ const Token& Tokenizer::peekToken(int ahead)
 		if (!processElement(it))
 			return invalidToken;
 
-		it++;
+		++it;
 	}
 	
 	if (!processElement(it))
@@ -155,7 +155,7 @@ void Tokenizer::eatTokens(int num)
 	{
 		if (!processElement(position.it))
 			break;
-		position.it++;
+		++position.it;
 	}
 }
 

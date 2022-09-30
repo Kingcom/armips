@@ -57,7 +57,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveCreate(Parser& parser, int flag
 		return nullptr;
 
 	int64_t memoryAddress;
-	StringLiteral inputName, outputName;
+	StringLiteral inputName;
 
 	if (!list[0].evaluateString(inputName,false))
 		return nullptr;

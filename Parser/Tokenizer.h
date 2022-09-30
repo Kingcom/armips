@@ -117,7 +117,7 @@ struct TokenizerPosition
 	TokenizerPosition previous()
 	{
 		TokenizerPosition pos = *this;
-		pos.it--;
+		--pos.it;
 		return pos;
 	}
 private:

@@ -28,10 +28,9 @@ void Architecture::registerExpressionFunctions([[maybe_unused]] ExpressionFuncti
 }
 
 ArchitectureCommand::ArchitectureCommand(const std::string& tempText, const std::string& symText)
+	: tempText(tempText), symText(symText)
 {
 	this->architecture = &Architecture::current();
-	this->tempText = tempText;
-	this->symText = symText;
 	this->endianness = Architecture::current().getEndianness();
 }
 

@@ -5,9 +5,8 @@
 #include "Core/SymbolData.h"
 
 CDirectiveMessage::CDirectiveMessage(Type type, Expression exp)
+	: errorType(type), exp(exp)
 {
-	errorType = type;
-	this->exp = exp;
 }
 
 bool CDirectiveMessage::Validate(const ValidateState &state)
