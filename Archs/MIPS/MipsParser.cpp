@@ -1555,7 +1555,8 @@ bool MipsParser::parseMacroParameters(Parser& parser, const MipsMacroDefinition&
 
 std::unique_ptr<CAssemblerCommand> MipsParser::parseMacro(Parser& parser)
 {
-	TokenizerPosition startPos = parser.getTokenizer()->getPosition();
+	Tokenizer* tokenizer = parser.getTokenizer();
+	TokenizerPosition startPos = tokenizer->getPosition();
 
 	// Cannot be a reference (we eat below.)
 	const Token token = parser.peekToken();
@@ -1568,19 +1569,19 @@ std::unique_ptr<CAssemblerCommand> MipsParser::parseMacro(Parser& parser)
 	{
 		if (identifier == mipsMacros[z].name)
 		{
-			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
+			TokenizerPosition tokenPos = tokenizer->getPosition();
 
 			if (parseMacroParameters(parser,mipsMacros[z]))
 			{
 				return mipsMacros[z].function(parser,registers,immediate,mipsMacros[z].flags);
 			}
 
-			parser.getTokenizer()->setPosition(tokenPos);
+			tokenizer->setPosition(tokenPos);
 		}
 	}
 
 	// no matching macro found, restore state
-	parser.getTokenizer()->setPosition(startPos);
+	tokenizer->setPosition(startPos);
 	return nullptr;
 }
 

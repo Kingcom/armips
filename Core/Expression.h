@@ -47,7 +47,7 @@ enum class OperatorType
 	FunctionCall
 };
 
-enum class ExpressionValueType { Invalid, Integer, Float, String};
+enum class ExpressionValueType { Invalid, Integer, Float, String };
 
 struct ExpressionValue
 {
@@ -72,9 +72,8 @@ struct ExpressionValue
 	}
 
 	ExpressionValue(const StringLiteral& value)
+		: type(ExpressionValueType::String), strValue(value)
 	{
-		type = ExpressionValueType::String;
-		strValue = value;
 	}
 
 	bool isFloat() const

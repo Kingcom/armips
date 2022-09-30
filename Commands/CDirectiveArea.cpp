@@ -11,15 +11,8 @@
 #include <cstring>
 
 CDirectiveArea::CDirectiveArea(bool shared, Expression& size)
+	: areaSize(0), contentSize(0), position(0), fillValue(0), shared(shared), sizeExpression(size), content(nullptr)
 {
-	this->areaSize = 0;
-	this->contentSize = 0;
-	this->position = 0;
-	this->fillValue = 0;
-
-	this->shared = shared;
-	this->sizeExpression = size;
-	this->content = nullptr;
 }
 
 void CDirectiveArea::setFillExpression(Expression& exp)

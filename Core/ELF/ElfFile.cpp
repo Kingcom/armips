@@ -72,10 +72,9 @@ void ElfSection::setOffsetBase(int base)
 	header.sh_offset += base;
 }
 
-ElfSegment::ElfSegment(Elf32_Phdr header, ByteArray& segmentData): header(header)
+ElfSegment::ElfSegment(Elf32_Phdr header, ByteArray& segmentData)
+	: header(header), data(segmentData), paddrSection(nullptr)
 {
-	data = segmentData;
-	paddrSection = nullptr;
 }
 
 bool ElfSegment::isSectionPartOf(ElfSection* section)

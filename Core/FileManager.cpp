@@ -24,20 +24,15 @@ inline uint16_t swapEndianness16(uint16_t value)
 
 
 GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, int64_t headerSize, bool overwrite)
+	: fileName(fileName), headerSize(headerSize), originalHeaderSize(headerSize)
 {
-	this->fileName = fileName;
-	this->headerSize = headerSize;
-	this->originalHeaderSize = headerSize;
 	this->seekPhysical(0);
 	mode = overwrite ? Create : Open;
 }
 
 GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, const fs::path& originalFileName, int64_t headerSize)
+	: fileName(fileName), originalName(originalFileName), headerSize(headerSize), originalHeaderSize(headerSize)
 {
-	this->fileName = fileName;
-	this->originalName = originalFileName;
-	this->headerSize = headerSize;
-	this->originalHeaderSize = headerSize;
 	this->seekPhysical(0);
 	mode = Copy;
 }
@@ -233,10 +228,7 @@ FileManager::FileManager()
 	reset();
 }
 
-FileManager::~FileManager()
-{
-
-}
+FileManager::~FileManager() = default;
 
 void FileManager::reset()
 {
@@ -262,7 +254,7 @@ bool FileManager::openFile(std::shared_ptr<AssemblerFile> file, bool onlyCheck)
 		activeFile->close();
 	}
 
-	activeFile = file;
+	activeFile = std::move(file);
 	return activeFile->open(onlyCheck);
 }
 
