@@ -9,7 +9,7 @@
 
 #define CHECK(exp) if (!(exp)) return false;
 
-static const char* shSpecialForcedRegisters[] =
+static const char *shSpecialForcedRegisters[] =
 {
 	"r0", "sr", "gbr", "vbr", "mach", "macl", "pr", "pc", nullptr
 };
@@ -185,11 +185,14 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 
 	while (*encoding != 0)
 	{
+		// Some registers in instructions are forced
+		// and do not have a numerical representation (except for r0.)
+		// This handles said forced registers.
 		if (opcode.flags & SH_FREG)
 		{
-			const char** fReg = shSpecialForcedRegisters;
-			bool skip = false;
+			const char **fReg = shSpecialForcedRegisters;
 			const Token &token = parser.peekToken();
+			bool skip = false;
 			while (*fReg)
 			{
 				int length = strlen(*fReg);
@@ -206,7 +209,6 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 						parser.eatToken();
 						break;
 					}
-
 					break;
 				}
 				fReg += 1;
@@ -228,6 +230,9 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 			CHECK(decodeImmediateSize(encoding,immediate.primary.type));
 			break;
 		case '@':
+			// '@' is not a separate token, and at the same time it's
+			// part of the SuperH instruction parameter scheme,
+			// so I came up with this rather ugly solution to handle it. 
 			if (parser.peekToken().type != TokenType::Identifier)
 				return false;
 			if (parser.peekToken().identifierValue().string()[0] != '@')
@@ -240,7 +245,7 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 			{
 				CHECK(parseRegister(parser,registers.grs));
 			}
-			else if (*encoding == '(' || *encoding == '-')
+			else if (*encoding == '(' || *encoding == '-') // "mov.* r0,@(i4,t)", "mov.* s,@-t" and the others
 			{
 				parser.eatToken();
 				CHECK(matchSymbol(parser, *encoding));
@@ -278,6 +283,8 @@ std::unique_ptr<CShInstruction> ShParser::parseOpcode(Parser& parser)
 	const Identifier &identifier = token.identifierValue();
 
 	std::string opcodeIdentifier = identifier.string();
+	
+	// This is needed because '/' is a separate token.
 	if (opcodeIdentifier == "cmp" ||
 		opcodeIdentifier == "bf" ||
 		opcodeIdentifier == "bt")
