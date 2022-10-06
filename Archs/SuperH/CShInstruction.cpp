@@ -34,13 +34,17 @@ int getImmediateBits(ShImmediateType type)
 	}
 }
 
+//
+// NOTE: SuperH *does* have delayed instructions, but
+//       I'm not entirely sure how they work exactly,
+//       so leaving this functionality, that was taken
+//		 from the MIPS parser, removed.
+//       Delayed opcodes are currently marked with the
+//       SH_DELAYED flag.
+//
+
 bool CShInstruction::Validate(const ValidateState &state)
 {
-	//bool Result = false;
-
-	//bool previousNop = addNop;
-	//addNop = false;
-
 	RamPos = g_fileManager->getVirtualAddress();
 	if (RamPos % 2)
 	{
@@ -80,7 +84,7 @@ bool CShInstruction::Validate(const ValidateState &state)
 		int immediateBits = getImmediateBits(immediateData.primary.type);
 		int maxImmediate = ((1 << immediateBits) - 1);
 
-		if (opcodeData.opcode.flags & SH_IMMREL)	// relative
+		if (opcodeData.opcode.flags & SH_IMMREL) // relative
 		{
 			int ldSize = (opcodeData.opcode.flags & SH_IMM32) ? 4 : 2;
 			int rPos = (opcodeData.opcode.flags & SH_IMM32) ? ((RamPos+4) & 0xFFFFFFFFFFFFFFFC) : (RamPos+4);
@@ -115,67 +119,12 @@ bool CShInstruction::Validate(const ValidateState &state)
 		immediateData.primary.value &= mask;
 	}
 
-    //
-    // NOTE: SuperH *does* have delayed instructions, but
-    //       I'm not entirely sure how they work exactly yet,
-    //       so leaving this functionality off (it was originally
-    //       taken from the MIPS parser.)
-    //       Delayed opcodes are currently marked with the
-    //       SH_DELAYED flag.
-    //
-
-#if 0
-	// check load delay
-	if (Sh.hasLoadDelay() && Sh.GetLoadDelay() && !IgnoreLoadDelay)
-	{
-		bool fix = false;
-
-		if (registerData.grd.num != -1 && registerData.grd.num == Sh.GetLoadDelayRegister())
-		{
-			Logger::queueError(Logger::Warning, "register %S may not be available due to load delay",registerData.grd.name);
-			fix = true;
-		} else if (registerData.grs.num != -1 && registerData.grs.num == Sh.GetLoadDelayRegister())
-		{
-			Logger::queueError(Logger::Warning, "register %S may not be available due to load delay",registerData.grs.name);
-			fix = true;
-		} else if (registerData.grt.num != -1 && registerData.grt.num == Sh.GetLoadDelayRegister()
-			&& !(opcodeData.opcode.flags & MO_IGNORERTD))
-		{
-			Logger::queueError(Logger::Warning, "register %S may not be available due to load delay",registerData.grt.name);
-			fix = true;
-		}
-
-		if (Sh.GetFixLoadDelay() && fix)
-		{
-			addNop = true;
-			Logger::queueError(Logger::Notice, "added nop to ensure correct behavior");
-		}
-	}
-
-	if ((opcodeData.opcode.flags & MO_NODELAYSLOT) && Sh.GetDelaySlot() && !IgnoreLoadDelay)
-	{
-		Logger::queueError(Logger::Error, "This instruction can't be in a delay slot");
-	}
-
-	Sh.SetDelaySlot((opcodeData.opcode.flags & MO_DELAY) != 0);
-
-	// now check if this opcode causes a load delay
-	if (Sh.hasLoadDelay())
-		Sh.SetLoadDelay((opcodeData.opcode.flags & MO_DELAYRT) != 0,registerData.grt.num);
-	
-	if (previousNop != addNop)
-		Result = true;
-#endif
-
-	g_fileManager->advanceMemory(2); //addNop ? 4 : 2
+	g_fileManager->advanceMemory(2);
 	return false;
 }
 
 void CShInstruction::Encode() const
 {
-	//if (addNop)
-	//	g_fileManager->writeU32(0);
-
 	uint16_t encoding = opcodeData.opcode.base;
 
 	switch (opcodeData.opcode.format)

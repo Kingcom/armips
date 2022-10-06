@@ -20,7 +20,10 @@ bool ShElfRelocator::relocateOpcode(int type, const RelocationData& data, std::v
 		op += (int) (data.relocationBase + data.addend);
 		break;
 	case R_SH_REL32:
-		op += (int) (data.relocationBase - data.opcodeOffset + data.addend); // I have no clue whether this is correct
+		// NOTE: I'm not entirely sure whether this is a correct way of doing this,
+		//       so far I haven't encountered this relocation type in any of the
+		//       object files I tested.
+		op += (int) (data.relocationBase - data.opcodeOffset + data.addend);
 		break;
 	default:
 		errors.emplace_back(tfm::format("Unknown SuperH relocation type %d",type));
@@ -41,39 +44,6 @@ bool ShElfRelocator::finish(std::vector<RelocationAction>& actions, std::vector<
 {
 	return true;
 }
-
-/*const char* shCtorTemplate = R"(
-	addiu	sp,-32
-	sw		ra,0(sp)
-	sw		s0,4(sp)
-	sw		s1,8(sp)
-	sw		s2,12(sp)
-	sw		s3,16(sp)
-	li		s0,%ctorTable%
-	li		s1,%ctorTable%+%ctorTableSize%
-	%outerLoopLabel%:
-	lw		s2,(s0)
-	lw		s3,4(s0)
-	addiu	s0,8
-	%innerLoopLabel%:
-	lw		a0,(s2)
-	jalr	a0
-	addiu	s2,4h
-	bne		s2,s3,%innerLoopLabel%
-	nop
-	bne		s0,s1,%outerLoopLabel%
-	nop
-	lw		ra,0(sp)
-	lw		s0,4(sp)
-	lw		s1,8(sp)
-	lw		s2,12(sp)
-	lw		s3,16(sp)
-	jr		ra
-	addiu	sp,32
-	%ctorTable%:
-	.word	%ctorContent%
-)";*/
-
 
 //
 //	WARNING: NOT TESTED!!!!!
