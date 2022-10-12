@@ -52,6 +52,8 @@ bool CShInstruction::Validate(const ValidateState &state)
 		return false;
 	}
 
+	bool memoryAdvanced = false;
+
 	// check immediates
 	if (immediateData.primary.type != ShImmediateType::None)
 	{
@@ -65,16 +67,29 @@ bool CShInstruction::Validate(const ValidateState &state)
 
 			immediateData.primary.originalValue = immediateData.primary.value;
 		}
+		
+		g_fileManager->advanceMemory(2);
+		memoryAdvanced = true;
 
-		if (opcodeData.opcode.flags & SH_MUSTBEALIGNED)	// immediate must be aligned
+		int opflags = opcodeData.opcode.flags;
+		uint64_t immRelAddr = (opflags & SH_IMM32) ? 
+							  ((RamPos+4) & 0xFFFFFFFFFFFFFFFC) : 
+							   (RamPos+4);
+		
+		if (opflags & SH_MUSTBEALIGNED)	// immediate must be aligned
 		{
-			if ((opcodeData.opcode.flags & SH_IMM16) && (immediateData.primary.value % 2))
+			if (opflags & SH_PCRELMANUAL)
+				immediateData.primary.value += RamPos;
+		
+			uint64_t value = immediateData.primary.value;
+		
+			if ((opflags & SH_IMM16) && (value % 2))
 			{
 				Logger::queueError(Logger::Error, "Immediate must be 2-byte aligned");
 				return false;
 			}
 
-			if ((opcodeData.opcode.flags & SH_IMM32) && (immediateData.primary.value % 4))
+			if ((opflags & SH_IMM32) && (value % 4))
 			{
 				Logger::queueError(Logger::Error, "Immediate must be 4-byte aligned");
 				return false;
@@ -84,15 +99,13 @@ bool CShInstruction::Validate(const ValidateState &state)
 		int immediateBits = getImmediateBits(immediateData.primary.type);
 		int maxImmediate = ((1 << immediateBits) - 1);
 
-		if (opcodeData.opcode.flags & SH_IMMREL) // relative
+		if (opflags & SH_IMMREL || opflags & SH_PCRELMANUAL) // relative
 		{
-			int ldSize = (opcodeData.opcode.flags & SH_IMM32) ? 4 : 2;
-			int rPos = (opcodeData.opcode.flags & SH_IMM32) ? ((RamPos+4) & 0xFFFFFFFFFFFFFFFC) : (RamPos+4);
-			int range = maxImmediate*ldSize;
-			int hiRange = (opcodeData.opcode.flags & SH_IMMSIGNED) ? (range/2) : range;
-			int lowRange = (opcodeData.opcode.flags & SH_IMMSIGNED) ? -(range/2) : 0;
+			int range    = maxImmediate * (opflags & SH_IMM32 ? 4 : 2);
+			int hiRange  = (opflags & SH_IMMSIGNED) ?  (range/2) : range;
+			int lowRange = (opflags & SH_IMMSIGNED) ? -(range/2) : 0;
 
-			int num = (int) (immediateData.primary.value-rPos);
+			int64_t num = (int64_t) (immediateData.primary.value - immRelAddr);
 
 			if (num > hiRange || num < lowRange)
 			{
@@ -102,9 +115,9 @@ bool CShInstruction::Validate(const ValidateState &state)
 			immediateData.primary.value = num;
 		}
 
-		if (opcodeData.opcode.flags & SH_IMM16)
+		if (opflags & SH_IMM16)
 			immediateData.primary.value = immediateData.primary.value >> 1;
-		else if (opcodeData.opcode.flags & SH_IMM32)
+		else if (opflags & SH_IMM32)
 			immediateData.primary.value = immediateData.primary.value >> 2;
 		
 		unsigned int mask = (0xFFFFFFFF << (32-immediateBits)) >> (32-immediateBits);
@@ -119,7 +132,9 @@ bool CShInstruction::Validate(const ValidateState &state)
 		immediateData.primary.value &= mask;
 	}
 
-	g_fileManager->advanceMemory(2);
+	if (!memoryAdvanced)
+		g_fileManager->advanceMemory(2);
+
 	return false;
 }
 
