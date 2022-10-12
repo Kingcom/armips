@@ -7,13 +7,17 @@
 	if (getExpFuncParameter(params,index,dest,funcName,false) == false) \
 		return ExpressionValue();
 
+/*
 const ExpressionFunctionEntry shExpressionFunctions[] = {
 };
+*/
 
 void registerShExpressionFunctions(ExpressionFunctionHandler &handler)
 {
+/*
 	for (const auto &func : shExpressionFunctions)
 	{
 		handler.addFunction(Identifier(func.name), func.function, func.minParams, func.maxParams, func.safety);
 	}
+*/
 }

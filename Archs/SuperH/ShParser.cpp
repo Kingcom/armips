@@ -162,15 +162,10 @@ bool ShParser::decodeOpcode(const std::string& name, const tShOpcode& opcode)
 	immediate.reset();
 	opcodeData.reset();
 
-	while (*encoding != 0)
+	while (*encoding++ != 0)
 	{
-		switch (*encoding++)
-		{
-		default:
-			CHECK(pos < name.size());
-			CHECK(*(encoding-1) == name[pos++]);
-			break;
-		}
+		CHECK(pos < name.size());
+		CHECK(*(encoding-1) == name[pos++]);
 	}
 
 	return pos >= name.size();
@@ -195,7 +190,7 @@ bool ShParser::parseParameters(Parser& parser, const tShOpcode& opcode)
 			bool skip = false;
 			while (*fReg)
 			{
-				int length = strlen(*fReg);
+				size_t length = strlen(*fReg);
 				if (memcmp(*fReg, encoding, length) == 0)
 				{
 					if (token.type != TokenType::Identifier)
@@ -333,25 +328,15 @@ void ShOpcodeFormatter::handleOpcodeName(const ShOpcodeData& opData)
 {
 	const char* encoding = opData.opcode.name;
 
-	while (*encoding != 0)
+	while (*encoding++ != 0)
 	{
-		switch (*encoding++)
-		{
-		default:
-			buffer += *(encoding-1);
-			break;
-		}
+		buffer += *(encoding-1);
 	}
 }
 
 void ShOpcodeFormatter::handleImmediate(ShImmediateType type, unsigned int originalValue, unsigned int opcodeFlags)
 {
-	switch (type)
-	{
-	default:
-		buffer += tfm::format("0x%X", originalValue);
-		break;
-	}
+	buffer += tfm::format("0x%X", originalValue);
 }
 
 void ShOpcodeFormatter::handleOpcodeParameters(const ShOpcodeData& opData, const ShRegisterData& regData,
