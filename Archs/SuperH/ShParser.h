@@ -25,7 +25,7 @@ private:
 	bool parseRegister(Parser& parser, ShRegisterValue& dest);
 	bool parseImmediate(Parser& parser, Expression& dest);
 
-	bool decodeOpcode(const std::string& name, const tShOpcode& opcode);
+	bool decodeOpcode(Parser& parser, const tShOpcode& opcode);
 
 	void setOmittedRegisters(const tShOpcode& opcode);
 	bool matchSymbol(Parser& parser, char symbol);

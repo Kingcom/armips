@@ -153,7 +153,7 @@ static bool decodeImmediateSize(const char*& encoding, ShImmediateType& dest)
 	return true;
 }
 
-bool ShParser::decodeOpcode(const std::string& name, const tShOpcode& opcode)
+bool ShParser::decodeOpcode(Parser& parser, const tShOpcode& opcode)
 {
 	const char* encoding = opcode.name;
 	size_t pos = 0;
@@ -162,10 +162,30 @@ bool ShParser::decodeOpcode(const std::string& name, const tShOpcode& opcode)
 	immediate.reset();
 	opcodeData.reset();
 
-	while (*encoding++ != 0)
+	const Token &token = parser.nextToken();
+	if (token.type != TokenType::Identifier)
+		return false;
+		
+	const Identifier &identifier = token.identifierValue();
+	std::string name = identifier.string();
+
+	while (*encoding != 0)
 	{
-		CHECK(pos < name.size());
-		CHECK(*(encoding-1) == name[pos++]);
+		switch (*encoding++)
+		{
+		case '/':
+			CHECK(pos >= name.size());
+			CHECK(parser.nextToken().type == TokenType::Div);
+			CHECK(parser.peekToken().type == TokenType::Identifier);
+			
+			name = parser.nextToken().identifierValue().string();
+			pos = 0;
+			break;
+		default:
+			CHECK(pos < name.size());
+			CHECK(*(encoding-1) == name[pos++]);
+			break;
+		}
 	}
 
 	return pos >= name.size();
@@ -271,28 +291,10 @@ std::unique_ptr<CShInstruction> ShParser::parseOpcode(Parser& parser)
 	if (parser.peekToken().type != TokenType::Identifier)
 		return nullptr;
 
-	const Token &token = parser.nextToken();
+	const ShArchDefinition& arch = shArchs[SuperH.getVersion()];
+	const Token &token = parser.peekToken();
 
 	bool paramFail = false;
-	const ShArchDefinition& arch = shArchs[SuperH.getVersion()];
-	const Identifier &identifier = token.identifierValue();
-
-	std::string opcodeIdentifier = identifier.string();
-	
-	// This is needed because '/' is a separate token.
-	if (opcodeIdentifier == "cmp" ||
-		opcodeIdentifier == "bf" ||
-		opcodeIdentifier == "bt")
-	{
-		if (parser.peekToken().type == TokenType::Div)
-		{
-			parser.eatToken();
-			if (parser.peekToken().type != TokenType::Identifier)
-				goto _exit;
-			opcodeIdentifier = identifier.string() + "/" + parser.nextToken().identifierValue().string();
-		}
-	}
-
 	for (int z = 0; shOpcodes[z].name != nullptr; z++)
 	{
 		if ((shOpcodes[z].archs & arch.supportSets) == 0)
@@ -300,7 +302,8 @@ std::unique_ptr<CShInstruction> ShParser::parseOpcode(Parser& parser)
 		if ((shOpcodes[z].archs & arch.excludeMask) != 0)
 			continue;
 
-		if (decodeOpcode(opcodeIdentifier,shOpcodes[z]))
+		TokenizerPosition tokenOpcodePos = parser.getTokenizer()->getPosition();
+		if (decodeOpcode(parser, shOpcodes[z]))
 		{
 			TokenizerPosition tokenPos = parser.getTokenizer()->getPosition();
 
@@ -313,13 +316,13 @@ std::unique_ptr<CShInstruction> ShParser::parseOpcode(Parser& parser)
 			parser.getTokenizer()->setPosition(tokenPos);
 			paramFail = true;
 		}
+		parser.getTokenizer()->setPosition(tokenOpcodePos);
 	}
 
-_exit:
 	if (paramFail)
 		parser.printError(token, "SuperH parameter failure");
 	else
-		parser.printError(token, "Invalid SuperH opcode '%s'",opcodeIdentifier);
+		parser.printError(token, "Invalid SuperH opcode");
 
 	return nullptr;
 }
