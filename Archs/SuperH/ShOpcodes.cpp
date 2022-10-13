@@ -1,17 +1,9 @@
 #include "Archs/SuperH/ShOpcodes.h"
 
 const tShOpcode shOpcodes[] = {
-	/*
-		I'm not entirely sure whether having a hash before an immediate
-		byte value in an instruction should be a requirement. As far as examples go,
-		it seems like Ghidra uses a hash for the immediate mov instruction, but doesn't
-		use it for the add instruction.
-
-		I think I'll have all immediate byte values require a hash before it, just for
-		consistency.
-	 */
 	// MOVE IMMEDIATE
 	{ "mov",	"#i8,t",		0b1110000000000000, SHFMT_NI,	SH_SUPERH1, 0 },
+	{ "mov",	"i8,t",			0b1110000000000000, SHFMT_NI,	SH_SUPERH1, 0 },
 	{ "mov.w",	"i8,t",			0b1001000000000000, SHFMT_ND8,	SH_SUPERH1, SH_IMM16|SH_IMMREL },
 	{ "mov.l",	"i8,t",			0b1101000000000000, SHFMT_ND8,	SH_SUPERH1, SH_IMM32|SH_IMMREL },
 
@@ -73,10 +65,12 @@ const tShOpcode shOpcodes[] = {
 
 	{ "add",	"s,t",			0b0011000000001100, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "add",	"#i8,t",		0b0111000000000000, SHFMT_NI,	SH_SUPERH1, 0 },
+	{ "add",	"i8,t",			0b0111000000000000, SHFMT_NI,	SH_SUPERH1, 0 },
 	{ "addc",	"s,t",			0b0011000000001110, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "addv",	"s,t",			0b0011000000001111, SHFMT_NM,	SH_SUPERH1, 0 },
 
 	{ "cmp/eq",	"#i8,r0",		0b1000100000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "cmp/eq",	"i8,r0",		0b1000100000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "cmp/eq",	"s,t",			0b0011000000000000, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "cmp/hs",	"s,t",			0b0011000000000010, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "cmp/ge",	"s,t",			0b0011000000000011, SHFMT_NM,	SH_SUPERH1, 0 },
@@ -110,17 +104,25 @@ const tShOpcode shOpcodes[] = {
 	{ "and",	"s,t",			0b0010000000001001, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "and",	"#i8,r0",		0b1100100100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "and.b",	"#i8,@(r0,gbr)",0b1100110100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "and",	"i8,r0",		0b1100100100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "and.b",	"i8,@(r0,gbr)",	0b1100110100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "not",	"s,t",			0b0110000000000111, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "or",		"s,t",			0b0010000000001011, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "or",		"#i8,r0",		0b1100101100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "or.b",	"#i8,@(r0,gbr)",0b1100111100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "or",		"i8,r0",		0b1100101100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "or.b",	"i8,@(r0,gbr)",	0b1100111100000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "tas.b",	"@t",			0b0100000000011011, SHFMT_N,	SH_SUPERH1, 0 },
 	{ "tst",	"s,t",			0b0010000000001000, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "tst",	"#i8,r0",		0b1100100000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "tst.b",	"#i8,@(r0,gbr)",0b1100110000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "tst",	"i8,r0",		0b1100100000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "tst.b",	"i8,@(r0,gbr)",0b1100110000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "xor",	"s,t",			0b0010000000001010, SHFMT_NM,	SH_SUPERH1, 0 },
 	{ "xor",	"#i8,r0",		0b1100101000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 	{ "xor.b",	"#i8,@(r0,gbr)",0b1100111000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "xor",	"i8,r0",		0b1100101000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
+	{ "xor.b",	"i8,@(r0,gbr)",	0b1100111000000000, SHFMT_I,	SH_SUPERH1, SH_FREG },
 
 	{ "rotl",	"t",			0b0100000000000100, SHFMT_N,	SH_SUPERH1, 0 },
 	{ "rotr",	"t",			0b0100000000000101, SHFMT_N,	SH_SUPERH1, 0 },
