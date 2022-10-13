@@ -72,6 +72,8 @@ public:
 	void writeTempData(TempData& tempData) const override;
 private:
 	int64_t RamPos;
+	
+	int getImmediateBits(ShImmediateType type);
 
 	// opcode variables
 	ShOpcodeData opcodeData;

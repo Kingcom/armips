@@ -14,12 +14,9 @@ CShInstruction::CShInstruction(ShOpcodeData& opcode, ShImmediateData& immediate,
 	this->registerData = registers;
 }
 
-CShInstruction::~CShInstruction()
-{
+CShInstruction::~CShInstruction() = default;
 
-}
-
-int getImmediateBits(ShImmediateType type)
+int CShInstruction::getImmediateBits(ShImmediateType type)
 {
 	switch (type)
 	{

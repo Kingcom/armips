@@ -514,10 +514,7 @@ DirectiveObjImport::DirectiveObjImport(const fs::path& inputName)
 	ctor = nullptr;
 	success = rel.init(inputName);
 	if (success)
-	{
-		success = true;
 		rel.exportSymbols();
-	}
 }
 
 DirectiveObjImport::DirectiveObjImport(const fs::path& inputName, const Identifier& ctorName)

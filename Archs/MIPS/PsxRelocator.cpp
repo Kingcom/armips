@@ -326,13 +326,10 @@ checkothertype:
 bool PsxRelocator::init(const fs::path& inputName)
 {
 	auto inputFiles = loadPsxLibrary(inputName);
+	
+	// The ELF loader will report the error messages, if needed.
 	if (inputFiles.size() == 0)
-	{
-		// The ELF loader will report those messages, if needed.
-		// Logger::printError(Logger::Error, "Could not load library");
-
 		return false;
-	}
 
 	reloc = new MipsElfRelocator();
 
@@ -342,10 +339,7 @@ bool PsxRelocator::init(const fs::path& inputName)
 		file.name = entry.name;
 
 		if (!parseObject(entry.data,file))
-		{
-			// Logger::printError(Logger::Error, "Could not load object file %s",entry.name);
 			return false;
-		}
 
 		// sort relocations
 		for (PsxSegment& seg: file.segments)
