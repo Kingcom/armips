@@ -480,6 +480,7 @@ These directives can be used to set the architecture that the following assembly
 | `.arm.big` | - | ARM | Output in big endian |
 | `.arm.little` | - | ARM | Output in little endian |
 | `.saturn` | SEGA Saturn | SuperH | - |
+| `.32x` | SEGA 32x | SuperH | Alias to `.saturn` |
 
 ### Open a generic file
 

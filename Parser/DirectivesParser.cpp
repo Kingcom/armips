@@ -801,6 +801,7 @@ const DirectiveMap directives = {
 	{ ".arm.little",      { &parseDirectiveArmArch,         DIRECTIVE_ARM_LITTLE } },
 
 	{ ".saturn",          { &parseDirectiveShArch,          DIRECTIVE_SH_SATURN } },
+	{ ".32x",             { &parseDirectiveShArch,          DIRECTIVE_SH_SATURN } },
 
 	{ ".area",            { &parseDirectiveArea,            0 } },
 	{ ".autoregion",      { &parseDirectiveAutoRegion,      0 } },
