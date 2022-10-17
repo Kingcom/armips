@@ -4,6 +4,8 @@
 #include "Archs/ARM/ArmExpressionFunctions.h"
 #include "Archs/MIPS/Mips.h"
 #include "Archs/MIPS/MipsExpressionFunctions.h"
+#include "Archs/SuperH/SuperH.h"
+#include "Archs/SuperH/ShExpressionFunctions.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Allocations.h"
 #include "Core/Common.h"
@@ -21,6 +23,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	
 	Arm.Pass2();
 	Mips.Pass2();
+	SuperH.Pass2();
 
 	ValidateState validation;
 	do	// loop until everything is constant
@@ -49,6 +52,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 
 		Arm.Revalidate();
 		Mips.Revalidate();
+		SuperH.Revalidate();
 
 		if (Global.memoryMode)
 			g_fileManager->closeFile();

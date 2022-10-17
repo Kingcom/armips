@@ -21,6 +21,7 @@ enum ElfMachine
 	EM_NONE  =0,
 	EM_MIPS  =8,
 	EM_ARM   =40,
+	EM_SH2	 =42
 };
 
 // File version
@@ -266,6 +267,16 @@ struct Elf32_Rela
 	Elf32_Addr  r_offset;
 	Elf32_Word  r_info;
 	Elf32_Sword r_addend;
+
+	unsigned char getType()
+	{
+		return r_info & 0xFF;
+	}
+
+	Elf32_Word getSymbolNum()
+	{
+		return r_info >> 8;
+	}
 };
 
 #define ELF32_R_SYM(i) ((i)>>8)

@@ -130,7 +130,9 @@ public:
 	void Encode() const override;
 	void writeTempData(TempData& tempData) const override;
 	void writeSymData(SymbolData& symData) const override;
+	inline bool isSuccessfullyImported() { return success; };
 private:
+	bool success;
 	ElfRelocator rel;
 	std::unique_ptr<CAssemblerCommand> ctor;
 };

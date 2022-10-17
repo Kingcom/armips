@@ -179,17 +179,34 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveImportObj(Parser& parser, int f
 		
 		if (Mips.GetVersion() == MARCH_PSX)
 		{
-			parser.printError(start, "Constructor not supported for PSX libraries");
-			return std::make_unique<InvalidCommand>();
+			auto attempt = std::make_unique<DirectiveObjImport>(inputName.path(),ctorName);
+			if (!attempt->isSuccessfullyImported())
+			{
+				parser.printError(start, "Constructor not supported for non-ELF PSX libraries");
+				return std::make_unique<InvalidCommand>();
+			}
+			else
+			{
+				return attempt;
+			}
 		}
 
 		return std::make_unique<DirectiveObjImport>(inputName.path(),ctorName);
 	}
 
 	if (Mips.GetVersion() == MARCH_PSX)
-		return std::make_unique<DirectivePsxObjImport>(inputName.path());
+	{
+		// Fallback to ELF, if the PSX library importer fails.
+		auto psxLib = std::make_unique<DirectivePsxObjImport>(inputName.path());
+		if (!psxLib->isSuccessfullyImported())
+			return std::make_unique<DirectiveObjImport>(inputName.path());
+		else
+			return psxLib;
+	}
 	else
+	{
 		return std::make_unique<DirectiveObjImport>(inputName.path());
+	}
 }
 
 const DirectiveMap mipsDirectives = {

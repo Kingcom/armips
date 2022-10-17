@@ -124,6 +124,19 @@ armips_target_sources(armips PRIVATE
 	Archs/MIPS/MipsParser.h
 	Archs/MIPS/PsxRelocator.cpp
 	Archs/MIPS/PsxRelocator.h
+
+	Archs/SuperH/SuperH.cpp
+	Archs/SuperH/SuperH.h
+	Archs/SuperH/CShInstruction.cpp
+	Archs/SuperH/CShInstruction.h
+	Archs/SuperH/ShParser.cpp
+	Archs/SuperH/ShParser.h
+	Archs/SuperH/ShOpcodes.cpp
+	Archs/SuperH/ShOpcodes.h
+	Archs/SuperH/ShElfRelocator.cpp
+	Archs/SuperH/ShElfRelocator.h
+	Archs/SuperH/ShExpressionFunctions.cpp
+	Archs/SuperH/ShExpressionFunctions.h
 	
 	Commands/CAssemblerCommand.cpp
 	Commands/CAssemblerCommand.h

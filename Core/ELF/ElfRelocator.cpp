@@ -167,7 +167,7 @@ bool ElfRelocator::init(const fs::path& inputName)
 				for (size_t k = 0; k < elf->getSegmentlessSectionCount(); k++)
 				{
 					ElfSection* relSection = elf->getSegmentlessSection(k);
-					if (relSection->getType() != SHT_REL)
+					if (relSection->getType() != SHT_REL && relSection->getType() != SHT_RELA)
 						continue;
 					if (relSection->getInfo() != s)
 						continue;
@@ -278,10 +278,14 @@ std::unique_ptr<CAssemblerCommand> ElfRelocator::generateCtor(const Identifier& 
 	return func;
 }
 
-void ElfRelocator::loadRelocation(Elf32_Rel& rel, ByteArray& data, int offset, Endianness endianness)
+void ElfRelocator::loadRelocation(Elf32_Rela& rela, bool addend, ByteArray& data, int offset, Endianness endianness)
 {
-	rel.r_offset = data.getDoubleWord(offset + 0x00, endianness);
-	rel.r_info   = data.getDoubleWord(offset + 0x04, endianness);
+	rela.r_offset = data.getDoubleWord(offset + 0x00, endianness);
+	rela.r_info   = data.getDoubleWord(offset + 0x04, endianness);
+	if (addend)
+		rela.r_addend = data.getDoubleWord(offset + 0x08, endianness);
+	else
+		rela.r_addend = 0;
 }
 
 bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddress)
@@ -329,17 +333,20 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 		ElfSection* relSection = entry.relSection;
 		if (relSection != nullptr)
 		{
-			std::vector<RelocationAction> relocationActions;
-			for (unsigned int relOffset = 0; relOffset < relSection->getSize(); relOffset += sizeof(Elf32_Rel))
-			{
-				Elf32_Rel rel;
-				loadRelocation(rel, relSection->getData(), relOffset, elf->getEndianness());
-				int pos = rel.r_offset;
+			bool isRela = relSection->getType() == SHT_RELA;
+			int structSize = isRela ? sizeof(Elf32_Rela) : sizeof(Elf32_Rel);
 
-				if (relocator->isDummyRelocationType(rel.getType()))
+			std::vector<RelocationAction> relocationActions;
+			for (unsigned int relOffset = 0; relOffset < relSection->getSize(); relOffset += structSize)
+			{
+				Elf32_Rela rela;
+				loadRelocation(rela, isRela, relSection->getData(), relOffset, elf->getEndianness());
+				int pos = rela.r_offset;
+
+				if (relocator->isDummyRelocationType(rela.getType()))
 					continue;
 
-				int symNum = rel.getSymbolNum();
+				int symNum = rela.getSymbolNum();
 				if (symNum <= 0)
 				{
 					Logger::queueError(Logger::Warning, "Invalid symbol num %06X",symNum);
@@ -354,6 +361,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 				RelocationData relData;
 				relData.opcode = sectionData.getDoubleWord(pos, elf->getEndianness());
 				relData.opcodeOffset = pos+relocationOffsets[index];
+				relData.addend = rela.r_addend;
 				relocator->setSymbolAddress(relData,sym.st_value,sym.st_info & 0xF);
 
 				// externs?
@@ -390,7 +398,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 				}
 
 				std::vector<std::string> errors;
-				if (!relocator->relocateOpcode(rel.getType(),relData, relocationActions, errors))
+				if (!relocator->relocateOpcode(rela.getType(), relData, relocationActions, errors))
 				{
 					for (const std::string& error : errors)
 					{
