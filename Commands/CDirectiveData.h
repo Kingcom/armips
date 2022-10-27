@@ -42,7 +42,7 @@ private:
 	size_t getUnitSize() const;
 	size_t getDataSize() const;
 	
-	int64_t position;
+	int64_t position = 0;
 	EncodingMode mode;
 	bool writeTermination;
 	std::vector<Expression> entries;
