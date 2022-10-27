@@ -80,7 +80,16 @@ Most free region: 0x0806E80C, 564 / 1156 (free at 0x0806EA40)
 ## 2.1 Download binary
 Download the latest Windows 32-bit binary from the [Automated armips builds](http://buildbot.orphis.net/armips) site. You will need the [Microsoft Visual Studio 2015 x86 Redistributable](https://www.microsoft.com/en-US/download/details.aspx?id=48145).
 
-## 2.2 Building from source
+## 2.2 Installing from a package manager
+If you have [Scoop](https://scoop.sh/) installed, you can use it to install **armips** by using the following commands in powershell (or pwsh):
+```
+scoop bucket add extras
+```
+```
+scoop install armips
+```
+
+## 2.3 Building from source
 
 The latest code is available at the [armips GitHub repository](https://github.com/Kingcom/armips). Make sure to also initialize and update submodules. This can be accomplished with one command:
 ```bash
