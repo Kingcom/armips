@@ -1,5 +1,6 @@
 #include "Commands/CDirectiveData.h"
 
+#include <cinttypes>
 #include "Archs/Architecture.h"
 #include "Core/Common.h"
 #include "Core/FileManager.h"
@@ -430,7 +431,7 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += snprintf(str,20,"0x%16llX,",(uint64_t)normalData[i]);
+			str += snprintf(str,20,"0x%16" PRIx64 ",",(uint64_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::Invalid:
