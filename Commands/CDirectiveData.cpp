@@ -436,10 +436,10 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 		break;
 	case EncodingMode::Invalid:
 		// TODO: Assert?
+		str[0] = '\0';
 		break;
 	}
 
-	*(str-1) = 0;
 	tempData.writeLine(position,start);
 	delete[] start;
 }
