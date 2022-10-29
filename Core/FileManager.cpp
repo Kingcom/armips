@@ -24,14 +24,14 @@ inline uint16_t swapEndianness16(uint16_t value)
 
 
 GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, int64_t headerSize, bool overwrite)
-	: fileName(fileName), headerSize(headerSize), originalHeaderSize(headerSize)
+	: originalHeaderSize(headerSize), headerSize(headerSize), fileName(fileName)
 {
 	this->seekPhysical(0);
 	mode = overwrite ? Create : Open;
 }
 
 GenericAssemblerFile::GenericAssemblerFile(const fs::path& fileName, const fs::path& originalFileName, int64_t headerSize)
-	: fileName(fileName), originalName(originalFileName), headerSize(headerSize), originalHeaderSize(headerSize)
+	: originalHeaderSize(headerSize), headerSize(headerSize), fileName(fileName), originalName(originalFileName)
 {
 	this->seekPhysical(0);
 	mode = Copy;

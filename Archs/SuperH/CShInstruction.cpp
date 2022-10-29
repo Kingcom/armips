@@ -76,7 +76,7 @@ bool CShInstruction::Validate(const ValidateState &state)
 		if (opflags & SH_MUSTBEALIGNED)	// immediate must be aligned
 		{
 			if (opflags & SH_PCRELMANUAL)
-				immediateData.primary.value += RamPos;
+				immediateData.primary.value += (int)RamPos;
 		
 			uint64_t value = immediateData.primary.value;
 		
@@ -109,7 +109,7 @@ bool CShInstruction::Validate(const ValidateState &state)
 				Logger::queueError(Logger::Error, "Branch/move target %08X out of range", immediateData.primary.value);
 				return false;
 			}
-			immediateData.primary.value = num;
+			immediateData.primary.value = (int)num;
 		}
 
 		if (opflags & SH_IMM16)

@@ -74,6 +74,7 @@ struct ExpressionValue
 	ExpressionValue(const StringLiteral& value)
 		: type(ExpressionValueType::String), strValue(value)
 	{
+		intValue = 0;
 	}
 
 	bool isFloat() const

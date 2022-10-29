@@ -11,7 +11,7 @@
 #include <cstring>
 
 CDirectiveArea::CDirectiveArea(bool shared, Expression& size)
-	: areaSize(0), contentSize(0), position(0), fillValue(0), shared(shared), sizeExpression(size), content(nullptr)
+	: shared(shared), sizeExpression(size), content(nullptr)
 {
 }
 

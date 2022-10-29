@@ -16,12 +16,12 @@ public:
 	void setContent(std::unique_ptr<CAssemblerCommand> content) { this->content = std::move(content); }
 private:
 	bool shared;
-	int64_t position;
+	int64_t position = 0;
 	Expression sizeExpression;
-	int64_t areaSize;
-	int64_t contentSize;
+	int64_t areaSize = 0;
+	int64_t contentSize = 0;
 	Expression fillExpression;
-	int8_t fillValue;
+	int8_t fillValue = 0;
 	int64_t fileID = 0;
 	Expression positionExpression;
 	std::unique_ptr<CAssemblerCommand> content;
