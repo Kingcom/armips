@@ -75,25 +75,25 @@ struct Token
 	const Identifier &identifierValue() const
 	{
 		assert(std::holds_alternative<Identifier>(value));
-		return std::get<Identifier>(value);
+		return *std::get_if<Identifier>(&value);
 	}
 
 	const StringLiteral &stringValue() const
 	{
 		assert(std::holds_alternative<StringLiteral>(value));
-		return std::get<StringLiteral>(value);
+		return *std::get_if<StringLiteral>(&value);
 	}
 
 	int64_t intValue() const
 	{
 		assert(std::holds_alternative<int64_t>(value));
-		return std::get<int64_t>(value);
+		return *std::get_if<int64_t>(&value);
 	}
 
 	double floatValue() const
 	{
 		assert(std::holds_alternative<double>(value));
-		return std::get<double>(value);
+		return *std::get_if<double>(&value);
 	}
 
 	size_t line = 0;

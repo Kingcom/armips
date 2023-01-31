@@ -160,7 +160,7 @@ private:
 	const T &valueAs() const
 	{
 		assert(std::holds_alternative<T>(value));
-		return std::get<T>(value);
+		return *std::get_if<T>(&value);
 	}
 
 	std::string formatFunctionCall();
