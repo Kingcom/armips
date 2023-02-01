@@ -209,7 +209,7 @@ void CDirectiveData::encodeSjis()
 			if (auto unicodeValue = sjisToUnicode(SJISValue))
 			{
 				hexBuffer[0] = SJISValue & 0xFF;
-				sjisTable.addEntry(hexBuffer, 1, convertUnicodeCharToUtf8(unicodeValue.value()));
+				sjisTable.addEntry(hexBuffer, 1, convertUnicodeCharToUtf8(*unicodeValue));
 			}
 		}
 		for (unsigned short SJISValue = 0x8100; SJISValue < 0xEF00; SJISValue++)
@@ -218,7 +218,7 @@ void CDirectiveData::encodeSjis()
 			{
 				hexBuffer[0] = (SJISValue >> 8) & 0xFF;
 				hexBuffer[1] = SJISValue & 0xFF;
-				sjisTable.addEntry(hexBuffer, 2, convertUnicodeCharToUtf8(unicodeValue.value()));
+				sjisTable.addEntry(hexBuffer, 2, convertUnicodeCharToUtf8(*unicodeValue));
 			}
 		}
 	}
