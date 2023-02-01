@@ -847,7 +847,7 @@ char32_t TextFile::readCharacter()
 				sjis = (sjis << 8) | bufGetChar();
 
 			if (auto unicode = sjisToUnicode(sjis))
-				value = unicode.value();
+				value = *unicode;
 			else
 				errorText = tfm::format("One or more invalid Shift-JIS characters in this file");
 		}
