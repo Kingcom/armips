@@ -482,6 +482,12 @@ These directives can be used to set the architecture that the following assembly
 | `.saturn` | SEGA Saturn | SuperH | - |
 | `.32x` | SEGA 32x | SuperH | Alias to `.saturn` |
 
+| Architecture | Word size (in bits) |
+| ------------ |:---------------------|
+| MIPS | 32 |
+| ARM | 32 |
+| SuperH | 16 |
+
 ### Open a generic file
 
 ```
@@ -607,6 +613,7 @@ Inserts the file specified by `FileName` into the currently opened output file. 
 .byte   value[,...]
 .db     value[,...]
 .dcb    value[,...]
+.d8     value[,...]
 .ascii  value[,...]
 .asciiz value[,...]
 db      value[,...]
@@ -615,17 +622,27 @@ dcb     value[,...]
 
 Inserts the specified sequence of bytes. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer or float, only the lowest 8 bits are inserted. If it evaluates to a string, every character is inserted as a byte using ASCII encoding.
 
+### Write 16/32/64-bit integers
+
+```
+.d16 value[,...]
+.d32 value[,...]
+.d64 value[,...]
+```
+Inserts the specified sequence of 16, 32, or 64-bit integers, depending on the directive used. If it evaluates to an integer or float, only the lowest 16/32/64 bits are inserted. If it evaluates to a string, every character is inserted as a 16/32/64-bit values using ASCII encoding.
+
 ### Write halfwords
 
 ```
 .halfword value[,...]
+.hword    value[,...]
 .dh       value[,...]
 .dcw      value[,...]
 dh        value[,...]
 dcw       value[,...]
 ```
 
-Inserts the specified sequence of 16-bit halfwords. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 16 bits are inserted. If it evaluates to a string, every character is inserted as a halfword using ASCII encoding.
+Inserts the specified sequence of halfwords. The size of a halfword is defined by architecture's word size. Each parameter can be any expression that evaluates to an integer or a string. If it evaluates to an integer, only the lowest 16/8 bits are inserted. If it evaluates to a string, every character is inserted as a halfword using ASCII encoding.
 
 If No$gba semantics are enabled, then `dh` and `.dh` are treated as invalid directives and will return an error.
 
@@ -639,23 +656,24 @@ dw    value[,...]
 dcd   value[,...]
 ```
 
-Inserts the specified sequence of 32-bit words. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to an integer, only the lowest 32 bits are inserted. If it evaluates to a string, every character is inserted as a word using ASCII encoding. Floats are inserted using an integer representation of the single-precision float's encoding.
+Inserts the specified sequence of words. The size of a word is defined by architecture. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to an integer, only the lowest 32/16 bits are inserted. If it evaluates to a string, every character is inserted as a word using ASCII encoding. Floats are inserted using an integer representation of the single-precision float's encoding.
 
-If No$gba semantics are enabled, then `dw` and `.dw` are treated as inserting 16-bit halfwords instead (i.e. equivalent to `.halfword`).
+If No$gba semantics are enabled, then `dw` and `.dw` are treated as inserting 16-bit values instead (i.e. equivalent to `.d16`).
 
 ### Write doublewords
 
 ```
 .doubleword value[,...]
+.dword      value[,...]
 .dd         value[,...]
 .dcq        value[,...]
 dd          value[,...]
 dcq         value[,...]
 ```
 
-Inserts the specified sequence of 64-bit doublewords. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to a string, every character is inserted as a doubleword using ASCII encoding. Floats are inserted using an integer representation of the double-precision float's encoding.
+Inserts the specified sequence of doublewords. The size of a doubleword is defined by architecture's word size. Each parameter can be any expression that evaluates to an integer, a string, or a floating point number. If it evaluates to a string, every character is inserted as a doubleword using ASCII encoding. Floats are inserted using an integer representation of the double-precision float's encoding.
 
-If No$gba semantics are enabled, then `dd` and `.dd` are treated as inserting 32-bit words instead (i.e. equivalent to `.word`).
+If No$gba semantics are enabled, then `dd` and `.dd` are treated as inserting 32-bit values instead (i.e. equivalent to `.d32`).
 
 ### Write floating point numbers
 
