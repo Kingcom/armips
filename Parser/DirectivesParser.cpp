@@ -375,6 +375,15 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveData(Parser& parser, int flags)
 	case DIRECTIVE_DATA_64:
 		data->setNormal(list,8);
 		break;
+	case DIRECTIVE_DATA_HWORD:
+		data->setNormal(list,Architecture::current().getWordSize()/2);
+		break;
+	case DIRECTIVE_DATA_WORD:
+		data->setNormal(list,Architecture::current().getWordSize());
+		break;
+	case DIRECTIVE_DATA_DWORD:
+		data->setNormal(list,Architecture::current().getWordSize()*2);
+		break;
 	case DIRECTIVE_DATA_ASCII:
 		data->setAscii(list,terminate);
 		break;
@@ -754,29 +763,35 @@ const DirectiveMap directives = {
 	{ ".loadtable",       { &parseDirectiveTable,           0 } },
 	{ ".table",           { &parseDirectiveTable,           0 } },
 	{ ".byte",            { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
-	{ ".halfword",        { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
-	{ ".word",            { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
-	{ ".doubleword",      { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
+	{ ".halfword",        { &parseDirectiveData,            DIRECTIVE_DATA_HWORD } },
+	{ ".hword",           { &parseDirectiveData,            DIRECTIVE_DATA_HWORD } },
+	{ ".word",            { &parseDirectiveData,            DIRECTIVE_DATA_WORD } },
+	{ ".doubleword",      { &parseDirectiveData,            DIRECTIVE_DATA_DWORD } },
+	{ ".dword",           { &parseDirectiveData,            DIRECTIVE_DATA_DWORD } },
 	{ ".db",              { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
-	{ ".dh",              { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
-	{ ".dw",              { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
-	{ ".dd",              { &parseDirectiveData,            DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
+	{ ".dh",              { &parseDirectiveData,            DIRECTIVE_DATA_HWORD|DIRECTIVE_NOCASHOFF } },
+	{ ".dw",              { &parseDirectiveData,            DIRECTIVE_DATA_WORD|DIRECTIVE_NOCASHOFF } },
+	{ ".dd",              { &parseDirectiveData,            DIRECTIVE_DATA_DWORD|DIRECTIVE_NOCASHOFF } },
 	{ ".dw",              { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
 	{ ".dd",              { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
 	{ ".dcb",             { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
-	{ ".dcw",             { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
-	{ ".dcd",             { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
-	{ ".dcq",             { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
+	{ ".dcw",             { &parseDirectiveData,            DIRECTIVE_DATA_HWORD } },
+	{ ".dcd",             { &parseDirectiveData,            DIRECTIVE_DATA_WORD } },
+	{ ".dcq",             { &parseDirectiveData,            DIRECTIVE_DATA_DWORD } },
 	{ "db",               { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
-	{ "dh",               { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHOFF } },
-	{ "dw",               { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHOFF } },
-	{ "dd",               { &parseDirectiveData,            DIRECTIVE_DATA_64|DIRECTIVE_NOCASHOFF } },
+	{ "dh",               { &parseDirectiveData,            DIRECTIVE_DATA_HWORD|DIRECTIVE_NOCASHOFF } },
+	{ "dw",               { &parseDirectiveData,            DIRECTIVE_DATA_WORD|DIRECTIVE_NOCASHOFF } },
+	{ "dd",               { &parseDirectiveData,            DIRECTIVE_DATA_DWORD|DIRECTIVE_NOCASHOFF } },
 	{ "dw",               { &parseDirectiveData,            DIRECTIVE_DATA_16|DIRECTIVE_NOCASHON } },
 	{ "dd",               { &parseDirectiveData,            DIRECTIVE_DATA_32|DIRECTIVE_NOCASHON } },
 	{ "dcb",              { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
-	{ "dcw",              { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
-	{ "dcd",              { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
-	{ "dcq",              { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
+	{ "dcw",              { &parseDirectiveData,            DIRECTIVE_DATA_HWORD } },
+	{ "dcd",              { &parseDirectiveData,            DIRECTIVE_DATA_WORD } },
+	{ "dcq",              { &parseDirectiveData,            DIRECTIVE_DATA_DWORD } },
+	{ ".d8",              { &parseDirectiveData,            DIRECTIVE_DATA_8 } },
+	{ ".d16",             { &parseDirectiveData,            DIRECTIVE_DATA_16 } },
+	{ ".d32",             { &parseDirectiveData,            DIRECTIVE_DATA_32 } },
+	{ ".d64",             { &parseDirectiveData,            DIRECTIVE_DATA_64 } },
 	{ ".float",           { &parseDirectiveData,            DIRECTIVE_DATA_FLOAT } },
 	{ ".double",          { &parseDirectiveData,            DIRECTIVE_DATA_DOUBLE } },
 	{ ".ascii",           { &parseDirectiveData,            DIRECTIVE_DATA_ASCII } },

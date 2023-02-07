@@ -36,7 +36,7 @@
 	nop
 	
 	.align 2
-	Immediate16BitValue: .dh 0xCCCC
+	Immediate16BitValue: .dw 0xCCCC
 
 	mov.l Immediate32BitValue, r0
 	mov.l Immediate32BitValue, r1
@@ -56,7 +56,7 @@
 	mov.l Immediate32BitValue, r15
 
 	.align 4
-	Immediate32BitValue: .dw 0xCCCCCCCC
+	Immediate32BitValue: .dd 0xCCCCCCCC
 
 	mov.w @(4,pc), r0
 	mov.w @(4,pc), r1

@@ -6,9 +6,9 @@
 
 .org 0x206
 OutofRangeValue16:
-    .dh 0x1234
+    .dw 0x1234
 .org 0x404
 OutofRangeValue32:
-    .dw 0x12345678
+    .dd 0x12345678
 
 .close

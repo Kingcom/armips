@@ -21,6 +21,7 @@ public:
 	{
 		return Version == MARCH_N64 || Version == MARCH_RSP ? Endianness::Big : Endianness::Little;
 	};
+	virtual int getWordSize() { return 4; };
 	void SetLoadDelay(bool Delay, int Register);
 	bool GetLoadDelay() { return LoadDelay; };
 	int GetLoadDelayRegister() { return LoadDelayRegister; };

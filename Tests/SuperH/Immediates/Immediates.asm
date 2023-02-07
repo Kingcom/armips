@@ -62,7 +62,7 @@ ForwardBranching:
 
     .align 4
 
-Some32BitValue: .dw 0x12345678, 0x87654321
-Some16BitValue: .dh 0x1234, 0x5678
+Some32BitValue: .dd 0x12345678, 0x87654321
+Some16BitValue: .dw 0x1234, 0x5678
 
 .close
