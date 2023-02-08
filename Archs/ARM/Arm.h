@@ -46,6 +46,7 @@ public:
 	virtual void Revalidate();
 	virtual std::unique_ptr<IElfRelocator> getElfRelocator();
 	virtual Endianness getEndianness() { return version == AARCH_BIG ? Endianness::Big : Endianness::Little; };
+	virtual int getWordSize() { return 4; };
 	void SetThumbMode(bool b) { thumb = b; };
 	bool GetThumbMode() { return thumb; };
 	void setVersion(ArmArchType type) { version = type; }

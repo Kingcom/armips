@@ -18,6 +18,7 @@ public:
 	virtual void Revalidate();
 	virtual std::unique_ptr<IElfRelocator> getElfRelocator();
 	virtual Endianness getEndianness() { return version == SHARCH_LITTLE ? Endianness::Little : Endianness::Big; };
+	virtual int getWordSize() { return 2; };
 	void setVersion(ShArchType type) { version = type; }
 	ShArchType getVersion() { return version; }
 

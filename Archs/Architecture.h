@@ -25,6 +25,7 @@ public:
 	virtual void Revalidate() = 0;
 	virtual std::unique_ptr<IElfRelocator> getElfRelocator() = 0;
 	virtual Endianness getEndianness() = 0;
+	virtual int getWordSize() = 0;
 private:
 	static Architecture *currentArchitecture;
 };
@@ -53,6 +54,7 @@ public:
 	void Revalidate() override;
 	std::unique_ptr<IElfRelocator> getElfRelocator() override;
 	Endianness getEndianness() override { return Endianness::Little; }
+	int getWordSize() override { return 4; };
 };
 
 extern CInvalidArchitecture InvalidArchitecture;
