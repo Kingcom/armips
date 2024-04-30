@@ -200,7 +200,7 @@ bool ElfRelocator::init(const fs::path& inputName)
 			Elf32_Sym symbol;
 			elf->getSymbol(symbol, i);
 
-			if (ELF32_ST_BIND(symbol.st_info) == STB_GLOBAL && symbol.st_shndx != 0)
+			if ((ELF32_ST_BIND(symbol.st_info) == STB_GLOBAL || ELF32_ST_BIND(symbol.st_info) == STB_WEAK) && symbol.st_shndx != 0)
 			{
 				ElfRelocatorSymbol symEntry;
 				symEntry.type = ELF32_ST_TYPE(symbol.st_info);
