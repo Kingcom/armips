@@ -399,7 +399,7 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 					
 					relData.relocationBase = (unsigned int) label->getValue();
 					relData.targetSymbolType = label->isData() ? STT_OBJECT : STT_FUNC;
-					relData.targetSymbolInfo = label->getInfo();
+					relData.targetSymbolInfo = (int)label->getInfo();
 				} else {
 					relData.relocationBase = relocationOffsets[symSection]+relData.symbolAddress;
 				}
