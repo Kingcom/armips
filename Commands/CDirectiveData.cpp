@@ -387,51 +387,52 @@ void CDirectiveData::writeTempData(TempData& tempData) const
 	size_t size = (getUnitSize()*2+3)*getDataSize()+20;
 	char* str = new char[size];
 	char* start = str;
+	char* end = start + size;
 
 	switch (mode)
 	{
 	case EncodingMode::Sjis:
 	case EncodingMode::Custom:
-		str += snprintf(str,20,".byte ");
+		str += snprintf(str,end-str,".byte ");
 
 		for (size_t i = 0; i < customData.size(); i++)
 		{
-			str += snprintf(str,20,"0x%02X,",(uint8_t)customData[i]);
+			str += snprintf(str,end-str,"0x%02X,",(uint8_t)customData[i]);
 		}
 		break;
 	case EncodingMode::U8:
 	case EncodingMode::Ascii:
-		str += snprintf(str,20,".byte ");
+		str += snprintf(str,end-str,".byte ");
 		
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += snprintf(str,20,"0x%02X,",(uint8_t)normalData[i]);
+			str += snprintf(str,end-str,"0x%02X,",(uint8_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U16:
-		str += snprintf(str,20,".halfword ");
+		str += snprintf(str,end-str,".halfword ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += snprintf(str,20,"0x%04X,",(uint16_t)normalData[i]);
+			str += snprintf(str,end-str,"0x%04X,",(uint16_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U32:
 	case EncodingMode::Float:
-		str += snprintf(str,20, ".word ");
+		str += snprintf(str,end-str, ".word ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += snprintf(str,20,"0x%08X,",(uint32_t)normalData[i]);
+			str += snprintf(str,end-str,"0x%08X,",(uint32_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::U64:
 	case EncodingMode::Double:
-		str += snprintf(str,20,".doubleword ");
+		str += snprintf(str,end-str,".doubleword ");
 
 		for (size_t i = 0; i < normalData.size(); i++)
 		{
-			str += snprintf(str,20,"0x%16" PRIx64 ",",(uint64_t)normalData[i]);
+			str += snprintf(str,end-str,"0x%16" PRIx64 ",",(uint64_t)normalData[i]);
 		}
 		break;
 	case EncodingMode::Invalid:
