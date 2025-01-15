@@ -1,0 +1,17 @@
+; Line with comment
+
+01100110 ValidLabel
+23322332    ValidLabelWithSpaces
+45544554		ValidLabelWithTabs
+67766776  	  	ValidLabelWithSpacesAndTabs
+89988998 ValidLabelWithComment ; No$gba does allow this, if there is whitespace before the ;
+    
+11223344 @StaticLabel
+55667788 @StaticLabel
+99AABBCC @@LocalLabel
+DDEEFF00 @@LocalLabel
+
+  004488CC  Function  ,  CC884400  
+
+FEDCBA98 .pool
+
