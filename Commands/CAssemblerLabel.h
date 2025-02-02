@@ -4,13 +4,15 @@
 #include "Core/Expression.h"
 #include "Core/Types.h"
 
+#include <optional>
+
 class Label;
 
 class CAssemblerLabel: public CAssemblerCommand
 {
 public:
-	CAssemblerLabel(const Identifier& name, const Identifier& originalName);
-	CAssemblerLabel(const Identifier& name, const Identifier& originalName, Expression& value);
+	CAssemblerLabel(const Identifier& name, const Identifier& originalName, std::optional<bool> thumbMode = std::nullopt);
+	CAssemblerLabel(const Identifier& name, const Identifier& originalName, Expression& value, std::optional<bool> thumbMode = std::nullopt);
 	bool Validate(const ValidateState &state) override;
 	void Encode() const override;
 	void writeTempData(TempData& tempData) const override;

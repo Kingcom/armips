@@ -765,6 +765,13 @@ Defines `Label` with a given value, creating a symbol for it. This can be used s
 
 Unlike `Label:`, note that `.definelabel Label,value` is evaluated only once, thus using any expressions that refer to the current state of the assembler (e.g. `org()`, `.`) in combination with `.definelabel` leads to undefined behavior.
 
+
+```
+.definedatalabel Label,value
+```
+
+For architectures other than ARM, this works identically to `.definelabel`, however it can be used to essentially document your intent that the symbol doesn't refer to code. Under ARM architecture, it works identically to `.definearmlabel` (see below).
+
 ### Function labels
 
 ```
@@ -894,6 +901,17 @@ ldr  r0,=0xFFEEDDCC
 ```
 
 Inserts a no$gba debug message as described by GBATEK.
+
+### Define labels
+
+```
+.definearmlabel Label,value
+.definethumblabel Label,value
+```
+
+Identical to `.definelabel`, but explicitly creates an ARM or THUMB label regardless of the current mode.
+
+Only relevant when linking external code through `.importobj`. ARM uses the least significant bit in addresses to signify whether the code at the target address is using ARM or THUMB mode when setting the program counter through instructions such as `bl` or `blx`.  armips automatically remembers the current mode when labels are defined, but this mode may be incorrect when using `.definelabel`. Note that using `.definethumblabel` for data may result in incorrect addresses.
 
 # 6. Macros
 
