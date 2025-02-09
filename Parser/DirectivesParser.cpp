@@ -192,6 +192,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveObjImport(Parser& parser, int f
 	return std::make_unique<DirectiveObjImport>(fileName.path());
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveSymImport(Parser& parser, int flags)
+{
+	Expression exp = parser.parseExpression();
+	StringLiteral fileName;
+	if (!exp.evaluateString(fileName,true))
+		return nullptr;
+
+	return std::make_unique<CDirectiveSymImport>(fileName.path());
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveConditional(Parser& parser, int flags)
 {
 	ConditionType type;
@@ -836,6 +846,7 @@ const DirectiveMap directives = {
 
 	{ ".importobj",       { &parseDirectiveObjImport,       0 } },
 	{ ".importlib",       { &parseDirectiveObjImport,       0 } },
+	{ ".importsym",       { &parseDirectiveSymImport,       0 } },
 
 	{ ".erroronwarning",  { &parseDirectiveErrorWarning,    0 } },
 	{ ".relativeinclude", { &parseDirectiveRelativeInclude, 0 } },

@@ -843,6 +843,14 @@ By specifying `.nocash on`, No$gba semantics will be enabled for data directives
 
 By specifying `.sym off`, any symbols (e.g. labels) defined after it will not be written to the symfile (if specified with the `-sym`/`-sym2` command line flag). This can be useful when using labels to define enum values that should not be interpreted as memory addresses. Writing to the symfile can be enabled again with `.sym on`. By default, this feature is on.
 
+### Import symfile
+
+```
+.importsym SymFile
+```
+
+Imports all symbols from the existing symfile specified by `SymFile`. For any symbols in `SymFile` not starting with `.`, `@` or `@@`, a global label will be created, which can be used like any other label. Regardless of prefix, all symbols and directives in `SymFile` are also written to the main output symfile for this run of armips, if symfile writing is enabled. This directive terminates the scope for local labels and `equ`s.
+
 ## 5.2 MIPS directives
 
 ### Load delay

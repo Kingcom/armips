@@ -75,6 +75,17 @@ bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, s
 	fs::path oldDir = fs::current_path();
 	fs::current_path(dir);
 
+	// Remove previous output files
+	for (const auto& file : fs::directory_iterator(fs::current_path()))
+	{
+		std::string fileName = file.path().filename().u8string();
+		if (fileName.rfind("output",0) == 0)
+		{
+			// If filename starts with output, delete the file
+			fs::remove(file.path());
+		}
+	}
+
 	ArmipsArguments settings;
 	std::vector<std::string> errors;
 	int expectedRetVal = 0;
@@ -165,6 +176,28 @@ bool TestRunner::executeTest(const fs::path& dir, const std::string& testName, s
 			}
 		} else {
 			errorString += tfm::format("Output data size does not match\n");
+			result = false;
+		}
+	}
+
+	if (fs::exists("expected.sym"))
+	{
+		TextFile expectedFile;
+		TextFile actualFile;
+		expectedFile.open("expected.sym",TextFile::Read);
+		actualFile.open("output.sym",TextFile::Read);
+		if (actualFile.isOpen())
+		{
+			std::vector<std::string> expected = expectedFile.readAll();
+			std::vector<std::string> actual = actualFile.readAll();
+
+			if (expected != actual)
+			{
+				errorString += tfm::format("Symbols file does not match\n");
+				result = false;
+			}
+		} else {
+			errorString += tfm::format("Symbols file not produced\n");
 			result = false;
 		}
 	}
