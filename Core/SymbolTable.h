@@ -44,8 +44,8 @@ public:
 	void setDefined(bool b) { defined = b; };
 	bool isData() { return data; };
 	void setIsData(bool b) { data = b; };
-	void setInfo(int inf) { info = inf; };
-	int getInfo() { return info; };
+	void setInfo(int64_t inf) { info = inf; };
+	int64_t getInfo() { return info; };
 	void setUpdateInfo(bool b) { updateInfo = b; };
 	bool getUpdateInfo() { return updateInfo; };
 	void setSection(int num) { section = num; }
@@ -59,7 +59,7 @@ private:
 	bool defined = false;
 	bool data = false;
 	bool updateInfo = true;
-	int info = 0;
+	int64_t info = 0;
 	int section = 0;
 };
 
