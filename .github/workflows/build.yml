@@ -22,7 +22,7 @@ jobs:
         config:
           - { name: "Ubuntu gcc", os: "ubuntu-latest", generator: "Unix Makefiles", cc: "gcc", cxx: "g++" }
           - { name: "Ubuntu clang", os: "ubuntu-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
-          - { name: "macOS clang", os: "macos-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
+          - { name: "macOS clang", os: "macos-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++", cmake_flags: "-DCMAKE_OSX_ARCHITECTURES='x86_64;arm64'" }
           - { name: "Windows clang", os: "windows-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
           - { name: "Windows MSVC", os: "windows-2022", generator: "Visual Studio 17 2022"}
 
@@ -35,7 +35,7 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -G "${{matrix.config.generator}}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DARMIPS_USE_STD_FILESYSTEM=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+      run: cmake -B ${{github.workspace}}/build -G "${{matrix.config.generator}}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DARMIPS_USE_STD_FILESYSTEM=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install ${{matrix.config.cmake_flags}}
       env:
         CC: ${{matrix.config.cc}}
         CXX: ${{matrix.config.cxx}}
