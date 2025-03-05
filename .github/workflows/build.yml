@@ -53,8 +53,8 @@ jobs:
     - name: Install
       shell: bash
       run: |
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
-        VERSION=$(git -C ${{github.workspace}} describe --first-parent)
+        cmake --build '${{github.workspace}}/build' --config ${{env.BUILD_TYPE}} --target install
+        VERSION=$(git -C '${{github.workspace}}' describe --first-parent)
         PLATFORM=$(echo ${{matrix.config.name}} | tr '[:upper:]' '[:lower:'] | sed 's/ /_/g')
         echo "FILENAME=armips_${VERSION}_${PLATFORM}" >> $GITHUB_ENV
 
