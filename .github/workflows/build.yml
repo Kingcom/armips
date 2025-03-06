@@ -2,6 +2,8 @@ name: CMake
 
 on:
   push:
+    tags:
+      - '*'
     branches: [ master ]
   pull_request:
     branches: [ master ]
@@ -57,9 +59,27 @@ jobs:
         VERSION=$(git -C '${{github.workspace}}' describe --first-parent)
         PLATFORM=$(echo ${{matrix.config.name}} | tr '[:upper:]' '[:lower:'] | sed 's/ /_/g')
         echo "FILENAME=armips_${VERSION}_${PLATFORM}" >> $GITHUB_ENV
+        echo "RELEASENAME=armips_${VERSION}" >> $GITHUB_ENV
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: ${{env.FILENAME}}
         path: ${{github.workspace}}/install
+
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.6
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        type: 'zip'
+        filename: ${{env.FILENAME}}.zip
+        directory: '${{github.workspace}}/install'
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: ${{env.RELEASENAME}}
+        prerelease: true
+        files: ${{github.workspace}}/install/${{env.FILENAME}}.zip
+    
