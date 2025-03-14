@@ -261,6 +261,11 @@ if(NOT ARMIPS_LIBRARY_ONLY)
 	add_test(NAME armipstests COMMAND armipstests ${CMAKE_CURRENT_SOURCE_DIR}/Tests)
 
 	# install
-	install(TARGETS armips-bin RUNTIME DESTINATION .)
-	install(FILES Readme.md DESTINATION .)
+	include(GNUInstallDirs)
+	if(WIN32)
+		set(${CMAKE_INSTALL_BINDIR} ".")
+		set(${CMAKE_INSTALL_DOCDIR} ".")
+	endif()
+	install(TARGETS armips-bin RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+	install(FILES Readme.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
