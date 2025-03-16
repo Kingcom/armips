@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - '*'
-    branches: [ master ]
+    branches: [ ci ]
   pull_request:
     branches: [ master ]
 
