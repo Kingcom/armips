@@ -15,6 +15,7 @@ CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& im
 
 	addNop = false;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
+	RelaxImmediateSign = Mips.RelaxImmediateSign();
 }
 
 CMipsInstruction::~CMipsInstruction()
@@ -132,7 +133,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		{
 			int num = (int) (immediateData.primary.value-RamPos-4);
 			
-			if (num > 0x20000 || num < (-0x20000))
+			if (num >= 0x20000 || num < (-0x20000))
 			{
 				Logger::queueError(Logger::Error, "Branch target %08X out of range",immediateData.primary.value);
 				return false;
@@ -156,16 +157,24 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		}
 		
 		int immediateBits = getImmediateBits(immediateData.primary.type);
-		unsigned int mask = (0xFFFFFFFF << (32-immediateBits)) >> (32-immediateBits);
 		int digits = (immediateBits+3) / 4;
-
-		if ((unsigned int)std::abs(immediateData.primary.value) > mask)
+		// Example: 8 bit immediate. If signed, -0x80 to 0x7F. If unsigned, 0x00 to 0xFF. If relaxed, -0x80 to 0xFF.
+		int maxInclusive = ((opcodeData.opcode.flags & MO_IMMUNSIGNED) || RelaxImmediateSign)
+			? (1 << immediateBits) - 1
+			: (1 << (immediateBits - 1)) - 1;
+		int minInclusive = (!(opcodeData.opcode.flags & MO_IMMUNSIGNED) || RelaxImmediateSign)
+			? -(1 << (immediateBits - 1))
+			: 0;
+		if (immediateData.primary.value < minInclusive || immediateData.primary.value > maxInclusive)
 		{
-			Logger::queueError(Logger::Error, "Immediate value 0x%0*X out of range",digits,immediateData.primary.value);
+			Logger::queueError(Logger::Error, "Immediate value 0x%0*X out of range 0x%0*X - 0x%0*X",
+				digits, immediateData.primary.value,
+				digits, minInclusive,
+				digits, maxInclusive);
 			return false;
 		}
 
-		immediateData.primary.value &= mask;
+		immediateData.primary.value &= (1 << immediateBits) - 1;
 	}
 
 	if (immediateData.secondary.type != MipsImmediateType::None)

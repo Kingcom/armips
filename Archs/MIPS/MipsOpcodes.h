@@ -32,6 +32,7 @@
 #define MO_64BIT						(1 << 12)	// only available on 64 bit cpus
 #define MO_FPU							(1 << 13)	// only available with an fpu
 #define MO_DFPU							(1 << 14)	// double-precision fpu opcodes
+#define MO_IMMUNSIGNED                  (1 << 15)   // immediate is interpreted as unsigned
 
 #define MO_VFPU							(1 << 16)	// vfpu type opcode
 #define MO_VFPU_MIXED					(1 << 17)	// mixed mode vfpu register
