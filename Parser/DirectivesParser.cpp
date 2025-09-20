@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <initializer_list>
+#include <optional>
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveOpen(Parser& parser, int flags)
 {
@@ -618,7 +619,7 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveSym(Parser& parser, int flags)
 		return nullptr;
 }
 
-std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int flags)
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int flags, std::optional<bool> thumbMode)
 {
 	const Token& tok = parser.nextToken();
 	if (tok.type != TokenType::Identifier)
@@ -638,7 +639,17 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int
 		return nullptr;
 	}
 
-	return std::make_unique<CAssemblerLabel>(identifier,Identifier(tok.getOriginalText()),value);
+	return std::make_unique<CAssemblerLabel>(identifier,Identifier(tok.getOriginalText()),value,thumbMode);
+}
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int flags)
+{
+	return parseDirectiveDefineLabel(parser, flags, std::nullopt);
+}
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineDataLabel(Parser& parser, int flags)
+{
+	return parseDirectiveDefineLabel(parser, flags, false);
 }
 
 std::unique_ptr<CAssemblerCommand> parseDirectiveFunction(Parser& parser, int flags)
@@ -832,6 +843,7 @@ const DirectiveMap directives = {
 	{ ".sym",             { &parseDirectiveSym,             0 } },
 
 	{ ".definelabel",     { &parseDirectiveDefineLabel,     0 } },
+	{ ".definedatalabel", { &parseDirectiveDefineDataLabel, 0 } },
 	{ ".function",        { &parseDirectiveFunction,        DIRECTIVE_MANUALSEPARATOR } },
 	{ ".func",            { &parseDirectiveFunction,        DIRECTIVE_MANUALSEPARATOR } },
 

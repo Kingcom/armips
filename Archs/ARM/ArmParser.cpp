@@ -56,6 +56,16 @@ std::unique_ptr<CAssemblerCommand> parseDirectivePool(Parser& parser, int flags)
 	return seq;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineArmLabel(Parser& parser, int flags)
+{
+	return parseDirectiveDefineLabel(parser, flags, false);
+}
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineThumbLabel(Parser& parser, int flags)
+{
+	return parseDirectiveDefineLabel(parser, flags, true);
+}
+
 const char* msgTemplate = R"(
 	mov    r12,r12
 	b      %after%
@@ -89,6 +99,8 @@ const DirectiveMap armDirectives = {
 	{ ".arm",		{ &parseDirectiveArm,	0 } },
 	{ ".pool",		{ &parseDirectivePool,	0 } },
 	{ ".msg",		{ &parseDirectiveMsg,	0 } },
+	{ ".definearmlabel",	{ &parseDirectiveDefineArmLabel,	0 } },
+	{ ".definethumblabel",	{ &parseDirectiveDefineThumbLabel,	0 } },
 };
 
 std::unique_ptr<CAssemblerCommand> ArmParser::parseDirective(Parser& parser)

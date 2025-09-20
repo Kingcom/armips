@@ -2,6 +2,8 @@ name: CMake
 
 on:
   push:
+    tags:
+      - '*'
     branches: [ master ]
   pull_request:
     branches: [ master ]
@@ -20,19 +22,22 @@ jobs:
     strategy:
       matrix:
         config:
-          - { name: "Ubuntu gcc", os: "ubuntu-latest", generator: "Unix Makefiles", cc: "gcc", cxx: "g++" }
-          - { name: "Ubuntu clang", os: "ubuntu-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
-          - { name: "macOS clang", os: "macos-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
-          - { name: "Windows clang", os: "windows-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
+          - { name: "Ubuntu gcc", os: "ubuntu-22.04", generator: "Unix Makefiles", cc: "gcc", cxx: "g++" }
+          - { name: "Ubuntu clang", os: "ubuntu-22.04", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
+          - { name: "macOS clang", os: "macos-latest", generator: "Unix Makefiles", cc: "clang", cxx: "clang++", cmake_flags: "-DCMAKE_OSX_ARCHITECTURES='x86_64;arm64' -DCMAKE_OSX_DEPLOYMENT_TARGET=14.5" }
+          - { name: "Windows clang", os: "windows-2022", generator: "Unix Makefiles", cc: "clang", cxx: "clang++" }
           - { name: "Windows MSVC", os: "windows-2022", generator: "Visual Studio 17 2022"}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -G "${{matrix.config.generator}}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DARMIPS_USE_STD_FILESYSTEM=ON
+      run: cmake -B ${{github.workspace}}/build -G "${{matrix.config.generator}}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DARMIPS_USE_STD_FILESYSTEM=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install ${{matrix.config.cmake_flags}}
       env:
         CC: ${{matrix.config.cc}}
         CXX: ${{matrix.config.cxx}}
@@ -47,3 +52,34 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
 
+    - name: Install
+      shell: bash
+      run: |
+        cmake --build '${{github.workspace}}/build' --config ${{env.BUILD_TYPE}} --target install
+        VERSION=$(git -C '${{github.workspace}}' describe --first-parent)
+        PLATFORM=$(echo ${{matrix.config.name}} | tr '[:upper:]' '[:lower:'] | sed 's/ /_/g')
+        echo "FILENAME=armips_${VERSION}_${PLATFORM}" >> $GITHUB_ENV
+        echo "RELEASENAME=armips_${VERSION}" >> $GITHUB_ENV
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{env.FILENAME}}
+        path: ${{github.workspace}}/install
+
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.6
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        type: 'zip'
+        filename: ${{env.FILENAME}}.zip
+        directory: '${{github.workspace}}/install'
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: ${{env.RELEASENAME}}
+        prerelease: true
+        files: ${{github.workspace}}/install/${{env.FILENAME}}.zip
+    

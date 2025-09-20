@@ -7,7 +7,7 @@
 #include "Core/SymbolData.h"
 #include "Util/Util.h"
 
-CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& originalName)
+CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& originalName, std::optional<bool> thumbMode)
 {
 	this->defined = false;
 	this->label = nullptr;
@@ -27,15 +27,15 @@ CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& origi
 	// does this need to be in validate?
 	if (label->getUpdateInfo())
 	{
-		if (&Architecture::current() == &Arm && Arm.GetThumbMode())
-			label->setInfo(1);
-		else
+		if (&Architecture::current() != &Arm)
 			label->setInfo(0);
+		else
+			label->setInfo(thumbMode.value_or(Arm.GetThumbMode()));
 	}
 }
 
-CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& originalName, Expression& value)
-	: CAssemblerLabel(name,originalName)
+CAssemblerLabel::CAssemblerLabel(const Identifier& name, const Identifier& originalName, Expression& value, std::optional<bool> thumbMode)
+	: CAssemblerLabel(name,originalName,thumbMode)
 {
 	labelValue = value;
 }

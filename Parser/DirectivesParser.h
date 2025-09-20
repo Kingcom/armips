@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <optional>
 
 class CAssemblerCommand;
 class Parser;
@@ -78,3 +79,5 @@ using DirectiveMap = std::unordered_multimap<std::string, const DirectiveEntry>;
 #define DIRECTIVE_AREA_SHARED		0x00000001
 
 extern const DirectiveMap directives;
+
+std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int flags, std::optional<bool> thumbMode);
