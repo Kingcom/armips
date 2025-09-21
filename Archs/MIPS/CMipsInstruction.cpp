@@ -15,7 +15,7 @@ CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& im
 
 	addNop = false;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
-	RelaxImmediateSign = Mips.RelaxImmediateSign();
+	RelaxImmediateSign = Mips.GetRelaxImmediateSign();
 }
 
 CMipsInstruction::~CMipsInstruction()
