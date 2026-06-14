@@ -109,6 +109,108 @@ int32_t getFloatBits(float value)
 	return u.i;
 }
 
+uint16_t toHalfFloat(double x)
+{
+	union
+	{
+		double value;
+		struct
+		{
+			unsigned long mantissa : 52;
+			unsigned int exponent : 11;
+			unsigned int sign : 1;
+		} parts;
+	};
+	value = x;
+
+	// per https://pspdev.github.io/vfpu-docs/#floating-point-format
+	// rounding is hardwired to nearest and subnormals flush to zero
+	if (parts.exponent == 0x7FF && parts.mantissa == 0)
+	{
+		// inf
+		return (parts.sign << 15) | (0x1F << 10);
+	}
+	else if (parts.exponent == 0x7FF && parts.mantissa != 0)
+	{
+		// NaN
+		return (parts.sign << 15) | (0x1F << 10) | 1;
+	}
+	else if (parts.exponent <= 0x3F0)
+	{
+		// 0, subnormals, numbers less than 2^-15
+		return parts.sign << 15;
+	}
+	else
+	{
+		// numbers between 2^-14 (inclusive) and 2^16 (exclusive)
+		uint16_t exponent = parts.exponent - 0x3F0;
+
+		// round to nearest (essentially `floor(x + 0.5)`)
+		uint64_t mantissa = ((parts.mantissa >> (42 - 1)) + 1) >> 1;
+		if (mantissa == 0x400) {
+			// round up to the next exponent
+			exponent += 1;
+			mantissa = 0;
+		}
+		if (exponent >= 0x1F) {
+			// round down to 65504 (greatest finite half float)
+			exponent = 0x1E;
+			mantissa = 0x3FF;
+		}
+		return (parts.sign << 15) | (exponent << 10) | mantissa;
+	}
+}
+
+double fromHalfFloat(uint16_t x)
+{
+	using nl = std::numeric_limits<double>;
+	union
+	{
+		uint16_t hValue;
+		struct
+		{
+			unsigned int mantissa : 10;
+			unsigned int exponent : 5;
+			unsigned int sign : 1;
+		} hParts;
+	};
+	hValue = x;
+
+	if (hParts.exponent == 0x1F && hParts.mantissa == 0)
+	{
+		// inf
+		return (hParts.sign ? -1.0 : 1.0) * nl::infinity();
+	}
+	else if (hParts.exponent == 0x1F && hParts.mantissa != 0)
+	{
+		// NaN
+		return nl::signaling_NaN();
+	}
+	else if (hParts.exponent == 0)
+	{
+		// 0
+		return hParts.sign ? -0.0 : 0.0;
+	}
+	else
+	{
+		// numbers between 2^-14 (inclusive) and 2^16 (exclusive)
+		union
+		{
+			double dValue;
+			struct
+			{
+				unsigned long mantissa : 52;
+				unsigned int exponent : 11;
+				unsigned int sign : 1;
+			} dParts;
+		};
+		dParts.mantissa = long(hParts.mantissa) << 42;
+		dParts.exponent = hParts.exponent + 0x3F0;
+		dParts.sign = hParts.sign;
+		return dValue;
+	}
+}
+
 float bitsToFloat(int32_t value)
 {
 	union { float f; int32_t i; } u;

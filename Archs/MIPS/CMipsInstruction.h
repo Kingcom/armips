@@ -137,7 +137,7 @@ public:
 private:
 	void encodeNormal() const;
 	void encodeVfpu() const;
-	int floatToHalfFloat(int i);
+	bool immediateToHalfFloat(int &out);
 
 	bool IgnoreLoadDelay;
 	int64_t RamPos;

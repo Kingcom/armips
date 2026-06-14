@@ -6,6 +6,7 @@
 #include "Core/Common.h"
 #include "Core/FileManager.h"
 #include "Core/Misc.h"
+#include "Util/Util.h"
 
 CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& immediate, MipsRegisterData& registers)
 {
@@ -47,39 +48,23 @@ int getImmediateBits(MipsImmediateType type)
 	}
 }
 
-// http://code.google.com/p/jpcsp/source/browse/trunk/src/jpcsp/Allegrex/VfpuState.java?spec=svn3676&r=3383#1196
-int CMipsInstruction::floatToHalfFloat(int i)
+bool CMipsInstruction::immediateToHalfFloat(int &out)
 {
-	int s = ((i >> 16) & 0x00008000); // sign
-	int e = ((i >> 23) & 0x000000ff) - (127 - 15); // exponent
-	int f = ((i >> 0) & 0x007fffff); // fraction
-
-	// need to handle NaNs and Inf?
-	if (e <= 0) {
-		if (e < -10) {
-			if (s != 0) {
-				// handle -0.0
-				return 0x8000;
-			}
-			return 0;
-		}
-		f = (f | 0x00800000) >> (1 - e);
-		return s | (f >> 13);
-	} else if (e == 0xff - (127 - 15)) {
-		if (f == 0) {
-			// Inf
-			return s | 0x7c00;
-		}
-		// NAN
-		return s | 0x7fff;
+	ExpressionValue value = immediateData.primary.expression.evaluate();
+	if (value.isFloat())
+	{
+		out = toHalfFloat(value.floatValue);
+		return true;
 	}
-
-	if (e > 30) {
-		// Overflow
-		return s | 0x7c00;
+	else if (value.isInt())
+	{
+		out = toHalfFloat((double) value.intValue);
+		return true;
 	}
-
-	return s | (e << 10) | (f >> 13);
+	else
+	{
+		return false;
+	}
 }
 
 bool CMipsInstruction::Validate(const ValidateState &state)
@@ -101,7 +86,18 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 	{
 		if (immediateData.primary.expression.isLoaded())
 		{
-			if (!immediateData.primary.expression.evaluateInteger(immediateData.primary.value))
+			bool isValidExpression;
+
+			if (immediateData.primary.type == MipsImmediateType::ImmediateHalfFloat)
+			{
+				isValidExpression = immediateToHalfFloat(immediateData.primary.value);
+			}
+			else
+			{
+				isValidExpression = immediateData.primary.expression.evaluateInteger(immediateData.primary.value);
+			}
+
+			if (!isValidExpression)
 			{
 				Logger::queueError(Logger::Error, "Invalid immediate expression");
 				return false;
@@ -109,9 +105,6 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 
 			immediateData.primary.originalValue = immediateData.primary.value;
 		}
-
-		if (immediateData.primary.type == MipsImmediateType::ImmediateHalfFloat)
-			immediateData.primary.value = floatToHalfFloat(immediateData.primary.originalValue);
 
 		if (opcodeData.opcode.flags & MO_IMMALIGNED)	// immediate must be aligned
 		{
