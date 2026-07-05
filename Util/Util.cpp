@@ -117,9 +117,9 @@ uint16_t toHalfFloat(double x)
 		double value;
 		struct
 		{
-			unsigned long mantissa : 52;
-			unsigned int exponent : 11;
-			unsigned int sign : 1;
+			uint64_t mantissa : 52;
+			uint64_t exponent : 11;
+			uint64_t sign : 1;
 		} parts;
 	};
 	value = x;
@@ -200,12 +200,12 @@ double fromHalfFloat(uint16_t x)
 			double dValue;
 			struct
 			{
-				unsigned long mantissa : 52;
-				unsigned int exponent : 11;
-				unsigned int sign : 1;
+				uint64_t mantissa : 52;
+				uint64_t exponent : 11;
+				uint64_t sign : 1;
 			} dParts;
 		};
-		dParts.mantissa = long(hParts.mantissa) << 42;
+		dParts.mantissa = int64_t(hParts.mantissa) << 42;
 		dParts.exponent = hParts.exponent + 0x3F0;
 		dParts.sign = hParts.sign;
 		return dValue;
