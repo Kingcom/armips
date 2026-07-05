@@ -1180,6 +1180,39 @@ will align the memory address to a multiple of 4, then create a label named `Mai
 
 ## 7.1 Change log
 
+* Current Development Version
+    * *BREAKING* changes to PSP VFPU instruction parsing
+      * renamed `vuc2i.s` to [`vuc2ifs.s`](https://pspdev.github.io/vfpu-docs/#vuc2ifs.s)
+      * changed [`vfim.s`](https://pspdev.github.io/vfpu-docs/#vfim.s) half float immediate parsing from binary representation to float literals (was:`vfim.s S100,0x3f800000`, now: `vfim.s S100,1.0`)
+      * removed invalid instructions `vsbn.p`/`vsbn.t`/`vsbn.q`
+      * fixed `vt` register size for [`vscl.p`](https://pspdev.github.io/vfpu-docs/#vscl.p)/[`vscl.t`](https://pspdev.github.io/vfpu-docs/#vscl.q)/[`vscl.t`](https://pspdev.github.io/vfpu-docs/#vscl.q) (was: `vscl.t C100,C200,C203`, now: `vscl.t C100,C200,S203`)
+      * fixed `vd` register size for pack/unpack instructions (was: `vf2h.p C103,C202`, now: `vf2h.p S103,C202`)
+        * 2-to-1 packing instructions:
+          * [`vf2h.p`](https://pspdev.github.io/vfpu-docs/#vf2h.p)/[`vf2h.q`](https://pspdev.github.io/vfpu-docs/#vf2h.q): floats to packed half floats
+          * [`vi2us.p`](https://pspdev.github.io/vfpu-docs/#vi2us.p)/[`vi2us.q`](https://pspdev.github.io/vfpu-docs/#vi2us.q): integers to packed unsigned shorts (negatives clamp to 0; only keep 16 most significant bits)
+          * [`vi2s.p`](https://pspdev.github.io/vfpu-docs/#vi2s.p)/[`vi2s.q`](https://pspdev.github.io/vfpu-docs/#vi2s.q): integers to packed shorts (only keep 16 most significant bits)
+          * [`vt4444.q`](https://pspdev.github.io/vfpu-docs/#vt4444.q): four ABGR8888 color points to packed ABGR4444
+          * [`vt5551.q`](https://pspdev.github.io/vfpu-docs/#vt5551.q): four ABGR8888 color points to packed ABGR1555
+          * [`vt5650.q`](https://pspdev.github.io/vfpu-docs/#vt5650.q): four ABGR8888 color points to packed BGR565
+        * 1-to-2 unpacking instructions:
+          * [`vh2f.s`](https://pspdev.github.io/vfpu-docs/#vh2f.s)/[`vh2f.p`](https://pspdev.github.io/vfpu-docs/#vh2f.p): packed half floats to floats
+          * [`vus2i.s`](https://pspdev.github.io/vfpu-docs/#vus2i.s)/[`vus2i.p`](https://pspdev.github.io/vfpu-docs/#vus2i.p): packed unsigned shorts to integers (least significant 15 bits set to 0)
+          * [`vs2i.s`](https://pspdev.github.io/vfpu-docs/#vs2i.s)/[`vs2i.p`](https://pspdev.github.io/vfpu-docs/#vs2i.p): packed shorts to integers (least significant 16 bits set to 0)
+        * 4-to-1 packing instructions:
+          * [`vi2uc.q`](https://pspdev.github.io/vfpu-docs/#vi2uc.q): integers to packed unsigned bytes (negatives clamp to 0; only keep 8 most significant bits)
+          * [`vi2c.q`](https://pspdev.github.io/vfpu-docs/#vi2c.q): integers to packed bytes (only keep 8 most significant bits)
+        * 1-to-4 unpacking instructions:
+          * [`vc2i.s`](https://pspdev.github.io/vfpu-docs/#vc2i.s): packed bytes to integers (least significant 24 bits set to 0)
+          * [`vuc2ifs.s`](https://pspdev.github.io/vfpu-docs/#vuc2ifs.s): packed unsigned bytes to integers (least significant 23 bits set to 0)
+      * updated `vpfxs`/`vpfxt`/`vpfxd` parsing to match [binutils](https://github.com/pspdev/binutils-gdb/blob/allegrex-v2.37.0/gas/config/tc-mips.c#L3442-L3538) & MWCC syntax
+        * changed saturation operations from `0-1`/`-1-1` & unbracketed `0:1`/`-1:1` to `[0:1]`/`[-1:1]`
+        * removed invalid saturation+mask operations `0-1m`/`-1-1m`/`0:1m`/`-1:1m`
+        * removed enclosing brackets from instruction operands (was: `vpfxs [x,y,z,w]`, now: `vpfxs x,y,z,w`)
+    * fixes to PSP VFPU instruction parsing
+      * fixed zero slots support for [`vrot.p`](https://pspdev.github.io/vfpu-docs/#vrot.p)/[`vrot.t`](https://pspdev.github.io/vfpu-docs/#vrot.t)/[`vrot.q`](https://pspdev.github.io/vfpu-docs/#vrot.q)
+      * fixed numeric constant operations for `vpfxs`/`vpfxt` (e.g. `vpfxs 1,1/2,1,0`)
+      * added write mask operation to `vpfxd` to skip writing a channel (e.g. `vpfxd ,,,m` prevents writing the last channel)
+      * added empty prefix to `vpfxd` to leave a channel unmodified (e.g. `vpfxd ,,,m` leaves the first three channels unmodified)
 * Version 0.11
     * new `.aligna` directive for absolute address alignment
     * new expression functions: `org(label)`, `orga(label)`, `headersize(label)`

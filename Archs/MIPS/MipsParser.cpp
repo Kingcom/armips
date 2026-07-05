@@ -767,6 +767,15 @@ bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 
 		const Token& token = *tokenFinder;
 
+		if (token.type == TokenType::Integer)
+		{
+			if (token.getOriginalText() != "0" || isNeg)
+			{
+				return false;
+			}
+			continue;
+		}
+
 		if (token.type != TokenType::Identifier || token.identifierValue().size() != 1)
 			return false;
 
@@ -787,10 +796,6 @@ bool MipsParser::parseVfpuVrot(Parser& parser, int& result, int size)
 			if (isNeg || cos != -1)
 				return false;
 			cos = i;
-			break;
-		case '0':
-			if (isNeg)
-				return false;
 			break;
 		default:
 			return false;
@@ -878,42 +883,42 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 	{
 		// 0
 		sequenceParser.addEntry(0, {TokenType::Integer}, {INT64_C(0)} );
-		// 1
-		sequenceParser.addEntry(1, {TokenType::Integer}, {INT64_C(1)} );
-		// 2
-		sequenceParser.addEntry(2, {TokenType::Integer}, {INT64_C(2)} );
 		// 1/2
 		sequenceParser.addEntry(3, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(2)} );
-		// 3
-		sequenceParser.addEntry(4, {TokenType::Integer}, {INT64_C(3)} );
 		// 1/3
 		sequenceParser.addEntry(5, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(3)} );
 		// 1/4
 		sequenceParser.addEntry(6, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(4)} );
 		// 1/6
 		sequenceParser.addEntry(7, {TokenType::Integer, TokenType::Div, TokenType::Integer}, {INT64_C(1), INT64_C(6)} );
+		// 1
+		sequenceParser.addEntry(1, {TokenType::Integer}, {INT64_C(1)} );
+		// 2
+		sequenceParser.addEntry(2, {TokenType::Integer}, {INT64_C(2)} );
+		// 3
+		sequenceParser.addEntry(4, {TokenType::Integer}, {INT64_C(3)} );
 	}
 
-	if (parser.nextToken().type != TokenType::LBrack)
-		return false;
-	
+	result = 0;
+
 	for (int i = 0; i < 4; i++)
 	{
-		const Token *tokenFinder = &parser.nextToken();
+		const Token *tokenFinder = &parser.peekToken();
 
 		if (i != 0)
 		{
 			if (tokenFinder->type != TokenType::Comma)
 				return false;
-
-			tokenFinder = &parser.nextToken();
+			parser.eatToken();
+			tokenFinder = &parser.peekToken();
 		}
 		
 		// negation
 		if (tokenFinder->type == TokenType::Minus)
 		{
 			result |= 1 << (16+i);
-			tokenFinder = &parser.nextToken();
+			parser.eatToken();
+			tokenFinder = &parser.peekToken();
 		}
 
 		// abs
@@ -922,25 +927,32 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 		{
 			result |= 1 << (8+i);
 			abs = true;
-			tokenFinder = &parser.nextToken();
+			parser.eatToken();
+			tokenFinder = &parser.peekToken();
 		}
 
 		const Token& token = *tokenFinder;
-		if (token.type != TokenType::Identifier)
-			return false;
-
-		// check for register
-		const char* reg;
-		static const char* vpfxstRegisters = "xyzw";
-		const std::string &stringValue = token.identifierValue().string();
-		if (stringValue.size() == 1 && (reg = strchr(vpfxstRegisters,stringValue[0])) != nullptr)
+		if (token.type == TokenType::Identifier)
 		{
-			result |= (reg-vpfxstRegisters) << (i*2);
+			parser.eatToken();
 
-			if (abs && parser.nextToken().type != TokenType::BitOr)
+			// check for register
+			const char* reg;
+			static const char* vpfxstRegisters = "xyzw";
+			const std::string &stringValue = token.identifierValue().string();
+			if (stringValue.size() == 1 && (reg = strchr(vpfxstRegisters,stringValue[0])) != nullptr)
+			{
+				result |= (reg-vpfxstRegisters) << (i*2);
+
+				if (abs && parser.nextToken().type != TokenType::BitOr)
+					return false;
+
+				continue;
+			}
+			else
+			{
 				return false;
-
-			continue;
+			}
 		}
 		
 		// abs is invalid with constants
@@ -958,7 +970,7 @@ bool MipsParser::parseVpfxsParameter(Parser& parser, int& result)
 			result |= 1 << (8+i);
 	}
 
-	return parser.nextToken().type == TokenType::RBrack;
+	return true;
 }
 
 bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
@@ -968,67 +980,65 @@ bool MipsParser::parseVpfxdParameter(Parser& parser, int& result)
 	// initialize on first use
 	if (sequenceParser.getEntryCount() == 0)
 	{
-		// 0-1
-		sequenceParser.addEntry(1,
-			{TokenType::Integer, TokenType::Minus, TokenType::Integer},
-			{INT64_C(0), INT64_C(1)} );
-		// 0-1
+		// m
 		sequenceParser.addEntry(-1,
-			{TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{INT64_C(0), "1m"} );
-		// 0:1
+			{TokenType::Identifier},
+			{"m"} );
+		// [0:1]
 		sequenceParser.addEntry(1,
-			{TokenType::Integer, TokenType::Colon, TokenType::Integer},
+			{TokenType::LBrack, TokenType::Integer, TokenType::Colon, TokenType::Integer, TokenType::RBrack},
 			{INT64_C(0), INT64_C(1)} );
-		// 0:1
-		sequenceParser.addEntry(-1,
-			{TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{INT64_C(0), "1m"} );
-		// -1-1
+		// [-1:1]
 		sequenceParser.addEntry(3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::Integer},
+			{TokenType::LBrack, TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::Integer, TokenType::RBrack},
 			{INT64_C(1), INT64_C(1)} );
-		// -1-1m
-		sequenceParser.addEntry(-3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Minus, TokenType::NumberString},
-			{INT64_C(1), "1m"} );
-		// -1:1
-		sequenceParser.addEntry(3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::Integer},
-			{INT64_C(1), INT64_C(1)} );
-		// -1:1m
-		sequenceParser.addEntry(-3,
-			{TokenType::Minus, TokenType::Integer, TokenType::Colon, TokenType::NumberString},
-			{INT64_C(1), "1m"} );
 	}
+
+	result = 0;
 
 	for (int i = 0; i < 4; i++)
 	{
+		const Token *tokenFinder = &parser.peekToken();
+
 		if (i != 0)
 		{
-			if (parser.nextToken().type != TokenType::Comma)
-				return false;
+			CHECK(tokenFinder->type == TokenType::Comma);
+			parser.eatToken();
+			tokenFinder = &parser.peekToken();
 		}
 
-		parser.eatToken();
-		
+
+		// empty
+		if (tokenFinder->type == TokenType::Comma)
+		{
+			CHECK(i < 3);
+			continue;
+		}
+		if (tokenFinder->type == TokenType::Separator)
+		{
+			CHECK(i == 3);
+			continue;
+		}
+
+		// mask or saturation
 		int num = 0;
 		if (!sequenceParser.parse(parser,num))
 			return false;
 
-		// m versions
 		if (num < 0)
 		{
+			// mask
 			result |= 1 << (8+i);
-			num = abs(num);
 		}
-
-		result |= num << (2*i);
+		else
+		{
+			// saturation
+			result |= num << (2*i);
+		}
 	}
-	
-	return parser.nextToken().type == TokenType::RBrack;
-}
 
+	return true;
+}
 
 bool MipsParser::decodeCop2BranchCondition(const std::string& text, size_t& pos, int& result)
 {
@@ -1252,10 +1262,11 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 
 	// parse parameters
 	MipsRegisterValue tempRegister;
-	int actualSize = opcodeData.vfpuSize;
 
 	while (*encoding != 0)
 	{
+		int actualSize = opcodeData.vfpuSize;
+
 		switch (*encoding++)
 		{
 		case 't':	// register
@@ -1283,10 +1294,52 @@ bool MipsParser::parseParameters(Parser& parser, const tMipsOpcode& opcode)
 			CHECK(parseCop0Register(parser,registers.grd));
 			break;
 		case 'v':	// psp vfpu reg
-			if (*encoding == 'S')
+			if (*encoding == 'S')		// Single
 			{
 				encoding++;
 				actualSize = 0;
+			}
+			else if (*encoding == 'H')	// (one-)Half
+			{
+				encoding++;
+				switch (opcodeData.vfpuSize)
+				{
+				case 1:
+					actualSize = 0;
+					break;
+				case 3:
+					actualSize = 1;
+					break;
+				default:
+					return false;
+				}
+			}
+			else if (*encoding == 'D')	// Double
+			{
+				encoding++;
+				switch (opcodeData.vfpuSize)
+				{
+				case 0:
+					actualSize = 1;
+					break;
+				case 1:
+					actualSize = 3;
+					break;
+				default:
+					return false;
+				}
+			}
+			else if (*encoding == 'F')	// (one-)Fourth
+			{
+				encoding++;
+				CHECK(opcodeData.vfpuSize == 3);
+				actualSize = 0;
+			}
+			else if (*encoding == 'Q')	// Quadruple
+			{
+				encoding++;
+				CHECK(opcodeData.vfpuSize == 0);
+				actualSize = 3;
 			}
 
 			switch (*encoding++)
@@ -1628,7 +1681,7 @@ void MipsOpcodeFormatter::handleImmediate(MipsImmediateType type, unsigned int o
 	switch (type)
 	{
 	case MipsImmediateType::ImmediateHalfFloat:
-		buffer += tfm::format("%f", bitsToFloat(originalValue));
+		buffer += tfm::format("%f", fromHalfFloat(originalValue));
 		break;
 	case MipsImmediateType::Immediate16:
 		if (!(opcodeFlags & MO_IPCR) && originalValue & 0x8000)

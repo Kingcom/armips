@@ -9,8 +9,9 @@ std::string convertWStringToUtf8(std::wstring_view source);
 
 bool stringToInt(const std::string& line, size_t start, size_t end, int64_t& result);
 int32_t getFloatBits(float value);
-float bitsToFloat(int32_t value);
 int64_t getDoubleBits(double value);
+uint16_t toHalfFloat(double value);
+double fromHalfFloat(uint16_t value);
 
 std::string toLowercase(const std::string& str);
 size_t replaceAll(std::string& str, const char* oldValue,const std::string& newValue);
