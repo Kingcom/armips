@@ -1,6 +1,7 @@
 #include "Util/Util.h"
 
 #include <cstring>
+#include <limits>
 #include <sstream>
 
 std::string convertUnicodeCharToUtf8(char32_t character)
