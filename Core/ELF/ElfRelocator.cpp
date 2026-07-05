@@ -301,21 +301,14 @@ bool ElfRelocator::relocateFile(ElfRelocatorFile& file, int64_t& relocationAddre
 		size_t index = entry.index;
 		int size = section->getSize();
 
-		if (section->getType() == SHT_NOBITS) 
-		{
-			// these sections should not be relocated...
-			relocationOffsets[index] = section->getAddress();
+		while (relocationAddress % section->getAlignment())
+			relocationAddress++;
 
-		} else {
-			while (relocationAddress % section->getAlignment())
-				relocationAddress++;
+		if (entry.label != nullptr)
+			entry.label->setValue(relocationAddress);
 
-			if (entry.label != nullptr)
-				entry.label->setValue(relocationAddress);
-
-			relocationOffsets[index] = relocationAddress;
-			relocationAddress += size;
-		}
+		relocationOffsets[index] = relocationAddress;
+		relocationAddress += size;
 	}
 
 	size_t dataStart = outputData.size();
