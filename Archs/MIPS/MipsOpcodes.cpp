@@ -610,14 +610,20 @@ const tMipsOpcode MipsOpcodes[] = {
 //     |=   VFPU1|  f  |                                               |
 //     -----6-------3---------------------------------------------------
 //     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--|
-//     |  VMUL |  VDOT |  VSCL |  ---  |  VHDP |  VDET |  VCRS |  ---  |
+//     |  VMUL |  VDOT |  VSCL |  ---  |  VHDP |  VCRS |  VDET |  ---  |
 //     |-------|-------|-------|-------|-------|-------|-------|-------|
 	{ "vmul.S",		"vd,vs,vt",	MIPS_VFPU1(0),				MA_PSP,		MO_VFPU },
-	{ "vdot.S",		"vd,vs,vt",	MIPS_VFPU1(1),				MA_PSP,		MO_VFPU },
-	{ "vscl.S",		"vd,vs,vSt",	MIPS_VFPU1(2),				MA_PSP,		MO_VFPU },
-	{ "vhdp.S",		"vd,vs,vt",	MIPS_VFPU1(4),				MA_PSP,		MO_VFPU },
-	{ "vdet.S",		"vd,vs,vt",	MIPS_VFPU1(5),				MA_PSP,		MO_VFPU },
-	{ "vcrs.S",		"vd,vs,vt",	MIPS_VFPU1(6),				MA_PSP,		MO_VFPU },
+	{ "vdot.p",		"vSd,vs,vt",	MIPS_VFPU1(1)|MIPS_VFPUSIZE(1),		MA_PSP,		MO_VFPU|MO_VFPU_PAIR },
+	{ "vdot.t",		"vSd,vs,vt",	MIPS_VFPU1(1)|MIPS_VFPUSIZE(2),		MA_PSP,		MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vdot.q",		"vSd,vs,vt",	MIPS_VFPU1(1)|MIPS_VFPUSIZE(3),		MA_PSP,		MO_VFPU|MO_VFPU_QUAD },
+	{ "vscl.p",		"vd,vs,vSt",	MIPS_VFPU1(2)|MIPS_VFPUSIZE(1),		MA_PSP,		MO_VFPU|MO_VFPU_PAIR },
+	{ "vscl.t",		"vd,vs,vSt",	MIPS_VFPU1(2)|MIPS_VFPUSIZE(2),		MA_PSP,		MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vscl.q",		"vd,vs,vSt",	MIPS_VFPU1(2)|MIPS_VFPUSIZE(3),		MA_PSP,		MO_VFPU|MO_VFPU_QUAD },
+	{ "vhdp.p",		"vSd,vs,vt",	MIPS_VFPU1(4)|MIPS_VFPUSIZE(1),		MA_PSP,		MO_VFPU|MO_VFPU_PAIR },
+	{ "vhdp.t",		"vSd,vs,vt",	MIPS_VFPU1(4)|MIPS_VFPUSIZE(2),		MA_PSP,		MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vhdp.q",		"vSd,vs,vt",	MIPS_VFPU1(4)|MIPS_VFPUSIZE(3),		MA_PSP,		MO_VFPU|MO_VFPU_QUAD },
+	{ "vcrs.t",		"vd,vs,vt",		MIPS_VFPU1(5)|MIPS_VFPUSIZE(2),		MA_PSP,		MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vdet.p",		"vSd,vs,vt",	MIPS_VFPU1(6)|MIPS_VFPUSIZE(1),		MA_PSP,		MO_VFPU|MO_VFPU_PAIR },
 
 //     31-------26-----23----------------------------------------------0
 //     |=   VFPU3|  f  |                                               |
@@ -766,8 +772,12 @@ const tMipsOpcode MipsOpcodes[] = {
 	{ "vbfy2.S",	"vd,vs",	MIPS_VFPU4_13(0x03),		MA_PSP,		MO_VFPU },
 	{ "vocp.S",		"vd,vs",	MIPS_VFPU4_13(0x04),		MA_PSP,		MO_VFPU },
 	{ "vsocp.S",	"vd,vs",	MIPS_VFPU4_13(0x05),		MA_PSP,		MO_VFPU },
-	{ "vfad.S",		"vd,vs",	MIPS_VFPU4_13(0x06),		MA_PSP,		MO_VFPU },
-	{ "vavg.S",		"vd,vs",	MIPS_VFPU4_13(0x07),		MA_PSP,		MO_VFPU },
+	{ "vfad.p",		"vSd,vs",	MIPS_VFPU4_13(0x06)|MIPS_VFPUSIZE(1),	MA_PSP,		MO_VFPU|MO_VFPU_PAIR },
+	{ "vfad.t",		"vSd,vs",	MIPS_VFPU4_13(0x06)|MIPS_VFPUSIZE(2),	MA_PSP,		MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vfad.q",		"vSd,vs",	MIPS_VFPU4_13(0x06)|MIPS_VFPUSIZE(3),	MA_PSP,		MO_VFPU|MO_VFPU_QUAD },
+	{ "vavg.p",		"vSd,vs",	MIPS_VFPU4_13(0x07)|MIPS_VFPUSIZE(1),	MA_PSP,		MO_VFPU|MO_VFPU_PAIR },
+	{ "vavg.t",		"vSd,vs",	MIPS_VFPU4_13(0x07)|MIPS_VFPUSIZE(2),	MA_PSP,		MO_VFPU|MO_VFPU_TRIPLE },
+	{ "vavg.q",		"vSd,vs",	MIPS_VFPU4_13(0x07)|MIPS_VFPUSIZE(3),	MA_PSP,		MO_VFPU|MO_VFPU_QUAD },
 	{ "vsrt3.S",	"vd,vs",	MIPS_VFPU4_13(0x08),		MA_PSP,		MO_VFPU },
 	{ "vsrt4.S",	"vd,vs",	MIPS_VFPU4_13(0x09),		MA_PSP,		MO_VFPU },
 	{ "vsgn.S",		"vd,vs",	MIPS_VFPU4_13(0x0a),		MA_PSP,		MO_VFPU },

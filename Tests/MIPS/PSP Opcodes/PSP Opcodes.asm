@@ -59,6 +59,15 @@ vdiv.q	C120,C430,C010
 
 				; VFPU1
 vscl.t	C100,C220,S333
+vdot.p	S113,C202,C202
+vdot.t	S301,C110,C110
+vdot.t	S223,C201,C301
+vdot.q	S333,C200,C200
+vhdp.p	S113,C202,C202
+vhdp.t	S223,C201,C201
+vhdp.q	S333,C200,C200
+vdet.p	S113,C202,C212
+vcrs.t	C101,C111,C121
 
 				; VFPU3
 vcmp.s	GT,S100,S101
@@ -103,6 +112,12 @@ vi2s.p	S103,C202
 vi2s.q	C102,C200
 
 				; VFPU4-1.3
+vavg.p	S103,C202
+vavg.t	S103,C201
+vavg.q	S103,C200
+vfad.p	S103,C202
+vfad.t	S103,C201
+vfad.q	S103,C200
 vt4444.q	C102,C200
 vt5551.q	C102,C200
 vt5650.q	C102,C200

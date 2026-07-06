@@ -1185,6 +1185,19 @@ will align the memory address to a multiple of 4, then create a label named `Mai
       * renamed `vuc2i.s` to [`vuc2ifs.s`](https://pspdev.github.io/vfpu-docs/#vuc2ifs.s)
       * changed [`vfim.s`](https://pspdev.github.io/vfpu-docs/#vfim.s) half float immediate parsing from binary representation to float literals (was:`vfim.s S100,0x3f800000`, now: `vfim.s S100,1.0`)
       * removed invalid instructions `vsbn.p`/`vsbn.t`/`vsbn.q`
+      * removed invalid instructions `vdet.s`/`vdet.t`/`vdet.q`
+      * removed invalid instructions `vcrs.s`/`vcrs.p`/`vcrs.q`
+      * removed invalid instruction `vdot.s`
+      * removed invalid instruction `vhdp.s`
+      * removed invalid instruction `vscl.s`
+      * removed invalid instruction `vavg.s`
+      * removed invalid instruction `vfad.s`
+      * corrected output encodings for [`vdet.p`](https://pspdev.github.io/vfpu-docs/#vdet.p) & [`vcrs.t`](https://pspdev.github.io/vfpu-docs/#vcrs.t)
+      * fixed `vd` register size for [`vdot.p`](https://pspdev.github.io/vfpu-docs/#vdot.p)/[`vdot.t`](https://pspdev.github.io/vfpu-docs/#vdot.q)/[`vdot.t`](https://pspdev.github.io/vfpu-docs/#vdot.q) (was: `vdot.t C103,C201,C201`, now: `vdot.t S103,C201,C201`)
+      * fixed `vd` register size for [`vhdp.p`](https://pspdev.github.io/vfpu-docs/#vhdp.p)/[`vhdp.t`](https://pspdev.github.io/vfpu-docs/#vhdp.q)/[`vhdp.t`](https://pspdev.github.io/vfpu-docs/#vhdp.q) (was: `vhdp.t C103,C201,C201`, now: `vhdp.t S103,C201,C201`)
+      * fixed `vd` register size for [`vdet.p`](https://pspdev.github.io/vfpu-docs/#vdet.p) (was: `vdet.p C103,C202,C212`, now: `vdet.p S103,C202,C212`)
+      * fixed `vd` register size for [`vavg.p`](https://pspdev.github.io/vfpu-docs/#vavg.p)/[`vavg.t`](https://pspdev.github.io/vfpu-docs/#vavg.q)/[`vavg.t`](https://pspdev.github.io/vfpu-docs/#vavg.q) (was: `vavg.t C103,C201,C201`, now: `vavg.t S103,C201,C201`)
+      * fixed `vd` register size for [`vfad.p`](https://pspdev.github.io/vfpu-docs/#vfad.p)/[`vfad.t`](https://pspdev.github.io/vfpu-docs/#vfad.q)/[`vfad.t`](https://pspdev.github.io/vfpu-docs/#vfad.q) (was: `vfad.t C103,C201,C201`, now: `vfad.t S103,C201,C201`)
       * fixed `vt` register size for [`vscl.p`](https://pspdev.github.io/vfpu-docs/#vscl.p)/[`vscl.t`](https://pspdev.github.io/vfpu-docs/#vscl.q)/[`vscl.t`](https://pspdev.github.io/vfpu-docs/#vscl.q) (was: `vscl.t C100,C200,C203`, now: `vscl.t C100,C200,S203`)
       * fixed `vd` register size for pack/unpack instructions (was: `vf2h.p C103,C202`, now: `vf2h.p S103,C202`)
         * 2-to-1 packing instructions:
