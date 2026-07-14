@@ -12,4 +12,9 @@ end:
 	.error "Area content not filled"
 .endif
 
+// Perfectly filled area
+.area 20h,2
+	.fill 20h
+.endarea
+
 .close

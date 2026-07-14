@@ -136,3 +136,17 @@ private:
 	ElfRelocator rel;
 	std::unique_ptr<CAssemblerCommand> ctor;
 };
+
+class CDirectiveSymImport : public CAssemblerCommand
+{
+public:
+	CDirectiveSymImport(const fs::path& fileName);
+	bool Validate(const ValidateState& state) override;
+	void Encode() const override;
+	void writeTempData(TempData& tempData) const override;
+	void writeSymData(SymbolData& symData) const override;
+private:
+	fs::path fileName;
+	std::vector<std::shared_ptr<Label>> labels;
+	std::vector<std::pair<uint64_t, std::string>> otherSymbols;
+};
