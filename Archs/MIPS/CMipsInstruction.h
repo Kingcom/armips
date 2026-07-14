@@ -140,6 +140,7 @@ private:
 	bool immediateToHalfFloat(int &out);
 
 	bool IgnoreLoadDelay;
+	bool RelaxImmediateSign;
 	int64_t RamPos;
 	bool addNop;
 

@@ -16,6 +16,7 @@ CMipsInstruction::CMipsInstruction(MipsOpcodeData& opcode, MipsImmediateData& im
 
 	addNop = false;
 	IgnoreLoadDelay = Mips.GetIgnoreDelay();
+	RelaxImmediateSign = Mips.GetRelaxImmediateSign();
 }
 
 CMipsInstruction::~CMipsInstruction()
@@ -125,7 +126,7 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		{
 			int num = (int) (immediateData.primary.value-RamPos-4);
 			
-			if (num > 0x20000 || num < (-0x20000))
+			if (num >= 0x20000 || num < (-0x20000))
 			{
 				Logger::queueError(Logger::Error, "Branch target %08X out of range",immediateData.primary.value);
 				return false;
@@ -149,16 +150,50 @@ bool CMipsInstruction::Validate(const ValidateState &state)
 		}
 		
 		int immediateBits = getImmediateBits(immediateData.primary.type);
-		unsigned int mask = (0xFFFFFFFF << (32-immediateBits)) >> (32-immediateBits);
 		int digits = (immediateBits+3) / 4;
 
-		if ((unsigned int)std::abs(immediateData.primary.value) > mask)
-		{
-			Logger::queueError(Logger::Error, "Immediate value 0x%0*X out of range",digits,immediateData.primary.value);
-			return false;
+		// Example: 8 bit immediate. If signed, -0x80 to 0x7F. If unsigned, 0x00 to 0xFF. If relaxed, -0x80 to 0xFF.
+		int maxInclusiveUns = (1 << immediateBits) - 1;
+		int maxInclusiveSgn = (1 << (immediateBits - 1)) - 1;
+		int minInclusiveUns = 0;
+		int minInclusiveSgn = -(1 << (immediateBits - 1));
+
+		int minInclusiveStrict, maxInclusiveStrict;
+		if ((opcodeData.opcode.flags & MO_IMMUNSIGNED)) {
+			minInclusiveStrict = minInclusiveUns;
+			maxInclusiveStrict = maxInclusiveUns;
+		} else {
+			minInclusiveStrict = minInclusiveSgn;
+			maxInclusiveStrict = maxInclusiveSgn;
 		}
 
-		immediateData.primary.value &= mask;
+		if (immediateData.primary.value >= minInclusiveStrict && immediateData.primary.value <= maxInclusiveStrict) {
+			// In strict range, no problem.
+			(void)0;
+		} else if (immediateData.primary.value >= minInclusiveSgn && immediateData.primary.value <= maxInclusiveUns) {
+			// In relaxed range.
+			if (!RelaxImmediateSign) {
+				Logger::queueError(Logger::Error, "Immediate value 0x%0*X out of range 0x%0*X - 0x%0*X, .relaximmsign to suppress",
+					digits, immediateData.primary.value,
+					digits, minInclusiveStrict,
+					digits, maxInclusiveStrict);
+			}
+		} else {
+			// Entirely out of range.
+			if (RelaxImmediateSign) {
+				Logger::queueError(Logger::Error, "Immediate value 0x%0*X out of relaxed range 0x%0*X - 0x%0*X",
+					digits, immediateData.primary.value,
+					digits, minInclusiveSgn,
+					digits, maxInclusiveUns);
+			} else {
+				Logger::queueError(Logger::Error, "Immediate value 0x%0*X out of range 0x%0*X - 0x%0*X",
+					digits, immediateData.primary.value,
+					digits, minInclusiveStrict,
+					digits, maxInclusiveStrict);
+			}
+		}
+
+		immediateData.primary.value &= maxInclusiveUns;
 	}
 
 	if (immediateData.secondary.type != MipsImmediateType::None)
