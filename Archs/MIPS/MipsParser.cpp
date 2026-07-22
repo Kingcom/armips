@@ -520,6 +520,7 @@ bool MipsParser::parseVfpuRegister(Parser& parser, MipsRegisterValue& reg, int s
 		break;
 	case 'e':					// transposed matrix
 		reg.num |= (1 << 5);
+		std::swap(col,row);
 		[[fallthrough]];
 	case 'm':					// matrix
 		reg.type = MipsRegisterType::VfpuMatrix;
@@ -1138,6 +1139,9 @@ static bool decodeImmediateSize(const char*& encoding, MipsImmediateType& dest)
 			break;
 		case 7:
 			dest = MipsImmediateType::Immediate7;
+			break;
+		case 8:
+			dest = MipsImmediateType::Immediate8;
 			break;
 		case 10:
 			dest = MipsImmediateType::Immediate10;

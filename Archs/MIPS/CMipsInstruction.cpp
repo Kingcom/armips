@@ -31,6 +31,8 @@ int getImmediateBits(MipsImmediateType type)
 		return 5;
 	case MipsImmediateType::Immediate7:
 		return 7;
+	case MipsImmediateType::Immediate8:
+		return 8;
 	case MipsImmediateType::Immediate10:
 		return 10;
 	case MipsImmediateType::Immediate16:
@@ -285,6 +287,7 @@ void CMipsInstruction::encodeNormal() const
 	case MipsImmediateType::Immediate26:
 	case MipsImmediateType::Immediate20_0:
 	case MipsImmediateType::Immediate7:
+	case MipsImmediateType::Immediate8:
 	case MipsImmediateType::ImmediateHalfFloat:
 		encoding |= immediateData.primary.value;
 		break;
@@ -343,6 +346,9 @@ void CMipsInstruction::encodeVfpu() const
 		break;
 	case MipsImmediateType::Immediate7:
 		encoding |= immediateData.primary.value << 0;
+		break;
+	case MipsImmediateType::Immediate8:
+		encoding |= immediateData.primary.value << 16;
 		break;
 	default:
 		// TODO: Assert?

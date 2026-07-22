@@ -1182,8 +1182,10 @@ will align the memory address to a multiple of 4, then create a label named `Mai
 
 * Current Development Version
     * *BREAKING* changes to PSP VFPU instruction parsing
+      * fixed transposed matrix register encoding (e.g. `vmidt.p E220` was assembling to `vmidt.p E202`)
       * renamed `vuc2i.s` to [`vuc2ifs.s`](https://pspdev.github.io/vfpu-docs/#vuc2ifs.s)
       * changed [`vfim.s`](https://pspdev.github.io/vfpu-docs/#vfim.s) half float immediate parsing from binary representation to float literals (was:`vfim.s S100,0x3f800000`, now: `vfim.s S100,1.0`)
+      * removed invalid instructions `vwbn.p`/`vwbn.t`/`vwbn.q`
       * removed invalid instructions `vsbn.p`/`vsbn.t`/`vsbn.q`
       * removed invalid instructions `vdet.s`/`vdet.t`/`vdet.q`
       * removed invalid instructions `vcrs.s`/`vcrs.p`/`vcrs.q`
@@ -1193,6 +1195,8 @@ will align the memory address to a multiple of 4, then create a label named `Mai
       * removed invalid instruction `vavg.s`
       * removed invalid instruction `vfad.s`
       * corrected output encodings for [`vdet.p`](https://pspdev.github.io/vfpu-docs/#vdet.p) & [`vcrs.t`](https://pspdev.github.io/vfpu-docs/#vcrs.t)
+      * corrected output encodings for [`vhtfm2.p`](https://pspdev.github.io/vfpu-docs/#vhtfm2.p) & [`vhtfm3.t`](https://pspdev.github.io/vfpu-docs/#vhtfm3.t)
+      * fixed `vd` register size for [`vsocp.s`](https://pspdev.github.io/vfpu-docs/#vsocp.s) & [`vsocp.p`](https://pspdev.github.io/vfpu-docs/#vsocp.p)
       * fixed `vd` register size for [`vdot.p`](https://pspdev.github.io/vfpu-docs/#vdot.p)/[`vdot.t`](https://pspdev.github.io/vfpu-docs/#vdot.q)/[`vdot.t`](https://pspdev.github.io/vfpu-docs/#vdot.q) (was: `vdot.t C103,C201,C201`, now: `vdot.t S103,C201,C201`)
       * fixed `vd` register size for [`vhdp.p`](https://pspdev.github.io/vfpu-docs/#vhdp.p)/[`vhdp.t`](https://pspdev.github.io/vfpu-docs/#vhdp.q)/[`vhdp.t`](https://pspdev.github.io/vfpu-docs/#vhdp.q) (was: `vhdp.t C103,C201,C201`, now: `vhdp.t S103,C201,C201`)
       * fixed `vd` register size for [`vdet.p`](https://pspdev.github.io/vfpu-docs/#vdet.p) (was: `vdet.p C103,C202,C212`, now: `vdet.p S103,C202,C212`)
@@ -1226,6 +1230,8 @@ will align the memory address to a multiple of 4, then create a label named `Mai
       * fixed numeric constant operations for `vpfxs`/`vpfxt` (e.g. `vpfxs 1,1/2,1,0`)
       * added write mask operation to `vpfxd` to skip writing a channel (e.g. `vpfxd ,,,m` prevents writing the last channel)
       * added empty prefix to `vpfxd` to leave a channel unmodified (e.g. `vpfxd ,,,m` leaves the first three channels unmodified)
+      * fixed immediate size for [`vwbn.s`](https://pspdev.github.io/vfpu-docs/#vwbn.s) (is 8 bits, was limited to 5 bits)
+      * added missing instruction [`vhtfm4.q`](https://pspdev.github.io/vfpu-docs/#vhtfm4.q)
 * Version 0.11
     * new `.aligna` directive for absolute address alignment
     * new expression functions: `org(label)`, `orga(label)`, `headersize(label)`
