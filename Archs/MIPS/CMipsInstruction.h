@@ -39,7 +39,8 @@ enum class MipsImmediateType
 	CacheOp,
 	Ext,
 	Ins,
-	Cop2BranchType
+	Cop2BranchType,
+	Immediate8
 };
 
 struct MipsRegisterValue
