@@ -843,6 +843,17 @@ By specifying `.nocash on`, No$gba semantics will be enabled for data directives
 
 By specifying `.sym off`, any symbols (e.g. labels) defined after it will not be written to the symfile (if specified with the `-sym`/`-sym2` command line flag). This can be useful when using labels to define enum values that should not be interpreted as memory addresses. Writing to the symfile can be enabled again with `.sym on`. By default, this feature is on.
 
+### Relaxed immediates sign
+
+```
+.relaximmsign on
+.relaximmsign off
+```
+
+By default, armips checks whether immediate values in MIPS are in range based on the signedness of how the instruction interprets them. For example, for a hypothetical instruction with an 8-bit immediate, if the hardware interprets this immediate value as a signed number, armips will raise an error if it is not in the range -0x80 to 0x7F. Or if the hardware interprets this immediate value as an unsigned number, armips will raise an error if it is not in the range 0x00 to 0xFF.
+
+By specifying `.relaximmsign on`, the range of valid immediates is relaxed to allow all values that would be valid with either signed or unsigned interpretation. In the example above, values of -0x80 to 0xFF would be allowed. This may be desirable for existing code which uses unsigned immediates as a shorthand for the hex representation of signed immediates, for example `addi r1, r1, 0xFFFF`.
+
 ## 5.2 MIPS directives
 
 ### Load delay

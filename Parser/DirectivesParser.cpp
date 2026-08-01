@@ -619,6 +619,30 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveSym(Parser& parser, int flags)
 		return nullptr;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveRelaxImmSign(Parser& parser, int flags)
+{
+	auto stringValue = getStringOrIdentifier(parser);
+	if (!stringValue)
+		return nullptr;
+
+	Architecture& arch = Architecture::current();
+	CMipsArchitecture* mipsArch = dynamic_cast<CMipsArchitecture*>(&arch);
+	if (!mipsArch)
+		return nullptr;
+
+	if (stringValue == "on")
+	{	
+		mipsArch->SetRelaxImmediateSign(true);
+		return std::make_unique<DummyCommand>();
+	} else if (stringValue == "off")
+	{
+		mipsArch->SetRelaxImmediateSign(false);
+		return std::make_unique<DummyCommand>();
+	}
+
+	return nullptr;
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveDefineLabel(Parser& parser, int flags, std::optional<bool> thumbMode)
 {
 	const Token& tok = parser.nextToken();
@@ -841,6 +865,7 @@ const DirectiveMap directives = {
 	{ ".relativeinclude", { &parseDirectiveRelativeInclude, 0 } },
 	{ ".nocash",          { &parseDirectiveNocash,          0 } },
 	{ ".sym",             { &parseDirectiveSym,             0 } },
+	{ ".relaximmsign",    { &parseDirectiveRelaxImmSign,   0 } },
 
 	{ ".definelabel",     { &parseDirectiveDefineLabel,     0 } },
 	{ ".definedatalabel", { &parseDirectiveDefineDataLabel, 0 } },

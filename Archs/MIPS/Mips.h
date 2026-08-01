@@ -34,12 +34,15 @@ public:
 	bool GetDelaySlot() { return DelaySlot; };
 	void SetDelaySlot(bool b) {DelaySlot = b; };
 	bool hasLoadDelay() { return Version == MARCH_PSX; };
+	bool GetRelaxImmediateSign() { return RelaxImmediateSign; }
+	void SetRelaxImmediateSign(bool b) { RelaxImmediateSign = b; }
 private:
 	bool FixLoadDelay;
 	bool IgnoreLoadDelay;
 	bool LoadDelay;
 	int LoadDelayRegister;
 	bool DelaySlot;
+	bool RelaxImmediateSign;
 	MipsArchType Version;
 };
 

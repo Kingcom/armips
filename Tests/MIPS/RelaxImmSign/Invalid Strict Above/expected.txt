@@ -1,0 +1,1 @@
+﻿Invalid Strict Above.asm(4) error: Immediate value 0xFFFF out of range 0xFFFF8000 - 0x7FFF, .relaximmsign to suppress

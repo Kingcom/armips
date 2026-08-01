@@ -13,6 +13,7 @@ CMipsArchitecture::CMipsArchitecture()
 	LoadDelay = false;
 	LoadDelayRegister = 0;
 	DelaySlot = false;
+	RelaxImmediateSign = false;
 	Version = MARCH_INVALID;
 }
 
