@@ -1,3 +1,4 @@
 output.bin
+output.sym
 output.txt
 *.temp.txt
