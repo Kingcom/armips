@@ -2,9 +2,9 @@ name: CMake
 
 on:
   push:
-    tags:
-      - '*'
     branches: [ master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ master ]
 
@@ -29,7 +29,7 @@ jobs:
           - { name: "Windows MSVC", os: "windows-2022", generator: "Visual Studio 17 2022"}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
         fetch-tags: true
@@ -54,15 +54,17 @@ jobs:
 
     - name: Install
       shell: bash
+      run: cmake --build '${{github.workspace}}/build' --config ${{env.BUILD_TYPE}} --target install
+
+    - name: Setup env vars
+      shell: bash
       run: |
-        cmake --build '${{github.workspace}}/build' --config ${{env.BUILD_TYPE}} --target install
-        VERSION=$(git -C '${{github.workspace}}' describe --first-parent)
         PLATFORM=$(echo ${{matrix.config.name}} | tr '[:upper:]' '[:lower:'] | sed 's/ /_/g')
-        echo "FILENAME=armips_${VERSION}_${PLATFORM}" >> $GITHUB_ENV
-        echo "RELEASENAME=armips_${VERSION}" >> $GITHUB_ENV
+        echo "FILENAME=armips_${GITHUB_REF_NAME}_${GITHUB_SHA::7}_${PLATFORM}" >> $GITHUB_ENV
+        echo "RELEASENAME=armips_${GITHUB_REF_NAME}" >> $GITHUB_ENV
 
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{env.FILENAME}}
         path: ${{github.workspace}}/install
@@ -76,10 +78,9 @@ jobs:
         directory: '${{github.workspace}}/install'
 
     - name: Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v3
+      if: github.ref_type == 'tag'
       with:
         name: ${{env.RELEASENAME}}
         prerelease: true
         files: ${{github.workspace}}/install/${{env.FILENAME}}.zip
-    
